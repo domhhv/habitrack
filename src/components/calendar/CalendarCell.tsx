@@ -1,11 +1,9 @@
-import { CalendarEvent } from '@context';
-import {
-  LocalBar,
-  OndemandVideo,
-  Park,
-  SmokingRooms,
-} from '@mui/icons-material';
-import { Box, Typography } from '@mui/joy';
+import { deleteCalendarEvent } from '@actions';
+import { CalendarEvent, CalendarEventsContext } from '@context';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
+import { Box, Chip, ChipDelete, CircularProgress, Typography } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
 import React from 'react';
 
@@ -18,13 +16,6 @@ type Props = {
   onNavigateBack?: () => void;
   onNavigateForward?: () => void;
   rangeStatus: 'below-range' | 'in-range' | 'above-range';
-};
-
-const HabitIcons: Record<string, React.ElementType> = {
-  tobacco: SmokingRooms,
-  alcohol: LocalBar,
-  weed: Park,
-  porn: OndemandVideo,
 };
 
 const StyledCalendarDayCellButton = styled('button')(() => ({
@@ -79,6 +70,11 @@ const StyledCalendarDayCellButtonHeader = styled('div')(({ theme }) => ({
 
 const StyledCalendarDayCellButtonIconsContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(0.25, 0.5),
+  textAlign: 'left',
+}));
+
+const StyledChip = styled(Chip)(({ theme }) => ({
+  marginTop: theme.spacing(0.6),
 }));
 
 export default function CalendarCell({
@@ -91,8 +87,12 @@ export default function CalendarCell({
   onClick,
   rangeStatus,
 }: Props) {
+  const { setCalendarEvents } = React.useContext(CalendarEventsContext);
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
+  const [eventIdBeingDeleted, setEventIdBeingDeleted] = React.useState<
+    number | null
+  >(null);
 
   React.useEffect(() => {
     const today = new Date();
@@ -120,6 +120,25 @@ export default function CalendarCell({
     return onClick(dateNumber, monthIndex, fullYear);
   };
 
+  const handleCalendarEventDelete = async (
+    calendarEventId: number,
+    clickEvent: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    clickEvent.stopPropagation();
+    setEventIdBeingDeleted(calendarEventId);
+
+    try {
+      await deleteCalendarEvent(calendarEventId);
+      setCalendarEvents((prevCalendarEvents) =>
+        prevCalendarEvents.filter((event) => event.id !== calendarEventId)
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setEventIdBeingDeleted(null);
+    }
+  };
+
   return (
     <StyledCalendarDayCellButton
       data-active={active}
@@ -140,14 +159,38 @@ export default function CalendarCell({
       </StyledCalendarDayCellButtonHeader>
       <StyledCalendarDayCellButtonIconsContainer>
         {events.map((event) => {
-          const Icon = HabitIcons[event.habit.name];
+          const Icon =
+            event.habit.trait === 'good'
+              ? DoneAllRoundedIcon
+              : CheckRoundedIcon;
+
+          const isBeingDeleted = eventIdBeingDeleted === event.id;
+
+          const endDecorator = isBeingDeleted ? (
+            <CircularProgress size="sm" />
+          ) : (
+            <ChipDelete
+              color={event.habit.trait === 'good' ? 'success' : 'danger'}
+              variant="soft"
+              onClick={(clickEvent) =>
+                handleCalendarEventDelete(event.id, clickEvent)
+              }
+            >
+              <DeleteForeverIcon fontSize="small" />
+            </ChipDelete>
+          );
 
           return (
-            <Icon
+            <StyledChip
+              variant="soft"
+              color={event.habit.trait === 'good' ? 'success' : 'danger'}
               key={event.id}
-              className="calendar-day-cell-habit-icon"
-              color="primary"
-            />
+              startDecorator={<Icon fontSize="small" />}
+              disabled={isBeingDeleted}
+              endDecorator={endDecorator}
+            >
+              {event.habit.name}
+            </StyledChip>
           );
         })}
       </StyledCalendarDayCellButtonIconsContainer>
