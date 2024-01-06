@@ -7,7 +7,7 @@ import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
 import { CalendarState } from 'react-stately';
 
-import CalendarDay from './CalendarDay';
+import CalendarCell from './CalendarCell';
 import DayHabitModalDialog from './DayHabitModalDialog';
 
 type Props = {
@@ -83,11 +83,7 @@ export default function CalendarGrid({ state }: Props) {
         {[...Array(7)].map((_, index) => {
           return (
             <StyledCalendarWeekDay key={index}>
-              <Typography
-                key={`weekLabel-${index}`}
-                level="body-sm"
-                className="calendar-week-day-label"
-              >
+              <Typography key={`weekLabel-${index}`} level="body-sm">
                 {WEEK_DAYS[index]}
               </Typography>
             </StyledCalendarWeekDay>
@@ -118,7 +114,7 @@ export default function CalendarGrid({ state }: Props) {
                         : 'in-range';
 
                   return (
-                    <CalendarDay
+                    <CalendarCell
                       key={`${calendarDate.month}-${calendarDate.day}-${calendarDate.year}`}
                       dateNumber={calendarDate.day}
                       monthIndex={calendarDate.month}

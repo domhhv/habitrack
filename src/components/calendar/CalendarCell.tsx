@@ -81,7 +81,7 @@ const StyledCalendarDayCellButtonIconsContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(0.25, 0.5),
 }));
 
-export default function CalendarDay({
+export default function CalendarCell({
   dateNumber,
   monthIndex,
   fullYear,
@@ -99,7 +99,7 @@ export default function CalendarDay({
     setActive(rangeStatus === 'in-range');
     setCurrent(
       today.getDate() === dateNumber &&
-        today.getMonth() === monthIndex &&
+        today.getMonth() + 1 === monthIndex &&
         today.getFullYear() === fullYear
     );
   }, [dateNumber, monthIndex, fullYear, rangeStatus]);

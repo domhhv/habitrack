@@ -65,13 +65,19 @@ export default function DayHabitModalDialog({ open, onClose, date }: Props) {
         <DialogContent>Select from the habits provided below</DialogContent>
         <form onSubmit={handleSubmit}>
           <Select
-            placeholder="Select Bad Habit"
+            required
+            placeholder="Select Habit"
             value={selectedBadHabit}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             onChange={handleSelect}
             disabled={submitting}
           >
+            {!habits.length && (
+              <Option value={0} label="No habits found" disabled>
+                No habits found
+              </Option>
+            )}
             {habits.map((habit) => (
               <Option key={habit.id} value={habit.id} label={habit.name}>
                 {habit.name}
