@@ -1,5 +1,5 @@
 import { Input, styled } from '@mui/joy';
-import * as React from 'react';
+import React from 'react';
 
 const StyledInput = styled('input')({
   border: 'none',

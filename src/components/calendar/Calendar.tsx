@@ -1,7 +1,7 @@
 import { createCalendar } from '@internationalized/date';
 import { styled } from '@mui/joy';
 import React from 'react';
-import { useCalendar, useLocale } from 'react-aria';
+import { AriaButtonProps, useCalendar, useLocale } from 'react-aria';
 import { useCalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
@@ -24,19 +24,20 @@ export default function Calendar() {
 
   const [activeMonthLabel, activeYear] = title.split(' ');
 
+  const transformButtonProps = (
+    buttonProps: Pick<AriaButtonProps<'button'>, 'isDisabled' | 'aria-label'>
+  ) => ({
+    'aria-label': buttonProps['aria-label'] || '',
+    disabled: Boolean(buttonProps.isDisabled),
+  });
+
   return (
     <StyledCalendarContainerDiv {...calendarProps}>
       <CalendarHeader
         activeMonthLabel={activeMonthLabel}
         activeYear={activeYear}
-        prevButtonProps={{
-          'aria-label': prevButtonProps['aria-label'] || '',
-          disabled: Boolean(prevButtonProps.isDisabled),
-        }}
-        nextButtonProps={{
-          'aria-label': nextButtonProps['aria-label'] || '',
-          disabled: Boolean(nextButtonProps.isDisabled),
-        }}
+        prevButtonProps={transformButtonProps(prevButtonProps)}
+        nextButtonProps={transformButtonProps(nextButtonProps)}
         onNavigateBack={state.focusNextPage}
         onNavigateForward={state.focusNextPage}
       />
