@@ -38,7 +38,7 @@ export default function Calendar() {
         activeYear={activeYear}
         prevButtonProps={transformButtonProps(prevButtonProps)}
         nextButtonProps={transformButtonProps(nextButtonProps)}
-        onNavigateBack={state.focusNextPage}
+        onNavigateBack={state.focusPreviousPage}
         onNavigateForward={state.focusNextPage}
       />
       <CalendarGrid state={state} />

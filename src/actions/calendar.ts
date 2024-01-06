@@ -24,3 +24,20 @@ export async function getCalendarEvents() {
 
   return data;
 }
+
+export async function deleteCalendarEvent(id: number) {
+  const response = await fetch(
+    `${process.env.API_BASE_URL}/calendar-events/${id}`,
+    {
+      method: 'DELETE',
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Something went wrong');
+  }
+
+  const data = await response.json();
+
+  return data;
+}

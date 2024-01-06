@@ -92,7 +92,7 @@ export default function CalendarGrid({ state }: Props) {
       </Box>
       <AnimatePresence mode="wait">
         <motion.div
-          key={`${state.value}`}
+          key={state.visibleRange.start.month}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
