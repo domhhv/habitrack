@@ -13,6 +13,8 @@ import {
 } from '@mui/joy';
 import React from 'react';
 
+import EditHabitDialog from '../edit-habit/EditHabitDialog';
+
 import HabitItem from './HabitItem';
 
 const StyledPlaceholderContainer = styled(Box)(({ theme }) => ({
@@ -25,9 +27,11 @@ const StyledPlaceholderContainer = styled(Box)(({ theme }) => ({
   margin: `${theme.spacing(1)} auto 0`,
 }));
 
-export default function ViewAllHabitsModal() {
+export default function ViewAllHabitsModalButton() {
   const { habits } = React.useContext(HabitsContext);
   const [open, setOpen] = React.useState(false);
+  const [isEditingHabit, setIsEditingHabit] = React.useState(false);
+  const [habitIdToEdit, setHabitIdToEdit] = React.useState<number | null>(null);
 
   const handleOpen = () => {
     setOpen(true);
@@ -35,6 +39,16 @@ export default function ViewAllHabitsModal() {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleEditStart = (habitId: number) => {
+    setIsEditingHabit(true);
+    setHabitIdToEdit(habitId);
+  };
+
+  const handleEditEnd = () => {
+    setIsEditingHabit(false);
+    setHabitIdToEdit(null);
   };
 
   return (
@@ -61,13 +75,22 @@ export default function ViewAllHabitsModal() {
             {!!habits.length && (
               <List>
                 {habits.map((habit) => (
-                  <HabitItem key={habit.id} habit={habit} />
+                  <HabitItem
+                    key={habit.id}
+                    habit={habit}
+                    onEdit={() => handleEditStart(habit.id)}
+                  />
                 ))}
               </List>
             )}
           </DialogContent>
         </ModalDialog>
       </Modal>
+      <EditHabitDialog
+        open={isEditingHabit}
+        onClose={handleEditEnd}
+        habit={habits.find((h) => h.id === habitIdToEdit)}
+      />
     </>
   );
 }

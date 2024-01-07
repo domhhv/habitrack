@@ -19,7 +19,7 @@ import {
 } from '@mui/joy';
 import React, { FormEventHandler } from 'react';
 
-export function AddHabitModal() {
+export default function AddHabitDialogButton() {
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');

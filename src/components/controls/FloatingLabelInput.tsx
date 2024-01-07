@@ -1,4 +1,6 @@
 import { Input, styled } from '@mui/joy';
+import { ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
+import { VariantProp } from '@mui/joy/styles/types/variants';
 import React from 'react';
 
 const StyledInput = styled('input')({
@@ -79,6 +81,9 @@ type Props = {
   placeholder?: string;
   label?: string;
   required?: boolean;
+  variant?: VariantProp;
+  color?: ColorPaletteProp;
+  disabled?: boolean;
 };
 
 export default function FloatingLabelInput({
@@ -87,7 +92,10 @@ export default function FloatingLabelInput({
   onChange,
   placeholder = 'Enter value',
   label = 'Label',
+  variant = 'outlined',
+  color = 'neutral',
   required = false,
+  disabled = false,
 }: Props) {
   return (
     <Input
@@ -96,6 +104,9 @@ export default function FloatingLabelInput({
       slotProps={{ input: { placeholder, type, label } }}
       value={value}
       onChange={onChange}
+      variant={variant}
+      color={color}
+      disabled={disabled}
       sx={{
         '--Input-minHeight': '56px',
         '--Input-radius': '6px',

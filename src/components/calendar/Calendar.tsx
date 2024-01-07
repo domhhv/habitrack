@@ -1,5 +1,6 @@
 import { createCalendar } from '@internationalized/date';
 import { styled } from '@mui/joy';
+import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
 import { AriaButtonProps, useCalendar, useLocale } from 'react-aria';
 import { useCalendarState } from 'react-stately';
@@ -34,7 +35,7 @@ export default function Calendar() {
   return (
     <StyledCalendarContainerDiv {...calendarProps}>
       <CalendarHeader
-        activeMonthLabel={activeMonthLabel}
+        activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
         activeYear={activeYear}
         prevButtonProps={transformButtonProps(prevButtonProps)}
         nextButtonProps={transformButtonProps(nextButtonProps)}
