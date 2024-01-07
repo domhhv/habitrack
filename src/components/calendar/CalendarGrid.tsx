@@ -107,9 +107,9 @@ export default function CalendarGrid({ state }: Props) {
                   }
 
                   const rangeStatus =
-                    state.visibleRange.start.month < calendarDate.month
+                    calendarDate.month < state.visibleRange.start.month
                       ? 'below-range'
-                      : state.visibleRange.start.month > calendarDate.month
+                      : calendarDate.month > state.visibleRange.start.month
                         ? 'above-range'
                         : 'in-range';
 
@@ -126,6 +126,8 @@ export default function CalendarGrid({ state }: Props) {
                         ] || []
                       }
                       rangeStatus={rangeStatus}
+                      onNavigateBack={state.focusPreviousPage}
+                      onNavigateForward={state.focusNextPage}
                     />
                   );
                 })}

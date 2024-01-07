@@ -7,6 +7,7 @@
     "url": "https://github.com/domhhv/react-habits-calendar-tracker.git"
   },
   "description": "A simple calendar tracker for your habits",
+  "homepage": "https://domhhv.github.io/react-habits-calendar-tracker",
   "license": "MIT",
   "keywords": [
     "react",
@@ -20,6 +21,8 @@
     "date-fns"
   ],
   "scripts": {
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d dist",
     "start": "NODE_ENV=development webpack serve --mode development --open --hot",
     "build": "NODE_ENV=production webpack --mode production",
     "eslint:check": "eslint src",
@@ -37,6 +40,7 @@
     "@mui/material": "^5.15.2",
     "date-fns": "^3.0.6",
     "framer-motion": "^10.16.16",
+    "gh-pages": "^6.1.1",
     "html-webpack-plugin": "^5.6.0",
     "react": "^18.2.0",
     "react-aria": "^3.31.0",
