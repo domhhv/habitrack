@@ -14,6 +14,7 @@ import {
   Modal,
   ModalClose,
   ModalDialog,
+  Menu,
   Option,
   Select,
 } from '@mui/joy';
@@ -100,11 +101,10 @@ export function AddHabitModal() {
               </Box>
               <Box mb={1}>
                 <FloatingLabelTextarea
-                  required
                   value={habitDescription}
                   onChange={handleHabitDescriptionChange}
                   label="Description"
-                  placeholder="Enter habit description"
+                  placeholder="Enter habit description (optional)"
                 />
               </Box>
               <Box mb={1}>

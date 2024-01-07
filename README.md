@@ -1,46 +1,99 @@
-# Getting Started with Create React App
+# Habits Calendar Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![Habits Calendar Tracker](https://i.ibb.co/BGYzV8x/Screenshot-2024-01-07-at-17-57-19.png)
 
-## Available Scripts
+This app is designed to provide a simple and intuitive way to monitor habits. Track your habits with ease using this customizable and user-friendly React-based habits calendar tracker.
 
-In the project directory, you can run:
+The app is live [here](https://domhhv.github.io/react-habits-calendar-tracker/). It uses:
+- React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
+- [framer-motion](https://www.framer.com/motion/) for animations
+- [Material Joy UI](https://mui.com/joy-ui/getting-started/) for the UI and styling solution
 
-### `yarn start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **Calendar View**: Visualize your habits on a monthly calendar.
+- **Customizable Habits**: Add, remove, and customize habits to fit your routine.
+- **Daily Tracking**: Easily mark off completed habits on a daily basis.
+- **Data Persistence**: Your habit data is saved locally, ensuring it persists between sessions.
+- **Responsive Design**: Access your habit tracker seamlessly on various devices.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Running locally
 
-### `yarn test`
+### Data storage and management
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+A designated server application was built to handle the backend and database. The code for the server can be found [here](https://github.com/domhhv/nest-habits-calendar-tracker). Follow the instructions in the README to get the server up and running.
 
-### `yarn build`
+Alternatively, you can use your own server and database.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Provide the server URL in the `API_BASE_URL` environment variable in the `.env.development` file.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Prerequisites
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- [Node.js](https://nodejs.org/en/) (v14.17.0 or higher)
+- [Yarn](https://yarnpkg.com/) (v1.22.10 or higher)
+- [Git](https://git-scm.com/)
 
-### `yarn eject`
+### Installation
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Follow these steps to get the project up and running on your local machine.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Clone the repository:**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+    ```bash
+    git clone https://github.com/domhhv/react-habits-calendar-tracker.git
+    ```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+2. **Navigate to the project directory:**
 
-## Learn More
+    ```bash
+    cd react-habits-calendar-tracker
+    ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+3. **Install dependencies:**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+    ```bash
+    yarn install
+    ```
+
+4. **Run the application:**
+
+    ```bash
+    yarn start
+    ```
+
+5. **Open your browser and go to [http://localhost:8080](http://localhost:8080).**
+
+### Environment variables
+
+The following environment variables are used in the project:
+
+- `API_BASE_URL`: The base URL of the server application. Defaults to `http://localhost:3000` if not provided.
+- `NODE_ENV`: The environment the application is running in. Either `development` (for `yarn start`) or `production` (for `yarn build`).
+
+Create a `.env.development` file in the root directory of the project and add the environment variables there. For example:
+
+```bash
+API_BASE_URL=http://localhost:3000
+```
+
+### Linting
+
+The project uses [ESLint](https://eslint.org/) for linting. To run ESLint, use the following command:
+
+```bash
+yarn eslint:check # Check for linting errors
+yarn eslint:fix # Fix linting errors
+```
+
+### Formatting
+
+The project uses [Prettier](https://prettier.io/) for formatting. To run Prettier, use the following command:
+
+```bash
+yarn prettier:check # Check for formatting errors
+yarn prettier:fix # Fix formatting errors
+```
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or pull requests for any improvements, bug fixes, or new features.
