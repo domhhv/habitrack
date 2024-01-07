@@ -1,5 +1,7 @@
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 import { Textarea, styled } from '@mui/joy';
+import { ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
+import { VariantProp } from '@mui/joy/styles/types/variants';
 import React from 'react';
 
 const StyledTextarea = styled(TextareaAutosize)({
@@ -70,6 +72,9 @@ type FloatingLabelTextareaProps = {
   label?: string;
   placeholder?: string;
   required?: boolean;
+  variant?: VariantProp;
+  color?: ColorPaletteProp;
+  disabled?: boolean;
 };
 
 export default function FloatingLabelTextarea({
@@ -78,6 +83,9 @@ export default function FloatingLabelTextarea({
   label = 'Label',
   placeholder = 'Enter text',
   required = false,
+  variant = 'outlined',
+  color = 'neutral',
+  disabled = false,
 }: FloatingLabelTextareaProps) {
   return (
     <Textarea
@@ -87,6 +95,9 @@ export default function FloatingLabelTextarea({
       sx={{ borderRadius: '6px' }}
       value={value}
       onChange={onChange}
+      variant={variant}
+      color={color}
+      disabled={disabled}
     />
   );
 }

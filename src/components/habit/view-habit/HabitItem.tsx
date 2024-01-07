@@ -44,9 +44,10 @@ const StyledHabitTitleWrapper = styled('div')(({ theme }) => ({
 
 type HabitItemProps = {
   habit: Habit;
+  onEdit: () => void;
 };
 
-export default function HabitItem({ habit }: HabitItemProps) {
+export default function HabitItem({ habit, onEdit }: HabitItemProps) {
   const [isBeingDeleted, setIsBeingDeleted] = React.useState(false);
   const { setHabits } = React.useContext(HabitsContext);
 
@@ -69,12 +70,13 @@ export default function HabitItem({ habit }: HabitItemProps) {
   return (
     <StyleListItem>
       <ListItemDecorator>
-        <Tooltip title="Editing habits is coming soon!">
+        <Tooltip title="Edit habit">
           <StyledEditIconButton
             size="sm"
             variant="soft"
             color="primary"
             disabled={isBeingDeleted}
+            onClick={onEdit}
           >
             <ModeRoundedIcon fontSize="small" />
           </StyledEditIconButton>
