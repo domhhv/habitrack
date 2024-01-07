@@ -21,6 +21,7 @@
     "date-fns"
   ],
   "scripts": {
+    "prepare": "([ -d ./.git ] && husky install) || echo \"Skipping husky install since package does not have .git folder\"",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d dist",
     "start": "NODE_ENV=development webpack serve --mode development --open --hot",
@@ -30,6 +31,12 @@
     "prettier:check": "prettier --check src",
     "prettier:write": "prettier --write src",
     "typecheck": "tsc --noEmit"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "eslint",
+      "prettier --check"
+    ]
   },
   "dependencies": {
     "@adobe/react-spectrum": "^3.33.0",
@@ -72,6 +79,7 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unused-imports": "^3.0.0",
+    "husky": "^8.0.3",
     "prettier": "3.1.1",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.5.1",
