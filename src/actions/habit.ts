@@ -29,3 +29,17 @@ export async function getHabits() {
 
   return data;
 }
+
+export async function deleteHabit(id: number) {
+  const response = await fetch(`${process.env.API_BASE_URL}/habits/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Something went wrong');
+  }
+
+  const data = await response.json();
+
+  return data;
+}

@@ -1,7 +1,11 @@
 import { createHabit } from '@actions';
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
 import { HabitsContext } from '@context';
-import { Add, CheckCircleOutline, WarningAmber } from '@mui/icons-material';
+import {
+  AddRounded,
+  CheckCircleOutline,
+  WarningAmber,
+} from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -72,9 +76,9 @@ export function AddHabitModal() {
   return (
     <>
       <Button
-        color="neutral"
-        variant="soft"
-        startDecorator={<Add />}
+        color="primary"
+        variant="solid"
+        startDecorator={<AddRounded />}
         onClick={handleDialogOpen}
       >
         Add habit
