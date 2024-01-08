@@ -1,6 +1,6 @@
 # .github/workflows/lint.yml
 
-name: Lint # name of the action (displayed in the github interface)
+name: Code health checks # name of the action (displayed in the github interface)
 
 on: # event list
   pull_request: # on a pull request to each of these branches
@@ -26,5 +26,11 @@ jobs: # list of things to do
       - name: Install Dependencies
         run: yarn install
 
+      - name: Type Checking
+        run: yarn typecheck
+
       - name: Code Linting
         run: yarn eslint:check
+
+      - name: Code Formatting
+        run: yarn prettier:check

@@ -60,7 +60,7 @@ export default function CalendarEventsProvider({ children }: Props) {
         prevCalendarEvent.habit.id === habit.id
           ? {
               ...prevCalendarEvent,
-              habit: habit,
+              habit,
             }
           : prevCalendarEvent
       )

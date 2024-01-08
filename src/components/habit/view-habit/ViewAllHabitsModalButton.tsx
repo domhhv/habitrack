@@ -11,7 +11,6 @@ import {
   ModalClose,
   ModalDialog,
   styled,
-  Typography,
 } from '@mui/joy';
 import React from 'react';
 

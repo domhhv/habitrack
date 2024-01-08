@@ -29,6 +29,7 @@
     }
   },
   "rules": {
+    "object-shorthand": "error",
     "import/order": [
       "error",
       {
