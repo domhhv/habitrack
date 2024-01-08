@@ -1,3 +1,4 @@
+import { CalendarEventsContext } from '@context';
 import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { Typography, styled, IconButton } from '@mui/joy';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -10,6 +11,7 @@ const StyledCalendarHeader = styled('div')(({ theme }) => ({
   border: '1px solid',
   borderRadius: theme.radius.sm,
   alignItems: 'center',
+  position: 'relative',
 }));
 
 const StyledCalendarActiveMonthContainer = styled('div')({
@@ -28,6 +30,19 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
   '&:first-of-type': {
     marginRight: theme.spacing(1),
   },
+}));
+
+const StyledLoadingOverlay = styled(Typography)(() => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  margin: 'auto',
+  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 }));
 
 type ButtonProps = {
@@ -52,6 +67,8 @@ export default function CalendarHeader({
   onNavigateBack,
   onNavigateForward,
 }: Props) {
+  const { fetchingCalendarEvents } = React.useContext(CalendarEventsContext);
+
   return (
     <StyledCalendarHeader>
       <StyledCalendarActiveMonthContainer>
@@ -84,6 +101,17 @@ export default function CalendarHeader({
           </StyledIconButton>
         </StyledCalendarNavigationContainer>
       </StyledCalendarActiveMonthContainer>
+
+      {fetchingCalendarEvents && (
+        <StyledLoadingOverlay>
+          <motion.div
+            animate={{ opacity: [0, 1, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            Fetching calendar events, please wait...
+          </motion.div>
+        </StyledLoadingOverlay>
+      )}
     </StyledCalendarHeader>
   );
 }

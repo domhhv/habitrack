@@ -10,10 +10,11 @@ export type CalendarEvent = {
 };
 
 export const CalendarEventsContext = React.createContext({
+  fetchingCalendarEvents: false,
   calendarEvents: [] as CalendarEvent[],
-  setCalendarEvents: (
-    _: CalendarEvent[] | ((prevHabits: CalendarEvent[]) => CalendarEvent[])
-  ) => {},
+  addCalendarEvent: (_: CalendarEvent) => {},
+  removeCalendarEvent: (_: number) => {},
+  updateHabitInsideCalendarEvents: (_: Habit) => {},
 });
 
 type Props = {
@@ -21,17 +22,60 @@ type Props = {
 };
 
 export default function CalendarEventsProvider({ children }: Props) {
+  const [fetchingCalendarEvents, setFetchingCalendarEvents] =
+    React.useState(false);
   const [calendarEvents, setCalendarEvents] = React.useState<CalendarEvent[]>(
     []
   );
 
   React.useEffect(() => {
-    getCalendarEvents().then(setCalendarEvents);
+    const loadCalendarEvents = async () => {
+      setFetchingCalendarEvents(true);
+      const calendarEvents = await getCalendarEvents();
+      setCalendarEvents(calendarEvents);
+      setFetchingCalendarEvents(false);
+    };
+
+    void loadCalendarEvents();
   }, []);
 
+  const addCalendarEvent = (calendarEvent: CalendarEvent) => {
+    setCalendarEvents((prevCalendarEvents) => [
+      ...prevCalendarEvents,
+      calendarEvent,
+    ]);
+  };
+
+  const removeCalendarEvent = (id: number) => {
+    setCalendarEvents((prevCalendarEvents) =>
+      prevCalendarEvents.filter(
+        (prevCalendarEvent) => prevCalendarEvent.id !== id
+      )
+    );
+  };
+
+  const updateHabitInsideCalendarEvents = (habit: Habit) => {
+    setCalendarEvents((prevCalendarEvents) =>
+      prevCalendarEvents.map((prevCalendarEvent) =>
+        prevCalendarEvent.habit.id === habit.id
+          ? {
+              ...prevCalendarEvent,
+              habit,
+            }
+          : prevCalendarEvent
+      )
+    );
+  };
+
   const value = React.useMemo(
-    () => ({ calendarEvents, setCalendarEvents }),
-    [calendarEvents]
+    () => ({
+      fetchingCalendarEvents,
+      calendarEvents,
+      addCalendarEvent,
+      removeCalendarEvent,
+      updateHabitInsideCalendarEvents,
+    }),
+    [calendarEvents, fetchingCalendarEvents]
   );
 
   return (

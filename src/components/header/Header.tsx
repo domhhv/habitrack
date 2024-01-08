@@ -1,4 +1,5 @@
 import { AddHabitDialogButton, ViewAllHabitsModalButton } from '@components';
+import { HabitsContext } from '@context';
 import { AccountCircleOutlined } from '@mui/icons-material';
 import { IconButton } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
@@ -29,12 +30,14 @@ const StyledAppHeaderContent = styled('div')(() => ({
 }));
 
 export default function Header() {
+  const { fetchingHabits } = React.useContext(HabitsContext);
+
   return (
     <StyledAppHeader>
       <StyledAppHeaderContent>
         <StyledButtonsContainer>
-          <AddHabitDialogButton />
-          <ViewAllHabitsModalButton />
+          <AddHabitDialogButton disabled={fetchingHabits} />
+          <ViewAllHabitsModalButton loading={fetchingHabits} />
         </StyledButtonsContainer>
         <IconButton>
           <AccountCircleOutlined />

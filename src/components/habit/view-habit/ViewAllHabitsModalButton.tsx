@@ -3,6 +3,7 @@ import ViewListRoundedIcon from '@mui/icons-material/ViewListRounded';
 import {
   Box,
   Button,
+  CircularProgress,
   DialogContent,
   DialogTitle,
   List,
@@ -27,7 +28,11 @@ const StyledPlaceholderContainer = styled(Box)(({ theme }) => ({
   margin: `${theme.spacing(1)} auto 0`,
 }));
 
-export default function ViewAllHabitsModalButton() {
+type Props = {
+  loading?: boolean;
+};
+
+export default function ViewAllHabitsModalButton({ loading = false }: Props) {
   const { habits } = React.useContext(HabitsContext);
   const [open, setOpen] = React.useState(false);
   const [isEditingHabit, setIsEditingHabit] = React.useState(false);
@@ -56,10 +61,17 @@ export default function ViewAllHabitsModalButton() {
       <Button
         color="neutral"
         variant="soft"
+        disabled={loading}
         onClick={handleOpen}
-        startDecorator={<ViewListRoundedIcon />}
+        startDecorator={
+          loading ? (
+            <CircularProgress size="sm" variant="soft" color="neutral" />
+          ) : (
+            <ViewListRoundedIcon />
+          )
+        }
       >
-        View All Habits
+        {loading ? 'Fetching habits...' : 'View All Habits'}
       </Button>
       <Modal open={open} onClose={handleClose}>
         <ModalDialog>

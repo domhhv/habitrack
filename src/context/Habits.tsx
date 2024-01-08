@@ -9,8 +9,11 @@ export type Habit = {
 };
 
 export const HabitsContext = React.createContext({
+  fetchingHabits: false,
   habits: [] as Habit[],
-  setHabits: (_: Habit[] | ((prevHabits: Habit[]) => Habit[])) => {},
+  addHabit: (_: Habit) => {},
+  removeHabit: (_: number) => {},
+  updateHabit: (_: Habit) => {},
 });
 
 type Props = {
@@ -18,13 +21,42 @@ type Props = {
 };
 
 export default function HabitsProvider({ children }: Props) {
+  const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<Habit[]>([]);
 
   React.useEffect(() => {
-    getHabits().then(setHabits);
+    const loadHabits = async () => {
+      setFetchingHabits(true);
+      const habits = await getHabits();
+      setHabits(habits);
+      setFetchingHabits(false);
+    };
+
+    void loadHabits();
   }, []);
 
-  const value = React.useMemo(() => ({ habits, setHabits }), [habits]);
+  const addHabit = (habit: Habit) => {
+    setHabits((prevHabits) => [...prevHabits, habit]);
+  };
+
+  const removeHabit = (id: number) => {
+    setHabits((prevHabits) =>
+      prevHabits.filter((prevHabit) => prevHabit.id !== id)
+    );
+  };
+
+  const updateHabit = (habit: Habit) => {
+    setHabits((prevHabits) =>
+      prevHabits.map((prevHabit) =>
+        prevHabit.id === habit.id ? { ...prevHabit, ...habit } : prevHabit
+      )
+    );
+  };
+
+  const value = React.useMemo(
+    () => ({ fetchingHabits, habits, addHabit, removeHabit, updateHabit }),
+    [habits, fetchingHabits]
+  );
 
   return (
     <HabitsContext.Provider value={value}>{children}</HabitsContext.Provider>

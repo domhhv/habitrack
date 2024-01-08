@@ -26,7 +26,7 @@ type Props = {
 
 export default function DayHabitModalDialog({ open, onClose, date }: Props) {
   const { habits } = React.useContext(HabitsContext);
-  const { setCalendarEvents } = React.useContext(CalendarEventsContext);
+  const { addCalendarEvent } = React.useContext(CalendarEventsContext);
   const [submitting, setSubmitting] = React.useState(false);
   const [selectedBadHabit, setSelectedBadHabit] = React.useState<number | null>(
     null
@@ -49,10 +49,7 @@ export default function DayHabitModalDialog({ open, onClose, date }: Props) {
         date,
         selectedBadHabit as number
       );
-      setCalendarEvents((prevCalendarEvents) => [
-        ...prevCalendarEvents,
-        newCalendarEvent,
-      ]);
+      addCalendarEvent(newCalendarEvent);
     } catch (error) {
       console.error(error);
     } finally {

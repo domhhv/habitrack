@@ -49,17 +49,14 @@ type HabitItemProps = {
 
 export default function HabitItem({ habit, onEdit }: HabitItemProps) {
   const [isBeingDeleted, setIsBeingDeleted] = React.useState(false);
-  const { setHabits } = React.useContext(HabitsContext);
+  const { removeHabit } = React.useContext(HabitsContext);
 
   const handleDeleteHabit = async () => {
     setIsBeingDeleted(true);
 
     try {
       await deleteHabit(habit.id);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setHabits((prevHabits) =>
-        prevHabits.filter((prevHabit) => prevHabit.id !== habit.id)
-      );
+      removeHabit(habit.id);
     } catch (error) {
       console.error(error);
     } finally {
