@@ -1,4 +1,4 @@
-import { getCalendarEvents } from '@actions';
+import { calendarActions } from '@actions';
 import React from 'react';
 
 import { Habit } from './Habits';
@@ -31,7 +31,7 @@ export default function CalendarEventsProvider({ children }: Props) {
   React.useEffect(() => {
     const loadCalendarEvents = async () => {
       setFetchingCalendarEvents(true);
-      const calendarEvents = await getCalendarEvents();
+      const calendarEvents = await calendarActions.getCalendarEvents();
       setCalendarEvents(calendarEvents);
       setFetchingCalendarEvents(false);
     };

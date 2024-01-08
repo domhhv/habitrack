@@ -1,5 +1,9 @@
-import { deleteCalendarEvent } from '@actions';
-import { CalendarEvent, CalendarEventsContext } from '@context';
+import { calendarActions } from '@actions';
+import {
+  CalendarEvent,
+  CalendarEventsContext,
+  SnackbarContext,
+} from '@context';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
@@ -92,14 +96,13 @@ export default function CalendarCell({
   onClick,
   rangeStatus,
 }: Props) {
-  const { removeCalendarEvent, fetchingCalendarEvents } = React.useContext(
-    CalendarEventsContext
-  );
+  const calendarEventsContext = React.useContext(CalendarEventsContext);
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
   const [eventIdBeingDeleted, setEventIdBeingDeleted] = React.useState<
     number | null
   >(null);
+  const { showSnackbar } = React.useContext(SnackbarContext);
 
   React.useEffect(() => {
     const today = new Date();
@@ -135,8 +138,11 @@ export default function CalendarCell({
     setEventIdBeingDeleted(calendarEventId);
 
     try {
-      await deleteCalendarEvent(calendarEventId);
-      removeCalendarEvent(calendarEventId);
+      await calendarActions.deleteCalendarEvent(calendarEventId);
+      calendarEventsContext.removeCalendarEvent(calendarEventId);
+      showSnackbar('Your habit entry has been deleted from the calendar.', {
+        dismissible: true,
+      });
     } catch (error) {
       console.error(error);
     } finally {
@@ -151,7 +157,7 @@ export default function CalendarCell({
       data-next-month={rangeStatus === 'above-range'}
       data-current={current}
       onClick={handleClick}
-      disabled={fetchingCalendarEvents}
+      disabled={calendarEventsContext.fetchingCalendarEvents}
     >
       <StyledCalendarDayCellButtonHeader>
         <Typography level="body-sm" fontWeight={current ? 900 : 400}>

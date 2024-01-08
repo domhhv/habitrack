@@ -1,6 +1,11 @@
-import { updateHabit } from '@actions';
+import { habitActions } from '@actions';
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { CalendarEventsContext, Habit, HabitsContext } from '@context';
+import {
+  CalendarEventsContext,
+  Habit,
+  HabitsContext,
+  SnackbarContext,
+} from '@context';
 import {
   Button,
   DialogContent,
@@ -40,6 +45,7 @@ export default function EditHabitDialog({
   const { updateHabitInsideCalendarEvents } = React.useContext(
     CalendarEventsContext
   );
+  const { showSnackbar } = React.useContext(SnackbarContext);
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -81,13 +87,18 @@ export default function EditHabitDialog({
     setIsUpdating(true);
 
     try {
-      const updatedHabit = await updateHabit(habit.id, {
+      const updatedHabit = await habitActions.updateHabit(habit.id, {
         name,
         description,
         trait: trait as 'good' | 'bad',
       });
       habitsContext.updateHabit(updatedHabit);
       updateHabitInsideCalendarEvents(updatedHabit);
+      showSnackbar('Your habit has been updated!', {
+        color: 'success',
+        dismissible: true,
+        dismissText: 'Done',
+      });
     } catch (error) {
       console.error(error);
     } finally {

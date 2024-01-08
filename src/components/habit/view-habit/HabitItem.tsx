@@ -1,5 +1,5 @@
-import { deleteHabit } from '@actions';
-import { Habit, HabitsContext } from '@context';
+import { habitActions } from '@actions';
+import { Habit, HabitsContext, SnackbarContext } from '@context';
 import { DeleteForever } from '@mui/icons-material';
 import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
 import {
@@ -49,14 +49,18 @@ type HabitItemProps = {
 
 export default function HabitItem({ habit, onEdit }: HabitItemProps) {
   const [isBeingDeleted, setIsBeingDeleted] = React.useState(false);
-  const { removeHabit } = React.useContext(HabitsContext);
+  const habitsContext = React.useContext(HabitsContext);
+  const { showSnackbar } = React.useContext(SnackbarContext);
 
   const handleDeleteHabit = async () => {
     setIsBeingDeleted(true);
 
     try {
-      await deleteHabit(habit.id);
-      removeHabit(habit.id);
+      await habitActions.deleteHabit(habit.id);
+      habitsContext.removeHabit(habit.id);
+      showSnackbar('Your habit has been deleted!', {
+        dismissible: true,
+      });
     } catch (error) {
       console.error(error);
     } finally {
