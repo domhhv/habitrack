@@ -9,16 +9,16 @@ import React from 'react';
 
 function App() {
   return (
-    <HabitsProvider>
-      <CalendarEventsProvider>
-        <SnackbarProvider>
+    <SnackbarProvider>
+      <HabitsProvider>
+        <CalendarEventsProvider>
           <Box textAlign="center">
             <AppHeader />
             <Calendar aria-label="Event date" />
           </Box>
-        </SnackbarProvider>
-      </CalendarEventsProvider>
-    </HabitsProvider>
+        </CalendarEventsProvider>
+      </HabitsProvider>
+    </SnackbarProvider>
   );
 }
 

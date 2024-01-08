@@ -34,13 +34,16 @@ const StyledSnackbarsWrapper = styled('div')(({ theme }) => ({
   zIndex: 1000,
 }));
 
-function SnackbarProvider({ children }: { children: React.ReactNode }) {
+export default function SnackbarProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [snackbars, setSnackbars] = React.useState<
     { id: string; message: string; options: SnackbarOptions }[]
   >([]);
 
   const showSnackbar = (message: string, options: SnackbarOptions = {}) => {
-    console.log('showSnackbar');
     setSnackbars((prevSnackbars) => [
       ...prevSnackbars,
       { id: crypto.randomUUID(), message, options },
@@ -134,5 +137,3 @@ function SnackbarProvider({ children }: { children: React.ReactNode }) {
     </SnackbarContext.Provider>
   );
 }
-
-export default React.memo(SnackbarProvider);
