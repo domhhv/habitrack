@@ -31,29 +31,34 @@ const StyledCalendarDayCellButton = styled('button')(() => ({
   '&:last-of-type': {
     borderRight: '1px solid',
   },
-  '&[data-prev-month="true"]': {
+  '&[data-prev-month="true"]:not([disabled])': {
     cursor: 'w-resize',
   },
-  '&[data-next-month="true"]': {
+  '&[data-next-month="true"]:not([disabled])': {
     cursor: 'e-resize',
   },
   '&[data-prev-month="true"], &[data-next-month="true"]': {
     backgroundColor: 'white',
-    '&:hover': {
+    '&:not([disabled]):hover': {
       backgroundColor: '#f5f5f4',
     },
   },
   '&[data-active="true"]': {
-    cursor: 'pointer',
     backgroundColor: '#f5f5f4',
-    '&:hover': {
-      backgroundColor: '#e7e5e4',
+    '&:not([disabled])': {
+      cursor: 'pointer',
+      '&:hover': {
+        backgroundColor: '#e7e5e4',
+      },
     },
   },
   '&[data-current="true"]': {
     backgroundColor: '#e7e5e4',
-    '&:hover': {
-      backgroundColor: '#d6d3d1',
+    '&:not([disabled])': {
+      cursor: 'pointer',
+      '&:hover': {
+        backgroundColor: '#d6d3d1',
+      },
     },
   },
 }));
@@ -87,7 +92,9 @@ export default function CalendarCell({
   onClick,
   rangeStatus,
 }: Props) {
-  const { setCalendarEvents } = React.useContext(CalendarEventsContext);
+  const { removeCalendarEvent, fetchingCalendarEvents } = React.useContext(
+    CalendarEventsContext
+  );
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
   const [eventIdBeingDeleted, setEventIdBeingDeleted] = React.useState<
@@ -129,9 +136,7 @@ export default function CalendarCell({
 
     try {
       await deleteCalendarEvent(calendarEventId);
-      setCalendarEvents((prevCalendarEvents) =>
-        prevCalendarEvents.filter((event) => event.id !== calendarEventId)
-      );
+      removeCalendarEvent(calendarEventId);
     } catch (error) {
       console.error(error);
     } finally {
@@ -146,6 +151,7 @@ export default function CalendarCell({
       data-next-month={rangeStatus === 'above-range'}
       data-current={current}
       onClick={handleClick}
+      disabled={fetchingCalendarEvents}
     >
       <StyledCalendarDayCellButtonHeader>
         <Typography level="body-sm" fontWeight={current ? 900 : 400}>

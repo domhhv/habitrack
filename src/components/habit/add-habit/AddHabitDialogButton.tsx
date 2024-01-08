@@ -19,13 +19,17 @@ import {
 } from '@mui/joy';
 import React, { FormEventHandler } from 'react';
 
-export default function AddHabitDialogButton() {
+type Props = {
+  disabled?: boolean;
+};
+
+export default function AddHabitDialogButton({ disabled = false }: Props) {
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
   const [habitTrait, setHabitTrait] = React.useState<'good' | 'bad' | ''>('');
   const [addingHabit, setAddingHabit] = React.useState(false);
-  const { setHabits } = React.useContext(HabitsContext);
+  const { addHabit } = React.useContext(HabitsContext);
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -48,7 +52,7 @@ export default function AddHabitDialogButton() {
       setHabitName('');
       setHabitDescription('');
       setHabitTrait('');
-      setHabits((prevHabits) => [...prevHabits, newHabit]);
+      addHabit(newHabit);
     } catch (error) {
       console.error(error);
     } finally {
@@ -80,6 +84,7 @@ export default function AddHabitDialogButton() {
         variant="solid"
         startDecorator={<AddRounded />}
         onClick={handleDialogOpen}
+        disabled={disabled}
       >
         Add habit
       </Button>

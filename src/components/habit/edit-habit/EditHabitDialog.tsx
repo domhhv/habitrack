@@ -36,8 +36,10 @@ export default function EditHabitDialog({
   const [description, setDescription] = React.useState('');
   const [trait, setTrait] = React.useState<'good' | 'bad' | ''>('');
   const [isUpdating, setIsUpdating] = React.useState(false);
-  const { setHabits } = React.useContext(HabitsContext);
-  const { setCalendarEvents } = React.useContext(CalendarEventsContext);
+  const habitsContext = React.useContext(HabitsContext);
+  const { updateHabitInsideCalendarEvents } = React.useContext(
+    CalendarEventsContext
+  );
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -84,21 +86,8 @@ export default function EditHabitDialog({
         description,
         trait: trait as 'good' | 'bad',
       });
-      setHabits((prevHabits) =>
-        prevHabits.map((prevHabit) =>
-          prevHabit.id === habit.id ? updatedHabit : prevHabit
-        )
-      );
-      setCalendarEvents((prevCalendarEvents) =>
-        prevCalendarEvents.map((prevCalendarEvent) =>
-          prevCalendarEvent.habit.id === habit.id
-            ? {
-                ...prevCalendarEvent,
-                habit: updatedHabit,
-              }
-            : prevCalendarEvent
-        )
-      );
+      habitsContext.updateHabit(updatedHabit);
+      updateHabitInsideCalendarEvents(updatedHabit);
     } catch (error) {
       console.error(error);
     } finally {
