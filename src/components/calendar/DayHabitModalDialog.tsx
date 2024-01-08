@@ -1,5 +1,9 @@
 import { createCalendarEvent } from '@actions';
-import { CalendarEventsContext, HabitsContext } from '@context';
+import {
+  CalendarEventsContext,
+  HabitsContext,
+  SnackbarContext,
+} from '@context';
 import {
   Box,
   Button,
@@ -31,6 +35,7 @@ export default function DayHabitModalDialog({ open, onClose, date }: Props) {
   const [selectedBadHabit, setSelectedBadHabit] = React.useState<number | null>(
     null
   );
+  const { showSnackbar } = React.useContext(SnackbarContext);
 
   if (!date || !open) {
     return null;
@@ -50,6 +55,11 @@ export default function DayHabitModalDialog({ open, onClose, date }: Props) {
         selectedBadHabit as number
       );
       addCalendarEvent(newCalendarEvent);
+      showSnackbar('Your habit entry has been added to the calendar!', {
+        color: 'success',
+        dismissible: true,
+        dismissText: 'Done',
+      });
     } catch (error) {
       console.error(error);
     } finally {

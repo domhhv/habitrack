@@ -29,7 +29,7 @@ const StyledAppHeaderContent = styled('div')(() => ({
   height: '100%',
 }));
 
-export default function Header() {
+function Header() {
   const { fetchingHabits } = React.useContext(HabitsContext);
 
   return (
@@ -46,3 +46,5 @@ export default function Header() {
     </StyledAppHeader>
   );
 }
+
+export default React.memo(Header);
