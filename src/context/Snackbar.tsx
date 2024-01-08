@@ -31,7 +31,7 @@ const StyledSnackbarsWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing(2),
-  zIndex: 1000,
+  zIndex: 9999,
 }));
 
 export default function SnackbarProvider({

@@ -1,4 +1,4 @@
-import { createHabit } from '@actions';
+import { habitActions } from '@actions';
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
 import { HabitsContext, SnackbarContext } from '@context';
 import {
@@ -29,7 +29,7 @@ export default function AddHabitDialogButton({ disabled = false }: Props) {
   const [habitDescription, setHabitDescription] = React.useState('');
   const [habitTrait, setHabitTrait] = React.useState<'good' | 'bad' | ''>('');
   const [addingHabit, setAddingHabit] = React.useState(false);
-  const { addHabit } = React.useContext(HabitsContext);
+  const habitsContext = React.useContext(HabitsContext);
   const { showSnackbar } = React.useContext(SnackbarContext);
 
   const handleDialogOpen = () => {
@@ -45,7 +45,7 @@ export default function AddHabitDialogButton({ disabled = false }: Props) {
     setAddingHabit(true);
 
     try {
-      const newHabit = await createHabit(
+      const newHabit = await habitActions.createHabit(
         habitName,
         habitDescription,
         habitTrait as 'good' | 'bad'
@@ -53,7 +53,7 @@ export default function AddHabitDialogButton({ disabled = false }: Props) {
       setHabitName('');
       setHabitDescription('');
       setHabitTrait('');
-      addHabit(newHabit);
+      habitsContext.addHabit(newHabit);
       showSnackbar('Your habit has been added!', {
         color: 'success',
         dismissible: true,

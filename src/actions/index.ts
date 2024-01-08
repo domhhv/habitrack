@@ -1,2 +1,2 @@
-export * from './habit';
-export * from './calendar';
+export * as habitActions from './habit';
+export * as calendarActions from './calendar';

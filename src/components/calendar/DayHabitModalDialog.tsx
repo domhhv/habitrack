@@ -1,4 +1,4 @@
-import { createCalendarEvent } from '@actions';
+import { calendarActions } from '@actions';
 import {
   CalendarEventsContext,
   HabitsContext,
@@ -30,7 +30,7 @@ type Props = {
 
 export default function DayHabitModalDialog({ open, onClose, date }: Props) {
   const { habits } = React.useContext(HabitsContext);
-  const { addCalendarEvent } = React.useContext(CalendarEventsContext);
+  const calendarEventsContext = React.useContext(CalendarEventsContext);
   const [submitting, setSubmitting] = React.useState(false);
   const [selectedBadHabit, setSelectedBadHabit] = React.useState<number | null>(
     null
@@ -50,11 +50,11 @@ export default function DayHabitModalDialog({ open, onClose, date }: Props) {
 
     setSubmitting(true);
     try {
-      const newCalendarEvent = await createCalendarEvent(
+      const newCalendarEvent = await calendarActions.createCalendarEvent(
         date,
         selectedBadHabit as number
       );
-      addCalendarEvent(newCalendarEvent);
+      calendarEventsContext.addCalendarEvent(newCalendarEvent);
       showSnackbar('Your habit entry has been added to the calendar!', {
         color: 'success',
         dismissible: true,

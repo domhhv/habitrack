@@ -1,4 +1,4 @@
-import { updateHabit } from '@actions';
+import { habitActions } from '@actions';
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
 import {
   CalendarEventsContext,
@@ -87,7 +87,7 @@ export default function EditHabitDialog({
     setIsUpdating(true);
 
     try {
-      const updatedHabit = await updateHabit(habit.id, {
+      const updatedHabit = await habitActions.updateHabit(habit.id, {
         name,
         description,
         trait: trait as 'good' | 'bad',

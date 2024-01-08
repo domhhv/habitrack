@@ -1,4 +1,4 @@
-import { getHabits } from '@actions';
+import { habitActions } from '@actions';
 import React from 'react';
 
 export type Habit = {
@@ -27,7 +27,7 @@ export default function HabitsProvider({ children }: Props) {
   React.useEffect(() => {
     const loadHabits = async () => {
       setFetchingHabits(true);
-      const habits = await getHabits();
+      const habits = await habitActions.getHabits();
       setHabits(habits);
       setFetchingHabits(false);
     };

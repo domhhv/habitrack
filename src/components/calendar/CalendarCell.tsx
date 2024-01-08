@@ -1,4 +1,4 @@
-import { deleteCalendarEvent } from '@actions';
+import { calendarActions } from '@actions';
 import {
   CalendarEvent,
   CalendarEventsContext,
@@ -96,9 +96,7 @@ export default function CalendarCell({
   onClick,
   rangeStatus,
 }: Props) {
-  const { removeCalendarEvent, fetchingCalendarEvents } = React.useContext(
-    CalendarEventsContext
-  );
+  const calendarEventsContext = React.useContext(CalendarEventsContext);
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
   const [eventIdBeingDeleted, setEventIdBeingDeleted] = React.useState<
@@ -140,8 +138,8 @@ export default function CalendarCell({
     setEventIdBeingDeleted(calendarEventId);
 
     try {
-      await deleteCalendarEvent(calendarEventId);
-      removeCalendarEvent(calendarEventId);
+      await calendarActions.deleteCalendarEvent(calendarEventId);
+      calendarEventsContext.removeCalendarEvent(calendarEventId);
       showSnackbar('Your habit entry has been deleted from the calendar.', {
         dismissible: true,
       });
@@ -159,7 +157,7 @@ export default function CalendarCell({
       data-next-month={rangeStatus === 'above-range'}
       data-current={current}
       onClick={handleClick}
-      disabled={fetchingCalendarEvents}
+      disabled={calendarEventsContext.fetchingCalendarEvents}
     >
       <StyledCalendarDayCellButtonHeader>
         <Typography level="body-sm" fontWeight={current ? 900 : 400}>
