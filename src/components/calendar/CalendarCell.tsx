@@ -3,6 +3,7 @@ import {
   CalendarEvent,
   CalendarEventsContext,
   SnackbarContext,
+  UserContext,
 } from '@context';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -96,6 +97,7 @@ export default function CalendarCell({
   onClick,
   rangeStatus,
 }: Props) {
+  const { accessToken } = React.useContext(UserContext);
   const calendarEventsContext = React.useContext(CalendarEventsContext);
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
@@ -138,7 +140,10 @@ export default function CalendarCell({
     setEventIdBeingDeleted(calendarEventId);
 
     try {
-      await calendarActions.deleteCalendarEvent(calendarEventId);
+      await calendarActions.deleteCalendarEvent(
+        calendarEventId,
+        accessToken as string
+      );
       calendarEventsContext.removeCalendarEvent(calendarEventId);
       showSnackbar('Your habit entry has been deleted from the calendar.', {
         dismissible: true,

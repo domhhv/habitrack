@@ -2,6 +2,7 @@ import { calendarActions } from '@actions';
 import React from 'react';
 
 import { Habit } from './Habits';
+import { UserContext } from './User';
 
 export type CalendarEvent = {
   id: number;
@@ -22,6 +23,7 @@ type Props = {
 };
 
 export default function CalendarEventsProvider({ children }: Props) {
+  const { accessToken } = React.useContext(UserContext);
   const [fetchingCalendarEvents, setFetchingCalendarEvents] =
     React.useState(false);
   const [calendarEvents, setCalendarEvents] = React.useState<CalendarEvent[]>(
@@ -30,14 +32,21 @@ export default function CalendarEventsProvider({ children }: Props) {
 
   React.useEffect(() => {
     const loadCalendarEvents = async () => {
+      if (!accessToken) {
+        clearCalendarEvents();
+        return null;
+      }
+
       setFetchingCalendarEvents(true);
-      const calendarEvents = await calendarActions.getCalendarEvents();
+      const calendarEvents = await calendarActions.getCalendarEvents(
+        accessToken as string
+      );
       setCalendarEvents(calendarEvents);
       setFetchingCalendarEvents(false);
     };
 
     void loadCalendarEvents();
-  }, []);
+  }, [accessToken]);
 
   const addCalendarEvent = (calendarEvent: CalendarEvent) => {
     setCalendarEvents((prevCalendarEvents) => [
@@ -65,6 +74,10 @@ export default function CalendarEventsProvider({ children }: Props) {
           : prevCalendarEvent
       )
     );
+  };
+
+  const clearCalendarEvents = () => {
+    setCalendarEvents([]);
   };
 
   const value = React.useMemo(

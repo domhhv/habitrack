@@ -5,6 +5,7 @@ import {
   Habit,
   HabitsContext,
   SnackbarContext,
+  UserContext,
 } from '@context';
 import {
   Button,
@@ -36,6 +37,7 @@ export default function EditHabitDialog({
   habit,
   onClose,
 }: EditHabitDialogProps) {
+  const { accessToken } = React.useContext(UserContext);
   const [isOpen, setIsOpen] = React.useState(false);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -87,11 +89,15 @@ export default function EditHabitDialog({
     setIsUpdating(true);
 
     try {
-      const updatedHabit = await habitActions.updateHabit(habit.id, {
-        name,
-        description,
-        trait: trait as 'good' | 'bad',
-      });
+      const updatedHabit = await habitActions.updateHabit(
+        habit.id,
+        {
+          name,
+          description,
+          trait: trait as 'good' | 'bad',
+        },
+        accessToken as string
+      );
       habitsContext.updateHabit(updatedHabit);
       updateHabitInsideCalendarEvents(updatedHabit);
       showSnackbar('Your habit has been updated!', {

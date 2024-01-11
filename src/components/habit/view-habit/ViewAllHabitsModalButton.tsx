@@ -60,7 +60,7 @@ export default function ViewAllHabitsModalButton({ loading = false }: Props) {
     <>
       <Button
         color="neutral"
-        variant="soft"
+        variant="plain"
         disabled={loading}
         onClick={handleOpen}
         startDecorator={
@@ -85,24 +85,26 @@ export default function ViewAllHabitsModalButton({ loading = false }: Props) {
               </StyledPlaceholderContainer>
             )}
             {!!habits.length && (
-              <List>
-                {habits.map((habit) => (
-                  <HabitItem
-                    key={habit.id}
-                    habit={habit}
-                    onEdit={() => handleEditStart(habit.id)}
-                  />
-                ))}
-              </List>
+              <>
+                <List>
+                  {habits.map((habit) => (
+                    <HabitItem
+                      key={habit.id}
+                      habit={habit}
+                      onEdit={() => handleEditStart(habit.id)}
+                    />
+                  ))}
+                </List>
+                <EditHabitDialog
+                  open={isEditingHabit}
+                  onClose={handleEditEnd}
+                  habit={habits.find((h) => h.id === habitIdToEdit)}
+                />
+              </>
             )}
           </DialogContent>
         </ModalDialog>
       </Modal>
-      <EditHabitDialog
-        open={isEditingHabit}
-        onClose={handleEditEnd}
-        habit={habits.find((h) => h.id === habitIdToEdit)}
-      />
     </>
   );
 }

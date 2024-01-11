@@ -24,7 +24,7 @@
     "prepare": "([ -d ./.git ] && husky install) || echo \"Skipping husky install since package does not have .git folder\"",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d dist",
-    "start": "NODE_ENV=development webpack serve --mode development --open --hot",
+    "dev": "NODE_ENV=development webpack serve --mode development --open --hot",
     "build": "NODE_ENV=production webpack --mode production",
     "eslint:check": "eslint src",
     "eslint:fix": "eslint --fix src",

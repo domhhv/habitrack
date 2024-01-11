@@ -1,6 +1,8 @@
 import { habitActions } from '@actions';
 import React from 'react';
 
+import { UserContext } from './User';
+
 export type Habit = {
   id: number;
   name: string;
@@ -21,19 +23,25 @@ type Props = {
 };
 
 export default function HabitsProvider({ children }: Props) {
+  const { accessToken } = React.useContext(UserContext);
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<Habit[]>([]);
 
   React.useEffect(() => {
     const loadHabits = async () => {
+      if (!accessToken) {
+        clearHabits();
+        return null;
+      }
+
       setFetchingHabits(true);
-      const habits = await habitActions.getHabits();
+      const habits = await habitActions.getHabits(accessToken as string);
       setHabits(habits);
       setFetchingHabits(false);
     };
 
     void loadHabits();
-  }, []);
+  }, [accessToken]);
 
   const addHabit = (habit: Habit) => {
     setHabits((prevHabits) => [...prevHabits, habit]);
@@ -51,6 +59,10 @@ export default function HabitsProvider({ children }: Props) {
         prevHabit.id === habit.id ? { ...prevHabit, ...habit } : prevHabit
       )
     );
+  };
+
+  const clearHabits = () => {
+    setHabits([]);
   };
 
   const value = React.useMemo(
