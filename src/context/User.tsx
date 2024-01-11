@@ -60,7 +60,6 @@ export default function UserProvider({ children }: Props) {
         'user_access_token',
         JSON.stringify(loginResponse.access_token)
       );
-      console.log({ loginResponse });
       setAccessToken(loginResponse.access_token);
       setUser(user);
       const snackbarMessage = loginResponse.signedUp

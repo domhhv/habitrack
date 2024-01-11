@@ -60,8 +60,6 @@ export default function CalendarGrid({ state }: Props) {
     setDayModalDialogOpen(false);
   };
 
-  console.log({ calendarEvents });
-
   const calendarEventsByDate = calendarEvents?.reduce(
     (acc, event) => {
       const date = new Date(event.date);
