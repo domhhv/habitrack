@@ -1,5 +1,5 @@
 import { AddHabitDialogButton, ViewAllHabitsModalButton } from '@components';
-import { HabitsContext } from '@context';
+import { useHabits } from '@context';
 import { styled } from '@mui/joy/styles';
 import React from 'react';
 
@@ -30,7 +30,7 @@ const StyledAppHeaderContent = styled('div')(() => ({
 }));
 
 export default function Header() {
-  const { fetchingHabits } = React.useContext(HabitsContext);
+  const { fetchingHabits } = useHabits();
 
   return (
     <StyledAppHeader>

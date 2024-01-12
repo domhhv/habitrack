@@ -1,11 +1,11 @@
 import { habitActions } from '@actions';
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
 import {
-  CalendarEventsContext,
   Habit,
-  HabitsContext,
-  SnackbarContext,
-  UserContext,
+  useCalendarEvents,
+  useHabits,
+  useSnackbar,
+  useUser,
 } from '@context';
 import {
   Button,
@@ -37,17 +37,15 @@ export default function EditHabitDialog({
   habit,
   onClose,
 }: EditHabitDialogProps) {
-  const { accessToken } = React.useContext(UserContext);
+  const { accessToken } = useUser();
   const [isOpen, setIsOpen] = React.useState(false);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [trait, setTrait] = React.useState<'good' | 'bad' | ''>('');
   const [isUpdating, setIsUpdating] = React.useState(false);
-  const habitsContext = React.useContext(HabitsContext);
-  const { updateHabitInsideCalendarEvents } = React.useContext(
-    CalendarEventsContext
-  );
-  const { showSnackbar } = React.useContext(SnackbarContext);
+  const habitsContext = useHabits();
+  const { updateHabitInsideCalendarEvents } = useCalendarEvents();
+  const { showSnackbar } = useSnackbar();
 
   React.useEffect(() => {
     setIsOpen(open);

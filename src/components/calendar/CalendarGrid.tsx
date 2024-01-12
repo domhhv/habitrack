@@ -1,4 +1,4 @@
-import { CalendarEvent, CalendarEventsContext } from '@context';
+import { CalendarEvent, useCalendarEvents } from '@context';
 import { getWeeksInMonth } from '@internationalized/date';
 import { CalendarDate } from '@internationalized/date';
 import { Box, styled, Typography } from '@mui/joy';
@@ -42,7 +42,7 @@ export default function CalendarGrid({ state }: Props) {
 
   const weeksInMonth = getWeeksInMonth(state.visibleRange.start, locale);
 
-  const { calendarEvents } = React.useContext(CalendarEventsContext);
+  const { calendarEvents } = useCalendarEvents();
   const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
 

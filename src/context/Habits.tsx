@@ -1,7 +1,7 @@
 import { habitActions } from '@actions';
 import React from 'react';
 
-import { UserContext } from './User';
+import { useUser } from './User';
 
 export type Habit = {
   id: number;
@@ -10,7 +10,7 @@ export type Habit = {
   trait: 'good' | 'bad';
 };
 
-export const HabitsContext = React.createContext({
+const HabitsContext = React.createContext({
   fetchingHabits: false,
   habits: [] as Habit[],
   addHabit: (_: Habit) => {},
@@ -18,12 +18,22 @@ export const HabitsContext = React.createContext({
   updateHabit: (_: Habit) => {},
 });
 
+export const useHabits = () => {
+  const context = React.useContext(HabitsContext);
+
+  if (!context) {
+    throw new Error('useHabits must be used within a HabitsProvider');
+  }
+
+  return context;
+};
+
 type Props = {
   children: React.ReactNode;
 };
 
 export default function HabitsProvider({ children }: Props) {
-  const { accessToken } = React.useContext(UserContext);
+  const { accessToken } = useUser();
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<Habit[]>([]);
 

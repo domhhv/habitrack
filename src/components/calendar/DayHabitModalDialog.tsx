@@ -1,10 +1,5 @@
 import { calendarActions } from '@actions';
-import {
-  CalendarEventsContext,
-  HabitsContext,
-  SnackbarContext,
-  UserContext,
-} from '@context';
+import { useCalendarEvents, useHabits, useSnackbar, useUser } from '@context';
 import {
   Box,
   Button,
@@ -30,14 +25,14 @@ type Props = {
 };
 
 export default function DayHabitModalDialog({ open, onClose, date }: Props) {
-  const { accessToken } = React.useContext(UserContext);
-  const { habits } = React.useContext(HabitsContext);
-  const calendarEventsContext = React.useContext(CalendarEventsContext);
+  const { accessToken } = useUser();
+  const { habits } = useHabits();
+  const calendarEventsContext = useCalendarEvents();
   const [submitting, setSubmitting] = React.useState(false);
   const [selectedBadHabit, setSelectedBadHabit] = React.useState<number | null>(
     null
   );
-  const { showSnackbar } = React.useContext(SnackbarContext);
+  const { showSnackbar } = useSnackbar();
 
   if (!date || !open) {
     return null;

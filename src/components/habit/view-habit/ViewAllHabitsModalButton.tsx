@@ -1,4 +1,4 @@
-import { HabitsContext } from '@context';
+import { useHabits } from '@context';
 import ViewListRoundedIcon from '@mui/icons-material/ViewListRounded';
 import {
   Box,
@@ -33,7 +33,7 @@ type Props = {
 };
 
 export default function ViewAllHabitsModalButton({ loading = false }: Props) {
-  const { habits } = React.useContext(HabitsContext);
+  const { habits } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [isEditingHabit, setIsEditingHabit] = React.useState(false);
   const [habitIdToEdit, setHabitIdToEdit] = React.useState<number | null>(null);

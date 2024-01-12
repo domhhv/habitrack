@@ -1,7 +1,7 @@
 import { userActions } from '@actions';
 import React from 'react';
 
-import { SnackbarContext } from './Snackbar';
+import { useSnackbar } from './Snackbar';
 
 export type User = {
   id: string;
@@ -16,7 +16,7 @@ type UserContextType = {
   accessToken: string | null;
 };
 
-export const UserContext = React.createContext<UserContextType>({
+const UserContext = React.createContext<UserContextType>({
   user: null,
   login: (_username: string, _password: string) => Promise.resolve(),
   logout: () => {},
@@ -24,12 +24,22 @@ export const UserContext = React.createContext<UserContextType>({
   accessToken: null,
 });
 
+export const useUser = () => {
+  const context = React.useContext(UserContext);
+
+  if (context === undefined) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+
+  return context;
+};
+
 type Props = {
   children: React.ReactNode;
 };
 
 export default function UserProvider({ children }: Props) {
-  const { showSnackbar } = React.useContext(SnackbarContext);
+  const { showSnackbar } = useSnackbar();
   const [user, setUser] = React.useState<User | null>(null);
   const [accessToken, setAccessToken] = React.useState<string | null>(null);
   const [loggingIn, setLoggingIn] = React.useState(false);

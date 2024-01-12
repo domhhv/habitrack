@@ -1,9 +1,9 @@
 import { calendarActions } from '@actions';
 import {
   CalendarEvent,
-  CalendarEventsContext,
-  SnackbarContext,
-  UserContext,
+  useCalendarEvents,
+  useSnackbar,
+  useUser,
 } from '@context';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -97,14 +97,14 @@ export default function CalendarCell({
   onClick,
   rangeStatus,
 }: Props) {
-  const { accessToken } = React.useContext(UserContext);
-  const calendarEventsContext = React.useContext(CalendarEventsContext);
+  const { accessToken } = useUser();
+  const calendarEventsContext = useCalendarEvents();
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
   const [eventIdBeingDeleted, setEventIdBeingDeleted] = React.useState<
     number | null
   >(null);
-  const { showSnackbar } = React.useContext(SnackbarContext);
+  const { showSnackbar } = useSnackbar();
 
   React.useEffect(() => {
     const today = new Date();

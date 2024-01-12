@@ -1,5 +1,5 @@
 import { FloatingLabelInput } from '@components';
-import { UserContext } from '@context';
+import { useUser } from '@context';
 import { AccountCircleOutlined } from '@mui/icons-material';
 import {
   Button,
@@ -20,7 +20,7 @@ const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
 }));
 
 export default function AuthModalButton() {
-  const { user, loggingIn, login, logout } = React.useContext(UserContext);
+  const { user, loggingIn, login, logout } = useUser();
   const [open, setOpen] = React.useState(false);
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
