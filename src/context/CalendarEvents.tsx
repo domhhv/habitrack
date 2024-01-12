@@ -2,7 +2,7 @@ import { calendarActions } from '@actions';
 import React from 'react';
 
 import { Habit } from './Habits';
-import { UserContext } from './User';
+import { useUser } from './User';
 
 export type CalendarEvent = {
   id: number;
@@ -10,7 +10,7 @@ export type CalendarEvent = {
   habit: Habit;
 };
 
-export const CalendarEventsContext = React.createContext({
+const CalendarEventsContext = React.createContext({
   fetchingCalendarEvents: false,
   calendarEvents: [] as CalendarEvent[],
   addCalendarEvent: (_: CalendarEvent) => {},
@@ -18,12 +18,24 @@ export const CalendarEventsContext = React.createContext({
   updateHabitInsideCalendarEvents: (_: Habit) => {},
 });
 
+export const useCalendarEvents = () => {
+  const context = React.useContext(CalendarEventsContext);
+
+  if (!context) {
+    throw new Error(
+      'useCalendarEvents must be used within a CalendarEventsProvider'
+    );
+  }
+
+  return context;
+};
+
 type Props = {
   children: React.ReactNode;
 };
 
 export default function CalendarEventsProvider({ children }: Props) {
-  const { accessToken } = React.useContext(UserContext);
+  const { accessToken } = useUser();
   const [fetchingCalendarEvents, setFetchingCalendarEvents] =
     React.useState(false);
   const [calendarEvents, setCalendarEvents] = React.useState<CalendarEvent[]>(

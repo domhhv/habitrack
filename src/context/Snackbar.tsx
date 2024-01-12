@@ -20,9 +20,19 @@ type SnackbarOptions = {
   dismissText?: string;
 };
 
-export const SnackbarContext = React.createContext({
+const SnackbarContext = React.createContext({
   showSnackbar: (_: string, __: SnackbarOptions = {}) => {},
 });
+
+export const useSnackbar = () => {
+  const context = React.useContext(SnackbarContext);
+
+  if (!context) {
+    throw new Error('useSnackbar must be used within a SnackbarProvider');
+  }
+
+  return context;
+};
 
 const StyledSnackbarsWrapper = styled('div')(({ theme }) => ({
   position: 'fixed',
@@ -34,11 +44,11 @@ const StyledSnackbarsWrapper = styled('div')(({ theme }) => ({
   zIndex: 9999,
 }));
 
-export default function SnackbarProvider({
-  children,
-}: {
+type Props = {
   children: React.ReactNode;
-}) {
+};
+
+export default function SnackbarProvider({ children }: Props) {
   const [snackbars, setSnackbars] = React.useState<
     { id: string; message: string; options: SnackbarOptions }[]
   >([]);

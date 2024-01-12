@@ -1,4 +1,4 @@
-import { CalendarEventsContext } from '@context';
+import { useCalendarEvents } from '@context';
 import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { Typography, styled, IconButton } from '@mui/joy';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -67,7 +67,7 @@ export default function CalendarHeader({
   onNavigateBack,
   onNavigateForward,
 }: Props) {
-  const { fetchingCalendarEvents } = React.useContext(CalendarEventsContext);
+  const { fetchingCalendarEvents } = useCalendarEvents();
 
   return (
     <StyledCalendarHeader>

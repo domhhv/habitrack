@@ -1,6 +1,6 @@
 import { habitActions } from '@actions';
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { HabitsContext, SnackbarContext, UserContext } from '@context';
+import { useHabits, useSnackbar, useUser } from '@context';
 import {
   AddRounded,
   CheckCircleOutline,
@@ -24,14 +24,14 @@ type Props = {
 };
 
 export default function AddHabitDialogButton({ disabled = false }: Props) {
-  const { accessToken } = React.useContext(UserContext);
+  const { accessToken } = useUser();
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
   const [habitTrait, setHabitTrait] = React.useState<'good' | 'bad' | ''>('');
   const [addingHabit, setAddingHabit] = React.useState(false);
-  const habitsContext = React.useContext(HabitsContext);
-  const { showSnackbar } = React.useContext(SnackbarContext);
+  const habitsContext = useHabits();
+  const { showSnackbar } = useSnackbar();
 
   const handleDialogOpen = () => {
     setOpen(true);
