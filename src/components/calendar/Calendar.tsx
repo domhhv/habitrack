@@ -9,7 +9,9 @@ import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';
 
 const StyledCalendarContainerDiv = styled('div')(({ theme }) => ({
-  display: 'inline-block',
+  display: 'flex',
+  flexDirection: 'column',
+  flexGrow: 1,
   margin: `${theme.spacing(2)} auto 0`,
 }));
 

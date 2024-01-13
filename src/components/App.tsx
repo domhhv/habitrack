@@ -5,8 +5,14 @@ import {
   SnackbarProvider,
   UserProvider,
 } from '@context';
-import { Box } from '@mui/joy';
+import { styled } from '@mui/joy';
 import React from 'react';
+
+const StyledAppContainerDiv = styled('div')({
+  display: 'flex',
+  flexDirection: 'column',
+  flexGrow: 1,
+});
 
 function App() {
   return (
@@ -14,10 +20,10 @@ function App() {
       <UserProvider>
         <HabitsProvider>
           <CalendarEventsProvider>
-            <Box textAlign="center">
+            <StyledAppContainerDiv>
               <AppHeader />
               <Calendar aria-label="Event date" />
-            </Box>
+            </StyledAppContainerDiv>
           </CalendarEventsProvider>
         </HabitsProvider>
       </UserProvider>
