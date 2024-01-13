@@ -2,6 +2,7 @@ import { CalendarEvent, useCalendarEvents } from '@context';
 import { getWeeksInMonth } from '@internationalized/date';
 import { CalendarDate } from '@internationalized/date';
 import { Box, Typography } from '@mui/joy';
+// import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
 import { CalendarState } from 'react-stately';
@@ -74,6 +75,14 @@ export default function CalendarGrid({ state }: Props) {
           );
         })}
       </Box>
+      {/* TODO: Uncomment with flex layout preserved */}
+      {/*<AnimatePresence mode="wait">*/}
+      {/*  <motion.div*/}
+      {/*    key={state.visibleRange.start.month}*/}
+      {/*    initial={{ opacity: 0 }}*/}
+      {/*    animate={{ opacity: 1 }}*/}
+      {/*    exit={{ opacity: 0 }}*/}
+      {/*  >*/}
       {[...new Array(weeksInMonth).keys()].map((weekIndex) => (
         <StyledCalendarWeekRow key={weekIndex}>
           {state
@@ -110,6 +119,8 @@ export default function CalendarGrid({ state }: Props) {
             })}
         </StyledCalendarWeekRow>
       ))}
+      {/*  </motion.div>*/}
+      {/*</AnimatePresence>*/}
 
       <DayHabitModalDialog
         open={dayModalDialogOpen}
