@@ -1,38 +1,22 @@
 import { CalendarEvent, useCalendarEvents } from '@context';
 import { getWeeksInMonth } from '@internationalized/date';
 import { CalendarDate } from '@internationalized/date';
-import { Box, styled, Typography } from '@mui/joy';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Box, Typography } from '@mui/joy';
 import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
 import { CalendarState } from 'react-stately';
 
 import CalendarCell from './CalendarCell';
 import DayHabitModalDialog from './DayHabitModalDialog';
+import {
+  StyledCalendarContainerDiv,
+  StyledCalendarWeekDay,
+  StyledCalendarWeekRow,
+} from './styled';
 
 type Props = {
   state: CalendarState;
 };
-
-const StyledCalendarContainerDiv = styled('div')(({ theme }) => ({
-  display: 'inline-block',
-  margin: `${theme.spacing(2)} auto 0`,
-}));
-
-const StyledCalendarWeekDay = styled('div')(() => ({
-  width: 150,
-  height: 24,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledCalendarWeekRow = styled('div')(() => ({
-  display: 'flex',
-  '&:last-of-type': {
-    borderBottom: '1px solid',
-  },
-}));
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -90,51 +74,42 @@ export default function CalendarGrid({ state }: Props) {
           );
         })}
       </Box>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={state.visibleRange.start.month}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          {[...new Array(weeksInMonth).keys()].map((weekIndex) => (
-            <StyledCalendarWeekRow key={weekIndex}>
-              {state
-                .getDatesInWeek(weekIndex)
-                .map((calendarDate: CalendarDate | null) => {
-                  if (!calendarDate) {
-                    return null;
+      {[...new Array(weeksInMonth).keys()].map((weekIndex) => (
+        <StyledCalendarWeekRow key={weekIndex}>
+          {state
+            .getDatesInWeek(weekIndex)
+            .map((calendarDate: CalendarDate | null) => {
+              if (!calendarDate) {
+                return null;
+              }
+
+              const rangeStatus =
+                calendarDate.month < state.visibleRange.start.month
+                  ? 'below-range'
+                  : calendarDate.month > state.visibleRange.start.month
+                    ? 'above-range'
+                    : 'in-range';
+
+              return (
+                <CalendarCell
+                  key={`${calendarDate.month}-${calendarDate.day}-${calendarDate.year}`}
+                  dateNumber={calendarDate.day}
+                  monthIndex={calendarDate.month}
+                  fullYear={calendarDate.year}
+                  onClick={handleDayModalDialogOpen}
+                  events={
+                    calendarEventsByDate[
+                      `${calendarDate.year}-${calendarDate.month}-${calendarDate.day}`
+                    ] || []
                   }
-
-                  const rangeStatus =
-                    calendarDate.month < state.visibleRange.start.month
-                      ? 'below-range'
-                      : calendarDate.month > state.visibleRange.start.month
-                        ? 'above-range'
-                        : 'in-range';
-
-                  return (
-                    <CalendarCell
-                      key={`${calendarDate.month}-${calendarDate.day}-${calendarDate.year}`}
-                      dateNumber={calendarDate.day}
-                      monthIndex={calendarDate.month}
-                      fullYear={calendarDate.year}
-                      onClick={handleDayModalDialogOpen}
-                      events={
-                        calendarEventsByDate[
-                          `${calendarDate.year}-${calendarDate.month}-${calendarDate.day}`
-                        ] || []
-                      }
-                      rangeStatus={rangeStatus}
-                      onNavigateBack={state.focusPreviousPage}
-                      onNavigateForward={state.focusNextPage}
-                    />
-                  );
-                })}
-            </StyledCalendarWeekRow>
-          ))}
-        </motion.div>
-      </AnimatePresence>
+                  rangeStatus={rangeStatus}
+                  onNavigateBack={state.focusPreviousPage}
+                  onNavigateForward={state.focusNextPage}
+                />
+              );
+            })}
+        </StyledCalendarWeekRow>
+      ))}
 
       <DayHabitModalDialog
         open={dayModalDialogOpen}

@@ -8,9 +8,15 @@ import {
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
-import { Box, Chip, ChipDelete, CircularProgress, Typography } from '@mui/joy';
-import { styled } from '@mui/joy/styles';
+import { ChipDelete, CircularProgress, Typography } from '@mui/joy';
 import React from 'react';
+
+import {
+  StyledCalendarDayCellButton,
+  StyledCalendarDayCellButtonHeader,
+  StyledCalendarDayCellButtonIconsContainer,
+  StyledHabitChip,
+} from './styled';
 
 type Props = {
   dateNumber: number;
@@ -22,70 +28,6 @@ type Props = {
   onNavigateForward?: () => void;
   rangeStatus: 'below-range' | 'in-range' | 'above-range';
 };
-
-const StyledCalendarDayCellButton = styled('button')(() => ({
-  background: 'none',
-  display: 'flex',
-  flexDirection: 'column',
-  border: 'none',
-  width: 150,
-  height: 150,
-  borderTop: '1px solid',
-  borderLeft: '1px solid',
-  padding: 0,
-  '&:last-of-type': {
-    borderRight: '1px solid',
-  },
-  '&[data-prev-month="true"]:not([disabled])': {
-    cursor: 'w-resize',
-  },
-  '&[data-next-month="true"]:not([disabled])': {
-    cursor: 'e-resize',
-  },
-  '&[data-prev-month="true"], &[data-next-month="true"]': {
-    backgroundColor: 'white',
-    '&:not([disabled]):hover': {
-      backgroundColor: '#f5f5f4',
-    },
-  },
-  '&[data-active="true"]': {
-    backgroundColor: '#f5f5f4',
-    '&:not([disabled])': {
-      cursor: 'pointer',
-      '&:hover': {
-        backgroundColor: '#e7e5e4',
-      },
-    },
-  },
-  '&[data-current="true"]': {
-    backgroundColor: '#e7e5e4',
-    '&:not([disabled])': {
-      cursor: 'pointer',
-      '&:hover': {
-        backgroundColor: '#d6d3d1',
-      },
-    },
-  },
-}));
-
-const StyledCalendarDayCellButtonHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: theme.spacing(0.25, 0.5),
-  width: '100%',
-  borderBottom: '1px solid',
-  boxSizing: 'border-box',
-}));
-
-const StyledCalendarDayCellButtonIconsContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(0.25, 0.5),
-  textAlign: 'left',
-}));
-
-const StyledChip = styled(Chip)(({ theme }) => ({
-  marginTop: theme.spacing(0.6),
-}));
 
 export default function CalendarCell({
   dateNumber,
@@ -198,7 +140,7 @@ export default function CalendarCell({
           );
 
           return (
-            <StyledChip
+            <StyledHabitChip
               variant="soft"
               color={event.habit.trait === 'good' ? 'success' : 'danger'}
               key={event.id}
@@ -207,7 +149,7 @@ export default function CalendarCell({
               endDecorator={endDecorator}
             >
               {event.habit.name}
-            </StyledChip>
+            </StyledHabitChip>
           );
         })}
       </StyledCalendarDayCellButtonIconsContainer>
