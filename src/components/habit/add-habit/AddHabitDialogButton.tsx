@@ -1,4 +1,3 @@
-import { habitActions } from '@actions';
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
 import { useHabits, useSnackbar, useUser } from '@context';
 import {
@@ -17,6 +16,7 @@ import {
   Option,
   Select,
 } from '@mui/joy';
+import { habitService } from '@services';
 import React, { FormEventHandler } from 'react';
 
 type Props = {
@@ -49,7 +49,7 @@ export default function AddHabitDialogButton({ disabled = false }: Props) {
     setAddingHabit(true);
 
     try {
-      const newHabit = await habitActions.createHabit(
+      const newHabit = await habitService.createHabit(
         habitName,
         habitDescription,
         habitTrait as 'good' | 'bad',

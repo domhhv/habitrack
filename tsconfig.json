@@ -22,7 +22,7 @@
     "sourceMap": true,
     "baseUrl": "./src",
     "paths": {
-      "@actions": ["actions"],
+      "@services": ["services"],
       "@context": ["context"],
       "@components": ["components"],
       "@utils": ["utils"],

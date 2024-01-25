@@ -1,4 +1,4 @@
-import { habitActions } from '@actions';
+import { habitService } from '@services';
 import React from 'react';
 
 import { useUser } from './User';
@@ -45,7 +45,7 @@ export default function HabitsProvider({ children }: Props) {
       }
 
       setFetchingHabits(true);
-      const habits = await habitActions.getHabits(accessToken as string);
+      const habits = await habitService.getHabits(accessToken as string);
       setHabits(habits);
       setFetchingHabits(false);
     };

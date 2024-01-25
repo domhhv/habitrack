@@ -1,4 +1,4 @@
-import { userActions } from '@actions';
+import { userService } from '@services';
 import React from 'react';
 
 import { useSnackbar } from './Snackbar';
@@ -64,7 +64,7 @@ export default function UserProvider({ children }: Props) {
   const login = async (username: string, password: string) => {
     setLoggingIn(true);
     try {
-      const loginResponse = await userActions.login(username, password);
+      const loginResponse = await userService.login(username, password);
       localStorage.setItem('user', JSON.stringify(loginResponse.user));
       localStorage.setItem(
         'user_access_token',
