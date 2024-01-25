@@ -43,7 +43,6 @@ export default function CalendarEventsProvider({ children }: Props) {
   );
 
   React.useEffect(() => {
-    console.log('accessToken', accessToken);
     const loadCalendarEvents = async () => {
       if (!accessToken) {
         clearCalendarEvents();
