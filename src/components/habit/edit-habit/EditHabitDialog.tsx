@@ -1,4 +1,3 @@
-import { habitActions } from '@actions';
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
 import {
   Habit,
@@ -18,6 +17,7 @@ import {
   Select,
   styled,
 } from '@mui/joy';
+import { habitService } from '@services';
 import React from 'react';
 
 type EditHabitDialogProps = {
@@ -87,7 +87,7 @@ export default function EditHabitDialog({
     setIsUpdating(true);
 
     try {
-      const updatedHabit = await habitActions.updateHabit(
+      const updatedHabit = await habitService.updateHabit(
         habit.id,
         {
           name,

@@ -29,7 +29,7 @@ module.exports = {
     modules: [path.resolve(__dirname, './src'), 'node_modules'],
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
     alias: {
-      '@actions': path.resolve(__dirname, './src/actions'),
+      '@services': path.resolve(__dirname, './src/services'),
       '@components': path.resolve(__dirname, './src/components'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@context': path.resolve(__dirname, './src/context'),

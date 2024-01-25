@@ -1,4 +1,3 @@
-import { habitActions } from '@actions';
 import { Habit, useHabits, useSnackbar, useUser } from '@context';
 import { DeleteForever } from '@mui/icons-material';
 import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
@@ -13,6 +12,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/joy';
+import { habitService } from '@services';
 import React from 'react';
 
 const StyleListItem = styled(ListItem)(({ theme }) => ({
@@ -57,7 +57,7 @@ export default function HabitItem({ habit, onEdit }: HabitItemProps) {
     setIsBeingDeleted(true);
 
     try {
-      await habitActions.deleteHabit(habit.id, accessToken as string);
+      await habitService.destroyHabit(habit.id, accessToken as string);
       habitsContext.removeHabit(habit.id);
       showSnackbar('Your habit has been deleted!', {
         dismissible: true,

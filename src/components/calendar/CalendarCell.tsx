@@ -1,4 +1,3 @@
-import { calendarActions } from '@actions';
 import {
   CalendarEvent,
   useCalendarEvents,
@@ -9,6 +8,7 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
 import { ChipDelete, CircularProgress, Typography } from '@mui/joy';
+import { calendarService } from '@services';
 import React from 'react';
 
 import {
@@ -82,7 +82,7 @@ export default function CalendarCell({
     setEventIdBeingDeleted(calendarEventId);
 
     try {
-      await calendarActions.deleteCalendarEvent(
+      await calendarService.destroyCalendarEvent(
         calendarEventId,
         accessToken as string
       );

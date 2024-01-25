@@ -1,4 +1,3 @@
-import { calendarActions } from '@actions';
 import { useCalendarEvents, useHabits, useSnackbar, useUser } from '@context';
 import {
   Box,
@@ -15,6 +14,7 @@ import {
   FormLabel,
   FormHelperText,
 } from '@mui/joy';
+import { calendarService } from '@services';
 import { format } from 'date-fns';
 import React, { FormEventHandler } from 'react';
 
@@ -47,7 +47,7 @@ export default function DayHabitModalDialog({ open, onClose, date }: Props) {
 
     setSubmitting(true);
     try {
-      const newCalendarEvent = await calendarActions.createCalendarEvent(
+      const newCalendarEvent = await calendarService.createCalendarEvent(
         date,
         selectedBadHabit as number,
         accessToken as string
