@@ -5,18 +5,26 @@ const calendarGap = 16;
 
 export const StyledCalendarContainerDiv = styled('div')(({ theme }) => ({
   display: 'flex',
+  flexDirection: 'column',
+  margin: `${theme.spacing(2)} auto 0`,
+  width: 1050,
+  maxWidth: '100%',
+  padding: theme.spacing(0, 2),
+  borderBox: 'border-box',
+}));
+
+export const StyledCalendarGridContainerDiv = styled('div')(({ theme }) => ({
+  display: 'flex',
   gap: calendarGap,
   flexDirection: 'column',
-  flexGrow: 0.9,
-  margin: `${theme.spacing(2)} auto 0`,
+  margin: `${theme.spacing(2)} 0`,
 }));
 
 export const StyledCalendarWeekDay = styled('div')(() => ({
-  width: 150,
-  height: 24,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  flex: '1 1 0%',
 }));
 
 export const StyledCalendarWeekRow = styled('div')(() => ({
@@ -71,6 +79,7 @@ export const StyledCalendarDayCellButton = styled('button')({
   display: 'flex',
   flexDirection: 'column',
   flex: '1 1 0%',
+  minHeight: 100,
   border: '3px solid black',
   borderRadius: '8px',
   padding: 0,
