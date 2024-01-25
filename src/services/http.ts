@@ -18,7 +18,7 @@ export const get = <T extends object>(
   headers: HeadersInit = {},
   options: RequestInit = {}
 ): Promise<T> => {
-  return fetch(path, { method: 'GET', ...options, ...headers });
+  return fetch(path, { method: 'GET', ...options, headers });
 };
 
 export const post = <T extends object>(
@@ -60,7 +60,7 @@ export const destroy = <T extends object>(
   headers: HeadersInit = {},
   options: RequestInit = {}
 ): Promise<T> => {
-  return fetch(path, { method: 'DELETE', ...options, ...headers });
+  return fetch(path, { method: 'DELETE', ...options, headers });
 };
 
 export const composeAuthorizationHeader = (

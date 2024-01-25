@@ -5,11 +5,10 @@ import React from 'react';
 
 import AuthModalButton from '../user/AuthModalButton';
 
-const StyledAppHeader = styled('header')(() => ({
-  width: '100%',
-  height: 50,
+const StyledAppHeader = styled('header')(({ theme }) => ({
   backgroundColor: '#d6d3d1',
   borderBottom: '1px solid #78716c',
+  padding: theme.spacing(1, 0),
 }));
 
 const StyledButtonsContainer = styled('div')(() => ({
@@ -20,8 +19,10 @@ const StyledButtonsContainer = styled('div')(() => ({
   },
 }));
 
-const StyledAppHeaderContent = styled('div')(() => ({
+const StyledAppHeaderContent = styled('div')(({ theme }) => ({
   width: 1050,
+  padding: theme.spacing(0, 2),
+  borderBox: 'border-box',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',

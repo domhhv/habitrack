@@ -93,7 +93,7 @@ export default function AddHabitDialogButton({ disabled = false }: Props) {
         variant="soft"
         startDecorator={<AddRounded />}
         onClick={handleDialogOpen}
-        disabled={disabled}
+        disabled={disabled || !accessToken}
       >
         Add habit
       </Button>

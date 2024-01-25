@@ -10,7 +10,7 @@ import { CalendarState } from 'react-stately';
 import CalendarCell from './CalendarCell';
 import DayHabitModalDialog from './DayHabitModalDialog';
 import {
-  StyledCalendarContainerDiv,
+  StyledCalendarGridContainerDiv,
   StyledCalendarWeekDay,
   StyledCalendarWeekRow,
 } from './styled';
@@ -63,7 +63,7 @@ export default function CalendarGrid({ state }: Props) {
   );
 
   return (
-    <StyledCalendarContainerDiv {...gridProps}>
+    <StyledCalendarGridContainerDiv {...gridProps}>
       <Box display="flex" mb={0.25}>
         {[...Array(7)].map((_, index) => {
           return (
@@ -127,6 +127,6 @@ export default function CalendarGrid({ state }: Props) {
         onClose={handleDayModalDialogClose}
         date={activeDate}
       />
-    </StyledCalendarContainerDiv>
+    </StyledCalendarGridContainerDiv>
   );
 }

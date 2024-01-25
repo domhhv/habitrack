@@ -1,5 +1,4 @@
 import { createCalendar } from '@internationalized/date';
-import { styled } from '@mui/joy';
 import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
 import { AriaButtonProps, useCalendar, useLocale } from 'react-aria';
@@ -7,13 +6,7 @@ import { useCalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';
-
-const StyledCalendarContainerDiv = styled('div')(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flexGrow: 1,
-  margin: `${theme.spacing(2)} auto 0`,
-}));
+import { StyledCalendarContainerDiv } from './styled';
 
 export default function Calendar() {
   const { locale } = useLocale();

@@ -4,9 +4,9 @@ import {
   useSnackbar,
   useUser,
 } from '@context';
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
+import FmdBadIcon from '@mui/icons-material/FmdBad';
+import FmdGoodIcon from '@mui/icons-material/FmdGood';
 import { ChipDelete, CircularProgress, Typography } from '@mui/joy';
 import { calendarService } from '@services';
 import React from 'react';
@@ -118,10 +118,7 @@ export default function CalendarCell({
       </StyledCalendarDayCellButtonHeader>
       <StyledCalendarDayCellButtonIconsContainer>
         {events.map((event) => {
-          const Icon =
-            event.habit.trait === 'good'
-              ? DoneAllRoundedIcon
-              : CheckRoundedIcon;
+          const Icon = event.habit.trait === 'good' ? FmdGoodIcon : FmdBadIcon;
 
           const isBeingDeleted = eventIdBeingDeleted === event.id;
 
