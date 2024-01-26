@@ -11,7 +11,7 @@ export type User = {
 type UserContextType = {
   user: User | null;
   login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: (shouldShowSnackbar?: boolean) => void;
   loggingIn: boolean;
   accessToken: string | null;
 };
@@ -19,7 +19,7 @@ type UserContextType = {
 const UserContext = React.createContext<UserContextType>({
   user: null,
   login: (_username: string, _password: string) => Promise.resolve(),
-  logout: () => {},
+  logout: (_shouldShowSnackbar?: boolean) => {},
   loggingIn: false,
   accessToken: null,
 });
@@ -59,7 +59,7 @@ export default function UserProvider({ children }: Props) {
         color: 'neutral',
       });
     }
-  }, []);
+  }, [showSnackbar]);
 
   const login = async (username: string, password: string) => {
     setLoggingIn(true);
@@ -89,6 +89,13 @@ export default function UserProvider({ children }: Props) {
         throw e;
       }
 
+      if ((e as Error).message === 'Token expired') {
+        return showSnackbar('You have been logged out', {
+          variant: 'solid',
+          color: 'danger',
+        });
+      }
+
       showSnackbar('Something went wrong', {
         variant: 'solid',
         color: 'danger',
@@ -98,14 +105,17 @@ export default function UserProvider({ children }: Props) {
     }
   };
 
-  const logout = () => {
+  const logout = (shouldShowSnackbar: boolean = true) => {
     localStorage.removeItem('user');
+    localStorage.removeItem('user_access_token');
     setUser(null);
     setAccessToken(null);
-    showSnackbar('You have logged out', {
-      variant: 'outlined',
-      color: 'neutral',
-    });
+    if (shouldShowSnackbar) {
+      showSnackbar('You have logged out', {
+        variant: 'outlined',
+        color: 'neutral',
+      });
+    }
   };
 
   const value = React.useMemo(

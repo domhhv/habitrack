@@ -38,19 +38,25 @@ export default function HabitsProvider({ children }: Props) {
   const [habits, setHabits] = React.useState<Habit[]>([]);
 
   React.useEffect(() => {
-    const loadHabits = async () => {
-      if (!accessToken) {
-        clearHabits();
-        return null;
-      }
+    if (!accessToken) {
+      clearHabits();
+      return undefined;
+    }
 
-      setFetchingHabits(true);
-      const habits = await habitService.getHabits(accessToken as string);
-      setHabits(habits);
-      setFetchingHabits(false);
-    };
+    setFetchingHabits(true);
 
-    void loadHabits();
+    habitService
+      .getHabits(accessToken as string)
+      .then((res) => {
+        setHabits(res);
+        setFetchingHabits(false);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setFetchingHabits(false);
+      });
   }, [accessToken]);
 
   const addHabit = (habit: Habit) => {
