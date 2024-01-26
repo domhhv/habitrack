@@ -104,6 +104,10 @@ export default function EditHabitDialog({
         dismissText: 'Done',
       });
     } catch (error) {
+      showSnackbar('Something went wrong', {
+        color: 'danger',
+        dismissible: true,
+      });
       console.error(error);
     } finally {
       setIsUpdating(false);

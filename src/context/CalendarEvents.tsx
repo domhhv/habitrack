@@ -2,6 +2,7 @@ import { calendarService } from '@services';
 import React from 'react';
 
 import { Habit } from './Habits';
+import { useSnackbar } from './Snackbar';
 import { useUser } from './User';
 
 export type CalendarEvent = {
@@ -35,7 +36,8 @@ type Props = {
 };
 
 export default function CalendarEventsProvider({ children }: Props) {
-  const { accessToken } = useUser();
+  const { accessToken, logout } = useUser();
+  const { showSnackbar } = useSnackbar();
   const [fetchingCalendarEvents, setFetchingCalendarEvents] =
     React.useState(false);
   const [calendarEvents, setCalendarEvents] = React.useState<CalendarEvent[]>(
@@ -43,22 +45,33 @@ export default function CalendarEventsProvider({ children }: Props) {
   );
 
   React.useEffect(() => {
-    const loadCalendarEvents = async () => {
-      if (!accessToken) {
-        clearCalendarEvents();
-        return null;
-      }
+    if (!accessToken) {
+      clearCalendarEvents();
+      return undefined;
+    }
 
-      setFetchingCalendarEvents(true);
-      const calendarEvents = await calendarService.getCalendarEvents(
-        accessToken as string
-      );
-      setCalendarEvents(calendarEvents);
-      setFetchingCalendarEvents(false);
-    };
+    setFetchingCalendarEvents(true);
 
-    void loadCalendarEvents();
-  }, [accessToken]);
+    calendarService
+      .getCalendarEvents(accessToken as string)
+      .then((res) => {
+        setCalendarEvents(res);
+      })
+      .catch(async (err) => {
+        if (err.message === 'Token expired') {
+          logout(false);
+          showSnackbar('You have been logged out', {
+            variant: 'solid',
+            color: 'neutral',
+          });
+        }
+
+        console.error(err);
+      })
+      .finally(() => {
+        setFetchingCalendarEvents(false);
+      });
+  }, [accessToken, logout, showSnackbar]);
 
   const addCalendarEvent = (calendarEvent: CalendarEvent) => {
     setCalendarEvents((prevCalendarEvents) => [
@@ -76,16 +89,18 @@ export default function CalendarEventsProvider({ children }: Props) {
   };
 
   const updateHabitInsideCalendarEvents = (habit: Habit) => {
-    setCalendarEvents((prevCalendarEvents) =>
-      prevCalendarEvents.map((prevCalendarEvent) =>
-        prevCalendarEvent.habit.id === habit.id
-          ? {
-              ...prevCalendarEvent,
-              habit,
-            }
-          : prevCalendarEvent
-      )
-    );
+    setCalendarEvents((prevCalendarEvents) => {
+      return prevCalendarEvents.map((prevCalendarEvent) => {
+        if (prevCalendarEvent.habit.id === habit.id) {
+          return {
+            ...prevCalendarEvent,
+            habit,
+          };
+        }
+
+        return prevCalendarEvent;
+      });
+    });
   };
 
   const clearCalendarEvents = () => {

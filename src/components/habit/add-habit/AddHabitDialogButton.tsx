@@ -63,6 +63,10 @@ export default function AddHabitDialogButton({ disabled = false }: Props) {
       });
       handleDialogClose();
     } catch (error) {
+      showSnackbar('Something went wrong', {
+        color: 'danger',
+        dismissible: true,
+      });
       console.error(error);
     } finally {
       setAddingHabit(false);

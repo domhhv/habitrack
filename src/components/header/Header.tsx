@@ -5,10 +5,19 @@ import React from 'react';
 
 import AuthModalButton from '../user/AuthModalButton';
 
-const StyledAppHeader = styled('header')(({ theme }) => ({
+const StyledAppHeader = styled('header')({
   backgroundColor: '#d6d3d1',
   borderBottom: '1px solid #78716c',
-  padding: theme.spacing(1, 0),
+});
+
+const StyledAppHeaderContent = styled('div')(({ theme }) => ({
+  width: 1050,
+  maxWidth: '100%',
+  padding: theme.spacing(1, 2),
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  margin: '0 auto',
 }));
 
 const StyledButtonsContainer = styled('div')(() => ({
@@ -17,17 +26,6 @@ const StyledButtonsContainer = styled('div')(() => ({
   '& > button:first-of-type': {
     marginRight: 10,
   },
-}));
-
-const StyledAppHeaderContent = styled('div')(({ theme }) => ({
-  width: 1050,
-  padding: theme.spacing(0, 2),
-  borderBox: 'border-box',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  margin: '0 auto',
-  height: '100%',
 }));
 
 export default function Header() {

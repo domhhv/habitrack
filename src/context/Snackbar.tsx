@@ -48,10 +48,14 @@ type Props = {
   children: React.ReactNode;
 };
 
+type Snackbar = {
+  id: string;
+  message: string;
+  options: SnackbarOptions;
+};
+
 export default function SnackbarProvider({ children }: Props) {
-  const [snackbars, setSnackbars] = React.useState<
-    { id: string; message: string; options: SnackbarOptions }[]
-  >([]);
+  const [snackbars, setSnackbars] = React.useState<Snackbar[]>([]);
 
   const showSnackbar = (message: string, options: SnackbarOptions = {}) => {
     setSnackbars((prevSnackbars) => [
@@ -65,8 +69,6 @@ export default function SnackbarProvider({ children }: Props) {
       prevSnackbars.filter((snackbar) => snackbar.id !== id)
     );
   };
-
-  const value = React.useMemo(() => ({ showSnackbar }), []);
 
   const ICONS_BY_COLOR: Record<ColorPaletteProp, React.ReactNode> = {
     success: <CheckCircleOutlined />,
@@ -86,8 +88,10 @@ export default function SnackbarProvider({ children }: Props) {
     plain: 'plain',
   };
 
+  const providerValue = React.useMemo(() => ({ showSnackbar }), []);
+
   return (
-    <SnackbarContext.Provider value={value}>
+    <SnackbarContext.Provider value={providerValue}>
       {children}
       <StyledSnackbarsWrapper>
         {snackbars.map(({ id, message, options }) => {
