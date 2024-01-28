@@ -12,28 +12,28 @@ import {
   StyledNavigationIconButton,
 } from './styled';
 
-type ButtonProps = {
+type NavigationButtonProps = {
   disabled: boolean;
   'aria-label': string;
 };
 
-type Props = {
+type CalendarHeaderProps = {
   activeMonthLabel: string;
   activeYear: string;
-  prevButtonProps: ButtonProps;
-  nextButtonProps: ButtonProps;
+  prevButtonProps: NavigationButtonProps;
+  nextButtonProps: NavigationButtonProps;
   onNavigateBack: () => void;
   onNavigateForward: () => void;
 };
 
-export default function CalendarHeader({
+const CalendarHeader = ({
   activeMonthLabel,
   activeYear,
   prevButtonProps,
   nextButtonProps,
   onNavigateBack,
   onNavigateForward,
-}: Props) {
+}: CalendarHeaderProps) => {
   const { fetchingCalendarEvents } = useCalendarEvents();
 
   return (
@@ -81,4 +81,6 @@ export default function CalendarHeader({
       )}
     </StyledCalendarHeader>
   );
-}
+};
+
+export default CalendarHeader;

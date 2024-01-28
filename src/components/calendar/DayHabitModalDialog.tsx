@@ -18,13 +18,17 @@ import { calendarService } from '@services';
 import { format } from 'date-fns';
 import React, { FormEventHandler } from 'react';
 
-type Props = {
+type DayHabitModalDialogProps = {
   open: boolean;
   onClose: () => void;
   date: Date | null;
 };
 
-export default function DayHabitModalDialog({ open, onClose, date }: Props) {
+const DayHabitModalDialog = ({
+  open,
+  onClose,
+  date,
+}: DayHabitModalDialogProps) => {
   const { accessToken } = useUser();
   const { habits } = useHabits();
   const calendarEventsContext = useCalendarEvents();
@@ -126,4 +130,6 @@ export default function DayHabitModalDialog({ open, onClose, date }: Props) {
       </ModalDialog>
     </Modal>
   );
-}
+};
+
+export default DayHabitModalDialog;

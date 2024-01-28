@@ -1,41 +1,18 @@
+import {
+  type Habit,
+  type CalendarEvent,
+  useSnackbar,
+  useUser,
+  CalendarEventsContext,
+} from '@context';
 import { calendarService } from '@services';
 import React from 'react';
-
-import { Habit } from './Habits';
-import { useSnackbar } from './Snackbar';
-import { useUser } from './User';
-
-export type CalendarEvent = {
-  id: number;
-  date: string;
-  habit: Habit;
-};
-
-const CalendarEventsContext = React.createContext({
-  fetchingCalendarEvents: false,
-  calendarEvents: [] as CalendarEvent[],
-  addCalendarEvent: (_: CalendarEvent) => {},
-  removeCalendarEvent: (_: number) => {},
-  updateHabitInsideCalendarEvents: (_: Habit) => {},
-});
-
-export const useCalendarEvents = () => {
-  const context = React.useContext(CalendarEventsContext);
-
-  if (!context) {
-    throw new Error(
-      'useCalendarEvents must be used within a CalendarEventsProvider'
-    );
-  }
-
-  return context;
-};
 
 type Props = {
   children: React.ReactNode;
 };
 
-export default function CalendarEventsProvider({ children }: Props) {
+const CalendarEventsProvider = ({ children }: Props) => {
   const { accessToken, logout } = useUser();
   const { showSnackbar } = useSnackbar();
   const [fetchingCalendarEvents, setFetchingCalendarEvents] =
@@ -123,4 +100,6 @@ export default function CalendarEventsProvider({ children }: Props) {
       {children}
     </CalendarEventsContext.Provider>
   );
-}
+};
+
+export default CalendarEventsProvider;

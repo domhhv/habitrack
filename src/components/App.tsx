@@ -14,7 +14,7 @@ const StyledAppContainerDiv = styled('div')({
   flexGrow: 1,
 });
 
-function App() {
+const App = () => {
   return (
     <SnackbarProvider>
       <UserProvider>
@@ -29,6 +29,6 @@ function App() {
       </UserProvider>
     </SnackbarProvider>
   );
-}
+};
 
 export default App;

@@ -18,7 +18,7 @@ import {
   StyledHabitChip,
 } from './styled';
 
-type Props = {
+type CalendarCellProps = {
   dateNumber: number;
   monthIndex: number;
   fullYear: number;
@@ -29,7 +29,7 @@ type Props = {
   rangeStatus: 'below-range' | 'in-range' | 'above-range';
 };
 
-export default function CalendarCell({
+const CalendarCell = ({
   dateNumber,
   monthIndex,
   fullYear,
@@ -38,7 +38,7 @@ export default function CalendarCell({
   onNavigateForward,
   onClick,
   rangeStatus,
-}: Props) {
+}: CalendarCellProps) => {
   const { accessToken } = useUser();
   const calendarEventsContext = useCalendarEvents();
   const [active, setActive] = React.useState(false);
@@ -152,4 +152,6 @@ export default function CalendarCell({
       </StyledCalendarDayCellButtonIconsContainer>
     </StyledCalendarDayCellButton>
   );
-}
+};
+
+export default CalendarCell;

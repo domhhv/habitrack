@@ -5,49 +5,26 @@ import {
   Chip,
   CircularProgress,
   IconButton,
-  ListItem,
-  ListItemContent,
   ListItemDecorator,
-  styled,
   Tooltip,
   Typography,
 } from '@mui/joy';
 import { habitService } from '@services';
 import React from 'react';
 
-const StyleListItem = styled(ListItem)(({ theme }) => ({
-  alignItems: 'flex-start',
-  padding: theme.spacing(1.5, 0, 1),
-  '&:not(:last-of-type)': {
-    borderBottom: `1px solid ${theme.palette.divider}`,
-  },
-}));
-
-const StyledEditIconButton = styled(IconButton)(({ theme }) => ({
-  marginRight: theme.spacing(2),
-}));
-
-const StyledListItemContent = styled(ListItemContent)({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  width: '100%',
-});
-
-const StyledHabitTitleWrapper = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  '& > div': {
-    marginLeft: theme.spacing(1),
-  },
-}));
+import {
+  StyledEditIconButton,
+  StyledHabitTitleWrapper,
+  StyledListItemContent,
+  StyleListItem,
+} from './styled';
 
 type HabitItemProps = {
   habit: Habit;
   onEdit: () => void;
 };
 
-export default function HabitItem({ habit, onEdit }: HabitItemProps) {
+const HabitItem = ({ habit, onEdit }: HabitItemProps) => {
   const { accessToken } = useUser();
   const [isBeingDeleted, setIsBeingDeleted] = React.useState(false);
   const habitsContext = useHabits();
@@ -120,4 +97,6 @@ export default function HabitItem({ habit, onEdit }: HabitItemProps) {
       </StyledListItemContent>
     </StyleListItem>
   );
-}
+};
+
+export default HabitItem;

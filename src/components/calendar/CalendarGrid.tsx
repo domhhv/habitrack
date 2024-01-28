@@ -15,13 +15,13 @@ import {
   StyledCalendarWeekRow,
 } from './styled';
 
-type Props = {
+type CalendarGridProps = {
   state: CalendarState;
 };
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-export default function CalendarGrid({ state }: Props) {
+const CalendarGrid = ({ state }: CalendarGridProps) => {
   const { locale } = useLocale();
   const { gridProps } = useCalendarGrid({}, state);
 
@@ -129,4 +129,6 @@ export default function CalendarGrid({ state }: Props) {
       />
     </StyledCalendarGridContainerDiv>
   );
-}
+};
+
+export default CalendarGrid;

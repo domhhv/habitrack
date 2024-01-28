@@ -8,7 +8,7 @@ import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';
 import { StyledCalendarContainerDiv } from './styled';
 
-export default function Calendar() {
+const Calendar = () => {
   const { locale } = useLocale();
   const state = useCalendarState({
     locale,
@@ -40,4 +40,6 @@ export default function Calendar() {
       <CalendarGrid state={state} />
     </StyledCalendarContainerDiv>
   );
-}
+};
+
+export default Calendar;
