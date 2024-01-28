@@ -6,7 +6,7 @@ export const StyledAppHeader = styled('header')({
 });
 
 export const StyledAppHeaderContent = styled('div')(({ theme }) => ({
-  width: 1050,
+  width: '90%',
   maxWidth: '100%',
   padding: theme.spacing(1, 2),
   display: 'flex',
