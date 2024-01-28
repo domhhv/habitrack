@@ -7,10 +7,10 @@ type LoginResponse = {
   user: User;
 };
 
-export async function login(
+export const login = async (
   username: string,
   password: string
-): Promise<LoginResponse> {
+): Promise<LoginResponse> => {
   const response = await fetch(`${process.env.API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: {
@@ -27,4 +27,4 @@ export async function login(
   const data = await response.json();
 
   return data;
-}
+};

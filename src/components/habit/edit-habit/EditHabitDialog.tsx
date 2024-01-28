@@ -15,10 +15,11 @@ import {
   ModalDialog,
   Option,
   Select,
-  styled,
 } from '@mui/joy';
 import { habitService } from '@services';
 import React from 'react';
+
+import { StyledForm } from './styled';
 
 type EditHabitDialogProps = {
   open: boolean;
@@ -26,17 +27,11 @@ type EditHabitDialogProps = {
   onClose?: () => void;
 };
 
-const StyledForm = styled('form')(({ theme }) => ({
-  '& > div': {
-    marginBottom: theme.spacing(2),
-  },
-}));
-
-export default function EditHabitDialog({
+const EditHabitDialog = ({
   open = false,
   habit,
   onClose,
-}: EditHabitDialogProps) {
+}: EditHabitDialogProps) => {
   const { accessToken } = useUser();
   const [isOpen, setIsOpen] = React.useState(false);
   const [name, setName] = React.useState('');
@@ -166,4 +161,6 @@ export default function EditHabitDialog({
       </ModalDialog>
     </Modal>
   );
-}
+};
+
+export default EditHabitDialog;

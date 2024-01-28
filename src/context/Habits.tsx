@@ -32,7 +32,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function HabitsProvider({ children }: Props) {
+const HabitsProvider = ({ children }: Props) => {
   const { accessToken } = useUser();
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<Habit[]>([]);
@@ -89,4 +89,6 @@ export default function HabitsProvider({ children }: Props) {
   return (
     <HabitsContext.Provider value={value}>{children}</HabitsContext.Provider>
   );
-}
+};
+
+export default HabitsProvider;

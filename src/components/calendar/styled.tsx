@@ -20,25 +20,25 @@ export const StyledCalendarGridContainerDiv = styled('div')(({ theme }) => ({
   margin: `${theme.spacing(2)} 0`,
 }));
 
-export const StyledCalendarWeekDay = styled('div')(() => ({
+export const StyledCalendarWeekDay = styled('div')({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   flex: '1 1 0%',
-}));
+});
 
-export const StyledCalendarWeekRow = styled('div')(() => ({
+export const StyledCalendarWeekRow = styled('div')({
   display: 'flex',
   flex: '1 1 0%',
   gap: calendarGap,
-}));
+});
 
 export const StyledCalendarHeader = styled('div')(({ theme }) => ({
   marginBottom: theme.spacing(1),
   padding: theme.spacing(1, 1.5),
   display: 'flex',
   border: '3px solid',
-  borderRadius: theme.radius.sm,
+  borderRadius: theme.radius.md,
   alignItems: 'center',
   position: 'relative',
 }));
@@ -61,7 +61,8 @@ export const StyledNavigationIconButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-export const StyledHeaderLoadingOverlay = styled(Typography)(() => ({
+export const StyledHeaderLoadingOverlay = styled(Typography)(({ theme }) => ({
+  borderRadius: theme.radius.md,
   position: 'absolute',
   top: 0,
   left: 0,
@@ -74,14 +75,14 @@ export const StyledHeaderLoadingOverlay = styled(Typography)(() => ({
   justifyContent: 'center',
 }));
 
-export const StyledCalendarDayCellButton = styled('button')({
+export const StyledCalendarDayCellButton = styled('button')(({ theme }) => ({
   background: 'none',
   display: 'flex',
   flexDirection: 'column',
   flex: '1 1 0%',
   minHeight: 100,
+  borderRadius: theme.radius.md,
   border: '3px solid black',
-  borderRadius: '8px',
   padding: 0,
   '&[data-prev-month="true"]:not([disabled])': {
     cursor: 'w-resize',
@@ -113,7 +114,7 @@ export const StyledCalendarDayCellButton = styled('button')({
       },
     },
   },
-});
+}));
 
 export const StyledCalendarDayCellButtonHeader = styled('div')(({ theme }) => ({
   display: 'flex',

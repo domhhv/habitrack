@@ -38,7 +38,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function UserProvider({ children }: Props) {
+const UserProvider = ({ children }: Props) => {
   const { showSnackbar } = useSnackbar();
   const [user, setUser] = React.useState<User | null>(null);
   const [accessToken, setAccessToken] = React.useState<string | null>(null);
@@ -124,4 +124,6 @@ export default function UserProvider({ children }: Props) {
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
-}
+};
+
+export default UserProvider;

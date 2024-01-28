@@ -54,7 +54,7 @@ type Snackbar = {
   options: SnackbarOptions;
 };
 
-export default function SnackbarProvider({ children }: Props) {
+const SnackbarProvider = ({ children }: Props) => {
   const [snackbars, setSnackbars] = React.useState<Snackbar[]>([]);
 
   const showSnackbar = (message: string, options: SnackbarOptions = {}) => {
@@ -150,4 +150,6 @@ export default function SnackbarProvider({ children }: Props) {
       </StyledSnackbarsWrapper>
     </SnackbarContext.Provider>
   );
-}
+};
+
+export default SnackbarProvider;

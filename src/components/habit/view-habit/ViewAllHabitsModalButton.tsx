@@ -10,29 +10,21 @@ import {
   Modal,
   ModalClose,
   ModalDialog,
-  styled,
 } from '@mui/joy';
 import React from 'react';
 
 import EditHabitDialog from '../edit-habit/EditHabitDialog';
 
 import HabitItem from './HabitItem';
+import { StyledPlaceholderContainer } from './styled';
 
-const StyledPlaceholderContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: 200,
-  width: 300,
-  margin: `${theme.spacing(1)} auto 0`,
-}));
-
-type Props = {
+type ViewAllHabitsModalButtonProps = {
   loading?: boolean;
 };
 
-export default function ViewAllHabitsModalButton({ loading = false }: Props) {
+const ViewAllHabitsModalButton = ({
+  loading = false,
+}: ViewAllHabitsModalButtonProps) => {
   const { habits } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [isEditingHabit, setIsEditingHabit] = React.useState(false);
@@ -107,4 +99,6 @@ export default function ViewAllHabitsModalButton({ loading = false }: Props) {
       </Modal>
     </>
   );
-}
+};
+
+export default ViewAllHabitsModalButton;

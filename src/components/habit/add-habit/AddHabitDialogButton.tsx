@@ -19,11 +19,13 @@ import {
 import { habitService } from '@services';
 import React, { FormEventHandler } from 'react';
 
-type Props = {
+type AddHabitDialogButtonProps = {
   disabled?: boolean;
 };
 
-export default function AddHabitDialogButton({ disabled = false }: Props) {
+const AddHabitDialogButton = ({
+  disabled = false,
+}: AddHabitDialogButtonProps) => {
   const { accessToken } = useUser();
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
@@ -157,4 +159,6 @@ export default function AddHabitDialogButton({ disabled = false }: Props) {
       </Modal>
     </>
   );
-}
+};
+
+export default AddHabitDialogButton;

@@ -35,7 +35,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function CalendarEventsProvider({ children }: Props) {
+const CalendarEventsProvider = ({ children }: Props) => {
   const { accessToken, logout } = useUser();
   const { showSnackbar } = useSnackbar();
   const [fetchingCalendarEvents, setFetchingCalendarEvents] =
@@ -123,4 +123,6 @@ export default function CalendarEventsProvider({ children }: Props) {
       {children}
     </CalendarEventsContext.Provider>
   );
-}
+};
+
+export default CalendarEventsProvider;

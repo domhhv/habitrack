@@ -19,7 +19,7 @@ const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   },
 }));
 
-export default function AuthModalButton() {
+const AuthModalButton = () => {
   const { user, loggingIn, login, logout } = useUser();
   const [open, setOpen] = React.useState(false);
   const [username, setUsername] = React.useState('');
@@ -108,4 +108,6 @@ export default function AuthModalButton() {
       </Modal>
     </>
   );
-}
+};
+
+export default AuthModalButton;
