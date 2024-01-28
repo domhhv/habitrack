@@ -1,18 +1,16 @@
 import { CalendarEvent, useCalendarEvents } from '@context';
 import { getWeeksInMonth } from '@internationalized/date';
-import { CalendarDate } from '@internationalized/date';
 import { Box, Typography } from '@mui/joy';
-// import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
 import { CalendarState } from 'react-stately';
 
-import CalendarCell from './CalendarCell';
+import MotionCalendarMonthGrid from './CalendarMonthGrid';
 import DayHabitModalDialog from './DayHabitModalDialog';
 import {
   StyledCalendarGridContainerDiv,
   StyledCalendarWeekDay,
-  StyledCalendarWeekRow,
 } from './styled';
 
 type CalendarGridProps = {
@@ -75,52 +73,18 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
           );
         })}
       </Box>
-      {/* TODO: Uncomment with flex layout preserved */}
-      {/*<AnimatePresence mode="wait">*/}
-      {/*  <motion.div*/}
-      {/*    key={state.visibleRange.start.month}*/}
-      {/*    initial={{ opacity: 0 }}*/}
-      {/*    animate={{ opacity: 1 }}*/}
-      {/*    exit={{ opacity: 0 }}*/}
-      {/*  >*/}
-      {[...new Array(weeksInMonth).keys()].map((weekIndex) => (
-        <StyledCalendarWeekRow key={weekIndex}>
-          {state
-            .getDatesInWeek(weekIndex)
-            .map((calendarDate: CalendarDate | null) => {
-              if (!calendarDate) {
-                return null;
-              }
-
-              const rangeStatus =
-                calendarDate.month < state.visibleRange.start.month
-                  ? 'below-range'
-                  : calendarDate.month > state.visibleRange.start.month
-                    ? 'above-range'
-                    : 'in-range';
-
-              return (
-                <CalendarCell
-                  key={`${calendarDate.month}-${calendarDate.day}-${calendarDate.year}`}
-                  dateNumber={calendarDate.day}
-                  monthIndex={calendarDate.month}
-                  fullYear={calendarDate.year}
-                  onClick={handleDayModalDialogOpen}
-                  events={
-                    calendarEventsByDate[
-                      `${calendarDate.year}-${calendarDate.month}-${calendarDate.day}`
-                    ] || []
-                  }
-                  rangeStatus={rangeStatus}
-                  onNavigateBack={state.focusPreviousPage}
-                  onNavigateForward={state.focusNextPage}
-                />
-              );
-            })}
-        </StyledCalendarWeekRow>
-      ))}
-      {/*  </motion.div>*/}
-      {/*</AnimatePresence>*/}
+      <AnimatePresence mode="wait">
+        <MotionCalendarMonthGrid
+          key={state.visibleRange.start.month}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          calendarEventsByDate={calendarEventsByDate}
+          onDayModalDialogOpen={handleDayModalDialogOpen}
+          weeksInMonth={weeksInMonth}
+          state={state}
+        />
+      </AnimatePresence>
 
       <DayHabitModalDialog
         open={dayModalDialogOpen}

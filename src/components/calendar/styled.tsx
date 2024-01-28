@@ -7,10 +7,10 @@ export const StyledCalendarContainerDiv = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   margin: `${theme.spacing(2)} auto 0`,
-  width: 1050,
+  width: '90%',
   maxWidth: '100%',
   padding: theme.spacing(0, 2),
-  borderBox: 'border-box',
+  flex: '1 1 0%',
 }));
 
 export const StyledCalendarGridContainerDiv = styled('div')(({ theme }) => ({
@@ -18,7 +18,15 @@ export const StyledCalendarGridContainerDiv = styled('div')(({ theme }) => ({
   gap: calendarGap,
   flexDirection: 'column',
   margin: `${theme.spacing(2)} 0`,
+  flex: '1 1 0%',
 }));
+
+export const StyledCalendarMonthGrid = styled('div')({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: calendarGap,
+  flex: '1 1 0%',
+});
 
 export const StyledCalendarWeekDay = styled('div')({
   display: 'flex',
