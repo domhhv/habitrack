@@ -1,10 +1,9 @@
-import { Input, styled } from '@mui/joy';
+import { Input } from '@mui/joy';
 import { ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
 import { VariantProp } from '@mui/joy/styles/types/variants';
 import React from 'react';
 
 import InnerInput from './InnnerInput';
-import { StyledInput, StyledLabel } from './styled';
 
 type FloatingLabelInputProps = {
   value: string;

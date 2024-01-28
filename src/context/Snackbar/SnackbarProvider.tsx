@@ -1,3 +1,5 @@
+import type { SnackbarOptions, Snackbar } from '@context';
+import { SnackbarContext } from '@context';
 import {
   CheckCircleOutlined,
   ErrorOutlined,
@@ -5,56 +7,19 @@ import {
   WarningOutlined,
   NotificationsOutlined,
 } from '@mui/icons-material';
-import { Alert, Button, styled, Typography } from '@mui/joy';
+import { Alert, Button, Typography } from '@mui/joy';
 import { ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
 import { VariantProp } from '@mui/joy/styles/types/variants';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 
-type SnackbarOptions = {
-  variant?: VariantProp;
-  color?: ColorPaletteProp;
-  autoHideDuration?: number;
-  dismissible?: boolean;
-  description?: string;
-  dismissText?: string;
-};
+import { StyledSnackbarsWrapper } from './styled';
 
-const SnackbarContext = React.createContext({
-  showSnackbar: (_: string, __: SnackbarOptions = {}) => {},
-});
-
-export const useSnackbar = () => {
-  const context = React.useContext(SnackbarContext);
-
-  if (!context) {
-    throw new Error('useSnackbar must be used within a SnackbarProvider');
-  }
-
-  return context;
-};
-
-const StyledSnackbarsWrapper = styled('div')(({ theme }) => ({
-  position: 'fixed',
-  bottom: theme.spacing(2),
-  left: theme.spacing(2),
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing(2),
-  zIndex: 9999,
-}));
-
-type Props = {
+type SnackbarProviderProps = {
   children: React.ReactNode;
 };
 
-type Snackbar = {
-  id: string;
-  message: string;
-  options: SnackbarOptions;
-};
-
-const SnackbarProvider = ({ children }: Props) => {
+const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
   const [snackbars, setSnackbars] = React.useState<Snackbar[]>([]);
 
   const showSnackbar = (message: string, options: SnackbarOptions = {}) => {

@@ -1,38 +1,12 @@
+import { type Habit, HabitsContext, useUser } from '@context';
 import { habitService } from '@services';
 import React from 'react';
 
-import { useUser } from './User';
-
-export type Habit = {
-  id: number;
-  name: string;
-  description: string;
-  trait: 'good' | 'bad';
-};
-
-const HabitsContext = React.createContext({
-  fetchingHabits: false,
-  habits: [] as Habit[],
-  addHabit: (_: Habit) => {},
-  removeHabit: (_: number) => {},
-  updateHabit: (_: Habit) => {},
-});
-
-export const useHabits = () => {
-  const context = React.useContext(HabitsContext);
-
-  if (!context) {
-    throw new Error('useHabits must be used within a HabitsProvider');
-  }
-
-  return context;
-};
-
-type Props = {
+type HabitsProviderProps = {
   children: React.ReactNode;
 };
 
-const HabitsProvider = ({ children }: Props) => {
+const HabitsProvider = ({ children }: HabitsProviderProps) => {
   const { accessToken } = useUser();
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<Habit[]>([]);

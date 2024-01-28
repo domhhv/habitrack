@@ -1,7 +1,6 @@
 import { useHabits } from '@context';
 import ViewListRoundedIcon from '@mui/icons-material/ViewListRounded';
 import {
-  Box,
   Button,
   CircularProgress,
   DialogContent,
