@@ -39,7 +39,9 @@ const CalendarCell = ({
   onClick,
   rangeStatus,
 }: CalendarCellProps) => {
-  const { accessToken } = useUser();
+  const {
+    user: { token },
+  } = useUser();
   const calendarEventsContext = useCalendarEvents();
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
@@ -82,10 +84,7 @@ const CalendarCell = ({
     setEventIdBeingDeleted(calendarEventId);
 
     try {
-      await calendarService.destroyCalendarEvent(
-        calendarEventId,
-        accessToken as string
-      );
+      await calendarService.destroyCalendarEvent(calendarEventId, token);
       calendarEventsContext.removeCalendarEvent(calendarEventId);
       showSnackbar('Your habit entry has been deleted from the calendar.', {
         dismissible: true,

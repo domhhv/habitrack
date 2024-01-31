@@ -13,7 +13,10 @@ type Props = {
 };
 
 const CalendarEventsProvider = ({ children }: Props) => {
-  const { accessToken, logout } = useUser();
+  const {
+    user: { token },
+    logout,
+  } = useUser();
   const { showSnackbar } = useSnackbar();
   const [fetchingCalendarEvents, setFetchingCalendarEvents] =
     React.useState(false);
@@ -22,7 +25,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
   );
 
   React.useEffect(() => {
-    if (!accessToken) {
+    if (!token) {
       clearCalendarEvents();
       return undefined;
     }
@@ -30,7 +33,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
     setFetchingCalendarEvents(true);
 
     calendarService
-      .getCalendarEvents(accessToken as string)
+      .getCalendarEvents(token)
       .then((res) => {
         setCalendarEvents(res);
       })
@@ -48,7 +51,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
       .finally(() => {
         setFetchingCalendarEvents(false);
       });
-  }, [accessToken, logout, showSnackbar]);
+  }, [token, logout, showSnackbar]);
 
   const addCalendarEvent = (calendarEvent: CalendarEvent) => {
     setCalendarEvents((prevCalendarEvents) => [

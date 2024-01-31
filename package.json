@@ -43,7 +43,7 @@
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.2",
-    "@mui/joy": "^5.0.0-beta.20",
+    "@mui/joy": "^5.0.0-beta.25",
     "@mui/material": "^5.15.2",
     "date-fns": "^3.0.6",
     "framer-motion": "^10.16.16",

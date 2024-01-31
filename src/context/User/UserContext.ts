@@ -1,24 +1,35 @@
 import React from 'react';
 
 export type User = {
-  id: string;
+  id: number;
   username: string;
+  token: string;
+};
+
+export type LocalUser = User & {
+  token: string;
+};
+
+export const DEFAULT_USER: LocalUser = {
+  id: 0,
+  username: '',
+  token: '',
 };
 
 export type UserContextType = {
-  user: User | null;
+  user: LocalUser;
+  authenticating: boolean;
+  register: (username: string, password: string) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: (shouldShowSnackbar?: boolean) => void;
-  loggingIn: boolean;
-  accessToken: string | null;
 };
 
 export const UserContext = React.createContext<UserContextType>({
-  user: null,
+  user: DEFAULT_USER,
+  authenticating: false,
+  register: (_username: string, _password: string) => Promise.resolve(),
   login: (_username: string, _password: string) => Promise.resolve(),
   logout: (_shouldShowSnackbar?: boolean) => {},
-  loggingIn: false,
-  accessToken: null,
 });
 
 export const useUser = () => {
