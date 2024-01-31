@@ -1,30 +1,23 @@
-import { User } from '@context';
+import { type LocalUser, type User } from '@context';
 
-type LoginResponse = {
-  loggedIn: boolean;
-  signedUp: boolean;
-  access_token: string;
-  user: User;
-};
+import { post } from './http';
 
 export const login = async (
   username: string,
   password: string
-): Promise<LoginResponse> => {
-  const response = await fetch(`${process.env.API_BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username, password }),
+): Promise<LocalUser> => {
+  return post('/auth/login', {
+    username,
+    password,
   });
+};
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message);
-  }
-
-  const data = await response.json();
-
-  return data;
+export const register = async (
+  username: string,
+  password: string
+): Promise<User> => {
+  return post('/auth/register', {
+    username,
+    password,
+  });
 };

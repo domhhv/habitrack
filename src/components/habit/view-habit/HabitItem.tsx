@@ -25,7 +25,9 @@ type HabitItemProps = {
 };
 
 const HabitItem = ({ habit, onEdit }: HabitItemProps) => {
-  const { accessToken } = useUser();
+  const {
+    user: { token },
+  } = useUser();
   const [isBeingDeleted, setIsBeingDeleted] = React.useState(false);
   const habitsContext = useHabits();
   const { showSnackbar } = useSnackbar();
@@ -34,7 +36,7 @@ const HabitItem = ({ habit, onEdit }: HabitItemProps) => {
     setIsBeingDeleted(true);
 
     try {
-      await habitService.destroyHabit(habit.id, accessToken as string);
+      await habitService.destroyHabit(habit.id, token);
       habitsContext.removeHabit(habit.id);
       showSnackbar('Your habit has been deleted!', {
         dismissible: true,

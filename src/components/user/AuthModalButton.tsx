@@ -1,32 +1,28 @@
-import { FloatingLabelInput } from '@components';
-import { useUser } from '@context';
+import { useSnackbar, useUser } from '@context';
 import { AccountCircleOutlined } from '@mui/icons-material';
 import {
   Button,
-  DialogActions,
-  DialogContent,
   DialogTitle,
   Modal,
   ModalDialog,
-  styled,
-  Typography,
+  Tab,
+  tabClasses,
+  TabList,
+  TabPanel,
+  Tabs,
 } from '@mui/joy';
-import React from 'react';
+import React, { type SyntheticEvent } from 'react';
 
-const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
-  '& > div': {
-    marginTop: theme.spacing(1),
-  },
-}));
+import { AuthForm } from './AuthForm';
 
 const AuthModalButton = () => {
-  const { user, loggingIn, login, logout } = useUser();
+  const { user, authenticating, register, login, logout } = useUser();
   const [open, setOpen] = React.useState(false);
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [mode, setMode] = React.useState<'login' | 'register'>('login');
+  const { showSnackbar } = useSnackbar();
 
   const handleClick = () => {
-    if (user) {
+    if (user.id) {
       return logout();
     }
 
@@ -34,76 +30,92 @@ const AuthModalButton = () => {
   };
 
   const handleClose = () => {
-    setUsername('');
-    setPassword('');
+    setMode('login');
     setOpen(false);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleTabChange = (
+    _: SyntheticEvent<Element, Event> | null,
+    newValue: number | string | null
+  ) => {
+    setMode(newValue as 'login' | 'register');
+  };
+
+  const handleSubmit = async (username: string, password: string) => {
     try {
-      await login(username, password);
-      handleClose();
-    } catch (error) {
-      console.error(error);
-    }
+      if (mode === 'login') {
+        await login(username, password);
+
+        showSnackbar(`Welcome, ${username}!`, {
+          variant: 'solid',
+          color: 'success',
+        });
+
+        handleClose();
+      } else {
+        await register(username, password);
+
+        showSnackbar('Account successfully created, you can now login.', {
+          variant: 'solid',
+          color: 'success',
+        });
+
+        setMode('login');
+      }
+    } catch (e) {} // eslint-disable-line no-empty
   };
 
-  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(event.target.value);
+  const authFormProps = {
+    onSubmit: handleSubmit,
+    onCancel: handleClose,
+    disabled: authenticating,
   };
 
-  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
-  };
+  const actionLabel = mode === 'login' ? 'Log in' : 'Register';
 
   return (
     <>
       <Button startDecorator={<AccountCircleOutlined />} onClick={handleClick}>
-        {user ? 'Sign Out' : 'Log In'}
+        {user.id ? 'Sign Out' : 'Log In'}
       </Button>
       <Modal open={open} onClose={handleClose}>
-        <ModalDialog>
-          <DialogTitle>Log in with a username and a password</DialogTitle>
-          <form onSubmit={handleSubmit}>
-            <StyledDialogContent>
-              <Typography level="body-sm">
-                If you don&apos;t have an account yet, we&apos;ll create one for
-                you
-              </Typography>
-              <FloatingLabelInput
-                value={username}
-                onChange={handleUsernameChange}
-                label="Username"
-                disabled={loggingIn}
-              />
-              <FloatingLabelInput
-                value={password}
-                onChange={handlePasswordChange}
-                label="Password"
-                type="password"
-                disabled={loggingIn}
-              />
-            </StyledDialogContent>
-            <DialogActions>
-              <Button
-                variant="solid"
-                color="primary"
-                loading={loggingIn}
-                type="submit"
-              >
-                Log In / Sign Up
-              </Button>
-              <Button
-                onClick={handleClose}
-                variant="outlined"
-                color="neutral"
-                disabled={loggingIn}
-              >
-                Cancel
-              </Button>
-            </DialogActions>
-          </form>
+        <ModalDialog sx={{ width: 420, padding: '20px 24px 10px' }}>
+          <DialogTitle>
+            {actionLabel} with a username and a password
+          </DialogTitle>
+          <Tabs
+            value={mode}
+            onChange={handleTabChange}
+            sx={{ bgcolor: 'transparent', marginTop: 0.5 }}
+          >
+            <TabList
+              aria-label="tabs"
+              sx={{
+                p: 0.5,
+                gap: 0.5,
+                borderRadius: 'xl',
+                bgcolor: 'background.level1',
+                [`& .${tabClasses.root}[aria-selected="true"]`]: {
+                  boxShadow: 'sm',
+                  bgcolor: 'background.surface',
+                },
+              }}
+              disableUnderline
+            >
+              <Tab value="login" disableIndicator sx={{ flex: '1 1 0%' }}>
+                Log In
+              </Tab>
+              <Tab value="register" disableIndicator sx={{ flex: '1 1 0%' }}>
+                Create Account
+              </Tab>
+            </TabList>
+            <TabPanel value="login" sx={{ padding: '16px 0' }}>
+              <AuthForm {...authFormProps} submitButtonLabel="Log In" />
+            </TabPanel>
+            <TabPanel value="register" sx={{ padding: '16px 0' }}>
+              <AuthForm {...authFormProps} submitButtonLabel="Create Account" />
+            </TabPanel>
+          </Tabs>
         </ModalDialog>
       </Modal>
     </>

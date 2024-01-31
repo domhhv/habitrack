@@ -7,12 +7,15 @@ type HabitsProviderProps = {
 };
 
 const HabitsProvider = ({ children }: HabitsProviderProps) => {
-  const { accessToken } = useUser();
+  const {
+    user: { token },
+  } = useUser();
+
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<Habit[]>([]);
 
   React.useEffect(() => {
-    if (!accessToken) {
+    if (!token) {
       clearHabits();
       return undefined;
     }
@@ -20,18 +23,15 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     setFetchingHabits(true);
 
     habitService
-      .getHabits(accessToken as string)
+      .getHabits(token)
       .then((res) => {
         setHabits(res);
         setFetchingHabits(false);
       })
-      .catch((err) => {
-        console.error(err);
-      })
       .finally(() => {
         setFetchingHabits(false);
       });
-  }, [accessToken]);
+  }, [token]);
 
   const addHabit = (habit: Habit) => {
     setHabits((prevHabits) => [...prevHabits, habit]);
