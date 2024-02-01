@@ -48,7 +48,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
       .finally(() => {
         setFetchingCalendarEvents(false);
       });
-  }, [user.token, logout, showSnackbar]);
+  }, [user, logout, showSnackbar]);
 
   const addCalendarEvent = (calendarEvent: CalendarEvent) => {
     setCalendarEvents((prevCalendarEvents) => [
