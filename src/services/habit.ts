@@ -1,4 +1,4 @@
-import { Habit } from '@context';
+import { Habit, type LocalUser } from '@context';
 
 import { composeAuthorizationHeader, destroy, get, patch, post } from './http';
 
@@ -6,38 +6,41 @@ export const createHabit = (
   name: string,
   description: string,
   trait: 'good' | 'bad',
-  accessToken: string
+  user: LocalUser
 ) => {
   return post<Habit>(
-    '/habits',
+    `/users/${user.id}/habits`,
     {
       name,
       description,
       trait,
     },
-    composeAuthorizationHeader(accessToken)
+    composeAuthorizationHeader(user.token)
   );
 };
 
-export const getHabits = (accessToken: string) => {
-  return get<Habit[]>('/habits', composeAuthorizationHeader(accessToken));
+export const getHabits = (user: LocalUser) => {
+  return get<Habit[]>(
+    `/users/${user.id}/habits`,
+    composeAuthorizationHeader(user.token)
+  );
 };
 
 export const updateHabit = (
   id: number,
   habit: Omit<Habit, 'id'>,
-  accessToken: string
+  user: LocalUser
 ) => {
   return patch<Habit>(
-    `/habits/${id}`,
+    `/users/${user.id}/habits/${id}`,
     habit,
-    composeAuthorizationHeader(accessToken)
+    composeAuthorizationHeader(user.token)
   );
 };
 
-export const destroyHabit = (id: number, accessToken: string) => {
+export const destroyHabit = (id: number, user: LocalUser) => {
   return destroy<Habit>(
-    `/habits/${id}`,
-    composeAuthorizationHeader(accessToken)
+    `/users/${user.id}/habits/${id}`,
+    composeAuthorizationHeader(user.token)
   );
 };

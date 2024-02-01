@@ -29,9 +29,7 @@ const DayHabitModalDialog = ({
   onClose,
   date,
 }: DayHabitModalDialogProps) => {
-  const {
-    user: { token },
-  } = useUser();
+  const { user } = useUser();
   const { habits } = useHabits();
   const calendarEventsContext = useCalendarEvents();
   const [submitting, setSubmitting] = React.useState(false);
@@ -56,7 +54,7 @@ const DayHabitModalDialog = ({
       const newCalendarEvent = await calendarService.createCalendarEvent(
         date,
         selectedBadHabit as number,
-        token
+        user
       );
       calendarEventsContext.addCalendarEvent(newCalendarEvent);
       showSnackbar('Your habit entry has been added to the calendar!', {

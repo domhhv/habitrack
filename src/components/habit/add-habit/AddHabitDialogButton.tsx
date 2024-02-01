@@ -26,9 +26,7 @@ type AddHabitDialogButtonProps = {
 const AddHabitDialogButton = ({
   disabled = false,
 }: AddHabitDialogButtonProps) => {
-  const {
-    user: { token },
-  } = useUser();
+  const { user } = useUser();
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
@@ -57,7 +55,7 @@ const AddHabitDialogButton = ({
         habitName,
         habitDescription,
         habitTrait as 'good' | 'bad',
-        token
+        user
       );
       habitsContext.addHabit(newHabit);
       showSnackbar('Your habit has been added!', {
@@ -101,7 +99,7 @@ const AddHabitDialogButton = ({
         variant="soft"
         startDecorator={<AddRounded />}
         onClick={handleDialogOpen}
-        disabled={disabled || !token}
+        disabled={disabled || !user.token}
       >
         Add habit
       </Button>

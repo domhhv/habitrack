@@ -7,15 +7,13 @@ type HabitsProviderProps = {
 };
 
 const HabitsProvider = ({ children }: HabitsProviderProps) => {
-  const {
-    user: { token },
-  } = useUser();
+  const { user } = useUser();
 
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<Habit[]>([]);
 
   React.useEffect(() => {
-    if (!token) {
+    if (!user.token) {
       clearHabits();
       return undefined;
     }
@@ -23,7 +21,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     setFetchingHabits(true);
 
     habitService
-      .getHabits(token)
+      .getHabits(user)
       .then((res) => {
         setHabits(res);
         setFetchingHabits(false);
@@ -31,7 +29,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
       .finally(() => {
         setFetchingHabits(false);
       });
-  }, [token]);
+  }, [user]);
 
   const addHabit = (habit: Habit) => {
     setHabits((prevHabits) => [...prevHabits, habit]);
@@ -44,6 +42,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
   };
 
   const updateHabit = (habit: Habit) => {
+    console.log('ctx updateHabit', habit);
     setHabits((prevHabits) =>
       prevHabits.map((prevHabit) =>
         prevHabit.id === habit.id ? { ...prevHabit, ...habit } : prevHabit
