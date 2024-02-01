@@ -32,9 +32,7 @@ const EditHabitDialog = ({
   habit,
   onClose,
 }: EditHabitDialogProps) => {
-  const {
-    user: { token },
-  } = useUser();
+  const { user } = useUser();
   const [isOpen, setIsOpen] = React.useState(false);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -91,7 +89,7 @@ const EditHabitDialog = ({
           description,
           trait: trait as 'good' | 'bad',
         },
-        token
+        user
       );
       habitsContext.updateHabit(updatedHabit);
       updateHabitInsideCalendarEvents(updatedHabit);

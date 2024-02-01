@@ -1,44 +1,44 @@
-import { CalendarEvent } from '@context';
+import { CalendarEvent, type LocalUser } from '@context';
 
 import { composeAuthorizationHeader, destroy, get, patch, post } from './http';
 
 export const createCalendarEvent = (
   date: Date,
   habitId: number,
-  accessToken: string
+  user: LocalUser
 ) => {
   return post<CalendarEvent>(
-    '/calendar-events',
+    `/users/${user.id}/calendar-events`,
     {
       date: date.toISOString(),
       habit: habitId,
     },
-    composeAuthorizationHeader(accessToken)
+    composeAuthorizationHeader(user.token)
   );
 };
 
-export const getCalendarEvents = (accessToken: string) => {
+export const getCalendarEvents = (user: LocalUser) => {
   return get<CalendarEvent[]>(
-    '/calendar-events',
-    composeAuthorizationHeader(accessToken)
+    `/users/${user.id}/calendar-events`,
+    composeAuthorizationHeader(user.token)
   );
 };
 
 export const updateCalendarEvent = (
   id: number,
   calendarEvent: Omit<CalendarEvent, 'id'>,
-  accessToken: string
+  user: LocalUser
 ) => {
   return patch<CalendarEvent>(
-    `/calendar-events/${id}`,
+    `/users/${user.id}/calendar-events/${id}`,
     calendarEvent,
-    composeAuthorizationHeader(accessToken)
+    composeAuthorizationHeader(user.token)
   );
 };
 
-export const destroyCalendarEvent = (id: number, accessToken: string) => {
+export const destroyCalendarEvent = (id: number, user: LocalUser) => {
   return destroy<CalendarEvent>(
-    `/calendar-events/${id}`,
-    composeAuthorizationHeader(accessToken)
+    `/users/${user.id}/calendar-events/${id}`,
+    composeAuthorizationHeader(user.token)
   );
 };
