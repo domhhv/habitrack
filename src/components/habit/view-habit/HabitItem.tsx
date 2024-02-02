@@ -1,4 +1,4 @@
-import { Habit, useHabits, useSnackbar, useUser } from '@context';
+import { Habit, useCalendarEvents, useHabits } from '@context';
 import { DeleteForever } from '@mui/icons-material';
 import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
 import {
@@ -9,7 +9,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/joy';
-import { habitService } from '@services';
 import React from 'react';
 
 import {
@@ -25,25 +24,15 @@ type HabitItemProps = {
 };
 
 const HabitItem = ({ habit, onEdit }: HabitItemProps) => {
-  const { user } = useUser();
   const [isBeingDeleted, setIsBeingDeleted] = React.useState(false);
-  const habitsContext = useHabits();
-  const { showSnackbar } = useSnackbar();
+  const { removeHabit } = useHabits();
+  const { removeCalendarEventsByHabitId } = useCalendarEvents();
 
   const handleDeleteHabit = async () => {
     setIsBeingDeleted(true);
-
-    try {
-      await habitService.destroyHabit(habit.id, user);
-      habitsContext.removeHabit(habit.id);
-      showSnackbar('Your habit has been deleted!', {
-        dismissible: true,
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsBeingDeleted(false);
-    }
+    await removeHabit(habit.id);
+    removeCalendarEventsByHabitId(habit.id);
+    setIsBeingDeleted(false);
   };
 
   return (

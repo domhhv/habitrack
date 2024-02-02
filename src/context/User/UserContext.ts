@@ -3,20 +3,21 @@ import React from 'react';
 export type User = {
   id: number;
   username: string;
-  token: string;
 };
 
 export type LocalUser = User & {
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 };
 
 export const DEFAULT_USER: LocalUser = {
   id: 0,
   username: '',
-  token: '',
+  accessToken: '',
+  refreshToken: '',
 };
 
-export type UserContextType = {
+type UserContextType = {
   user: LocalUser;
   authenticating: boolean;
   register: (username: string, password: string) => Promise<void>;

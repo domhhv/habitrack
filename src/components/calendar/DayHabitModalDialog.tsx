@@ -1,4 +1,4 @@
-import { useCalendarEvents, useHabits, useSnackbar, useUser } from '@context';
+import { useCalendarEvents, useHabits } from '@context';
 import {
   Box,
   Button,
@@ -14,7 +14,6 @@ import {
   FormLabel,
   FormHelperText,
 } from '@mui/joy';
-import { calendarService } from '@services';
 import { format } from 'date-fns';
 import React, { FormEventHandler } from 'react';
 
@@ -29,14 +28,11 @@ const DayHabitModalDialog = ({
   onClose,
   date,
 }: DayHabitModalDialogProps) => {
-  const { user } = useUser();
   const { habits } = useHabits();
-  const calendarEventsContext = useCalendarEvents();
-  const [submitting, setSubmitting] = React.useState(false);
+  const { addCalendarEvent, addingCalendarEvent } = useCalendarEvents();
   const [selectedBadHabit, setSelectedBadHabit] = React.useState<number | null>(
     null
   );
-  const { showSnackbar } = useSnackbar();
 
   if (!date || !open) {
     return null;
@@ -45,34 +41,20 @@ const DayHabitModalDialog = ({
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
 
-    if (!selectedBadHabit) {
-      return null;
-    }
+    const calendarEvent = {
+      date: date.toISOString(),
+      habitId: selectedBadHabit as number,
+    };
+    await addCalendarEvent(calendarEvent);
 
-    setSubmitting(true);
-    try {
-      const newCalendarEvent = await calendarService.createCalendarEvent(
-        date,
-        selectedBadHabit as number,
-        user
-      );
-      calendarEventsContext.addCalendarEvent(newCalendarEvent);
-      showSnackbar('Your habit entry has been added to the calendar!', {
-        color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setSubmitting(false);
-    }
     onClose();
   };
 
   const handleSelect = (_: null, newValue: string) => {
     setSelectedBadHabit(Number(newValue));
   };
+
+  const hasHabits = Object.keys(habits).length > 0;
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -91,26 +73,26 @@ const DayHabitModalDialog = ({
               required
               color={'neutral'}
               placeholder="Select Habit"
-              value={habits.length ? selectedBadHabit : 0}
+              value={hasHabits ? selectedBadHabit : 0}
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
               onChange={handleSelect}
-              disabled={submitting}
+              disabled={addingCalendarEvent}
               id="habit-select"
             >
-              {!habits.length && (
+              {!hasHabits && (
                 <Option value={0} label="No habits found" disabled>
                   No habits found
                 </Option>
               )}
-              {habits.map((habit) => (
+              {Object.values(habits).map((habit) => (
                 <Option key={habit.id} value={habit.id} label={habit.name}>
                   {habit.name}
                   <Typography level="body-xs">{habit.trait}</Typography>
                 </Option>
               ))}
             </Select>
-            {!habits.length && (
+            {!hasHabits && (
               <FormHelperText id="select-field-demo-helper">
                 Add a habit or some first
               </FormHelperText>
@@ -119,8 +101,8 @@ const DayHabitModalDialog = ({
           <Box mt={1}>
             <Button
               fullWidth
-              loading={submitting}
-              disabled={!habits.length}
+              loading={addingCalendarEvent}
+              disabled={!hasHabits}
               type="submit"
             >
               Submit

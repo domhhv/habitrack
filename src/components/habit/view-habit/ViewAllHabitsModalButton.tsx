@@ -27,7 +27,7 @@ const ViewAllHabitsModalButton = ({
   const { habits } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [isEditingHabit, setIsEditingHabit] = React.useState(false);
-  const [habitIdToEdit, setHabitIdToEdit] = React.useState<number | null>(null);
+  const [habitIdToEdit, setHabitIdToEdit] = React.useState<number>(0);
 
   const handleOpen = () => {
     setOpen(true);
@@ -44,8 +44,10 @@ const ViewAllHabitsModalButton = ({
 
   const handleEditEnd = () => {
     setIsEditingHabit(false);
-    setHabitIdToEdit(null);
+    setHabitIdToEdit(0);
   };
+
+  const hasHabits = !!Object.keys(habits).length;
 
   return (
     <>
@@ -69,16 +71,16 @@ const ViewAllHabitsModalButton = ({
           <ModalClose />
           <DialogTitle>View All Habits</DialogTitle>
           <DialogContent>
-            {!habits.length && (
+            {!hasHabits && (
               <StyledPlaceholderContainer>
                 <ViewListRoundedIcon sx={{ fontSize: 50 }} />
                 <p>You have no habits yet.</p>
               </StyledPlaceholderContainer>
             )}
-            {!!habits.length && (
+            {!!hasHabits && (
               <>
                 <List>
-                  {habits.map((habit) => (
+                  {Object.values(habits).map((habit) => (
                     <HabitItem
                       key={habit.id}
                       habit={habit}
@@ -89,7 +91,7 @@ const ViewAllHabitsModalButton = ({
                 <EditHabitDialog
                   open={isEditingHabit}
                   onClose={handleEditEnd}
-                  habit={habits.find((h) => h.id === habitIdToEdit)}
+                  habit={habits[habitIdToEdit]}
                 />
               </>
             )}

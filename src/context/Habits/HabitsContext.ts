@@ -7,12 +7,25 @@ export type Habit = {
   trait: 'good' | 'bad';
 };
 
-export const HabitsContext = React.createContext({
+type HabitId = number;
+export type HabitsMap = Record<HabitId, Habit>;
+
+type HabitsContextType = {
+  addingHabit: boolean;
+  fetchingHabits: boolean;
+  habits: HabitsMap;
+  addHabit: (habit: Omit<Habit, 'id'>) => void;
+  removeHabit: (habitId: number) => Promise<void>;
+  updateHabit: (habit: Habit) => Promise<void>;
+};
+
+export const HabitsContext = React.createContext<HabitsContextType>({
+  addingHabit: false,
   fetchingHabits: false,
   habits: [] as Habit[],
-  addHabit: (_: Habit) => {},
-  removeHabit: (_: number) => {},
-  updateHabit: (_: Habit) => {},
+  addHabit: (_: Omit<Habit, 'id'>) => {},
+  removeHabit: (_: number) => Promise.resolve(),
+  updateHabit: (_: Habit) => Promise.resolve(),
 });
 
 export const useHabits = () => {

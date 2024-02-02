@@ -1,11 +1,5 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import {
-  Habit,
-  useCalendarEvents,
-  useHabits,
-  useSnackbar,
-  useUser,
-} from '@context';
+import { Habit, useCalendarEvents, useHabits } from '@context';
 import {
   Button,
   DialogContent,
@@ -16,7 +10,6 @@ import {
   Option,
   Select,
 } from '@mui/joy';
-import { habitService } from '@services';
 import React from 'react';
 
 import { StyledForm } from './styled';
@@ -32,7 +25,6 @@ const EditHabitDialog = ({
   habit,
   onClose,
 }: EditHabitDialogProps) => {
-  const { user } = useUser();
   const [isOpen, setIsOpen] = React.useState(false);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -40,7 +32,6 @@ const EditHabitDialog = ({
   const [isUpdating, setIsUpdating] = React.useState(false);
   const habitsContext = useHabits();
   const { updateHabitInsideCalendarEvents } = useCalendarEvents();
-  const { showSnackbar } = useSnackbar();
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -80,34 +71,16 @@ const EditHabitDialog = ({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsUpdating(true);
-
-    try {
-      const updatedHabit = await habitService.updateHabit(
-        habit.id,
-        {
-          name,
-          description,
-          trait: trait as 'good' | 'bad',
-        },
-        user
-      );
-      habitsContext.updateHabit(updatedHabit);
-      updateHabitInsideCalendarEvents(updatedHabit);
-      showSnackbar('Your habit has been updated!', {
-        color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
-      });
-    } catch (error) {
-      showSnackbar('Something went wrong', {
-        color: 'danger',
-        dismissible: true,
-      });
-      console.error(error);
-    } finally {
-      setIsUpdating(false);
-      handleClose();
-    }
+    const newHabit = {
+      id: habit.id,
+      name,
+      description,
+      trait: trait as 'good' | 'bad',
+    };
+    await habitsContext.updateHabit(newHabit);
+    updateHabitInsideCalendarEvents(newHabit);
+    setIsUpdating(false);
+    handleClose();
   };
 
   return (

@@ -28,8 +28,57 @@ const UserProvider = ({ children }: UserProviderProps) => {
       return setUser(DEFAULT_USER);
     }
 
-    setUser(JSON.parse(localStorage.getItem('user') as string));
+    const parsedLocalUser = JSON.parse(localUser);
+    setUser(parsedLocalUser);
   }, [showSnackbar]);
+
+  const logout = (shouldShowSnackbar: boolean = true) => {
+    localStorage.removeItem('user');
+    setUser(DEFAULT_USER);
+    if (shouldShowSnackbar) {
+      showSnackbar('You have logged out', {
+        variant: 'outlined',
+        color: 'neutral',
+      });
+    }
+  };
+
+  React.useEffect(() => {
+    if (user.id && user.accessToken && user.refreshToken) {
+      const validateUserTokens = async () =>
+        userService.validateTokens(user.accessToken, user.refreshToken);
+
+      validateUserTokens()
+        .then(async (res) => {
+          let userWithTokens = user;
+
+          if (res.accessTokenExpired) {
+            try {
+              const newTokens = await userService.regenerateAccessToken(
+                user.refreshToken
+              );
+
+              if (newTokens.refreshTokenExpired) {
+                return logout();
+              }
+
+              userWithTokens = { ...userWithTokens, ...newTokens };
+            } catch (e) {
+              console.log('e: ', e);
+              if ((e as Error).message === 'Token expired') {
+                return logout();
+              }
+            }
+          }
+
+          localStorage.setItem('user', JSON.stringify(userWithTokens));
+          setUser(userWithTokens);
+        })
+        .catch(async (error) => {
+          console.error(error);
+        });
+    }
+  }, [user, logout]);
 
   const register = async (username: string, password: string) => {
     setAuthenticating(true);
@@ -42,12 +91,14 @@ const UserProvider = ({ children }: UserProviderProps) => {
           variant: 'solid',
           color: 'danger',
         });
+      } else {
+        showSnackbar('Something went wrong while registering your account', {
+          variant: 'solid',
+          color: 'danger',
+        });
+        console.error(e);
+        throw e;
       }
-
-      showSnackbar('Something went wrong', {
-        variant: 'solid',
-        color: 'danger',
-      });
     } finally {
       setAuthenticating(false);
     }
@@ -65,16 +116,6 @@ const UserProvider = ({ children }: UserProviderProps) => {
           variant: 'solid',
           color: 'danger',
         });
-
-        throw e;
-      }
-
-      if ((e as Error).message === 'Token expired') {
-        showSnackbar('You have been logged out', {
-          variant: 'solid',
-          color: 'danger',
-        });
-
         throw e;
       }
 
@@ -86,17 +127,6 @@ const UserProvider = ({ children }: UserProviderProps) => {
       throw e;
     } finally {
       setAuthenticating(false);
-    }
-  };
-
-  const logout = (shouldShowSnackbar: boolean = true) => {
-    localStorage.removeItem('user');
-    setUser(DEFAULT_USER);
-    if (shouldShowSnackbar) {
-      showSnackbar('You have logged out', {
-        variant: 'outlined',
-        color: 'neutral',
-      });
     }
   };
 
