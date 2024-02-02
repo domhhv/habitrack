@@ -32,16 +32,19 @@ const UserProvider = ({ children }: UserProviderProps) => {
     setUser(parsedLocalUser);
   }, [showSnackbar]);
 
-  const logout = (shouldShowSnackbar: boolean = true) => {
-    localStorage.removeItem('user');
-    setUser(DEFAULT_USER);
-    if (shouldShowSnackbar) {
-      showSnackbar('You have logged out', {
-        variant: 'outlined',
-        color: 'neutral',
-      });
-    }
-  };
+  const logout = React.useCallback(
+    (shouldShowSnackbar: boolean = true) => {
+      localStorage.removeItem('user');
+      setUser(DEFAULT_USER);
+      if (shouldShowSnackbar) {
+        showSnackbar('You have logged out', {
+          variant: 'outlined',
+          color: 'neutral',
+        });
+      }
+    },
+    [showSnackbar]
+  );
 
   React.useEffect(() => {
     if (user.id && user.accessToken && user.refreshToken) {

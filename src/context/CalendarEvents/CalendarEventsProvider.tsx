@@ -51,63 +51,69 @@ const CalendarEventsProvider = ({ children }: Props) => {
       });
   }, [user, logout, showSnackbar]);
 
-  const addCalendarEvent = async (calendarEvent: CreatedCalendarEvent) => {
-    try {
-      setAddingCalendarEvent(true);
+  const addCalendarEvent = React.useCallback(
+    async (calendarEvent: CreatedCalendarEvent) => {
+      try {
+        setAddingCalendarEvent(true);
 
-      const newCalendarEvent = await calendarService.createCalendarEvent(
-        calendarEvent,
-        user
-      );
+        const newCalendarEvent = await calendarService.createCalendarEvent(
+          calendarEvent,
+          user
+        );
 
-      setCalendarEvents((prevCalendarEvents) => ({
-        ...prevCalendarEvents,
-        [newCalendarEvent.id]: newCalendarEvent,
-      }));
+        setCalendarEvents((prevCalendarEvents) => ({
+          ...prevCalendarEvents,
+          [newCalendarEvent.id]: newCalendarEvent,
+        }));
 
-      showSnackbar('Your habit entry has been added to the calendar!', {
-        color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
-      });
-    } catch (e) {
-      showSnackbar('Something went wrong while adding your habit', {
-        color: 'danger',
-        dismissible: true,
-      });
+        showSnackbar('Your habit entry has been added to the calendar!', {
+          color: 'success',
+          dismissible: true,
+          dismissText: 'Done',
+        });
+      } catch (e) {
+        showSnackbar('Something went wrong while adding your habit', {
+          color: 'danger',
+          dismissible: true,
+        });
 
-      console.error(e);
-    } finally {
-      setAddingCalendarEvent(false);
-    }
-  };
+        console.error(e);
+      } finally {
+        setAddingCalendarEvent(false);
+      }
+    },
+    [user, showSnackbar]
+  );
 
-  const removeCalendarEvent = async (id: number) => {
-    try {
-      setCalendarEventIdBeingDeleted(id);
+  const removeCalendarEvent = React.useCallback(
+    async (id: number) => {
+      try {
+        setCalendarEventIdBeingDeleted(id);
 
-      await calendarService.destroyCalendarEvent(id, user);
+        await calendarService.destroyCalendarEvent(id, user);
 
-      setCalendarEvents((prevCalendarEvents) => {
-        const nextCalendarEvents = { ...prevCalendarEvents };
-        delete nextCalendarEvents[id];
-        return nextCalendarEvents;
-      });
+        setCalendarEvents((prevCalendarEvents) => {
+          const nextCalendarEvents = { ...prevCalendarEvents };
+          delete nextCalendarEvents[id];
+          return nextCalendarEvents;
+        });
 
-      showSnackbar('Your habit entry has been deleted from the calendar.', {
-        dismissible: true,
-      });
-    } catch (error) {
-      showSnackbar('Something went wrong while removing your habit entry', {
-        color: 'danger',
-        dismissible: true,
-      });
+        showSnackbar('Your habit entry has been deleted from the calendar.', {
+          dismissible: true,
+        });
+      } catch (error) {
+        showSnackbar('Something went wrong while removing your habit entry', {
+          color: 'danger',
+          dismissible: true,
+        });
 
-      console.error(error);
-    } finally {
-      setCalendarEventIdBeingDeleted(0);
-    }
-  };
+        console.error(error);
+      } finally {
+        setCalendarEventIdBeingDeleted(0);
+      }
+    },
+    [user, showSnackbar]
+  );
 
   const updateCalendarEvent = (calendarEvent: CalendarEvent) => {
     // TODO: add service call to update calendar event
@@ -162,11 +168,12 @@ const CalendarEventsProvider = ({ children }: Props) => {
       updateHabitInsideCalendarEvents,
     }),
     [
-      // eslint-disable-line react-hooks/exhaustive-deps
       addingCalendarEvent,
       fetchingCalendarEvents,
       calendarEvents,
       calendarEventIdBeingDeleted,
+      addCalendarEvent,
+      removeCalendarEvent,
     ]
   );
 
