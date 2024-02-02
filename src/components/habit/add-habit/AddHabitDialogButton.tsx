@@ -16,7 +16,6 @@ import {
   Option,
   Select,
 } from '@mui/joy';
-import { habitService } from '@services';
 import React, { FormEventHandler } from 'react';
 
 type AddHabitDialogButtonProps = {
@@ -31,8 +30,7 @@ const AddHabitDialogButton = ({
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
   const [habitTrait, setHabitTrait] = React.useState<'good' | 'bad' | ''>('');
-  const [addingHabit, setAddingHabit] = React.useState(false);
-  const habitsContext = useHabits();
+  const { addingHabit, addHabit } = useHabits();
   const { showSnackbar } = useSnackbar();
 
   const handleDialogOpen = () => {
@@ -48,16 +46,13 @@ const AddHabitDialogButton = ({
 
   const handleAdd: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
-    setAddingHabit(true);
-
     try {
-      const newHabit = await habitService.createHabit(
-        habitName,
-        habitDescription,
-        habitTrait as 'good' | 'bad',
-        user
-      );
-      habitsContext.addHabit(newHabit);
+      const habit = {
+        name: habitName,
+        description: habitDescription,
+        trait: habitTrait as 'good' | 'bad',
+      };
+      addHabit(habit);
       showSnackbar('Your habit has been added!', {
         color: 'success',
         dismissible: true,
@@ -71,7 +66,6 @@ const AddHabitDialogButton = ({
       });
       console.error(error);
     } finally {
-      setAddingHabit(false);
       setOpen(false);
     }
   };
@@ -99,7 +93,7 @@ const AddHabitDialogButton = ({
         variant="soft"
         startDecorator={<AddRounded />}
         onClick={handleDialogOpen}
-        disabled={disabled || !user.token}
+        disabled={disabled || !user.accessToken}
       >
         Add habit
       </Button>

@@ -1,14 +1,8 @@
-import {
-  CalendarEvent,
-  useCalendarEvents,
-  useSnackbar,
-  useUser,
-} from '@context';
+import { CalendarEvent, useCalendarEvents } from '@context';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FmdBadIcon from '@mui/icons-material/FmdBad';
 import FmdGoodIcon from '@mui/icons-material/FmdGood';
 import { ChipDelete, CircularProgress, Typography } from '@mui/joy';
-import { calendarService } from '@services';
 import React from 'react';
 
 import {
@@ -39,14 +33,13 @@ const CalendarCell = ({
   onClick,
   rangeStatus,
 }: CalendarCellProps) => {
-  const { user } = useUser();
-  const calendarEventsContext = useCalendarEvents();
+  const {
+    removeCalendarEvent,
+    fetchingCalendarEvents,
+    calendarEventIdBeingDeleted,
+  } = useCalendarEvents();
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
-  const [eventIdBeingDeleted, setEventIdBeingDeleted] = React.useState<
-    number | null
-  >(null);
-  const { showSnackbar } = useSnackbar();
 
   React.useEffect(() => {
     const today = new Date();
@@ -79,19 +72,7 @@ const CalendarCell = ({
     clickEvent: React.MouseEvent<HTMLButtonElement>
   ) => {
     clickEvent.stopPropagation();
-    setEventIdBeingDeleted(calendarEventId);
-
-    try {
-      await calendarService.destroyCalendarEvent(calendarEventId, user);
-      calendarEventsContext.removeCalendarEvent(calendarEventId);
-      showSnackbar('Your habit entry has been deleted from the calendar.', {
-        dismissible: true,
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setEventIdBeingDeleted(null);
-    }
+    removeCalendarEvent(calendarEventId);
   };
 
   return (
@@ -101,7 +82,7 @@ const CalendarCell = ({
       data-next-month={rangeStatus === 'above-range'}
       data-current={current}
       onClick={handleClick}
-      disabled={calendarEventsContext.fetchingCalendarEvents}
+      disabled={fetchingCalendarEvents}
     >
       <StyledCalendarDayCellButtonHeader>
         <Typography level="body-sm" fontWeight={current ? 900 : 400}>
@@ -117,7 +98,7 @@ const CalendarCell = ({
         {events.map((event) => {
           const Icon = event.habit.trait === 'good' ? FmdGoodIcon : FmdBadIcon;
 
-          const isBeingDeleted = eventIdBeingDeleted === event.id;
+          const isBeingDeleted = calendarEventIdBeingDeleted === event.id;
 
           const endDecorator = isBeingDeleted ? (
             <CircularProgress size="sm" />

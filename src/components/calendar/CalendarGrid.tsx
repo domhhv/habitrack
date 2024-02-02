@@ -43,7 +43,7 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
     setDayModalDialogOpen(false);
   };
 
-  const calendarEventsByDate = calendarEvents?.reduce(
+  const calendarEventsByDate = Object.values(calendarEvents).reduce(
     (acc, event) => {
       const date = new Date(event.date);
       const year = date.getFullYear();

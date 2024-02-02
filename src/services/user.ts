@@ -21,3 +21,29 @@ export const register = async (
     password,
   });
 };
+
+type ValidateTokensResponse = LocalUser & {
+  accessTokenExpired?: boolean;
+};
+
+export const validateTokens = async (
+  accessToken: string,
+  refreshToken: string
+): Promise<ValidateTokensResponse> => {
+  return post('/auth/tokens/validate', {
+    accessToken,
+    refreshToken,
+  });
+};
+
+type RefreshTokensResponse = LocalUser & {
+  refreshTokenExpired?: boolean;
+};
+
+export const regenerateAccessToken = async (
+  refreshToken: string
+): Promise<RefreshTokensResponse> => {
+  return post('/auth/tokens/access/regenerate', {
+    refreshToken,
+  });
+};
