@@ -52,8 +52,8 @@ const ViewAllHabitsModalButton = ({
   return (
     <>
       <Button
-        color="neutral"
-        variant="plain"
+        color="primary"
+        variant="soft"
         disabled={loading}
         onClick={handleOpen}
         startDecorator={

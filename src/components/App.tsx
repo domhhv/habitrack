@@ -5,7 +5,8 @@ import {
   SnackbarProvider,
   UserProvider,
 } from '@context';
-import { styled } from '@mui/joy';
+import { CssVarsProvider, styled } from '@mui/joy';
+import { theme } from '@utils';
 import React from 'react';
 
 const StyledAppContainerDiv = styled('div')({
@@ -16,18 +17,24 @@ const StyledAppContainerDiv = styled('div')({
 
 const App = () => {
   return (
-    <SnackbarProvider>
-      <UserProvider>
-        <HabitsProvider>
-          <CalendarEventsProvider>
-            <StyledAppContainerDiv>
-              <AppHeader />
-              <Calendar aria-label="Event date" />
-            </StyledAppContainerDiv>
-          </CalendarEventsProvider>
-        </HabitsProvider>
-      </UserProvider>
-    </SnackbarProvider>
+    <CssVarsProvider
+      theme={theme}
+      defaultMode="system"
+      modeStorageKey="user_mode_preference"
+    >
+      <SnackbarProvider>
+        <UserProvider>
+          <HabitsProvider>
+            <CalendarEventsProvider>
+              <StyledAppContainerDiv>
+                <AppHeader />
+                <Calendar aria-label="Event date" />
+              </StyledAppContainerDiv>
+            </CalendarEventsProvider>
+          </HabitsProvider>
+        </UserProvider>
+      </SnackbarProvider>
+    </CssVarsProvider>
   );
 };
 

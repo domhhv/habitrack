@@ -14,7 +14,7 @@ type HabitsContextType = {
   addingHabit: boolean;
   fetchingHabits: boolean;
   habits: HabitsMap;
-  addHabit: (habit: Omit<Habit, 'id'>) => void;
+  addHabit: (habit: Omit<Habit, 'id'>) => Promise<void>;
   removeHabit: (habitId: number) => Promise<void>;
   updateHabit: (habit: Habit) => Promise<void>;
 };
@@ -23,7 +23,7 @@ export const HabitsContext = React.createContext<HabitsContextType>({
   addingHabit: false,
   fetchingHabits: false,
   habits: [] as Habit[],
-  addHabit: (_: Omit<Habit, 'id'>) => {},
+  addHabit: (_: Omit<Habit, 'id'>) => Promise.resolve(),
   removeHabit: (_: number) => Promise.resolve(),
   updateHabit: (_: Habit) => Promise.resolve(),
 });

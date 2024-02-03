@@ -10,16 +10,19 @@ import {
   TabList,
   TabPanel,
   Tabs,
+  useTheme,
 } from '@mui/joy';
 import React, { type SyntheticEvent } from 'react';
 
 import { AuthForm } from './AuthForm';
+import { StyledAuthButton } from './styled';
 
 const AuthModalButton = () => {
   const { user, authenticating, register, login, logout } = useUser();
   const [open, setOpen] = React.useState(false);
   const [mode, setMode] = React.useState<'login' | 'register'>('login');
   const { showSnackbar } = useSnackbar();
+  const theme = useTheme();
 
   const handleClick = () => {
     if (user.id) {
@@ -75,9 +78,12 @@ const AuthModalButton = () => {
 
   return (
     <>
-      <Button startDecorator={<AccountCircleOutlined />} onClick={handleClick}>
+      <StyledAuthButton
+        startDecorator={<AccountCircleOutlined />}
+        onClick={handleClick}
+      >
         {user.id ? 'Sign Out' : 'Log In'}
-      </Button>
+      </StyledAuthButton>
       <Modal open={open} onClose={handleClose}>
         <ModalDialog sx={{ width: 420, padding: '20px 24px 10px' }}>
           <DialogTitle>

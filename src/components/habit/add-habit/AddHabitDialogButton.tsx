@@ -1,5 +1,5 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { useHabits, useSnackbar, useUser } from '@context';
+import { useHabits, useUser } from '@context';
 import {
   AddRounded,
   CheckCircleOutline,
@@ -31,7 +31,6 @@ const AddHabitDialogButton = ({
   const [habitDescription, setHabitDescription] = React.useState('');
   const [habitTrait, setHabitTrait] = React.useState<'good' | 'bad' | ''>('');
   const { addingHabit, addHabit } = useHabits();
-  const { showSnackbar } = useSnackbar();
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -53,17 +52,8 @@ const AddHabitDialogButton = ({
         trait: habitTrait as 'good' | 'bad',
       };
       addHabit(habit);
-      showSnackbar('Your habit has been added!', {
-        color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
-      });
       handleDialogClose();
     } catch (error) {
-      showSnackbar('Something went wrong', {
-        color: 'danger',
-        dismissible: true,
-      });
       console.error(error);
     } finally {
       setOpen(false);

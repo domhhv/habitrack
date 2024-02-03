@@ -6,7 +6,10 @@ import { useCalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';
-import { StyledCalendarContainerDiv } from './styled';
+import {
+  StyledCalendarBackgroundDiv,
+  StyledCalendarContainerDiv,
+} from './styled';
 
 const Calendar = () => {
   const { locale } = useLocale();
@@ -28,17 +31,19 @@ const Calendar = () => {
   });
 
   return (
-    <StyledCalendarContainerDiv {...calendarProps}>
-      <CalendarHeader
-        activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
-        activeYear={activeYear}
-        prevButtonProps={transformButtonProps(prevButtonProps)}
-        nextButtonProps={transformButtonProps(nextButtonProps)}
-        onNavigateBack={state.focusPreviousPage}
-        onNavigateForward={state.focusNextPage}
-      />
-      <CalendarGrid state={state} />
-    </StyledCalendarContainerDiv>
+    <StyledCalendarBackgroundDiv>
+      <StyledCalendarContainerDiv {...calendarProps}>
+        <CalendarHeader
+          activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
+          activeYear={activeYear}
+          prevButtonProps={transformButtonProps(prevButtonProps)}
+          nextButtonProps={transformButtonProps(nextButtonProps)}
+          onNavigateBack={state.focusPreviousPage}
+          onNavigateForward={state.focusNextPage}
+        />
+        <CalendarGrid state={state} />
+      </StyledCalendarContainerDiv>
+    </StyledCalendarBackgroundDiv>
   );
 };
 

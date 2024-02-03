@@ -1,4 +1,4 @@
-import { CalendarEvent } from '@context';
+import { CalendarEvent, type CalendarEventsDateMap } from '@context';
 import { CalendarDate } from '@internationalized/date';
 import { motion } from 'framer-motion';
 import React, { type ForwardedRef } from 'react';
@@ -15,7 +15,7 @@ type MonthProps = {
     monthIndex: number,
     fullYear: number
   ) => void;
-  calendarEventsByDate: Record<string, CalendarEvent[]>;
+  calendarEventsByDate: CalendarEventsDateMap;
 };
 
 const Month = (

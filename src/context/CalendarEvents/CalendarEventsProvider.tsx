@@ -6,6 +6,7 @@ import {
   CalendarEventsContext,
   type CalendarEventsMap,
   type CreatedCalendarEvent,
+  type CalendarEventsDateMap,
 } from '@context';
 import { calendarService } from '@services';
 import React from 'react';
@@ -24,6 +25,8 @@ const CalendarEventsProvider = ({ children }: Props) => {
   const [calendarEvents, setCalendarEvents] = React.useState<CalendarEventsMap>(
     {}
   );
+  const [calendarEventsByDate, setCalendarEventsByDate] =
+    React.useState<CalendarEventsDateMap>({});
   const [calendarEventIdBeingDeleted, setCalendarEventIdBeingDeleted] =
     React.useState(0);
 
@@ -41,7 +44,26 @@ const CalendarEventsProvider = ({ children }: Props) => {
         const calendarEvents = res.reduce((acc, calendarEvent) => {
           return { ...acc, [calendarEvent.id]: calendarEvent };
         }, {});
+
+        const calendarEventsByDate = res.reduce(
+          (acc, calendarEvent) => {
+            const date = new Date(calendarEvent.date);
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const day = date.getDate();
+            const key = `${year}-${month}-${day}`;
+            if (!acc[key]) {
+              acc[key] = [calendarEvent];
+            } else {
+              acc[key].push(calendarEvent);
+            }
+            return acc;
+          },
+          {} as Record<string, CalendarEvent[]>
+        );
+
         setCalendarEvents(calendarEvents);
+        setCalendarEventsByDate(calendarEventsByDate);
       })
       .catch(async (err) => {
         console.error(err);
@@ -152,7 +174,8 @@ const CalendarEventsProvider = ({ children }: Props) => {
   };
 
   const clearCalendarEvents = () => {
-    setCalendarEvents([]);
+    setCalendarEvents({});
+    setCalendarEventsByDate({});
   };
 
   const value = React.useMemo(
@@ -160,6 +183,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
       addingCalendarEvent,
       fetchingCalendarEvents,
       calendarEventIdBeingDeleted,
+      calendarEventsByDate,
       calendarEvents,
       addCalendarEvent,
       removeCalendarEvent,
@@ -170,6 +194,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
     [
       addingCalendarEvent,
       fetchingCalendarEvents,
+      calendarEventsByDate,
       calendarEvents,
       calendarEventIdBeingDeleted,
       addCalendarEvent,
