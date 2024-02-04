@@ -149,7 +149,6 @@ const CalendarEventsProvider = ({ children }: Props) => {
   };
 
   const removeCalendarEventsByHabitId = (habitId: number) => {
-    console.log('removeCalendarEventsByHabitId', habitId);
     setCalendarEvents((prevCalendarEvents) => {
       const nextCalendarEvents = prevCalendarEvents.filter((event) => {
         return event.habit.id !== habitId;
