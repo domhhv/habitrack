@@ -1,7 +1,6 @@
 import { useSnackbar, useUser } from '@context';
 import { AccountCircleOutlined } from '@mui/icons-material';
 import {
-  Button,
   DialogTitle,
   Modal,
   ModalDialog,
@@ -10,7 +9,6 @@ import {
   TabList,
   TabPanel,
   Tabs,
-  useTheme,
 } from '@mui/joy';
 import React, { type SyntheticEvent } from 'react';
 
@@ -22,7 +20,6 @@ const AuthModalButton = () => {
   const [open, setOpen] = React.useState(false);
   const [mode, setMode] = React.useState<'login' | 'register'>('login');
   const { showSnackbar } = useSnackbar();
-  const theme = useTheme();
 
   const handleClick = () => {
     if (user.id) {

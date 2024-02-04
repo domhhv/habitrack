@@ -11,9 +11,6 @@ export type CreatedCalendarEvent = Omit<CalendarEvent, 'id' | 'habit'> & {
   habitId: number;
 };
 
-type CalendarEventId = number;
-export type CalendarEventsMap = Record<CalendarEventId, CalendarEvent>;
-
 type CalendarEventsDate = string;
 export type CalendarEventsDateMap = Record<CalendarEventsDate, CalendarEvent[]>;
 
@@ -21,11 +18,9 @@ type CalendarEventsContextType = {
   addingCalendarEvent: boolean;
   fetchingCalendarEvents: boolean;
   calendarEventIdBeingDeleted: number;
-  calendarEvents: CalendarEventsMap;
   calendarEventsByDate: CalendarEventsDateMap;
   addCalendarEvent: (calendarEvent: CreatedCalendarEvent) => Promise<void>;
   removeCalendarEvent: (calendarEventId: number) => Promise<void>;
-  updateCalendarEvent: (calendarEvent: CalendarEvent) => void;
   updateHabitInsideCalendarEvents: (habit: Habit) => void;
   removeCalendarEventsByHabitId: (habitId: number) => void;
 };
@@ -35,11 +30,9 @@ export const CalendarEventsContext =
     addingCalendarEvent: false,
     fetchingCalendarEvents: false,
     calendarEventIdBeingDeleted: 0,
-    calendarEvents: {},
     calendarEventsByDate: {},
     addCalendarEvent: (_: CreatedCalendarEvent) => Promise.resolve(),
     removeCalendarEvent: (_: number) => Promise.resolve(),
-    updateCalendarEvent: (_: CalendarEvent) => {},
     updateHabitInsideCalendarEvents: (_: Habit) => {},
     removeCalendarEventsByHabitId: (_: number) => {},
   });

@@ -1,4 +1,4 @@
-import { CalendarEvent, type CalendarEventsDateMap } from '@context';
+import { type CalendarEventsDateMap } from '@context';
 import { CalendarDate } from '@internationalized/date';
 import { motion } from 'framer-motion';
 import React, { type ForwardedRef } from 'react';

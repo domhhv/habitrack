@@ -7,7 +7,7 @@ export const StyledAppHeader = styled('header')(({ theme }) => ({
     borderBottom: `1px solid ${theme.palette.neutral[400]}`,
   },
   [theme.getColorSchemeSelector('dark')]: {
-    backgroundColor: theme.palette.neutral[800],
+    backgroundColor: theme.palette.neutral[900],
     borderBottom: `1px solid ${theme.palette.neutral[900]}`,
   },
 }));
@@ -21,7 +21,7 @@ export const StyledAppHeaderContent = styled('div')(({ theme }) => ({
   alignItems: 'center',
   margin: '0 auto',
 }));
-('rgba(var(--joy-palette-neutral-darkChannel, 251 252 254) / 0.25)');
+
 export const StyledButtonsContainer = styled('div')({
   display: 'flex',
   alignItems: 'center',
@@ -31,10 +31,6 @@ export const StyledButtonsContainer = styled('div')({
 });
 
 export const StyledToggleModeIconButton = styled(IconButton)(({ theme }) => ({
-  [theme.getColorSchemeSelector('light')]: {
-    // color: 'blue',
-  },
-  [theme.getColorSchemeSelector('dark')]: {
-    // color: 'red',
-  },
+  [theme.getColorSchemeSelector('light')]: {},
+  [theme.getColorSchemeSelector('dark')]: {},
 }));

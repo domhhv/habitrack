@@ -2,13 +2,7 @@ import { CalendarEvent, useCalendarEvents } from '@context';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FmdBadIcon from '@mui/icons-material/FmdBad';
 import FmdGoodIcon from '@mui/icons-material/FmdGood';
-import {
-  ChipDelete,
-  CircularProgress,
-  Typography,
-  useColorScheme,
-  useTheme,
-} from '@mui/joy';
+import { ChipDelete, CircularProgress, Typography } from '@mui/joy';
 import React from 'react';
 
 import {
@@ -46,8 +40,6 @@ const CalendarCell = ({
   } = useCalendarEvents();
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
-  const { mode } = useColorScheme();
-  const theme = useTheme();
 
   React.useEffect(() => {
     const today = new Date();

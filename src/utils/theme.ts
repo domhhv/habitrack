@@ -159,8 +159,8 @@ export const theme = extendTheme({
         text: {
           primary: 'var(--joy-palette-neutral-100)',
           secondary: 'var(--joy-palette-neutral-300)',
-          tertiary: 'var(--joy-palette-neutral-400)',
-          icon: 'var(--joy-palette-neutral-400)',
+          tertiary: 'var(--joy-palette-neutral-300)',
+          icon: 'var(--joy-palette-neutral-300)',
         },
       },
     },

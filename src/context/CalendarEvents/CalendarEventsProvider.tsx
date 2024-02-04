@@ -4,9 +4,8 @@ import {
   useSnackbar,
   useUser,
   CalendarEventsContext,
-  type CalendarEventsMap,
-  type CreatedCalendarEvent,
   type CalendarEventsDateMap,
+  type CreatedCalendarEvent,
 } from '@context';
 import { calendarService } from '@services';
 import React from 'react';
@@ -22,8 +21,8 @@ const CalendarEventsProvider = ({ children }: Props) => {
   const [addingCalendarEvent, setAddingCalendarEvent] = React.useState(false);
   const [fetchingCalendarEvents, setFetchingCalendarEvents] =
     React.useState(false);
-  const [calendarEvents, setCalendarEvents] = React.useState<CalendarEventsMap>(
-    {}
+  const [calendarEvents, setCalendarEvents] = React.useState<CalendarEvent[]>(
+    []
   );
   const [calendarEventsByDate, setCalendarEventsByDate] =
     React.useState<CalendarEventsDateMap>({});
@@ -40,38 +39,33 @@ const CalendarEventsProvider = ({ children }: Props) => {
 
     calendarService
       .getCalendarEvents(user)
-      .then((res) => {
-        const calendarEvents = res.reduce((acc, calendarEvent) => {
-          return { ...acc, [calendarEvent.id]: calendarEvent };
-        }, {});
-
-        const calendarEventsByDate = res.reduce(
-          (acc, calendarEvent) => {
-            const date = new Date(calendarEvent.date);
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const day = date.getDate();
-            const key = `${year}-${month}-${day}`;
-            if (!acc[key]) {
-              acc[key] = [calendarEvent];
-            } else {
-              acc[key].push(calendarEvent);
-            }
-            return acc;
-          },
-          {} as Record<string, CalendarEvent[]>
-        );
-
-        setCalendarEvents(calendarEvents);
-        setCalendarEventsByDate(calendarEventsByDate);
-      })
-      .catch(async (err) => {
-        console.error(err);
-      })
+      .then(setCalendarEvents)
+      .catch(console.error)
       .finally(() => {
         setFetchingCalendarEvents(false);
       });
   }, [user, logout, showSnackbar]);
+
+  React.useEffect(() => {
+    const calendarEventsByDate = calendarEvents.reduce(
+      (acc, calendarEvent) => {
+        const date = new Date(calendarEvent.date);
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const day = date.getDate();
+        const key = `${year}-${month}-${day}`;
+        if (!acc[key]) {
+          acc[key] = [calendarEvent];
+        } else {
+          acc[key].push(calendarEvent);
+        }
+        return acc;
+      },
+      {} as Record<string, CalendarEvent[]>
+    );
+
+    setCalendarEventsByDate(calendarEventsByDate);
+  }, [calendarEvents]);
 
   const addCalendarEvent = React.useCallback(
     async (calendarEvent: CreatedCalendarEvent) => {
@@ -83,10 +77,10 @@ const CalendarEventsProvider = ({ children }: Props) => {
           user
         );
 
-        setCalendarEvents((prevCalendarEvents) => ({
+        setCalendarEvents((prevCalendarEvents) => [
           ...prevCalendarEvents,
-          [newCalendarEvent.id]: newCalendarEvent,
-        }));
+          newCalendarEvent,
+        ]);
 
         showSnackbar('Your habit entry has been added to the calendar!', {
           color: 'success',
@@ -115,8 +109,11 @@ const CalendarEventsProvider = ({ children }: Props) => {
         await calendarService.destroyCalendarEvent(id, user);
 
         setCalendarEvents((prevCalendarEvents) => {
-          const nextCalendarEvents = { ...prevCalendarEvents };
-          delete nextCalendarEvents[id];
+          const nextCalendarEvents = [...prevCalendarEvents];
+          const indexToRemove = nextCalendarEvents.findIndex(
+            (event) => event.id === id
+          );
+          delete nextCalendarEvents[indexToRemove];
           return nextCalendarEvents;
         });
 
@@ -137,19 +134,11 @@ const CalendarEventsProvider = ({ children }: Props) => {
     [user, showSnackbar]
   );
 
-  const updateCalendarEvent = (calendarEvent: CalendarEvent) => {
-    // TODO: add service call to update calendar event
-    setCalendarEvents((prevCalendarEvents) => ({
-      ...prevCalendarEvents,
-      [calendarEvent.id]: calendarEvent,
-    }));
-  };
-
   const updateHabitInsideCalendarEvents = (habit: Habit) => {
     setCalendarEvents((prevCalendarEvents) => {
-      const nextCalendarEvents = { ...prevCalendarEvents };
+      const nextCalendarEvents = [...prevCalendarEvents];
 
-      Object.values(nextCalendarEvents).forEach((calendarEvent) => {
+      nextCalendarEvents.forEach((calendarEvent: CalendarEvent) => {
         if (calendarEvent.habit.id === habit.id) {
           calendarEvent.habit = habit;
         }
@@ -160,13 +149,10 @@ const CalendarEventsProvider = ({ children }: Props) => {
   };
 
   const removeCalendarEventsByHabitId = (habitId: number) => {
+    console.log('removeCalendarEventsByHabitId', habitId);
     setCalendarEvents((prevCalendarEvents) => {
-      const nextCalendarEvents = { ...prevCalendarEvents };
-
-      Object.values(nextCalendarEvents).forEach((calendarEvent) => {
-        if (calendarEvent.habit.id === habitId) {
-          delete nextCalendarEvents[calendarEvent.id];
-        }
+      const nextCalendarEvents = prevCalendarEvents.filter((event) => {
+        return event.habit.id !== habitId;
       });
 
       return nextCalendarEvents;
@@ -174,7 +160,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
   };
 
   const clearCalendarEvents = () => {
-    setCalendarEvents({});
+    setCalendarEvents([]);
     setCalendarEventsByDate({});
   };
 
@@ -188,7 +174,6 @@ const CalendarEventsProvider = ({ children }: Props) => {
       addCalendarEvent,
       removeCalendarEvent,
       removeCalendarEventsByHabitId,
-      updateCalendarEvent,
       updateHabitInsideCalendarEvents,
     }),
     [

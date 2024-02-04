@@ -47,17 +47,22 @@ const DayHabitModalDialog = ({
     };
     await addCalendarEvent(calendarEvent);
 
-    onClose();
+    handleClose();
   };
 
   const handleSelect = (_: null, newValue: string) => {
     setSelectedBadHabit(Number(newValue));
   };
 
+  const handleClose = () => {
+    setSelectedBadHabit(null);
+    onClose();
+  };
+
   const hasHabits = Object.keys(habits).length > 0;
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose}>
       <ModalDialog sx={{ width: 380 }}>
         <ModalClose />
         <DialogTitle>
