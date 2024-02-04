@@ -1,7 +1,6 @@
 import { useSnackbar, useUser } from '@context';
 import { AccountCircleOutlined } from '@mui/icons-material';
 import {
-  Button,
   DialogTitle,
   Modal,
   ModalDialog,
@@ -14,6 +13,7 @@ import {
 import React, { type SyntheticEvent } from 'react';
 
 import { AuthForm } from './AuthForm';
+import { StyledAuthButton } from './styled';
 
 const AuthModalButton = () => {
   const { user, authenticating, register, login, logout } = useUser();
@@ -75,9 +75,12 @@ const AuthModalButton = () => {
 
   return (
     <>
-      <Button startDecorator={<AccountCircleOutlined />} onClick={handleClick}>
+      <StyledAuthButton
+        startDecorator={<AccountCircleOutlined />}
+        onClick={handleClick}
+      >
         {user.id ? 'Sign Out' : 'Log In'}
-      </Button>
+      </StyledAuthButton>
       <Modal open={open} onClose={handleClose}>
         <ModalDialog sx={{ width: 420, padding: '20px 24px 10px' }}>
           <DialogTitle>

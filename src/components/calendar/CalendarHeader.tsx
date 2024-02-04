@@ -46,7 +46,7 @@ const CalendarHeader = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Typography level="title-md" sx={{ margin: 0 }}>
+            <Typography level="title-lg" sx={{ margin: 0 }}>
               {activeMonthLabel} {activeYear}
             </Typography>
           </motion.div>

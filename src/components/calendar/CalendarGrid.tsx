@@ -1,4 +1,4 @@
-import { CalendarEvent, useCalendarEvents } from '@context';
+import { useCalendarEvents } from '@context';
 import { getWeeksInMonth } from '@internationalized/date';
 import { Box, Typography } from '@mui/joy';
 import { AnimatePresence } from 'framer-motion';
@@ -25,7 +25,7 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
 
   const weeksInMonth = getWeeksInMonth(state.visibleRange.start, locale);
 
-  const { calendarEvents } = useCalendarEvents();
+  const { calendarEventsByDate } = useCalendarEvents();
   const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
 
@@ -43,30 +43,17 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
     setDayModalDialogOpen(false);
   };
 
-  const calendarEventsByDate = Object.values(calendarEvents).reduce(
-    (acc, event) => {
-      const date = new Date(event.date);
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const day = date.getDate();
-      const key = `${year}-${month}-${day}`;
-      if (!acc[key]) {
-        acc[key] = [event];
-      } else {
-        acc[key].push(event);
-      }
-      return acc;
-    },
-    {} as Record<string, CalendarEvent[]>
-  );
-
   return (
     <StyledCalendarGridContainerDiv {...gridProps}>
       <Box display="flex" mb={0.25}>
         {[...Array(7)].map((_, index) => {
           return (
             <StyledCalendarWeekDay key={index}>
-              <Typography key={`weekLabel-${index}`} level="body-sm">
+              <Typography
+                key={`weekLabel-${index}`}
+                level="body-lg"
+                fontWeight={900}
+              >
                 {WEEK_DAYS[index]}
               </Typography>
             </StyledCalendarWeekDay>

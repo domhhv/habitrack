@@ -85,11 +85,11 @@ const CalendarCell = ({
       disabled={fetchingCalendarEvents}
     >
       <StyledCalendarDayCellButtonHeader>
-        <Typography level="body-sm" fontWeight={current ? 900 : 400}>
+        <Typography level="body-md" fontWeight={900}>
           {dateNumber}
         </Typography>
         {current && (
-          <Typography level="body-sm" fontWeight={900}>
+          <Typography level="body-md" fontWeight={900}>
             Today
           </Typography>
         )}

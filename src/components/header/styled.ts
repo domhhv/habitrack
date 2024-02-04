@@ -1,9 +1,16 @@
+import { IconButton } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
 
-export const StyledAppHeader = styled('header')({
-  backgroundColor: '#d6d3d1',
-  borderBottom: '1px solid #78716c',
-});
+export const StyledAppHeader = styled('header')(({ theme }) => ({
+  [theme.getColorSchemeSelector('light')]: {
+    backgroundColor: theme.palette.neutral[300],
+    borderBottom: `1px solid ${theme.palette.neutral[400]}`,
+  },
+  [theme.getColorSchemeSelector('dark')]: {
+    backgroundColor: theme.palette.neutral[900],
+    borderBottom: `1px solid ${theme.palette.neutral[900]}`,
+  },
+}));
 
 export const StyledAppHeaderContent = styled('div')(({ theme }) => ({
   width: '90%',
@@ -18,7 +25,12 @@ export const StyledAppHeaderContent = styled('div')(({ theme }) => ({
 export const StyledButtonsContainer = styled('div')({
   display: 'flex',
   alignItems: 'center',
-  '& > button:first-of-type': {
+  '& > button:not(:last-of-type)': {
     marginRight: 10,
   },
 });
+
+export const StyledToggleModeIconButton = styled(IconButton)(({ theme }) => ({
+  [theme.getColorSchemeSelector('light')]: {},
+  [theme.getColorSchemeSelector('dark')]: {},
+}));
