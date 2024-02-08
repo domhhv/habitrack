@@ -47,7 +47,7 @@ const ViewAllHabitsModalButton = ({
     setHabitIdToEdit(0);
   };
 
-  const hasHabits = !!Object.keys(habits).length;
+  const hasHabits = !!Object.keys(habits || {}).length;
 
   return (
     <>

@@ -4,4 +4,4 @@ export * from './CalendarEvents';
 
 export * from './Snackbar';
 
-export * from './User';
+export * from './Auth';

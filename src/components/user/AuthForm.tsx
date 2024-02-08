@@ -29,13 +29,22 @@ export const AuthForm = ({
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    onSubmit(username, password);
+    try {
+      event.preventDefault();
+      onSubmit(username, password);
+    } catch (e) {
+      console.error(e);
+      clearValues();
+    }
+  };
+
+  const clearValues = () => {
+    setUsername('');
+    setPassword('');
   };
 
   const handleCancel = () => {
-    setUsername('');
-    setPassword('');
+    clearValues();
     onCancel();
   };
 
@@ -45,7 +54,8 @@ export const AuthForm = ({
         <FloatingLabelInput
           value={username}
           onChange={handleUsernameChange}
-          label="Username"
+          type="email"
+          label="Email"
           disabled={disabled}
         />
         <FloatingLabelInput

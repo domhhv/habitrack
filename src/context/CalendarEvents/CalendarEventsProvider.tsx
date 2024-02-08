@@ -1,13 +1,16 @@
 import {
-  type Habit,
   type CalendarEvent,
   useSnackbar,
-  useUser,
   CalendarEventsContext,
   type CalendarEventsDateMap,
-  type CreatedCalendarEvent,
 } from '@context';
-import { calendarService } from '@services';
+import {
+  createCalendarEvent,
+  destroyCalendarEvent,
+  listCalendarEvents,
+  type PostEntity,
+} from '@services';
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type Props = {
@@ -15,8 +18,9 @@ type Props = {
 };
 
 const CalendarEventsProvider = ({ children }: Props) => {
-  const { user, logout } = useUser();
   const { showSnackbar } = useSnackbar();
+  const user = useUser();
+  const supabase = useSupabaseClient();
 
   const [addingCalendarEvent, setAddingCalendarEvent] = React.useState(false);
   const [fetchingCalendarEvents, setFetchingCalendarEvents] =
@@ -29,35 +33,35 @@ const CalendarEventsProvider = ({ children }: Props) => {
   const [calendarEventIdBeingDeleted, setCalendarEventIdBeingDeleted] =
     React.useState(0);
 
-  React.useEffect(() => {
-    if (!user.accessToken) {
-      clearCalendarEvents();
-      return undefined;
-    }
-
+  const fetchCalendarEvents = async () => {
     setFetchingCalendarEvents(true);
+    const calendarEvents = await listCalendarEvents();
+    setCalendarEvents(calendarEvents);
+    setFetchingCalendarEvents(false);
+  };
 
-    calendarService
-      .getCalendarEvents(user)
-      .then(setCalendarEvents)
-      .catch(console.error)
-      .finally(() => {
-        setFetchingCalendarEvents(false);
-      });
-  }, [user, logout, showSnackbar]);
+  React.useEffect(() => {
+    void fetchCalendarEvents();
+
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        clearCalendarEvents();
+      }
+
+      if (event === 'SIGNED_IN') {
+        void fetchCalendarEvents();
+      }
+    });
+  }, [user, supabase, showSnackbar]);
 
   React.useEffect(() => {
     const calendarEventsByDate = calendarEvents.reduce(
       (acc, calendarEvent) => {
-        const date = new Date(calendarEvent.date);
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const day = date.getDate();
-        const key = `${year}-${month}-${day}`;
-        if (!acc[key]) {
-          acc[key] = [calendarEvent];
+        const { day } = calendarEvent;
+        if (!acc[day]) {
+          acc[day] = [calendarEvent];
         } else {
-          acc[key].push(calendarEvent);
+          acc[day].push(calendarEvent);
         }
         return acc;
       },
@@ -68,14 +72,11 @@ const CalendarEventsProvider = ({ children }: Props) => {
   }, [calendarEvents]);
 
   const addCalendarEvent = React.useCallback(
-    async (calendarEvent: CreatedCalendarEvent) => {
+    async (calendarEvent: PostEntity<CalendarEvent>) => {
       try {
         setAddingCalendarEvent(true);
 
-        const newCalendarEvent = await calendarService.createCalendarEvent(
-          calendarEvent,
-          user
-        );
+        const newCalendarEvent = await createCalendarEvent(calendarEvent);
 
         setCalendarEvents((prevCalendarEvents) => [
           ...prevCalendarEvents,
@@ -98,7 +99,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
         setAddingCalendarEvent(false);
       }
     },
-    [user, showSnackbar]
+    [showSnackbar]
   );
 
   const removeCalendarEvent = React.useCallback(
@@ -106,7 +107,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
       try {
         setCalendarEventIdBeingDeleted(id);
 
-        await calendarService.destroyCalendarEvent(id, user);
+        await destroyCalendarEvent(id);
 
         setCalendarEvents((prevCalendarEvents) => {
           const nextCalendarEvents = [...prevCalendarEvents];
@@ -131,27 +132,13 @@ const CalendarEventsProvider = ({ children }: Props) => {
         setCalendarEventIdBeingDeleted(0);
       }
     },
-    [user, showSnackbar]
+    [showSnackbar]
   );
-
-  const updateHabitInsideCalendarEvents = (habit: Habit) => {
-    setCalendarEvents((prevCalendarEvents) => {
-      const nextCalendarEvents = [...prevCalendarEvents];
-
-      nextCalendarEvents.forEach((calendarEvent: CalendarEvent) => {
-        if (calendarEvent.habit.id === habit.id) {
-          calendarEvent.habit = habit;
-        }
-      });
-
-      return nextCalendarEvents;
-    });
-  };
 
   const removeCalendarEventsByHabitId = (habitId: number) => {
     setCalendarEvents((prevCalendarEvents) => {
       const nextCalendarEvents = prevCalendarEvents.filter((event) => {
-        return event.habit.id !== habitId;
+        return event.habit_id !== habitId;
       });
 
       return nextCalendarEvents;
@@ -173,7 +160,6 @@ const CalendarEventsProvider = ({ children }: Props) => {
       addCalendarEvent,
       removeCalendarEvent,
       removeCalendarEventsByHabitId,
-      updateHabitInsideCalendarEvents,
     }),
     [
       addingCalendarEvent,

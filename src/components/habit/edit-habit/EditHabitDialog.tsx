@@ -10,6 +10,7 @@ import {
   Option,
   Select,
 } from '@mui/joy';
+import { type User, useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 import { StyledForm } from './styled';
@@ -30,8 +31,8 @@ const EditHabitDialog = ({
   const [description, setDescription] = React.useState('');
   const [trait, setTrait] = React.useState<'good' | 'bad' | ''>('');
   const [isUpdating, setIsUpdating] = React.useState(false);
-  const habitsContext = useHabits();
-  const { updateHabitInsideCalendarEvents } = useCalendarEvents();
+  const { updateHabit } = useHabits();
+  const user = useUser();
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -72,13 +73,12 @@ const EditHabitDialog = ({
     event.preventDefault();
     setIsUpdating(true);
     const newHabit = {
-      id: habit.id,
       name,
       description,
       trait: trait as 'good' | 'bad',
+      user_id: user?.id as string,
     };
-    await habitsContext.updateHabit(newHabit);
-    updateHabitInsideCalendarEvents(newHabit);
+    await updateHabit(habit.id, newHabit);
     setIsUpdating(false);
     handleClose();
   };

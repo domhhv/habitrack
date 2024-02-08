@@ -12,6 +12,9 @@ require('dotenv').config({ path: envPaths[process.env.NODE_ENV] });
 module.exports = {
   entry: './src/index.tsx',
   devtool: 'inline-source-map',
+  devServer: {
+    historyApiFallback: true,
+  },
   module: {
     rules: [
       {
@@ -39,6 +42,7 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    publicPath: '/',
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -46,6 +50,9 @@ module.exports = {
         env: {
           NODE_ENV: JSON.stringify(process.env.NODE_ENV),
           API_BASE_URL: JSON.stringify(process.env.API_BASE_URL),
+          APP_BASE_URL: JSON.stringify(process.env.APP_BASE_URL),
+          SUPABASE_URL: JSON.stringify(process.env.SUPABASE_URL),
+          SUPABASE_ANON_KEY: JSON.stringify(process.env.SUPABASE_ANON_KEY),
         },
       },
     }),

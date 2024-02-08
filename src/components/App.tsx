@@ -1,19 +1,17 @@
-import { AppHeader, Calendar } from '@components';
+import { AppHeader } from '@components';
 import {
   HabitsProvider,
   CalendarEventsProvider,
   SnackbarProvider,
-  UserProvider,
 } from '@context';
-import { CssVarsProvider, styled } from '@mui/joy';
-import { theme } from '@utils';
+import { CssVarsProvider } from '@mui/joy';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabaseClient, theme } from '@utils';
 import React from 'react';
 
-const StyledAppContainerDiv = styled('div')({
-  display: 'flex',
-  flexDirection: 'column',
-  flexGrow: 1,
-});
+import AuthProvider from '../context/Auth/AuthProvider';
+
+import Router from './Router';
 
 const App = () => {
   return (
@@ -22,18 +20,18 @@ const App = () => {
       defaultMode="system"
       modeStorageKey="user_mode_preference"
     >
-      <SnackbarProvider>
-        <UserProvider>
-          <HabitsProvider>
-            <CalendarEventsProvider>
-              <StyledAppContainerDiv>
+      <SessionContextProvider supabaseClient={supabaseClient}>
+        <SnackbarProvider>
+          <AuthProvider>
+            <HabitsProvider>
+              <CalendarEventsProvider>
                 <AppHeader />
-                <Calendar aria-label="Event date" />
-              </StyledAppContainerDiv>
-            </CalendarEventsProvider>
-          </HabitsProvider>
-        </UserProvider>
-      </SnackbarProvider>
+                <Router />
+              </CalendarEventsProvider>
+            </HabitsProvider>
+          </AuthProvider>
+        </SnackbarProvider>
+      </SessionContextProvider>
     </CssVarsProvider>
   );
 };

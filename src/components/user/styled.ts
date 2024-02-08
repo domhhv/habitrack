@@ -1,4 +1,4 @@
-import { Button, DialogContent, styled } from '@mui/joy';
+import { Box, Button, DialogContent, styled } from '@mui/joy';
 
 export const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   '& > div': {
@@ -22,3 +22,12 @@ export const StyledAuthButton = styled(Button)(({ theme }) => ({
     },
   },
 }));
+
+export const StyledAccountLoaderContainer = styled(Box)({
+  width: '90%',
+  margin: '0 auto',
+  display: 'flex',
+  height: 'calc(100vh - 52px)',
+  alignItems: 'center',
+  justifyContent: 'center',
+});

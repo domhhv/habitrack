@@ -1,3 +1,4 @@
-export * as habitService from './habit';
-export * as calendarService from './calendar';
-export * as userService from './user';
+export * from './supabase';
+export * from './habit';
+export * from './calendar';
+export * from './user';

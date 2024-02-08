@@ -1,44 +1,32 @@
-import {
-  CalendarEvent,
-  type CreatedCalendarEvent,
-  type LocalUser,
-} from '@context';
+import { CalendarEvent } from '@context';
 
-import { composeAuthorizationHeader, destroy, get, patch, post } from './http';
+import {
+  Collections,
+  type PostEntity,
+  destroy,
+  get,
+  patch,
+  post,
+  type PatchEntity,
+} from './supabase';
 
 export const createCalendarEvent = (
-  calendarEvent: CreatedCalendarEvent,
-  user: LocalUser
+  calendarEvent: PostEntity<CalendarEvent>
 ) => {
-  return post<CalendarEvent>(
-    `/users/${user.id}/calendar-events`,
-    calendarEvent,
-    composeAuthorizationHeader(user.accessToken)
-  );
+  return post<CalendarEvent>(Collections.CALENDAR_EVENTS, calendarEvent);
 };
 
-export const getCalendarEvents = (user: LocalUser) => {
-  return get<CalendarEvent[]>(
-    `/users/${user.id}/calendar-events`,
-    composeAuthorizationHeader(user.accessToken)
-  );
+export const listCalendarEvents = () => {
+  return get<CalendarEvent[]>(Collections.CALENDAR_EVENTS);
 };
 
 export const updateCalendarEvent = (
   id: number,
-  calendarEvent: Omit<CalendarEvent, 'id'>,
-  user: LocalUser
+  calendarEvent: PatchEntity<CalendarEvent>
 ) => {
-  return patch<CalendarEvent>(
-    `/users/${user.id}/calendar-events/${id}`,
-    calendarEvent,
-    composeAuthorizationHeader(user.accessToken)
-  );
+  return patch<CalendarEvent>(Collections.CALENDAR_EVENTS, id, calendarEvent);
 };
 
-export const destroyCalendarEvent = (id: number, user: LocalUser) => {
-  return destroy<CalendarEvent>(
-    `/users/${user.id}/calendar-events/${id}`,
-    composeAuthorizationHeader(user.accessToken)
-  );
+export const destroyCalendarEvent = (id: number) => {
+  return destroy<CalendarEvent>(Collections.CALENDAR_EVENTS, id);
 };

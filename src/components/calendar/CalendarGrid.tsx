@@ -35,7 +35,7 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
     fullYear: number
   ) => {
     setDayModalDialogOpen(true);
-    setActiveDate(new Date(fullYear, monthIndex, dateNumber));
+    setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
   };
 
   const handleDayModalDialogClose = () => {

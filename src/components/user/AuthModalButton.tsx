@@ -1,4 +1,4 @@
-import { useSnackbar, useUser } from '@context';
+import { useAuth } from '@context';
 import { AccountCircleOutlined } from '@mui/icons-material';
 import {
   DialogTitle,
@@ -10,19 +10,20 @@ import {
   TabPanel,
   Tabs,
 } from '@mui/joy';
+import { useUser } from '@supabase/auth-helpers-react';
 import React, { type SyntheticEvent } from 'react';
 
 import { AuthForm } from './AuthForm';
 import { StyledAuthButton } from './styled';
 
 const AuthModalButton = () => {
-  const { user, authenticating, register, login, logout } = useUser();
+  const { login, logout, register, authenticating } = useAuth();
   const [open, setOpen] = React.useState(false);
   const [mode, setMode] = React.useState<'login' | 'register'>('login');
-  const { showSnackbar } = useSnackbar();
+  const user = useUser();
 
   const handleClick = () => {
-    if (user.id) {
+    if (user?.id) {
       return logout();
     }
 
@@ -45,23 +46,11 @@ const AuthModalButton = () => {
     try {
       if (mode === 'login') {
         await login(username, password);
-
-        showSnackbar(`Welcome, ${username}!`, {
-          variant: 'solid',
-          color: 'success',
-        });
-
-        handleClose();
       } else {
         await register(username, password);
-
-        showSnackbar('Account successfully created, you can now login.', {
-          variant: 'solid',
-          color: 'success',
-        });
-
-        setMode('login');
       }
+
+      handleClose();
     } catch (e) {} // eslint-disable-line no-empty
   };
 
@@ -79,7 +68,7 @@ const AuthModalButton = () => {
         startDecorator={<AccountCircleOutlined />}
         onClick={handleClick}
       >
-        {user.id ? 'Sign Out' : 'Log In'}
+        {user?.id ? 'Sign Out' : 'Log In'}
       </StyledAuthButton>
       <Modal open={open} onClose={handleClose}>
         <ModalDialog sx={{ width: 420, padding: '20px 24px 10px' }}>

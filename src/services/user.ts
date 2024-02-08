@@ -1,49 +1,44 @@
-import { type LocalUser, type User } from '@context';
+import type { Account } from '@context';
+import type {
+  AuthResponse,
+  AuthTokenResponsePassword,
+} from '@supabase/supabase-js';
+import { supabaseClient } from '@utils';
 
-import { post } from './http';
+import { Collections, get, patch, type PatchEntity } from './supabase';
 
-export const login = async (
-  username: string,
+export const signUp = async (
+  email: string,
   password: string
-): Promise<LocalUser> => {
-  return post('/auth/login', {
-    username,
+): Promise<AuthResponse> => {
+  return supabaseClient.auth.signUp({
+    email,
     password,
   });
 };
 
-export const register = async (
-  username: string,
+export const signIn = async (
+  email: string,
   password: string
-): Promise<User> => {
-  return post('/auth/register', {
-    username,
+): Promise<AuthTokenResponsePassword> => {
+  return supabaseClient.auth.signInWithPassword({
+    email,
     password,
   });
 };
 
-type ValidateTokensResponse = LocalUser & {
-  accessTokenExpired?: boolean;
+export const signOut = async () => {
+  console.log('signOut');
+  return supabaseClient.auth.signOut();
 };
 
-export const validateTokens = async (
-  accessToken: string,
-  refreshToken: string
-): Promise<ValidateTokensResponse> => {
-  return post('/auth/tokens/validate', {
-    accessToken,
-    refreshToken,
-  });
+export const getUserAccount = async () => {
+  return get<Account[]>(Collections.ACCOUNTS);
 };
 
-type RefreshTokensResponse = LocalUser & {
-  refreshTokenExpired?: boolean;
-};
-
-export const regenerateAccessToken = async (
-  refreshToken: string
-): Promise<RefreshTokensResponse> => {
-  return post('/auth/tokens/access/regenerate', {
-    refreshToken,
-  });
+export const updateUserAccount = async (
+  id: string,
+  account: PatchEntity<Account>
+) => {
+  return patch(Collections.ACCOUNTS, id, account);
 };

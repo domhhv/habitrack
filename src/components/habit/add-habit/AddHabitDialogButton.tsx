@@ -1,5 +1,5 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { useHabits, useUser } from '@context';
+import { useHabits } from '@context';
 import {
   AddRounded,
   CheckCircleOutline,
@@ -16,6 +16,7 @@ import {
   Option,
   Select,
 } from '@mui/joy';
+import { useSession, useUser } from '@supabase/auth-helpers-react';
 import React, { FormEventHandler } from 'react';
 
 type AddHabitDialogButtonProps = {
@@ -25,12 +26,13 @@ type AddHabitDialogButtonProps = {
 const AddHabitDialogButton = ({
   disabled = false,
 }: AddHabitDialogButtonProps) => {
-  const { user } = useUser();
+  const user = useUser();
+  const session = useSession();
+  const { addingHabit, addHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
   const [habitTrait, setHabitTrait] = React.useState<'good' | 'bad' | ''>('');
-  const { addingHabit, addHabit } = useHabits();
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -50,8 +52,9 @@ const AddHabitDialogButton = ({
         name: habitName,
         description: habitDescription,
         trait: habitTrait as 'good' | 'bad',
+        user_id: user?.id || session?.user?.id || '',
       };
-      addHabit(habit);
+      void addHabit(habit);
       handleDialogClose();
     } catch (error) {
       console.error(error);
@@ -83,7 +86,7 @@ const AddHabitDialogButton = ({
         variant="soft"
         startDecorator={<AddRounded />}
         onClick={handleDialogOpen}
-        disabled={disabled || !user.accessToken}
+        disabled={disabled || !session?.user?.id}
       >
         Add habit
       </Button>
