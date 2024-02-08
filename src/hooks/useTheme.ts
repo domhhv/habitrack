@@ -10,11 +10,20 @@ export enum ThemeModes {
 
 const useTheme = () => {
   const { setMode } = useColorScheme();
-  const [theme, setTheme] = React.useState<ThemeModes>(ThemeModes.LIGHT);
+  const [theme, setTheme] = React.useState<ThemeModes>();
+  console.log({ theme });
 
-  const darkThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const toggleTheme = () => {
+    setTheme((prevTheme) =>
+      prevTheme === ThemeModes.LIGHT ? ThemeModes.DARK : ThemeModes.LIGHT
+    );
+  };
 
   React.useEffect(() => {
+    const darkThemeMediaQuery = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    );
+
     const userTheme = localStorage.getItem(
       USER_THEME_STORAGE_KEY
     ) as ThemeModes | null;
@@ -26,7 +35,19 @@ const useTheme = () => {
         darkThemeMediaQuery.matches ? ThemeModes.DARK : ThemeModes.LIGHT
       );
     }
-  }, [darkThemeMediaQuery.matches]);
+
+    const eventListener = (mediaQueryListEvent: MediaQueryListEvent) => {
+      setTheme(
+        mediaQueryListEvent.matches ? ThemeModes.DARK : ThemeModes.LIGHT
+      );
+    };
+
+    darkThemeMediaQuery.addEventListener('change', eventListener);
+
+    return () => {
+      darkThemeMediaQuery.removeEventListener('change', eventListener);
+    };
+  }, []);
 
   React.useEffect(() => {
     if (theme) {
@@ -35,12 +56,9 @@ const useTheme = () => {
     }
   }, [theme, setMode]);
 
-  darkThemeMediaQuery.addEventListener('change', (mediaQueryListEvent) => {
-    setTheme(mediaQueryListEvent.matches ? ThemeModes.DARK : ThemeModes.LIGHT);
-  });
-
   return {
     theme,
+    toggleTheme,
   };
 };
 
