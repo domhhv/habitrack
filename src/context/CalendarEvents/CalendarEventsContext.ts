@@ -1,14 +1,12 @@
-import type { Habit } from '@context';
+import type { PostEntity } from '@services';
 import React from 'react';
 
 export type CalendarEvent = {
   id: number;
-  date: string;
-  habit: Habit;
-};
-
-export type CreatedCalendarEvent = Omit<CalendarEvent, 'id' | 'habit'> & {
-  habitId: number;
+  day: string;
+  habit_id: number;
+  created_at: string;
+  updated_at: string;
 };
 
 type CalendarEventsDate = string;
@@ -19,9 +17,8 @@ type CalendarEventsContextType = {
   fetchingCalendarEvents: boolean;
   calendarEventIdBeingDeleted: number;
   calendarEventsByDate: CalendarEventsDateMap;
-  addCalendarEvent: (calendarEvent: CreatedCalendarEvent) => Promise<void>;
+  addCalendarEvent: (calendarEvent: PostEntity<CalendarEvent>) => Promise<void>;
   removeCalendarEvent: (calendarEventId: number) => Promise<void>;
-  updateHabitInsideCalendarEvents: (habit: Habit) => void;
   removeCalendarEventsByHabitId: (habitId: number) => void;
 };
 
@@ -31,9 +28,8 @@ export const CalendarEventsContext =
     fetchingCalendarEvents: false,
     calendarEventIdBeingDeleted: 0,
     calendarEventsByDate: {},
-    addCalendarEvent: (_: CreatedCalendarEvent) => Promise.resolve(),
+    addCalendarEvent: (_: PostEntity<CalendarEvent>) => Promise.resolve(),
     removeCalendarEvent: (_: number) => Promise.resolve(),
-    updateHabitInsideCalendarEvents: (_: Habit) => {},
     removeCalendarEventsByHabitId: (_: number) => {},
   });
 

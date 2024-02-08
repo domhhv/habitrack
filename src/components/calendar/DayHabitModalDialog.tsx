@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormHelperText,
 } from '@mui/joy';
+import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
 import React, { FormEventHandler } from 'react';
 
@@ -29,6 +30,7 @@ const DayHabitModalDialog = ({
   date,
 }: DayHabitModalDialogProps) => {
   const { habits } = useHabits();
+  const user = useUser();
   const { addCalendarEvent, addingCalendarEvent } = useCalendarEvents();
   const [selectedBadHabit, setSelectedBadHabit] = React.useState<number | null>(
     null
@@ -42,8 +44,9 @@ const DayHabitModalDialog = ({
     event.preventDefault();
 
     const calendarEvent = {
-      date: date.toISOString(),
-      habitId: selectedBadHabit as number,
+      day: date.toISOString().split('T')[0],
+      habit_id: selectedBadHabit as number,
+      user_id: user?.id as string,
     };
     await addCalendarEvent(calendarEvent);
 

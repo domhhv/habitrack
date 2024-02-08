@@ -45,18 +45,16 @@ const Month = (
                     ? 'above-range'
                     : 'in-range';
 
+              const day = calendarDate.toString().split('T')[0];
+
               return (
                 <CalendarCell
-                  key={`${calendarDate.month}-${calendarDate.day}-${calendarDate.year}`}
+                  key={day}
                   dateNumber={calendarDate.day}
                   monthIndex={calendarDate.month}
                   fullYear={calendarDate.year}
                   onClick={onDayModalDialogOpen}
-                  events={
-                    calendarEventsByDate[
-                      `${calendarDate.year}-${calendarDate.month}-${calendarDate.day}`
-                    ] || []
-                  }
+                  events={calendarEventsByDate[day] || []}
                   rangeStatus={rangeStatus}
                   onNavigateBack={state.focusPreviousPage}
                   onNavigateForward={state.focusNextPage}

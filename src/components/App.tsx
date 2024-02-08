@@ -1,39 +1,58 @@
-import { AppHeader, Calendar } from '@components';
+import { AppHeader, Calendar, AccountPage } from '@components';
 import {
+  AuthProvider,
   HabitsProvider,
   CalendarEventsProvider,
   SnackbarProvider,
-  UserProvider,
 } from '@context';
+import { USER_THEME_STORAGE_KEY } from '@hooks';
 import { CssVarsProvider, styled } from '@mui/joy';
-import { theme } from '@utils';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabaseClient, theme } from '@utils';
 import React from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 const StyledAppContainerDiv = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   flexGrow: 1,
+  [theme.getColorSchemeSelector('light')]: {
+    backgroundColor: theme.palette.neutral[100],
+  },
+  [theme.getColorSchemeSelector('dark')]: {
+    backgroundColor: theme.palette.neutral[800],
+  },
 });
 
 const App = () => {
   return (
     <CssVarsProvider
       theme={theme}
-      defaultMode="system"
-      modeStorageKey="user_mode_preference"
+      defaultMode="light"
+      modeStorageKey={USER_THEME_STORAGE_KEY}
     >
-      <SnackbarProvider>
-        <UserProvider>
-          <HabitsProvider>
-            <CalendarEventsProvider>
-              <StyledAppContainerDiv>
-                <AppHeader />
-                <Calendar aria-label="Event date" />
-              </StyledAppContainerDiv>
-            </CalendarEventsProvider>
-          </HabitsProvider>
-        </UserProvider>
-      </SnackbarProvider>
+      <SessionContextProvider supabaseClient={supabaseClient}>
+        <SnackbarProvider>
+          <AuthProvider>
+            <HabitsProvider>
+              <CalendarEventsProvider>
+                <BrowserRouter>
+                  <AppHeader />
+                  <StyledAppContainerDiv>
+                    <Routes>
+                      <Route
+                        path="/calendar"
+                        element={<Calendar aria-label="Event date" />}
+                      />
+                      <Route path="/account" element={<AccountPage />} />
+                    </Routes>
+                  </StyledAppContainerDiv>
+                </BrowserRouter>
+              </CalendarEventsProvider>
+            </HabitsProvider>
+          </AuthProvider>
+        </SnackbarProvider>
+      </SessionContextProvider>
     </CssVarsProvider>
   );
 };

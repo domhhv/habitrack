@@ -3,9 +3,15 @@ import {
   HabitsContext,
   type HabitsMap,
   useSnackbar,
-  useUser,
 } from '@context';
-import { habitService } from '@services';
+import {
+  listHabits,
+  createHabit,
+  destroyHabit,
+  patchHabit,
+  type PostEntity,
+} from '@services';
+import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type HabitsProviderProps = {
@@ -13,42 +19,54 @@ type HabitsProviderProps = {
 };
 
 const HabitsProvider = ({ children }: HabitsProviderProps) => {
-  const { user } = useUser();
+  const supabase = useSupabaseClient();
+  const user = useUser();
   const { showSnackbar } = useSnackbar();
 
   const [addingHabit, setAddingHabit] = React.useState(false);
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<HabitsMap>({});
 
-  React.useEffect(() => {
-    if (!user.accessToken) {
-      clearHabits();
-      return undefined;
-    }
-
+  const fetchHabits = async () => {
     setFetchingHabits(true);
 
-    habitService
-      .getHabits(user)
-      .then((res) => {
-        const habits = res.reduce((acc, habit) => {
-          return { ...acc, [habit.id]: habit };
-        }, {});
-        setHabits(habits);
-        setFetchingHabits(false);
-      })
-      .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => {
-        setFetchingHabits(false);
-      });
-  }, [user]);
+    const habits = await listHabits();
 
-  const addHabit = async (habit: Omit<Habit, 'id'>) => {
+    const habitsMap = habits.reduce((acc, habit) => {
+      return { ...acc, [habit.id]: habit };
+    }, {});
+    setHabits(habitsMap);
+    setFetchingHabits(false);
+  };
+
+  React.useEffect(() => {
+    void fetchHabits();
+
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        clearHabits();
+      }
+
+      if (event === 'SIGNED_IN') {
+        void fetchHabits();
+      }
+    });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, [user, supabase]);
+
+  const clearHabits = () => {
+    setHabits({});
+  };
+
+  const addHabit = async (habit: PostEntity<Habit>) => {
     try {
       setAddingHabit(true);
-      const newHabit = await habitService.createHabit(habit, user);
+
+      const newHabit = await createHabit(habit);
+
       setHabits((prevHabits) => ({ ...prevHabits, [newHabit.id]: newHabit }));
       showSnackbar('Your habit has been added!', {
         color: 'success',
@@ -67,9 +85,36 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     }
   };
 
+  const updateHabit = async (
+    id: number,
+    habit: PostEntity<Habit>
+  ): Promise<Habit> => {
+    try {
+      const updatedHabit = await patchHabit(id, habit);
+
+      setHabits((prevHabits) => ({ ...prevHabits, [id]: updatedHabit }));
+
+      showSnackbar('Your habit has been updated!', {
+        color: 'success',
+        dismissible: true,
+      });
+
+      return updatedHabit;
+    } catch (error) {
+      showSnackbar('Something went wrong while updating your habit', {
+        color: 'danger',
+        dismissible: true,
+      });
+
+      console.error(error);
+
+      return Promise.resolve({} as Habit);
+    }
+  };
+
   const removeHabit = async (id: number) => {
     try {
-      await habitService.destroyHabit(id, user);
+      await destroyHabit(id);
 
       const nextHabits = { ...habits };
       delete nextHabits[id];
@@ -79,37 +124,13 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
         dismissible: true,
       });
     } catch (error) {
-      showSnackbar('Something went wrong while removing your habit', {
+      showSnackbar('Something went wrong while deleting your habit', {
         color: 'danger',
         dismissible: true,
       });
 
       console.error(error);
     }
-  };
-
-  const updateHabit = async (habit: Habit) => {
-    try {
-      await habitService.updateHabit(habit, user);
-
-      setHabits((prevHabits) => ({ ...prevHabits, [habit.id]: habit }));
-
-      showSnackbar('Your habit has been updated!', {
-        color: 'success',
-        dismissible: true,
-      });
-    } catch (error) {
-      showSnackbar('Something went wrong while updating your habit', {
-        color: 'danger',
-        dismissible: true,
-      });
-
-      console.error(error);
-    }
-  };
-
-  const clearHabits = () => {
-    setHabits([]);
   };
 
   const value = React.useMemo(

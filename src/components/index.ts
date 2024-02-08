@@ -8,3 +8,5 @@ export * from './header';
 export * from './controls';
 
 export * from './habit';
+
+export * from './user';

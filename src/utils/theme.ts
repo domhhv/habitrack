@@ -1,6 +1,27 @@
 import { extendTheme } from '@mui/joy/styles';
 
 export const theme = extendTheme({
+  components: {
+    JoyAlert: {
+      styleOverrides: {
+        root: ({ ownerState, theme }) => {
+          if (ownerState.color !== 'neutral' && ownerState.variant !== 'soft') {
+            return null;
+          }
+
+          return theme.palette.mode === 'light'
+            ? {
+                backgroundColor: theme.palette.neutral[50],
+                color: theme.palette.neutral[800],
+              }
+            : {
+                backgroundColor: theme.palette.neutral[900],
+                color: theme.palette.neutral[100],
+              };
+        },
+      },
+    },
+  },
   colorSchemes: {
     light: {
       palette: {

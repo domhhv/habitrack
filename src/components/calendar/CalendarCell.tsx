@@ -1,8 +1,9 @@
-import { CalendarEvent, useCalendarEvents } from '@context';
+import { CalendarEvent, useCalendarEvents, useHabits } from '@context';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FmdBadIcon from '@mui/icons-material/FmdBad';
 import FmdGoodIcon from '@mui/icons-material/FmdGood';
 import { ChipDelete, CircularProgress, Typography } from '@mui/joy';
+import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 import {
@@ -33,11 +34,13 @@ const CalendarCell = ({
   onClick,
   rangeStatus,
 }: CalendarCellProps) => {
+  const user = useUser();
   const {
     removeCalendarEvent,
     fetchingCalendarEvents,
     calendarEventIdBeingDeleted,
   } = useCalendarEvents();
+  const { habits } = useHabits();
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
 
@@ -82,7 +85,7 @@ const CalendarCell = ({
       data-next-month={rangeStatus === 'above-range'}
       data-current={current}
       onClick={handleClick}
-      disabled={fetchingCalendarEvents}
+      disabled={fetchingCalendarEvents || !user?.id}
     >
       <StyledCalendarDayCellButtonHeader>
         <Typography level="body-md" fontWeight={900}>
@@ -96,7 +99,8 @@ const CalendarCell = ({
       </StyledCalendarDayCellButtonHeader>
       <StyledCalendarDayCellButtonIconsContainer>
         {events.map((event) => {
-          const Icon = event.habit.trait === 'good' ? FmdGoodIcon : FmdBadIcon;
+          const isGoodHabit = habits[event.habit_id]?.trait === 'good';
+          const Icon = isGoodHabit ? FmdGoodIcon : FmdBadIcon;
 
           const isBeingDeleted = calendarEventIdBeingDeleted === event.id;
 
@@ -104,8 +108,8 @@ const CalendarCell = ({
             <CircularProgress size="sm" />
           ) : (
             <ChipDelete
-              color={event.habit.trait === 'good' ? 'success' : 'danger'}
               variant="soft"
+              color={isGoodHabit ? 'success' : 'danger'}
               onClick={(clickEvent) =>
                 handleCalendarEventDelete(event.id, clickEvent)
               }
@@ -117,13 +121,13 @@ const CalendarCell = ({
           return (
             <StyledHabitChip
               variant="soft"
-              color={event.habit.trait === 'good' ? 'success' : 'danger'}
+              color={isGoodHabit ? 'success' : 'danger'}
               key={event.id}
               startDecorator={<Icon fontSize="small" />}
               disabled={isBeingDeleted}
               endDecorator={endDecorator}
             >
-              {event.habit.name}
+              {habits[event.habit_id]?.name}
             </StyledHabitChip>
           );
         })}

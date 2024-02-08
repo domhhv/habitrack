@@ -1,3 +1,4 @@
+import { type PostEntity } from '@services';
 import React from 'react';
 
 export type Habit = {
@@ -5,27 +6,31 @@ export type Habit = {
   name: string;
   description: string;
   trait: 'good' | 'bad';
+  user_id: string;
+  created_at: string;
+  updated_at: string;
 };
 
-type HabitId = number;
+type HabitId = string;
 export type HabitsMap = Record<HabitId, Habit>;
 
 type HabitsContextType = {
   addingHabit: boolean;
   fetchingHabits: boolean;
   habits: HabitsMap;
-  addHabit: (habit: Omit<Habit, 'id'>) => Promise<void>;
+  addHabit: (habit: PostEntity<Habit>) => Promise<void>;
   removeHabit: (habitId: number) => Promise<void>;
-  updateHabit: (habit: Habit) => Promise<void>;
+  updateHabit: (id: number, habit: PostEntity<Habit>) => Promise<Habit>;
 };
 
 export const HabitsContext = React.createContext<HabitsContextType>({
   addingHabit: false,
   fetchingHabits: false,
-  habits: [] as Habit[],
-  addHabit: (_: Omit<Habit, 'id'>) => Promise.resolve(),
+  habits: {},
+  addHabit: (_: PostEntity<Habit>) => Promise.resolve(),
   removeHabit: (_: number) => Promise.resolve(),
-  updateHabit: (_: Habit) => Promise.resolve(),
+  updateHabit: (_: number, __: PostEntity<Habit>) =>
+    Promise.resolve({} as Habit),
 });
 
 export const useHabits = () => {

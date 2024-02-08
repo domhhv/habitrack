@@ -1,33 +1,27 @@
-import { Habit, type LocalUser } from '@context';
+import { Habit } from '@context';
 
-import { composeAuthorizationHeader, destroy, get, patch, post } from './http';
+import {
+  Collections,
+  type PostEntity,
+  destroy,
+  get,
+  patch,
+  post,
+  type PatchEntity,
+} from './supabase';
 
-export const createHabit = (habit: Omit<Habit, 'id'>, user: LocalUser) => {
-  return post<Habit>(
-    `/users/${user.id}/habits`,
-    habit,
-    composeAuthorizationHeader(user.accessToken)
-  );
+export const createHabit = async (body: PostEntity<Habit>) => {
+  return post<Habit>(Collections.HABITS, body);
 };
 
-export const getHabits = (user: LocalUser) => {
-  return get<Habit[]>(
-    `/users/${user.id}/habits`,
-    composeAuthorizationHeader(user.accessToken)
-  );
+export const listHabits = async () => {
+  return get<Habit[]>(Collections.HABITS);
 };
 
-export const updateHabit = (habit: Habit, user: LocalUser) => {
-  return patch<Habit>(
-    `/users/${user.id}/habits/${habit.id}`,
-    habit,
-    composeAuthorizationHeader(user.accessToken)
-  );
+export const patchHabit = (id: number, body: PatchEntity<Habit>) => {
+  return patch<Habit>(Collections.HABITS, id, body);
 };
 
-export const destroyHabit = (id: number, user: LocalUser) => {
-  return destroy<Habit>(
-    `/users/${user.id}/habits/${id}`,
-    composeAuthorizationHeader(user.accessToken)
-  );
+export const destroyHabit = (id: number) => {
+  return destroy<Habit>(Collections.HABITS, id);
 };
