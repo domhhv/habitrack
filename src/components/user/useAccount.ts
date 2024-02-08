@@ -18,9 +18,8 @@ export const useAccount = () => {
       return;
     }
 
-    setForbidden(false);
-
     setLoading(true);
+    setForbidden(false);
 
     const loadUserProfile = async () => {
       const [data] = await getUserAccount();

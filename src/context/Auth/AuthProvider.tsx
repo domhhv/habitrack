@@ -2,11 +2,11 @@ import { useSnackbar, AuthContext } from '@context';
 import { signIn, signOut, signUp } from '@services';
 import React from 'react';
 
-type UserProviderProps = {
+type AuthProviderProps = {
   children: React.ReactNode;
 };
 
-const AuthProvider = ({ children }: UserProviderProps) => {
+const AuthProvider = ({ children }: AuthProviderProps) => {
   const { showSnackbar } = useSnackbar();
   const [authenticating, setAuthenticating] = React.useState(false);
 
@@ -50,13 +50,11 @@ const AuthProvider = ({ children }: UserProviderProps) => {
       try {
         const { error } = await signIn(email, password);
 
-        console.log('error:', error);
-
         if (error) {
           throw error;
         }
 
-        showSnackbar(`Welcome, ${email}!`, {
+        showSnackbar('Welcome back!', {
           variant: 'solid',
           color: 'success',
         });
@@ -80,7 +78,7 @@ const AuthProvider = ({ children }: UserProviderProps) => {
   const logout = React.useCallback(async () => {
     await signOut();
     showSnackbar('Logged out', {
-      variant: 'solid',
+      variant: 'soft',
       color: 'neutral',
       dismissible: true,
     });
