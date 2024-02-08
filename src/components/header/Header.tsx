@@ -1,8 +1,6 @@
 import { AddHabitDialogButton, ViewAllHabitsModalButton } from '@components';
-import { useHabits } from '@context';
+import { AuthModalButton } from '@components';
 import React from 'react';
-
-import AuthModalButton from '../user/AuthModalButton';
 
 import ThemeToggle from './ThemeToggle';
 import {
@@ -12,14 +10,12 @@ import {
 } from './styled';
 
 const Header = () => {
-  const { fetchingHabits } = useHabits();
-
   return (
     <StyledAppHeader>
       <StyledAppHeaderContent>
         <StyledButtonsContainer>
-          <AddHabitDialogButton disabled={fetchingHabits} />
-          <ViewAllHabitsModalButton loading={fetchingHabits} />
+          <AddHabitDialogButton />
+          <ViewAllHabitsModalButton />
           <ThemeToggle />
         </StyledButtonsContainer>
         <AuthModalButton />

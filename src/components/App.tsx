@@ -1,5 +1,6 @@
 import { AppHeader } from '@components';
 import {
+  AuthProvider,
   HabitsProvider,
   CalendarEventsProvider,
   SnackbarProvider,
@@ -8,8 +9,6 @@ import { CssVarsProvider } from '@mui/joy';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { supabaseClient, theme } from '@utils';
 import React from 'react';
-
-import AuthProvider from '../context/Auth/AuthProvider';
 
 import Router from './Router';
 

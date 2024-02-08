@@ -23,7 +23,7 @@ export const StyledAuthButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export const StyledAccountLoaderContainer = styled(Box)({
+export const StyledAccountPageContainer = styled(Box)({
   width: '90%',
   margin: '0 auto',
   display: 'flex',

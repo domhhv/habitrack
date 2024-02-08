@@ -121,9 +121,7 @@ const CalendarCell = ({
           return (
             <StyledHabitChip
               variant="soft"
-              color={
-                habits[event.habit_id].trait === 'good' ? 'success' : 'danger'
-              }
+              color={isGoodHabit ? 'success' : 'danger'}
               key={event.id}
               startDecorator={<Icon fontSize="small" />}
               disabled={isBeingDeleted}

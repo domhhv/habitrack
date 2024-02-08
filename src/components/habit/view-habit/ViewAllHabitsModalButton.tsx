@@ -17,14 +17,8 @@ import EditHabitDialog from '../edit-habit/EditHabitDialog';
 import HabitItem from './HabitItem';
 import { StyledPlaceholderContainer } from './styled';
 
-type ViewAllHabitsModalButtonProps = {
-  loading?: boolean;
-};
-
-const ViewAllHabitsModalButton = ({
-  loading = false,
-}: ViewAllHabitsModalButtonProps) => {
-  const { habits } = useHabits();
+const ViewAllHabitsModalButton = () => {
+  const { fetchingHabits, habits } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [isEditingHabit, setIsEditingHabit] = React.useState(false);
   const [habitIdToEdit, setHabitIdToEdit] = React.useState<number>(0);
@@ -54,17 +48,17 @@ const ViewAllHabitsModalButton = ({
       <Button
         color="primary"
         variant="soft"
-        disabled={loading}
+        disabled={fetchingHabits}
         onClick={handleOpen}
         startDecorator={
-          loading ? (
+          fetchingHabits ? (
             <CircularProgress size="sm" variant="soft" color="neutral" />
           ) : (
             <ViewListRoundedIcon />
           )
         }
       >
-        {loading ? 'Fetching habits...' : 'View All Habits'}
+        {fetchingHabits ? 'Fetching habits...' : 'View All Habits'}
       </Button>
       <Modal open={open} onClose={handleClose}>
         <ModalDialog>

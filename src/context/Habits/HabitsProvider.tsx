@@ -9,7 +9,6 @@ import {
   createHabit,
   destroyHabit,
   patchHabit,
-  type CreateHabit,
   type PostEntity,
 } from '@services';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
@@ -58,7 +57,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     setHabits({});
   };
 
-  const addHabit = async (habit: CreateHabit) => {
+  const addHabit = async (habit: PostEntity<Habit>) => {
     try {
       setAddingHabit(true);
 
@@ -121,7 +120,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
         dismissible: true,
       });
     } catch (error) {
-      showSnackbar('Something went wrong while removing your habit', {
+      showSnackbar('Something went wrong while deleting your habit', {
         color: 'danger',
         dismissible: true,
       });

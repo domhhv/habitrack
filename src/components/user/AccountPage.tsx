@@ -1,35 +1,46 @@
-import { FloatingLabelInput } from '@components';
-import { Button, Box, Typography, CircularProgress } from '@mui/joy';
-import { useSession } from '@supabase/auth-helpers-react';
+import { AuthModalButton, FloatingLabelInput } from '@components';
+import DoNotDisturbAltRoundedIcon from '@mui/icons-material/DoNotDisturbAltRounded';
+import { Button, Box, Typography, CircularProgress, Alert } from '@mui/joy';
 import React, { type FormEventHandler } from 'react';
-import { useLocation } from 'react-router-dom';
 
-import { StyledAccountLoaderContainer } from './styled';
+import { StyledAccountPageContainer } from './styled';
 import { useAccount } from './useAccount';
 
-export default function Account() {
-  const session = useSession();
+const AccountPage = () => {
   const {
     loading,
+    forbidden,
     email,
     handleEmailChange,
     name,
     handleNameChange,
     updateProfile,
   } = useAccount();
-  const location = useLocation();
-  console.log({ location });
+  console.log('Account -> forbidden', forbidden);
 
   if (loading) {
     return (
-      <StyledAccountLoaderContainer>
+      <StyledAccountPageContainer>
         <CircularProgress />
-      </StyledAccountLoaderContainer>
+      </StyledAccountPageContainer>
     );
   }
 
-  if (!session) {
-    return 'Please sign in first.';
+  if (forbidden) {
+    return (
+      <StyledAccountPageContainer>
+        <Alert
+          color="danger"
+          size="lg"
+          startDecorator={<DoNotDisturbAltRoundedIcon />}
+          endDecorator={<AuthModalButton />}
+        >
+          <Typography level="h4">
+            Please log in to your account first
+          </Typography>
+        </Alert>
+      </StyledAccountPageContainer>
+    );
   }
 
   const handleSubmit: FormEventHandler = (e) => {
@@ -67,4 +78,6 @@ export default function Account() {
       </form>
     </Box>
   );
-}
+};
+
+export default AccountPage;

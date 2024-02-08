@@ -1,4 +1,3 @@
-import type { Habit } from '@context';
 import type { PostEntity } from '@services';
 import React from 'react';
 

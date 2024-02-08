@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { Calendar } from './calendar';
-import Account from './user/Account';
+import AccountPage from './user/AccountPage';
 
 const StyledAppContainerDiv = styled('div')({
   display: 'flex',
@@ -17,8 +17,7 @@ const Router = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Calendar aria-label="Event date" />} />
-          {/*<Route path="/" element={null} />*/}
-          <Route path="/account" element={<Account />} />
+          <Route path="/account" element={<AccountPage />} />
         </Routes>
       </BrowserRouter>
     </StyledAppContainerDiv>

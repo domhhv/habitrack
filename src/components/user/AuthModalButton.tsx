@@ -105,7 +105,10 @@ const AuthModalButton = () => {
               <AuthForm {...authFormProps} submitButtonLabel="Log In" />
             </TabPanel>
             <TabPanel value="register" sx={{ padding: '16px 0' }}>
-              <AuthForm {...authFormProps} submitButtonLabel="Create Account" />
+              <AuthForm
+                {...authFormProps}
+                submitButtonLabel="Create AccountPage"
+              />
             </TabPanel>
           </Tabs>
         </ModalDialog>

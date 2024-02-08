@@ -27,7 +27,6 @@ const Month = (
   }: MonthProps,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
-  console.log('Month -> calendarEventsByDate', calendarEventsByDate);
   return (
     <StyledCalendarMonthGrid ref={ref}>
       {[...new Array(weeksInMonth).keys()].map((weekIndex) => (

@@ -19,16 +19,10 @@ import {
 import { useSession, useUser } from '@supabase/auth-helpers-react';
 import React, { FormEventHandler } from 'react';
 
-type AddHabitDialogButtonProps = {
-  disabled?: boolean;
-};
-
-const AddHabitDialogButton = ({
-  disabled = false,
-}: AddHabitDialogButtonProps) => {
+const AddHabitDialogButton = () => {
   const user = useUser();
   const session = useSession();
-  const { addingHabit, addHabit } = useHabits();
+  const { fetchingHabits, addingHabit, addHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
@@ -86,7 +80,7 @@ const AddHabitDialogButton = ({
         variant="soft"
         startDecorator={<AddRounded />}
         onClick={handleDialogOpen}
-        disabled={disabled || !session?.user?.id}
+        disabled={fetchingHabits || !session?.user?.id}
       >
         Add habit
       </Button>

@@ -10,8 +10,6 @@ import {
   type PatchEntity,
 } from './supabase';
 
-export type CreateHabit = Omit<Habit, 'id'>;
-
 export const createHabit = async (body: PostEntity<Habit>) => {
   return post<Habit>(Collections.HABITS, body);
 };

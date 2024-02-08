@@ -27,7 +27,7 @@ const AuthProvider = ({ children }: UserProviderProps) => {
           throw signInRes.error;
         }
 
-        showSnackbar('Account created! You can now add your first habit.', {
+        showSnackbar('AccountPage created! You can now add your first habit.', {
           variant: 'solid',
           color: 'success',
         });

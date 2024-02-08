@@ -1,4 +1,4 @@
-import { CreateHabit, type PostEntity } from '@services';
+import { type PostEntity } from '@services';
 import React from 'react';
 
 export type Habit = {
@@ -18,7 +18,7 @@ type HabitsContextType = {
   addingHabit: boolean;
   fetchingHabits: boolean;
   habits: HabitsMap;
-  addHabit: (habit: CreateHabit) => Promise<void>;
+  addHabit: (habit: PostEntity<Habit>) => Promise<void>;
   removeHabit: (habitId: number) => Promise<void>;
   updateHabit: (id: number, habit: PostEntity<Habit>) => Promise<Habit>;
 };
@@ -27,7 +27,7 @@ export const HabitsContext = React.createContext<HabitsContextType>({
   addingHabit: false,
   fetchingHabits: false,
   habits: {},
-  addHabit: (_: CreateHabit) => Promise.resolve(),
+  addHabit: (_: PostEntity<Habit>) => Promise.resolve(),
   removeHabit: (_: number) => Promise.resolve(),
   updateHabit: (_: number, __: PostEntity<Habit>) =>
     Promise.resolve({} as Habit),

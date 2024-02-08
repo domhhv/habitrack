@@ -6,12 +6,19 @@ import React, { type ChangeEventHandler } from 'react';
 export const useAccount = () => {
   const user = useUser();
   const { showSnackbar } = useSnackbar();
+  const [forbidden, setForbidden] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [email, setEmail] = React.useState('');
   const [name, setName] = React.useState('');
 
   React.useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setLoading(false);
+      setForbidden(true);
+      return;
+    }
+
+    setForbidden(false);
 
     setLoading(true);
 
@@ -52,6 +59,7 @@ export const useAccount = () => {
 
   return {
     loading,
+    forbidden,
     email,
     handleEmailChange,
     name,

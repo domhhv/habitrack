@@ -1,5 +1,5 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { Habit, useCalendarEvents, useHabits } from '@context';
+import { Habit, useHabits } from '@context';
 import {
   Button,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   Option,
   Select,
 } from '@mui/joy';
-import { type User, useUser } from '@supabase/auth-helpers-react';
+import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 import { StyledForm } from './styled';
