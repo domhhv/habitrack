@@ -89,7 +89,12 @@ export const StyledHeaderLoadingOverlay = styled(Typography)(({ theme }) => ({
   right: 0,
   bottom: 0,
   margin: 'auto',
-  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  [theme.getColorSchemeSelector('light')]: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  [theme.getColorSchemeSelector('dark')]: {
+    backgroundColor: 'rgba(12,12,12,0.6)',
+  },
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
