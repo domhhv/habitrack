@@ -11,7 +11,6 @@ export enum ThemeModes {
 const useTheme = () => {
   const { setMode } = useColorScheme();
   const [theme, setTheme] = React.useState<ThemeModes>();
-  console.log({ theme });
 
   const toggleTheme = () => {
     setTheme((prevTheme) =>

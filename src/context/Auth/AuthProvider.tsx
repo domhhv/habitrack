@@ -59,7 +59,6 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
           color: 'success',
         });
       } catch (e) {
-        console.log('e:', e);
         const message = (e as Error).message || 'Something went wrong';
 
         showSnackbar(message, {

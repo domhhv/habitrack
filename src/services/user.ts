@@ -28,7 +28,6 @@ export const signIn = async (
 };
 
 export const signOut = async () => {
-  console.log('signOut');
   return supabaseClient.auth.signOut();
 };
 

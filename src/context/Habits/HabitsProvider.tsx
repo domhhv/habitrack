@@ -42,7 +42,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
   React.useEffect(() => {
     void fetchHabits();
 
-    supabase.auth.onAuthStateChange((event) => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         clearHabits();
       }
@@ -51,6 +51,10 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
         void fetchHabits();
       }
     });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
   }, [user, supabase]);
 
   const clearHabits = () => {

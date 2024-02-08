@@ -43,7 +43,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
   React.useEffect(() => {
     void fetchCalendarEvents();
 
-    supabase.auth.onAuthStateChange((event) => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         clearCalendarEvents();
       }
@@ -52,6 +52,10 @@ const CalendarEventsProvider = ({ children }: Props) => {
         void fetchCalendarEvents();
       }
     });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
   }, [user, supabase, showSnackbar]);
 
   React.useEffect(() => {

@@ -7,9 +7,14 @@ export enum Collections {
   NOTES = 'notes',
 }
 
-export type PostEntity<T> = Omit<T, 'id' | 'created_at' | 'updated_at'>;
+export type PostEntity<T extends object> = Omit<
+  T,
+  'id' | 'created_at' | 'updated_at'
+>;
 
-export type PatchEntity<T> = Partial<Omit<T, 'id' | 'created_at' | 'user_id'>>;
+export type PatchEntity<T extends object> = Partial<
+  Omit<T, 'id' | 'created_at' | 'user_id'>
+>;
 
 export const fetch = (collection: Collections) =>
   supabaseClient.from(collection);
@@ -44,7 +49,7 @@ export const post = async <T extends object>(
 export const patch = async <T extends object>(
   collection: Collections,
   id: string | number,
-  body: Partial<T>
+  body: PatchEntity<T>
 ): Promise<T> => {
   const { error, data } = await fetch(collection)
     .upsert({ id, ...body, updated_at: new Date() })
@@ -53,8 +58,6 @@ export const patch = async <T extends object>(
   if (error) {
     throw new Error(error.message);
   }
-
-  console.log();
 
   return data?.[0];
 };
