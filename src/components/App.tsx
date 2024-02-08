@@ -5,6 +5,7 @@ import {
   CalendarEventsProvider,
   SnackbarProvider,
 } from '@context';
+import { USER_THEME_STORAGE_KEY } from '@hooks';
 import { CssVarsProvider, styled } from '@mui/joy';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { supabaseClient, theme } from '@utils';
@@ -21,8 +22,8 @@ const App = () => {
   return (
     <CssVarsProvider
       theme={theme}
-      defaultMode="system"
-      modeStorageKey="user_mode_preference"
+      defaultMode="light"
+      modeStorageKey={USER_THEME_STORAGE_KEY}
     >
       <SessionContextProvider supabaseClient={supabaseClient}>
         <SnackbarProvider>
