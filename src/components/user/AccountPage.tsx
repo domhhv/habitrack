@@ -3,7 +3,7 @@ import DoNotDisturbAltRoundedIcon from '@mui/icons-material/DoNotDisturbAltRound
 import { Button, Box, Typography, CircularProgress, Alert } from '@mui/joy';
 import React, { type FormEventHandler } from 'react';
 
-import { StyledAccountPageContainer } from './styled';
+import { StyledAccountForm, StyledAccountPageContainer } from './styled';
 import { useAccount } from './useAccount';
 
 const AccountPage = () => {
@@ -48,11 +48,11 @@ const AccountPage = () => {
   };
 
   return (
-    <Box p={2} width="90%" m="0 auto">
+    <StyledAccountPageContainer>
       <Typography gutterBottom level="h4">
-        Account
+        Your Account Info
       </Typography>
-      <form onSubmit={handleSubmit}>
+      <StyledAccountForm onSubmit={handleSubmit}>
         <Box mb={2}>
           <FloatingLabelInput
             value={email}
@@ -71,11 +71,11 @@ const AccountPage = () => {
         </Box>
         <Box mt={2}>
           <Button fullWidth type="submit" loading={loading}>
-            Submit
+            Save
           </Button>
         </Box>
-      </form>
-    </Box>
+      </StyledAccountForm>
+    </StyledAccountPageContainer>
   );
 };
 

@@ -13,12 +13,6 @@ export const StyledCalendarBackgroundDiv = styled('div')(({ theme }) => ({
   height: '100%',
   padding: theme.spacing(2),
   flex: '1 1 0%',
-  [theme.getColorSchemeSelector('light')]: {
-    backgroundColor: theme.palette.neutral[100],
-  },
-  [theme.getColorSchemeSelector('dark')]: {
-    backgroundColor: theme.palette.neutral[800],
-  },
 }));
 
 export const StyledCalendarContainerDiv = styled('div')(({ theme }) => ({

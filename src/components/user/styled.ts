@@ -29,6 +29,7 @@ export const StyledAccountPageContainer = styled(Box)({
   width: '90%',
   margin: '0 auto',
   display: 'flex',
+  flexDirection: 'column',
   height: 'calc(100vh - 52px)',
   alignItems: 'center',
   justifyContent: 'center',
@@ -46,3 +47,7 @@ export const StyleLogOutIconButton = styled(IconButton)(({ theme }) => ({
     backgroundColor: theme.palette.primary[900],
   },
 }));
+
+export const StyledAccountForm = styled('form')({
+  width: 400,
+});

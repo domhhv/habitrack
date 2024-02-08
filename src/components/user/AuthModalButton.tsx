@@ -102,7 +102,7 @@ const AuthModalButton = () => {
                 borderRadius: 'xl',
                 bgcolor: 'background.level1',
                 [`& .${tabClasses.root}[aria-selected="true"]`]: {
-                  boxShadow: 'sm',
+                  boxShadow: 'none',
                   bgcolor: 'background.surface',
                 },
               }}

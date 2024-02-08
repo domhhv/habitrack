@@ -16,6 +16,12 @@ const StyledAppContainerDiv = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   flexGrow: 1,
+  [theme.getColorSchemeSelector('light')]: {
+    backgroundColor: theme.palette.neutral[100],
+  },
+  [theme.getColorSchemeSelector('dark')]: {
+    backgroundColor: theme.palette.neutral[800],
+  },
 });
 
 const App = () => {
