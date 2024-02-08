@@ -1,6 +1,8 @@
 import { AddHabitDialogButton, ViewAllHabitsModalButton } from '@components';
 import { AuthModalButton } from '@components';
+import { Button } from '@mui/joy';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import ThemeToggle from './ThemeToggle';
 import {
@@ -14,6 +16,9 @@ const Header = () => {
     <StyledAppHeader>
       <StyledAppHeaderContent>
         <StyledButtonsContainer>
+          <Button component={Link} to="/calendar">
+            Calendar
+          </Button>
           <AddHabitDialogButton />
           <ViewAllHabitsModalButton />
           <ThemeToggle />

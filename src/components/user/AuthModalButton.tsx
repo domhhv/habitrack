@@ -1,6 +1,8 @@
 import { useAuth } from '@context';
-import { AccountCircleOutlined } from '@mui/icons-material';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import {
+  ButtonGroup,
   DialogTitle,
   Modal,
   ModalDialog,
@@ -12,9 +14,10 @@ import {
 } from '@mui/joy';
 import { useUser } from '@supabase/auth-helpers-react';
 import React, { type SyntheticEvent } from 'react';
+import { Link } from 'react-router-dom';
 
 import { AuthForm } from './AuthForm';
-import { StyledAuthButton } from './styled';
+import { StyledAuthButton, StyleLogOutIconButton } from './styled';
 
 const AuthModalButton = () => {
   const { login, logout, register, authenticating } = useAuth();
@@ -23,11 +26,9 @@ const AuthModalButton = () => {
   const user = useUser();
 
   const handleClick = () => {
-    if (user?.id) {
-      return logout();
+    if (!user?.id) {
+      setOpen(true);
     }
-
-    setOpen(true);
   };
 
   const handleClose = () => {
@@ -64,12 +65,25 @@ const AuthModalButton = () => {
 
   return (
     <>
-      <StyledAuthButton
-        startDecorator={<AccountCircleOutlined />}
-        onClick={handleClick}
-      >
-        {user?.id ? 'Sign Out' : 'Log In'}
-      </StyledAuthButton>
+      <ButtonGroup>
+        <StyledAuthButton
+          startDecorator={user?.id ? null : <AccountCircleOutlinedIcon />}
+          onClick={handleClick}
+          {...(user?.id
+            ? {
+                component: Link,
+                to: '/account',
+              }
+            : {})}
+        >
+          {user?.id ? 'Account' : 'Log In'}
+        </StyledAuthButton>
+        {user?.id && (
+          <StyleLogOutIconButton onClick={() => logout()}>
+            <LogoutRoundedIcon />
+          </StyleLogOutIconButton>
+        )}
+      </ButtonGroup>
       <Modal open={open} onClose={handleClose}>
         <ModalDialog sx={{ width: 420, padding: '20px 24px 10px' }}>
           <DialogTitle>

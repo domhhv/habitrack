@@ -16,7 +16,6 @@ const AccountPage = () => {
     handleNameChange,
     updateProfile,
   } = useAccount();
-  console.log('Account -> forbidden', forbidden);
 
   if (loading) {
     return (

@@ -127,7 +127,7 @@ const CalendarCell = ({
               disabled={isBeingDeleted}
               endDecorator={endDecorator}
             >
-              {habits[event.habit_id].name}
+              {habits[event.habit_id]?.name}
             </StyledHabitChip>
           );
         })}

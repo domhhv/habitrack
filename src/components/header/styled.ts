@@ -25,7 +25,7 @@ export const StyledAppHeaderContent = styled('div')(({ theme }) => ({
 export const StyledButtonsContainer = styled('div')({
   display: 'flex',
   alignItems: 'center',
-  '& > button:not(:last-of-type)': {
+  '& > .MuiButton-root:not(:last-child)': {
     marginRight: 10,
   },
 });
