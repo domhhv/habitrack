@@ -1,6 +1,7 @@
-import { useCalendarEvents } from '@context';
+import { useCalendarEvents, useHabits } from '@context';
 import { getWeeksInMonth } from '@internationalized/date';
 import { Box, Typography } from '@mui/joy';
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import { AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
@@ -22,12 +23,41 @@ const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CalendarGrid = ({ state }: CalendarGridProps) => {
   const { locale } = useLocale();
   const { gridProps } = useCalendarGrid({}, state);
+  const { habits } = useHabits();
+  const user = useUser();
+  const supabase = useSupabaseClient();
+  // const [habitIcons, setHabitIcons] = React.useState<Record<string, string>>(
+  //   {}
+  // );
 
   const weeksInMonth = getWeeksInMonth(state.visibleRange.start, locale);
 
   const { calendarEventsByDate } = useCalendarEvents();
   const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
+
+  React.useEffect(() => {
+    const loadHabitIcons = async () => {
+      const { data } = await supabase.storage
+        .from('habit_icons')
+        .list(user?.id, {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'name', order: 'asc' },
+        });
+
+      const habitIconsMap = data?.reduce((acc, icon) => {
+        return {
+          ...acc,
+          [icon.name]: `${process.env.SUPABASE_STORAGE_URL}/${icon.name}`,
+        };
+      }, {});
+
+      console.log({ habitIconsMap });
+    };
+
+    void loadHabitIcons();
+  }, [habits, supabase, user?.id]);
 
   const handleDayModalDialogOpen = (
     dateNumber: number,

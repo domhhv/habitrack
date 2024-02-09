@@ -1,8 +1,7 @@
-import { Habit } from '@context';
+import { type AddHabit, Habit } from '@context';
 
 import {
   Collections,
-  type PostEntity,
   destroy,
   get,
   patch,
@@ -10,8 +9,8 @@ import {
   type PatchEntity,
 } from './supabase';
 
-export const createHabit = async (body: PostEntity<Habit>) => {
-  return post<Habit>(Collections.HABITS, body);
+export const createHabit = async (body: AddHabit) => {
+  return post<Omit<Habit, 'icon_path'>>(Collections.HABITS, body);
 };
 
 export const listHabits = async () => {

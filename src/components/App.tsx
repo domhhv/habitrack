@@ -10,7 +10,9 @@ import { CssVarsProvider, styled } from '@mui/joy';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { supabaseClient, theme } from '@utils';
 import React from 'react';
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+
+import HabitsPage from './habit/HabitsPage';
 
 const StyledAppContainerDiv = styled('div')({
   display: 'flex',
@@ -36,7 +38,7 @@ const App = () => {
           <AuthProvider>
             <HabitsProvider>
               <CalendarEventsProvider>
-                <HashRouter>
+                <BrowserRouter>
                   <AppHeader />
                   <StyledAppContainerDiv>
                     <Routes>
@@ -44,6 +46,7 @@ const App = () => {
                         path="/calendar"
                         element={<Calendar aria-label="Event date" />}
                       />
+                      <Route path="/habits" element={<HabitsPage />} />
                       <Route path="/account" element={<AccountPage />} />
                       <Route
                         path="*"
@@ -51,7 +54,7 @@ const App = () => {
                       />
                     </Routes>
                   </StyledAppContainerDiv>
-                </HashRouter>
+                </BrowserRouter>
               </CalendarEventsProvider>
             </HabitsProvider>
           </AuthProvider>

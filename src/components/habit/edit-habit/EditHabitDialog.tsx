@@ -77,6 +77,7 @@ const EditHabitDialog = ({
       description,
       trait: trait as 'good' | 'bad',
       user_id: user?.id as string,
+      icon_path: habit.icon_path,
     };
     await updateHabit(habit.id, newHabit);
     setIsUpdating(false);

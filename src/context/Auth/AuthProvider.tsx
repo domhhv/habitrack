@@ -27,12 +27,12 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
           throw signInRes.error;
         }
 
-        showSnackbar('AccountPage created! You can now add your first habit.', {
+        showSnackbar('Account created! You can now add your first habit.', {
           variant: 'solid',
           color: 'success',
         });
       } catch (e) {
-        showSnackbar((e as Error).message, {
+        showSnackbar((e as Error).message || 'Something went wrong', {
           variant: 'solid',
           color: 'danger',
         });

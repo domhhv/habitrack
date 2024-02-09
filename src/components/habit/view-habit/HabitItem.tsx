@@ -13,6 +13,7 @@ import React from 'react';
 
 import {
   StyledEditIconButton,
+  StyledHabitImage,
   StyledHabitTitleWrapper,
   StyledListItemContent,
   StyleListItem,
@@ -66,9 +67,11 @@ const HabitItem = ({ habit, onEdit }: HabitItemProps) => {
               </Typography>
             </Chip>
           </StyledHabitTitleWrapper>
-          <Typography level="body-xs" sx={{ margin: 0 }}>
-            {habit.description || 'None'}
-          </Typography>
+          {habit.description && (
+            <Typography level="body-xs" sx={{ margin: 0 }}>
+              {habit.description}
+            </Typography>
+          )}
         </div>
         {!isBeingDeleted ? (
           <Tooltip title="Delete this habit. This action cannot be undone!">
@@ -84,6 +87,12 @@ const HabitItem = ({ habit, onEdit }: HabitItemProps) => {
           <CircularProgress size="sm" />
         )}
       </StyledListItemContent>
+      {habit.icon_path && (
+        <StyledHabitImage
+          src={`${process.env.SUPABASE_STORAGE_URL}/${habit.icon_path}`}
+          alt={habit.name}
+        />
+      )}
     </StyleListItem>
   );
 };

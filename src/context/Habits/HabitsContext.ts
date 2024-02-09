@@ -9,16 +9,19 @@ export type Habit = {
   user_id: string;
   created_at: string;
   updated_at: string;
+  icon_path: string;
 };
 
 type HabitId = string;
 export type HabitsMap = Record<HabitId, Habit>;
 
+export type AddHabit = PostEntity<Omit<Habit, 'icon_path'>>;
+
 type HabitsContextType = {
   addingHabit: boolean;
   fetchingHabits: boolean;
   habits: HabitsMap;
-  addHabit: (habit: PostEntity<Habit>) => Promise<void>;
+  addHabit: (habit: AddHabit) => Promise<Habit>;
   removeHabit: (habitId: number) => Promise<void>;
   updateHabit: (id: number, habit: PostEntity<Habit>) => Promise<Habit>;
 };
@@ -27,7 +30,7 @@ export const HabitsContext = React.createContext<HabitsContextType>({
   addingHabit: false,
   fetchingHabits: false,
   habits: {},
-  addHabit: (_: PostEntity<Habit>) => Promise.resolve(),
+  addHabit: (_: AddHabit) => Promise.resolve({} as Habit),
   removeHabit: (_: number) => Promise.resolve(),
   updateHabit: (_: number, __: PostEntity<Habit>) =>
     Promise.resolve({} as Habit),

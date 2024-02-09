@@ -1,3 +1,4 @@
+import { EditHabitDialog } from '@components';
 import { useHabits } from '@context';
 import ViewListRoundedIcon from '@mui/icons-material/ViewListRounded';
 import {
@@ -11,8 +12,6 @@ import {
   ModalDialog,
 } from '@mui/joy';
 import React from 'react';
-
-import EditHabitDialog from '../edit-habit/EditHabitDialog';
 
 import HabitItem from './HabitItem';
 import { StyledPlaceholderContainer } from './styled';

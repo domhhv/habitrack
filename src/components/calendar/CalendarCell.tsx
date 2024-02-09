@@ -3,7 +3,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FmdBadIcon from '@mui/icons-material/FmdBad';
 import FmdGoodIcon from '@mui/icons-material/FmdGood';
 import { ChipDelete, CircularProgress, Typography } from '@mui/joy';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useSession, useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 import {
@@ -34,6 +34,7 @@ const CalendarCell = ({
   onClick,
   rangeStatus,
 }: CalendarCellProps) => {
+  const session = useSession();
   const user = useUser();
   const {
     removeCalendarEvent,
@@ -43,6 +44,10 @@ const CalendarCell = ({
   const { habits } = useHabits();
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
+
+  React.useEffect(() => {
+    console.log({ session });
+  }, [session]);
 
   React.useEffect(() => {
     const today = new Date();
@@ -75,7 +80,7 @@ const CalendarCell = ({
     clickEvent: React.MouseEvent<HTMLButtonElement>
   ) => {
     clickEvent.stopPropagation();
-    removeCalendarEvent(calendarEventId);
+    void removeCalendarEvent(calendarEventId);
   };
 
   return (
@@ -99,8 +104,22 @@ const CalendarCell = ({
       </StyledCalendarDayCellButtonHeader>
       <StyledCalendarDayCellButtonIconsContainer>
         {events.map((event) => {
-          const isGoodHabit = habits[event.habit_id]?.trait === 'good';
-          const Icon = isGoodHabit ? FmdGoodIcon : FmdBadIcon;
+          const eventHabit = habits[event.habit_id] || {};
+          const isGoodHabit = eventHabit.trait === 'good';
+          const hasIcon = !!eventHabit.icon_path;
+
+          const icon = hasIcon ? (
+            <img
+              src={`${process.env.SUPABASE_STORAGE_URL}/${user?.id}/${eventHabit.icon_path}`}
+              alt={`${eventHabit.name} icon`}
+              width={24}
+              height={24}
+            />
+          ) : isGoodHabit ? (
+            <FmdGoodIcon fontSize="small" />
+          ) : (
+            <FmdBadIcon fontSize="small" />
+          );
 
           const isBeingDeleted = calendarEventIdBeingDeleted === event.id;
 
@@ -123,11 +142,11 @@ const CalendarCell = ({
               variant="soft"
               color={isGoodHabit ? 'success' : 'danger'}
               key={event.id}
-              startDecorator={<Icon fontSize="small" />}
+              startDecorator={icon}
               disabled={isBeingDeleted}
               endDecorator={endDecorator}
             >
-              {habits[event.habit_id]?.name}
+              {eventHabit.name}
             </StyledHabitChip>
           );
         })}
