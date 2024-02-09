@@ -1,10 +1,11 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { useHabits } from '@context';
+import { useHabits, useSnackbar } from '@context';
 import {
   AddRounded,
   CheckCircleOutline,
   WarningAmber,
 } from '@mui/icons-material';
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import {
   Box,
   Button,
@@ -15,9 +16,28 @@ import {
   ModalDialog,
   Option,
   Select,
+  styled,
+  Typography,
 } from '@mui/joy';
-import { useSession, useUser } from '@supabase/auth-helpers-react';
-import React, { FormEventHandler } from 'react';
+import { patchHabit } from '@services';
+import {
+  useSession,
+  useSupabaseClient,
+  useUser,
+} from '@supabase/auth-helpers-react';
+import React, { type FormEventHandler } from 'react';
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: '1px',
+});
 
 const AddHabitDialogButton = () => {
   const user = useUser();
@@ -27,6 +47,9 @@ const AddHabitDialogButton = () => {
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
   const [habitTrait, setHabitTrait] = React.useState<'good' | 'bad' | ''>('');
+  const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
+  const supabase = useSupabaseClient();
+  const { showSnackbar } = useSnackbar();
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -48,7 +71,34 @@ const AddHabitDialogButton = () => {
         trait: habitTrait as 'good' | 'bad',
         user_id: user?.id || session?.user?.id || '',
       };
-      void addHabit(habit);
+
+      let icon_path = '';
+
+      const { id } = await addHabit(habit);
+
+      showSnackbar('Habit added, uploading icon...', {
+        variant: 'soft',
+        color: 'success',
+      });
+
+      if (habitIcon) {
+        const { data } = await supabase.storage
+          .from('habit_icons')
+          .upload(`habit-id-${id}`, habitIcon, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        icon_path = data?.path || '';
+      }
+
+      await patchHabit(id, { icon_path });
+
+      showSnackbar('Icon uploaded', {
+        variant: 'soft',
+        color: 'success',
+      });
+
       handleDialogClose();
     } catch (error) {
       console.error(error);
@@ -71,6 +121,15 @@ const AddHabitDialogButton = () => {
 
   const handleHabitTraitChange = (_: null, newValue: string) => {
     setHabitTrait(newValue as 'good' | 'bad');
+  };
+
+  const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
+    event
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setHabitIcon(file);
+    }
   };
 
   return (
@@ -128,6 +187,25 @@ const AddHabitDialogButton = () => {
                   <Option value="good">Good</Option>
                   <Option value="bad">Bad</Option>
                 </Select>
+              </Box>
+              <Box mb={1}>
+                <Button
+                  fullWidth
+                  component="label"
+                  variant="outlined"
+                  color="neutral"
+                  startDecorator={<CloudUploadOutlinedIcon />}
+                >
+                  Upload Icon
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </Button>
+                {habitIcon && (
+                  <Typography level="body-md">{habitIcon.name}</Typography>
+                )}
               </Box>
               <Box mt={1}>
                 <Button fullWidth loading={addingHabit} type="submit">

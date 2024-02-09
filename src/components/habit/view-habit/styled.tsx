@@ -25,7 +25,7 @@ export const StyledEditIconButton = styled(IconButton)(({ theme }) => ({
 export const StyledListItemContent = styled(ListItemContent)({
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'flex-start',
+  alignItems: 'center',
   width: '100%',
 });
 
@@ -36,3 +36,9 @@ export const StyledHabitTitleWrapper = styled('div')(({ theme }) => ({
     marginLeft: theme.spacing(1),
   },
 }));
+
+export const StyledHabitImage = styled('img')({
+  display: 'inline-block',
+  width: 20,
+  height: 20,
+});

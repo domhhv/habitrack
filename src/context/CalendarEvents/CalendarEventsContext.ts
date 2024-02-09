@@ -1,10 +1,19 @@
 import type { PostEntity } from '@services';
 import React from 'react';
 
+export enum TimeOfDay {
+  NIGHT = 'night',
+  MORNING = 'morning',
+  AFTERNOON = 'afternoon',
+  EVENING = 'evening',
+}
+
 export type CalendarEvent = {
   id: number;
   day: string;
+  time_of_day: TimeOfDay | null;
   habit_id: number;
+  user_id: string;
   created_at: string;
   updated_at: string;
 };

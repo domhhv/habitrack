@@ -49,10 +49,12 @@ module.exports = {
       process: {
         env: {
           NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-          API_BASE_URL: JSON.stringify(process.env.API_BASE_URL),
           APP_BASE_URL: JSON.stringify(process.env.APP_BASE_URL),
           SUPABASE_URL: JSON.stringify(process.env.SUPABASE_URL),
           SUPABASE_ANON_KEY: JSON.stringify(process.env.SUPABASE_ANON_KEY),
+          SUPABASE_STORAGE_URL: JSON.stringify(
+            process.env.SUPABASE_STORAGE_URL
+          ),
         },
       },
     }),
