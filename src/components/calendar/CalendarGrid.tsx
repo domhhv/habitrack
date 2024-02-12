@@ -1,10 +1,11 @@
 import { useCalendarEvents, useHabits } from '@context';
-import { getWeeksInMonth } from '@internationalized/date';
 import { Box, Typography } from '@mui/joy';
+import { listFiles, StorageBuckets } from '@services';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
+import { getHabitIconUrl } from '@utils';
 import { AnimatePresence } from 'framer-motion';
 import React from 'react';
-import { useCalendarGrid, useLocale } from 'react-aria';
+import { useCalendarGrid } from 'react-aria';
 import { CalendarState } from 'react-stately';
 
 import MotionCalendarMonthGrid from './CalendarMonthGrid';
@@ -16,21 +17,16 @@ import {
 
 type CalendarGridProps = {
   state: CalendarState;
+  weeksInMonth: number;
 };
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const CalendarGrid = ({ state }: CalendarGridProps) => {
-  const { locale } = useLocale();
+const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
-  const { habits } = useHabits();
+  const { habitsMap } = useHabits();
   const user = useUser();
   const supabase = useSupabaseClient();
-  // const [habitIcons, setHabitIcons] = React.useState<Record<string, string>>(
-  //   {}
-  // );
-
-  const weeksInMonth = getWeeksInMonth(state.visibleRange.start, locale);
 
   const { calendarEventsByDate } = useCalendarEvents();
   const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
@@ -38,18 +34,15 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
 
   React.useEffect(() => {
     const loadHabitIcons = async () => {
-      const { data } = await supabase.storage
-        .from('habit_icons')
-        .list(user?.id, {
-          limit: 100,
-          offset: 0,
-          sortBy: { column: 'name', order: 'asc' },
-        });
+      const { data } = await listFiles(
+        StorageBuckets.HABIT_ICONS,
+        user?.id as string
+      );
 
       const habitIconsMap = data?.reduce((acc, icon) => {
         return {
           ...acc,
-          [icon.name]: `${process.env.SUPABASE_STORAGE_URL}/${icon.name}`,
+          [icon.name]: getHabitIconUrl(icon.name),
         };
       }, {});
 
@@ -57,7 +50,7 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
     };
 
     void loadHabitIcons();
-  }, [habits, supabase, user?.id]);
+  }, [habitsMap, supabase, user?.id]);
 
   const handleDayModalDialogOpen = (
     dateNumber: number,

@@ -29,7 +29,7 @@ const DayHabitModalDialog = ({
   onClose,
   date,
 }: DayHabitModalDialogProps) => {
-  const { habits } = useHabits();
+  const { habitsMap } = useHabits();
   const user = useUser();
   const { addCalendarEvent, addingCalendarEvent } = useCalendarEvents();
   const [selectedBadHabit, setSelectedBadHabit] = React.useState<number | null>(
@@ -48,6 +48,7 @@ const DayHabitModalDialog = ({
 
     const calendarEvent = {
       day: date.toISOString().split('T')[0],
+      timestamp: +date,
       habit_id: selectedBadHabit as number,
       time_of_day: selectedTimeOfDay || null,
       user_id: user?.id as string,
@@ -76,7 +77,7 @@ const DayHabitModalDialog = ({
     onClose();
   };
 
-  const hasHabits = Object.keys(habits).length > 0;
+  const hasHabits = Object.keys(habitsMap).length > 0;
 
   return (
     <Modal open={open} onClose={handleClose}>
@@ -105,7 +106,7 @@ const DayHabitModalDialog = ({
                 </Option>
               )}
               {hasHabits &&
-                Object.values(habits).map((habit) => (
+                Object.values(habitsMap).map((habit) => (
                   <Option key={habit.id} value={habit.id} label={habit.name}>
                     {habit.name}
                     <Typography level="body-xs">{habit.trait}</Typography>

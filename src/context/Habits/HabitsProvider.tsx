@@ -26,17 +26,20 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
 
   const [addingHabit, setAddingHabit] = React.useState(false);
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
-  const [habits, setHabits] = React.useState<HabitsMap>({});
+  const [habits, setHabits] = React.useState<Habit[]>([]);
+  const [habitsMap, setHabitsMap] = React.useState<HabitsMap>({});
 
   const fetchHabits = async () => {
     setFetchingHabits(true);
 
     const habits = await listHabits();
+    setHabits(habits);
 
     const habitsMap = habits.reduce((acc, habit) => {
       return { ...acc, [habit.id]: habit };
     }, {});
-    setHabits(habitsMap);
+    setHabitsMap(habitsMap);
+
     setFetchingHabits(false);
   };
 
@@ -59,7 +62,8 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
   }, [user, supabase]);
 
   const clearHabits = () => {
-    setHabits({});
+    setHabits([]);
+    setHabitsMap({});
   };
 
   const addHabit = async (habit: AddHabit): Promise<Habit> => {
@@ -68,7 +72,11 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
 
       const newHabit = await createHabit(habit);
 
-      setHabits((prevHabits) => ({ ...prevHabits, [newHabit.id]: newHabit }));
+      setHabits((prevHabits) => [...prevHabits, newHabit]);
+      setHabitsMap((prevHabits) => ({
+        ...prevHabits,
+        [newHabit.id]: newHabit,
+      }));
       showSnackbar('Your habit has been added!', {
         color: 'success',
         dismissible: true,
@@ -97,7 +105,13 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     try {
       const updatedHabit = await patchHabit(id, habit);
 
-      setHabits((prevHabits) => ({ ...prevHabits, [id]: updatedHabit }));
+      setHabits((prevHabits) => {
+        const habitIndex = prevHabits.findIndex((h) => h.id === id);
+        const nextHabits = [...prevHabits];
+        nextHabits[habitIndex] = updatedHabit;
+        return nextHabits;
+      });
+      setHabitsMap((prevHabits) => ({ ...prevHabits, [id]: updatedHabit }));
 
       showSnackbar('Your habit has been updated!', {
         color: 'success',
@@ -121,9 +135,12 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     try {
       await destroyHabit(id);
 
-      const nextHabits = { ...habits };
-      delete nextHabits[id];
+      const nextHabits = habits.filter((habit) => habit.id !== id);
       setHabits(nextHabits);
+
+      const nextHabitsMap = { ...habitsMap };
+      delete nextHabitsMap[id];
+      setHabitsMap(nextHabitsMap);
 
       showSnackbar('Your habit has been deleted!', {
         dismissible: true,
@@ -143,6 +160,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
       addingHabit,
       fetchingHabits,
       habits,
+      habitsMap,
       addHabit,
       removeHabit,
       updateHabit,

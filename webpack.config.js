@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpackDevServer = require('webpack-dev-server');
 
 const envPaths = {
   development: './.env.development',
@@ -9,11 +10,13 @@ const envPaths = {
 
 require('dotenv').config({ path: envPaths[process.env.NODE_ENV] });
 
-module.exports = {
-  entry: './src/index.tsx',
+const config = {
+  entry: ['react-hot-loader/patch', './src/index.tsx'],
+  mode: process.env.NODE_ENV,
   devtool: 'inline-source-map',
   devServer: {
     historyApiFallback: true,
+    hot: false,
   },
   module: {
     rules: [
@@ -37,6 +40,7 @@ module.exports = {
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@context': path.resolve(__dirname, './src/context'),
       '@utils': path.resolve(__dirname, './src/utils'),
+      '@helpers': path.resolve(__dirname, './src/helpers'),
     },
   },
   output: {
@@ -45,6 +49,7 @@ module.exports = {
     publicPath: '/',
   },
   plugins: [
+    new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       process: {
         env: {
@@ -52,9 +57,6 @@ module.exports = {
           APP_BASE_URL: JSON.stringify(process.env.APP_BASE_URL),
           SUPABASE_URL: JSON.stringify(process.env.SUPABASE_URL),
           SUPABASE_ANON_KEY: JSON.stringify(process.env.SUPABASE_ANON_KEY),
-          SUPABASE_STORAGE_URL: JSON.stringify(
-            process.env.SUPABASE_STORAGE_URL
-          ),
         },
       },
     }),
@@ -63,3 +65,15 @@ module.exports = {
     }),
   ],
 };
+
+const compiler = webpack(config);
+
+// `hot` and `client` options are disabled because we added them manually
+const server = new webpackDevServer({ hot: false, client: false }, compiler);
+
+(async () => {
+  await server.start();
+  console.log('dev server is running');
+})();
+
+module.exports = config;

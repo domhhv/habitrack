@@ -11,6 +11,7 @@ export enum TimeOfDay {
 export type CalendarEvent = {
   id: number;
   day: string;
+  timestamp: number;
   time_of_day: TimeOfDay | null;
   habit_id: number;
   user_id: string;

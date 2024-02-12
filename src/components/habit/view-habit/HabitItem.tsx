@@ -9,6 +9,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/joy';
+import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
 import {
@@ -89,7 +90,7 @@ const HabitItem = ({ habit, onEdit }: HabitItemProps) => {
       </StyledListItemContent>
       {habit.icon_path && (
         <StyledHabitImage
-          src={`${process.env.SUPABASE_STORAGE_URL}/${habit.icon_path}`}
+          src={getHabitIconUrl(habit.icon_path)}
           alt={habit.name}
         />
       )}

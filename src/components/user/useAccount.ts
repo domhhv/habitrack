@@ -1,10 +1,11 @@
 import { useSnackbar } from '@context';
 import { getUserAccount, updateUserAccount } from '@services';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useSession, useUser } from '@supabase/auth-helpers-react';
 import React, { type ChangeEventHandler } from 'react';
 
 export const useAccount = () => {
   const user = useUser();
+  const session = useSession();
   const { showSnackbar } = useSnackbar();
   const [forbidden, setForbidden] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
@@ -23,8 +24,11 @@ export const useAccount = () => {
 
     const loadUserProfile = async () => {
       const [data] = await getUserAccount();
-      setEmail(data.email);
-      setName(data.name);
+      console.log({ data });
+      if (data) {
+        setEmail(data.email || session?.user?.email || '');
+        setName(data.name);
+      }
       setLoading(false);
     };
 

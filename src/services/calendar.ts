@@ -4,10 +4,10 @@ import {
   Collections,
   type PostEntity,
   destroy,
-  get,
   patch,
   post,
   type PatchEntity,
+  getInRange,
 } from './supabase';
 
 export const createCalendarEvent = (
@@ -16,8 +16,12 @@ export const createCalendarEvent = (
   return post<CalendarEvent>(Collections.CALENDAR_EVENTS, calendarEvent);
 };
 
-export const listCalendarEvents = () => {
-  return get<CalendarEvent[]>(Collections.CALENDAR_EVENTS);
+export const listCalendarEvents = (range: [number, number]) => {
+  return getInRange<CalendarEvent>(
+    Collections.CALENDAR_EVENTS,
+    'timestamp',
+    range
+  );
 };
 
 export const updateCalendarEvent = (
