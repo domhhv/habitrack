@@ -1,4 +1,4 @@
-import { supabaseClient } from '@utils';
+import { supabaseClient } from '@helpers';
 
 export enum Collections {
   ACCOUNTS = 'accounts',
@@ -21,7 +21,7 @@ export const fetch = (collection: Collections) =>
 
 export const get = async <T extends object>(
   collection: Collections
-): Promise<T> => {
+): Promise<T[]> => {
   const request = fetch(collection).select('*');
 
   const { error, data } = await request;
@@ -30,7 +30,26 @@ export const get = async <T extends object>(
     throw new Error(error.message);
   }
 
-  return data as T;
+  return data as T[];
+};
+
+export const getInRange = async <T extends object>(
+  collection: Collections,
+  columnName: keyof T & string,
+  range: [number, number]
+): Promise<T[]> => {
+  const request = fetch(collection)
+    .select()
+    .gt(columnName, range[0])
+    .lt(columnName, range[1]);
+
+  const { error, data } = await request;
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as T[];
 };
 
 export const post = async <T extends object>(

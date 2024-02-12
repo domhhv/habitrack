@@ -17,7 +17,7 @@ import HabitItem from './HabitItem';
 import { StyledPlaceholderContainer } from './styled';
 
 const ViewAllHabitsModalButton = () => {
-  const { fetchingHabits, habits } = useHabits();
+  const { fetchingHabits, habits, habitsMap } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [isEditingHabit, setIsEditingHabit] = React.useState(false);
   const [habitIdToEdit, setHabitIdToEdit] = React.useState<number>(0);
@@ -40,7 +40,7 @@ const ViewAllHabitsModalButton = () => {
     setHabitIdToEdit(0);
   };
 
-  const hasHabits = !!Object.keys(habits || {}).length;
+  const hasHabits = !!habits.length;
 
   return (
     <>
@@ -70,10 +70,10 @@ const ViewAllHabitsModalButton = () => {
                 <p>You have no habits yet.</p>
               </StyledPlaceholderContainer>
             )}
-            {!!hasHabits && (
+            {hasHabits && (
               <>
                 <List>
-                  {Object.values(habits).map((habit) => (
+                  {habits.map((habit) => (
                     <HabitItem
                       key={habit.id}
                       habit={habit}
@@ -84,7 +84,7 @@ const ViewAllHabitsModalButton = () => {
                 <EditHabitDialog
                   open={isEditingHabit}
                   onClose={handleEditEnd}
-                  habit={habits[habitIdToEdit]}
+                  habit={habitsMap[habitIdToEdit]}
                 />
               </>
             )}

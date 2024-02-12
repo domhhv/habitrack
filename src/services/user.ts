@@ -1,9 +1,9 @@
 import type { Account } from '@context';
+import { supabaseClient } from '@helpers';
 import type {
   AuthResponse,
   AuthTokenResponsePassword,
 } from '@supabase/supabase-js';
-import { supabaseClient } from '@utils';
 
 import { Collections, get, patch, type PatchEntity } from './supabase';
 
@@ -32,7 +32,7 @@ export const signOut = async () => {
 };
 
 export const getUserAccount = async () => {
-  return get<Account[]>(Collections.ACCOUNTS);
+  return get<Account>(Collections.ACCOUNTS);
 };
 
 export const updateUserAccount = async (

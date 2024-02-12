@@ -19,12 +19,8 @@ import {
   styled,
   Typography,
 } from '@mui/joy';
-import { patchHabit } from '@services';
-import {
-  useSession,
-  useSupabaseClient,
-  useUser,
-} from '@supabase/auth-helpers-react';
+import { patchHabit, StorageBuckets, uploadFile } from '@services';
+import { useSession, useUser } from '@supabase/auth-helpers-react';
 import React, { type FormEventHandler } from 'react';
 
 const VisuallyHiddenInput = styled('input')({
@@ -48,7 +44,6 @@ const AddHabitDialogButton = () => {
   const [habitDescription, setHabitDescription] = React.useState('');
   const [habitTrait, setHabitTrait] = React.useState<'good' | 'bad' | ''>('');
   const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
-  const supabase = useSupabaseClient();
   const { showSnackbar } = useSnackbar();
 
   const handleDialogOpen = () => {
@@ -76,25 +71,19 @@ const AddHabitDialogButton = () => {
 
       const { id } = await addHabit(habit);
 
-      showSnackbar('Habit added, uploading icon...', {
-        variant: 'soft',
-        color: 'success',
-      });
-
       if (habitIcon) {
-        const { data } = await supabase.storage
-          .from('habit_icons')
-          .upload(`habit-id-${id}`, habitIcon, {
-            cacheControl: '3600',
-            upsert: false,
-          });
+        const { data } = await uploadFile(
+          StorageBuckets.HABIT_ICONS,
+          `habit-id-${id}`,
+          habitIcon
+        );
 
         icon_path = data?.path || '';
       }
 
-      await patchHabit(id, { icon_path });
+      await patchHabit(id, { ...habit, icon_path });
 
-      showSnackbar('Icon uploaded', {
+      showSnackbar('Habit added!', {
         variant: 'soft',
         color: 'success',
       });
@@ -135,8 +124,9 @@ const AddHabitDialogButton = () => {
   return (
     <>
       <Button
+        sx={{ width: 400 }}
         color="primary"
-        variant="soft"
+        variant="solid"
         startDecorator={<AddRounded />}
         onClick={handleDialogOpen}
         disabled={fetchingHabits || !session?.user?.id}

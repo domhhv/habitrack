@@ -1,8 +1,7 @@
-import { createCalendar } from '@internationalized/date';
 import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
-import { AriaButtonProps, useCalendar, useLocale } from 'react-aria';
-import { useCalendarState } from 'react-stately';
+import { AriaButtonProps, useCalendar } from 'react-aria';
+import { type CalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';
@@ -11,13 +10,12 @@ import {
   StyledCalendarContainerDiv,
 } from './styled';
 
-const Calendar = () => {
-  const { locale } = useLocale();
-  const state = useCalendarState({
-    locale,
-    createCalendar,
-  });
+type CalendarProps = {
+  state: CalendarState;
+  weeksInMonth: number;
+};
 
+const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
   const { calendarProps, prevButtonProps, nextButtonProps, title } =
     useCalendar({}, state);
 
@@ -41,7 +39,7 @@ const Calendar = () => {
           onNavigateBack={state.focusPreviousPage}
           onNavigateForward={state.focusNextPage}
         />
-        <CalendarGrid state={state} />
+        <CalendarGrid state={state} weeksInMonth={weeksInMonth} />
       </StyledCalendarContainerDiv>
     </StyledCalendarBackgroundDiv>
   );

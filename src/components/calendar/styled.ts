@@ -64,10 +64,16 @@ export const StyledNavigationIconButton = styled(IconButton)(({ theme }) => ({
     '& svg': {
       color: getLightNeutralColor(theme),
     },
+    '&:hover': {
+      backgroundColor: theme.palette.neutral[200],
+    },
   },
   [theme.getColorSchemeSelector('dark')]: {
     '& svg': {
       color: getDarkNeutralColor(theme),
+    },
+    '&:hover': {
+      backgroundColor: theme.palette.neutral[900],
     },
   },
   '&:first-of-type': {

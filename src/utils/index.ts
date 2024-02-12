@@ -1,3 +1,3 @@
 export * from './capitalizeFirstLetter';
-export * from './theme';
-export * from './supabaseClient';
+export * from './generateCalendarRange';
+export * from './getHabitIconUrl';

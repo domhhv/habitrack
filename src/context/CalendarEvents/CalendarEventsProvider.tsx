@@ -15,9 +15,10 @@ import React from 'react';
 
 type Props = {
   children: React.ReactNode;
+  range: [number, number];
 };
 
-const CalendarEventsProvider = ({ children }: Props) => {
+const CalendarEventsProvider = ({ children, range }: Props) => {
   const { showSnackbar } = useSnackbar();
   const user = useUser();
   const supabase = useSupabaseClient();
@@ -33,12 +34,16 @@ const CalendarEventsProvider = ({ children }: Props) => {
   const [calendarEventIdBeingDeleted, setCalendarEventIdBeingDeleted] =
     React.useState(0);
 
-  const fetchCalendarEvents = async () => {
+  const fetchCalendarEvents = React.useCallback(async () => {
     setFetchingCalendarEvents(true);
-    const calendarEvents = await listCalendarEvents();
+    const calendarEvents = await listCalendarEvents(range);
     setCalendarEvents(calendarEvents);
     setFetchingCalendarEvents(false);
-  };
+  }, [range]);
+
+  React.useEffect(() => {
+    void fetchCalendarEvents();
+  }, [range, fetchCalendarEvents]);
 
   React.useEffect(() => {
     void fetchCalendarEvents();
@@ -56,7 +61,7 @@ const CalendarEventsProvider = ({ children }: Props) => {
     return () => {
       data.subscription.unsubscribe();
     };
-  }, [user, supabase, showSnackbar]);
+  }, [user, supabase, showSnackbar, fetchCalendarEvents]);
 
   React.useEffect(() => {
     const calendarEventsByDate = calendarEvents.reduce(

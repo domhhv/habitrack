@@ -1,4 +1,3 @@
-import { AddHabitDialogButton, ViewAllHabitsModalButton } from '@components';
 import { AuthModalButton } from '@components';
 import { Button } from '@mui/joy';
 import React from 'react';
@@ -19,8 +18,9 @@ const Header = () => {
           <Button component={Link} to="/calendar">
             Calendar
           </Button>
-          <AddHabitDialogButton />
-          <ViewAllHabitsModalButton />
+          <Button component={Link} to="/habits">
+            Habits
+          </Button>
           <ThemeToggle />
         </StyledButtonsContainer>
         <AuthModalButton />

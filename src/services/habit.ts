@@ -10,11 +10,11 @@ import {
 } from './supabase';
 
 export const createHabit = async (body: AddHabit) => {
-  return post<Omit<Habit, 'icon_path'>>(Collections.HABITS, body);
+  return post<Habit>(Collections.HABITS, body as Habit);
 };
 
 export const listHabits = async () => {
-  return get<Habit[]>(Collections.HABITS);
+  return get<Habit>(Collections.HABITS);
 };
 
 export const patchHabit = (id: number, body: PatchEntity<Habit>) => {

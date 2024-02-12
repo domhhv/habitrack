@@ -11,15 +11,15 @@ export const StyledPlaceholderContainer = styled(Box)(({ theme }) => ({
 }));
 
 export const StyleListItem = styled(ListItem)(({ theme }) => ({
-  alignItems: 'flex-start',
-  padding: theme.spacing(1.5, 0, 1),
+  alignItems: 'center',
+  padding: theme.spacing(2, 0, 1.5),
   '&:not(:last-of-type)': {
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
 }));
 
 export const StyledEditIconButton = styled(IconButton)(({ theme }) => ({
-  marginRight: theme.spacing(2),
+  marginRight: theme.spacing(1),
 }));
 
 export const StyledListItemContent = styled(ListItemContent)({

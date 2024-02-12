@@ -5,12 +5,17 @@ import {
   CalendarEventsProvider,
   SnackbarProvider,
 } from '@context';
+import { supabaseClient, theme } from '@helpers';
 import { USER_THEME_STORAGE_KEY } from '@hooks';
+import { createCalendar, getWeeksInMonth } from '@internationalized/date';
 import { CssVarsProvider, styled } from '@mui/joy';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
-import { supabaseClient, theme } from '@utils';
+import { generateCalendarRange } from '@utils';
 import React from 'react';
+import { useLocale } from 'react-aria';
+import { hot } from 'react-hot-loader/root';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useCalendarState } from 'react-stately';
 
 import HabitsPage from './habit/HabitsPage';
 
@@ -27,24 +32,38 @@ const StyledAppContainerDiv = styled('div')({
 });
 
 const App = () => {
+  const { locale } = useLocale();
+  const state = useCalendarState({
+    locale,
+    createCalendar,
+  });
+  const weeksInMonth = getWeeksInMonth(state.visibleRange.start, locale);
+  const range = generateCalendarRange(state, weeksInMonth);
+
   return (
     <CssVarsProvider
-      theme={theme}
       defaultMode="light"
+      theme={theme}
       modeStorageKey={USER_THEME_STORAGE_KEY}
     >
       <SessionContextProvider supabaseClient={supabaseClient}>
         <SnackbarProvider>
           <AuthProvider>
             <HabitsProvider>
-              <CalendarEventsProvider>
+              <CalendarEventsProvider range={range}>
                 <BrowserRouter>
                   <AppHeader />
                   <StyledAppContainerDiv>
                     <Routes>
                       <Route
                         path="/calendar"
-                        element={<Calendar aria-label="Event date" />}
+                        element={
+                          <Calendar
+                            state={state}
+                            weeksInMonth={weeksInMonth}
+                            aria-label="Event date"
+                          />
+                        }
                       />
                       <Route path="/habits" element={<HabitsPage />} />
                       <Route path="/account" element={<AccountPage />} />
@@ -64,4 +83,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default hot(App);
