@@ -102,7 +102,7 @@ const HabitRow = ({ habit, onEdit, onDelete }: HabitRowProps) => {
             size="lg"
             variant="plain"
             color="primary"
-            component="label"
+            as="label"
           >
             <StyledHabitImage
               src={getHabitIconUrl(habit.icon_path)}
