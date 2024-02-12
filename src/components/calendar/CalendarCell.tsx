@@ -1,7 +1,5 @@
 import { CalendarEvent, useCalendarEvents, useHabits } from '@context';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import FmdBadIcon from '@mui/icons-material/FmdBad';
-import FmdGoodIcon from '@mui/icons-material/FmdGood';
 import { ChipDelete, CircularProgress, Typography } from '@mui/joy';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';

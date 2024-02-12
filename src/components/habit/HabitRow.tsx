@@ -98,7 +98,12 @@ const HabitRow = ({ habit, onEdit, onDelete }: HabitRowProps) => {
     <StyleListItem>
       <ListItemDecorator>
         <Tooltip title="Upload new icon">
-          <StyledEditIconButton size="lg" variant="plain" color="primary">
+          <StyledEditIconButton
+            size="lg"
+            variant="plain"
+            color="primary"
+            component="label"
+          >
             <StyledHabitImage
               src={getHabitIconUrl(habit.icon_path)}
               alt={habit.name}

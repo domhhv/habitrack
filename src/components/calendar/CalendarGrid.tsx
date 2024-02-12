@@ -1,8 +1,5 @@
-import { useCalendarEvents, useHabits } from '@context';
+import { useCalendarEvents } from '@context';
 import { Box, Typography } from '@mui/joy';
-import { listFiles, StorageBuckets } from '@services';
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
-import { getHabitIconUrl } from '@utils';
 import { AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid } from 'react-aria';
@@ -24,33 +21,10 @@ const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
-  const { habitsMap } = useHabits();
-  const user = useUser();
-  const supabase = useSupabaseClient();
 
   const { calendarEventsByDate } = useCalendarEvents();
   const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
-
-  React.useEffect(() => {
-    const loadHabitIcons = async () => {
-      const { data } = await listFiles(
-        StorageBuckets.HABIT_ICONS,
-        user?.id as string
-      );
-
-      const habitIconsMap = data?.reduce((acc, icon) => {
-        return {
-          ...acc,
-          [icon.name]: getHabitIconUrl(icon.name),
-        };
-      }, {});
-
-      console.log({ habitIconsMap });
-    };
-
-    void loadHabitIcons();
-  }, [habitsMap, supabase, user?.id]);
 
   const handleDayModalDialogOpen = (
     dateNumber: number,

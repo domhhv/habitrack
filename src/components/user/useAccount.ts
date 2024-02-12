@@ -24,16 +24,15 @@ export const useAccount = () => {
 
     const loadUserProfile = async () => {
       const [data] = await getUserAccount();
-      console.log({ data });
       if (data) {
-        setEmail(data.email || session?.user?.email || '');
-        setName(data.name);
+        setEmail(data?.email || session?.user?.email || '');
+        setName(data?.name);
       }
       setLoading(false);
     };
 
     void loadUserProfile();
-  }, [user]);
+  }, [user, session?.user?.email]);
 
   const handleEmailChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     setEmail(event.target.value);

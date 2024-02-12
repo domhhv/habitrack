@@ -1,8 +1,7 @@
-import { createCalendar } from '@internationalized/date';
 import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
-import { AriaButtonProps, useCalendar, useLocale } from 'react-aria';
-import { type CalendarState, useCalendarState } from 'react-stately';
+import { AriaButtonProps, useCalendar } from 'react-aria';
+import { type CalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';

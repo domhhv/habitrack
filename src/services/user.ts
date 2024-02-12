@@ -32,7 +32,7 @@ export const signOut = async () => {
 };
 
 export const getUserAccount = async () => {
-  return get<Account[]>(Collections.ACCOUNTS);
+  return get<Account>(Collections.ACCOUNTS);
 };
 
 export const updateUserAccount = async (

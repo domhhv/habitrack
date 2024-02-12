@@ -14,7 +14,7 @@ export const createHabit = async (body: AddHabit) => {
 };
 
 export const listHabits = async () => {
-  return get<Habit[]>(Collections.HABITS);
+  return get<Habit>(Collections.HABITS);
 };
 
 export const patchHabit = (id: number, body: PatchEntity<Habit>) => {
