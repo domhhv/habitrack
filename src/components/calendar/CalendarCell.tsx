@@ -1,6 +1,6 @@
 import { CalendarEvent, useCalendarEvents, useHabits } from '@context';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import { ChipDelete, CircularProgress, Typography } from '@mui/joy';
+import { ChipDelete, CircularProgress, Tooltip, Typography } from '@mui/joy';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
@@ -118,23 +118,23 @@ const CalendarCell = ({
           );
 
           return (
-            <StyledHabitChip
-              variant="soft"
-              color={isGoodHabit ? 'success' : 'danger'}
-              key={event.id}
-              startDecorator={
-                <img
-                  src={getHabitIconUrl(eventHabit.icon_path)}
-                  alt={`${eventHabit.name} icon`}
-                  width={16}
-                  height={16}
-                />
-              }
-              disabled={isBeingDeleted}
-              endDecorator={endDecorator}
-            >
-              {eventHabit.name}
-            </StyledHabitChip>
+            <Tooltip title={eventHabit.name} key={event.id}>
+              <StyledHabitChip
+                variant="soft"
+                color={isGoodHabit ? 'success' : 'danger'}
+                key={event.id}
+                startDecorator={
+                  <img
+                    src={getHabitIconUrl(eventHabit.icon_path)}
+                    alt={`${eventHabit.name} icon`}
+                    width={16}
+                    height={16}
+                  />
+                }
+                disabled={isBeingDeleted}
+                endDecorator={endDecorator}
+              />
+            </Tooltip>
           );
         })}
       </StyledCalendarDayCellButtonIconsContainer>

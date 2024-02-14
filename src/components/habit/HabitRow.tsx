@@ -60,34 +60,47 @@ const HabitRow = ({ habit, onEdit, onDelete }: HabitRowProps) => {
     const uploadHabitIcon = async () => {
       let icon_path = habit.icon_path;
 
-      if (habitIcon) {
-        if (icon_path) {
-          await updateFile(
-            StorageBuckets.HABIT_ICONS,
-            `habit-id-${habit.id}`,
-            habitIcon
-          );
+      try {
+        if (habitIcon) {
+          if (icon_path) {
+            await updateFile(
+              StorageBuckets.HABIT_ICONS,
+              `habit-id-${habit.id}`,
+              habitIcon
+            );
 
-          showSnackbar('Icon replaced!', {
-            variant: 'soft',
-            color: 'success',
-          });
-        } else {
-          const { data } = await uploadFile(
-            StorageBuckets.HABIT_ICONS,
-            `habit-id-${habit.id}`,
-            habitIcon
-          );
+            showSnackbar('Icon replaced!', {
+              variant: 'soft',
+              color: 'success',
+            });
+          } else {
+            const split = habitIcon.name.split('.');
+            const extension = split[split.length - 1];
+            const { error, data } = await uploadFile(
+              StorageBuckets.HABIT_ICONS,
+              `habit-id-${habit.id}.${extension}`,
+              habitIcon
+            );
 
-          icon_path = data?.path || '';
+            if (error) {
+              throw error;
+            }
 
-          await patchHabit(habit.id, { ...habit, icon_path });
+            icon_path = data?.path || '';
 
-          showSnackbar('Icon uploaded!', {
-            variant: 'soft',
-            color: 'success',
-          });
+            await patchHabit(habit.id, { ...habit, icon_path });
+
+            showSnackbar('Icon uploaded!', {
+              variant: 'soft',
+              color: 'success',
+            });
+          }
         }
+      } catch (e) {
+        showSnackbar('Failed to upload icon', {
+          variant: 'soft',
+          color: 'danger',
+        });
       }
     };
 
