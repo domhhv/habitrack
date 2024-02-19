@@ -8,6 +8,8 @@ const useTraits = () => {
   const [traitsMap, setTraitsMap] = React.useState<TraitsMap>({});
   const [fetchingTraits, setFetchingTraits] = React.useState(false);
 
+  const allTraits = [...publicTraits, ...userTraits];
+
   React.useEffect(() => {
     const loadTraits = async () => {
       setFetchingTraits(true);
@@ -29,7 +31,7 @@ const useTraits = () => {
     void loadTraits();
   }, []);
 
-  return { traitsMap, publicTraits, userTraits, fetchingTraits };
+  return { allTraits, traitsMap, publicTraits, userTraits, fetchingTraits };
 };
 
 export default useTraits;

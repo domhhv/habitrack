@@ -1,4 +1,4 @@
-import { useAuth } from '@context';
+import { useUserAccount } from '@context';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import {
@@ -20,7 +20,7 @@ import { AuthForm } from './AuthForm';
 import { StyledAuthButton, StyleLogOutIconButton } from './styled';
 
 const AuthModalButton = () => {
-  const { login, logout, register, authenticating } = useAuth();
+  const { login, logout, register, authenticating } = useUserAccount();
   const [open, setOpen] = React.useState(false);
   const [mode, setMode] = React.useState<'login' | 'register'>('login');
   const user = useUser();

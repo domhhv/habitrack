@@ -1,17 +1,17 @@
 import React from 'react';
 
-export const AuthContext = React.createContext({
+export const UserAccountContext = React.createContext({
   authenticating: false,
   register: (_username: string, _password: string) => Promise.resolve(),
   login: (_username: string, _password: string) => Promise.resolve(),
   logout: (_shouldShowSnackbar?: boolean) => {},
 });
 
-export const useAuth = () => {
-  const context = React.useContext(AuthContext);
+export const useUserAccount = () => {
+  const context = React.useContext(UserAccountContext);
 
   if (context === undefined) {
-    throw new Error('useAuth must be used within a AuthProvider');
+    throw new Error('useUserAccount must be used within a UserAccountProvider');
   }
 
   return context;

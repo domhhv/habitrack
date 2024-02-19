@@ -16,7 +16,6 @@ import {
 
 export const createOccurrence = (occurrence: AddOccurrence) => {
   const serverBody = transformClientEntity(occurrence);
-  console.log({ serverBody });
   const serverOccurrence = post<Occurrence>(
     Collections.OCCURRENCES,
     serverBody

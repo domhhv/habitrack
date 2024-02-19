@@ -1,7 +1,7 @@
 import { useColorScheme } from '@mui/joy';
 import React from 'react';
 
-export const USER_THEME_STORAGE_KEY = 'user-account-theme-preference';
+export const USER_THEME_STORAGE_KEY = 'user-theme-preference';
 
 export enum ThemeModes {
   LIGHT = 'light',

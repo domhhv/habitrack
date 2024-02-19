@@ -53,10 +53,13 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
 
       try {
         if (habitIcon) {
+          const split = habitIcon.name.split('.');
+          const extension = split[split.length - 1];
+
           if (iconPath) {
             await updateFile(
               StorageBuckets.HABIT_ICONS,
-              `${user?.id}/habit-id-${habit.id}`,
+              `${user?.id}/habit-id-${habit.id}.${extension}`,
               habitIcon
             );
 
@@ -67,8 +70,6 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
               color: 'success',
             });
           } else {
-            const split = habitIcon.name.split('.');
-            const extension = split[split.length - 1];
             const { data, error } = await uploadFile(
               StorageBuckets.HABIT_ICONS,
               `${user?.id}/habit-id-${habit.id}.${extension}`,

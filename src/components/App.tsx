@@ -1,6 +1,6 @@
 import { AppHeader, Calendar, AccountPage, HabitsPage } from '@components';
 import {
-  AuthProvider,
+  UserAccountProvider,
   HabitsProvider,
   OccurrencesProvider,
   SnackbarProvider,
@@ -46,7 +46,7 @@ const App = () => {
     >
       <SessionContextProvider supabaseClient={supabaseClient}>
         <SnackbarProvider>
-          <AuthProvider>
+          <UserAccountProvider>
             <HabitsProvider>
               <OccurrencesProvider range={range}>
                 <BrowserRouter>
@@ -74,7 +74,7 @@ const App = () => {
                 </BrowserRouter>
               </OccurrencesProvider>
             </HabitsProvider>
-          </AuthProvider>
+          </UserAccountProvider>
         </SnackbarProvider>
       </SessionContextProvider>
     </CssVarsProvider>

@@ -1,12 +1,12 @@
-import { useSnackbar, AuthContext } from '@context';
+import { useSnackbar, UserAccountContext } from '@context';
 import { signIn, signOut, signUp } from '@services';
 import React from 'react';
 
-type AuthProviderProps = {
+type UserAccountProviderProps = {
   children: React.ReactNode;
 };
 
-const AuthProvider = ({ children }: AuthProviderProps) => {
+const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
   const { showSnackbar } = useSnackbar();
   const [authenticating, setAuthenticating] = React.useState(false);
 
@@ -85,7 +85,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     [authenticating, register, login, logout]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <UserAccountContext.Provider value={value}>
+      {children}
+    </UserAccountContext.Provider>
+  );
 };
 
-export default AuthProvider;
+export default UserAccountProvider;

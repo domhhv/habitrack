@@ -14,7 +14,7 @@ export type PostEntity<T extends object> = Omit<
 >;
 
 export type PatchEntity<T extends object> = Partial<
-  Omit<T, 'id' | 'created_at' | 'user_id'>
+  Omit<T, 'id' | 'createdAt' | 'userId'>
 >;
 
 export const fetch = (collection: Collections) =>

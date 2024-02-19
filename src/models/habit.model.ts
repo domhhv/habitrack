@@ -1,4 +1,4 @@
-import type { PostEntity } from '@services';
+import type { PatchEntity, PostEntity } from '@services';
 
 export type ServerHabit = {
   id: number;
@@ -25,4 +25,8 @@ export type Habit = {
 type HabitId = string;
 export type HabitsMap = Record<HabitId, Habit>;
 
-export type AddHabit = PostEntity<Omit<Habit, 'iconPath'>>;
+export type AddHabit = PostEntity<
+  Omit<Habit, 'createdAt' | 'updatedAt' | 'iconPath'>
+>;
+
+export type UpdateHabit = PatchEntity<Habit>;

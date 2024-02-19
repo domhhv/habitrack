@@ -46,8 +46,7 @@ const AddHabitDialogButton = () => {
   const [habitTraitId, setHabitTraitId] = React.useState(0);
   const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
   const { showSnackbar } = useSnackbar();
-  const { publicTraits, userTraits } = useTraits();
-  const traits = [...publicTraits, ...userTraits];
+  const { allTraits, traitsMap } = useTraits();
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -69,7 +68,6 @@ const AddHabitDialogButton = () => {
         userId: user?.id || session?.user?.id || '',
         iconPath: '',
         traitId: habitTraitId as number,
-        createdAt: new Date().toISOString(),
       };
 
       const { id } = await addHabit(habit);
@@ -88,7 +86,12 @@ const AddHabitDialogButton = () => {
           color: 'success',
         });
 
-        updateHabit(id, { ...habit, iconPath: data?.path });
+        void updateHabit(id, { ...habit, iconPath: data?.path });
+
+        showSnackbar('Habit updated with new icon path!', {
+          variant: 'soft',
+          color: 'success',
+        });
       }
 
       handleDialogClose();
@@ -169,15 +172,15 @@ const AddHabitDialogButton = () => {
                   value={habitTraitId}
                   endDecorator={
                     <>
-                      {habitTraitId === 1 ? (
+                      {traitsMap[habitTraitId]?.slug === 'good' ? (
                         <CheckCircleOutline color="success" fontSize="small" />
-                      ) : habitTraitId === 2 ? (
+                      ) : traitsMap[habitTraitId]?.slug === 'bad' ? (
                         <WarningAmber color="warning" fontSize="small" />
                       ) : null}
                     </>
                   }
                 >
-                  {traits.map((trait) => (
+                  {allTraits.map((trait) => (
                     <Option key={trait.id} value={trait.id}>
                       {trait.name}
                     </Option>
