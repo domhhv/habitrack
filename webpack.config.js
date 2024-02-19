@@ -41,6 +41,7 @@ const config = {
       '@context': path.resolve(__dirname, './src/context'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@helpers': path.resolve(__dirname, './src/helpers'),
+      '@models': path.resolve(__dirname, './src/models'),
     },
   },
   output: {
@@ -54,7 +55,6 @@ const config = {
       process: {
         env: {
           NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-          APP_BASE_URL: JSON.stringify(process.env.APP_BASE_URL),
           SUPABASE_URL: JSON.stringify(process.env.SUPABASE_URL),
           SUPABASE_ANON_KEY: JSON.stringify(process.env.SUPABASE_ANON_KEY),
         },

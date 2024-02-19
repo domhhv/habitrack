@@ -21,16 +21,13 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
           throw signUpRes.error;
         }
 
-        const signInRes = await signIn(email, password);
-
-        if (signInRes.error) {
-          throw signInRes.error;
-        }
-
-        showSnackbar('Account created! You can now add your first habit.', {
-          variant: 'solid',
-          color: 'success',
-        });
+        showSnackbar(
+          'Account created! Please confirm your email before using the app.',
+          {
+            variant: 'solid',
+            color: 'success',
+          }
+        );
       } catch (e) {
         showSnackbar((e as Error).message || 'Something went wrong', {
           variant: 'solid',

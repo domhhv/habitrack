@@ -1,5 +1,6 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
 import { useHabits, useSnackbar } from '@context';
+import { useTraits } from '@hooks';
 import {
   AddRounded,
   CheckCircleOutline,
@@ -38,13 +39,15 @@ const VisuallyHiddenInput = styled('input')({
 const AddHabitDialogButton = () => {
   const user = useUser();
   const session = useSession();
-  const { fetchingHabits, addingHabit, addHabit } = useHabits();
+  const { fetchingHabits, addingHabit, addHabit, updateHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
-  const [habitTrait, setHabitTrait] = React.useState<'good' | 'bad' | ''>('');
+  const [habitTraitId, setHabitTraitId] = React.useState(0);
   const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
   const { showSnackbar } = useSnackbar();
+  const { publicTraits, userTraits } = useTraits();
+  const traits = [...publicTraits, ...userTraits];
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -53,7 +56,7 @@ const AddHabitDialogButton = () => {
   const handleDialogClose = () => {
     setHabitName('');
     setHabitDescription('');
-    setHabitTrait('');
+    setHabitTraitId(0);
     setOpen(false);
   };
 
@@ -63,30 +66,30 @@ const AddHabitDialogButton = () => {
       const habit = {
         name: habitName,
         description: habitDescription,
-        trait: habitTrait as 'good' | 'bad',
-        user_id: user?.id || session?.user?.id || '',
+        userId: user?.id || session?.user?.id || '',
+        iconPath: '',
+        traitId: habitTraitId as number,
+        createdAt: new Date().toISOString(),
       };
-
-      let icon_path = '';
 
       const { id } = await addHabit(habit);
 
       if (habitIcon) {
         const { data } = await uploadFile(
           StorageBuckets.HABIT_ICONS,
-          `habit-id-${id}`,
+          `${user?.id}/habit-id-${id}`,
           habitIcon
         );
 
-        icon_path = data?.path || '';
+        await patchHabit(id, { ...habit, iconPath: data?.path });
+
+        showSnackbar('Icon updated!', {
+          variant: 'soft',
+          color: 'success',
+        });
+
+        updateHabit(id, { ...habit, iconPath: data?.path });
       }
-
-      await patchHabit(id, { ...habit, icon_path });
-
-      showSnackbar('Habit added!', {
-        variant: 'soft',
-        color: 'success',
-      });
 
       handleDialogClose();
     } catch (error) {
@@ -108,8 +111,8 @@ const AddHabitDialogButton = () => {
     setHabitDescription(event.target.value);
   };
 
-  const handleHabitTraitChange = (_: null, newValue: string) => {
-    setHabitTrait(newValue as 'good' | 'bad');
+  const handleHabitTraitChange = (_: null, newTraitId: number) => {
+    setHabitTraitId(newTraitId);
   };
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
@@ -163,19 +166,22 @@ const AddHabitDialogButton = () => {
                   onChange={handleHabitTraitChange}
                   required
                   placeholder="Choose a trait"
-                  value={habitTrait}
+                  value={habitTraitId}
                   endDecorator={
                     <>
-                      {habitTrait === 'good' ? (
+                      {habitTraitId === 1 ? (
                         <CheckCircleOutline color="success" fontSize="small" />
-                      ) : habitTrait === 'bad' ? (
+                      ) : habitTraitId === 2 ? (
                         <WarningAmber color="warning" fontSize="small" />
                       ) : null}
                     </>
                   }
                 >
-                  <Option value="good">Good</Option>
-                  <Option value="bad">Bad</Option>
+                  {traits.map((trait) => (
+                    <Option key={trait.id} value={trait.id}>
+                      {trait.name}
+                    </Option>
+                  ))}
                 </Select>
               </Box>
               <Box mb={1}>

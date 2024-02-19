@@ -108,10 +108,20 @@ const AuthModalButton = () => {
               }}
               disableUnderline
             >
-              <Tab value="login" disableIndicator sx={{ flex: '1 1 0%' }}>
+              <Tab
+                disabled={authenticating}
+                value="login"
+                disableIndicator
+                sx={{ flex: '1 1 0%' }}
+              >
                 Log In
               </Tab>
-              <Tab value="register" disableIndicator sx={{ flex: '1 1 0%' }}>
+              <Tab
+                disabled={authenticating}
+                value="register"
+                disableIndicator
+                sx={{ flex: '1 1 0%' }}
+              >
                 Create Account
               </Tab>
             </TabList>

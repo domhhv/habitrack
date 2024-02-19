@@ -1,7 +1,7 @@
 import { supabaseClient } from '@helpers';
 
 export enum StorageBuckets {
-  HABIT_ICONS = 'habit-icons',
+  HABIT_ICONS = 'habit_icons',
 }
 
 export const listFiles = async (bucket: StorageBuckets, userId: string) => {
@@ -31,4 +31,8 @@ export const updateFile = async (
   return supabaseClient.storage
     .from(bucket)
     .update(path, file, { cacheControl: '3600', upsert: true });
+};
+
+export const deleteFile = async (bucket: StorageBuckets, path: string) => {
+  return supabaseClient.storage.from(bucket).remove([path]);
 };

@@ -9,4 +9,4 @@ export * from './controls';
 
 export * from './habit';
 
-export * from './user';
+export * from './user-account';

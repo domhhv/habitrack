@@ -3,8 +3,9 @@ import { supabaseClient } from '@helpers';
 export enum Collections {
   ACCOUNTS = 'accounts',
   HABITS = 'habits',
-  CALENDAR_EVENTS = 'calendar_events',
+  OCCURRENCES = 'occurrences',
   NOTES = 'notes',
+  TRAITS = 'traits',
 }
 
 export type PostEntity<T extends object> = Omit<

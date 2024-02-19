@@ -1,9 +1,10 @@
-import type { Account } from '@context';
 import { supabaseClient } from '@helpers';
+import { type ServerAccount } from '@models';
 import type {
   AuthResponse,
   AuthTokenResponsePassword,
 } from '@supabase/supabase-js';
+import { transformServerEntity } from '@utils';
 
 import { Collections, get, patch, type PatchEntity } from './supabase';
 
@@ -14,6 +15,9 @@ export const signUp = async (
   return supabaseClient.auth.signUp({
     email,
     password,
+    options: {
+      emailRedirectTo: `${window.location.origin}/account?emailConfirmed=true`,
+    },
   });
 };
 
@@ -32,12 +36,13 @@ export const signOut = async () => {
 };
 
 export const getUserAccount = async () => {
-  return get<Account>(Collections.ACCOUNTS);
+  const [serverAccount] = await get<ServerAccount>(Collections.ACCOUNTS);
+  return transformServerEntity(serverAccount);
 };
 
 export const updateUserAccount = async (
   id: string,
-  account: PatchEntity<Account>
+  account: PatchEntity<ServerAccount>
 ) => {
   return patch(Collections.ACCOUNTS, id, account);
 };

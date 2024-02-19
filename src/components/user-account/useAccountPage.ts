@@ -1,16 +1,17 @@
 import { useSnackbar } from '@context';
 import { getUserAccount, updateUserAccount } from '@services';
-import { useSession, useUser } from '@supabase/auth-helpers-react';
+import { useUser } from '@supabase/auth-helpers-react';
+import { transformClientEntity } from '@utils';
 import React, { type ChangeEventHandler } from 'react';
 
-export const useAccount = () => {
+export const useAccountPage = () => {
   const user = useUser();
-  const session = useSession();
   const { showSnackbar } = useSnackbar();
   const [forbidden, setForbidden] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [email, setEmail] = React.useState('');
   const [name, setName] = React.useState('');
+  const [phoneNumber, setPhoneNumber] = React.useState('');
 
   React.useEffect(() => {
     if (!user?.id) {
@@ -23,19 +24,25 @@ export const useAccount = () => {
     setForbidden(false);
 
     const loadUserProfile = async () => {
-      const [data] = await getUserAccount();
-      if (data) {
-        setEmail(data?.email || session?.user?.email || '');
-        setName(data?.name);
-      }
+      const data = await getUserAccount();
+
+      setEmail(data?.email || user?.email || '');
+      setPhoneNumber(data?.phoneNumber || user?.phone || '');
+      setName(data?.name);
       setLoading(false);
     };
 
     void loadUserProfile();
-  }, [user, session?.user?.email]);
+  }, [user, user?.email, user?.phone]);
 
   const handleEmailChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     setEmail(event.target.value);
+  };
+
+  const handlePhoneNumberChange: ChangeEventHandler<HTMLInputElement> = (
+    event
+  ) => {
+    setPhoneNumber(event.target.value);
   };
 
   const handleNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -46,13 +53,14 @@ export const useAccount = () => {
     if (!user?.id) return;
 
     setLoading(true);
-    const updates = {
+    const serverUpdates = transformClientEntity({
       name,
       email,
-      updated_at: new Date().toISOString(),
-    };
+      phoneNumber,
+      updatedAt: new Date().toISOString(),
+    });
 
-    await updateUserAccount(user.id, updates);
+    await updateUserAccount(user.id, serverUpdates);
 
     showSnackbar('Profile updated');
 
@@ -60,12 +68,14 @@ export const useAccount = () => {
   };
 
   return {
-    loading,
+    loading: loading || !user?.id,
     forbidden,
     email,
     handleEmailChange,
     name,
     handleNameChange,
+    phoneNumber,
+    handlePhoneNumberChange,
     updateProfile,
   };
 };
