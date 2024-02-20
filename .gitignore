@@ -6,7 +6,7 @@
 .pnp.js
 
 # testing
-/coverage
+/tests/coverage
 
 # production
 /build
@@ -27,6 +27,7 @@ yarn-error.log*
 .env
 .env.development
 .env.production
+.env.test
 
 # IDE
 .idea
