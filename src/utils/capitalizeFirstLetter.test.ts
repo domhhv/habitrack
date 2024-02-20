@@ -1,7 +1,7 @@
 import { capitalizeFirstLetter } from './capitalizeFirstLetter';
 
 describe(capitalizeFirstLetter.name, () => {
-  it('should be tested', () => {
-    expect(true).toBeTruthy();
+  it('should capitalize the first letter of a string', () => {
+    expect(capitalizeFirstLetter('hello')).toBe('Hello');
   });
 });

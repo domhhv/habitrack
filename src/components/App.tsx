@@ -7,7 +7,11 @@ import {
 } from '@context';
 import { supabaseClient, theme } from '@helpers';
 import { USER_THEME_STORAGE_KEY } from '@hooks';
-import { createCalendar, getWeeksInMonth } from '@internationalized/date';
+import {
+  type CalendarDate,
+  createCalendar,
+  getWeeksInMonth,
+} from '@internationalized/date';
 import { CssVarsProvider, styled } from '@mui/joy';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { generateCalendarRange } from '@utils';
@@ -36,7 +40,11 @@ const App = () => {
     createCalendar,
   });
   const weeksInMonth = getWeeksInMonth(state.visibleRange.start, locale);
-  const range = generateCalendarRange(state, weeksInMonth);
+  const weeks = [...new Array(weeksInMonth).keys()];
+  const range = generateCalendarRange(
+    state.getDatesInWeek(0) as CalendarDate[],
+    state.getDatesInWeek(weeks[weeks.length - 1]) as CalendarDate[]
+  );
 
   return (
     <CssVarsProvider
