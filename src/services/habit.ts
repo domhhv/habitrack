@@ -36,6 +36,8 @@ export const patchHabit = async (id: number, body: PatchEntity<Habit>) => {
   return transformServerEntity(habit) as unknown as Habit;
 };
 
-export const destroyHabit = (id: number) => {
-  return destroy<ServerHabit>(Collections.HABITS, id);
+export const destroyHabit = async (id: number) => {
+  const serverHabit = await destroy<ServerHabit>(Collections.HABITS, id);
+
+  return transformServerEntity(serverHabit) as unknown as Habit;
 };

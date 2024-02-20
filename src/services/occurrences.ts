@@ -45,6 +45,11 @@ export const updateOccurrence = async (
   return transformServerEntity(serverOccurrence);
 };
 
-export const destroyOccurrence = (id: number) => {
-  return destroy<Occurrence>(Collections.OCCURRENCES, id);
+export const destroyOccurrence = async (id: number) => {
+  const destroyedOccurrence = await destroy<Occurrence>(
+    Collections.OCCURRENCES,
+    id
+  );
+
+  return transformServerEntity(destroyedOccurrence);
 };

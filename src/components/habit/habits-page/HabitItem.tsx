@@ -33,7 +33,6 @@ type HabitRowProps = {
 
 const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
   const user = useUser();
-  const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
   const { showSnackbar } = useSnackbar();
   const { traitsMap } = useTraits();
   const { updateHabit } = useHabits();
@@ -41,52 +40,41 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     event
   ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setHabitIcon(file);
-    }
-  };
-
-  React.useEffect(() => {
-    const uploadHabitIcon = async () => {
-      const iconPath = habit.iconPath;
+    const iconFile = event.target.files?.[0];
+    if (iconFile) {
+      const existingIconPath = habit.iconPath;
 
       try {
-        if (habitIcon) {
-          const split = habitIcon.name.split('.');
-          const extension = split[split.length - 1];
+        const split = iconFile.name.split('.');
+        const extension = split[split.length - 1];
+        const habitIconPath = `${user?.id}/habit-id-${habit.id}.${extension}`;
 
-          if (iconPath) {
-            await updateFile(
-              StorageBuckets.HABIT_ICONS,
-              `${user?.id}/habit-id-${habit.id}.${extension}`,
-              habitIcon
-            );
+        if (existingIconPath) {
+          await updateFile(StorageBuckets.HABIT_ICONS, habitIconPath, iconFile);
 
-            await updateHabit(habit.id, { ...habit, iconPath: habitIcon.name });
+          await updateHabit(habit.id, { ...habit, iconPath: habitIconPath });
 
-            showSnackbar('Icon replaced!', {
-              variant: 'soft',
-              color: 'success',
-            });
-          } else {
-            const { data, error } = await uploadFile(
-              StorageBuckets.HABIT_ICONS,
-              `${user?.id}/habit-id-${habit.id}.${extension}`,
-              habitIcon
-            );
+          showSnackbar('Icon replaced!', {
+            variant: 'soft',
+            color: 'success',
+          });
+        } else {
+          const { data, error } = await uploadFile(
+            StorageBuckets.HABIT_ICONS,
+            habitIconPath,
+            iconFile
+          );
 
-            if (error) {
-              throw error;
-            }
-
-            await updateHabit(habit.id, { ...habit, iconPath: data.path });
-
-            showSnackbar('Icon uploaded!', {
-              variant: 'soft',
-              color: 'success',
-            });
+          if (error) {
+            throw error;
           }
+
+          await updateHabit(habit.id, { ...habit, iconPath: data.path });
+
+          showSnackbar('Icon uploaded!', {
+            variant: 'soft',
+            color: 'success',
+          });
         }
       } catch (e) {
         showSnackbar('Failed to upload icon', {
@@ -94,10 +82,8 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
           color: 'danger',
         });
       }
-    };
-
-    void uploadHabitIcon();
-  }, [habitIcon, showSnackbar, habit, updateHabit, user?.id]);
+    }
+  };
 
   const isGoodHabit = traitsMap[habit.traitId]?.slug === 'good';
 
