@@ -32,7 +32,8 @@
     "eslint:fix": "eslint --fix src",
     "prettier:check": "prettier --check src",
     "prettier:write": "prettier --write src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "supabase migration up"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [

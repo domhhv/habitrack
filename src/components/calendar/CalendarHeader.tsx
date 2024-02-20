@@ -1,4 +1,4 @@
-import { useCalendarEvents } from '@context';
+import { useOccurrences } from '@context';
 import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { Typography } from '@mui/joy';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -34,7 +34,7 @@ const CalendarHeader = ({
   onNavigateBack,
   onNavigateForward,
 }: CalendarHeaderProps) => {
-  const { fetchingCalendarEvents } = useCalendarEvents();
+  const { fetchingOccurrences } = useOccurrences();
 
   return (
     <StyledCalendarHeader>
@@ -69,14 +69,14 @@ const CalendarHeader = ({
         </StyledCalendarNavigationContainer>
       </StyledCalendarActiveMonthContainer>
 
-      {fetchingCalendarEvents && (
+      {fetchingOccurrences && (
         <StyledHeaderLoadingOverlay>
-          <motion.div
+          <motion.span
             animate={{ opacity: [0, 1, 0] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
             Fetching calendar events, please wait...
-          </motion.div>
+          </motion.span>
         </StyledHeaderLoadingOverlay>
       )}
     </StyledCalendarHeader>

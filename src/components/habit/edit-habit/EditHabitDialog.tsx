@@ -1,5 +1,7 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { Habit, useHabits } from '@context';
+import { useHabits } from '@context';
+import { useTraits } from '@hooks';
+import type { Habit } from '@models';
 import {
   Button,
   DialogContent,
@@ -17,7 +19,7 @@ import { StyledForm } from './styled';
 
 type EditHabitDialogProps = {
   open: boolean;
-  habit: Habit | undefined;
+  habit: Habit;
   onClose?: () => void;
 };
 
@@ -29,10 +31,11 @@ const EditHabitDialog = ({
   const [isOpen, setIsOpen] = React.useState(false);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [trait, setTrait] = React.useState<'good' | 'bad' | ''>('');
+  const [trait, setTrait] = React.useState<string>('');
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { updateHabit } = useHabits();
   const user = useUser();
+  const { traitsMap } = useTraits();
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -42,9 +45,9 @@ const EditHabitDialog = ({
     if (habit) {
       setName(habit.name);
       setDescription(habit.description);
-      setTrait(habit.trait);
+      setTrait(traitsMap[habit.traitId].slug);
     }
-  }, [habit]);
+  }, [habit, traitsMap]);
 
   if (!isOpen || !habit) {
     return null;
@@ -65,7 +68,7 @@ const EditHabitDialog = ({
     setDescription(event.target.value);
   };
 
-  const handleTraitChange = (_: null, newValue: 'good' | 'bad') => {
+  const handleTraitChange = (_: null, newValue: string) => {
     setTrait(newValue);
   };
 
@@ -75,9 +78,11 @@ const EditHabitDialog = ({
     const newHabit = {
       name,
       description,
-      trait: trait as 'good' | 'bad',
-      user_id: user?.id as string,
-      icon_path: habit.icon_path,
+      traitId: habit.traitId,
+      userId: user?.id as string,
+      iconPath: habit.iconPath,
+      createdAt: habit.createdAt,
+      updatedAt: new Date().toISOString(),
     };
     await updateHabit(habit.id, newHabit);
     setIsUpdating(false);

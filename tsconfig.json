@@ -27,7 +27,8 @@
       "@components": ["components"],
       "@utils": ["utils"],
       "@hooks": ["hooks"],
-      "@helpers": ["helpers"]
+      "@helpers": ["helpers"],
+      "@models": ["models"]
     }
   },
   "include": [

@@ -1,4 +1,6 @@
-import { CalendarEvent, useCalendarEvents, useHabits } from '@context';
+import { useOccurrences, useHabits } from '@context';
+import { useTraits } from '@hooks';
+import type { Occurrence } from '@models';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { ChipDelete, CircularProgress, Tooltip, Typography } from '@mui/joy';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -6,7 +8,7 @@ import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
 import {
-  StyledCalendarDayCellButton,
+  StyledCalendarDayCellDiv,
   StyledCalendarDayCellButtonHeader,
   StyledCalendarDayCellButtonIconsContainer,
   StyledHabitChip,
@@ -17,7 +19,7 @@ type CalendarCellProps = {
   monthIndex: number;
   fullYear: number;
   onClick: (dateNumber: number, monthIndex: number, fullYear: number) => void;
-  events: CalendarEvent[];
+  events: Occurrence[];
   onNavigateBack?: () => void;
   onNavigateForward?: () => void;
   rangeStatus: 'below-range' | 'in-range' | 'above-range';
@@ -34,14 +36,13 @@ const CalendarCell = ({
   rangeStatus,
 }: CalendarCellProps) => {
   const user = useUser();
-  const {
-    removeCalendarEvent,
-    fetchingCalendarEvents,
-    calendarEventIdBeingDeleted,
-  } = useCalendarEvents();
+  const { removeOccurrence, fetchingOccurrences, occurrenceIdBeingDeleted } =
+    useOccurrences();
   const { habitsMap } = useHabits();
   const [active, setActive] = React.useState(false);
   const [current, setCurrent] = React.useState(false);
+  const cellRef = React.useRef<HTMLDivElement>(null);
+  const { traitsMap } = useTraits();
 
   React.useEffect(() => {
     const today = new Date();
@@ -53,7 +54,11 @@ const CalendarCell = ({
     );
   }, [dateNumber, monthIndex, fullYear, rangeStatus]);
 
-  const handleClick = () => {
+  const handleClick = React.useCallback(() => {
+    if (fetchingOccurrences || !user?.id) {
+      return null;
+    }
+
     if (!active) {
       if (rangeStatus === 'below-range') {
         return onNavigateBack?.();
@@ -67,24 +72,55 @@ const CalendarCell = ({
     }
 
     return onClick(dateNumber, monthIndex, fullYear);
-  };
+  }, [
+    active,
+    dateNumber,
+    fetchingOccurrences,
+    fullYear,
+    monthIndex,
+    onClick,
+    onNavigateBack,
+    onNavigateForward,
+    rangeStatus,
+    user?.id,
+  ]);
+
+  React.useEffect(() => {
+    const cell = cellRef.current;
+
+    if (!cell) {
+      return;
+    }
+
+    const clickHandler = (event: MouseEvent) => {
+      if (event.target instanceof HTMLDivElement) {
+        handleClick();
+      }
+    };
+
+    cell.addEventListener('click', clickHandler);
+
+    return () => {
+      cell?.removeEventListener('click', clickHandler);
+    };
+  }, [cellRef, handleClick]);
 
   const handleCalendarEventDelete = async (
     calendarEventId: number,
     clickEvent: React.MouseEvent<HTMLButtonElement>
   ) => {
     clickEvent.stopPropagation();
-    void removeCalendarEvent(calendarEventId);
+    void removeOccurrence(calendarEventId);
   };
 
   return (
-    <StyledCalendarDayCellButton
+    <StyledCalendarDayCellDiv
+      ref={cellRef}
       data-active={active}
       data-prev-month={rangeStatus === 'below-range'}
       data-next-month={rangeStatus === 'above-range'}
       data-current={current}
       onClick={handleClick}
-      disabled={fetchingCalendarEvents || !user?.id}
     >
       <StyledCalendarDayCellButtonHeader>
         <Typography level="body-md" fontWeight={900}>
@@ -98,10 +134,10 @@ const CalendarCell = ({
       </StyledCalendarDayCellButtonHeader>
       <StyledCalendarDayCellButtonIconsContainer>
         {events.map((event) => {
-          const eventHabit = habitsMap[event.habit_id] || {};
-          const isGoodHabit = eventHabit.trait === 'good';
+          const eventHabit = habitsMap[event.habitId!] || {};
+          const isGoodHabit = traitsMap[eventHabit.traitId]?.slug === 'good';
 
-          const isBeingDeleted = calendarEventIdBeingDeleted === event.id;
+          const isBeingDeleted = occurrenceIdBeingDeleted === event.id;
 
           const endDecorator = isBeingDeleted ? (
             <CircularProgress size="sm" />
@@ -125,7 +161,7 @@ const CalendarCell = ({
                 key={event.id}
                 startDecorator={
                   <img
-                    src={getHabitIconUrl(eventHabit.icon_path)}
+                    src={getHabitIconUrl(eventHabit.iconPath)}
                     alt={`${eventHabit.name} icon`}
                     width={16}
                     height={16}
@@ -138,7 +174,7 @@ const CalendarCell = ({
           );
         })}
       </StyledCalendarDayCellButtonIconsContainer>
-    </StyledCalendarDayCellButton>
+    </StyledCalendarDayCellDiv>
   );
 };
 

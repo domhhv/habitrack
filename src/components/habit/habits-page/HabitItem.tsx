@@ -1,15 +1,17 @@
-import { type Habit, useSnackbar } from '@context';
+import { useHabits, useSnackbar } from '@context';
+import { useTraits } from '@hooks';
+import type { Habit } from '@models';
 import { DeleteForever } from '@mui/icons-material';
 import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
 import {
   Chip,
   IconButton,
   ListItemDecorator,
-  styled,
   Tooltip,
   Typography,
 } from '@mui/joy';
-import { patchHabit, StorageBuckets, updateFile, uploadFile } from '@services';
+import { StorageBuckets, updateFile, uploadFile } from '@services';
+import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
@@ -17,13 +19,11 @@ import {
   StyledEditIconButton,
   StyledHabitTitleWrapper,
   StyledListItemContent,
-  StyleListItem,
-} from './view-habit/styled';
-
-const StyledHabitImage = styled('img')({
-  width: 32,
-  height: 32,
-});
+  StyledHabitImage,
+  StyledListItem,
+  VisuallyHiddenInput,
+  StyledImageIconButton,
+} from './styled';
 
 type HabitRowProps = {
   habit: Habit;
@@ -31,70 +31,50 @@ type HabitRowProps = {
   onDelete: () => void;
 };
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: '1px',
-});
-
-const HabitRow = ({ habit, onEdit, onDelete }: HabitRowProps) => {
-  const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
+const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
+  const user = useUser();
   const { showSnackbar } = useSnackbar();
+  const { traitsMap } = useTraits();
+  const { updateHabit } = useHabits();
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     event
   ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setHabitIcon(file);
-    }
-  };
-
-  React.useEffect(() => {
-    const uploadHabitIcon = async () => {
-      let icon_path = habit.icon_path;
+    const iconFile = event.target.files?.[0];
+    if (iconFile) {
+      const existingIconPath = habit.iconPath;
 
       try {
-        if (habitIcon) {
-          if (icon_path) {
-            await updateFile(
-              StorageBuckets.HABIT_ICONS,
-              `habit-id-${habit.id}`,
-              habitIcon
-            );
+        const split = iconFile.name.split('.');
+        const extension = split[split.length - 1];
+        const habitIconPath = `${user?.id}/habit-id-${habit.id}.${extension}`;
 
-            showSnackbar('Icon replaced!', {
-              variant: 'soft',
-              color: 'success',
-            });
-          } else {
-            const split = habitIcon.name.split('.');
-            const extension = split[split.length - 1];
-            const { error, data } = await uploadFile(
-              StorageBuckets.HABIT_ICONS,
-              `habit-id-${habit.id}.${extension}`,
-              habitIcon
-            );
+        if (existingIconPath) {
+          await updateFile(StorageBuckets.HABIT_ICONS, habitIconPath, iconFile);
 
-            if (error) {
-              throw error;
-            }
+          await updateHabit(habit.id, { ...habit, iconPath: habitIconPath });
 
-            icon_path = data?.path || '';
+          showSnackbar('Icon replaced!', {
+            variant: 'soft',
+            color: 'success',
+          });
+        } else {
+          const { data, error } = await uploadFile(
+            StorageBuckets.HABIT_ICONS,
+            habitIconPath,
+            iconFile
+          );
 
-            await patchHabit(habit.id, { ...habit, icon_path });
-
-            showSnackbar('Icon uploaded!', {
-              variant: 'soft',
-              color: 'success',
-            });
+          if (error) {
+            throw error;
           }
+
+          await updateHabit(habit.id, { ...habit, iconPath: data.path });
+
+          showSnackbar('Icon uploaded!', {
+            variant: 'soft',
+            color: 'success',
+          });
         }
       } catch (e) {
         showSnackbar('Failed to upload icon', {
@@ -102,23 +82,23 @@ const HabitRow = ({ habit, onEdit, onDelete }: HabitRowProps) => {
           color: 'danger',
         });
       }
-    };
+    }
+  };
 
-    void uploadHabitIcon();
-  }, [habitIcon, showSnackbar, habit]);
+  const isGoodHabit = traitsMap[habit.traitId]?.slug === 'good';
 
   return (
-    <StyleListItem>
+    <StyledListItem>
       <ListItemDecorator>
         <Tooltip title="Upload new icon">
-          <StyledEditIconButton
+          <StyledImageIconButton
             size="lg"
             variant="plain"
             color="primary"
             as="label"
           >
             <StyledHabitImage
-              src={getHabitIconUrl(habit.icon_path)}
+              src={getHabitIconUrl(habit.iconPath)}
               alt={habit.name}
             />
             <VisuallyHiddenInput
@@ -126,7 +106,7 @@ const HabitRow = ({ habit, onEdit, onDelete }: HabitRowProps) => {
               accept="image/*"
               onChange={handleFileChange}
             />
-          </StyledEditIconButton>
+          </StyledImageIconButton>
         </Tooltip>
       </ListItemDecorator>
       <StyledListItemContent>
@@ -137,12 +117,12 @@ const HabitRow = ({ habit, onEdit, onDelete }: HabitRowProps) => {
                 {habit.name}
               </Typography>
               <Chip
-                color={habit.trait === 'good' ? 'success' : 'danger'}
+                color={isGoodHabit ? 'success' : 'danger'}
                 size="sm"
                 variant="soft"
               >
                 <Typography level="body-xs" sx={{ margin: 0 }}>
-                  {habit.trait === 'good' ? 'Good' : 'Bad'}
+                  {isGoodHabit ? 'Good' : 'Bad'}
                 </Typography>
               </Chip>
             </StyledHabitTitleWrapper>
@@ -165,14 +145,19 @@ const HabitRow = ({ habit, onEdit, onDelete }: HabitRowProps) => {
             </StyledEditIconButton>
           </Tooltip>
           <Tooltip title="Delete habit">
-            <IconButton color="danger" variant="soft" onClick={onDelete}>
+            <IconButton
+              size="sm"
+              color="danger"
+              variant="soft"
+              onClick={onDelete}
+            >
               <DeleteForever />
             </IconButton>
           </Tooltip>
         </div>
       </StyledListItemContent>
-    </StyleListItem>
+    </StyledListItem>
   );
 };
 
-export default HabitRow;
+export default HabitItem;

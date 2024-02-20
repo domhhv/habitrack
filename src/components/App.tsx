@@ -1,8 +1,8 @@
-import { AppHeader, Calendar, AccountPage } from '@components';
+import { AppHeader, Calendar, AccountPage, HabitsPage } from '@components';
 import {
-  AuthProvider,
+  UserAccountProvider,
   HabitsProvider,
-  CalendarEventsProvider,
+  OccurrencesProvider,
   SnackbarProvider,
 } from '@context';
 import { supabaseClient, theme } from '@helpers';
@@ -16,8 +16,6 @@ import { useLocale } from 'react-aria';
 import { hot } from 'react-hot-loader/root';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useCalendarState } from 'react-stately';
-
-import HabitsPage from './habit/HabitsPage';
 
 const StyledAppContainerDiv = styled('div')({
   display: 'flex',
@@ -48,9 +46,9 @@ const App = () => {
     >
       <SessionContextProvider supabaseClient={supabaseClient}>
         <SnackbarProvider>
-          <AuthProvider>
+          <UserAccountProvider>
             <HabitsProvider>
-              <CalendarEventsProvider range={range}>
+              <OccurrencesProvider range={range}>
                 <BrowserRouter>
                   <AppHeader />
                   <StyledAppContainerDiv>
@@ -74,9 +72,9 @@ const App = () => {
                     </Routes>
                   </StyledAppContainerDiv>
                 </BrowserRouter>
-              </CalendarEventsProvider>
+              </OccurrencesProvider>
             </HabitsProvider>
-          </AuthProvider>
+          </UserAccountProvider>
         </SnackbarProvider>
       </SessionContextProvider>
     </CssVarsProvider>

@@ -1,4 +1,4 @@
-import { useCalendarEvents } from '@context';
+import { useOccurrences } from '@context';
 import { Box, Typography } from '@mui/joy';
 import { AnimatePresence } from 'framer-motion';
 import React from 'react';
@@ -22,7 +22,7 @@ const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
 
-  const { calendarEventsByDate } = useCalendarEvents();
+  const { occurrencesByDate } = useOccurrences();
   const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
 
@@ -63,7 +63,7 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          calendarEventsByDate={calendarEventsByDate}
+          calendarEventsByDate={occurrencesByDate}
           onDayModalDialogOpen={handleDayModalDialogOpen}
           weeksInMonth={weeksInMonth}
           state={state}

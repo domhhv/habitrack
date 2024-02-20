@@ -1,10 +1,12 @@
 import { AuthModalButton, FloatingLabelInput } from '@components';
+import { useSnackbar } from '@context';
 import DoNotDisturbAltRoundedIcon from '@mui/icons-material/DoNotDisturbAltRounded';
 import { Button, Box, Typography, CircularProgress, Alert } from '@mui/joy';
 import React, { type FormEventHandler } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { StyledAccountForm, StyledAccountPageContainer } from './styled';
-import { useAccount } from './useAccount';
+import { useAccountPage } from './useAccountPage';
 
 const AccountPage = () => {
   const {
@@ -14,8 +16,25 @@ const AccountPage = () => {
     handleEmailChange,
     name,
     handleNameChange,
+    phoneNumber,
+    handlePhoneNumberChange,
     updateProfile,
-  } = useAccount();
+  } = useAccountPage();
+  const { showSnackbar } = useSnackbar();
+
+  const location = useLocation();
+
+  React.useEffect(() => {
+    const [, emailConfirmed] = location.search.split('=');
+
+    if (email && emailConfirmed) {
+      showSnackbar('Email confirmed', {
+        color: 'success',
+        dismissible: true,
+        dismissText: 'Done',
+      });
+    }
+  }, [email, location, showSnackbar]);
 
   if (loading) {
     return (
@@ -59,6 +78,14 @@ const AccountPage = () => {
             onChange={handleEmailChange}
             disabled={loading}
             label="Email"
+          />
+        </Box>
+        <Box mb={2}>
+          <FloatingLabelInput
+            value={phoneNumber}
+            onChange={handlePhoneNumberChange}
+            disabled={loading}
+            label="Phone number"
           />
         </Box>
         <Box mb={2}>

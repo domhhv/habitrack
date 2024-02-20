@@ -1,4 +1,4 @@
-import { useAuth } from '@context';
+import { useUserAccount } from '@context';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import {
@@ -20,7 +20,7 @@ import { AuthForm } from './AuthForm';
 import { StyledAuthButton, StyleLogOutIconButton } from './styled';
 
 const AuthModalButton = () => {
-  const { login, logout, register, authenticating } = useAuth();
+  const { login, logout, register, authenticating } = useUserAccount();
   const [open, setOpen] = React.useState(false);
   const [mode, setMode] = React.useState<'login' | 'register'>('login');
   const user = useUser();
@@ -108,10 +108,20 @@ const AuthModalButton = () => {
               }}
               disableUnderline
             >
-              <Tab value="login" disableIndicator sx={{ flex: '1 1 0%' }}>
+              <Tab
+                disabled={authenticating}
+                value="login"
+                disableIndicator
+                sx={{ flex: '1 1 0%' }}
+              >
                 Log In
               </Tab>
-              <Tab value="register" disableIndicator sx={{ flex: '1 1 0%' }}>
+              <Tab
+                disabled={authenticating}
+                value="register"
+                disableIndicator
+                sx={{ flex: '1 1 0%' }}
+              >
                 Create Account
               </Tab>
             </TabList>

@@ -3,8 +3,9 @@ import { supabaseClient } from '@helpers';
 export enum Collections {
   ACCOUNTS = 'accounts',
   HABITS = 'habits',
-  CALENDAR_EVENTS = 'calendar_events',
+  OCCURRENCES = 'occurrences',
   NOTES = 'notes',
+  TRAITS = 'traits',
 }
 
 export type PostEntity<T extends object> = Omit<
@@ -13,7 +14,7 @@ export type PostEntity<T extends object> = Omit<
 >;
 
 export type PatchEntity<T extends object> = Partial<
-  Omit<T, 'id' | 'created_at' | 'user_id'>
+  Omit<T, 'id' | 'createdAt' | 'userId'>
 >;
 
 export const fetch = (collection: Collections) =>

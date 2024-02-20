@@ -1,7 +1,7 @@
 export * from './Habits';
 
-export * from './CalendarEvents';
+export * from './Occurrences';
 
 export * from './Snackbar';
 
-export * from './Auth';
+export * from './UserAccount';

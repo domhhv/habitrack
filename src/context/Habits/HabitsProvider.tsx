@@ -1,18 +1,15 @@
+import { HabitsContext, useSnackbar } from '@context';
+import type { AddHabit, Habit, HabitsMap, ServerHabit } from '@models';
 import {
-  type AddHabit,
-  type Habit,
-  HabitsContext,
-  type HabitsMap,
-  useSnackbar,
-} from '@context';
-import {
-  listHabits,
   createHabit,
+  deleteFile,
   destroyHabit,
-  patchHabit,
+  listHabits,
   type PatchEntity,
+  patchHabit,
+  StorageBuckets,
 } from '@services';
-import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type HabitsProviderProps = {
@@ -66,7 +63,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     setHabitsMap({});
   };
 
-  const addHabit = async (habit: AddHabit): Promise<Habit> => {
+  const addHabit = async (habit: AddHabit) => {
     try {
       setAddingHabit(true);
 
@@ -98,10 +95,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     }
   };
 
-  const updateHabit = async (
-    id: number,
-    habit: PatchEntity<Habit>
-  ): Promise<Habit> => {
+  const updateHabit = async (id: number, habit: PatchEntity<ServerHabit>) => {
     try {
       const updatedHabit = await patchHabit(id, habit);
 
@@ -134,6 +128,10 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
   const removeHabit = async (id: number) => {
     try {
       await destroyHabit(id);
+
+      if (habitsMap[id]?.iconPath) {
+        await deleteFile(StorageBuckets.HABIT_ICONS, habitsMap[id].iconPath!);
+      }
 
       const nextHabits = habits.filter((habit) => habit.id !== id);
       setHabits(nextHabits);

@@ -1,4 +1,5 @@
-import { TimeOfDay, useCalendarEvents, useHabits } from '@context';
+import { useOccurrences, useHabits } from '@context';
+import { useTraits } from '@hooks';
 import {
   Box,
   Button,
@@ -31,13 +32,11 @@ const DayHabitModalDialog = ({
 }: DayHabitModalDialogProps) => {
   const { habits } = useHabits();
   const user = useUser();
-  const { addCalendarEvent, addingCalendarEvent } = useCalendarEvents();
+  const { addOccurrence, addingOccurrence } = useOccurrences();
   const [selectedBadHabit, setSelectedBadHabit] = React.useState<number | null>(
     null
   );
-  const [selectedTimeOfDay, setSelectedTimeOfDay] = React.useState<
-    TimeOfDay | 0
-  >(0);
+  const { traitsMap } = useTraits();
 
   if (!date || !open) {
     return null;
@@ -46,14 +45,13 @@ const DayHabitModalDialog = ({
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
 
-    const calendarEvent = {
+    const occurrence = {
       day: date.toISOString().split('T')[0],
       timestamp: +date,
-      habit_id: selectedBadHabit as number,
-      time_of_day: selectedTimeOfDay || null,
-      user_id: user?.id as string,
+      habitId: selectedBadHabit as number,
+      userId: user?.id as string,
     };
-    await addCalendarEvent(calendarEvent);
+    await addOccurrence(occurrence);
 
     handleClose();
   };
@@ -63,13 +61,6 @@ const DayHabitModalDialog = ({
     newValue: number | null
   ) => {
     setSelectedBadHabit(Number(newValue));
-  };
-
-  const handleTimeOfDaySelect = (
-    _: React.SyntheticEvent | null,
-    newValue: string | null
-  ) => {
-    setSelectedTimeOfDay(newValue as TimeOfDay | 0);
   };
 
   const handleClose = () => {
@@ -98,7 +89,7 @@ const DayHabitModalDialog = ({
               placeholder="Select Habit"
               value={hasHabits ? selectedBadHabit : 0}
               onChange={handleHabitSelect}
-              disabled={addingCalendarEvent}
+              disabled={addingOccurrence}
             >
               {!hasHabits && (
                 <Option value={0} label="No habits found" disabled>
@@ -109,7 +100,9 @@ const DayHabitModalDialog = ({
                 habits.map((habit) => (
                   <Option key={habit.id} value={habit.id} label={habit.name}>
                     {habit.name}
-                    <Typography level="body-xs">{habit.trait}</Typography>
+                    <Typography level="body-xs">
+                      {traitsMap[habit.traitId].name}
+                    </Typography>
                   </Option>
                 ))}
             </Select>
@@ -119,49 +112,10 @@ const DayHabitModalDialog = ({
               </FormHelperText>
             )}
           </FormControl>
-          <Box mt={2} mb={2}>
-            <FormControl>
-              <FormLabel id="habit-select-label" htmlFor="habit-select">
-                Pick time of day
-              </FormLabel>
-              <Select
-                color="neutral"
-                placeholder="Pick time of day"
-                value={selectedTimeOfDay || 'indifferent'}
-                onChange={handleTimeOfDaySelect}
-                disabled={addingCalendarEvent || !hasHabits}
-              >
-                {!hasHabits && (
-                  <Option value={1} label="No habits found" disabled>
-                    No habits found
-                  </Option>
-                )}
-                {hasHabits && (
-                  <>
-                    <Option value="indifferent" label="Indifferent">
-                      Indifferent (default)
-                    </Option>
-                    <Option value={TimeOfDay.NIGHT} label="Night">
-                      Night
-                    </Option>
-                    <Option value={TimeOfDay.MORNING} label="Morning">
-                      Morning
-                    </Option>
-                    <Option value={TimeOfDay.AFTERNOON} label="Afternoon">
-                      Afternoon
-                    </Option>
-                    <Option value={TimeOfDay.EVENING} label="Evening">
-                      Evening
-                    </Option>
-                  </>
-                )}
-              </Select>
-            </FormControl>
-          </Box>
           <Box mt={1}>
             <Button
               fullWidth
-              loading={addingCalendarEvent}
+              loading={addingOccurrence}
               disabled={!hasHabits}
               type="submit"
             >

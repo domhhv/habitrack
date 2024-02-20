@@ -1,12 +1,12 @@
-import { useSnackbar, AuthContext } from '@context';
+import { useSnackbar, UserAccountContext } from '@context';
 import { signIn, signOut, signUp } from '@services';
 import React from 'react';
 
-type AuthProviderProps = {
+type UserAccountProviderProps = {
   children: React.ReactNode;
 };
 
-const AuthProvider = ({ children }: AuthProviderProps) => {
+const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
   const { showSnackbar } = useSnackbar();
   const [authenticating, setAuthenticating] = React.useState(false);
 
@@ -21,16 +21,13 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
           throw signUpRes.error;
         }
 
-        const signInRes = await signIn(email, password);
-
-        if (signInRes.error) {
-          throw signInRes.error;
-        }
-
-        showSnackbar('Account created! You can now add your first habit.', {
-          variant: 'solid',
-          color: 'success',
-        });
+        showSnackbar(
+          'Account created! Please confirm your email before using the app.',
+          {
+            variant: 'solid',
+            color: 'success',
+          }
+        );
       } catch (e) {
         showSnackbar((e as Error).message || 'Something went wrong', {
           variant: 'solid',
@@ -88,7 +85,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     [authenticating, register, login, logout]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <UserAccountContext.Provider value={value}>
+      {children}
+    </UserAccountContext.Provider>
+  );
 };
 
-export default AuthProvider;
+export default UserAccountProvider;
