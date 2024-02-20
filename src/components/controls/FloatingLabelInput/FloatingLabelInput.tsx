@@ -3,7 +3,7 @@ import { ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
 import { VariantProp } from '@mui/joy/styles/types/variants';
 import React from 'react';
 
-import InnerInput from './InnnerInput';
+import InnerInput from './InnerInput';
 
 type FloatingLabelInputProps = {
   value: string;

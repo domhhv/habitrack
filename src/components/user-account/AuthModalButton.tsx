@@ -16,7 +16,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import React, { type SyntheticEvent } from 'react';
 import { Link } from 'react-router-dom';
 
-import { AuthForm } from './AuthForm';
+import AuthForm from './AuthForm';
 import { StyledAuthButton, StyleLogOutIconButton } from './styled';
 
 const AuthModalButton = () => {

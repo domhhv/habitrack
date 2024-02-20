@@ -16,7 +16,6 @@ const config = {
   devtool: 'inline-source-map',
   devServer: {
     historyApiFallback: true,
-    hot: false,
   },
   module: {
     rules: [

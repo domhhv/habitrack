@@ -4,7 +4,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { transformClientEntity } from '@utils';
 import React, { type ChangeEventHandler } from 'react';
 
-export const useAccountPage = () => {
+const useAccountPage = () => {
   const user = useUser();
   const { showSnackbar } = useSnackbar();
   const [forbidden, setForbidden] = React.useState(false);
@@ -79,3 +79,5 @@ export const useAccountPage = () => {
     updateProfile,
   };
 };
+
+export default useAccountPage;
