@@ -6,7 +6,7 @@ import React, { type FormEventHandler } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { StyledAccountForm, StyledAccountPageContainer } from './styled';
-import { useAccountPage } from './useAccountPage';
+import useAccountPage from './useAccountPage';
 
 const AccountPage = () => {
   const {

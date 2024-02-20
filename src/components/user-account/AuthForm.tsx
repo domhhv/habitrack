@@ -11,7 +11,7 @@ type AuthFormProps = {
   submitButtonLabel: string;
 };
 
-export const AuthForm = ({
+const AuthForm = ({
   submitButtonLabel,
   onSubmit,
   onCancel,
@@ -87,3 +87,5 @@ export const AuthForm = ({
     </form>
   );
 };
+
+export default AuthForm;
