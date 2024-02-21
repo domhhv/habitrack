@@ -4,8 +4,8 @@ import { Button, Box, Typography, CircularProgress, Alert } from '@mui/joy';
 import React, { type FormEventHandler } from 'react';
 
 import { StyledAccountForm, StyledAccountPageContainer } from './styled';
-import useAccountPage from './useAccountPage';
-import useEmailConfirmed from './useEmailConfirmed';
+import { useAccountPage } from './use-account-page';
+import { useEmailConfirmed } from './use-email-confirmed';
 
 const AccountPage = () => {
   const {
@@ -20,7 +20,7 @@ const AccountPage = () => {
     updateProfile,
   } = useAccountPage();
 
-  useEmailConfirmed(email);
+  useEmailConfirmed();
 
   if (loading) {
     return (
