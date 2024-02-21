@@ -1,12 +1,11 @@
 import { AuthModalButton, FloatingLabelInput } from '@components';
-import { useSnackbar } from '@context';
 import DoNotDisturbAltRoundedIcon from '@mui/icons-material/DoNotDisturbAltRounded';
 import { Button, Box, Typography, CircularProgress, Alert } from '@mui/joy';
 import React, { type FormEventHandler } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { StyledAccountForm, StyledAccountPageContainer } from './styled';
 import useAccountPage from './useAccountPage';
+import useEmailConfirmed from './useEmailConfirmed';
 
 const AccountPage = () => {
   const {
@@ -20,38 +19,26 @@ const AccountPage = () => {
     handlePhoneNumberChange,
     updateProfile,
   } = useAccountPage();
-  const { showSnackbar } = useSnackbar();
 
-  const location = useLocation();
-
-  React.useEffect(() => {
-    const [, emailConfirmed] = location.search.split('=');
-
-    if (email && emailConfirmed) {
-      showSnackbar('Email confirmed', {
-        color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
-      });
-    }
-  }, [email, location, showSnackbar]);
+  useEmailConfirmed(email);
 
   if (loading) {
     return (
-      <StyledAccountPageContainer>
-        <CircularProgress />
+      <StyledAccountPageContainer data-testid="account-page">
+        <CircularProgress data-testid="loader" />
       </StyledAccountPageContainer>
     );
   }
 
   if (forbidden) {
     return (
-      <StyledAccountPageContainer>
+      <StyledAccountPageContainer data-testid="account-page">
         <Alert
           color="danger"
           size="lg"
           startDecorator={<DoNotDisturbAltRoundedIcon />}
           endDecorator={<AuthModalButton />}
+          data-testid="alert"
         >
           <Typography level="h4">
             Please log in to your account first
@@ -67,17 +54,18 @@ const AccountPage = () => {
   };
 
   return (
-    <StyledAccountPageContainer>
+    <StyledAccountPageContainer data-testid="account-page">
       <Typography gutterBottom level="h4">
         Your Account Info
       </Typography>
-      <StyledAccountForm onSubmit={handleSubmit}>
+      <StyledAccountForm onSubmit={handleSubmit} data-testid="account-form">
         <Box mb={2}>
           <FloatingLabelInput
             value={email}
             onChange={handleEmailChange}
             disabled={loading}
             label="Email"
+            dataTestId="email-input"
           />
         </Box>
         <Box mb={2}>
@@ -86,6 +74,7 @@ const AccountPage = () => {
             onChange={handlePhoneNumberChange}
             disabled={loading}
             label="Phone number"
+            dataTestId="phone-number-input"
           />
         </Box>
         <Box mb={2}>
@@ -94,6 +83,7 @@ const AccountPage = () => {
             onChange={handleNameChange}
             disabled={loading}
             label="Name"
+            dataTestId="name-input"
           />
         </Box>
         <Box mt={2}>

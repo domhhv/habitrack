@@ -25,7 +25,7 @@ const transformClientKey = (key: string) => {
 };
 
 export const transformServerEntity = <T extends object>(entity: T): T => {
-  const serverEntries = Object.entries(entity).map(([key, value]) => {
+  const serverEntries = Object.entries(entity || {}).map(([key, value]) => {
     return {
       [transformServerKey(key)]: value,
     };
@@ -35,7 +35,7 @@ export const transformServerEntity = <T extends object>(entity: T): T => {
 };
 
 export const transformClientEntity = <T extends object>(entity: T) => {
-  const clientEntries = Object.entries(entity).map(([key, value]) => {
+  const clientEntries = Object.entries(entity || {}).map(([key, value]) => {
     return {
       [transformClientKey(key)]: value,
     };

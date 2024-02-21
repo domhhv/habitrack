@@ -1,4 +1,5 @@
 module.exports = {
+  testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/tests/testing-library.setup.js'],
   verbose: true,
   roots: ['<rootDir>'],
@@ -18,7 +19,6 @@ module.exports = {
   },
   rootDir: '../',
   preset: 'ts-jest',
-  testEnvironment: 'node',
   coveragePathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/tests/'],
   coverageDirectory: '<rootDir>/tests/coverage',
 };

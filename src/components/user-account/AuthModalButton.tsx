@@ -12,22 +12,25 @@ import {
   TabPanel,
   Tabs,
 } from '@mui/joy';
-import { useUser } from '@supabase/auth-helpers-react';
 import React, { type SyntheticEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import AuthForm from './AuthForm';
 import { StyledAuthButton, StyleLogOutIconButton } from './styled';
 
 const AuthModalButton = () => {
-  const { login, logout, register, authenticating } = useUserAccount();
+  const { login, logout, register, authenticating, supabaseUser } =
+    useUserAccount();
   const [open, setOpen] = React.useState(false);
   const [mode, setMode] = React.useState<'login' | 'register'>('login');
-  const user = useUser();
+  const navigate = useNavigate();
 
   const handleClick = () => {
-    if (!user?.id) {
+    if (!supabaseUser?.id) {
       setOpen(true);
+    } else {
+      console.log('called navigate');
+      navigate('/account');
     }
   };
 
@@ -67,20 +70,18 @@ const AuthModalButton = () => {
     <>
       <ButtonGroup>
         <StyledAuthButton
-          startDecorator={user?.id ? null : <AccountCircleOutlinedIcon />}
+          startDecorator={
+            supabaseUser?.id ? null : <AccountCircleOutlinedIcon />
+          }
           onClick={handleClick}
-          {...(user?.id
-            ? {
-                component: Link,
-                to: '/account',
-              }
-            : {})}
+          data-testid="auth-button"
         >
-          {user?.id ? 'Account' : 'Log In'}
+          {supabaseUser?.id ? 'Account' : 'Log In'}
         </StyledAuthButton>
-        {user?.id && (
+        {supabaseUser?.id && (
           <StyleLogOutIconButton onClick={() => logout()}>
             <LogoutRoundedIcon />
+            <div style={{ display: 'none' }}>Log Out</div>
           </StyleLogOutIconButton>
         )}
       </ButtonGroup>
@@ -114,7 +115,7 @@ const AuthModalButton = () => {
                 disableIndicator
                 sx={{ flex: '1 1 0%' }}
               >
-                Log In
+                Login
               </Tab>
               <Tab
                 disabled={authenticating}
@@ -122,7 +123,7 @@ const AuthModalButton = () => {
                 disableIndicator
                 sx={{ flex: '1 1 0%' }}
               >
-                Create Account
+                Register
               </Tab>
             </TabList>
             <TabPanel value="login" sx={{ padding: '16px 0' }}>

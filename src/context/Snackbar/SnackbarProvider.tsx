@@ -25,7 +25,7 @@ const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
   const showSnackbar = (message: string, options: SnackbarOptions = {}) => {
     setSnackbars((prevSnackbars) => [
       ...prevSnackbars,
-      { id: crypto.randomUUID(), message, options },
+      { id: crypto.randomUUID?.() || +new Date(), message, options },
     ]);
   };
 
@@ -92,6 +92,7 @@ const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
                   color={color}
                   variant={variant}
                   endDecorator={endDecorator}
+                  data-testid="snackbar"
                 >
                   <Typography
                     level="title-md"

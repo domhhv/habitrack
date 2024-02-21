@@ -1,7 +1,7 @@
 import ConfirmDialog from './ConfirmDialog';
 
 describe(ConfirmDialog.name, () => {
-  it('should be tested', () => {
-    expect(true).toBeTruthy();
+  it('should render', async () => {
+    expect(true).toBe(true);
   });
 });

@@ -22,9 +22,6 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useCalendarState } from 'react-stately';
 
 const StyledAppContainerDiv = styled('div')({
-  display: 'flex',
-  flexDirection: 'column',
-  flexGrow: 1,
   [theme.getColorSchemeSelector('light')]: {
     backgroundColor: theme.palette.neutral[100],
   },

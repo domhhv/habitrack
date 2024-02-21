@@ -1,5 +1,6 @@
 import { useSnackbar, UserAccountContext } from '@context';
 import { signIn, signOut, signUp } from '@services';
+import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type UserAccountProviderProps = {
@@ -9,6 +10,7 @@ type UserAccountProviderProps = {
 const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
   const { showSnackbar } = useSnackbar();
   const [authenticating, setAuthenticating] = React.useState(false);
+  const supabaseUser = useUser();
 
   const register = React.useCallback(
     async (email: string, password: string) => {
@@ -81,8 +83,8 @@ const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
   }, [showSnackbar]);
 
   const value = React.useMemo(
-    () => ({ authenticating, register, login, logout }),
-    [authenticating, register, login, logout]
+    () => ({ supabaseUser, authenticating, register, login, logout }),
+    [supabaseUser, authenticating, register, login, logout]
   );
 
   return (
