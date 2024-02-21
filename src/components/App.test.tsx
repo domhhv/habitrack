@@ -1,6 +1,6 @@
-import InnerInput from './InnerInput';
+import App from './App';
 
-describe(InnerInput.name, () => {
+describe(App.name, () => {
   it('should be tested', () => {
     expect(true).toBeTruthy();
   });

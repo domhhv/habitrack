@@ -15,6 +15,7 @@ type FloatingLabelInputProps = {
   variant?: VariantProp;
   color?: ColorPaletteProp;
   disabled?: boolean;
+  dataTestId?: string;
 };
 
 const FloatingLabelInput = ({
@@ -27,12 +28,15 @@ const FloatingLabelInput = ({
   color = 'neutral',
   required = false,
   disabled = false,
+  dataTestId,
 }: FloatingLabelInputProps) => {
   return (
     <Input
       required={required}
       slots={{ input: InnerInput }}
-      slotProps={{ input: { placeholder, type, label } }}
+      slotProps={{
+        input: { placeholder, type, label, 'data-testid': dataTestId },
+      }}
       value={value}
       onChange={onChange}
       variant={variant}

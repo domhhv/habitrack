@@ -1,4 +1,5 @@
 import { FloatingLabelInput } from '@components';
+import { useSnackbar } from '@context';
 import { Button, DialogActions } from '@mui/joy';
 import React from 'react';
 
@@ -17,11 +18,12 @@ const AuthForm = ({
   onCancel,
   disabled,
 }: AuthFormProps) => {
-  const [username, setUsername] = React.useState('');
+  const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const { showSnackbar } = useSnackbar();
 
   const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(event.target.value);
+    setEmail(event.target.value);
   };
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,15 +33,18 @@ const AuthForm = ({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     try {
       event.preventDefault();
-      onSubmit(username, password);
+      onSubmit(email, password);
     } catch (e) {
-      console.error(e);
+      showSnackbar((e as Error).message || 'Something went wrong', {
+        variant: 'solid',
+        color: 'danger',
+      });
       clearValues();
     }
   };
 
   const clearValues = () => {
-    setUsername('');
+    setEmail('');
     setPassword('');
   };
 
@@ -49,10 +54,10 @@ const AuthForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} data-testid="submit-form">
       <StyledDialogContent>
         <FloatingLabelInput
-          value={username}
+          value={email}
           onChange={handleUsernameChange}
           type="email"
           label="Email"
@@ -72,6 +77,7 @@ const AuthForm = ({
           color="primary"
           loading={disabled}
           type="submit"
+          data-testid="submit-button"
         >
           {submitButtonLabel}
         </Button>
