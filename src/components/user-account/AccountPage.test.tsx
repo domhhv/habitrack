@@ -1,10 +1,14 @@
-jest.mock('./useAccountPage');
+jest.mock('./use-account-page');
 jest.mock('@supabase/auth-helpers-react', () => ({
   ...jest.requireActual('@supabase/auth-helpers-react'),
   __esModule: true,
   useUser: jest.fn().mockReturnValue({ id: '123' }),
 }));
 jest.mock('@services');
+jest.mock('./use-email-confirmed', () => ({
+  __esModule: true,
+  useEmailConfirmed: jest.fn(),
+}));
 
 import { useUser } from '@supabase/auth-helpers-react';
 import { act, fireEvent, render } from '@testing-library/react';
@@ -12,9 +16,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 
 import AccountPage from './AccountPage';
-import useAccountPage from './useAccountPage';
-
-jest.mock('./useEmailConfirmed', () => () => {});
+import { useAccountPage } from './use-account-page';
 
 describe(AccountPage.name, () => {
   it('should show loader', () => {

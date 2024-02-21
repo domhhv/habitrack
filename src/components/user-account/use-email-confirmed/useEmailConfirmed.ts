@@ -2,7 +2,7 @@ import { useSnackbar } from '@context';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-const useEmailConfirmed = (email: string) => {
+const useEmailConfirmed = () => {
   const { showSnackbar } = useSnackbar();
 
   const location = useLocation();
@@ -10,14 +10,14 @@ const useEmailConfirmed = (email: string) => {
   React.useEffect(() => {
     const [, emailConfirmed] = location.search.split('=');
 
-    if (email && emailConfirmed) {
+    if (emailConfirmed) {
       showSnackbar('Email confirmed', {
         color: 'success',
         dismissible: true,
         dismissText: 'Done',
       });
     }
-  }, [email, location, showSnackbar]);
+  }, [location, showSnackbar]);
 };
 
 export default useEmailConfirmed;
