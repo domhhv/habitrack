@@ -4,6 +4,7 @@ import { StyledInput, StyledLabel } from './styled';
 
 type InnerInputProps = {
   label: string;
+  placeholder?: string;
 };
 
 const InnerInput = (

@@ -17,9 +17,9 @@ import React from 'react';
 
 import { StyledForm } from './styled';
 
-type EditHabitDialogProps = {
+export type EditHabitDialogProps = {
   open: boolean;
-  habit: Habit;
+  habit: Habit | null;
   onClose?: () => void;
 };
 
@@ -73,6 +73,8 @@ const EditHabitDialog = ({
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const updatedAt = new Date();
+    updatedAt.setMilliseconds(0);
     event.preventDefault();
     setIsUpdating(true);
     const newHabit = {
@@ -82,7 +84,7 @@ const EditHabitDialog = ({
       userId: user?.id as string,
       iconPath: habit.iconPath,
       createdAt: habit.createdAt,
-      updatedAt: new Date().toISOString(),
+      updatedAt: updatedAt.toISOString(),
     };
     await updateHabit(habit.id, newHabit);
     setIsUpdating(false);
@@ -92,10 +94,10 @@ const EditHabitDialog = ({
   return (
     <Modal open={open} onClose={handleClose}>
       <ModalDialog>
-        <ModalClose />
+        <ModalClose data-testid="close-icon" onClick={handleClose} />
         <DialogTitle>Edit habit</DialogTitle>
         <DialogContent>
-          <StyledForm onSubmit={handleSubmit}>
+          <StyledForm onSubmit={handleSubmit} role="form">
             <FloatingLabelInput
               value={name}
               onChange={handleNameChange}

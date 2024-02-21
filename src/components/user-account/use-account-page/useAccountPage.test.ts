@@ -13,6 +13,7 @@ jest.mock('@supabase/auth-helpers-react', () => ({
 
 jest.mock('@utils', () => ({
   transformClientEntity: jest.fn(),
+  transformServerEntities: jest.fn(),
 }));
 
 import { getUserAccount, updateUserAccount } from '@services';
