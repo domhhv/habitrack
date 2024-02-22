@@ -23,7 +23,6 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
 
   const { occurrencesByDate } = useOccurrences();
-  console.log('occurrencesByDate', occurrencesByDate);
   const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
 

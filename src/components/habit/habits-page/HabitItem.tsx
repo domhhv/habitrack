@@ -164,6 +164,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
               color="primary"
               onClick={onEdit}
               role="edit-habit-button"
+              data-testid={`edit-habit-id-${habit.id}-button`}
             >
               <ModeRoundedIcon fontSize="small" />
             </StyledEditIconButton>

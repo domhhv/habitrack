@@ -1,10 +1,12 @@
-name: 'coverage'
+name: Jest Coverage Report
+
 on:
     pull_request:
         branches:
             - master
             - main
 jobs:
+    permissions: write-all
     coverage:
         runs-on: ubuntu-latest
         steps:

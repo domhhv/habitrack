@@ -98,7 +98,7 @@ describe(EditHabitDialog.name, () => {
     );
     const nameInput = getByLabelText('Name');
     const descriptionInput = getByLabelText('Description (optional)');
-    const form = getByRole('form');
+    const form = getByRole('edit-habit-form');
     const updatedAt = new Date();
     updatedAt.setMilliseconds(0);
     updatedAt.setSeconds(0);

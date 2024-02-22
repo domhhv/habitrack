@@ -58,11 +58,13 @@ const HabitsPage = () => {
           />
         ))}
       </StyledList>
-      <EditHabitDialog
-        open={isEditingHabit}
-        onClose={handleEditEnd}
-        habit={habitsMap[habitIdToEdit]}
-      />
+      {!!habitIdToEdit && (
+        <EditHabitDialog
+          open={isEditingHabit}
+          onClose={handleEditEnd}
+          habit={habitsMap[habitIdToEdit]}
+        />
+      )}
       <AddHabitDialogButton />
       {!!habitIdToRemove && (
         <ConfirmDialog

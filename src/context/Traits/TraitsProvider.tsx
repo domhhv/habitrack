@@ -12,7 +12,6 @@ const TraitsProvider = ({ children }: TraitsProviderProps) => {
   const [userTraits, setUserTraits] = React.useState<Trait[]>([]);
   const [traitsMap, setTraitsMap] = React.useState<TraitsMap>({});
   const [fetchingTraits, setFetchingTraits] = React.useState(false);
-  console.log('useTraits');
 
   const allTraits = [...publicTraits, ...userTraits];
 
