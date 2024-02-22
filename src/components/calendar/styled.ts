@@ -11,6 +11,7 @@ export const StyledCalendarBackgroundDiv = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
+  width: '100%',
   padding: theme.spacing(2),
   flex: '1 1 0%',
 }));

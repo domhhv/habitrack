@@ -1,6 +1,5 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { useHabits, useSnackbar } from '@context';
-import { useTraits } from '@hooks';
+import { useHabits, useSnackbar, useTraits } from '@context';
 import {
   AddRounded,
   CheckCircleOutline,

@@ -13,13 +13,13 @@ jest.mock('@supabase/auth-helpers-react', () => ({
 
 jest.mock('@utils', () => ({
   transformClientEntity: jest.fn(),
-  transformServerEntities: jest.fn(),
+  transformServerEntities: jest.fn().mockImplementation(() => ({})),
 }));
 
 import { getUserAccount, updateUserAccount } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { transformClientEntity } from '@utils';
+import { transformClientEntity, transformServerEntities } from '@utils';
 import React from 'react';
 
 import useAccountPage from './useAccountPage';
@@ -42,6 +42,7 @@ describe('useAccountPage', () => {
         name: '',
       })
     );
+    (transformServerEntities as jest.Mock).mockReturnValue(() => ({}));
     const { result } = renderHook(() => useAccountPage());
     expect(result.current.loading).toBe(true);
 
@@ -133,6 +134,7 @@ describe('useAccountPage', () => {
         name: '',
       })
     );
+    (transformServerEntities as jest.Mock).mockReturnValue(() => ({}));
     const { result } = renderHook(() => useAccountPage());
     expect(result.current.loading).toBe(true);
 

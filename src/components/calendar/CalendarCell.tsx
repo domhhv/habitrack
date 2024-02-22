@@ -1,5 +1,4 @@
-import { useOccurrences, useHabits } from '@context';
-import { useTraits } from '@hooks';
+import { useOccurrences, useHabits, useTraits } from '@context';
 import type { Occurrence } from '@models';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { ChipDelete, CircularProgress, Tooltip, Typography } from '@mui/joy';
@@ -121,6 +120,8 @@ const CalendarCell = ({
       data-next-month={rangeStatus === 'above-range'}
       data-current={current}
       onClick={handleClick}
+      role="button"
+      tabIndex={0}
     >
       <StyledCalendarDayCellButtonHeader>
         <Typography level="body-md" fontWeight={900}>

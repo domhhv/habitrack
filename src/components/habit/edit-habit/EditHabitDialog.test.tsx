@@ -6,6 +6,10 @@ jest.mock('@hooks', () => ({
 
 jest.mock('@context', () => ({
   useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
+  useTraits: jest
+    .fn()
+    .mockReturnValue({ traitsMap: { 1: { slug: 'trait-slug' } } }),
+  TraitsProvider: jest.fn(({ children }) => children),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
@@ -14,7 +18,7 @@ jest.mock('@supabase/auth-helpers-react', () => ({
     .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
 }));
 
-import { useHabits } from '@context';
+import { TraitsProvider, useHabits } from '@context';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -42,7 +46,9 @@ describe(EditHabitDialog.name, () => {
 
   it('should set values from props', () => {
     const { getByRole, getByLabelText } = render(
-      <EditHabitDialog {...props} />
+      <TraitsProvider>
+        <EditHabitDialog {...props} />
+      </TraitsProvider>
     );
     expect(getByRole('dialog')).toBeDefined();
     expect(getByLabelText('Name')).toHaveProperty('value', 'Habit Name');
@@ -53,19 +59,29 @@ describe(EditHabitDialog.name, () => {
   });
 
   it('should not render if habit is not provided', () => {
-    const { queryByRole } = render(<EditHabitDialog {...props} habit={null} />);
+    const { queryByRole } = render(
+      <TraitsProvider>
+        <EditHabitDialog {...props} habit={null} />
+      </TraitsProvider>
+    );
     expect(queryByRole('dialog')).toBeNull();
   });
 
   it('should not render if open is false', () => {
-    const { queryByRole } = render(<EditHabitDialog {...props} open={false} />);
+    const { queryByRole } = render(
+      <TraitsProvider>
+        <EditHabitDialog {...props} open={false} />
+      </TraitsProvider>
+    );
     expect(queryByRole('dialog')).toBeNull();
   });
 
   it('should call onClose when closed', async () => {
     const onClose = jest.fn();
     const { getByTestId } = render(
-      <EditHabitDialog {...props} onClose={onClose} />
+      <TraitsProvider>
+        <EditHabitDialog {...props} onClose={onClose} />
+      </TraitsProvider>
     );
     const closeIcon = getByTestId('close-icon');
     fireEvent.click(closeIcon);
@@ -76,13 +92,16 @@ describe(EditHabitDialog.name, () => {
     const mockUpdateHabit = jest.fn();
     (useHabits as jest.Mock).mockReturnValue({ updateHabit: mockUpdateHabit });
     const { getByRole, getByLabelText } = render(
-      <EditHabitDialog {...props} />
+      <TraitsProvider>
+        <EditHabitDialog {...props} />
+      </TraitsProvider>
     );
     const nameInput = getByLabelText('Name');
     const descriptionInput = getByLabelText('Description (optional)');
     const form = getByRole('form');
     const updatedAt = new Date();
     updatedAt.setMilliseconds(0);
+    updatedAt.setSeconds(0);
     act(() => {
       fireEvent.change(nameInput, { target: { value: 'New Habit Name' } });
       fireEvent.change(descriptionInput, {

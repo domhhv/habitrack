@@ -1,4 +1,4 @@
-# .github/workflows/lint.yml
+# .github/workflows/code-health.yml
 
 name: Code health checks # name of the action (displayed in the github interface)
 

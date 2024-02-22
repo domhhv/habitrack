@@ -1,6 +1,5 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { useHabits } from '@context';
-import { useTraits } from '@hooks';
+import { useHabits, useTraits } from '@context';
 import type { Habit } from '@models';
 import {
   Button,
@@ -75,6 +74,7 @@ const EditHabitDialog = ({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     const updatedAt = new Date();
     updatedAt.setMilliseconds(0);
+    updatedAt.setSeconds(0);
     event.preventDefault();
     setIsUpdating(true);
     const newHabit = {
