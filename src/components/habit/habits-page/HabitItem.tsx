@@ -176,6 +176,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
               variant="soft"
               onClick={onDelete}
               role="delete-habit-button"
+              data-testid={`delete-habit-id-${habit.id}-button`}
             >
               <DeleteForever />
             </IconButton>

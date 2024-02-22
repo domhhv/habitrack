@@ -27,17 +27,25 @@ const ConfirmDialog = ({
   children,
 }: ConfirmDialogProps) => {
   return (
-    <Modal open={open} onClose={onCancel}>
+    <Modal open={open} onClose={onCancel} role="confirm-dialog">
       <ModalDialog>
         <ModalClose />
         <DialogTitle>{heading}</DialogTitle>
         <DialogContent>
           <Typography>{children}</Typography>
         </DialogContent>
-        <Button onClick={onCancel} disabled={loading}>
+        <Button
+          onClick={onCancel}
+          disabled={loading}
+          role="confirm-dialog-cancel"
+        >
           Cancel
         </Button>
-        <Button onClick={onConfirm} loading={loading}>
+        <Button
+          onClick={onConfirm}
+          loading={loading}
+          role="confirm-dialog-confirm"
+        >
           Confirm
         </Button>
       </ModalDialog>

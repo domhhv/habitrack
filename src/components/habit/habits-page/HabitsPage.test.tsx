@@ -125,11 +125,151 @@ describe(HabitsPage.name, () => {
     expect(queryByRole('edit-habit-modal')).toBeNull();
     fireEvent.click(getByTestId('edit-habit-id-2-button'));
     expect(getByRole('edit-habit-modal')).toBeDefined();
-    // const form = getByRole('edit-habit-form');
-    // form.dispatchEvent(new Event('submit'));
-    // // fireEvent.click(getByRole('submit-edited-habit-button'));
-    // await waitFor(() => {
-    //   expect(queryByRole('edit-habit-modal')).toBeNull();
-    // });
+  });
+
+  it('should open confirm dialog on remove icon button click', async () => {
+    const habits: Habit[] = [
+      {
+        id: 1,
+        name: 'Habit name #1',
+        description: 'Habit description #1',
+        userId: 'uuid-42',
+        createdAt: '2021-01-01T00:00:00Z',
+        updatedAt: '2021-01-01T00:00:00Z',
+        iconPath: 'icon-path-2',
+        traitId: 1,
+      },
+      {
+        id: 2,
+        name: 'Habit name #2',
+        description: 'Habit description #2',
+        userId: 'uuid-43',
+        createdAt: '2021-01-01T00:00:00Z',
+        updatedAt: '2021-01-01T00:00:00Z',
+        iconPath: 'icon-path-2',
+        traitId: 2,
+      },
+    ];
+    (useHabits as jest.Mock).mockImplementation(() => ({
+      habits,
+      habitsMap: {
+        1: habits[0],
+        2: habits[1],
+      },
+      removeHabit: jest.fn(),
+    }));
+    (useTraits as jest.Mock).mockImplementation(() => ({
+      traitsMap: { 1: {}, 2: {} },
+      allTraits: [],
+    }));
+    const { queryByRole, getByRole, getByTestId } = render(
+      <TraitsProvider>
+        <HabitsProvider>
+          <HabitsPage />
+        </HabitsProvider>
+      </TraitsProvider>
+    );
+    expect(queryByRole('confirm-dialog')).toBeNull();
+    fireEvent.click(getByTestId('delete-habit-id-2-button'));
+    expect(getByRole('confirm-dialog')).toBeDefined();
+    fireEvent.click(getByRole('confirm-dialog-cancel'));
+    expect(queryByRole('confirm-dialog')).toBeNull();
+  });
+
+  it('should open edit dialog on edit icon button click', async () => {
+    const habits: Habit[] = [
+      {
+        id: 1,
+        name: 'Habit name #1',
+        description: 'Habit description #1',
+        userId: 'uuid-42',
+        createdAt: '2021-01-01T00:00:00Z',
+        updatedAt: '2021-01-01T00:00:00Z',
+        iconPath: 'icon-path-2',
+        traitId: 1,
+      },
+      {
+        id: 2,
+        name: 'Habit name #2',
+        description: 'Habit description #2',
+        userId: 'uuid-43',
+        createdAt: '2021-01-01T00:00:00Z',
+        updatedAt: '2021-01-01T00:00:00Z',
+        iconPath: 'icon-path-2',
+        traitId: 2,
+      },
+    ];
+    (useHabits as jest.Mock).mockImplementation(() => ({
+      habits,
+      habitsMap: {
+        1: habits[0],
+        2: habits[1],
+      },
+      removeHabit: jest.fn(),
+    }));
+    (useTraits as jest.Mock).mockImplementation(() => ({
+      traitsMap: { 1: {}, 2: {} },
+      allTraits: [],
+    }));
+    const { queryByRole, getByRole, getByTestId } = render(
+      <TraitsProvider>
+        <HabitsProvider>
+          <HabitsPage />
+        </HabitsProvider>
+      </TraitsProvider>
+    );
+    expect(queryByRole('edit-habit-modal')).toBeNull();
+    fireEvent.click(getByTestId('edit-habit-id-2-button'));
+    expect(getByRole('edit-habit-modal')).toBeDefined();
+  });
+
+  it('should remove habit on confirm', async () => {
+    const habits: Habit[] = [
+      {
+        id: 1,
+        name: 'Habit name #1',
+        description: 'Habit description #1',
+        userId: 'uuid-42',
+        createdAt: '2021-01-01T00:00:00Z',
+        updatedAt: '2021-01-01T00:00:00Z',
+        iconPath: 'icon-path-2',
+        traitId: 1,
+      },
+      {
+        id: 2,
+        name: 'Habit name #2',
+        description: 'Habit description #2',
+        userId: 'uuid-43',
+        createdAt: '2021-01-01T00:00:00Z',
+        updatedAt: '2021-01-01T00:00:00Z',
+        iconPath: 'icon-path-2',
+        traitId: 2,
+      },
+    ];
+    const mockRemoveHabit = jest.fn();
+    (useHabits as jest.Mock).mockImplementation(() => ({
+      habits,
+      habitsMap: {
+        1: habits[0],
+        2: habits[1],
+      },
+      removeHabit: mockRemoveHabit,
+    }));
+    (useTraits as jest.Mock).mockImplementation(() => ({
+      traitsMap: { 1: {}, 2: {} },
+      allTraits: [],
+    }));
+    const { queryByRole, getByRole, getByTestId } = render(
+      <TraitsProvider>
+        <HabitsProvider>
+          <HabitsPage />
+        </HabitsProvider>
+      </TraitsProvider>
+    );
+    expect(queryByRole('confirm-dialog')).toBeNull();
+    fireEvent.click(getByTestId('delete-habit-id-2-button'));
+    expect(getByRole('confirm-dialog')).toBeDefined();
+    fireEvent.click(getByRole('confirm-dialog-confirm'));
+    expect(mockRemoveHabit).toHaveBeenCalled();
   });
 });
