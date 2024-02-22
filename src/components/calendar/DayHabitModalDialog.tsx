@@ -1,5 +1,4 @@
-import { useOccurrences, useHabits } from '@context';
-import { useTraits } from '@hooks';
+import { useOccurrences, useHabits, useTraits } from '@context';
 import {
   Box,
   Button,

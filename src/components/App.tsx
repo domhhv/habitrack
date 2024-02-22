@@ -4,6 +4,7 @@ import {
   HabitsProvider,
   OccurrencesProvider,
   SnackbarProvider,
+  TraitsProvider,
 } from '@context';
 import { supabaseClient, theme } from '@helpers';
 import { USER_THEME_STORAGE_KEY } from '@hooks';
@@ -56,33 +57,35 @@ const App = () => {
       <SessionContextProvider supabaseClient={supabaseClient}>
         <SnackbarProvider>
           <UserAccountProvider>
-            <HabitsProvider>
-              <OccurrencesProvider range={range}>
-                <BrowserRouter>
-                  <AppHeader />
-                  <StyledAppContainerDiv>
-                    <Routes>
-                      <Route
-                        path="/calendar"
-                        element={
-                          <Calendar
-                            state={state}
-                            weeksInMonth={weeksInMonth}
-                            aria-label="Event date"
-                          />
-                        }
-                      />
-                      <Route path="/habits" element={<HabitsPage />} />
-                      <Route path="/account" element={<AccountPage />} />
-                      <Route
-                        path="*"
-                        element={<Navigate to="/calendar" replace />}
-                      />
-                    </Routes>
-                  </StyledAppContainerDiv>
-                </BrowserRouter>
-              </OccurrencesProvider>
-            </HabitsProvider>
+            <TraitsProvider>
+              <HabitsProvider>
+                <OccurrencesProvider range={range}>
+                  <BrowserRouter>
+                    <AppHeader />
+                    <StyledAppContainerDiv>
+                      <Routes>
+                        <Route
+                          path="/calendar"
+                          element={
+                            <Calendar
+                              state={state}
+                              weeksInMonth={weeksInMonth}
+                              aria-label="Event date"
+                            />
+                          }
+                        />
+                        <Route path="/habits" element={<HabitsPage />} />
+                        <Route path="/account" element={<AccountPage />} />
+                        <Route
+                          path="*"
+                          element={<Navigate to="/calendar" replace />}
+                        />
+                      </Routes>
+                    </StyledAppContainerDiv>
+                  </BrowserRouter>
+                </OccurrencesProvider>
+              </HabitsProvider>
+            </TraitsProvider>
           </UserAccountProvider>
         </SnackbarProvider>
       </SessionContextProvider>

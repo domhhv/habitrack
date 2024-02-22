@@ -1,0 +1,18 @@
+name: Jest Coverage Report
+
+on:
+    pull_request:
+        branches:
+            - master
+            - main
+jobs:
+    permissions: write-all
+    coverage:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: ArtiomTr/jest-coverage-report-action@v2
+              with:
+                  coverage_report_path: coverage/lcov-report/index.html
+                  check_thresholds: true
+                  thresholds: 'branches=90% lines=90% functions=90% statements=90%'

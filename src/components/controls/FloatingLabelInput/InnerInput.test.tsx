@@ -3,6 +3,10 @@ jest.mock('react', () => ({
   useId: jest.fn().mockReturnValue('my-id'),
 }));
 
+jest.mock('@utils', () => ({
+  transformServerEntities: jest.fn(),
+}));
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 

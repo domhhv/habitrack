@@ -1,6 +1,5 @@
 import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
-import { useHabits } from '@context';
-import { useTraits } from '@hooks';
+import { useHabits, useTraits } from '@context';
 import type { Habit } from '@models';
 import {
   Button,
@@ -56,6 +55,7 @@ const EditHabitDialog = ({
   const handleClose = () => {
     setIsOpen(false);
     onClose?.();
+    console.log('called handleClose');
   };
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +75,7 @@ const EditHabitDialog = ({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     const updatedAt = new Date();
     updatedAt.setMilliseconds(0);
+    updatedAt.setSeconds(0);
     event.preventDefault();
     setIsUpdating(true);
     const newHabit = {
@@ -92,12 +93,17 @@ const EditHabitDialog = ({
   };
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal
+      open={open}
+      onClose={handleClose}
+      role="edit-habit-modal"
+      data-visible={isOpen.toString()}
+    >
       <ModalDialog>
         <ModalClose data-testid="close-icon" onClick={handleClose} />
         <DialogTitle>Edit habit</DialogTitle>
         <DialogContent>
-          <StyledForm onSubmit={handleSubmit} role="form">
+          <StyledForm onSubmit={handleSubmit} role="edit-habit-form">
             <FloatingLabelInput
               value={name}
               onChange={handleNameChange}
@@ -134,7 +140,12 @@ const EditHabitDialog = ({
                 Bad
               </Option>
             </Select>
-            <Button type="submit" fullWidth loading={isUpdating}>
+            <Button
+              role="submit-edited-habit-button"
+              type="submit"
+              fullWidth
+              loading={isUpdating}
+            >
               Done
             </Button>
           </StyledForm>

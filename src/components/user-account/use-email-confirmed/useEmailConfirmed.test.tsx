@@ -9,6 +9,10 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(),
 }));
 
+jest.mock('@utils', () => ({
+  transformServerEntities: jest.fn(),
+}));
+
 import { useSnackbar } from '@context';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';

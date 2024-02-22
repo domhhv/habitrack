@@ -1,10 +1,10 @@
-import { useHabits, useSnackbar } from '@context';
-import { useTraits } from '@hooks';
+import { useHabits, useSnackbar, useTraits } from '@context';
 import type { Habit } from '@models';
 import { DeleteForever } from '@mui/icons-material';
 import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
 import {
   Chip,
+  type ChipProps,
   IconButton,
   ListItemDecorator,
   Tooltip,
@@ -25,13 +25,13 @@ import {
   StyledImageIconButton,
 } from './styled';
 
-type HabitRowProps = {
+export type HabitItemProps = {
   habit: Habit;
   onEdit: () => void;
   onDelete: () => void;
 };
 
-const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
+const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
   const user = useUser();
   const { showSnackbar } = useSnackbar();
   const { traitsMap } = useTraits();
@@ -50,7 +50,15 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
         const habitIconPath = `${user?.id}/habit-id-${habit.id}.${extension}`;
 
         if (existingIconPath) {
-          await updateFile(StorageBuckets.HABIT_ICONS, habitIconPath, iconFile);
+          const { error } = await updateFile(
+            StorageBuckets.HABIT_ICONS,
+            habitIconPath,
+            iconFile
+          );
+
+          if (error) {
+            throw error;
+          }
 
           await updateHabit(habit.id, { ...habit, iconPath: habitIconPath });
 
@@ -77,7 +85,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
           });
         }
       } catch (e) {
-        showSnackbar('Failed to upload icon', {
+        showSnackbar((e as Error).message || 'Failed to upload icon', {
           variant: 'soft',
           color: 'danger',
         });
@@ -85,7 +93,19 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
     }
   };
 
-  const isGoodHabit = traitsMap[habit.traitId]?.slug === 'good';
+  const getHabitTraitChipColor = (): ChipProps['color'] => {
+    const { slug } = traitsMap[habit.traitId] || {};
+
+    if (slug === 'good') {
+      return 'success';
+    }
+
+    if (slug === 'bad') {
+      return 'danger';
+    }
+
+    return 'neutral';
+  };
 
   return (
     <StyledListItem>
@@ -100,11 +120,13 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
             <StyledHabitImage
               src={getHabitIconUrl(habit.iconPath)}
               alt={habit.name}
+              role="habit-icon"
             />
             <VisuallyHiddenInput
               type="file"
               accept="image/*"
               onChange={handleFileChange}
+              role="habit-icon-input"
             />
           </StyledImageIconButton>
         </Tooltip>
@@ -117,12 +139,13 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
                 {habit.name}
               </Typography>
               <Chip
-                color={isGoodHabit ? 'success' : 'danger'}
+                color={getHabitTraitChipColor()}
                 size="sm"
                 variant="soft"
+                role="habit-trait-chip"
               >
                 <Typography level="body-xs" sx={{ margin: 0 }}>
-                  {isGoodHabit ? 'Good' : 'Bad'}
+                  {traitsMap[habit.traitId]?.name || 'Unknown'}
                 </Typography>
               </Chip>
             </StyledHabitTitleWrapper>
@@ -140,6 +163,8 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
               variant="soft"
               color="primary"
               onClick={onEdit}
+              role="edit-habit-button"
+              data-testid={`edit-habit-id-${habit.id}-button`}
             >
               <ModeRoundedIcon fontSize="small" />
             </StyledEditIconButton>
@@ -150,6 +175,8 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitRowProps) => {
               color="danger"
               variant="soft"
               onClick={onDelete}
+              role="delete-habit-button"
+              data-testid={`delete-habit-id-${habit.id}-button`}
             >
               <DeleteForever />
             </IconButton>

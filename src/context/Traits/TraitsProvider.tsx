@@ -1,8 +1,13 @@
+import { TraitsContext } from '@context';
 import type { Trait, TraitsMap } from '@models';
 import { listTraits } from '@services';
 import React from 'react';
 
-const useTraits = () => {
+type TraitsProviderProps = {
+  children: React.ReactNode;
+};
+
+const TraitsProvider = ({ children }: TraitsProviderProps) => {
   const [publicTraits, setPublicTraits] = React.useState<Trait[]>([]);
   const [userTraits, setUserTraits] = React.useState<Trait[]>([]);
   const [traitsMap, setTraitsMap] = React.useState<TraitsMap>({});
@@ -16,8 +21,8 @@ const useTraits = () => {
 
       const traits = await listTraits();
 
-      const publicTraits = traits.filter((trait: Trait) => !trait.user_id);
-      const userTraits = traits.filter((trait: Trait) => trait.user_id);
+      const publicTraits = traits.filter((trait: Trait) => !trait.userId);
+      const userTraits = traits.filter((trait: Trait) => trait.userId);
       setPublicTraits(publicTraits);
       setUserTraits(userTraits);
       setTraitsMap(
@@ -31,7 +36,19 @@ const useTraits = () => {
     void loadTraits();
   }, []);
 
-  return { allTraits, traitsMap, publicTraits, userTraits, fetchingTraits };
+  return (
+    <TraitsContext.Provider
+      value={{
+        allTraits,
+        traitsMap,
+        publicTraits,
+        userTraits,
+        fetchingTraits,
+      }}
+    >
+      {children}
+    </TraitsContext.Provider>
+  );
 };
 
-export default useTraits;
+export default TraitsProvider;
