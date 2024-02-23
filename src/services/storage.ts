@@ -28,7 +28,6 @@ export const updateFile = async (
   path: string,
   file: File
 ) => {
-  console.log('called updateFile');
   return supabaseClient.storage
     .from(bucket)
     .update(path, file, { cacheControl: '3600', upsert: true });

@@ -49,6 +49,7 @@ const DayHabitModalDialog = ({
       timestamp: +date,
       habitId: selectedBadHabit as number,
       userId: user?.id as string,
+      time: null, // TODO: Add time picker
     };
     await addOccurrence(occurrence);
 

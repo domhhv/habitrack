@@ -45,11 +45,11 @@ CREATE TABLE IF NOT EXISTS "public"."habits" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT now() NOT NULL,
     "updated_at" timestamp with time zone,
-    "user_id" uuid,
+    "user_id" uuid NON NULL,
     "name" text,
     "description" text,
     "trait_id" bigint NOT NULL,
-    "icon_id" uuid
+    "icon_path" uuid
 );
 
 ALTER TABLE "public"."habits" OWNER TO "postgres";

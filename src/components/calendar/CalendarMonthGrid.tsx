@@ -15,16 +15,11 @@ type MonthProps = {
     monthIndex: number,
     fullYear: number
   ) => void;
-  calendarEventsByDate: OccurrencesDateMap;
+  occurrencesByDate: OccurrencesDateMap;
 };
 
 const Month = (
-  {
-    weeksInMonth,
-    state,
-    onDayModalDialogOpen,
-    calendarEventsByDate,
-  }: MonthProps,
+  { weeksInMonth, state, onDayModalDialogOpen, occurrencesByDate }: MonthProps,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   return (
@@ -54,7 +49,7 @@ const Month = (
                   monthIndex={calendarDate.month}
                   fullYear={calendarDate.year}
                   onClick={onDayModalDialogOpen}
-                  events={calendarEventsByDate[day] || []}
+                  occurrences={occurrencesByDate[day] || []}
                   rangeStatus={rangeStatus}
                   onNavigateBack={state.focusPreviousPage}
                   onNavigateForward={state.focusNextPage}

@@ -55,7 +55,6 @@ const EditHabitDialog = ({
   const handleClose = () => {
     setIsOpen(false);
     onClose?.();
-    console.log('called handleClose');
   };
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
