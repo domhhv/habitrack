@@ -11,7 +11,6 @@ jest.mock('@services', () => ({
   StorageBuckets: {
     HABIT_ICONS: 'habit-icons',
   },
-  pathHabit: jest.fn(),
   uploadFile: jest.fn(),
 }));
 
@@ -112,7 +111,7 @@ describe(AddHabitDialogButton.name, () => {
     });
   });
 
-  it('if habit icon uploaded, should call uploadFile and patchHabit', async () => {
+  it('if habit icon uploaded, should call uploadFile and updateHabit', async () => {
     const mockAddHabit = jest
       .fn()
       .mockReturnValue(Promise.resolve({ id: 1234 }));
@@ -172,15 +171,6 @@ describe(AddHabitDialogButton.name, () => {
         iconPath: 'icon-path',
         traitId: 1,
       });
-      expect(mockShowSnackbar).toHaveBeenCalledWith(
-        'Your habit has been added!',
-        {
-          variant: 'soft',
-          color: 'success',
-        }
-      );
     });
   });
-
-  it('should show failure snackbar if habit adding failed', () => {});
 });

@@ -8,7 +8,7 @@ The app is live [here](https://domhhv.github.io/react-habits-calendar-tracker/).
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [framer-motion](https://www.framer.com/motion/) for animations
 - [Material Joy UI](https://mui.com/joy-ui/getting-started/) for the UI and styling solution
-- Supabase for Authentication, Database and Storage
+- [Supabase](https://supabase.io) for Authentication, Database and Storage
 
 ## Features
 
@@ -39,15 +39,6 @@ The app uses Supabase for data storage and management. In order to run the app l
       - `slug` (type: `text`)
       - `description` (type: `text`)
       - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
-  - `public.occurrences`:
-    - `id` (type: `int8`, primary key)
-    - `created_at` (type: `timestamp with time zone`)
-    - `updated_at` (type: `timestamp with time zone`)
-    - `timestamp` (type: `int8`)
-    - `day` (type: `date`)
-    - `time` (type: `time with time zone`)
-    - `habit_id` (type: `int8`, foreign key to `public.habits`)
-    - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
   - `public.habits`:
       - `id` (type: `int8`, primary key)
       - `created_at` (type: `timestamp with time zone`)
@@ -57,6 +48,15 @@ The app uses Supabase for data storage and management. In order to run the app l
       - `trait_id` (type: `int8`, foreign key to `public.traits`)
       - `icon_path` (type: `text`)
       - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
+  - `public.occurrences`:
+    - `id` (type: `int8`, primary key)
+    - `created_at` (type: `timestamp with time zone`)
+    - `updated_at` (type: `timestamp with time zone`)
+    - `timestamp` (type: `int8`)
+    - `day` (type: `date`)
+    - `time` (type: `time with time zone`)
+    - `habit_id` (type: `int8`, foreign key to `public.habits`)
+    - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
   - `public.accounts`:
       - `id` (type: `uuid`, primary key)
       - `created_at` (type: `timestamp with time zone`)
