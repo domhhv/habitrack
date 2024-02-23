@@ -65,14 +65,4 @@ const config = {
   ],
 };
 
-const compiler = webpack(config);
-
-// `hot` and `client` options are disabled because we added them manually
-const server = new webpackDevServer({ hot: false, client: false }, compiler);
-
-(async () => {
-  await server.start();
-  console.log('dev server is running');
-})();
-
 module.exports = config;

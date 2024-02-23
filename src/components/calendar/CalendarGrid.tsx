@@ -63,7 +63,7 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          calendarEventsByDate={occurrencesByDate}
+          occurrencesByDate={occurrencesByDate}
           onDayModalDialogOpen={handleDayModalDialogOpen}
           weeksInMonth={weeksInMonth}
           state={state}

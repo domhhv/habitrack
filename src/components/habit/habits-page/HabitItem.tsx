@@ -1,10 +1,10 @@
 import { useHabits, useSnackbar, useTraits } from '@context';
+import { useHabitTraitChipColor } from '@hooks';
 import type { Habit } from '@models';
 import { DeleteForever } from '@mui/icons-material';
 import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
 import {
   Chip,
-  type ChipProps,
   IconButton,
   ListItemDecorator,
   Tooltip,
@@ -36,6 +36,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
   const { showSnackbar } = useSnackbar();
   const { traitsMap } = useTraits();
   const { updateHabit } = useHabits();
+  const traitChipColor = useHabitTraitChipColor(habit.traitId);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     event
@@ -93,20 +94,6 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
     }
   };
 
-  const getHabitTraitChipColor = (): ChipProps['color'] => {
-    const { slug } = traitsMap[habit.traitId] || {};
-
-    if (slug === 'good') {
-      return 'success';
-    }
-
-    if (slug === 'bad') {
-      return 'danger';
-    }
-
-    return 'neutral';
-  };
-
   return (
     <StyledListItem>
       <ListItemDecorator>
@@ -139,7 +126,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
                 {habit.name}
               </Typography>
               <Chip
-                color={getHabitTraitChipColor()}
+                color={traitChipColor}
                 size="sm"
                 variant="soft"
                 role="habit-trait-chip"

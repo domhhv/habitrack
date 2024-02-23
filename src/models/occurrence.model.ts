@@ -6,8 +6,8 @@ export type Occurrence = {
   updatedAt: string;
   timestamp: number;
   day: string;
-  time?: string | null;
-  habitId: number | null;
+  time: string | null;
+  habitId: number;
   userId: string;
 };
 

@@ -70,7 +70,6 @@ const OccurrencesProvider = ({ children, range }: Props) => {
     );
 
     setOccurrencesByDate(occurrencesByDate);
-    console.log('called useEffect');
   }, [occurrences]);
 
   const addOccurrence = React.useCallback(

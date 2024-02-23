@@ -29,7 +29,6 @@ const AuthModalButton = () => {
     if (!supabaseUser?.id) {
       setOpen(true);
     } else {
-      console.log('called navigate');
       navigate('/account');
     }
   };

@@ -19,8 +19,8 @@ import {
   styled,
   Typography,
 } from '@mui/joy';
-import { patchHabit, StorageBuckets, uploadFile } from '@services';
-import { useSession, useUser } from '@supabase/auth-helpers-react';
+import { StorageBuckets, uploadFile } from '@services';
+import { useUser } from '@supabase/auth-helpers-react';
 import React, { type FormEventHandler } from 'react';
 
 const VisuallyHiddenInput = styled('input')({
@@ -37,15 +37,14 @@ const VisuallyHiddenInput = styled('input')({
 
 const AddHabitDialogButton = () => {
   const user = useUser();
-  const session = useSession();
+  const { showSnackbar } = useSnackbar();
+  const { allTraits, traitsMap } = useTraits();
   const { fetchingHabits, addingHabit, addHabit, updateHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
   const [habitTraitId, setHabitTraitId] = React.useState(0);
   const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
-  const { showSnackbar } = useSnackbar();
-  const { allTraits, traitsMap } = useTraits();
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -64,7 +63,7 @@ const AddHabitDialogButton = () => {
       const habit = {
         name: habitName,
         description: habitDescription,
-        userId: user?.id || session?.user?.id || '',
+        userId: user?.id || '',
         iconPath: '',
         traitId: habitTraitId as number,
       };
@@ -72,32 +71,23 @@ const AddHabitDialogButton = () => {
       const { id } = await addHabit(habit);
 
       if (habitIcon) {
+        const [, extension] = habitIcon.name.split('.');
         const { data } = await uploadFile(
           StorageBuckets.HABIT_ICONS,
-          `${user?.id}/habit-id-${id}`,
+          `${user?.id}/habit-id-${id}.${extension}`,
           habitIcon
         );
-
-        await patchHabit(id, { ...habit, iconPath: data?.path });
-
-        showSnackbar('Icon updated!', {
-          variant: 'soft',
-          color: 'success',
-        });
-
-        void updateHabit(id, { ...habit, iconPath: data?.path });
-
-        showSnackbar('Habit updated with new icon path!', {
-          variant: 'soft',
-          color: 'success',
-        });
+        await updateHabit(id, { ...habit, iconPath: data?.path });
       }
-
-      handleDialogClose();
     } catch (error) {
       console.error(error);
+
+      showSnackbar('Something went wrong while adding your habit', {
+        variant: 'soft',
+        color: 'danger',
+      });
     } finally {
-      setOpen(false);
+      handleDialogClose();
     }
   };
 
@@ -134,16 +124,20 @@ const AddHabitDialogButton = () => {
         variant="solid"
         startDecorator={<AddRounded />}
         onClick={handleDialogOpen}
-        disabled={fetchingHabits || !session?.user?.id}
+        disabled={fetchingHabits || !user?.id}
+        data-testid="add-habit-button"
       >
         Add habit
       </Button>
-      <Modal open={open} onClose={handleDialogClose}>
+      <Modal open={open} onClose={handleDialogClose} role="add-habit-dialog">
         <ModalDialog>
-          <ModalClose />
+          <ModalClose
+            role="close-add-habit-dialog-button"
+            onClick={handleDialogClose}
+          />
           <DialogTitle>Add New Habit</DialogTitle>
           <DialogContent>
-            <form onSubmit={handleAdd}>
+            <form onSubmit={handleAdd} role="add-habit-form">
               <Box mb={1}>
                 <FloatingLabelInput
                   required
@@ -167,6 +161,7 @@ const AddHabitDialogButton = () => {
                   // @ts-ignore
                   onChange={handleHabitTraitChange}
                   required
+                  data-testid="habit-trait-select"
                   placeholder="Choose a trait"
                   value={habitTraitId}
                   endDecorator={
@@ -180,7 +175,11 @@ const AddHabitDialogButton = () => {
                   }
                 >
                   {allTraits.map((trait) => (
-                    <Option key={trait.id} value={trait.id}>
+                    <Option
+                      key={trait.id}
+                      value={trait.id}
+                      data-testid={`habit-trait-id-${trait.id}-option`}
+                    >
                       {trait.name}
                     </Option>
                   ))}
@@ -199,6 +198,7 @@ const AddHabitDialogButton = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
+                    role="habit-icon-input"
                   />
                 </Button>
                 {habitIcon && (

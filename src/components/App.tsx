@@ -28,7 +28,7 @@ const StyledAppContainerDiv = styled('div')({
   alignItems: 'center',
   flex: '1 1 0%',
   [theme.getColorSchemeSelector('light')]: {
-    backgroundColor: theme.palette.neutral[100],
+    backgroundColor: theme.palette.neutral[200],
   },
   [theme.getColorSchemeSelector('dark')]: {
     backgroundColor: theme.palette.neutral[800],
@@ -42,11 +42,13 @@ const App = () => {
     createCalendar,
   });
   const weeksInMonth = getWeeksInMonth(state.visibleRange.start, locale);
-  const weeks = [...new Array(weeksInMonth).keys()];
-  const range = generateCalendarRange(
-    state.getDatesInWeek(0) as CalendarDate[],
-    state.getDatesInWeek(weeks[weeks.length - 1]) as CalendarDate[]
-  );
+  const range = React.useMemo(() => {
+    const weeks = [...new Array(weeksInMonth).keys()];
+    return generateCalendarRange(
+      state.getDatesInWeek(0) as CalendarDate[],
+      state.getDatesInWeek(weeks[weeks.length - 1]) as CalendarDate[]
+    );
+  }, [state, weeksInMonth]);
 
   return (
     <CssVarsProvider
