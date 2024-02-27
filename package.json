@@ -21,7 +21,7 @@
     "date-fns"
   ],
   "engines": {
-    "node": "^20.11.0",
+    "node": "18.x",
     "yarn": "^1.22.19"
   },
   "scripts": {
