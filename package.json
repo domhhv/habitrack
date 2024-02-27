@@ -20,6 +20,10 @@
     "framer-motion",
     "date-fns"
   ],
+  "engines": {
+    "node": "^20.11.0",
+    "yarn": "^1.22.19"
+  },
   "scripts": {
     "prepare": "([ -d ./.git ] && husky install) || echo \"Skipping husky install since package does not have .git folder\"",
     "prebuild": "yarn typecheck && yarn eslint:check && yarn prettier:check",
@@ -34,7 +38,7 @@
     "prettier:write": "prettier --write src",
     "typecheck": "tsc --noEmit",
     "db:migrate": "supabase migration up",
-    "test": "DEBUG_PRINT_LIMIT=30000 DOTENV_CONFIG_PATH=./.env.test jest --setupFiles dotenv/config --config tests/jest.config.js",
+    "test": "DEBUG_PRINT_LIMIT=30000 DOTENV_CONFIG_PATH=./.env.test jest --runInBand --setupFiles dotenv/config --config tests/jest.config.js",
     "test:watch": "yarn test --watch",
     "test:coverage": "yarn test --coverage"
   },
