@@ -18,7 +18,6 @@ import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { generateCalendarRange } from '@utils';
 import React from 'react';
 import { useLocale } from 'react-aria';
-import { hot } from 'react-hot-loader/root';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useCalendarState } from 'react-stately';
 
@@ -95,4 +94,4 @@ const App = () => {
   );
 };
 
-export default hot(App);
+export default App;

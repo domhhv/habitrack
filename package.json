@@ -18,29 +18,24 @@
     "emotion",
     "mui",
     "framer-motion",
-    "date-fns"
+    "date-fns",
+    "supabase"
   ],
-  "engines": {
-    "node": "18.x",
-    "yarn": "^1.22.19"
-  },
   "scripts": {
     "prepare": "([ -d ./.git ] && husky install) || echo \"Skipping husky install since package does not have .git folder\"",
-    "prebuild": "yarn typecheck && yarn eslint:check && yarn prettier:check",
-    "predeploy": "yarn build",
-    "deploy": "gh-pages -d dist",
-    "dev": "NODE_ENV=development webpack-dev-server --open --hot",
+    "prebuild": "npm run typecheck && npm run eslint:check && npm run prettier:check",
     "build": "NODE_ENV=production webpack",
+    "dev": "NODE_ENV=development webpack-dev-server --open --hot",
     "start": "NODE_ENV=production serve -s dist",
+    "typecheck": "tsc --noEmit",
     "eslint:check": "eslint src",
     "eslint:fix": "eslint --fix src",
     "prettier:check": "prettier --check src",
     "prettier:write": "prettier --write src",
-    "typecheck": "tsc --noEmit",
-    "db:migrate": "supabase migration up",
     "test": "DEBUG_PRINT_LIMIT=30000 DOTENV_CONFIG_PATH=./.env.test jest --runInBand --setupFiles dotenv/config --config tests/jest.config.js",
-    "test:watch": "yarn test --watch",
-    "test:coverage": "yarn test --coverage"
+    "test:watch": "npm test --watch",
+    "test:coverage": "npm test --coverage",
+    "db:migrate": "supabase migration up"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [
@@ -104,7 +99,6 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "prettier": "3.1.1",
-    "react-hot-loader": "^4.13.1",
     "style-loader": "^3.3.3",
     "supabase": "^1.142.2",
     "ts-jest": "^29.1.2",
