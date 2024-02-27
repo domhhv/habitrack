@@ -11,7 +11,7 @@ const envPaths = {
 require('dotenv').config({ path: envPaths[process.env.NODE_ENV] });
 
 const config = {
-  entry: ['react-hot-loader/patch', './src/index.tsx'],
+  entry: './src/index.tsx',
   mode: process.env.NODE_ENV,
   devtool: 'inline-source-map',
   devServer: {

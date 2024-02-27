@@ -8,7 +8,7 @@ import React from 'react';
 
 import { StyledHabitChip } from './styled';
 
-type OccurrenceChipProps = {
+export type OccurrenceChipProps = {
   occurrence: Occurrence;
   onDelete: (
     occurrenceId: number,
@@ -27,16 +27,19 @@ const OccurrenceChip = ({ occurrence, onDelete }: OccurrenceChipProps) => {
   const isBeingDeleted = occurrenceIdBeingDeleted === occurrence.id;
 
   const endDecorator = isBeingDeleted ? (
-    <CircularProgress size="sm" />
+    <CircularProgress size="sm" role="habit-chip-delete-loader" />
   ) : (
     <ChipDelete
       variant="soft"
       color={traitChipColor}
       onClick={(clickEvent) => onDelete(occurrence.id, clickEvent)}
+      role="habit-chip-delete-button"
     >
-      <DeleteForeverIcon fontSize="small" />
+      <DeleteForeverIcon fontSize="large" />
     </ChipDelete>
   );
+
+  if (!eventHabit.name) return null;
 
   return (
     <Tooltip title={eventHabit.name} key={occurrence.id}>
@@ -44,12 +47,13 @@ const OccurrenceChip = ({ occurrence, onDelete }: OccurrenceChipProps) => {
         variant="soft"
         color={traitChipColor}
         key={occurrence.id}
+        role="habit-chip"
         startDecorator={
           <img
             src={getHabitIconUrl(eventHabit.iconPath)}
             alt={`${eventHabit.name} icon`}
-            width={16}
-            height={16}
+            width={20}
+            height={20}
           />
         }
         disabled={isBeingDeleted}

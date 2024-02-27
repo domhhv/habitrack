@@ -277,6 +277,7 @@ export const StyledCalendarDayCellButtonIconsContainer = styled(Box)(
 );
 
 export const StyledHabitChip = styled(Chip)(({ theme }) => ({
+  padding: theme.spacing(0.5, 1),
   marginTop: theme.spacing(0.5),
   marginRight: theme.spacing(0.5),
 }));

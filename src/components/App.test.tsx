@@ -22,6 +22,14 @@ jest.mock('@components', () => ({
   AccountPage: jest.fn(),
 }));
 
+jest.mock('@context', () => ({
+  SnackbarProvider: jest.fn().mockImplementation(({ children }) => children),
+  UserAccountProvider: jest.fn().mockImplementation(({ children }) => children),
+  TraitsProvider: jest.fn().mockImplementation(({ children }) => children),
+  HabitsProvider: jest.fn().mockImplementation(({ children }) => children),
+  OccurrencesProvider: jest.fn().mockImplementation(({ children }) => children),
+}));
+
 import { getWeeksInMonth } from '@internationalized/date';
 import { act, render } from '@testing-library/react';
 import { generateCalendarRange } from '@utils';
