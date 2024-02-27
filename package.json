@@ -24,7 +24,7 @@
   "scripts": {
     "prepare": "([ -d ./.git ] && husky install) || echo \"Skipping husky install since package does not have .git folder\"",
     "prebuild": "npm run typecheck && npm run eslint:check && npm run prettier:check",
-    "build": "NODE_ENV=production webpack",
+    "build": "NODE_ENV=production webpack && npm run insert-favicons",
     "dev": "NODE_ENV=development webpack-dev-server --open --hot",
     "start": "NODE_ENV=production serve -s dist",
     "typecheck": "tsc --noEmit",
@@ -35,7 +35,8 @@
     "test": "DEBUG_PRINT_LIMIT=30000 DOTENV_CONFIG_PATH=./.env.test jest --runInBand --setupFiles dotenv/config --config tests/jest.config.js",
     "test:watch": "npm test --watch",
     "test:coverage": "npm test --coverage",
-    "db:migrate": "supabase migration up"
+    "db:migrate": "supabase migration up",
+    "insert-favicons": "node scripts/insert-favicons.js"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [
