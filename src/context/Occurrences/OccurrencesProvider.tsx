@@ -31,7 +31,7 @@ const OccurrencesProvider = ({ children, range }: Props) => {
     const occurrences = await listOccurrences(range);
     setOccurrences(occurrences);
     setFetchingOccurrences(false);
-  }, [range]);
+  }, [range[0], range[1]]);
 
   React.useEffect(() => {
     void fetchOccurrences();
@@ -180,4 +180,4 @@ const OccurrencesProvider = ({ children, range }: Props) => {
   );
 };
 
-export default OccurrencesProvider;
+export default React.memo(OccurrencesProvider);
