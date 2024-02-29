@@ -4,7 +4,7 @@
 
 This app is designed to provide a simple and intuitive way to monitor habits. Track your habits with ease using this customizable and user-friendly React-based habits calendar tracker.
 
-The app is live [here]([https://domhhv.github.io/react-habits-calendar-tracker/](https://whale-app-ilssy.ondigitalocean.app/calendar)). It uses:
+The app is live [here](https://habilify,io). It uses:
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [framer-motion](https://www.framer.com/motion/) for animations
 - [Material Joy UI](https://mui.com/joy-ui/getting-started/) for the UI and styling solution
