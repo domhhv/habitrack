@@ -1,12 +1,13 @@
-# Habits Calendar Tracker
+# Habilify
+
+### Habits Calendar Tracker
 
 ![Habits Calendar Tracker](https://i.ibb.co/HGKsdk5/screencapture-localhost-8081-calendar-2024-02-23-16-01-26.png)
 
 This app is designed to provide a simple and intuitive way to monitor habits. Track your habits with ease using this customizable and user-friendly React-based habits calendar tracker.
 
-The app is live [here](https://habilify,io). It uses:
+The app is live [here]([https://habilify.io]). It uses:
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
-- [framer-motion](https://www.framer.com/motion/) for animations
 - [Material Joy UI](https://mui.com/joy-ui/getting-started/) for the UI and styling solution
 - [Supabase](https://supabase.io) for Authentication, Database and Storage
 
@@ -101,7 +102,7 @@ Follow these steps to get the project up and running on your local machine.
 2. **Navigate to the project directory:**
 
     ```bash
-    cd react-habits-calendar-tracker
+    cd habilify
     ```
 
 3. **Install dependencies:**

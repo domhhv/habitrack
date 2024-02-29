@@ -32,7 +32,7 @@ const DayHabitModalDialog = ({
   const { habits } = useHabits();
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrences();
-  const [selectedBadHabit, setSelectedBadHabit] = React.useState<number | null>(
+  const [selectedHabitId, setSelectedHabitId] = React.useState<number | null>(
     null
   );
   const { traitsMap } = useTraits();
@@ -47,7 +47,7 @@ const DayHabitModalDialog = ({
     const occurrence = {
       day: date.toISOString().split('T')[0],
       timestamp: +date,
-      habitId: selectedBadHabit as number,
+      habitId: selectedHabitId as number,
       userId: user?.id as string,
       time: null, // TODO: Add time picker
     };
@@ -60,11 +60,11 @@ const DayHabitModalDialog = ({
     _: React.SyntheticEvent | null,
     newValue: number | null
   ) => {
-    setSelectedBadHabit(Number(newValue));
+    setSelectedHabitId(Number(newValue));
   };
 
   const handleClose = () => {
-    setSelectedBadHabit(0);
+    setSelectedHabitId(0);
     onClose();
   };
 
@@ -73,7 +73,7 @@ const DayHabitModalDialog = ({
   return (
     <Modal role="add-occurrence-modal" open={open} onClose={handleClose}>
       <ModalDialog sx={{ width: 380 }}>
-        <ModalClose />
+        <ModalClose role="add-occurrence-modal-close" />
         <DialogTitle>
           Add habits for {format(date, 'iii, LLL d, y')}
         </DialogTitle>
@@ -87,9 +87,10 @@ const DayHabitModalDialog = ({
               required
               color={'neutral'}
               placeholder="Select Habit"
-              value={hasHabits ? selectedBadHabit : 0}
+              value={hasHabits ? selectedHabitId : 0}
               onChange={handleHabitSelect}
               disabled={addingOccurrence}
+              role="habit-select"
             >
               {!hasHabits && (
                 <Option value={0} label="No habits found" disabled>
@@ -99,9 +100,9 @@ const DayHabitModalDialog = ({
               {hasHabits &&
                 habits.map((habit) => (
                   <Option key={habit.id} value={habit.id} label={habit.name}>
-                    {habit.name}
+                    <span>{habit.name}</span>
                     <Typography level="body-xs">
-                      {traitsMap[habit.traitId].name}
+                      {traitsMap[habit.traitId]?.name}
                     </Typography>
                   </Option>
                 ))}
