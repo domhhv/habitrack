@@ -23,6 +23,7 @@
   ],
   "scripts": {
     "prepare": "([ -d ./.git ] && husky install) || echo \"Skipping husky install since package does not have .git folder\"",
+    "prebuild": "npm run typecheck && npm run eslint:check && npm run prettier:check",
     "build": "NODE_ENV=production webpack --mode production && npm run insert-favicons",
     "dev": "NODE_ENV=development webpack-dev-server --open --hot",
     "start": "NODE_ENV=production serve -s dist",
@@ -99,7 +100,6 @@
     "typescript": "^5.3.3",
     "webpack": "^5.90.3",
     "webpack-bundle-analyzer": "^4.10.1",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.2"
+    "webpack-cli": "^5.1.4"
   }
 }

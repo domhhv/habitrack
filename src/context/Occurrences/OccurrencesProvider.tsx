@@ -10,7 +10,6 @@ import React from 'react';
 
 type Props = {
   children: React.ReactNode;
-  // range: [number, number];
   rangeStart: number;
   rangeEnd: number;
 };
@@ -174,8 +173,6 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
       occurrenceIdBeingDeleted,
       addOccurrence,
       removeOccurrence,
-      // start,
-      // end,
     ]
   );
 
