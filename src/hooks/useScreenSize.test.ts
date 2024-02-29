@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { fireEvent, renderHook } from '@testing-library/react';
 
 import useScreenSize from './useScreenSize';
 
@@ -15,8 +15,7 @@ describe(useScreenSize.name, () => {
 
   it('should update the screen size when the window is resized', () => {
     const { result } = renderHook(() => useScreenSize());
-    const initialSize = result.current;
-    global.dispatchEvent(new Event('resize'));
-    expect(result.current).not.toEqual(initialSize);
+    fireEvent.resize(window, { target: { innerWidth: 1000 } });
+    expect(result.current).toEqual(1000);
   });
 });
