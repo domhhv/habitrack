@@ -1,6 +1,8 @@
 import { IconButton } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
 
+import { StyledAppWideContainer } from '../styled';
+
 export const StyledAppHeader = styled('header')(({ theme }) => ({
   [theme.getColorSchemeSelector('light')]: {
     backgroundColor: theme.palette.neutral[300],
@@ -12,15 +14,16 @@ export const StyledAppHeader = styled('header')(({ theme }) => ({
   },
 }));
 
-export const StyledAppHeaderContent = styled('div')(({ theme }) => ({
-  width: '90%',
-  maxWidth: '100%',
-  padding: theme.spacing(1, 2),
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  margin: '0 auto',
-}));
+export const StyledAppHeaderContent = styled(StyledAppWideContainer)(
+  ({ theme }) => ({
+    maxWidth: '100%',
+    padding: theme.spacing(1, 2),
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    margin: '0 auto',
+  })
+);
 
 export const StyledButtonsContainer = styled('div')({
   display: 'flex',

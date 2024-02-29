@@ -71,14 +71,14 @@ const DayHabitModalDialog = ({
   const hasHabits = habits.length > 0;
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal role="add-occurrence-modal" open={open} onClose={handleClose}>
       <ModalDialog sx={{ width: 380 }}>
         <ModalClose />
         <DialogTitle>
           Add habits for {format(date, 'iii, LLL d, y')}
         </DialogTitle>
         <DialogContent>Select from the habits provided below</DialogContent>
-        <form onSubmit={handleSubmit}>
+        <form role="add-occurrence-form" onSubmit={handleSubmit}>
           <FormControl>
             <FormLabel id="habit-select-label" htmlFor="habit-select">
               Select Habit

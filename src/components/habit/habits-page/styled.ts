@@ -1,7 +1,8 @@
 import { IconButton, ListItem, ListItemContent, styled } from '@mui/joy';
 
-export const StyledPageDiv = styled('div')({
-  width: '90%',
+import { StyledAppWideContainer } from '../../styled';
+
+export const StyledPageDiv = styled(StyledAppWideContainer)({
   margin: '24px auto 0',
   padding: '0 16px',
   textAlign: 'center',

@@ -1,4 +1,5 @@
 import { useHabits, useOccurrences } from '@context';
+import { useScreenSize } from '@hooks';
 import { render, waitFor } from '@testing-library/react';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
@@ -11,6 +12,7 @@ jest.mock('@utils', () => ({
 
 jest.mock('@hooks', () => ({
   useHabitTraitChipColor: jest.fn(),
+  useScreenSize: jest.fn(),
 }));
 
 jest.mock('@context', () => ({
@@ -116,6 +118,26 @@ describe(OccurrenceChip.name, () => {
     const loader = getByRole('habit-chip-delete-loader');
     const chipDelete = queryByRole('habit-chip-delete-button');
     expect(loader).toBeInTheDocument();
+    expect(chipDelete).toBeNull();
+  });
+
+  it('should not render delete button on small screens', () => {
+    (useHabits as jest.Mock).mockReturnValue({
+      habitsMap: {
+        2: {
+          id: 2,
+          name: 'Test Habit Name',
+          iconPath: 'path/to/test/icon',
+          traitId: 1,
+        },
+      },
+    });
+    (useOccurrences as jest.Mock).mockReturnValue({
+      occurrenceIdBeingDeleted: null,
+    });
+    (useScreenSize as jest.Mock).mockReturnValue(1024);
+    const { queryByRole } = render(<OccurrenceChip {...props} />);
+    const chipDelete = queryByRole('habit-chip-delete-button');
     expect(chipDelete).toBeNull();
   });
 });

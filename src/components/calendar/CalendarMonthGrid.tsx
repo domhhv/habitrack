@@ -1,6 +1,5 @@
 import { CalendarDate } from '@internationalized/date';
 import type { OccurrencesDateMap } from '@models';
-import { motion } from 'framer-motion';
 import React, { type ForwardedRef } from 'react';
 import { CalendarState } from 'react-stately';
 
@@ -62,4 +61,4 @@ const Month = (
   );
 };
 
-export default motion(React.forwardRef(Month));
+export default React.forwardRef(Month);

@@ -1,7 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpackDevServer = require('webpack-dev-server');
+const BundleAnalyzerPlugin =
+  require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const envPaths = {
   development: './.env.development',
@@ -10,10 +11,15 @@ const envPaths = {
 
 require('dotenv').config({ path: envPaths[process.env.NODE_ENV] });
 
+const isProduction = process.env.NODE_ENV === 'production';
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 const config = {
   entry: './src/index.tsx',
   mode: process.env.NODE_ENV,
-  devtool: 'inline-source-map',
+  ...(isDevelopment && {
+    devtool: 'inline-source-map',
+  }),
   devServer: {
     historyApiFallback: true,
   },
@@ -44,12 +50,15 @@ const config = {
     },
   },
   output: {
-    filename: 'bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
+    isProduction &&
+      new BundleAnalyzerPlugin({
+        analyzerMode: 'static',
+      }),
     new webpack.DefinePlugin({
       process: {
         env: {

@@ -10,10 +10,11 @@ import React from 'react';
 
 type Props = {
   children: React.ReactNode;
-  range: [number, number];
+  rangeStart: number;
+  rangeEnd: number;
 };
 
-const OccurrencesProvider = ({ children, range }: Props) => {
+const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   const { showSnackbar } = useSnackbar();
   const user = useUser();
   const supabase = useSupabaseClient();
@@ -28,14 +29,14 @@ const OccurrencesProvider = ({ children, range }: Props) => {
 
   const fetchOccurrences = React.useCallback(async () => {
     setFetchingOccurrences(true);
-    const occurrences = await listOccurrences(range);
+    const occurrences = await listOccurrences([rangeStart, rangeEnd]);
     setOccurrences(occurrences);
     setFetchingOccurrences(false);
-  }, [range]);
+  }, [rangeStart, rangeEnd]);
 
   React.useEffect(() => {
     void fetchOccurrences();
-  }, [range, fetchOccurrences]);
+  }, [rangeStart, rangeEnd, fetchOccurrences]);
 
   React.useEffect(() => {
     void fetchOccurrences();
@@ -151,6 +152,8 @@ const OccurrencesProvider = ({ children, range }: Props) => {
     setOccurrencesByDate({});
   };
 
+  // const [start, end] = range;
+
   const value = React.useMemo(
     () => ({
       addingOccurrence,
@@ -180,4 +183,4 @@ const OccurrencesProvider = ({ children, range }: Props) => {
   );
 };
 
-export default OccurrencesProvider;
+export default React.memo(OccurrencesProvider);

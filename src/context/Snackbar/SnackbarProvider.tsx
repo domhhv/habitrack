@@ -10,7 +10,6 @@ import {
 import { Alert, Button, Typography } from '@mui/joy';
 import { ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
 import { VariantProp } from '@mui/joy/styles/types/variants';
-import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 
 import { StyledSnackbarsWrapper } from './styled';
@@ -79,38 +78,31 @@ const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
           }, options.autoHideDuration || 5000);
 
           return (
-            <AnimatePresence key={id} mode="wait">
-              <motion.div
+            <div key={id}>
+              <Alert
                 key={id}
-                initial={{ opacity: 0, y: 200 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -200 }}
+                startDecorator={ICONS_BY_COLOR[options.color || 'neutral']}
+                color={color}
+                variant={variant}
+                endDecorator={endDecorator}
+                data-testid="snackbar"
               >
-                <Alert
-                  key={id}
-                  startDecorator={ICONS_BY_COLOR[options.color || 'neutral']}
-                  color={color}
-                  variant={variant}
-                  endDecorator={endDecorator}
-                  data-testid="snackbar"
+                <Typography
+                  level="title-md"
+                  sx={{ margin: 0, color: 'inherit' }}
                 >
+                  {message}
+                </Typography>
+                {options.description && (
                   <Typography
-                    level="title-md"
+                    level="body-xs"
                     sx={{ margin: 0, color: 'inherit' }}
                   >
-                    {message}
+                    {options.description}
                   </Typography>
-                  {options.description && (
-                    <Typography
-                      level="body-xs"
-                      sx={{ margin: 0, color: 'inherit' }}
-                    >
-                      {options.description}
-                    </Typography>
-                  )}
-                </Alert>
-              </motion.div>
-            </AnimatePresence>
+                )}
+              </Alert>
+            </div>
           );
         })}
       </StyledSnackbarsWrapper>
