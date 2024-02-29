@@ -80,5 +80,5 @@ jobs: # list of things to do
       - name: Install Dependencies
         run: yarn install
 
-      - name: Code Formatting
+      - name: Unit Tests
         run: yarn test
