@@ -1,4 +1,6 @@
-import { Box, Button, DialogContent, IconButton, styled } from '@mui/joy';
+import { Button, DialogContent, IconButton, styled } from '@mui/joy';
+
+import { StyledAppWideContainer } from '../styled';
 
 export const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   '& > div': {
@@ -25,8 +27,7 @@ export const StyledAuthButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export const StyledAccountPageContainer = styled(Box)({
-  width: '90%',
+export const StyledAccountPageContainer = styled(StyledAppWideContainer)({
   margin: '0 auto',
   display: 'flex',
   flexDirection: 'column',

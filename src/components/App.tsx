@@ -8,12 +8,9 @@ import {
 } from '@context';
 import { supabaseClient, theme } from '@helpers';
 import { USER_THEME_STORAGE_KEY } from '@hooks';
-import {
-  type CalendarDate,
-  createCalendar,
-  getWeeksInMonth,
-} from '@internationalized/date';
-import { CssVarsProvider, styled } from '@mui/joy';
+import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
+import { GregorianCalendar } from '@internationalized/date';
+import { CssVarsProvider } from '@mui/joy';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { generateCalendarRange } from '@utils';
 import React from 'react';
@@ -21,18 +18,16 @@ import { useLocale } from 'react-aria';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useCalendarState } from 'react-stately';
 
-const StyledAppContainerDiv = styled('div')({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  flex: '1 1 0%',
-  [theme.getColorSchemeSelector('light')]: {
-    backgroundColor: theme.palette.neutral[200],
-  },
-  [theme.getColorSchemeSelector('dark')]: {
-    backgroundColor: theme.palette.neutral[800],
-  },
-});
+import { StyledAppContainerDiv } from './styled';
+
+const createCalendar = (identifier: string) => {
+  switch (identifier) {
+    case 'gregory':
+      return new GregorianCalendar();
+    default:
+      throw new Error(`Unsupported calendar ${identifier}`);
+  }
+};
 
 const App = () => {
   const { locale } = useLocale();
@@ -60,7 +55,7 @@ const App = () => {
           <UserAccountProvider>
             <TraitsProvider>
               <HabitsProvider>
-                <OccurrencesProvider range={range}>
+                <OccurrencesProvider rangeStart={range[0]} rangeEnd={range[1]}>
                   <BrowserRouter>
                     <AppHeader />
                     <StyledAppContainerDiv>

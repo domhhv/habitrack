@@ -1,5 +1,5 @@
 import { useHabits, useOccurrences } from '@context';
-import { useHabitTraitChipColor } from '@hooks';
+import { useHabitTraitChipColor, useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { ChipDelete, CircularProgress, Tooltip } from '@mui/joy';
@@ -23,6 +23,7 @@ const OccurrenceChip = ({ occurrence, onDelete }: OccurrenceChipProps) => {
   const traitChipColor = useHabitTraitChipColor(
     habitsMap[occurrence.habitId]?.traitId
   );
+  const screenSize = useScreenSize();
 
   const isBeingDeleted = occurrenceIdBeingDeleted === occurrence.id;
 
@@ -57,7 +58,7 @@ const OccurrenceChip = ({ occurrence, onDelete }: OccurrenceChipProps) => {
           />
         }
         disabled={isBeingDeleted}
-        endDecorator={endDecorator}
+        endDecorator={screenSize < 1025 ? null : endDecorator}
       />
     </Tooltip>
   );

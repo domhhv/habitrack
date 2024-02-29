@@ -1,11 +1,20 @@
-import { Box, Chip, IconButton, type Theme, Typography } from '@mui/joy';
+import { Box, Chip, IconButton, type Theme } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
+
+import { StyledAppWideContainer } from '../styled';
 
 const calendarGap = 16;
 
 const getDarkNeutralColor = (theme: Theme) => theme.palette.neutral[300];
 
 const getLightNeutralColor = (theme: Theme) => theme.palette.neutral[600];
+
+const StyledWithGapDiv = styled('div')(({ theme }) => ({
+  gap: calendarGap,
+  [theme.breakpoints.down('lg')]: {
+    gap: 0,
+  },
+}));
 
 export const StyledCalendarBackgroundDiv = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -14,17 +23,25 @@ export const StyledCalendarBackgroundDiv = styled('div')(({ theme }) => ({
   width: '100%',
   padding: theme.spacing(2),
   flex: '1 1 0%',
+  [theme.breakpoints.down('lg')]: {
+    padding: 0,
+  },
 }));
 
-export const StyledCalendarContainerDiv = styled('div')(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  margin: `${theme.spacing(2)} auto 0`,
-  width: '90%',
-  maxWidth: '100%',
-  padding: theme.spacing(0, 2),
-  flex: '1 1 0%',
-}));
+export const StyledCalendarContainerDiv = styled(StyledAppWideContainer)(
+  ({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    margin: `${theme.spacing(2)} auto 0`,
+    maxWidth: '100%',
+    padding: theme.spacing(0, 2),
+    flex: '1 1 0%',
+    [theme.breakpoints.down('lg')]: {
+      padding: 0,
+      margin: 0,
+    },
+  })
+);
 
 export const StyledCalendarHeader = styled('div')(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -82,32 +99,14 @@ export const StyledNavigationIconButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-export const StyledHeaderLoadingOverlay = styled(Typography)(({ theme }) => ({
-  borderRadius: theme.radius.md,
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  margin: 'auto',
-  [theme.getColorSchemeSelector('light')]: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-  },
-  [theme.getColorSchemeSelector('dark')]: {
-    backgroundColor: 'rgba(12,12,12,0.6)',
-  },
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-export const StyledCalendarGridContainerDiv = styled('div')(({ theme }) => ({
-  display: 'flex',
-  gap: calendarGap,
-  flexDirection: 'column',
-  margin: `${theme.spacing(2)} 0`,
-  flex: '1 1 0%',
-}));
+export const StyledCalendarGridContainerDiv = styled(StyledWithGapDiv)(
+  ({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    margin: `${theme.spacing(2)} 0`,
+    flex: '1 1 0%',
+  })
+);
 
 export const StyledCalendarWeekDay = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -122,18 +121,21 @@ export const StyledCalendarWeekDay = styled('div')(({ theme }) => ({
   },
 }));
 
-export const StyledCalendarMonthGrid = styled('div')({
+export const StyledCalendarMonthGrid = styled(StyledWithGapDiv)({
   display: 'flex',
   flexDirection: 'column',
-  gap: calendarGap,
   flex: '1 1 0%',
 });
 
-export const StyledCalendarWeekRow = styled('div')({
+export const StyledCalendarWeekRow = styled(StyledWithGapDiv)(({ theme }) => ({
   display: 'flex',
   flex: '1 1 0%',
-  gap: calendarGap,
-});
+  [theme.breakpoints.down('lg')]: {
+    '&:last-of-type': {
+      borderBottom: '3px solid',
+    },
+  },
+}));
 
 export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -144,6 +146,19 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   borderRadius: theme.radius.md,
   border: '3px solid black',
   padding: 0,
+  [theme.breakpoints.down('lg')]: {
+    border: 'none',
+    borderRadius: 0,
+    borderTop: '3px solid',
+    borderColor: 'black !important',
+    borderRight: '3px solid',
+    '&:first-of-type': {
+      borderLeft: '3px solid black',
+    },
+    '& > button:first-of-type': {
+      borderBottom: 'none',
+    },
+  },
   '&[data-is-within-prev-month="true"]:not([disabled])': {
     cursor: 'w-resize',
   },

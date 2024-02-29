@@ -1,11 +1,10 @@
 import { useOccurrences } from '@context';
 import { Box, Typography } from '@mui/joy';
-import { AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid } from 'react-aria';
 import { CalendarState } from 'react-stately';
 
-import MotionCalendarMonthGrid from './CalendarMonthGrid';
+import CalendarMonthGrid from './CalendarMonthGrid';
 import DayHabitModalDialog from './DayHabitModalDialog';
 import {
   StyledCalendarGridContainerDiv,
@@ -57,18 +56,13 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
           );
         })}
       </Box>
-      <AnimatePresence mode="wait">
-        <MotionCalendarMonthGrid
-          key={state.visibleRange.start.month}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          occurrencesByDate={occurrencesByDate}
-          onDayModalDialogOpen={handleDayModalDialogOpen}
-          weeksInMonth={weeksInMonth}
-          state={state}
-        />
-      </AnimatePresence>
+      <CalendarMonthGrid
+        key={state.visibleRange.start.month}
+        occurrencesByDate={occurrencesByDate}
+        onDayModalDialogOpen={handleDayModalDialogOpen}
+        weeksInMonth={weeksInMonth}
+        state={state}
+      />
 
       <DayHabitModalDialog
         open={dayModalDialogOpen}

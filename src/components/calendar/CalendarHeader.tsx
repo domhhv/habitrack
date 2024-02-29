@@ -1,14 +1,11 @@
-import { useOccurrences } from '@context';
 import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { Typography } from '@mui/joy';
-import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 
 import {
   StyledCalendarActiveMonthContainer,
   StyledCalendarHeader,
   StyledCalendarNavigationContainer,
-  StyledHeaderLoadingOverlay,
   StyledNavigationIconButton,
 } from './styled';
 
@@ -34,23 +31,14 @@ const CalendarHeader = ({
   onNavigateBack,
   onNavigateForward,
 }: CalendarHeaderProps) => {
-  const { fetchingOccurrences } = useOccurrences();
-
   return (
     <StyledCalendarHeader>
       <StyledCalendarActiveMonthContainer>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${activeMonthLabel}-${activeYear}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <Typography level="title-lg" sx={{ margin: 0 }}>
-              {activeMonthLabel} {activeYear}
-            </Typography>
-          </motion.div>
-        </AnimatePresence>
+        <div>
+          <Typography level="title-lg" sx={{ margin: 0 }}>
+            {activeMonthLabel} {activeYear}
+          </Typography>
+        </div>
         <StyledCalendarNavigationContainer>
           <StyledNavigationIconButton
             disabled={prevButtonProps.disabled}
@@ -68,17 +56,6 @@ const CalendarHeader = ({
           </StyledNavigationIconButton>
         </StyledCalendarNavigationContainer>
       </StyledCalendarActiveMonthContainer>
-
-      {fetchingOccurrences && (
-        <StyledHeaderLoadingOverlay>
-          <motion.span
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            Fetching calendar events, please wait...
-          </motion.span>
-        </StyledHeaderLoadingOverlay>
-      )}
     </StyledCalendarHeader>
   );
 };
