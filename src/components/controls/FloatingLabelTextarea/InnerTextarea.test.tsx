@@ -8,7 +8,7 @@ import React from 'react';
 
 import InnerTextarea from './InnerTextarea';
 
-describe(InnerTextarea.name, () => {
+describe('InnerTextarea', () => {
   it('should apply React id', async () => {
     const { container } = render(
       <InnerTextarea label="Label" placeholder="Placeholder" />

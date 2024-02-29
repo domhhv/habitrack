@@ -12,7 +12,7 @@ import React from 'react';
 
 import InnerInput from './InnerInput';
 
-describe(InnerInput.name, () => {
+describe('InnerInput', () => {
   it('should apply React id', async () => {
     const { container } = render(
       <InnerInput label="Label" placeholder="Placeholder" />

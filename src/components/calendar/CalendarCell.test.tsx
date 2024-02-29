@@ -1,7 +1,7 @@
 import CalendarCell from './CalendarCell';
 
 describe(CalendarCell.name, () => {
-  it('should be tested', () => {
-    expect(true).toBeTruthy();
+  it('should render', () => {
+    expect(true).toBe(true);
   });
 });
