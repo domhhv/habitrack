@@ -1,4 +1,3 @@
-import { useOccurrences } from '@context';
 import { Box, Typography } from '@mui/joy';
 import React from 'react';
 import { useCalendarGrid } from 'react-aria';
@@ -20,8 +19,6 @@ const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
-
-  const { occurrencesByDate } = useOccurrences();
   const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
 
@@ -57,7 +54,6 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
         })}
       </Box>
       <CalendarMonthGrid
-        occurrencesByDate={occurrencesByDate}
         onDayModalDialogOpen={handleDayModalDialogOpen}
         weeksInMonth={weeksInMonth}
         state={state}
