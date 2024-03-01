@@ -57,7 +57,6 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
         })}
       </Box>
       <CalendarMonthGrid
-        key={state.visibleRange.start.month}
         occurrencesByDate={occurrencesByDate}
         onDayModalDialogOpen={handleDayModalDialogOpen}
         weeksInMonth={weeksInMonth}

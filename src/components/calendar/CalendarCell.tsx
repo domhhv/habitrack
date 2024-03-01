@@ -1,4 +1,5 @@
 import { useOccurrences } from '@context';
+import { useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
 import { Typography } from '@mui/joy';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -9,6 +10,7 @@ import {
   StyledCalendarDayCellDiv,
   StyledCalendarDayCellButtonButton,
   StyledCalendarDayCellButtonIconsContainer,
+  StyledCalendarTodayIcon,
 } from './styled';
 
 type CalendarCellProps = {
@@ -40,6 +42,7 @@ const CalendarCell = ({
     today.getDate() === dateNumber &&
     today.getMonth() + 1 === monthIndex &&
     today.getFullYear() === fullYear;
+  const screenSize = useScreenSize();
 
   const handleClick = React.useCallback(() => {
     if (fetchingOccurrences || !user?.id) {
@@ -98,6 +101,24 @@ const CalendarCell = ({
     void removeOccurrence(calendarEventId);
   };
 
+  const renderToday = () => {
+    if (!isToday) {
+      return null;
+    }
+
+    const isMobile = screenSize < 768;
+
+    if (isMobile) {
+      return <StyledCalendarTodayIcon />;
+    }
+
+    return (
+      <Typography level="body-md" fontWeight={900}>
+        Today
+      </Typography>
+    );
+  };
+
   return (
     <StyledCalendarDayCellDiv
       ref={cellRef}
@@ -111,11 +132,7 @@ const CalendarCell = ({
         <Typography level="body-md" fontWeight={900}>
           {dateNumber}
         </Typography>
-        {isToday && (
-          <Typography level="body-md" fontWeight={900}>
-            Today
-          </Typography>
-        )}
+        {renderToday()}
       </StyledCalendarDayCellButtonButton>
       <StyledCalendarDayCellButtonIconsContainer>
         {occurrences.map((occurrence) => {
