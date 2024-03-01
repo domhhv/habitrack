@@ -14,7 +14,7 @@ type NavigationButtonProps = {
   'aria-label': string;
 };
 
-type CalendarHeaderProps = {
+export type CalendarHeaderProps = {
   activeMonthLabel: string;
   activeYear: string;
   prevButtonProps: NavigationButtonProps;
@@ -44,6 +44,7 @@ const CalendarHeader = ({
             disabled={prevButtonProps.disabled}
             aria-label={prevButtonProps['aria-label']}
             onClick={onNavigateBack}
+            role="navigate-back"
           >
             <NavigateBefore fontSize="small" />
           </StyledNavigationIconButton>
@@ -51,6 +52,7 @@ const CalendarHeader = ({
             disabled={nextButtonProps.disabled}
             aria-label={nextButtonProps['aria-label']}
             onClick={onNavigateForward}
+            role="navigate-forward"
           >
             <NavigateNext fontSize="small" />
           </StyledNavigationIconButton>

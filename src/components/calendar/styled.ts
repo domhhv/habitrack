@@ -1,3 +1,4 @@
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { Box, Chip, IconButton, type Theme } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
 
@@ -129,8 +130,9 @@ export const StyledCalendarMonthGrid = styled(StyledWithGapDiv)({
 
 export const StyledCalendarWeekRow = styled(StyledWithGapDiv)(({ theme }) => ({
   display: 'flex',
-  flex: '1 1 0%',
+  flex: 0,
   [theme.breakpoints.down('lg')]: {
+    height: 110,
     '&:last-of-type': {
       borderBottom: '3px solid',
     },
@@ -144,16 +146,16 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   height: 110,
   maxWidth: 172,
   borderRadius: theme.radius.md,
-  border: '3px solid black',
+  border: `3px solid ${theme.palette.neutral[700]}`,
   padding: 0,
   [theme.breakpoints.down('lg')]: {
     border: 'none',
     borderRadius: 0,
     borderTop: '3px solid',
-    borderColor: 'black !important',
+    borderColor: `${theme.palette.neutral[700]} !important`,
     borderRight: '3px solid',
     '&:first-of-type': {
-      borderLeft: '3px solid black',
+      borderLeft: `3px solid ${theme.palette.neutral[700]}`,
     },
     '& > button:first-of-type': {
       borderBottom: 'none',
@@ -296,3 +298,9 @@ export const StyledHabitChip = styled(Chip)(({ theme }) => ({
   marginTop: theme.spacing(0.5),
   marginRight: theme.spacing(0.5),
 }));
+
+export const StyledCalendarTodayIcon = styled(CalendarTodayIcon)(
+  ({ theme }) => ({
+    color: theme.palette.neutral[600],
+  })
+);
