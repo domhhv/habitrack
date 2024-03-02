@@ -1,5 +1,4 @@
 import { CalendarDate } from '@internationalized/date';
-import type { OccurrencesDateMap } from '@models';
 import React, { type ForwardedRef } from 'react';
 import { CalendarState } from 'react-stately';
 
@@ -14,11 +13,10 @@ type MonthProps = {
     monthIndex: number,
     fullYear: number
   ) => void;
-  occurrencesByDate: OccurrencesDateMap;
 };
 
 const Month = (
-  { weeksInMonth, state, onDayModalDialogOpen, occurrencesByDate }: MonthProps,
+  { weeksInMonth, state, onDayModalDialogOpen }: MonthProps,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   return (
@@ -48,7 +46,6 @@ const Month = (
                   monthIndex={calendarDate.month}
                   fullYear={calendarDate.year}
                   onClick={onDayModalDialogOpen}
-                  occurrences={occurrencesByDate[day] || []}
                   rangeStatus={rangeStatus}
                   onNavigateBack={state.focusPreviousPage}
                   onNavigateForward={state.focusNextPage}

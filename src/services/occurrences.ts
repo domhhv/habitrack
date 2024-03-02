@@ -14,9 +14,9 @@ import {
   getInRange,
 } from './supabase';
 
-export const createOccurrence = (occurrence: AddOccurrence) => {
+export const createOccurrence = async (occurrence: AddOccurrence) => {
   const serverBody = transformClientEntity(occurrence);
-  const serverOccurrence = post<Occurrence>(
+  const serverOccurrence = await post<Occurrence>(
     Collections.OCCURRENCES,
     serverBody
   );

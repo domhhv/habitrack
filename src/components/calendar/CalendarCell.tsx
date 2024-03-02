@@ -1,8 +1,8 @@
 import { useOccurrences } from '@context';
 import { useScreenSize } from '@hooks';
-import type { Occurrence } from '@models';
 import { Typography } from '@mui/joy';
 import { useUser } from '@supabase/auth-helpers-react';
+import { format } from 'date-fns';
 import React from 'react';
 
 import OccurrenceChip from './OccurrenceChip';
@@ -18,7 +18,6 @@ type CalendarCellProps = {
   monthIndex: number;
   fullYear: number;
   onClick: (dateNumber: number, monthIndex: number, fullYear: number) => void;
-  occurrences: Occurrence[];
   onNavigateBack?: () => void;
   onNavigateForward?: () => void;
   rangeStatus: 'below-range' | 'in-range' | 'above-range';
@@ -28,7 +27,6 @@ const CalendarCell = ({
   dateNumber,
   monthIndex,
   fullYear,
-  occurrences,
   onNavigateBack,
   onNavigateForward,
   onClick,
@@ -43,6 +41,12 @@ const CalendarCell = ({
     today.getMonth() + 1 === monthIndex &&
     today.getFullYear() === fullYear;
   const screenSize = useScreenSize();
+  const { occurrencesByDate } = useOccurrences();
+  const date = format(
+    new Date(fullYear, monthIndex - 1, dateNumber),
+    'yyyy-MM-dd'
+  );
+  const occurrences = occurrencesByDate[date] || [];
 
   const handleClick = React.useCallback(() => {
     if (fetchingOccurrences || !user?.id) {
