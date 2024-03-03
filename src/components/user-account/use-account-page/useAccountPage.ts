@@ -24,8 +24,8 @@ const useAccountPage = () => {
       const data = await getUserAccount();
 
       setEmail(data?.email || user?.email || '');
-      setPassword('random-string');
-      setName(data?.name);
+      setPassword('');
+      setName(data?.name || '');
       setLoading(false);
     };
 

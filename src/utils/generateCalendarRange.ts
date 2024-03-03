@@ -9,8 +9,8 @@ export const generateCalendarRange = (
   firstWeekDates: CalendarDate[],
   lastWeekDates: CalendarDate[]
 ): Range => {
-  const firstDay = firstWeekDates[0] as CalendarDate;
-  const lastDay = lastWeekDates[lastWeekDates.length - 1] as CalendarDate;
+  const firstDay = firstWeekDates[0];
+  const lastDay = lastWeekDates[lastWeekDates.length - 1];
 
   const firstDate = new Date(firstDay.year, firstDay.month - 1, firstDay.day);
   const lastDate = new Date(

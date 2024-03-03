@@ -105,7 +105,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
             as="label"
           >
             <StyledHabitImage
-              src={iconUrl || ''}
+              src={iconUrl}
               alt={habit.name}
               role="habit-icon"
             />

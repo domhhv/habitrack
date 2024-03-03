@@ -52,7 +52,7 @@ const OccurrenceChip = ({ occurrence, onDelete }: OccurrenceChipProps) => {
         role="habit-chip"
         startDecorator={
           <img
-            src={iconUrl || ''}
+            src={iconUrl}
             alt={`${eventHabit.name} icon`}
             width={20}
             height={20}

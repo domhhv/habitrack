@@ -74,7 +74,7 @@ const AccountPage = () => {
             value={password}
             onChange={handlePasswordChange}
             disabled={loading}
-            label="Password"
+            label="Set new password"
             dataTestId="password-input"
           />
         </Box>
