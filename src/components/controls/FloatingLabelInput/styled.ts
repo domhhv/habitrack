@@ -41,6 +41,11 @@ export const StyledInput = styled('input')({
     borderBottomLeftRadius:
       'calc(var(--Input-radius) - var(--variant-borderWidth, 0px))',
   },
+  '&[type="color"]': {
+    height: 50,
+    marginTop: 8,
+    marginBottom: 8,
+  },
 });
 
 export const StyledLabel = styled('label')(({ theme }) => ({

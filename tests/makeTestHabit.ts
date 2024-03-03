@@ -4,7 +4,7 @@ const makeTestHabit = (habit: Partial<Habit> = {}): Habit => {
   return {
     id: 1,
     name: 'Test Habit',
-    traitId: 1,
+    traitId: 'uuid',
     description: 'Test Description',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

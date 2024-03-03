@@ -6,9 +6,10 @@ jest.mock('@hooks', () => ({
 
 jest.mock('@context', () => ({
   useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
-  useTraits: jest
-    .fn()
-    .mockReturnValue({ traitsMap: { 1: { slug: 'trait-slug' } } }),
+  useTraits: jest.fn().mockReturnValue({
+    traitsMap: { 1: { label: 'Trait label', slug: 'trait-slug' } },
+    allTraits: [{ id: 1, label: 'Trait label', slug: 'trait-slug' }],
+  }),
   TraitsProvider: jest.fn(({ children }) => children),
 }));
 
@@ -18,7 +19,7 @@ jest.mock('@supabase/auth-helpers-react', () => ({
     .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
 }));
 
-import { TraitsProvider, useHabits } from '@context';
+import { TraitsProvider, useHabits, useTraits } from '@context';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -39,7 +40,7 @@ describe(EditHabitDialog.name, () => {
       userId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
       name: 'Habit Name',
       description: 'Habit description',
-      traitId: 1,
+      traitId: 'uuid',
       iconPath: '',
     },
   };
@@ -91,6 +92,10 @@ describe(EditHabitDialog.name, () => {
   it('should call updateHabit when submitted', async () => {
     const mockUpdateHabit = jest.fn();
     (useHabits as jest.Mock).mockReturnValue({ updateHabit: mockUpdateHabit });
+    (useTraits as jest.Mock).mockReturnValue({
+      traitsMap: { 1: { label: 'Trait label', slug: 'trait-slug' } },
+      allTraits: [{ id: 1, label: 'Trait label', slug: 'trait-slug' }],
+    });
     const { getByRole, getByLabelText } = render(
       <TraitsProvider>
         <EditHabitDialog {...props} />
@@ -116,7 +121,7 @@ describe(EditHabitDialog.name, () => {
         userId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
         name: 'New Habit Name',
         description: 'New habit description',
-        traitId: 1,
+        traitId: null,
         iconPath: '',
       })
     );

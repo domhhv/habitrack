@@ -30,11 +30,11 @@ const EditHabitDialog = ({
   const [isOpen, setIsOpen] = React.useState(false);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [trait, setTrait] = React.useState<string>('');
+  const [traitId, setTraitId] = React.useState<string>('');
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { updateHabit } = useHabits();
   const user = useUser();
-  const { traitsMap } = useTraits();
+  const { allTraits, traitsMap } = useTraits();
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -44,7 +44,7 @@ const EditHabitDialog = ({
     if (habit) {
       setName(habit.name);
       setDescription(habit.description);
-      setTrait(traitsMap[habit.traitId].slug);
+      setTraitId(habit.traitId);
     }
   }, [habit, traitsMap]);
 
@@ -68,7 +68,7 @@ const EditHabitDialog = ({
   };
 
   const handleTraitChange = (_: null, newValue: string) => {
-    setTrait(newValue);
+    setTraitId(newValue);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -80,7 +80,7 @@ const EditHabitDialog = ({
     const newHabit = {
       name,
       description,
-      traitId: habit.traitId,
+      traitId,
       userId: user?.id as string,
       iconPath: habit.iconPath,
       createdAt: habit.createdAt,
@@ -128,16 +128,24 @@ const EditHabitDialog = ({
               required
               disabled={isUpdating}
               placeholder="Choose a trait"
-              value={trait}
+              value={traitId}
               variant="soft"
-              color={trait === 'good' ? 'success' : 'danger'}
             >
-              <Option key="good" value="good">
-                Good
+              <Option value={0} disabled>
+                Choose a trait
               </Option>
-              <Option key="bad" value="bad">
-                Bad
-              </Option>
+              {allTraits.map((trait) => (
+                <Option
+                  key={trait.id}
+                  value={trait.id}
+                  sx={{
+                    backgroundColor: trait.color,
+                    color: 'white',
+                  }}
+                >
+                  {trait.label}
+                </Option>
+              ))}
             </Select>
             <Button
               role="submit-edited-habit-button"

@@ -1,11 +1,16 @@
 import type { CalendarDate } from '@internationalized/date';
 
+type Range = {
+  rangeStart: number;
+  rangeEnd: number;
+};
+
 export const generateCalendarRange = (
   firstWeekDates: CalendarDate[],
   lastWeekDates: CalendarDate[]
-): [number, number] => {
-  const firstDay = firstWeekDates[0] as CalendarDate;
-  const lastDay = lastWeekDates[lastWeekDates.length - 1] as CalendarDate;
+): Range => {
+  const firstDay = firstWeekDates[0];
+  const lastDay = lastWeekDates[lastWeekDates.length - 1];
 
   const firstDate = new Date(firstDay.year, firstDay.month - 1, firstDay.day);
   const lastDate = new Date(
@@ -18,8 +23,8 @@ export const generateCalendarRange = (
     999
   );
 
-  const rangeFrom = +firstDate;
-  const rangeTo = +lastDate;
+  const rangeStart = +firstDate;
+  const rangeEnd = +lastDate;
 
-  return [rangeFrom, rangeTo];
+  return { rangeStart, rangeEnd };
 };

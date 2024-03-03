@@ -1,9 +1,8 @@
 import { useHabits, useOccurrences } from '@context';
-import { useHabitTraitChipColor, useScreenSize } from '@hooks';
+import { useHabitTraitChipColor, useScreenSize, useHabitIconUrl } from '@hooks';
 import type { Occurrence } from '@models';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { ChipDelete, CircularProgress, Tooltip } from '@mui/joy';
-import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
 import { StyledHabitChip } from './styled';
@@ -24,6 +23,7 @@ const OccurrenceChip = ({ occurrence, onDelete }: OccurrenceChipProps) => {
     habitsMap[occurrence.habitId]?.traitId
   );
   const screenSize = useScreenSize();
+  const iconUrl = useHabitIconUrl(eventHabit.iconPath);
 
   const isBeingDeleted = occurrenceIdBeingDeleted === occurrence.id;
 
@@ -32,7 +32,6 @@ const OccurrenceChip = ({ occurrence, onDelete }: OccurrenceChipProps) => {
   ) : (
     <ChipDelete
       variant="soft"
-      color={traitChipColor}
       onClick={(clickEvent) => onDelete(occurrence.id, clickEvent)}
       role="habit-chip-delete-button"
     >
@@ -45,13 +44,15 @@ const OccurrenceChip = ({ occurrence, onDelete }: OccurrenceChipProps) => {
   return (
     <Tooltip title={eventHabit.name} key={occurrence.id}>
       <StyledHabitChip
+        sx={{
+          backgroundColor: traitChipColor,
+        }}
         variant="soft"
-        color={traitChipColor}
         key={occurrence.id}
         role="habit-chip"
         startDecorator={
           <img
-            src={getHabitIconUrl(eventHabit.iconPath)}
+            src={iconUrl}
             alt={`${eventHabit.name} icon`}
             width={20}
             height={20}

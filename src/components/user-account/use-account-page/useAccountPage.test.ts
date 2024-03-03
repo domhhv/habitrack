@@ -5,6 +5,7 @@ jest.mock('@context', () => ({
 jest.mock('@services', () => ({
   getUserAccount: jest.fn(),
   updateUserAccount: jest.fn(),
+  updateUserPassword: jest.fn(),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
@@ -33,44 +34,37 @@ describe('useAccountPage', () => {
     (useUser as jest.Mock).mockReturnValue({
       id: '123',
       email: 'email',
-      phone: 'phone',
     });
     (getUserAccount as jest.Mock).mockReturnValue(
       Promise.resolve({
         email: '',
-        phoneNumber: '',
         name: '',
       })
     );
     (transformServerEntities as jest.Mock).mockReturnValue(() => ({}));
-    const { result } = renderHook(() => useAccountPage());
-    expect(result.current.loading).toBe(true);
+    const result = renderHook(() => useAccountPage());
+    expect(result.result.current.loading).toBe(true);
 
     await waitFor(() => {
-      expect(result.current.loading).toBe(false);
+      expect(result.result.current.loading).toBe(false);
+      expect(result.result.current.forbidden).toBe(false);
+      expect(result.result.current.email).toBe('email');
     });
-
-    expect(result.current.forbidden).toBe(false);
-    expect(result.current.email).toBe('email');
-    expect(result.current.phoneNumber).toBe('phone');
   });
 
   it('should use account data', async () => {
     (transformClientEntity as jest.Mock).mockReturnValue({
       name: 'user-name',
       email: 'user-email',
-      'phone-number': 'user-phone',
       'updated-at': '2021-01-01T00:00:00.000Z',
     });
     (useUser as jest.Mock).mockReturnValue({
       id: '123',
       email: 'email',
-      phone: 'phone',
     });
     (getUserAccount as jest.Mock).mockReturnValue(
       Promise.resolve({
         email: 'user-email',
-        phoneNumber: 'user-phone',
         name: 'user-name',
       })
     );
@@ -84,10 +78,9 @@ describe('useAccountPage', () => {
     expect(result.current.forbidden).toBe(false);
     expect(result.current.email).toBe('user-email');
     expect(result.current.name).toBe('user-name');
-    expect(result.current.phoneNumber).toBe('user-phone');
 
     await act(async () => {
-      await result.current.updateProfile();
+      await result.current.updateAccount();
     });
 
     await waitFor(() => {
@@ -95,7 +88,6 @@ describe('useAccountPage', () => {
       expect(updateUserAccount).toHaveBeenCalledWith('123', {
         email: 'user-email',
         name: 'user-name',
-        'phone-number': 'user-phone',
         'updated-at': '2021-01-01T00:00:00.000Z',
       });
     });
@@ -110,12 +102,12 @@ describe('useAccountPage', () => {
     });
   });
 
-  it('should not call updateProfile if user not logged in', async () => {
+  it('should not call updateAccount if user not logged in', async () => {
     (useUser as jest.Mock).mockReturnValue({ id: null });
     const { result } = renderHook(() => useAccountPage());
 
     await act(async () => {
-      await result.current.updateProfile();
+      await result.current.updateAccount();
     });
 
     expect(updateUserAccount).not.toHaveBeenCalled();
@@ -142,7 +134,6 @@ describe('useAccountPage', () => {
       expect(result.current.loading).toBe(false);
       expect(result.current.forbidden).toBe(false);
       expect(result.current.email).toBe('');
-      expect(result.current.phoneNumber).toBe('');
       expect(result.current.name).toBe('');
     });
   });
@@ -168,17 +159,12 @@ describe('useAccountPage', () => {
       result.current.handleNameChange({
         target: { value: 'new-user-name' },
       } as React.ChangeEvent<HTMLInputElement>);
-
-      result.current.handlePhoneNumberChange({
-        target: { value: 'new-user-phone' },
-      } as React.ChangeEvent<HTMLInputElement>);
     });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
       expect(result.current.email).toBe('new-user-email');
       expect(result.current.name).toBe('new-user-name');
-      expect(result.current.phoneNumber).toBe('new-user-phone');
     });
   });
 });

@@ -25,6 +25,4 @@ export type ServerOccurrence = {
   user_id: string;
 };
 
-export type AddOccurrence = PostEntity<
-  Omit<Occurrence, 'createdAt' | 'updatedAt'>
->;
+export type AddOccurrence = PostEntity<Occurrence>;

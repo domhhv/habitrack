@@ -10,7 +10,7 @@ export enum Collections {
 
 export type PostEntity<T extends object> = Omit<
   T,
-  'id' | 'created_at' | 'updated_at'
+  'id' | 'createdAt' | 'updatedAt'
 >;
 
 export type PatchEntity<T extends object> = Partial<
@@ -23,9 +23,7 @@ export const fetch = (collection: Collections) =>
 export const get = async <T extends object>(
   collection: Collections
 ): Promise<T[]> => {
-  const request = fetch(collection).select('*');
-
-  const { error, data } = await request;
+  const { error, data } = await fetch(collection).select('*');
 
   if (error) {
     throw new Error(error.message);
@@ -39,12 +37,10 @@ export const getInRange = async <T extends object>(
   columnName: keyof T & string,
   range: [number, number]
 ): Promise<T[]> => {
-  const request = fetch(collection)
+  const { error, data } = await fetch(collection)
     .select()
     .gt(columnName, range[0])
     .lt(columnName, range[1]);
-
-  const { error, data } = await request;
 
   if (error) {
     throw new Error(error.message);

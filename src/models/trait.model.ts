@@ -1,11 +1,14 @@
+import { PostEntity } from '@services';
+
 export type Trait = {
   id: number;
-  name: string;
-  description: string;
+  label: string;
+  description: string | null;
   slug: string;
-  userId?: string;
+  userId: string | null;
   createdAt: string;
   updatedAt: string;
+  color: string;
 };
 
 type TraitId = number;
@@ -20,3 +23,5 @@ export type ServerTrait = {
   created_at: string;
   updated_at: string;
 };
+
+export type AddTrait = PostEntity<Trait>;

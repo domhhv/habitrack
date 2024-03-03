@@ -168,7 +168,7 @@ describe(AddHabitDialogButton.name, () => {
         name: 'habit-name',
         description: 'habit-description',
         userId: 'uuid-42',
-        iconPath: 'icon-path',
+        iconPath: 'uuid-42/habit-id-1234.png',
         traitId: 1,
       });
     });

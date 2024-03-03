@@ -1,6 +1,7 @@
-import { TraitsContext } from '@context';
-import type { Trait, TraitsMap } from '@models';
-import { listTraits } from '@services';
+import { TraitsContext, useSnackbar } from '@context';
+import type { Trait, TraitsMap, AddTrait } from '@models';
+import { listTraits, createTrait } from '@services';
+import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type TraitsProviderProps = {
@@ -12,6 +13,9 @@ const TraitsProvider = ({ children }: TraitsProviderProps) => {
   const [userTraits, setUserTraits] = React.useState<Trait[]>([]);
   const [traitsMap, setTraitsMap] = React.useState<TraitsMap>({});
   const [fetchingTraits, setFetchingTraits] = React.useState(false);
+  const [addingTrait, setAddingTrait] = React.useState(false);
+  const { showSnackbar } = useSnackbar();
+  const user = useUser();
 
   const allTraits = [...publicTraits, ...userTraits];
 
@@ -25,29 +29,64 @@ const TraitsProvider = ({ children }: TraitsProviderProps) => {
       const userTraits = traits.filter((trait: Trait) => trait.userId);
       setPublicTraits(publicTraits);
       setUserTraits(userTraits);
-      setTraitsMap(
-        traits.reduce((acc, trait) => {
-          return { ...acc, [trait.id]: trait };
-        }, {})
-      );
       setFetchingTraits(false);
     };
 
     void loadTraits();
   }, []);
 
+  React.useEffect(() => {
+    const nextTraits = [...publicTraits, ...userTraits];
+    setTraitsMap(
+      nextTraits.reduce((acc, trait) => {
+        return { ...acc, [trait.id]: trait };
+      }, {})
+    );
+  }, [publicTraits, userTraits]);
+
+  const addTrait = React.useCallback(
+    async (trait: Omit<AddTrait, 'userId'>) => {
+      try {
+        setAddingTrait(true);
+
+        const newTrait = await createTrait({ ...trait, userId: user!.id });
+
+        setUserTraits((prevUserTraits) => [...prevUserTraits, newTrait]);
+
+        showSnackbar('Trait added successfully', {
+          color: 'success',
+          dismissible: true,
+          dismissText: 'Done',
+        });
+      } catch (error) {
+        console.error(error);
+        showSnackbar(
+          (error as Error).message ||
+            'Something went wrong while adding your trait',
+          {
+            color: 'danger',
+            dismissible: true,
+          }
+        );
+      } finally {
+        setAddingTrait(false);
+      }
+    },
+    [showSnackbar, user]
+  );
+
+  const value = {
+    addingTrait,
+    allTraits,
+    traitsMap,
+    publicTraits,
+    userTraits,
+    fetchingTraits,
+    addTrait,
+  };
+
   return (
-    <TraitsContext.Provider
-      value={{
-        allTraits,
-        traitsMap,
-        publicTraits,
-        userTraits,
-        fetchingTraits,
-      }}
-    >
-      {children}
-    </TraitsContext.Provider>
+    <TraitsContext.Provider value={value}>{children}</TraitsContext.Provider>
   );
 };
 

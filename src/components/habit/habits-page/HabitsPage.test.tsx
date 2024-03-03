@@ -1,3 +1,10 @@
+import { HabitsProvider, TraitsProvider, useHabits, useTraits } from '@context';
+import type { Habit } from '@models';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import HabitsPage from './HabitsPage';
+
 jest.mock('@context', () => ({
   TraitsProvider: jest.fn(({ children }) => children),
   HabitsProvider: jest.fn(({ children }) => children),
@@ -24,12 +31,10 @@ jest.mock('@services', () => ({
   listHabits: jest.fn().mockReturnValue(() => []),
 }));
 
-import { HabitsProvider, TraitsProvider, useHabits, useTraits } from '@context';
-import type { Habit } from '@models';
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import React from 'react';
-
-import HabitsPage from './HabitsPage';
+jest.mock('@hooks', () => ({
+  useHabitIconUrl: jest.fn(),
+  useHabitTraitChipColor: jest.fn(),
+}));
 
 describe(HabitsPage.name, () => {
   it('should display habits', async () => {
@@ -42,7 +47,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 1,
+        traitId: 'uuid-1',
       },
       {
         id: 2,
@@ -52,7 +57,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 1,
+        traitId: 'uuid-2',
       },
     ];
     (useHabits as jest.Mock).mockImplementation(() => ({
@@ -90,7 +95,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 1,
+        traitId: 'uuid-1',
       },
       {
         id: 2,
@@ -100,7 +105,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 2,
+        traitId: 'uuid-2',
       },
     ];
     (useHabits as jest.Mock).mockImplementation(() => ({
@@ -137,7 +142,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 1,
+        traitId: 'uuid-1',
       },
       {
         id: 2,
@@ -147,7 +152,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 2,
+        traitId: 'uuid-2',
       },
     ];
     (useHabits as jest.Mock).mockImplementation(() => ({
@@ -186,7 +191,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 1,
+        traitId: 'uuid-1',
       },
       {
         id: 2,
@@ -196,7 +201,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 2,
+        traitId: 'uuid-2',
       },
     ];
     (useHabits as jest.Mock).mockImplementation(() => ({
@@ -233,7 +238,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 1,
+        traitId: 'uuid-1',
       },
       {
         id: 2,
@@ -243,7 +248,7 @@ describe(HabitsPage.name, () => {
         createdAt: '2021-01-01T00:00:00Z',
         updatedAt: '2021-01-01T00:00:00Z',
         iconPath: 'icon-path-2',
-        traitId: 2,
+        traitId: 'uuid-2',
       },
     ];
     const mockRemoveHabit = jest.fn();

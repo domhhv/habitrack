@@ -27,9 +27,7 @@ describe(AccountPage.name, () => {
       handleEmailChange: jest.fn(),
       name: '',
       handleNameChange: jest.fn(),
-      phoneNumber: '',
-      handlePhoneNumberChange: jest.fn(),
-      updateProfile: jest.fn(),
+      updateAccount: jest.fn(),
     });
     const { getByTestId } = render(
       <BrowserRouter>
@@ -48,9 +46,7 @@ describe(AccountPage.name, () => {
       handleEmailChange: jest.fn(),
       name: '',
       handleNameChange: jest.fn(),
-      phoneNumber: '',
-      handlePhoneNumberChange: jest.fn(),
-      updateProfile: jest.fn(),
+      updateAccount: jest.fn(),
     });
     (useUser as jest.Mock).mockReturnValue({ id: null });
     const { getByTestId } = render(
@@ -71,9 +67,7 @@ describe(AccountPage.name, () => {
       handleEmailChange: jest.fn(),
       name: 'Test name',
       handleNameChange: jest.fn(),
-      phoneNumber: '123-456-7890',
-      handlePhoneNumberChange: jest.fn(),
-      updateProfile: jest.fn(),
+      updateAccount: jest.fn(),
     });
     const { getByTestId } = render(
       <BrowserRouter>
@@ -89,15 +83,10 @@ describe(AccountPage.name, () => {
     );
 
     expect(getByTestId('name-input')).toHaveProperty('value', 'Test name');
-
-    expect(getByTestId('phone-number-input')).toHaveProperty(
-      'value',
-      '123-456-7890'
-    );
   });
 
-  it('should call updateProfile', async () => {
-    const updateProfile = jest.fn();
+  it('should call updateAccount', async () => {
+    const updateAccount = jest.fn();
     (useAccountPage as jest.Mock).mockReturnValue({
       loading: false,
       forbidden: false,
@@ -105,9 +94,7 @@ describe(AccountPage.name, () => {
       handleEmailChange: jest.fn(),
       name: '',
       handleNameChange: jest.fn(),
-      phoneNumber: '',
-      handlePhoneNumberChange: jest.fn(),
-      updateProfile,
+      updateAccount,
     });
     const { getByTestId } = render(
       <BrowserRouter>
@@ -119,6 +106,6 @@ describe(AccountPage.name, () => {
       fireEvent.submit(getByTestId('account-form'));
     });
 
-    expect(updateProfile).toHaveBeenCalled();
+    expect(updateAccount).toHaveBeenCalled();
   });
 });

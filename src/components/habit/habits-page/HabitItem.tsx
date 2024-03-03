@@ -1,5 +1,5 @@
 import { useHabits, useSnackbar, useTraits } from '@context';
-import { useHabitTraitChipColor } from '@hooks';
+import { useHabitTraitChipColor, useHabitIconUrl } from '@hooks';
 import type { Habit } from '@models';
 import { DeleteForever } from '@mui/icons-material';
 import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
@@ -12,7 +12,6 @@ import {
 } from '@mui/joy';
 import { StorageBuckets, updateFile, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
-import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
 import {
@@ -37,6 +36,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
   const { traitsMap } = useTraits();
   const { updateHabit } = useHabits();
   const traitChipColor = useHabitTraitChipColor(habit.traitId);
+  const iconUrl = useHabitIconUrl(habit.iconPath);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     event
@@ -48,12 +48,12 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
       try {
         const split = iconFile.name.split('.');
         const extension = split[split.length - 1];
-        const habitIconPath = `${user?.id}/habit-id-${habit.id}.${extension}`;
+        const iconPath = `${user?.id}/habit-id-${habit.id}.${extension}`;
 
         if (existingIconPath) {
           const { error } = await updateFile(
             StorageBuckets.HABIT_ICONS,
-            habitIconPath,
+            iconPath,
             iconFile
           );
 
@@ -61,7 +61,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
             throw error;
           }
 
-          await updateHabit(habit.id, { ...habit, iconPath: habitIconPath });
+          await updateHabit(habit.id, { ...habit, iconPath });
 
           showSnackbar('Icon replaced!', {
             variant: 'soft',
@@ -70,7 +70,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
         } else {
           const { data, error } = await uploadFile(
             StorageBuckets.HABIT_ICONS,
-            habitIconPath,
+            iconPath,
             iconFile
           );
 
@@ -105,7 +105,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
             as="label"
           >
             <StyledHabitImage
-              src={getHabitIconUrl(habit.iconPath)}
+              src={iconUrl}
               alt={habit.name}
               role="habit-icon"
             />
@@ -126,13 +126,15 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
                 {habit.name}
               </Typography>
               <Chip
-                color={traitChipColor}
+                sx={{
+                  backgroundColor: traitChipColor,
+                }}
                 size="sm"
                 variant="soft"
                 role="habit-trait-chip"
               >
                 <Typography level="body-xs" sx={{ margin: 0 }}>
-                  {traitsMap[habit.traitId]?.name || 'Unknown'}
+                  {traitsMap[habit.traitId]?.label || 'Unknown'}
                 </Typography>
               </Chip>
             </StyledHabitTitleWrapper>

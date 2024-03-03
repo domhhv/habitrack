@@ -1,27 +1,19 @@
 import { useHabits, useOccurrences } from '@context';
-import { useScreenSize } from '@hooks';
+import { useScreenSize, useHabitIconUrl } from '@hooks';
 import { render, waitFor } from '@testing-library/react';
-import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
 
-jest.mock('@utils', () => ({
-  getHabitIconUrl: jest.fn(),
-}));
-
 jest.mock('@hooks', () => ({
   useHabitTraitChipColor: jest.fn(),
   useScreenSize: jest.fn(),
+  useHabitIconUrl: jest.fn(),
 }));
 
 jest.mock('@context', () => ({
   useHabits: jest.fn(),
   useOccurrences: jest.fn(),
-}));
-
-jest.mock('@utils', () => ({
-  getHabitIconUrl: jest.fn(),
 }));
 
 describe(OccurrenceChip.name, () => {
@@ -54,7 +46,7 @@ describe(OccurrenceChip.name, () => {
     (useOccurrences as jest.Mock).mockReturnValue({
       occurrenceIdBeingDeleted: null,
     });
-    (getHabitIconUrl as jest.Mock).mockReturnValue('path/to/test/icon');
+    (useHabitIconUrl as jest.Mock).mockReturnValue('path/to/test/icon');
     const { getByAltText } = render(<OccurrenceChip {...props} />);
     const img = getByAltText('Test Habit Name icon');
     expect(img).toBeInTheDocument();
@@ -77,7 +69,6 @@ describe(OccurrenceChip.name, () => {
     (useOccurrences as jest.Mock).mockReturnValue({
       occurrenceIdBeingDeleted: null,
     });
-    (getHabitIconUrl as jest.Mock).mockReturnValue('path/to/test/icon');
     const { getByRole } = render(<OccurrenceChip {...props} />);
     const deleteButton = getByRole('habit-chip-delete-button');
     deleteButton.click();
@@ -85,6 +76,7 @@ describe(OccurrenceChip.name, () => {
   });
 
   it('should not render if habit not found', () => {
+    (useHabitIconUrl as jest.Mock).mockReturnValue('');
     (useHabits as jest.Mock).mockReturnValue({
       habitsMap: {
         2: {
@@ -101,6 +93,7 @@ describe(OccurrenceChip.name, () => {
   });
 
   it('should render CircularProgress when occurrence is being deleted', () => {
+    (useHabitIconUrl as jest.Mock).mockReturnValue('');
     (useHabits as jest.Mock).mockReturnValue({
       habitsMap: {
         2: {
@@ -122,6 +115,7 @@ describe(OccurrenceChip.name, () => {
   });
 
   it('should not render delete button on small screens', () => {
+    (useHabitIconUrl as jest.Mock).mockReturnValue('');
     (useHabits as jest.Mock).mockReturnValue({
       habitsMap: {
         2: {
