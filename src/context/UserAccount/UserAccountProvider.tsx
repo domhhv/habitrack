@@ -23,13 +23,10 @@ const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
           throw signUpRes.error;
         }
 
-        showSnackbar(
-          'Account created! Please confirm your email before using the app.',
-          {
-            variant: 'solid',
-            color: 'success',
-          }
-        );
+        showSnackbar('Account created!', {
+          variant: 'solid',
+          color: 'success',
+        });
       } catch (e) {
         showSnackbar((e as Error).message || 'Something went wrong', {
           variant: 'solid',

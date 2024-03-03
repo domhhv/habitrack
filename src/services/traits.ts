@@ -1,4 +1,4 @@
-import type { ServerTrait, Trait } from '@models';
+import type { ServerTrait, Trait, AddTrait } from '@models';
 import {
   transformClientEntity,
   transformServerEntities,
@@ -14,7 +14,7 @@ import {
   type PatchEntity,
 } from './supabase';
 
-export const createTrait = async (body: Trait) => {
+export const createTrait = async (body: AddTrait) => {
   const serverBody: ServerTrait = transformClientEntity(body);
 
   const trait = await post<ServerTrait>(Collections.TRAITS, serverBody);

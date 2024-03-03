@@ -29,9 +29,9 @@ describe(generateCalendarRange.name, () => {
       lastWeekDates as CalendarDate[]
     );
 
-    expect(range).toEqual([
-      new Date(2022, 0, 1).getTime(),
-      new Date(2022, 0, 31, 23, 59, 59, 999).getTime(),
-    ]);
+    expect(range).toEqual({
+      rangeStart: new Date(2022, 0, 1).getTime(),
+      rangeEnd: new Date(2022, 0, 31, 23, 59, 59, 999).getTime(),
+    });
   });
 });

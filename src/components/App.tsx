@@ -36,13 +36,11 @@ const App = () => {
     createCalendar,
   });
   const weeksInMonth = getWeeksInMonth(state.visibleRange.start, locale);
-  const range = React.useMemo(() => {
-    const weeks = [...new Array(weeksInMonth).keys()];
-    return generateCalendarRange(
-      state.getDatesInWeek(0) as CalendarDate[],
-      state.getDatesInWeek(weeks[weeks.length - 1]) as CalendarDate[]
-    );
-  }, [state, weeksInMonth]);
+  const weeks = [...new Array(weeksInMonth).keys()];
+  const { rangeStart, rangeEnd } = generateCalendarRange(
+    state.getDatesInWeek(0) as CalendarDate[],
+    state.getDatesInWeek(weeks[weeks.length - 1]) as CalendarDate[]
+  );
 
   return (
     <CssVarsProvider
@@ -55,7 +53,10 @@ const App = () => {
           <UserAccountProvider>
             <TraitsProvider>
               <HabitsProvider>
-                <OccurrencesProvider rangeStart={range[0]} rangeEnd={range[1]}>
+                <OccurrencesProvider
+                  rangeStart={rangeStart}
+                  rangeEnd={rangeEnd}
+                >
                   <BrowserRouter>
                     <AppHeader />
                     <StyledAppContainerDiv>

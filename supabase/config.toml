@@ -1,6 +1,6 @@
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
-project_id = "react-habits-calendar-tracker"
+project_id = "habilify"
 
 [api]
 enabled = true
@@ -37,7 +37,7 @@ default_pool_size = 20
 max_client_conn = 100
 
 [realtime]
-enabled = true
+enabled = false
 # Bind realtime via either IPv4 or IPv6. (default: IPv6)
 # ip_version = "IPv6"
 # The maximum length in bytes of HTTP request headers. (default: 4096)
@@ -89,9 +89,9 @@ enable_manual_linking = false
 enable_signup = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
-double_confirm_changes = true
+double_confirm_changes = false
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = true
+enable_confirmations = false
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -102,7 +102,7 @@ enable_confirmations = true
 # Allow/disallow new user signups via SMS to your project.
 enable_signup = true
 # If enabled, users need to confirm their phone number before signing in.
-enable_confirmations = true
+enable_confirmations = false
 # Template for sending OTP to users
 template = "Your code is {{ .Code }} ."
 
@@ -139,7 +139,7 @@ redirect_uri = ""
 url = ""
 
 [analytics]
-enabled = true
+enabled = false
 port = 54327
 vector_port = 54328
 # Configure one of the supported backends: `postgres`, `bigquery`.

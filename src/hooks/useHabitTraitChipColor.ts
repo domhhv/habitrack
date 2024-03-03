@@ -1,19 +1,9 @@
 import { useTraits } from '@context';
-import type { ChipProps } from '@mui/joy';
 
-const useHabitTraitChipColor = (traitId: number): ChipProps['color'] => {
+const useHabitTraitChipColor = (traitId: string): string => {
   const { traitsMap } = useTraits();
-  const { slug } = traitsMap[traitId] || {};
 
-  if (slug === 'good') {
-    return 'success';
-  }
-
-  if (slug === 'bad') {
-    return 'danger';
-  }
-
-  return 'neutral';
+  return traitsMap[traitId]?.color;
 };
 
 export default useHabitTraitChipColor;

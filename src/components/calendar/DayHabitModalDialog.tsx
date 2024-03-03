@@ -102,7 +102,7 @@ const DayHabitModalDialog = ({
                   <Option key={habit.id} value={habit.id} label={habit.name}>
                     <span>{habit.name}</span>
                     <Typography level="body-xs">
-                      {traitsMap[habit.traitId]?.name}
+                      {traitsMap[habit.traitId]?.label}
                     </Typography>
                   </Option>
                 ))}

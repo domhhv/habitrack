@@ -12,22 +12,24 @@ jest.mock('@services', () => ({
   },
   updateFile: jest.fn(),
   uploadFile: jest.fn(),
+  createSignedUrl: jest.fn(),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
   useUser: jest.fn(),
 }));
 
-jest.mock('@utils', () => ({
-  getHabitIconUrl: jest.fn(),
+jest.mock('@hooks', () => ({
+  useHabitIconUrl: jest.fn(),
+  useHabitTraitChipColor: jest.fn(),
 }));
 
 import { useHabits, useSnackbar, useTraits } from '@context';
+import { useHabitTraitChipColor, useHabitIconUrl } from '@hooks';
 import type { Habit } from '@models';
 import { StorageBuckets, updateFile, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
 import HabitItem, { type HabitItemProps } from './HabitItem';
@@ -41,7 +43,7 @@ describe(HabitItem.name, () => {
     createdAt: new Date().toISOString(),
     updatedAt: null,
     iconPath: 'icon-path',
-    traitId: 1,
+    traitId: 'uuid',
   };
   const mockOnEdit = jest.fn();
   const mockOnDelete = jest.fn();
@@ -60,29 +62,33 @@ describe(HabitItem.name, () => {
 
   it('should render good trait chip', async () => {
     (useTraits as jest.Mock).mockReturnValue({
-      traitsMap: { 1: { slug: 'good', name: 'Good habit' } },
+      traitsMap: {
+        uuid: { slug: 'good', label: 'Good habit', color: 'green' },
+      },
     });
+    (useHabitTraitChipColor as jest.Mock).mockReturnValue('green');
     const { getByRole } = render(<HabitItem {...props} />);
     const habitChip = getByRole('habit-trait-chip');
     expect(habitChip).toBeDefined();
     expect(habitChip.textContent).toContain('Good habit');
-    expect(habitChip.className).toContain('MuiChip-colorSuccess');
+    expect(habitChip).toHaveStyle('background-color: green');
   });
 
   it('should render bad trait chip', () => {
     (useTraits as jest.Mock).mockReturnValue({
-      traitsMap: { 1: { slug: 'bad', name: 'Bad habit' } },
+      traitsMap: { uuid: { slug: 'bad', label: 'Bad habit', color: 'red' } },
     });
+    (useHabitTraitChipColor as jest.Mock).mockReturnValue('red');
     const { getByRole } = render(<HabitItem {...props} />);
     const habitChip = getByRole('habit-trait-chip');
     expect(habitChip).toBeDefined();
     expect(habitChip.textContent).toContain('Bad habit');
-    expect(habitChip.className).toContain('MuiChip-colorDanger');
+    expect(habitChip).toHaveStyle('background-color: red');
   });
 
   it('should render custom trait chip', () => {
     (useTraits as jest.Mock).mockReturnValue({
-      traitsMap: { 1: { slug: 'custom-trait', name: 'Custom habit' } },
+      traitsMap: { uuid: { slug: 'custom-trait', label: 'Custom habit' } },
     });
     const { getByRole } = render(<HabitItem {...props} />);
     const habitChip = getByRole('habit-trait-chip');
@@ -104,7 +110,7 @@ describe(HabitItem.name, () => {
 
   it('should render habit icon image', () => {
     const iconPath = 'habit-icons/uuid-42/habit-id-123.png';
-    (getHabitIconUrl as jest.Mock).mockReturnValue(iconPath);
+    (useHabitIconUrl as jest.Mock).mockReturnValue(iconPath);
     const { getByRole } = render(<HabitItem {...props} />);
     const habitIcon = getByRole('habit-icon');
     expect(habitIcon).toBeDefined();

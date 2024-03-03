@@ -167,7 +167,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   '&[data-is-within-next-month="true"]:not([disabled])': {
     cursor: 'e-resize',
   },
-  '&[data-is-within-prev-month="true"], &[data-is-within-next-month="true"]': {
+  '&[data-is-within-active-month="false"]': {
     '&:hover': {
       [theme.getColorSchemeSelector('light')]: {
         backgroundColor: theme.palette.neutral[50],
@@ -197,6 +197,9 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   },
   '&[data-is-within-active-month="true"]': {
     cursor: 'pointer',
+    '& > button:first-of-type': {
+      cursor: 'pointer',
+    },
     [theme.getColorSchemeSelector('light')]: {
       borderColor: theme.palette.neutral[500],
       '& > button:first-of-type': {
@@ -237,6 +240,26 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     },
   },
   '&[data-is-today="true"]': {
+    '&[data-is-within-active-month="false"]': {
+      [theme.getColorSchemeSelector('light')]: {
+        borderColor: theme.palette.neutral[400],
+        '& > button:first-of-type': {
+          borderColor: theme.palette.neutral[400],
+          '& p': {
+            color: theme.palette.neutral[400],
+          },
+        },
+      },
+      [theme.getColorSchemeSelector('dark')]: {
+        borderColor: theme.palette.neutral[500],
+        '& > button:first-of-type': {
+          borderColor: theme.palette.neutral[500],
+          '& p': {
+            color: theme.palette.neutral[500],
+          },
+        },
+      },
+    },
     '&:hover': {
       [theme.getColorSchemeSelector('light')]: {
         backgroundColor: theme.palette.neutral[300],

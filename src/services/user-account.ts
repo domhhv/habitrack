@@ -35,6 +35,12 @@ export const signOut = async () => {
   return supabaseClient.auth.signOut();
 };
 
+export const updateUserPassword = async (password: string) => {
+  return supabaseClient.auth.updateUser({
+    password,
+  });
+};
+
 export const getUserAccount = async () => {
   const [serverAccount] = await get<ServerAccount>(Collections.ACCOUNTS);
   return transformServerEntity(serverAccount);

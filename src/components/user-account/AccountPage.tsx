@@ -13,11 +13,11 @@ const AccountPage = () => {
     forbidden,
     email,
     handleEmailChange,
+    password,
+    handlePasswordChange,
     name,
     handleNameChange,
-    phoneNumber,
-    handlePhoneNumberChange,
-    updateProfile,
+    updateAccount,
   } = useAccountPage();
 
   useEmailConfirmed();
@@ -50,7 +50,7 @@ const AccountPage = () => {
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
-    void updateProfile();
+    void updateAccount();
   };
 
   return (
@@ -70,11 +70,12 @@ const AccountPage = () => {
         </Box>
         <Box mb={2}>
           <FloatingLabelInput
-            value={phoneNumber}
-            onChange={handlePhoneNumberChange}
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
             disabled={loading}
-            label="Phone number"
-            dataTestId="phone-number-input"
+            label="Password"
+            dataTestId="password-input"
           />
         </Box>
         <Box mb={2}>

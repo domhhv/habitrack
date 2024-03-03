@@ -1,4 +1,8 @@
-import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
+import {
+  FloatingLabelInput,
+  FloatingLabelTextarea,
+  AddCustomTraitModal,
+} from '@components';
 import { useHabits, useSnackbar, useTraits } from '@context';
 import {
   AddRounded,
@@ -43,8 +47,9 @@ const AddHabitDialogButton = () => {
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
-  const [habitTraitId, setHabitTraitId] = React.useState(0);
+  const [habitTraitId, setHabitTraitId] = React.useState('');
   const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
+  const [addTraitModalOpen, setAddTraitModalOpen] = React.useState(false);
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -53,7 +58,7 @@ const AddHabitDialogButton = () => {
   const handleDialogClose = () => {
     setHabitName('');
     setHabitDescription('');
-    setHabitTraitId(0);
+    setHabitTraitId('');
     setOpen(false);
   };
 
@@ -64,20 +69,16 @@ const AddHabitDialogButton = () => {
         name: habitName,
         description: habitDescription,
         userId: user?.id || '',
-        iconPath: '',
-        traitId: habitTraitId as number,
+        traitId: habitTraitId as string,
       };
 
       const { id } = await addHabit(habit);
 
       if (habitIcon) {
         const [, extension] = habitIcon.name.split('.');
-        const { data } = await uploadFile(
-          StorageBuckets.HABIT_ICONS,
-          `${user?.id}/habit-id-${id}.${extension}`,
-          habitIcon
-        );
-        await updateHabit(id, { ...habit, iconPath: data?.path });
+        const iconPath = `${user?.id}/habit-id-${id}.${extension}`;
+        await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, habitIcon);
+        updateHabit(id, { ...habit, iconPath });
       }
     } catch (error) {
       console.error(error);
@@ -103,7 +104,14 @@ const AddHabitDialogButton = () => {
     setHabitDescription(event.target.value);
   };
 
-  const handleHabitTraitChange = (_: null, newTraitId: number) => {
+  const handleHabitTraitChange = (
+    _: null,
+    newTraitId: string | 'add-custom-trait'
+  ) => {
+    if (newTraitId === 'add-custom-trait') {
+      return setAddTraitModalOpen(true);
+    }
+
     setHabitTraitId(newTraitId);
   };
 
@@ -129,6 +137,10 @@ const AddHabitDialogButton = () => {
       >
         Add habit
       </Button>
+      <AddCustomTraitModal
+        open={addTraitModalOpen}
+        onClose={() => setAddTraitModalOpen(false)}
+      />
       <Modal open={open} onClose={handleDialogClose} role="add-habit-dialog">
         <ModalDialog>
           <ModalClose
@@ -174,15 +186,25 @@ const AddHabitDialogButton = () => {
                     </>
                   }
                 >
+                  <Option value={0} disabled>
+                    Choose a trait
+                  </Option>
                   {allTraits.map((trait) => (
                     <Option
                       key={trait.id}
                       value={trait.id}
                       data-testid={`habit-trait-id-${trait.id}-option`}
+                      sx={{
+                        backgroundColor: trait.color,
+                        color: 'white',
+                      }}
                     >
-                      {trait.name}
+                      {trait.label}
                     </Option>
                   ))}
+                  <Option value="add-custom-trait">
+                    <AddRounded /> Add Custom Trait
+                  </Option>
                 </Select>
               </Box>
               <Box mb={1}>

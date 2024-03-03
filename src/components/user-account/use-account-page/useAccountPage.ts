@@ -1,5 +1,9 @@
 import { useSnackbar } from '@context';
-import { getUserAccount, updateUserAccount } from '@services';
+import {
+  getUserAccount,
+  updateUserAccount,
+  updateUserPassword,
+} from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { transformClientEntity } from '@utils';
 import React, { type ChangeEventHandler } from 'react';
@@ -10,24 +14,17 @@ const useAccountPage = () => {
   const [forbidden, setForbidden] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
   const [name, setName] = React.useState('');
-  const [phoneNumber, setPhoneNumber] = React.useState('');
 
   React.useEffect(() => {
-    if (!user?.id) {
-      setLoading(false);
-      setForbidden(true);
-      return;
-    }
-
     setLoading(true);
-    setForbidden(false);
 
     const loadUserProfile = async () => {
       const data = await getUserAccount();
 
       setEmail(data?.email || user?.email || '');
-      setPhoneNumber(data?.phoneNumber || user?.phone || '');
+      setPassword('random-string');
       setName(data?.name);
       setLoading(false);
     };
@@ -35,30 +32,37 @@ const useAccountPage = () => {
     void loadUserProfile();
   }, [user, user?.email, user?.phone]);
 
+  React.useEffect(() => {
+    setForbidden(!user?.id && !loading);
+  }, [user, loading]);
+
   const handleEmailChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     setEmail(event.target.value);
   };
 
-  const handlePhoneNumberChange: ChangeEventHandler<HTMLInputElement> = (
+  const handlePasswordChange: ChangeEventHandler<HTMLInputElement> = (
     event
   ) => {
-    setPhoneNumber(event.target.value);
+    setPassword(event.target.value);
   };
 
   const handleNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     setName(event.target.value);
   };
 
-  const updateProfile = async () => {
+  const updateAccount = async () => {
     if (!user?.id) return;
 
     setLoading(true);
     const serverUpdates = transformClientEntity({
       name,
       email,
-      phoneNumber,
       updatedAt: new Date().toISOString(),
     });
+
+    if (password) {
+      await updateUserPassword(password);
+    }
 
     await updateUserAccount(user.id, serverUpdates);
 
@@ -68,15 +72,15 @@ const useAccountPage = () => {
   };
 
   return {
-    loading: loading || !user?.id,
+    loading,
     forbidden,
     email,
     handleEmailChange,
+    password,
+    handlePasswordChange,
     name,
     handleNameChange,
-    phoneNumber,
-    handlePhoneNumberChange,
-    updateProfile,
+    updateAccount,
   };
 };
 

@@ -11,7 +11,7 @@ const useEmailConfirmed = () => {
     const [, emailConfirmed] = location.search.split('=');
 
     if (emailConfirmed) {
-      showSnackbar('Email confirmed', {
+      showSnackbar(`Email confirmed! You're now logged in 🎉`, {
         color: 'success',
         dismissible: true,
         dismissText: 'Done',
