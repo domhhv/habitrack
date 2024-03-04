@@ -20,18 +20,6 @@ export const StyledHabitImage = styled('img')({
   height: 32,
 });
 
-export const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: '1px',
-});
-
 export const StyledImageIconButton = styled(IconButton)(({ theme }) => ({
   display: 'flex',
   marginRight: theme.spacing(1),

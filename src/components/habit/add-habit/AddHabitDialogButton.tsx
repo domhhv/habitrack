@@ -20,24 +20,13 @@ import {
   ModalDialog,
   Option,
   Select,
-  styled,
   Typography,
 } from '@mui/joy';
 import { StorageBuckets, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import React, { type FormEventHandler } from 'react';
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: '1px',
-});
+import { StyledTraitColorIndicator, VisuallyHiddenInput } from '../styled';
 
 const AddHabitDialogButton = () => {
   const user = useUser();
@@ -47,7 +36,7 @@ const AddHabitDialogButton = () => {
   const [open, setOpen] = React.useState(false);
   const [habitName, setHabitName] = React.useState('');
   const [habitDescription, setHabitDescription] = React.useState('');
-  const [habitTraitId, setHabitTraitId] = React.useState('');
+  const [habitTraitId, setHabitTraitId] = React.useState('choose-trait');
   const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
   const [addTraitModalOpen, setAddTraitModalOpen] = React.useState(false);
 
@@ -186,7 +175,7 @@ const AddHabitDialogButton = () => {
                     </>
                   }
                 >
-                  <Option value={0} disabled>
+                  <Option value="choose-trait" disabled>
                     Choose a trait
                   </Option>
                   {allTraits.map((trait) => (
@@ -194,12 +183,11 @@ const AddHabitDialogButton = () => {
                       key={trait.id}
                       value={trait.id}
                       data-testid={`habit-trait-id-${trait.id}-option`}
-                      sx={{
-                        backgroundColor: trait.color,
-                        color: 'white',
-                      }}
                     >
                       {trait.label}
+                      <StyledTraitColorIndicator
+                        sx={{ backgroundColor: trait.color }}
+                      />
                     </Option>
                   ))}
                   <Option value="add-custom-trait">

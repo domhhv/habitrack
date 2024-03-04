@@ -14,6 +14,8 @@ import {
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
+import { StyledTraitColorIndicator } from '../styled';
+
 import { StyledForm } from './styled';
 
 export type EditHabitDialogProps = {
@@ -30,7 +32,7 @@ const EditHabitDialog = ({
   const [isOpen, setIsOpen] = React.useState(false);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [traitId, setTraitId] = React.useState<string>('');
+  const [traitId, setTraitId] = React.useState<string>('choose-trait');
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { updateHabit } = useHabits();
   const user = useUser();
@@ -131,19 +133,17 @@ const EditHabitDialog = ({
               value={traitId}
               variant="soft"
             >
-              <Option value={0} disabled>
+              <Option value="choose-trait" disabled>
                 Choose a trait
               </Option>
               {allTraits.map((trait) => (
-                <Option
-                  key={trait.id}
-                  value={trait.id}
-                  sx={{
-                    backgroundColor: trait.color,
-                    color: 'white',
-                  }}
-                >
+                <Option key={trait.id} value={trait.id}>
                   {trait.label}
+                  <StyledTraitColorIndicator
+                    sx={{
+                      backgroundColor: traitsMap[trait.id]?.color,
+                    }}
+                  />
                 </Option>
               ))}
             </Select>

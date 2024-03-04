@@ -14,13 +14,14 @@ import { StorageBuckets, updateFile, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
+import { VisuallyHiddenInput } from '../styled';
+
 import {
   StyledEditIconButton,
   StyledHabitTitleWrapper,
   StyledListItemContent,
   StyledHabitImage,
   StyledListItem,
-  VisuallyHiddenInput,
   StyledImageIconButton,
 } from './styled';
 
@@ -126,12 +127,10 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
                 {habit.name}
               </Typography>
               <Chip
-                sx={{
-                  backgroundColor: traitChipColor,
-                }}
                 size="sm"
                 variant="soft"
                 role="habit-trait-chip"
+                sx={{ backgroundColor: traitChipColor }}
               >
                 <Typography level="body-xs" sx={{ margin: 0 }}>
                   {traitsMap[habit.traitId]?.label || 'Unknown'}
