@@ -35,7 +35,6 @@ export const StyledCalendarContainerDiv = styled(StyledAppWideContainer)(
     flexDirection: 'column',
     margin: `${theme.spacing(2)} auto 0`,
     maxWidth: '100%',
-    padding: theme.spacing(0, 2),
     flex: '1 1 0%',
     [theme.breakpoints.down('lg')]: {
       padding: 0,
@@ -131,6 +130,7 @@ export const StyledCalendarMonthGrid = styled(StyledWithGapDiv)({
 export const StyledCalendarWeekRow = styled(StyledWithGapDiv)(({ theme }) => ({
   display: 'flex',
   flex: 0,
+  justifyContent: 'space-between',
   [theme.breakpoints.down('lg')]: {
     height: 110,
     '&:last-of-type': {
