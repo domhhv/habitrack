@@ -16,10 +16,10 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 const config = {
   entry: './src/index.tsx',
-  mode: process.env.NODE_ENV,
   ...(isDevelopment && {
     devtool: 'inline-source-map',
   }),
+  mode: process.env.NODE_ENV,
   devServer: {
     historyApiFallback: true,
   },
@@ -50,9 +50,22 @@ const config = {
     },
   },
   output: {
-    filename: '[name].bundle.js',
+    filename: '[name].[contenthash].bundle.js',
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
+  },
+  optimization: {
+    moduleIds: 'deterministic',
+    runtimeChunk: 'single',
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    },
   },
   plugins: [
     isProduction &&
@@ -62,7 +75,6 @@ const config = {
     new webpack.DefinePlugin({
       process: {
         env: {
-          NODE_ENV: JSON.stringify(process.env.NODE_ENV),
           SUPABASE_URL: JSON.stringify(process.env.SUPABASE_URL),
           SUPABASE_ANON_KEY: JSON.stringify(process.env.SUPABASE_ANON_KEY),
         },
