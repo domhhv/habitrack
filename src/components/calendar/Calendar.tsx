@@ -28,6 +28,13 @@ const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
     disabled: Boolean(buttonProps.isDisabled),
   });
 
+  React.useEffect(() => {
+    document.title = `Calendar - ${activeMonthLabel.slice(
+      0,
+      3
+    )} ${activeYear} | Habilify`;
+  }, [activeMonthLabel, activeYear]);
+
   return (
     <StyledCalendarBackgroundDiv>
       <StyledCalendarContainerDiv {...calendarProps}>
