@@ -26,10 +26,26 @@
         display: flex;
         flex-direction: column;
       }
+
+      .loader-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+
+      .loader-container img {
+        margin-right: 8px;
+      }
     </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="root">
+      <div class="loader-container">
+        <img src="./android-chrome-512x512.png" alt="Habilify logo" width="16" height="16" />
+        We're preparing the app...
+      </div>
+    </div>
   </body>
 </html>
