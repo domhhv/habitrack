@@ -4,10 +4,10 @@
   "author": "Dominik Hryshaiev <domhryshaiev@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/domhhv/react-habits-calendar-tracker.git"
+    "url": "https://github.com/domhhv/habilify.git"
   },
   "description": "A simple calendar tracker for your habits",
-  "homepage": "https://domhhv.github.io/react-habits-calendar-tracker",
+  "homepage": "https://habilify.io",
   "license": "MIT",
   "keywords": [
     "react",
@@ -17,16 +17,15 @@
     "prettier",
     "emotion",
     "mui",
-    "framer-motion",
     "date-fns",
     "supabase"
   ],
   "scripts": {
-    "prepare": "([ -d ./.git ] && husky install) || echo \"Skipping husky install since package does not have .git folder\"",
+    "prepare": "husky install",
     "prebuild": "yarn typecheck && yarn eslint:check && yarn prettier:check",
-    "build": "NODE_ENV=production webpack --mode production && yarn insert-favicons",
+    "build": "NODE_ENV=production webpack && yarn insert-favicons",
     "dev": "NODE_ENV=development webpack-dev-server --open --hot",
-    "start": "NODE_ENV=production serve -s dist",
+    "start": "serve -s dist",
     "typecheck": "tsc --noEmit",
     "eslint:check": "eslint src",
     "eslint:fix": "eslint --fix src",
