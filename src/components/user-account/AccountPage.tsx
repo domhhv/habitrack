@@ -22,6 +22,10 @@ const AccountPage = () => {
 
   useEmailConfirmed();
 
+  React.useEffect(() => {
+    document.title = 'My Account | Habilify';
+  }, []);
+
   if (loading) {
     return (
       <StyledAccountPageContainer data-testid="account-page">

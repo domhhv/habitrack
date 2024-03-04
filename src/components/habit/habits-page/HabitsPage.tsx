@@ -18,6 +18,10 @@ const HabitsPage = () => {
   const [isRemovingHabit, setIsRemovingHabit] = React.useState(false);
   const { removeOccurrencesByHabitId } = useOccurrences();
 
+  React.useEffect(() => {
+    document.title = 'My Habits | Habilify';
+  }, []);
+
   const handleRemovalConfirmOpen = (id: number) => {
     setHabitIdToRemove(id);
   };
