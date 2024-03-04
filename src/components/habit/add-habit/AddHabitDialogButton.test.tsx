@@ -52,7 +52,7 @@ describe(AddHabitDialogButton.name, () => {
 
     expect(habitName).toHaveValue('');
     expect(habitDescription).toHaveValue('');
-    expect(habitTraitSelect).toHaveValue('');
+    expect(habitTraitSelect).toHaveValue('choose-trait');
     expect(icon).toHaveValue('');
 
     fireEvent.change(habitName, { target: { value: 'habit-name' } });
