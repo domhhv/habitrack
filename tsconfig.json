@@ -28,7 +28,8 @@
       "@utils": ["utils"],
       "@hooks": ["hooks"],
       "@helpers": ["helpers"],
-      "@models": ["models"]
+      "@models": ["models"],
+      "@tests": ["../tests"]
     }
   },
   "include": [

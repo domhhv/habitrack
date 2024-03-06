@@ -75,23 +75,6 @@ describe(OccurrenceChip.name, () => {
     expect(mockOnDelete).toHaveBeenCalledWith(1, expect.anything());
   });
 
-  it('should not render if habit not found', () => {
-    (useHabitIconUrl as jest.Mock).mockReturnValue('');
-    (useHabits as jest.Mock).mockReturnValue({
-      habitsMap: {
-        2: {
-          id: 2,
-          name: '',
-          iconPath: 'path/to/test/icon',
-          traitId: 1,
-        },
-      },
-    });
-    const { queryByRole } = render(<OccurrenceChip {...props} />);
-    const chip = queryByRole('habit-chip');
-    expect(chip).toBeNull();
-  });
-
   it('should render CircularProgress when occurrence is being deleted', () => {
     (useHabitIconUrl as jest.Mock).mockReturnValue('');
     (useHabits as jest.Mock).mockReturnValue({

@@ -67,7 +67,7 @@ const AddHabitDialogButton = () => {
         const [, extension] = habitIcon.name.split('.');
         const iconPath = `${user?.id}/habit-id-${id}.${extension}`;
         await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, habitIcon);
-        updateHabit(id, { ...habit, iconPath });
+        void updateHabit(id, { ...habit, iconPath });
       }
     } catch (error) {
       console.error(error);
@@ -116,7 +116,7 @@ const AddHabitDialogButton = () => {
   return (
     <>
       <Button
-        sx={{ width: 400 }}
+        sx={{ width: 400, maxWidth: '100%' }}
         color="primary"
         variant="solid"
         startDecorator={<AddRounded />}

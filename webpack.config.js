@@ -47,6 +47,7 @@ const config = {
       '@utils': path.resolve(__dirname, './src/utils'),
       '@helpers': path.resolve(__dirname, './src/helpers'),
       '@models': path.resolve(__dirname, './src/models'),
+      '@tests': path.resolve(__dirname, './tests'),
     },
   },
   output: {
