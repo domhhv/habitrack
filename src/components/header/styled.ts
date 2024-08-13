@@ -1,4 +1,3 @@
-import { IconButton } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
 
 import { StyledAppWideContainer } from '../styled';
@@ -32,8 +31,3 @@ export const StyledButtonsContainer = styled('div')({
     marginRight: 10,
   },
 });
-
-export const StyledToggleModeIconButton = styled(IconButton)(({ theme }) => ({
-  [theme.getColorSchemeSelector('light')]: {},
-  [theme.getColorSchemeSelector('dark')]: {},
-}));

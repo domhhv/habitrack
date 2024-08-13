@@ -119,17 +119,14 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
         <div>
           <StyledHabitTitleWrapper>
             <Typography level="title-sm">{habit.name}</Typography>
-            <StyledHabitTraitChip
-              size="sm"
-              variant="plain"
-              role="habit-trait-chip"
-            >
+            <StyledHabitTraitChip size="sm" variant="outlined">
               <StyledHabitTraitColorIndicator
+                role="habit-trait-chip-color-indicator"
                 sx={{
                   backgroundColor: traitChipColor,
                 }}
               />
-              <Typography level="body-xs">
+              <Typography level="body-xs" role="habit-trait-chip-name">
                 {traitsMap[habit.traitId]?.label || 'Unknown'}
               </Typography>
             </StyledHabitTraitChip>

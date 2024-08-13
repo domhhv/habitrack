@@ -1,6 +1,6 @@
 import { useSnackbar } from '@context';
 import {
-  getUserAccount,
+  getUserAccountByEmail,
   updateUserAccount,
   updateUserPassword,
 } from '@services';
@@ -21,11 +21,19 @@ const useAccountPage = () => {
     setLoading(true);
 
     const loadUserProfile = async () => {
-      const data = await getUserAccount();
+      if (!user?.id) {
+        setForbidden(true);
+        setLoading(false);
+        return;
+      }
 
-      setEmail(data?.email || user?.email || '');
+      const data = await getUserAccountByEmail(user.email || '');
+
+      console.log('data', data);
+
+      setEmail(data.email || user.email || '');
       setPassword('');
-      setName(data?.name || '');
+      setName(data.name || '');
       setLoading(false);
     };
 

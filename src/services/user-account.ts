@@ -6,7 +6,7 @@ import type {
 } from '@supabase/supabase-js';
 import { transformServerEntity } from '@utils';
 
-import { Collections, get, patch, type PatchEntity } from './supabase';
+import { Collections, getByField, patch, type PatchEntity } from './supabase';
 
 export const signUp = async (
   email: string,
@@ -41,8 +41,13 @@ export const updateUserPassword = async (password: string) => {
   });
 };
 
-export const getUserAccount = async () => {
-  const [serverAccount] = await get<ServerAccount>(Collections.ACCOUNTS);
+export const getUserAccountByEmail = async (supabaseUserEmail: string) => {
+  const [serverAccount] = await getByField<ServerAccount>(
+    Collections.ACCOUNTS,
+    'email',
+    supabaseUserEmail
+  );
+
   return transformServerEntity(serverAccount);
 };
 

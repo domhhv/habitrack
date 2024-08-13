@@ -7,7 +7,6 @@ import {
   TraitsProvider,
 } from '@context';
 import { supabaseClient, theme } from '@helpers';
-import { USER_THEME_STORAGE_KEY } from '@hooks';
 import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
 import { GregorianCalendar } from '@internationalized/date';
 import { CssVarsProvider } from '@mui/joy';
@@ -43,11 +42,7 @@ const App = () => {
   );
 
   return (
-    <CssVarsProvider
-      defaultMode="light"
-      theme={theme}
-      modeStorageKey={USER_THEME_STORAGE_KEY}
-    >
+    <CssVarsProvider defaultMode="system" theme={theme}>
       <SessionContextProvider supabaseClient={supabaseClient}>
         <SnackbarProvider>
           <UserAccountProvider>

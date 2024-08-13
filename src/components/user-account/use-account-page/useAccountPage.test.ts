@@ -3,7 +3,7 @@ jest.mock('@context', () => ({
 }));
 
 jest.mock('@services', () => ({
-  getUserAccount: jest.fn(),
+  getUserAccountByEmail: jest.fn(),
   updateUserAccount: jest.fn(),
   updateUserPassword: jest.fn(),
 }));
@@ -17,7 +17,7 @@ jest.mock('@utils', () => ({
   transformServerEntities: jest.fn().mockImplementation(() => ({})),
 }));
 
-import { getUserAccount, updateUserAccount } from '@services';
+import { getUserAccountByEmail, updateUserAccount } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { transformClientEntity, transformServerEntities } from '@utils';
@@ -35,7 +35,7 @@ describe('useAccountPage', () => {
       id: '123',
       email: 'email',
     });
-    (getUserAccount as jest.Mock).mockReturnValue(
+    (getUserAccountByEmail as jest.Mock).mockReturnValue(
       Promise.resolve({
         email: '',
         name: '',
@@ -62,7 +62,7 @@ describe('useAccountPage', () => {
       id: '123',
       email: 'email',
     });
-    (getUserAccount as jest.Mock).mockReturnValue(
+    (getUserAccountByEmail as jest.Mock).mockReturnValue(
       Promise.resolve({
         email: 'user-email',
         name: 'user-name',
@@ -119,7 +119,7 @@ describe('useAccountPage', () => {
       email: '',
       phone: '',
     });
-    (getUserAccount as jest.Mock).mockReturnValue(
+    (getUserAccountByEmail as jest.Mock).mockReturnValue(
       Promise.resolve({
         email: '',
         phoneNumber: '',

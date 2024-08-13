@@ -13,6 +13,7 @@ module.exports = {
     '@helpers': '<rootDir>/src/helpers',
     '@models': '<rootDir>/src/models',
     '@context': '<rootDir>/src/context',
+    '@tests': '<rootDir>/tests',
   },
   transform: {
     '\\.[jt]sx?$': 'babel-jest',

@@ -68,10 +68,14 @@ describe(HabitItem.name, () => {
     });
     (useHabitTraitChipColor as jest.Mock).mockReturnValue('green');
     const { getByRole } = render(<HabitItem {...props} />);
-    const habitChip = getByRole('habit-trait-chip');
-    expect(habitChip).toBeDefined();
-    expect(habitChip.textContent).toContain('Good habit');
-    expect(habitChip).toHaveStyle('background-color: green');
+    const habitChipName = getByRole('habit-trait-chip-name');
+    const habitChipColorIndicator = getByRole(
+      'habit-trait-chip-color-indicator'
+    );
+    expect(habitChipName).toBeDefined();
+    expect(habitChipName.textContent).toContain('Good habit');
+    expect(habitChipColorIndicator).toBeDefined();
+    expect(habitChipColorIndicator).toHaveStyle('background-color: green');
   });
 
   it('should render bad trait chip', () => {
@@ -80,10 +84,14 @@ describe(HabitItem.name, () => {
     });
     (useHabitTraitChipColor as jest.Mock).mockReturnValue('red');
     const { getByRole } = render(<HabitItem {...props} />);
-    const habitChip = getByRole('habit-trait-chip');
-    expect(habitChip).toBeDefined();
-    expect(habitChip.textContent).toContain('Bad habit');
-    expect(habitChip).toHaveStyle('background-color: red');
+    const habitChipName = getByRole('habit-trait-chip-name');
+    const habitChipColorIndicator = getByRole(
+      'habit-trait-chip-color-indicator'
+    );
+    expect(habitChipName).toBeDefined();
+    expect(habitChipName.textContent).toContain('Bad habit');
+    expect(habitChipColorIndicator).toBeDefined();
+    expect(habitChipColorIndicator).toHaveStyle('background-color: red');
   });
 
   it('should render custom trait chip', () => {
@@ -91,10 +99,9 @@ describe(HabitItem.name, () => {
       traitsMap: { uuid: { slug: 'custom-trait', label: 'Custom habit' } },
     });
     const { getByRole } = render(<HabitItem {...props} />);
-    const habitChip = getByRole('habit-trait-chip');
-    expect(habitChip).toBeDefined();
-    expect(habitChip.textContent).toContain('Custom habit');
-    expect(habitChip.className).toContain('MuiChip-colorNeutral');
+    const habitChipName = getByRole('habit-trait-chip-name');
+    expect(habitChipName).toBeDefined();
+    expect(habitChipName.textContent).toContain('Custom habit');
   });
 
   it('should render neutral habit chip if trait not found', () => {
@@ -102,10 +109,9 @@ describe(HabitItem.name, () => {
       traitsMap: {},
     });
     const { getByRole } = render(<HabitItem {...props} />);
-    const habitChip = getByRole('habit-trait-chip');
-    expect(habitChip).toBeDefined();
-    expect(habitChip.textContent).toContain('Unknown');
-    expect(habitChip.className).toContain('MuiChip-colorNeutral');
+    const habitChipName = getByRole('habit-trait-chip-name');
+    expect(habitChipName.textContent).toContain('Unknown');
+    expect(habitChipName).toBeDefined();
   });
 
   it('should render habit icon image', () => {

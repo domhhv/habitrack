@@ -32,6 +32,22 @@ export const get = async <T extends object>(
   return data as T[];
 };
 
+export const getByField = async <T extends object>(
+  collection: Collections,
+  columnName: keyof T & string,
+  value: string | number
+): Promise<T[]> => {
+  const { error, data } = await fetch(collection)
+    .select()
+    .eq(columnName, value);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as T[];
+};
+
 export const getInRange = async <T extends object>(
   collection: Collections,
   columnName: keyof T & string,

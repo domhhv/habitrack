@@ -18,9 +18,9 @@ CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
 begin
-  insert into public.profiles (id, email)
-  values (new.id, new.raw_user_meta_data->>'email');
-  return new;
+  insert into public.accounts (id, email)
+    values (new.id, new.email);
+    return new;
 end;
 $$;
 
