@@ -1,5 +1,5 @@
 import { useHabits, useSnackbar, useTraits } from '@context';
-import { useHabitTraitChipColor, useHabitIconUrl } from '@hooks';
+import { useHabitTraitChipColor } from '@hooks';
 import type { Habit } from '@models';
 import { DeleteForever } from '@mui/icons-material';
 import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
@@ -8,6 +8,7 @@ import { StorageBuckets, updateFile, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
+import { getHabitIconUrl } from '../../../utils/getHabitIconUrl';
 import { VisuallyHiddenInput } from '../styled';
 
 import {
@@ -33,7 +34,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
   const { traitsMap } = useTraits();
   const { updateHabit } = useHabits();
   const traitChipColor = useHabitTraitChipColor(habit.traitId);
-  const iconUrl = useHabitIconUrl(habit.iconPath);
+  const iconUrl = getHabitIconUrl(habit.iconPath);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     event

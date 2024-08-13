@@ -1,9 +1,11 @@
 import { useHabits, useOccurrences } from '@context';
-import { useHabitTraitChipColor, useScreenSize, useHabitIconUrl } from '@hooks';
+import { useHabitTraitChipColor, useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { ChipDelete, CircularProgress, Tooltip } from '@mui/joy';
 import React from 'react';
+
+import { getHabitIconUrl } from '../../utils/getHabitIconUrl';
 
 import { StyledHabitChip, StyledOccurrenceHabitImg } from './styled';
 
@@ -28,7 +30,7 @@ const OccurrenceChip = ({
     habitsMap[occurrence.habitId]?.traitId
   );
   const screenSize = useScreenSize();
-  const iconUrl = useHabitIconUrl(eventHabit.iconPath);
+  const iconUrl = getHabitIconUrl(eventHabit.iconPath);
 
   const isBeingDeleted = occurrenceIdBeingDeleted === occurrence.id;
 
