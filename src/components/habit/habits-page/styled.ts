@@ -1,4 +1,4 @@
-import { IconButton, ListItem, ListItemContent, styled } from '@mui/joy';
+import { Chip, IconButton, ListItem, ListItemContent, styled } from '@mui/joy';
 
 import { StyledAppWideContainer } from '../../styled';
 
@@ -18,6 +18,7 @@ export const StyledList = styled('ul')({
 export const StyledHabitImage = styled('img')({
   width: 32,
   height: 32,
+  borderRadius: 4,
 });
 
 export const StyledImageIconButton = styled(IconButton)(({ theme }) => ({
@@ -45,6 +46,7 @@ export const StyledEditIconButton = styled(IconButton)(({ theme }) => ({
 export const StyledHabitTitleWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
+  marginBottom: theme.spacing(0.5),
   '& > div': {
     marginLeft: theme.spacing(1),
   },
@@ -63,4 +65,19 @@ export const StyledListItem = styled(ListItem)(({ theme }) => ({
   '&:not(:last-of-type)': {
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
+}));
+
+export const StyledHabitTraitChip = styled(Chip)({
+  '& > span': {
+    display: 'flex',
+    alignItems: 'center',
+  },
+});
+
+export const StyledHabitTraitColorIndicator = styled('span')(({ theme }) => ({
+  width: 4,
+  height: 4,
+  borderRadius: '50%',
+  display: 'inline-block',
+  marginRight: theme.spacing(0.5),
 }));

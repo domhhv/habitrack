@@ -1,6 +1,6 @@
-import type { Habit } from '../src/models';
+import type { Habit } from '@models';
 
-const makeTestHabit = (habit: Partial<Habit> = {}): Habit => {
+const makeTestHabit = (override: Partial<Habit> = {}): Habit => {
   return {
     id: 1,
     name: 'Test Habit',
@@ -10,7 +10,7 @@ const makeTestHabit = (habit: Partial<Habit> = {}): Habit => {
     updatedAt: new Date().toISOString(),
     userId: '1',
     iconPath: 'path/to/test/icon.png',
-    ...habit,
+    ...override,
   };
 };
 

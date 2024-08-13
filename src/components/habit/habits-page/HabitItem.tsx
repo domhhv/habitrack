@@ -1,19 +1,14 @@
 import { useHabits, useSnackbar, useTraits } from '@context';
-import { useHabitTraitChipColor, useHabitIconUrl } from '@hooks';
+import { useHabitTraitChipColor } from '@hooks';
 import type { Habit } from '@models';
 import { DeleteForever } from '@mui/icons-material';
 import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
-import {
-  Chip,
-  IconButton,
-  ListItemDecorator,
-  Tooltip,
-  Typography,
-} from '@mui/joy';
+import { IconButton, ListItemDecorator, Tooltip, Typography } from '@mui/joy';
 import { StorageBuckets, updateFile, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
+import { getHabitIconUrl } from '../../../utils/getHabitIconUrl';
 import { VisuallyHiddenInput } from '../styled';
 
 import {
@@ -23,6 +18,8 @@ import {
   StyledHabitImage,
   StyledListItem,
   StyledImageIconButton,
+  StyledHabitTraitColorIndicator,
+  StyledHabitTraitChip,
 } from './styled';
 
 export type HabitItemProps = {
@@ -37,7 +34,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
   const { traitsMap } = useTraits();
   const { updateHabit } = useHabits();
   const traitChipColor = useHabitTraitChipColor(habit.traitId);
-  const iconUrl = useHabitIconUrl(habit.iconPath);
+  const iconUrl = getHabitIconUrl(habit.iconPath);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     event
@@ -120,29 +117,26 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
         </Tooltip>
       </ListItemDecorator>
       <StyledListItemContent>
-        <div style={{ display: 'flex' }}>
-          <div>
-            <StyledHabitTitleWrapper>
-              <Typography level="title-sm" sx={{ margin: 0 }}>
-                {habit.name}
+        <div>
+          <StyledHabitTitleWrapper>
+            <Typography level="title-sm">{habit.name}</Typography>
+            <StyledHabitTraitChip size="sm" variant="outlined">
+              <StyledHabitTraitColorIndicator
+                role="habit-trait-chip-color-indicator"
+                sx={{
+                  backgroundColor: traitChipColor,
+                }}
+              />
+              <Typography level="body-xs" role="habit-trait-chip-name">
+                {traitsMap[habit.traitId]?.label || 'Unknown'}
               </Typography>
-              <Chip
-                size="sm"
-                variant="soft"
-                role="habit-trait-chip"
-                sx={{ backgroundColor: traitChipColor }}
-              >
-                <Typography level="body-xs" sx={{ margin: 0 }}>
-                  {traitsMap[habit.traitId]?.label || 'Unknown'}
-                </Typography>
-              </Chip>
-            </StyledHabitTitleWrapper>
-            {habit.description && (
-              <Typography level="body-xs" sx={{ margin: 0 }} textAlign="left">
-                <i>{habit.description}</i>
-              </Typography>
-            )}
-          </div>
+            </StyledHabitTraitChip>
+          </StyledHabitTitleWrapper>
+          {habit.description && (
+            <Typography level="body-xs" textAlign="left">
+              <i>{habit.description}</i>
+            </Typography>
+          )}
         </div>
         <div>
           <Tooltip title="Edit habit">

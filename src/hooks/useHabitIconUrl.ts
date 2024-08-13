@@ -8,7 +8,7 @@ const useHabitIconUrl = (habitIconPath: string | null) => {
     const loadIcon = async () => {
       const { data } = await createSignedUrl(
         StorageBuckets.HABIT_ICONS,
-        habitIconPath || 'public/default.png',
+        habitIconPath || 'default.png',
         60
       );
       setIconUrl(data?.signedUrl || '');

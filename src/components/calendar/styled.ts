@@ -327,3 +327,9 @@ export const StyledCalendarTodayIcon = styled(CalendarTodayIcon)(
     color: theme.palette.neutral[600],
   })
 );
+
+export const StyledOccurrenceHabitImg = styled('img')({
+  width: 20,
+  height: 20,
+  borderRadius: 4,
+});

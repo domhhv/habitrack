@@ -9,6 +9,8 @@ on: # event list
 
 env: # environment variables (available in any part of the action)
   NODE_VERSION: 20
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
 jobs: # list of things to do
   typecheck:

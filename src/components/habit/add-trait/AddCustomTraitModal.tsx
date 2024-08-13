@@ -1,4 +1,8 @@
-import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
+import {
+  FloatingLabelInput,
+  FloatingLabelTextarea,
+  OccurrenceChip,
+} from '@components';
 import { useTraits } from '@context';
 import {
   Button,
@@ -10,8 +14,13 @@ import {
   ModalDialog,
   Box,
   Typography,
+  Input,
 } from '@mui/joy';
+import { makeTestOccurrence } from '@tests';
 import React, { type FormEventHandler } from 'react';
+import { HexColorPicker } from 'react-colorful';
+
+import { StyledColorPickerContainerDiv } from './styled';
 
 export type AddCustomTraitModalProps = {
   open: boolean;
@@ -22,7 +31,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   const [traitLabel, setTraitLabel] = React.useState('');
   const [traitSlug, setTraitSlug] = React.useState('');
   const [traitDescription, setTraitDescription] = React.useState('');
-  const [traitColor, setTraitColor] = React.useState('#94a3b8');
+  const [traitColor, setTraitColor] = React.useState('94a3b8');
   const { addingTrait, addTrait } = useTraits();
 
   React.useEffect(() => {
@@ -53,10 +62,8 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
     setTraitLabel(event.target.value);
   };
 
-  const handleTraitColorChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setTraitColor(event.target.value);
+  const handleTraitColorChange = (color: string) => {
+    setTraitColor(color.slice(1));
   };
 
   const handleTraitDescriptionChange = (
@@ -106,15 +113,29 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
                 label="Trait Description"
               />
             </Box>
-            <Box mb={2}>
-              <FloatingLabelInput
-                value={traitColor}
+            <StyledColorPickerContainerDiv>
+              <HexColorPicker
+                color={traitColor}
                 onChange={handleTraitColorChange}
-                disabled={addingTrait}
-                label="Trait Color"
-                type="color"
               />
-            </Box>
+              <div>
+                <Input
+                  value={traitColor}
+                  onChange={(event) =>
+                    handleTraitColorChange(event.target.value)
+                  }
+                  startDecorator="#"
+                />
+                <Typography level="body-sm">
+                  This is how habits of this trait will appear on your calendar
+                </Typography>
+                <OccurrenceChip
+                  occurrence={makeTestOccurrence()}
+                  onDelete={() => null}
+                  colorOverride={`#${traitColor}`}
+                />
+              </div>
+            </StyledColorPickerContainerDiv>
             <DialogActions>
               <Button type="submit" disabled={addingTrait}>
                 Add Trait

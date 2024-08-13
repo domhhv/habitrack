@@ -1,10 +1,9 @@
 import { useHabits, useOccurrences, useTraits } from '@context';
 import { useUser } from '@supabase/auth-helpers-react';
 import { fireEvent, render } from '@testing-library/react';
+import { makeTestHabit } from '@tests';
 import { format } from 'date-fns';
 import React from 'react';
-
-import makeTestHabit from '../../../tests/makeTestHabit';
 
 import DayHabitModalDialog from './DayHabitModalDialog';
 

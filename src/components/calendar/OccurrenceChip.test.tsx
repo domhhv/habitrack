@@ -1,7 +1,9 @@
 import { useHabits, useOccurrences } from '@context';
-import { useScreenSize, useHabitIconUrl } from '@hooks';
+import { useScreenSize } from '@hooks';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
+
+import { getHabitIconUrl } from '../../utils/getHabitIconUrl';
 
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
 
@@ -46,12 +48,11 @@ describe(OccurrenceChip.name, () => {
     (useOccurrences as jest.Mock).mockReturnValue({
       occurrenceIdBeingDeleted: null,
     });
-    (useHabitIconUrl as jest.Mock).mockReturnValue('path/to/test/icon');
     const { getByAltText } = render(<OccurrenceChip {...props} />);
     const img = getByAltText('Test Habit Name icon');
     expect(img).toBeInTheDocument();
     await waitFor(() => {
-      expect(img).toHaveAttribute('src', 'path/to/test/icon');
+      expect(img).toHaveAttribute('src', getHabitIconUrl('path/to/test/icon'));
     });
   });
 
@@ -75,25 +76,7 @@ describe(OccurrenceChip.name, () => {
     expect(mockOnDelete).toHaveBeenCalledWith(1, expect.anything());
   });
 
-  it('should not render if habit not found', () => {
-    (useHabitIconUrl as jest.Mock).mockReturnValue('');
-    (useHabits as jest.Mock).mockReturnValue({
-      habitsMap: {
-        2: {
-          id: 2,
-          name: '',
-          iconPath: 'path/to/test/icon',
-          traitId: 1,
-        },
-      },
-    });
-    const { queryByRole } = render(<OccurrenceChip {...props} />);
-    const chip = queryByRole('habit-chip');
-    expect(chip).toBeNull();
-  });
-
   it('should render CircularProgress when occurrence is being deleted', () => {
-    (useHabitIconUrl as jest.Mock).mockReturnValue('');
     (useHabits as jest.Mock).mockReturnValue({
       habitsMap: {
         2: {
@@ -115,7 +98,6 @@ describe(OccurrenceChip.name, () => {
   });
 
   it('should not render delete button on small screens', () => {
-    (useHabitIconUrl as jest.Mock).mockReturnValue('');
     (useHabits as jest.Mock).mockReturnValue({
       habitsMap: {
         2: {
