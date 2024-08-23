@@ -1,4 +1,3 @@
-// import { defaultTheme, Provider } from '@adobe/react-spectrum';
 import {
   HabitsProvider,
   OccurrencesProvider,
@@ -19,7 +18,6 @@ type ProviderProps = {
 
 const Providers = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
   return (
-    // <Provider theme={defaultTheme}>
     <CssVarsProvider defaultMode="system" theme={theme}>
       <SessionContextProvider supabaseClient={supabaseClient}>
         <SnackbarProvider>
@@ -38,7 +36,6 @@ const Providers = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
         </SnackbarProvider>
       </SessionContextProvider>
     </CssVarsProvider>
-    // </Provider>
   );
 };
 
