@@ -1,3 +1,4 @@
+import { CalendarDate } from '@internationalized/date';
 import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
 import { AriaButtonProps, useCalendar } from 'react-aria';
@@ -35,6 +36,29 @@ const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
     )} ${activeYear} | Habilify`;
   }, [activeMonthLabel, activeYear]);
 
+  const setFocusedDate = (year: number, month: number, day: number) => {
+    const nextFocusedDate = new CalendarDate(year, month, day);
+    state.setFocusedDate(nextFocusedDate);
+  };
+
+  const navigateToMonth = (month: number) => {
+    const { year, day } = state.focusedDate;
+    setFocusedDate(year, month, day);
+  };
+
+  const navigateToYear = (year: number) => {
+    const { month, day } = state.focusedDate;
+    setFocusedDate(year, month, day);
+  };
+
+  const resetFocusedDate = () => {
+    const now = new Date();
+    const day = now.getDate();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+    setFocusedDate(year, month + 1, day);
+  };
+
   return (
     <StyledCalendarBackgroundDiv>
       <StyledCalendarContainerDiv {...calendarProps}>
@@ -45,6 +69,9 @@ const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
           nextButtonProps={transformButtonProps(nextButtonProps)}
           onNavigateBack={state.focusPreviousPage}
           onNavigateForward={state.focusNextPage}
+          onNavigateToMonth={navigateToMonth}
+          onNavigateToYear={navigateToYear}
+          onResetFocusedDate={resetFocusedDate}
         />
         <CalendarGrid state={state} weeksInMonth={weeksInMonth} />
       </StyledCalendarContainerDiv>
