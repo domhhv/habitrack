@@ -22,6 +22,12 @@ jest.mock('@components', () => ({
   AccountPage: jest.fn(),
 }));
 
+jest.mock('react-aria', () => ({
+  useLocale: jest.fn(),
+  useCalendar: jest.fn(),
+  I18nProvider: jest.fn().mockImplementation(({ children }) => children),
+}));
+
 jest.mock('@context', () => ({
   SnackbarProvider: jest.fn().mockImplementation(({ children }) => children),
   UserAccountProvider: jest.fn().mockImplementation(({ children }) => children),
