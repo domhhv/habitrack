@@ -1,7 +1,7 @@
 import { CalendarDate } from '@internationalized/date';
 import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
-import { AriaButtonProps, useCalendar } from 'react-aria';
+import { type AriaButtonProps, useCalendar } from 'react-aria';
 import { type CalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
@@ -30,10 +30,10 @@ const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
   });
 
   React.useEffect(() => {
-    document.title = `Calendar - ${activeMonthLabel.slice(
+    document.title = `${activeMonthLabel.slice(
       0,
       3
-    )} ${activeYear} | Habilify`;
+    )} ${activeYear} | Habilify Calendar`;
   }, [activeMonthLabel, activeYear]);
 
   const setFocusedDate = (year: number, month: number, day: number) => {
