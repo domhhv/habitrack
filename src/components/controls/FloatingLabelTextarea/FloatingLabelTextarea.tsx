@@ -1,6 +1,6 @@
 import { Textarea } from '@mui/joy';
-import { ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
-import { VariantProp } from '@mui/joy/styles/types/variants';
+import { type ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
+import { type VariantProp } from '@mui/joy/styles/types/variants';
 import React from 'react';
 
 import InnerTextarea from './InnerTextarea';

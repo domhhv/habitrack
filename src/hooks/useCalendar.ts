@@ -1,5 +1,5 @@
 import {
-  CalendarDate,
+  type CalendarDate,
   getWeeksInMonth,
   GregorianCalendar,
 } from '@internationalized/date';
