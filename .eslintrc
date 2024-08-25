@@ -30,6 +30,7 @@
   },
   "rules": {
     "object-shorthand": "error",
+    "no-undef": "off",
     "import/order": [
       "error",
       {
