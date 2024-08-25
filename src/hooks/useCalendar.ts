@@ -4,7 +4,6 @@ import {
   GregorianCalendar,
 } from '@internationalized/date';
 import { generateCalendarRange } from '@utils';
-import { useLocale } from 'react-aria';
 import { useCalendarState } from 'react-stately';
 
 const createCalendar = (identifier: string) => {
@@ -17,7 +16,7 @@ const createCalendar = (identifier: string) => {
 };
 
 const useCalendar = () => {
-  const { locale } = useLocale();
+  const locale = 'en-GB';
   const state = useCalendarState({
     locale,
     createCalendar,
