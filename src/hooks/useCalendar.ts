@@ -22,7 +22,6 @@ const useCalendar = () => {
     locale,
     createCalendar,
   });
-  console.log('locale', locale);
   const weeksInMonth = getWeeksInMonth(state.visibleRange.start, locale);
   const weeks = [...new Array(weeksInMonth).keys()];
   const { rangeStart, rangeEnd } = generateCalendarRange(
