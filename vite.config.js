@@ -1,8 +1,9 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+
+import react from '@vitejs/plugin-react';
 import dotenv from 'dotenv';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig } from 'vite';
 
 const envPaths = {
   development: './.env.development',
@@ -11,20 +12,23 @@ const envPaths = {
 
 dotenv.config({ path: envPaths[process.env.NODE_ENV] });
 
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(({ _command, mode }) => {
   const isProduction = mode === 'production';
 
   return {
     plugins: [
       react(),
-      isProduction && visualizer({
-        filename: 'dist/stats.html',
-        open: true,
-      }),
+      isProduction &&
+        visualizer({
+          filename: 'dist/stats.html',
+          open: true,
+        }),
     ],
     define: {
       'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL),
-      'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY),
+      'process.env.SUPABASE_ANON_KEY': JSON.stringify(
+        process.env.SUPABASE_ANON_KEY
+      ),
     },
     resolve: {
       alias: {
