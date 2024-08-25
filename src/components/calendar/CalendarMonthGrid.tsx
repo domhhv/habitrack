@@ -1,6 +1,6 @@
-import { CalendarDate } from '@internationalized/date';
+import { type CalendarDate } from '@internationalized/date';
 import React, { type ForwardedRef } from 'react';
-import { CalendarState } from 'react-stately';
+import { type CalendarState } from 'react-stately';
 
 import CalendarCell from './CalendarCell';
 import { StyledCalendarMonthGrid, StyledCalendarWeekRow } from './styled';

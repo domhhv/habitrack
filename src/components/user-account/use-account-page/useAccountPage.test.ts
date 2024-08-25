@@ -21,7 +21,7 @@ import { getUserAccountByEmail, updateUserAccount } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { transformClientEntity, transformServerEntities } from '@utils';
-import React from 'react';
+import type React from 'react';
 
 import useAccountPage from './useAccountPage';
 

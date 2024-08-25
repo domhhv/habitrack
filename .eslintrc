@@ -31,6 +31,19 @@
   "rules": {
     "object-shorthand": "error",
     "no-undef": "off",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "fixStyle": "inline-type-imports"
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
     "import/order": [
       "error",
       {
@@ -45,13 +58,6 @@
           "parent",
           ["index", "sibling"]
         ]
-      }
-    ],
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
       }
     ]
   }

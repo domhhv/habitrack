@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/joy';
 import React from 'react';
 import { useCalendarGrid } from 'react-aria';
-import { CalendarState } from 'react-stately';
+import { type CalendarState } from 'react-stately';
 
 import CalendarMonthGrid from './CalendarMonthGrid';
 import DayHabitModalDialog from './DayHabitModalDialog';

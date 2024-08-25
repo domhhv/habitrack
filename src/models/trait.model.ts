@@ -1,4 +1,4 @@
-import { PostEntity } from '@services';
+import { type PostEntity } from '@services';
 
 export type Trait = {
   id: number;
