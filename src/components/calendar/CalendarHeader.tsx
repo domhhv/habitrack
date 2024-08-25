@@ -1,5 +1,5 @@
 import { NavigateBefore, NavigateNext } from '@mui/icons-material';
-import { Typography, Select, Option, Box, Button } from '@mui/joy';
+import { Select, Option, Box, Button } from '@mui/joy';
 import React from 'react';
 
 import {
@@ -78,40 +78,38 @@ const CalendarHeader = ({
     <StyledCalendarHeader>
       <StyledCalendarActiveMonthContainer>
         <Box mr={2}>
-          <Typography level="title-lg" sx={{ margin: 0 }}>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: '10px',
-              }}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <Select
+              variant="soft"
+              value={activeMonthLabel}
+              onChange={handleMonthSelect}
+              sx={{ minWidth: 132 }}
             >
-              <Select
-                variant="soft"
-                value={activeMonthLabel}
-                onChange={handleMonthSelect}
-                sx={{ minWidth: 132 }}
-              >
-                {MONTHS.map((month) => (
-                  <Option key={month} value={month} label={month}>
-                    {month}
-                  </Option>
-                ))}
-              </Select>
-              <Select
-                variant="soft"
-                value={Number(activeYear)}
-                onChange={handleYearSelect}
-              >
-                {YEARS.map((year) => (
-                  <Option key={year} value={year} label={year.toString()}>
-                    {year}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-          </Typography>
+              {MONTHS.map((month) => (
+                <Option key={month} value={month} label={month}>
+                  {month}
+                </Option>
+              ))}
+            </Select>
+            <Select
+              variant="soft"
+              value={Number(activeYear)}
+              onChange={handleYearSelect}
+            >
+              {YEARS.map((year) => (
+                <Option key={year} value={year} label={year.toString()}>
+                  {year}
+                </Option>
+              ))}
+            </Select>
+          </div>
         </Box>
         <StyledCalendarNavigationContainer>
           <StyledNavigationIconButton

@@ -7,8 +7,8 @@ import React from 'react';
 
 import OccurrenceChip from './OccurrenceChip';
 import {
-  StyledCalendarDayCellDiv,
-  StyledCalendarDayCellButtonButton,
+  StyledCalendarDayCellButton,
+  StyledCalendarDayCellHeader,
   StyledCalendarDayCellButtonIconsContainer,
   StyledCalendarTodayIcon,
 } from './styled';
@@ -32,7 +32,7 @@ const CalendarCell = ({
   onClick,
   rangeStatus,
 }: CalendarCellProps) => {
-  const cellRef = React.useRef<HTMLDivElement>(null);
+  const cellRef = React.useRef<HTMLButtonElement>(null);
   const user = useUser();
   const { removeOccurrence, fetchingOccurrences } = useOccurrences();
   const today = new Date();
@@ -84,25 +84,25 @@ const CalendarCell = ({
       return;
     }
 
-    const clickHandler = (event: MouseEvent) => {
-      if (event.target instanceof HTMLDivElement) {
+    const enterHandler = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
         handleClick();
       }
     };
 
-    cell.addEventListener('click', clickHandler);
+    cell.addEventListener('keydown', enterHandler);
 
     return () => {
-      cell?.removeEventListener('click', clickHandler);
+      cell.removeEventListener('keydown', enterHandler);
     };
   }, [cellRef, handleClick]);
 
-  const handleCalendarEventDelete = async (
-    calendarEventId: number,
+  const handleOccurrenceDelete = async (
+    occurrenceId: number,
     clickEvent: React.MouseEvent<HTMLButtonElement>
   ) => {
     clickEvent.stopPropagation();
-    void removeOccurrence(calendarEventId);
+    void removeOccurrence(occurrenceId);
   };
 
   const renderToday = () => {
@@ -124,32 +124,33 @@ const CalendarCell = ({
   };
 
   return (
-    <StyledCalendarDayCellDiv
+    <StyledCalendarDayCellButton
       ref={cellRef}
       data-is-within-active-month={rangeStatus === 'in-range'}
       data-is-within-prev-month={rangeStatus === 'below-range'}
       data-is-within-next-month={rangeStatus === 'above-range'}
       data-is-today={isToday}
       onClick={handleClick}
+      tabIndex={0}
     >
-      <StyledCalendarDayCellButtonButton tabIndex={0}>
+      <StyledCalendarDayCellHeader>
         <Typography level="body-md" fontWeight={900}>
           {dateNumber}
         </Typography>
         {renderToday()}
-      </StyledCalendarDayCellButtonButton>
+      </StyledCalendarDayCellHeader>
       <StyledCalendarDayCellButtonIconsContainer>
         {occurrences.map((occurrence) => {
           return (
             <OccurrenceChip
               key={occurrence.id}
               occurrence={occurrence}
-              onDelete={handleCalendarEventDelete}
+              onDelete={handleOccurrenceDelete}
             />
           );
         })}
       </StyledCalendarDayCellButtonIconsContainer>
-    </StyledCalendarDayCellDiv>
+    </StyledCalendarDayCellButton>
   );
 };
 

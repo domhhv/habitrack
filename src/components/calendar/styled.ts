@@ -134,12 +134,12 @@ export const StyledCalendarWeekRow = styled(StyledWithGapDiv)(({ theme }) => ({
   [theme.breakpoints.down('lg')]: {
     height: 110,
     '&:last-of-type': {
-      borderBottom: '3px solid',
+      borderBottom: `3px solid ${theme.palette.neutral[700]}`,
     },
   },
 }));
 
-export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
+export const StyledCalendarDayCellButton = styled('button')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   flex: '1 1 0%',
@@ -148,6 +148,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   borderRadius: theme.radius.md,
   border: `3px solid ${theme.palette.neutral[700]}`,
   padding: 0,
+  backgroundColor: 'transparent',
   [theme.breakpoints.down('lg')]: {
     border: 'none',
     borderRadius: 0,
@@ -157,7 +158,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     '&:first-of-type': {
       borderLeft: `3px solid ${theme.palette.neutral[700]}`,
     },
-    '& > button:first-of-type': {
+    '& > div:first-of-type': {
       borderBottom: 'none',
     },
   },
@@ -178,7 +179,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     },
     [theme.getColorSchemeSelector('light')]: {
       borderColor: theme.palette.neutral[300],
-      '& > button:first-of-type': {
+      '& > div:first-of-type': {
         borderColor: theme.palette.neutral[300],
         '& p': {
           color: theme.palette.neutral[300],
@@ -187,7 +188,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     },
     [theme.getColorSchemeSelector('dark')]: {
       borderColor: theme.palette.neutral[600],
-      '& > button:first-of-type': {
+      '& > div:first-of-type': {
         borderColor: theme.palette.neutral[600],
         '& p': {
           color: theme.palette.neutral[600],
@@ -197,12 +198,12 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   },
   '&[data-is-within-active-month="true"]': {
     cursor: 'pointer',
-    '& > button:first-of-type': {
+    '& > div:first-of-type': {
       cursor: 'pointer',
     },
     [theme.getColorSchemeSelector('light')]: {
       borderColor: theme.palette.neutral[500],
-      '& > button:first-of-type': {
+      '& > div:first-of-type': {
         borderColor: theme.palette.neutral[500],
         '& p': {
           color: theme.palette.neutral[500],
@@ -211,7 +212,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     },
     [theme.getColorSchemeSelector('dark')]: {
       borderColor: theme.palette.neutral[400],
-      '& > button:first-of-type': {
+      '& > div:first-of-type': {
         borderColor: theme.palette.neutral[400],
         '& p': {
           color: theme.palette.neutral[400],
@@ -221,7 +222,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     '&:hover': {
       [theme.getColorSchemeSelector('light')]: {
         borderColor: theme.palette.neutral[900],
-        '& > button:first-of-type': {
+        '& > div:first-of-type': {
           borderColor: theme.palette.neutral[900],
           '& p': {
             color: theme.palette.neutral[900],
@@ -230,7 +231,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
       },
       [theme.getColorSchemeSelector('dark')]: {
         borderColor: theme.palette.neutral[300],
-        '& > button:first-of-type': {
+        '& > div:first-of-type': {
           borderColor: theme.palette.neutral[300],
           '& p': {
             color: theme.palette.neutral[300],
@@ -240,10 +241,11 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     },
   },
   '&[data-is-today="true"]': {
+    borderBottom: '3px solid',
     '&[data-is-within-active-month="false"]': {
       [theme.getColorSchemeSelector('light')]: {
         borderColor: theme.palette.neutral[400],
-        '& > button:first-of-type': {
+        '& > div:first-of-type': {
           borderColor: theme.palette.neutral[400],
           '& p': {
             color: theme.palette.neutral[400],
@@ -252,7 +254,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
       },
       [theme.getColorSchemeSelector('dark')]: {
         borderColor: theme.palette.neutral[500],
-        '& > button:first-of-type': {
+        '& > div:first-of-type': {
           borderColor: theme.palette.neutral[500],
           '& p': {
             color: theme.palette.neutral[500],
@@ -271,7 +273,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     [theme.getColorSchemeSelector('light')]: {
       borderColor: theme.palette.neutral[700],
       backgroundColor: theme.palette.neutral[200],
-      '& > button:first-of-type': {
+      '& > div:first-of-type': {
         borderColor: theme.palette.neutral[700],
         '& p': {
           color: theme.palette.neutral[700],
@@ -281,7 +283,7 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     [theme.getColorSchemeSelector('dark')]: {
       borderColor: theme.palette.neutral[300],
       backgroundColor: theme.palette.neutral[800],
-      '& > button:first-of-type': {
+      '& > div:first-of-type': {
         borderColor: theme.palette.neutral[300],
         '& p': {
           color: theme.palette.neutral[300],
@@ -291,19 +293,21 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   },
 }));
 
-export const StyledCalendarDayCellButtonButton = styled('button')(
-  ({ theme }) => ({
-    backgroundColor: 'transparent',
-    border: 'none',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: theme.spacing(0.25, 0.5),
-    width: '100%',
-    borderBottom: '3px solid',
-    boxSizing: 'border-box',
-  })
-);
+export const StyledCalendarDayCellHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: theme.spacing(0.25, 0.5),
+  width: '100%',
+  borderBottom: '3px solid',
+  boxSizing: 'border-box',
+  [theme.getColorSchemeSelector('light')]: {
+    borderColor: theme.palette.neutral[300],
+  },
+  [theme.getColorSchemeSelector('dark')]: {
+    borderColor: theme.palette.neutral[600],
+  },
+}));
 
 export const StyledCalendarDayCellButtonIconsContainer = styled(Box)(
   ({ theme }) => ({
@@ -325,6 +329,8 @@ export const StyledHabitChip = styled(Chip)(({ theme }) => ({
 export const StyledCalendarTodayIcon = styled(CalendarTodayIcon)(
   ({ theme }) => ({
     color: theme.palette.neutral[600],
+    width: 20,
+    height: 20,
   })
 );
 
