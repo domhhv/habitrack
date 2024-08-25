@@ -23,7 +23,6 @@ jest.mock('@components', () => ({
 }));
 
 jest.mock('react-aria', () => ({
-  useLocale: jest.fn(),
   useCalendar: jest.fn(),
   I18nProvider: jest.fn().mockImplementation(({ children }) => children),
 }));
@@ -40,7 +39,7 @@ import { getWeeksInMonth } from '@internationalized/date';
 import { act, render } from '@testing-library/react';
 import { generateCalendarRange } from '@utils';
 import React from 'react';
-import { useLocale, useCalendar } from 'react-aria';
+import { useCalendar } from 'react-aria';
 import { useCalendarState } from 'react-stately';
 
 import App from './App';
@@ -61,7 +60,6 @@ Object.defineProperty(window, 'matchMedia', {
 
 describe(App.name, () => {
   it('should call generateCalendarRange', () => {
-    (useLocale as jest.Mock).mockReturnValue({ locale: 'en-US' });
     (useCalendarState as jest.Mock).mockReturnValue({
       visibleRange: {
         start: new Date('2022-01-01'),
@@ -77,11 +75,10 @@ describe(App.name, () => {
 
     act(() => render(<App />));
 
-    expect(useLocale).toHaveBeenCalled();
     expect(useCalendarState).toHaveBeenCalled();
     expect(getWeeksInMonth).toHaveBeenCalledWith(
       new Date('2022-01-01'),
-      'en-US'
+      'en-GB'
     );
   });
 });
