@@ -17,8 +17,6 @@ const TraitsProvider = ({ children }: TraitsProviderProps) => {
   const { showSnackbar } = useSnackbar();
   const user = useUser();
 
-  const allTraits = [...publicTraits, ...userTraits];
-
   React.useEffect(() => {
     const loadTraits = async () => {
       setFetchingTraits(true);
@@ -75,18 +73,10 @@ const TraitsProvider = ({ children }: TraitsProviderProps) => {
     [showSnackbar, user]
   );
 
-  // const value = {
-  //   addingTrait,
-  //   allTraits,
-  //   traitsMap,
-  //   publicTraits,
-  //   userTraits,
-  //   fetchingTraits,
-  //   addTrait,
-  // };
+  const value = React.useMemo(() => {
+    const allTraits = [...publicTraits, ...userTraits];
 
-  const value = React.useMemo(
-    () => ({
+    return {
       addingTrait,
       allTraits,
       traitsMap,
@@ -94,17 +84,15 @@ const TraitsProvider = ({ children }: TraitsProviderProps) => {
       userTraits,
       fetchingTraits,
       addTrait,
-    }),
-    [
-      addingTrait,
-      allTraits,
-      traitsMap,
-      publicTraits,
-      userTraits,
-      fetchingTraits,
-      addTrait,
-    ]
-  );
+    };
+  }, [
+    addingTrait,
+    traitsMap,
+    publicTraits,
+    userTraits,
+    fetchingTraits,
+    addTrait,
+  ]);
 
   return (
     <TraitsContext.Provider value={value}>{children}</TraitsContext.Provider>
