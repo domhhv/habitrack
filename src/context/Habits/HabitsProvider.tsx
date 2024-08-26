@@ -9,7 +9,7 @@ import {
   patchHabit,
   StorageBuckets,
 } from '@services';
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type HabitsProviderProps = {
@@ -18,7 +18,6 @@ type HabitsProviderProps = {
 
 const HabitsProvider = ({ children }: HabitsProviderProps) => {
   const supabase = useSupabaseClient();
-  const user = useUser();
   const { showSnackbar } = useSnackbar();
 
   const [addingHabit, setAddingHabit] = React.useState(false);
@@ -54,7 +53,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     return () => {
       data.subscription.unsubscribe();
     };
-  }, [user, supabase, fetchHabits]);
+  }, [supabase, fetchHabits]);
 
   const clearHabits = () => {
     setHabits([]);
@@ -161,7 +160,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
       removeHabit,
       updateHabit,
     }),
-    [addingHabit, fetchingHabits, habits] // eslint-disable-line react-hooks/exhaustive-deps
+    [addingHabit, fetchingHabits, habits, habitsMap] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   return (

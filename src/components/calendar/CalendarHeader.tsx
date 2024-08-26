@@ -1,6 +1,7 @@
 import { useHabits, useOccurrences, useTraits } from '@context';
 import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { Select, Option, Box, Button } from '@mui/joy';
+import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 import {
@@ -60,6 +61,10 @@ const CalendarHeader = ({
   const { habits } = useHabits();
   const { allTraits } = useTraits();
   const { filteredBy, filterBy } = useOccurrences();
+  const user = useUser();
+
+  const shouldRenderFilters =
+    !!user && habits.length > 0 && allTraits.length > 0;
 
   const handleMonthSelect = (
     _: React.SyntheticEvent | null,
@@ -138,52 +143,54 @@ const CalendarHeader = ({
           </StyledNavigationIconButton>
         </StyledCalendarNavigationContainer>
       </StyledCalendarActiveMonthContainer>
-      <Box
-        display="flex"
-        flexDirection="row"
-        justifyContent="space-between"
-        alignItems="center"
-        gap={2}
-      >
-        <Select
-          variant="soft"
-          renderValue={() => 'Filter by habits'}
-          value={filteredBy.habitIds}
-          onChange={(_, habitIds: number[]) => {
-            filterBy({
-              ...filteredBy,
-              habitIds,
-            });
-          }}
-          sx={{ minWidth: 132 }}
-          multiple
+      {shouldRenderFilters && (
+        <Box
+          display="flex"
+          flexDirection="row"
+          justifyContent="space-between"
+          alignItems="center"
+          gap={2}
         >
-          {habits.map((habit) => (
-            <Option key={habit.id} value={habit.id} label={habit.name}>
-              {habit.name}
-            </Option>
-          ))}
-        </Select>
-        <Select
-          variant="soft"
-          renderValue={() => 'Filter by traits'}
-          value={filteredBy.traitIds}
-          onChange={(_, newTraits: (number | string)[]) => {
-            filterBy({
-              ...filteredBy,
-              traitIds: newTraits,
-            });
-          }}
-          sx={{ minWidth: 132 }}
-          multiple
-        >
-          {allTraits.map((trait) => (
-            <Option key={trait.id} value={trait.id} label={trait.label}>
-              {trait.label}
-            </Option>
-          ))}
-        </Select>
-      </Box>
+          <Select
+            variant="soft"
+            renderValue={() => 'Filter by habits'}
+            value={filteredBy.habitIds}
+            onChange={(_, habitIds: number[]) => {
+              filterBy({
+                ...filteredBy,
+                habitIds,
+              });
+            }}
+            sx={{ minWidth: 132 }}
+            multiple
+          >
+            {habits.map((habit) => (
+              <Option key={habit.id} value={habit.id} label={habit.name}>
+                {habit.name}
+              </Option>
+            ))}
+          </Select>
+          <Select
+            variant="soft"
+            renderValue={() => 'Filter by traits'}
+            value={filteredBy.traitIds}
+            onChange={(_, newTraits: (number | string)[]) => {
+              filterBy({
+                ...filteredBy,
+                traitIds: newTraits,
+              });
+            }}
+            sx={{ minWidth: 132 }}
+            multiple
+          >
+            {allTraits.map((trait) => (
+              <Option key={trait.id} value={trait.id} label={trait.label}>
+                {trait.label}
+              </Option>
+            ))}
+          </Select>
+        </Box>
+      )}
     </StyledCalendarHeader>
   );
 };
