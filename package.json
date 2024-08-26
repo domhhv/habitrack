@@ -1,13 +1,14 @@
 {
-  "name": "habilify",
+  "name": "habitrack",
   "version": "1.0.0",
   "author": "Dominik Hryshaiev <domhryshaiev@gmail.com>",
+  "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/domhhv/habilify.git"
+    "url": "https://github.com/domhhv/habitrack.git"
   },
   "description": "A simple calendar tracker for your habits",
-  "homepage": "https://habilify.io",
+  "homepage": "https://www.habitrack.io",
   "license": "MIT",
   "keywords": [
     "react",

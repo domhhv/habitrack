@@ -45,8 +45,19 @@ export default defineConfig(({ _command, mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom'],
+          manualChunks(id) {
+            if (id.includes('@supabase')) {
+              return 'supabase';
+            }
+            if (id.includes('@mui')) {
+              return 'material-ui';
+            }
+
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+
+            return 'index';
           },
         },
       },
