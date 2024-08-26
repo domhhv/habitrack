@@ -10,7 +10,7 @@ import {
   destroyOccurrence,
   listOccurrences,
 } from '@services';
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type Props = {
@@ -26,7 +26,6 @@ export type OccurrenceFilters = {
 
 const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   const { showSnackbar } = useSnackbar();
-  const user = useUser();
   const supabase = useSupabaseClient();
   const { habits } = useHabits();
   const { allTraits } = useTraits();
@@ -56,8 +55,8 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
         return (
           filteredBy.habitIds.includes(occurrence.habitId) &&
           filteredBy.traitIds.includes(
-            habits.find((habit) => habit.id === occurrence.habitId)!
-              .traitId as number
+            habits.find((habit) => habit.id === occurrence.habitId)
+              ?.traitId as number
           )
         );
       })
@@ -86,7 +85,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
     return () => {
       data.subscription.unsubscribe();
     };
-  }, [user, supabase, showSnackbar, fetchOccurrences, rangeStart, rangeEnd]);
+  }, [supabase, fetchOccurrences]);
 
   React.useEffect(() => {
     const occurrencesByDate = occurrences.reduce(

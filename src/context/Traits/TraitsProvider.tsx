@@ -1,7 +1,7 @@
 import { TraitsContext, useSnackbar } from '@context';
 import type { Trait, TraitsMap, AddTrait } from '@models';
 import { listTraits, createTrait } from '@services';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type TraitsProviderProps = {
@@ -14,24 +14,37 @@ const TraitsProvider = ({ children }: TraitsProviderProps) => {
   const [traitsMap, setTraitsMap] = React.useState<TraitsMap>({});
   const [fetchingTraits, setFetchingTraits] = React.useState(false);
   const [addingTrait, setAddingTrait] = React.useState(false);
+  const supabase = useSupabaseClient();
   const { showSnackbar } = useSnackbar();
   const user = useUser();
 
-  React.useEffect(() => {
-    const loadTraits = async () => {
-      setFetchingTraits(true);
+  const fetchTraits = React.useCallback(async () => {
+    setFetchingTraits(true);
 
-      const traits = await listTraits();
+    const traits = await listTraits();
 
-      const publicTraits = traits.filter((trait: Trait) => !trait.userId);
-      const userTraits = traits.filter((trait: Trait) => trait.userId);
-      setPublicTraits(publicTraits);
-      setUserTraits(userTraits);
-      setFetchingTraits(false);
-    };
-
-    void loadTraits();
+    const publicTraits = traits.filter((trait: Trait) => !trait.userId);
+    const userTraits = traits.filter((trait: Trait) => trait.userId);
+    setPublicTraits(publicTraits);
+    setUserTraits(userTraits);
+    setFetchingTraits(false);
   }, []);
+
+  React.useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        clearTraits();
+      }
+
+      if (event === 'SIGNED_IN') {
+        void fetchTraits();
+      }
+    });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, [supabase, fetchTraits]);
 
   React.useEffect(() => {
     const nextTraits = [...publicTraits, ...userTraits];
@@ -72,6 +85,12 @@ const TraitsProvider = ({ children }: TraitsProviderProps) => {
     },
     [showSnackbar, user]
   );
+
+  const clearTraits = () => {
+    setPublicTraits([]);
+    setUserTraits([]);
+    setTraitsMap({});
+  };
 
   const value = React.useMemo(() => {
     const allTraits = [...publicTraits, ...userTraits];
