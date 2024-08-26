@@ -46,7 +46,7 @@ const EditHabitDialog = ({
     if (habit) {
       setName(habit.name);
       setDescription(habit.description);
-      setTraitId(habit.traitId);
+      setTraitId(habit.traitId as string);
     }
   }, [habit, traitsMap]);
 

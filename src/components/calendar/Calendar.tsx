@@ -33,7 +33,7 @@ const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
     document.title = `${activeMonthLabel.slice(
       0,
       3
-    )} ${activeYear} | Habilify Calendar`;
+    )} ${activeYear} | Habitrack Calendar`;
   }, [activeMonthLabel, activeYear]);
 
   const setFocusedDate = (year: number, month: number, day: number) => {

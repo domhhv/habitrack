@@ -58,7 +58,7 @@ const AddHabitDialogButton = () => {
         name: habitName,
         description: habitDescription,
         userId: user?.id || '',
-        traitId: habitTraitId as string,
+        traitId: habitTraitId as unknown as number,
       };
 
       const { id } = await addHabit(habit);

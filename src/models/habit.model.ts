@@ -7,7 +7,7 @@ export type ServerHabit = {
   user_id: string;
   created_at: string;
   updated_at: string | null;
-  trait_id: string;
+  trait_id: number | string;
   icon_path: string | null;
 };
 
@@ -18,7 +18,7 @@ export type Habit = {
   userId: string;
   createdAt: string;
   updatedAt: string | null;
-  traitId: string;
+  traitId: number | string;
   iconPath: string | null;
 };
 

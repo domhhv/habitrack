@@ -51,6 +51,7 @@ export const StyledCalendarHeader = styled('div')(({ theme }) => ({
   borderRadius: theme.radius.md,
   alignItems: 'center',
   position: 'relative',
+  justifyContent: 'space-between',
   [theme.getColorSchemeSelector('light')]: {
     borderColor: getLightNeutralColor(theme),
     '& p': {
