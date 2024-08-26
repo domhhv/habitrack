@@ -26,7 +26,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
   const [habits, setHabits] = React.useState<Habit[]>([]);
   const [habitsMap, setHabitsMap] = React.useState<HabitsMap>({});
 
-  const fetchHabits = async () => {
+  const fetchHabits = React.useCallback(async () => {
     setFetchingHabits(true);
 
     const habits = await listHabits();
@@ -38,11 +38,9 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     setHabitsMap(habitsMap);
 
     setFetchingHabits(false);
-  };
+  }, []);
 
   React.useEffect(() => {
-    void fetchHabits();
-
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         clearHabits();
@@ -56,7 +54,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     return () => {
       data.subscription.unsubscribe();
     };
-  }, [user, supabase]);
+  }, [user, supabase, fetchHabits]);
 
   const clearHabits = () => {
     setHabits([]);
@@ -171,4 +169,4 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
   );
 };
 
-export default HabitsProvider;
+export default React.memo(HabitsProvider);

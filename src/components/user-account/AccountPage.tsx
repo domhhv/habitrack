@@ -23,7 +23,7 @@ const AccountPage = () => {
   useEmailConfirmed();
 
   React.useEffect(() => {
-    document.title = 'My Account | Habilify';
+    document.title = 'My Account | Habitrack';
   }, []);
 
   if (loading) {

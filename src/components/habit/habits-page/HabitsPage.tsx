@@ -19,7 +19,7 @@ const HabitsPage = () => {
   const { removeOccurrencesByHabitId } = useOccurrences();
 
   React.useEffect(() => {
-    document.title = 'My Habits | Habilify';
+    document.title = 'My Habits | Habitrack';
   }, []);
 
   const handleRemovalConfirmOpen = (id: number) => {

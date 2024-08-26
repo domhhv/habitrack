@@ -1,4 +1,9 @@
-import { useSnackbar, OccurrencesContext } from '@context';
+import {
+  useSnackbar,
+  OccurrencesContext,
+  useHabits,
+  useTraits,
+} from '@context';
 import type { AddOccurrence, Occurrence, OccurrencesDateMap } from '@models';
 import {
   createOccurrence,
@@ -14,33 +19,60 @@ type Props = {
   rangeEnd: number;
 };
 
+export type OccurrenceFilters = {
+  habitIds: number[];
+  traitIds: (number | string)[];
+};
+
 const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   const { showSnackbar } = useSnackbar();
   const user = useUser();
   const supabase = useSupabaseClient();
+  const { habits } = useHabits();
+  const { allTraits } = useTraits();
 
   const [addingOccurrence, setAddingOccurrence] = React.useState(false);
   const [fetchingOccurrences, setFetchingOccurrences] = React.useState(false);
+  const [allOccurrences, setAllOccurrences] = React.useState<Occurrence[]>([]);
   const [occurrences, setOccurrences] = React.useState<Occurrence[]>([]);
   const [occurrencesByDate, setOccurrencesByDate] =
     React.useState<OccurrencesDateMap>({});
   const [occurrenceIdBeingDeleted, setOccurrenceIdBeingDeleted] =
     React.useState(0);
+  const [filteredBy, setFilteredBy] = React.useState<OccurrenceFilters>({
+    habitIds: [],
+    traitIds: [],
+  });
+
+  React.useEffect(() => {
+    const filteredHabitIds = habits.map((habit) => habit.id);
+    const filteredTraitIds = allTraits.map((trait) => trait.id);
+    setFilteredBy({ habitIds: filteredHabitIds, traitIds: filteredTraitIds });
+  }, [habits, allTraits]);
+
+  React.useEffect(() => {
+    setOccurrences(
+      allOccurrences.filter((occurrence) => {
+        return (
+          filteredBy.habitIds.includes(occurrence.habitId) &&
+          filteredBy.traitIds.includes(
+            habits.find((habit) => habit.id === occurrence.habitId)!
+              .traitId as number
+          )
+        );
+      })
+    );
+  }, [filteredBy, allOccurrences, habits]);
 
   const fetchOccurrences = React.useCallback(async () => {
     setFetchingOccurrences(true);
-    const occurrences = await listOccurrences([rangeStart, rangeEnd]);
-    setOccurrences(occurrences);
+    const result = await listOccurrences([rangeStart, rangeEnd]);
+    setOccurrences(result);
     setFetchingOccurrences(false);
+    setAllOccurrences(result);
   }, [rangeStart, rangeEnd]);
 
   React.useEffect(() => {
-    void fetchOccurrences();
-  }, [rangeStart, rangeEnd, fetchOccurrences]);
-
-  React.useEffect(() => {
-    void fetchOccurrences();
-
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         clearOccurrences();
@@ -54,7 +86,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
     return () => {
       data.subscription.unsubscribe();
     };
-  }, [user, supabase, showSnackbar, fetchOccurrences]);
+  }, [user, supabase, showSnackbar, fetchOccurrences, rangeStart, rangeEnd]);
 
   React.useEffect(() => {
     const occurrencesByDate = occurrences.reduce(
@@ -72,6 +104,10 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
 
     setOccurrencesByDate(occurrencesByDate);
   }, [occurrences]);
+
+  const filterBy = React.useCallback((options: OccurrenceFilters) => {
+    setFilteredBy(options);
+  }, []);
 
   const addOccurrence = React.useCallback(
     async (occurrence: AddOccurrence) => {
@@ -152,8 +188,6 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
     setOccurrencesByDate({});
   };
 
-  // const [start, end] = range;
-
   const value = React.useMemo(
     () => ({
       addingOccurrence,
@@ -164,6 +198,8 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
       addOccurrence,
       removeOccurrence,
       removeOccurrencesByHabitId,
+      filterBy,
+      filteredBy,
     }),
     [
       addingOccurrence,
@@ -173,6 +209,8 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
       occurrenceIdBeingDeleted,
       addOccurrence,
       removeOccurrence,
+      filterBy,
+      filteredBy,
     ]
   );
 

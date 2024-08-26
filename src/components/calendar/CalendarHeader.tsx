@@ -1,3 +1,4 @@
+import { useHabits, useOccurrences, useTraits } from '@context';
 import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { Select, Option, Box, Button } from '@mui/joy';
 import React from 'react';
@@ -56,6 +57,10 @@ const CalendarHeader = ({
   onNavigateToYear,
   onResetFocusedDate,
 }: CalendarHeaderProps) => {
+  const { habits } = useHabits();
+  const { allTraits } = useTraits();
+  const { filteredBy, filterBy } = useOccurrences();
+
   const handleMonthSelect = (
     _: React.SyntheticEvent | null,
     newMonth: string | null
@@ -133,6 +138,52 @@ const CalendarHeader = ({
           </StyledNavigationIconButton>
         </StyledCalendarNavigationContainer>
       </StyledCalendarActiveMonthContainer>
+      <Box
+        display="flex"
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        gap={2}
+      >
+        <Select
+          variant="soft"
+          renderValue={() => 'Filter by habits'}
+          value={filteredBy.habitIds}
+          onChange={(_, habitIds: number[]) => {
+            filterBy({
+              ...filteredBy,
+              habitIds,
+            });
+          }}
+          sx={{ minWidth: 132 }}
+          multiple
+        >
+          {habits.map((habit) => (
+            <Option key={habit.id} value={habit.id} label={habit.name}>
+              {habit.name}
+            </Option>
+          ))}
+        </Select>
+        <Select
+          variant="soft"
+          renderValue={() => 'Filter by traits'}
+          value={filteredBy.traitIds}
+          onChange={(_, newTraits: (number | string)[]) => {
+            filterBy({
+              ...filteredBy,
+              traitIds: newTraits,
+            });
+          }}
+          sx={{ minWidth: 132 }}
+          multiple
+        >
+          {allTraits.map((trait) => (
+            <Option key={trait.id} value={trait.id} label={trait.label}>
+              {trait.label}
+            </Option>
+          ))}
+        </Select>
+      </Box>
     </StyledCalendarHeader>
   );
 };

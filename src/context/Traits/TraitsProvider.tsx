@@ -75,19 +75,40 @@ const TraitsProvider = ({ children }: TraitsProviderProps) => {
     [showSnackbar, user]
   );
 
-  const value = {
-    addingTrait,
-    allTraits,
-    traitsMap,
-    publicTraits,
-    userTraits,
-    fetchingTraits,
-    addTrait,
-  };
+  // const value = {
+  //   addingTrait,
+  //   allTraits,
+  //   traitsMap,
+  //   publicTraits,
+  //   userTraits,
+  //   fetchingTraits,
+  //   addTrait,
+  // };
+
+  const value = React.useMemo(
+    () => ({
+      addingTrait,
+      allTraits,
+      traitsMap,
+      publicTraits,
+      userTraits,
+      fetchingTraits,
+      addTrait,
+    }),
+    [
+      addingTrait,
+      allTraits,
+      traitsMap,
+      publicTraits,
+      userTraits,
+      fetchingTraits,
+      addTrait,
+    ]
+  );
 
   return (
     <TraitsContext.Provider value={value}>{children}</TraitsContext.Provider>
   );
 };
 
-export default TraitsProvider;
+export default React.memo(TraitsProvider);
