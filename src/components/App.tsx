@@ -4,7 +4,6 @@ import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import Providers from './Providers';
-import { StyledAppContainerDiv } from './styled';
 
 const App = () => {
   const { rangeStart, rangeEnd, state, weeksInMonth } = useCalendar();
@@ -13,7 +12,7 @@ const App = () => {
     <Providers rangeStart={rangeStart} rangeEnd={rangeEnd}>
       <BrowserRouter>
         <AppHeader />
-        <StyledAppContainerDiv>
+        <div className="flex flex-1 flex-col items-center bg-neutral-200 dark:bg-neutral-800">
           <Routes>
             <Route
               path="/calendar"
@@ -29,7 +28,7 @@ const App = () => {
             <Route path="/account" element={<AccountPage />} />
             <Route path="*" element={<Navigate to="/calendar" replace />} />
           </Routes>
-        </StyledAppContainerDiv>
+        </div>
       </BrowserRouter>
     </Providers>
   );
