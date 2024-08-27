@@ -9,3 +9,6 @@ export { default as useHabitIconUrl } from './useHabitIconUrl';
 
 export * from './useCalendar';
 export { default as useCalendar } from './useCalendar';
+
+export * from './useThemeMode';
+export { default as useThemeMode } from './useThemeMode';

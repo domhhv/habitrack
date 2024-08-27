@@ -1,37 +1,53 @@
-import ComputerIcon from '@mui/icons-material/Computer';
-import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
-import NightlightRoundRoundedIcon from '@mui/icons-material/NightlightRoundRounded';
-import { IconButton, ToggleButtonGroup, useColorScheme } from '@mui/joy';
+import { ThemeMode, useThemeMode } from '@hooks';
+import { useColorScheme } from '@mui/joy';
+import {
+  SunDim as SunIcon,
+  Desktop as DesktopIcon,
+  Moon as MoonIcon,
+} from '@phosphor-icons/react';
+import clsx from 'clsx';
 import React from 'react';
+import { Button } from 'react-aria-components';
+
+const modesToIcons = {
+  [ThemeMode.LIGHT]: (
+    <SunIcon className="dark:text-neutral-200" weight="bold" />
+  ),
+  [ThemeMode.SYSTEM]: (
+    <DesktopIcon className="dark:text-neutral-200" weight="bold" />
+  ),
+  [ThemeMode.DARK]: (
+    <MoonIcon className="dark:text-neutral-200" weight="bold" />
+  ),
+};
 
 const ThemeToggle = () => {
-  const { mode, setMode } = useColorScheme();
+  const { setMode } = useColorScheme();
+  const { themeMode, changeThemeMode } = useThemeMode();
 
-  const handleThemeChange = (
-    _: React.MouseEvent<HTMLElement>,
-    newThemeMode: 'light' | 'system' | 'dark' | null
-  ) => {
-    if (newThemeMode) {
-      setMode(newThemeMode);
-    }
+  const handleThemeChange = (newThemeMode: ThemeMode) => () => {
+    setMode(newThemeMode);
+    changeThemeMode(newThemeMode);
   };
 
   return (
-    <ToggleButtonGroup
-      variant="plain"
-      value={mode}
-      onChange={handleThemeChange}
-    >
-      <IconButton value="light" size="sm">
-        <LightModeRoundedIcon />
-      </IconButton>
-      <IconButton value="system" size="sm">
-        <ComputerIcon />
-      </IconButton>
-      <IconButton value="dark" size="sm">
-        <NightlightRoundRoundedIcon />
-      </IconButton>
-    </ToggleButtonGroup>
+    <div className="[&>*:first-child]:rounded-l-md [&>*:last-child]:rounded-r-md">
+      {Object.values(ThemeMode).map((mode) => {
+        const className = clsx(
+          'p-2 outline-none hover:bg-neutral-200 dark:hover:bg-neutral-700',
+          themeMode === mode && 'bg-neutral-200 dark:bg-neutral-800'
+        );
+        return (
+          <Button
+            key={mode}
+            className={className}
+            onPress={handleThemeChange(mode)}
+          >
+            {modesToIcons[mode]}
+          </Button>
+        );
+      })}
+    </div>
   );
 };
 

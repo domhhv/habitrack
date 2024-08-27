@@ -1,4 +1,9 @@
 jest.mock('@hooks', () => ({
+  ThemeMode: {
+    LIGHT: 'light',
+    DARK: 'dark',
+    SYSTEM: 'system',
+  },
   useTraits: jest
     .fn()
     .mockReturnValue({ traitsMap: { 1: { slug: 'trait-slug' } } }),

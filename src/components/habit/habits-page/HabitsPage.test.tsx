@@ -32,6 +32,11 @@ jest.mock('@services', () => ({
 }));
 
 jest.mock('@hooks', () => ({
+  ThemeMode: {
+    LIGHT: 'light',
+    DARK: 'dark',
+    SYSTEM: 'system',
+  },
   useHabitIconUrl: jest.fn(),
   useHabitTraitChipColor: jest.fn(),
 }));
