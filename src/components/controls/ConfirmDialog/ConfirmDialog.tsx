@@ -1,12 +1,10 @@
 import {
   Button,
-  DialogContent,
-  DialogTitle,
+  ModalBody,
+  ModalHeader,
   Modal,
-  ModalClose,
-  ModalDialog,
-  Typography,
-} from '@mui/joy';
+  ModalContent,
+} from '@nextui-org/react';
 import React from 'react';
 
 type ConfirmDialogProps = {
@@ -27,28 +25,32 @@ const ConfirmDialog = ({
   children,
 }: ConfirmDialogProps) => {
   return (
-    <Modal open={open} onClose={onCancel} role="confirm-dialog">
-      <ModalDialog>
-        <ModalClose />
-        <DialogTitle>{heading}</DialogTitle>
-        <DialogContent>
-          <Typography>{children}</Typography>
-        </DialogContent>
-        <Button
-          onClick={onCancel}
-          disabled={loading}
-          role="confirm-dialog-cancel"
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={onConfirm}
-          loading={loading}
-          role="confirm-dialog-confirm"
-        >
-          Confirm
-        </Button>
-      </ModalDialog>
+    <Modal isOpen={open} onClose={onCancel}>
+      <ModalContent>
+        <ModalHeader>{heading}</ModalHeader>
+        <ModalBody>
+          {children}
+          <div className="mb-4 mt-2 flex flex-row justify-end gap-4">
+            <Button
+              color="primary"
+              variant="bordered"
+              onClick={onCancel}
+              disabled={loading}
+              role="confirm-dialog-cancel"
+            >
+              Cancel
+            </Button>
+            <Button
+              color="danger"
+              onClick={onConfirm}
+              isLoading={loading}
+              role="confirm-dialog-confirm"
+            >
+              Confirm
+            </Button>
+          </div>
+        </ModalBody>
+      </ModalContent>
     </Modal>
   );
 };

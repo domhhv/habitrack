@@ -24,7 +24,7 @@
   "scripts": {
     "prepare": "husky install",
     "prebuild": "yarn typecheck && yarn eslint:check && yarn prettier:check",
-    "dev": "vite",
+    "dev": "vite --open",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",

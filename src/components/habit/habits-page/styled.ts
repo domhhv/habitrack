@@ -27,6 +27,7 @@ export const StyledImageIconButton = styled(IconButton)(({ theme }) => ({
   padding: theme.spacing(1),
   cursor: 'pointer',
   borderRadius: 4,
+  width: 48,
   [theme.getColorSchemeSelector('light')]: {
     '&:hover': {
       backgroundColor: theme.palette.neutral[200],

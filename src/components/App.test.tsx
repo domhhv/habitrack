@@ -24,6 +24,9 @@ jest.mock('@components', () => ({
 
 jest.mock('react-aria', () => ({
   useCalendar: jest.fn(),
+  useLocale: jest.fn().mockImplementation(() => ({
+    locale: 'en-GB',
+  })),
   I18nProvider: jest.fn().mockImplementation(({ children }) => children),
 }));
 
@@ -40,6 +43,7 @@ import { act, render } from '@testing-library/react';
 import { generateCalendarRange } from '@utils';
 import React from 'react';
 import { useCalendar } from 'react-aria';
+import { BrowserRouter } from 'react-router-dom';
 import { useCalendarState } from 'react-stately';
 
 import App from './App';
@@ -73,7 +77,13 @@ describe(App.name, () => {
     });
     (generateCalendarRange as jest.Mock).mockReturnValue([]);
 
-    act(() => render(<App />));
+    act(() =>
+      render(
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      )
+    );
 
     expect(useCalendarState).toHaveBeenCalled();
     expect(getWeeksInMonth).toHaveBeenCalledWith(
