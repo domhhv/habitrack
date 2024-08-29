@@ -49,28 +49,28 @@ const HabitsPage = () => {
   };
 
   return (
-    <StyledPageDiv>
-      <Typography level="h1">Your habits</Typography>
-      <Typography level="body-md">Count: {habits.length}</Typography>
-      <StyledList>
-        {habits.map((habit) => (
-          <HabitItem
-            key={habit.id}
-            habit={habit}
-            onEdit={() => handleEditStart(habit.id)}
-            onDelete={() => handleRemovalConfirmOpen(habit.id)}
+    <div className="flex w-full flex-col items-start justify-center self-start">
+      <StyledPageDiv>
+        <Typography level="h1">Your habits</Typography>
+        <Typography level="body-md">Count: {habits.length}</Typography>
+        <StyledList>
+          {habits.map((habit) => (
+            <HabitItem
+              key={habit.id}
+              habit={habit}
+              onEdit={() => handleEditStart(habit.id)}
+              onDelete={() => handleRemovalConfirmOpen(habit.id)}
+            />
+          ))}
+        </StyledList>
+        {!!habitIdToEdit && (
+          <EditHabitDialog
+            open={isEditingHabit}
+            onClose={handleEditEnd}
+            habit={habitsMap[habitIdToEdit]}
           />
-        ))}
-      </StyledList>
-      {!!habitIdToEdit && (
-        <EditHabitDialog
-          open={isEditingHabit}
-          onClose={handleEditEnd}
-          habit={habitsMap[habitIdToEdit]}
-        />
-      )}
-      <AddHabitDialogButton />
-      {!!habitIdToRemove && (
+        )}
+        <AddHabitDialogButton />
         <ConfirmDialog
           open={!!habitIdToRemove}
           heading="Delete habit"
@@ -78,12 +78,13 @@ const HabitsPage = () => {
           onCancel={handleRemovalCancel}
           loading={isRemovingHabit}
         >
-          Are you sure you want to delete{' '}
-          <strong>{habitsMap[habitIdToRemove].name.toLowerCase()}</strong>{' '}
-          habit?
+          <div>
+            Are you sure you want to delete{' '}
+            <strong>{habitsMap[habitIdToRemove]?.name}</strong> habit?
+          </div>
         </ConfirmDialog>
-      )}
-    </StyledPageDiv>
+      </StyledPageDiv>
+    </div>
   );
 };
 

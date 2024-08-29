@@ -10,6 +10,7 @@ import {
   Tabs,
   useDisclosure,
   VisuallyHidden,
+  Tooltip,
 } from '@nextui-org/react';
 import {
   SignOut as SignOutIcon,
@@ -64,19 +65,23 @@ const AuthModalButton = () => {
             to="/account"
             data-testid="auth-button"
             color="primary"
+            startContent={<UserIcon data-testid="user-icon" weight="bold" />}
           >
-            <UserIcon data-testid="user-icon" />
             Account
           </Button>
-          <Button
-            onPress={() => logout()}
-            isIconOnly
-            color="primary"
-            className="border-l"
-          >
-            <SignOutIcon data-testid="sign-out-icon" />
-            <VisuallyHidden>Log Out</VisuallyHidden>
-          </Button>
+          <Tooltip content="Log out">
+            <Button
+              onPress={() => logout()}
+              isIconOnly
+              color="primary"
+              className="border-l"
+              startContent={
+                <SignOutIcon data-testid="sign-out-icon" weight="bold" />
+              }
+            >
+              <VisuallyHidden>Log Out</VisuallyHidden>
+            </Button>
+          </Tooltip>
         </ButtonGroup>
       ) : (
         <Button onPress={onOpen} data-testid="auth-button" color="primary">

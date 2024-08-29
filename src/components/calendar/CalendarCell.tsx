@@ -7,7 +7,7 @@ import React from 'react';
 
 import OccurrenceChip from './OccurrenceChip';
 import {
-  StyledCalendarDayCellButton,
+  StyledCalendarDayCellDiv,
   StyledCalendarDayCellHeader,
   StyledCalendarDayCellButtonIconsContainer,
   StyledCalendarTodayIcon,
@@ -32,7 +32,7 @@ const CalendarCell = ({
   onClick,
   rangeStatus,
 }: CalendarCellProps) => {
-  const cellRef = React.useRef<HTMLButtonElement>(null);
+  const cellRef = React.useRef<HTMLDivElement>(null);
   const user = useUser();
   const { removeOccurrence, fetchingOccurrences } = useOccurrences();
   const today = new Date();
@@ -124,7 +124,7 @@ const CalendarCell = ({
   };
 
   return (
-    <StyledCalendarDayCellButton
+    <StyledCalendarDayCellDiv
       ref={cellRef}
       data-is-within-active-month={rangeStatus === 'in-range'}
       data-is-within-prev-month={rangeStatus === 'below-range'}
@@ -132,6 +132,7 @@ const CalendarCell = ({
       data-is-today={isToday}
       onClick={handleClick}
       tabIndex={0}
+      role="button"
     >
       <StyledCalendarDayCellHeader>
         <Typography level="body-md" fontWeight={900}>
@@ -150,7 +151,7 @@ const CalendarCell = ({
           );
         })}
       </StyledCalendarDayCellButtonIconsContainer>
-    </StyledCalendarDayCellButton>
+    </StyledCalendarDayCellDiv>
   );
 };
 

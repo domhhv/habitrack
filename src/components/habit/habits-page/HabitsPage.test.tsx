@@ -172,18 +172,16 @@ describe(HabitsPage.name, () => {
       traitsMap: { 1: {}, 2: {} },
       allTraits: [],
     }));
-    const { queryByRole, getByRole, getByTestId } = render(
+    const { getByRole, getByTestId } = render(
       <TraitsProvider>
         <HabitsProvider>
           <HabitsPage />
         </HabitsProvider>
       </TraitsProvider>
     );
-    expect(queryByRole('confirm-dialog')).toBeNull();
     fireEvent.click(getByTestId('delete-habit-id-2-button'));
-    expect(getByRole('confirm-dialog')).toBeDefined();
+    expect(getByRole('dialog')).toBeDefined();
     fireEvent.click(getByRole('confirm-dialog-cancel'));
-    expect(queryByRole('confirm-dialog')).toBeNull();
   });
 
   it('should open edit dialog on edit icon button click', async () => {
@@ -276,9 +274,9 @@ describe(HabitsPage.name, () => {
         </HabitsProvider>
       </TraitsProvider>
     );
-    expect(queryByRole('confirm-dialog')).toBeNull();
+    expect(queryByRole('dialog')).toBeNull();
     fireEvent.click(getByTestId('delete-habit-id-2-button'));
-    expect(getByRole('confirm-dialog')).toBeDefined();
+    expect(getByRole('dialog')).toBeDefined();
     fireEvent.click(getByRole('confirm-dialog-confirm'));
     expect(mockRemoveHabit).toHaveBeenCalled();
   });

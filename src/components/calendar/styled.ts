@@ -140,7 +140,7 @@ export const StyledCalendarWeekRow = styled(StyledWithGapDiv)(({ theme }) => ({
   },
 }));
 
-export const StyledCalendarDayCellButton = styled('button')(({ theme }) => ({
+export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   flex: '1 1 0%',
