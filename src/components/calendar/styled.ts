@@ -1,8 +1,6 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { Box, Chip, IconButton, type Theme } from '@mui/joy';
+import { Box, Chip, type Theme } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
-
-import { StyledAppWideContainer } from '../styled';
 
 const calendarGap = 16;
 
@@ -14,89 +12,6 @@ const StyledWithGapDiv = styled('div')(({ theme }) => ({
   gap: calendarGap,
   [theme.breakpoints.down('lg')]: {
     gap: 0,
-  },
-}));
-
-export const StyledCalendarBackgroundDiv = styled('div')(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  width: '100%',
-  padding: theme.spacing(2),
-  flex: '1 1 0%',
-  [theme.breakpoints.down('lg')]: {
-    padding: 0,
-  },
-}));
-
-export const StyledCalendarContainerDiv = styled(StyledAppWideContainer)(
-  ({ theme }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    margin: `${theme.spacing(2)} auto 0`,
-    maxWidth: '100%',
-    flex: '1 1 0%',
-    [theme.breakpoints.down('lg')]: {
-      padding: 0,
-      margin: 0,
-    },
-  })
-);
-
-export const StyledCalendarHeader = styled('div')(({ theme }) => ({
-  marginBottom: theme.spacing(1),
-  padding: theme.spacing(1, 1.5),
-  display: 'flex',
-  border: '3px solid',
-  borderRadius: theme.radius.md,
-  alignItems: 'center',
-  position: 'relative',
-  justifyContent: 'space-between',
-  [theme.getColorSchemeSelector('light')]: {
-    borderColor: getLightNeutralColor(theme),
-    '& p': {
-      color: getLightNeutralColor(theme),
-    },
-  },
-  [theme.getColorSchemeSelector('dark')]: {
-    borderColor: getDarkNeutralColor(theme),
-    '& p': {
-      color: getDarkNeutralColor(theme),
-    },
-  },
-}));
-
-export const StyledCalendarActiveMonthContainer = styled('div')({
-  width: 230,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-});
-
-export const StyledCalendarNavigationContainer = styled('div')({
-  display: 'flex',
-  alignItems: 'center',
-});
-
-export const StyledNavigationIconButton = styled(IconButton)(({ theme }) => ({
-  [theme.getColorSchemeSelector('light')]: {
-    '& svg': {
-      color: getLightNeutralColor(theme),
-    },
-    '&:hover': {
-      backgroundColor: theme.palette.neutral[200],
-    },
-  },
-  [theme.getColorSchemeSelector('dark')]: {
-    '& svg': {
-      color: getDarkNeutralColor(theme),
-    },
-    '&:hover': {
-      backgroundColor: theme.palette.neutral[900],
-    },
-  },
-  '&:first-of-type': {
-    marginRight: theme.spacing(1),
   },
 }));
 
