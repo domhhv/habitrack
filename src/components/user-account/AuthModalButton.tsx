@@ -1,48 +1,38 @@
 import { useUserAccount } from '@context';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import {
+  Button,
   ButtonGroup,
-  DialogTitle,
   Modal,
-  ModalDialog,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
   Tab,
-  tabClasses,
-  TabList,
-  TabPanel,
   Tabs,
-} from '@mui/joy';
-import React, { type SyntheticEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+  useDisclosure,
+  VisuallyHidden,
+} from '@nextui-org/react';
+import {
+  SignOut as SignOutIcon,
+  User as UserIcon,
+} from '@phosphor-icons/react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 import AuthForm from './AuthForm';
-import { StyledAuthButton, StyleLogOutIconButton } from './styled';
 
 const AuthModalButton = () => {
   const { login, logout, register, authenticating, supabaseUser } =
     useUserAccount();
-  const [open, setOpen] = React.useState(false);
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [mode, setMode] = React.useState<'login' | 'register'>('login');
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    if (!supabaseUser?.id) {
-      setOpen(true);
-    } else {
-      navigate('/account');
-    }
-  };
 
   const handleClose = () => {
     setMode('login');
-    setOpen(false);
+    onClose();
   };
 
-  const handleTabChange = (
-    _: SyntheticEvent<Element, Event> | null,
-    newValue: number | string | null
-  ) => {
-    setMode(newValue as 'login' | 'register');
+  const handleTabChange = (key: React.Key) => {
+    setMode(key as 'login' | 'register');
   };
 
   const handleSubmit = async (username: string, password: string) => {
@@ -67,72 +57,54 @@ const AuthModalButton = () => {
 
   return (
     <>
-      <ButtonGroup>
-        <StyledAuthButton
-          startDecorator={
-            supabaseUser?.id ? null : <AccountCircleOutlinedIcon />
-          }
-          onClick={handleClick}
-          data-testid="auth-button"
-        >
-          {supabaseUser?.id ? 'Account' : 'Log In'}
-        </StyledAuthButton>
-        {supabaseUser?.id && (
-          <StyleLogOutIconButton onClick={() => logout()}>
-            <LogoutRoundedIcon />
-            <div style={{ display: 'none' }}>Log Out</div>
-          </StyleLogOutIconButton>
-        )}
-      </ButtonGroup>
-      <Modal open={open} onClose={handleClose}>
-        <ModalDialog sx={{ width: 420, padding: '20px 24px 10px' }}>
-          <DialogTitle>
-            {actionLabel} with a username and a password
-          </DialogTitle>
-          <Tabs
-            value={mode}
-            onChange={handleTabChange}
-            sx={{ bgcolor: 'transparent', marginTop: 0.5 }}
+      {supabaseUser?.id ? (
+        <ButtonGroup>
+          <Button
+            as={Link}
+            to="/account"
+            data-testid="auth-button"
+            color="primary"
           >
-            <TabList
-              aria-label="tabs"
-              sx={{
-                p: 0.5,
-                gap: 0.5,
-                borderRadius: 'xl',
-                bgcolor: 'background.level1',
-                [`& .${tabClasses.root}[aria-selected="true"]`]: {
-                  boxShadow: 'none',
-                  bgcolor: 'background.surface',
-                },
-              }}
-              disableUnderline
+            <UserIcon data-testid="user-icon" />
+            Account
+          </Button>
+          <Button
+            onPress={() => logout()}
+            isIconOnly
+            color="primary"
+            className="border-l"
+          >
+            <SignOutIcon data-testid="sign-out-icon" />
+            <VisuallyHidden>Log Out</VisuallyHidden>
+          </Button>
+        </ButtonGroup>
+      ) : (
+        <Button onPress={onOpen} data-testid="auth-button" color="primary">
+          Log In
+        </Button>
+      )}
+      <Modal isOpen={isOpen} onClose={handleClose} onOpenChange={onOpenChange}>
+        <ModalContent>
+          <ModalHeader>{`${actionLabel} with a username and a password`}</ModalHeader>
+          <ModalBody>
+            <Tabs
+              onSelectionChange={handleTabChange}
+              radius="full"
+              color="primary"
+              fullWidth
             >
-              <Tab
-                disabled={authenticating}
-                value="login"
-                disableIndicator
-                sx={{ flex: '1 1 0%' }}
-              >
-                Login
+              <Tab disabled={authenticating} key="login" title="Login">
+                <AuthForm {...authFormProps} submitButtonLabel="Log In" />
               </Tab>
-              <Tab
-                disabled={authenticating}
-                value="register"
-                disableIndicator
-                sx={{ flex: '1 1 0%' }}
-              >
-                Register
+              <Tab disabled={authenticating} key="register" title="Register">
+                <AuthForm
+                  {...authFormProps}
+                  submitButtonLabel="Create Account"
+                />
               </Tab>
-            </TabList>
-            <TabPanel value="login" sx={{ padding: '16px 0' }}>
-              <AuthForm {...authFormProps} submitButtonLabel="Log In" />
-            </TabPanel>
-            <TabPanel value="register" sx={{ padding: '16px 0' }}>
-              <AuthForm {...authFormProps} submitButtonLabel="Create Account" />
-            </TabPanel>
-          </Tabs>
-        </ModalDialog>
+            </Tabs>
+          </ModalBody>
+        </ModalContent>
       </Modal>
     </>
   );

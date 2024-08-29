@@ -1,9 +1,7 @@
-import { FloatingLabelInput } from '@components';
 import { useSnackbar } from '@context';
-import { Button, DialogActions } from '@mui/joy';
+import { useFormField } from '@hooks';
+import { Input, Button } from '@nextui-org/react';
 import React from 'react';
-
-import { StyledDialogContent } from './styled';
 
 type AuthFormProps = {
   onSubmit: (username: string, password: string) => void;
@@ -18,17 +16,9 @@ const AuthForm = ({
   onCancel,
   disabled,
 }: AuthFormProps) => {
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, handleEmailChange, clearEmail] = useFormField();
+  const [password, handlePasswordChange, clearPassword] = useFormField();
   const { showSnackbar } = useSnackbar();
-
-  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
-  };
-
-  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
-  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     try {
@@ -44,8 +34,8 @@ const AuthForm = ({
   };
 
   const clearValues = () => {
-    setEmail('');
-    setPassword('');
+    clearEmail();
+    clearPassword();
   };
 
   const handleCancel = () => {
@@ -55,41 +45,35 @@ const AuthForm = ({
 
   return (
     <form onSubmit={handleSubmit} data-testid="submit-form">
-      <StyledDialogContent>
-        <FloatingLabelInput
+      <div className="flex flex-col gap-4">
+        <Input
           value={email}
-          onChange={handleUsernameChange}
+          onChange={handleEmailChange}
           type="email"
           label="Email"
           disabled={disabled}
         />
-        <FloatingLabelInput
+        <Input
           value={password}
           onChange={handlePasswordChange}
           label="Password"
           type="password"
           disabled={disabled}
         />
-      </StyledDialogContent>
-      <DialogActions>
+      </div>
+      <div className="mt-4 flex justify-end gap-2">
+        <Button onClick={handleCancel} disabled={disabled} variant="flat">
+          Cancel
+        </Button>
         <Button
-          variant="solid"
           color="primary"
-          loading={disabled}
+          isLoading={disabled}
           type="submit"
           data-testid="submit-button"
         >
           {submitButtonLabel}
         </Button>
-        <Button
-          onClick={handleCancel}
-          variant="outlined"
-          color="neutral"
-          disabled={disabled}
-        >
-          Cancel
-        </Button>
-      </DialogActions>
+      </div>
     </form>
   );
 };

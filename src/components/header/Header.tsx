@@ -1,31 +1,26 @@
 import { AuthModalButton } from '@components';
-import { Button } from '@mui/joy';
+import { Button } from '@nextui-org/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 import ThemeToggle from './ThemeToggle';
-import {
-  StyledAppHeader,
-  StyledAppHeaderContent,
-  StyledButtonsContainer,
-} from './styled';
 
 const Header = () => {
   return (
-    <StyledAppHeader>
-      <StyledAppHeaderContent>
-        <StyledButtonsContainer>
-          <Button component={Link} to="/calendar">
-            Calendar
+    <header className="border-b border-b-neutral-400 bg-neutral-300 dark:border-b-neutral-700 dark:bg-neutral-900">
+      <div className="mx-auto flex w-full items-center justify-between p-4 lg:w-[90%]">
+        <div className="flex items-center gap-3">
+          <Button color="primary">
+            <Link to="/calendar">Calendar</Link>
           </Button>
-          <Button component={Link} to="/habits">
-            Habits
+          <Button color="primary">
+            <Link to="/habits">Habits</Link>
           </Button>
           <ThemeToggle />
-        </StyledButtonsContainer>
+        </div>
         <AuthModalButton />
-      </StyledAppHeaderContent>
-    </StyledAppHeader>
+      </div>
+    </header>
   );
 };
 

@@ -1,5 +1,6 @@
 import { ThemeMode, useThemeMode } from '@hooks';
 import { useColorScheme } from '@mui/joy';
+import { ButtonGroup, Button } from '@nextui-org/react';
 import {
   SunDim as SunIcon,
   Desktop as DesktopIcon,
@@ -7,7 +8,6 @@ import {
 } from '@phosphor-icons/react';
 import clsx from 'clsx';
 import React from 'react';
-import { Button } from 'react-aria-components';
 
 const modesToIcons = {
   [ThemeMode.LIGHT]: (
@@ -31,23 +31,24 @@ const ThemeToggle = () => {
   };
 
   return (
-    <div className="[&>*:first-child]:rounded-l-md [&>*:last-child]:rounded-r-md">
+    <ButtonGroup size="sm">
       {Object.values(ThemeMode).map((mode) => {
         const className = clsx(
-          'p-2 outline-none hover:bg-neutral-200 dark:hover:bg-neutral-700',
-          themeMode === mode && 'bg-neutral-200 dark:bg-neutral-800'
+          themeMode === mode && 'bg-neutral-200 dark:bg-neutral-500'
         );
+
         return (
           <Button
             key={mode}
             className={className}
             onPress={handleThemeChange(mode)}
+            isIconOnly
           >
             {modesToIcons[mode]}
           </Button>
         );
       })}
-    </div>
+    </ButtonGroup>
   );
 };
 
