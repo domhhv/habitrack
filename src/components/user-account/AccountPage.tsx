@@ -1,9 +1,10 @@
-import { AuthModalButton, FloatingLabelInput } from '@components';
-import DoNotDisturbAltRoundedIcon from '@mui/icons-material/DoNotDisturbAltRounded';
-import { Button, Box, Typography, CircularProgress, Alert } from '@mui/joy';
+import { AuthModalButton } from '@components';
+import { Button, Input, CircularProgress } from '@nextui-org/react';
+import { Prohibit as ProhibitIcon } from '@phosphor-icons/react';
+import clsx from 'clsx';
 import React, { type FormEventHandler } from 'react';
+import { twMerge } from 'tailwind-merge';
 
-import { StyledAccountForm, StyledAccountPageContainer } from './styled';
 import { useAccountPage } from './use-account-page';
 import { useEmailConfirmed } from './use-email-confirmed';
 
@@ -26,29 +27,33 @@ const AccountPage = () => {
     document.title = 'My Account | Habitrack';
   }, []);
 
+  const containerClassName = clsx(
+    'mx-auto flex flex-col items-center justify-center'
+  );
+
   if (loading) {
     return (
-      <StyledAccountPageContainer data-testid="account-page">
-        <CircularProgress data-testid="loader" />
-      </StyledAccountPageContainer>
+      <div className={containerClassName} data-testid="account-page">
+        <CircularProgress data-testid="loader" aria-label="Loading..." />
+      </div>
     );
   }
 
   if (forbidden) {
     return (
-      <StyledAccountPageContainer data-testid="account-page">
-        <Alert
-          color="danger"
-          size="lg"
-          startDecorator={<DoNotDisturbAltRoundedIcon />}
-          endDecorator={<AuthModalButton />}
+      <div
+        className={twMerge(containerClassName, 'items-start pt-16')}
+        data-testid="account-page"
+      >
+        <div
+          className="flex items-center gap-4 rounded-md bg-white p-4 dark:bg-black"
           data-testid="alert"
         >
-          <Typography level="h4">
-            Please log in to your account first
-          </Typography>
-        </Alert>
-      </StyledAccountPageContainer>
+          <ProhibitIcon size={24} weight="bold" />
+          <h4 className="font-semibold">Please log in to your account first</h4>
+          <AuthModalButton />
+        </div>
+      </div>
     );
   }
 
@@ -58,46 +63,60 @@ const AccountPage = () => {
   };
 
   return (
-    <StyledAccountPageContainer data-testid="account-page">
-      <Typography gutterBottom level="h4">
-        Your Account Info
-      </Typography>
-      <StyledAccountForm onSubmit={handleSubmit} data-testid="account-form">
-        <Box mb={2}>
-          <FloatingLabelInput
-            value={email}
-            onChange={handleEmailChange}
-            disabled={loading}
-            label="Email"
-            dataTestId="email-input"
-          />
-        </Box>
-        <Box mb={2}>
-          <FloatingLabelInput
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-            disabled={loading}
-            label="Set new password"
-            dataTestId="password-input"
-          />
-        </Box>
-        <Box mb={2}>
-          <FloatingLabelInput
-            value={name}
-            onChange={handleNameChange}
-            disabled={loading}
-            label="Name"
-            dataTestId="name-input"
-          />
-        </Box>
-        <Box mt={2}>
-          <Button fullWidth type="submit" loading={loading}>
-            Save
-          </Button>
-        </Box>
-      </StyledAccountForm>
-    </StyledAccountPageContainer>
+    <div className="flex w-full flex-col items-start justify-center self-start pt-16">
+      <div className={containerClassName} data-testid="account-page">
+        <h1 className="text-xl font-semibold">Your Account Info</h1>
+        <form
+          className="mt-4 w-[400px]"
+          onSubmit={handleSubmit}
+          data-testid="account-form"
+        >
+          <div className="flex flex-col gap-2">
+            <div>
+              <Input
+                variant="bordered"
+                value={email}
+                onChange={handleEmailChange}
+                disabled={loading}
+                label="Email"
+                data-testid="email-input"
+              />
+            </div>
+            <div>
+              <Input
+                variant="bordered"
+                type="password"
+                value={password}
+                onChange={handlePasswordChange}
+                disabled={loading}
+                label="Set new password"
+                data-testid="password-input"
+              />
+            </div>
+            <div>
+              <Input
+                variant="bordered"
+                value={name}
+                onChange={handleNameChange}
+                disabled={loading}
+                label="Name"
+                data-testid="name-input"
+              />
+            </div>
+            <div>
+              <Button
+                fullWidth
+                type="submit"
+                isLoading={loading}
+                color="primary"
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 
