@@ -11,7 +11,7 @@ const App = () => {
   return (
     <Providers rangeStart={rangeStart} rangeEnd={rangeEnd}>
       <AppHeader />
-      <div className="flex h-full flex-1 items-center bg-neutral-200 dark:bg-neutral-800">
+      <div className="flex h-full flex-1 items-start bg-neutral-100 dark:bg-neutral-900">
         <Routes>
           <Route
             path="/calendar"
