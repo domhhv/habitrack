@@ -49,8 +49,17 @@ export default defineConfig(({ _command, mode }) => {
             if (id.includes('@supabase')) {
               return 'supabase';
             }
+
             if (id.includes('@mui')) {
               return 'material-ui';
+            }
+
+            if (id.includes('framer-motion')) {
+              return 'framer-motion';
+            }
+
+            if (id.includes('nextui')) {
+              return 'next-ui';
             }
 
             if (id.includes('node_modules')) {
