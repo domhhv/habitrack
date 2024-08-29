@@ -9,8 +9,8 @@ const App = () => {
   const { rangeStart, rangeEnd, state, weeksInMonth } = useCalendar();
 
   return (
-    <Providers rangeStart={rangeStart} rangeEnd={rangeEnd}>
-      <BrowserRouter>
+    <BrowserRouter>
+      <Providers rangeStart={rangeStart} rangeEnd={rangeEnd}>
         <AppHeader />
         <div className="flex flex-1 flex-col items-center bg-neutral-200 dark:bg-neutral-800">
           <Routes>
@@ -29,8 +29,8 @@ const App = () => {
             <Route path="*" element={<Navigate to="/calendar" replace />} />
           </Routes>
         </div>
-      </BrowserRouter>
-    </Providers>
+      </Providers>
+    </BrowserRouter>
   );
 };
 

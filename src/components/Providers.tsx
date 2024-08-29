@@ -7,9 +7,11 @@ import {
 } from '@context';
 import { supabaseClient, theme } from '@helpers';
 import { CssVarsProvider } from '@mui/joy';
+import { NextUIProvider } from '@nextui-org/react';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import React from 'react';
 import { I18nProvider } from 'react-aria';
+import { useNavigate } from 'react-router-dom';
 
 type ProviderProps = {
   children: React.ReactNode;
@@ -18,27 +20,31 @@ type ProviderProps = {
 };
 
 const Providers = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
+  const navigate = useNavigate();
+
   return (
-    <CssVarsProvider defaultMode="system" theme={theme}>
-      <SessionContextProvider supabaseClient={supabaseClient}>
-        <I18nProvider locale="en-GB">
-          <SnackbarProvider>
-            <UserAccountProvider>
-              <TraitsProvider>
-                <HabitsProvider>
-                  <OccurrencesProvider
-                    rangeStart={rangeStart}
-                    rangeEnd={rangeEnd}
-                  >
-                    {children}
-                  </OccurrencesProvider>
-                </HabitsProvider>
-              </TraitsProvider>
-            </UserAccountProvider>
-          </SnackbarProvider>
-        </I18nProvider>
-      </SessionContextProvider>
-    </CssVarsProvider>
+    <NextUIProvider navigate={navigate}>
+      <CssVarsProvider defaultMode="system" theme={theme}>
+        <SessionContextProvider supabaseClient={supabaseClient}>
+          <I18nProvider locale="en-GB">
+            <SnackbarProvider>
+              <UserAccountProvider>
+                <TraitsProvider>
+                  <HabitsProvider>
+                    <OccurrencesProvider
+                      rangeStart={rangeStart}
+                      rangeEnd={rangeEnd}
+                    >
+                      {children}
+                    </OccurrencesProvider>
+                  </HabitsProvider>
+                </TraitsProvider>
+              </UserAccountProvider>
+            </SnackbarProvider>
+          </I18nProvider>
+        </SessionContextProvider>
+      </CssVarsProvider>
+    </NextUIProvider>
   );
 };
 

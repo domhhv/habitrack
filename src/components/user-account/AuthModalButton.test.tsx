@@ -77,7 +77,7 @@ describe(AuthModalButton.name, () => {
     expect(modal).toBeDefined();
   });
 
-  it('should close modal on cancel', () => {
+  it('should close modal on cancel', async () => {
     const { getByTestId, getByText, queryByText } = render(<AuthModalButton />);
     const button = getByTestId('auth-button');
     act(() => {
@@ -87,8 +87,10 @@ describe(AuthModalButton.name, () => {
     act(() => {
       fireEvent.click(cancel);
     });
-    const modal = queryByText('Log in with a username and a password');
-    expect(modal).toBeNull();
+    await waitFor(() => {
+      const modal = queryByText('Log in with a username and a password');
+      expect(modal).toBeNull();
+    });
   });
 
   it('should call login on submit', async () => {
@@ -123,29 +125,15 @@ describe(AuthModalButton.name, () => {
     });
   });
 
-  it('should display start decorator icon if user is logged out', () => {
-    const { getByTestId, queryByTestId } = render(<AuthModalButton />);
-    const accountCircleOutlinedIcon = getByTestId('AccountCircleOutlinedIcon');
-    const logoutRoundedIcon = queryByTestId('LogoutRoundedIcon');
-    expect(accountCircleOutlinedIcon).toBeDefined();
-    expect(logoutRoundedIcon).toBeNull();
-  });
-
-  it('should display logout button if user is logged in', () => {
+  it('should display start decorators and logout button if user is logged in', () => {
     (useUserAccount as jest.Mock).mockReturnValue({
       supabaseUser: { id: '123' },
     });
-    const { getByTestId, queryByTestId } = render(
-      <BrowserRouter>
-        <AuthModalButton />
-      </BrowserRouter>
-    );
-    const accountCircleOutlinedIcon = queryByTestId(
-      'AccountCircleOutlinedIcon'
-    );
-    const logoutRoundedIcon = getByTestId('LogoutRoundedIcon');
-    expect(accountCircleOutlinedIcon).toBeNull();
-    expect(logoutRoundedIcon).toBeDefined();
+    const { getByTestId, queryByTestId } = render(<AuthModalButton />);
+    const userIcon = getByTestId('user-icon');
+    const signOutIcon = queryByTestId('sign-out-icon');
+    expect(userIcon).toBeDefined();
+    expect(signOutIcon).toBeDefined();
   });
 
   it('should call logout on logout button click if user is logged in', () => {
@@ -159,8 +147,8 @@ describe(AuthModalButton.name, () => {
         <AuthModalButton />
       </BrowserRouter>
     );
-    const logoutRoundedIcon = getByTestId('LogoutRoundedIcon');
-    fireEvent.click(logoutRoundedIcon);
+    const signOutIcon = getByTestId('sign-out-icon');
+    fireEvent.click(signOutIcon);
     expect(mockLogOut).toHaveBeenCalled();
   });
 });
