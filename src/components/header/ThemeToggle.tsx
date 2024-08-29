@@ -5,19 +5,38 @@ import {
   SunDim as SunIcon,
   Desktop as DesktopIcon,
   Moon as MoonIcon,
+  type IconWeight,
 } from '@phosphor-icons/react';
 import clsx from 'clsx';
 import React from 'react';
+import { twMerge } from 'tailwind-merge';
+
+type IconProps = {
+  cn: string;
+  w: IconWeight;
+};
 
 const modesToIcons = {
-  [ThemeMode.LIGHT]: (
-    <SunIcon className="dark:text-neutral-200" weight="bold" />
+  [ThemeMode.LIGHT]: ({ cn, w }: IconProps) => (
+    <SunIcon
+      className={twMerge('dark:text-neutral-200', cn)}
+      weight={w}
+      size={16}
+    />
   ),
-  [ThemeMode.SYSTEM]: (
-    <DesktopIcon className="dark:text-neutral-200" weight="bold" />
+  [ThemeMode.SYSTEM]: ({ cn, w }: IconProps) => (
+    <DesktopIcon
+      className={twMerge('dark:text-neutral-200', cn)}
+      weight={w}
+      size={16}
+    />
   ),
-  [ThemeMode.DARK]: (
-    <MoonIcon className="dark:text-neutral-200" weight="bold" />
+  [ThemeMode.DARK]: ({ cn, w }: IconProps) => (
+    <MoonIcon
+      className={twMerge('dark:text-neutral-200', cn)}
+      weight={w}
+      size={16}
+    />
   ),
 };
 
@@ -31,20 +50,26 @@ const ThemeToggle = () => {
   };
 
   return (
-    <ButtonGroup size="sm">
+    <ButtonGroup>
       {Object.values(ThemeMode).map((mode) => {
-        const className = clsx(
-          themeMode === mode && 'bg-neutral-200 dark:bg-neutral-500'
+        const isSelected = themeMode === mode;
+        const buttonClassName = clsx(
+          'bg-gray-200 dark:bg-gray-800',
+          isSelected && 'bg-gray-500 dark:bg-gray-600'
         );
+
+        const iconClassName = clsx(isSelected && 'text-white');
+
+        const Icon = modesToIcons[mode];
 
         return (
           <Button
             key={mode}
-            className={className}
+            className={buttonClassName}
             onPress={handleThemeChange(mode)}
             isIconOnly
           >
-            {modesToIcons[mode]}
+            <Icon cn={iconClassName} w={isSelected ? 'bold' : 'regular'} />
           </Button>
         );
       })}
