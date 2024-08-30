@@ -63,8 +63,6 @@ const CalendarHeader = ({
   const user = useUser();
   const screenSize = useScreenSize();
 
-  console.log({ filteredBy });
-
   const shouldRenderFilters =
     !!user && habits.length > 0 && allTraits.length > 0;
 
@@ -99,30 +97,28 @@ const CalendarHeader = ({
   };
 
   return (
-    <div className="mb-2 flex items-center justify-between rounded-md border-3 border-neutral-500 px-4 py-2">
-      <div className="flex items-center justify-between">
-        <div className="mr-2 flex">
-          <div className="flex flex-row items-center gap-2">
-            <Select
-              variant="bordered"
-              selectedKeys={new Set([activeMonthLabel])}
-              onChange={handleMonthChange}
-              className="w-[250px]"
-            >
-              {MONTHS.map((month) => (
-                <SelectItem key={month}>{month}</SelectItem>
-              ))}
-            </Select>
-            <Select
-              variant="bordered"
-              selectedKeys={new Set([activeYear])}
-              onChange={handleYearChange}
-            >
-              {YEARS.map((year) => (
-                <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
-              ))}
-            </Select>
-          </div>
+    <div className="mb-2 flex flex-col items-center justify-between gap-2 rounded-md border-3 border-neutral-500 px-4 py-2 md:flex-row md:gap-0">
+      <div className="flex flex-col items-center justify-between gap-2 md:flex-row md:gap-0">
+        <div className="mr-2 flex flex-col items-center gap-2 md:flex-row">
+          <Select
+            variant="bordered"
+            selectedKeys={new Set([activeMonthLabel])}
+            onChange={handleMonthChange}
+            className="w-[250px]"
+          >
+            {MONTHS.map((month) => (
+              <SelectItem key={month}>{month}</SelectItem>
+            ))}
+          </Select>
+          <Select
+            variant="bordered"
+            selectedKeys={new Set([activeYear])}
+            onChange={handleYearChange}
+          >
+            {YEARS.map((year) => (
+              <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
+            ))}
+          </Select>
         </div>
         <div className="flex items-center">
           <Button
@@ -151,7 +147,7 @@ const CalendarHeader = ({
         </div>
       </div>
       {shouldRenderFilters && (
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
           <Select
             variant="bordered"
             renderValue={() => {

@@ -8,7 +8,7 @@ import ThemeToggle from './ThemeToggle';
 const Header = () => {
   return (
     <header className="border-b border-b-neutral-400 bg-neutral-300 dark:border-b-neutral-700 dark:bg-neutral-900">
-      <div className="mx-auto flex w-full items-center justify-between p-4 lg:w-[90%]">
+      <div className="mx-auto flex w-full flex-col items-center justify-between gap-2 p-4 md:flex-row md:gap-0 lg:w-[90%]">
         <div className="flex items-center gap-3">
           <Button color="primary">
             <Link to="/calendar">Calendar</Link>
