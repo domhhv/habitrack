@@ -1,5 +1,5 @@
 import { AuthModalButton } from '@components';
-import { Button, Input, CircularProgress } from '@nextui-org/react';
+import { Button, Input, Spinner } from '@nextui-org/react';
 import { Prohibit as ProhibitIcon } from '@phosphor-icons/react';
 import clsx from 'clsx';
 import React, { type FormEventHandler } from 'react';
@@ -34,7 +34,7 @@ const AccountPage = () => {
   if (loading) {
     return (
       <div className={containerClassName} data-testid="account-page">
-        <CircularProgress data-testid="loader" aria-label="Loading..." />
+        <Spinner data-testid="loader" aria-label="Loading..." />
       </div>
     );
   }

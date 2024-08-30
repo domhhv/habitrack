@@ -1,15 +1,14 @@
 import { useHabits, useOccurrences, useTraits } from '@context';
-import { NavigateBefore, NavigateNext } from '@mui/icons-material';
-import { Select, Option, Box, Button } from '@mui/joy';
+import { useScreenSize } from '@hooks';
+import { Select, SelectItem, Button } from '@nextui-org/react';
+import {
+  ArrowFatLeft,
+  ArrowFatRight,
+  ArrowsClockwise,
+  Scribble,
+} from '@phosphor-icons/react';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
-
-import {
-  StyledCalendarActiveMonthContainer,
-  StyledCalendarHeader,
-  StyledCalendarNavigationContainer,
-  StyledNavigationIconButton,
-} from './styled';
 
 type NavigationButtonProps = {
   disabled: boolean;
@@ -62,136 +61,148 @@ const CalendarHeader = ({
   const { allTraits } = useTraits();
   const { filteredBy, filterBy } = useOccurrences();
   const user = useUser();
+  const screenSize = useScreenSize();
 
   const shouldRenderFilters =
     !!user && habits.length > 0 && allTraits.length > 0;
 
-  const handleMonthSelect = (
-    _: React.SyntheticEvent | null,
-    newMonth: string | null
+  const handleMonthChange: React.ChangeEventHandler<HTMLSelectElement> = (
+    event
   ) => {
-    if (newMonth) {
-      onNavigateToMonth(MONTHS.indexOf(newMonth) + 1);
-    }
+    onNavigateToMonth(MONTHS.indexOf(event.target.value) + 1);
   };
 
-  const handleYearSelect = (
-    _: React.SyntheticEvent | null,
-    newYear: number | null
+  const handleYearChange: React.ChangeEventHandler<HTMLSelectElement> = (
+    event
   ) => {
-    if (newYear) {
-      onNavigateToYear(newYear);
-    }
+    onNavigateToYear(+event.target.value);
+  };
+
+  const handleHabitsFilterChange: React.ChangeEventHandler<
+    HTMLSelectElement
+  > = (event) => {
+    filterBy({
+      ...filteredBy,
+      habitIds: [...filteredBy.habitIds, +event.target.value],
+    });
+  };
+
+  const handleTraitsFilterChange: React.ChangeEventHandler<
+    HTMLSelectElement
+  > = (event) => {
+    filterBy({
+      ...filteredBy,
+      traitIds: [...filteredBy.traitIds, +event.target.value],
+    });
   };
 
   return (
-    <StyledCalendarHeader>
-      <StyledCalendarActiveMonthContainer>
-        <Box mr={2}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: '10px',
-            }}
+    <div className="mb-2 flex flex-col items-center justify-between gap-2 rounded-md border-3 border-neutral-500 px-4 py-2 md:flex-row md:gap-0">
+      <div className="flex flex-col items-center justify-between gap-2 md:flex-row md:gap-0">
+        <div className="mr-2 flex flex-col items-center gap-2 md:flex-row">
+          <Select
+            variant="bordered"
+            selectedKeys={new Set([activeMonthLabel])}
+            onChange={handleMonthChange}
+            className="w-[250px]"
           >
-            <Select
-              variant="soft"
-              value={activeMonthLabel}
-              onChange={handleMonthSelect}
-              sx={{ minWidth: 132 }}
-            >
-              {MONTHS.map((month) => (
-                <Option key={month} value={month} label={month}>
-                  {month}
-                </Option>
-              ))}
-            </Select>
-            <Select
-              variant="soft"
-              value={Number(activeYear)}
-              onChange={handleYearSelect}
-            >
-              {YEARS.map((year) => (
-                <Option key={year} value={year} label={year.toString()}>
-                  {year}
-                </Option>
-              ))}
-            </Select>
-          </div>
-        </Box>
-        <StyledCalendarNavigationContainer>
-          <StyledNavigationIconButton
+            {MONTHS.map((month) => (
+              <SelectItem key={month}>{month}</SelectItem>
+            ))}
+          </Select>
+          <Select
+            variant="bordered"
+            selectedKeys={new Set([activeYear])}
+            onChange={handleYearChange}
+          >
+            {YEARS.map((year) => (
+              <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
+            ))}
+          </Select>
+        </div>
+        <div className="flex items-center">
+          <Button
+            isIconOnly
+            variant="light"
             disabled={prevButtonProps.disabled}
             aria-label={prevButtonProps['aria-label']}
             onClick={onNavigateBack}
             role="navigate-back"
           >
-            <NavigateBefore fontSize="small" />
-          </StyledNavigationIconButton>
-          <Button variant="soft" color="neutral" onClick={onResetFocusedDate}>
+            <ArrowFatLeft size="20" />
+          </Button>
+          <Button variant="light" onClick={onResetFocusedDate}>
             Today
           </Button>
-          <StyledNavigationIconButton
+          <Button
+            isIconOnly
+            variant="light"
             disabled={nextButtonProps.disabled}
             aria-label={nextButtonProps['aria-label']}
             onClick={onNavigateForward}
             role="navigate-forward"
           >
-            <NavigateNext fontSize="small" />
-          </StyledNavigationIconButton>
-        </StyledCalendarNavigationContainer>
-      </StyledCalendarActiveMonthContainer>
+            <ArrowFatRight size="20" />
+          </Button>
+        </div>
+      </div>
       {shouldRenderFilters && (
-        <Box
-          display="flex"
-          flexDirection="row"
-          justifyContent="space-between"
-          alignItems="center"
-          gap={2}
-        >
+        <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
           <Select
-            variant="soft"
-            renderValue={() => 'Filter by habits'}
-            value={filteredBy.habitIds}
-            onChange={(_, habitIds: number[]) => {
-              filterBy({
-                ...filteredBy,
-                habitIds,
-              });
+            variant="bordered"
+            renderValue={() => {
+              if (screenSize < 1280) {
+                return <ArrowsClockwise />;
+              }
+
+              return 'Filter by habits';
             }}
-            sx={{ minWidth: 132 }}
-            multiple
+            selectedKeys={
+              new Set(filteredBy.habitIds.map((id) => id.toString()))
+            }
+            onChange={handleHabitsFilterChange}
+            className="w-[75px] xl:w-[200px]"
+            selectionMode="multiple"
+            classNames={{
+              popoverContent: 'w-[200px]',
+            }}
+            popoverProps={{
+              placement: screenSize < 1280 ? 'bottom-end' : 'bottom-start',
+            }}
           >
             {habits.map((habit) => (
-              <Option key={habit.id} value={habit.id} label={habit.name}>
-                {habit.name}
-              </Option>
+              <SelectItem key={habit.id}>{habit.name}</SelectItem>
             ))}
           </Select>
           <Select
-            variant="soft"
-            renderValue={() => 'Filter by traits'}
-            value={filteredBy.traitIds}
-            onChange={(_, newTraits: (number | string)[]) => {
-              filterBy({
-                ...filteredBy,
-                traitIds: newTraits,
-              });
+            variant="bordered"
+            renderValue={() => {
+              if (screenSize < 1280) {
+                return <Scribble />;
+              }
+
+              return 'Filter by habits';
             }}
-            sx={{ minWidth: 132 }}
-            multiple
+            selectedKeys={
+              new Set(filteredBy.traitIds.map((id) => id.toString()))
+            }
+            onChange={handleTraitsFilterChange}
+            className="w-[75px] xl:w-[200px]"
+            selectionMode="multiple"
+            classNames={{
+              popoverContent: 'w-[200px]',
+            }}
+            popoverProps={{
+              placement: screenSize < 1280 ? 'bottom-end' : 'bottom-start',
+            }}
           >
             {allTraits.map((trait) => (
-              <Option key={trait.id} value={trait.id} label={trait.label}>
-                {trait.label}
-              </Option>
+              <SelectItem key={trait.id}>{trait.label}</SelectItem>
             ))}
           </Select>
-        </Box>
+        </div>
       )}
-    </StyledCalendarHeader>
+    </div>
   );
 };
 

@@ -6,10 +6,6 @@ import { type CalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';
-import {
-  StyledCalendarBackgroundDiv,
-  StyledCalendarContainerDiv,
-} from './styled';
 
 type CalendarProps = {
   state: CalendarState;
@@ -60,8 +56,11 @@ const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
   };
 
   return (
-    <StyledCalendarBackgroundDiv>
-      <StyledCalendarContainerDiv {...calendarProps}>
+    <div className="flex h-full w-full flex-1 flex-col p-0 lg:p-4">
+      <div
+        {...calendarProps}
+        className="mt-4 flex max-w-full flex-1 flex-col px-0 lg:px-16"
+      >
         <CalendarHeader
           activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
           activeYear={activeYear}
@@ -74,8 +73,8 @@ const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
           onResetFocusedDate={resetFocusedDate}
         />
         <CalendarGrid state={state} weeksInMonth={weeksInMonth} />
-      </StyledCalendarContainerDiv>
-    </StyledCalendarBackgroundDiv>
+      </div>
+    </div>
   );
 };
 
