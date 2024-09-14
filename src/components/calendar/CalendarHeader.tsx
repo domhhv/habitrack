@@ -145,10 +145,10 @@ const CalendarHeader = ({
         <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
           <Select
             variant="bordered"
-            label="Filter by habits"
+            label={screenSize < 1280 ? null : 'Filter by habits'}
             selectedKeys={filteredBy.habitIds}
             onChange={handleHabitsFilterChange}
-            className="w-[75px] xl:w-[200px]"
+            className="w-[125px] xl:w-[200px]"
             selectionMode="multiple"
             classNames={{
               popoverContent: 'w-[200px]',
@@ -163,10 +163,10 @@ const CalendarHeader = ({
           </Select>
           <Select
             variant="bordered"
-            label="Filter by traits"
+            label={screenSize < 1280 ? null : 'Filter by traits'}
             selectedKeys={filteredBy.traitIds}
             onChange={handleTraitsFilterChange}
-            className="w-[75px] xl:w-[200px]"
+            className="w-[125px] xl:w-[200px]"
             selectionMode="multiple"
             classNames={{
               popoverContent: 'w-[200px]',
