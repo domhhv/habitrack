@@ -1,12 +1,7 @@
 import { useHabits, useOccurrences, useTraits } from '@context';
 import { useScreenSize } from '@hooks';
 import { Select, SelectItem, Button } from '@nextui-org/react';
-import {
-  ArrowFatLeft,
-  ArrowFatRight,
-  ArrowsClockwise,
-  Scribble,
-} from '@phosphor-icons/react';
+import { ArrowFatLeft, ArrowFatRight } from '@phosphor-icons/react';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
@@ -83,7 +78,7 @@ const CalendarHeader = ({
   > = (event) => {
     filterBy({
       ...filteredBy,
-      habitIds: [...filteredBy.habitIds, +event.target.value],
+      habitIds: new Set(event.target.value.split(',')),
     });
   };
 
@@ -92,12 +87,12 @@ const CalendarHeader = ({
   > = (event) => {
     filterBy({
       ...filteredBy,
-      traitIds: [...filteredBy.traitIds, +event.target.value],
+      traitIds: new Set(event.target.value.split(',')),
     });
   };
 
   return (
-    <div className="mb-2 flex flex-col items-center justify-between gap-2 rounded-md border-3 border-neutral-500 px-4 py-2 md:flex-row md:gap-0">
+    <div className="mb-2 flex flex-col items-center justify-between gap-2 rounded-md border-3 border-neutral-500 px-4 py-4 md:flex-row md:gap-0 md:py-2">
       <div className="flex flex-col items-center justify-between gap-2 md:flex-row md:gap-0">
         <div className="mr-2 flex flex-col items-center gap-2 md:flex-row">
           <Select
@@ -150,18 +145,10 @@ const CalendarHeader = ({
         <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
           <Select
             variant="bordered"
-            renderValue={() => {
-              if (screenSize < 1280) {
-                return <ArrowsClockwise />;
-              }
-
-              return 'Filter by habits';
-            }}
-            selectedKeys={
-              new Set(filteredBy.habitIds.map((id) => id.toString()))
-            }
+            label={screenSize < 1280 ? null : 'Filter by habits'}
+            selectedKeys={filteredBy.habitIds}
             onChange={handleHabitsFilterChange}
-            className="w-[75px] xl:w-[200px]"
+            className="w-[125px] xl:w-[200px]"
             selectionMode="multiple"
             classNames={{
               popoverContent: 'w-[200px]',
@@ -176,18 +163,10 @@ const CalendarHeader = ({
           </Select>
           <Select
             variant="bordered"
-            renderValue={() => {
-              if (screenSize < 1280) {
-                return <Scribble />;
-              }
-
-              return 'Filter by habits';
-            }}
-            selectedKeys={
-              new Set(filteredBy.traitIds.map((id) => id.toString()))
-            }
+            label={screenSize < 1280 ? null : 'Filter by traits'}
+            selectedKeys={filteredBy.traitIds}
             onChange={handleTraitsFilterChange}
-            className="w-[75px] xl:w-[200px]"
+            className="w-[125px] xl:w-[200px]"
             selectionMode="multiple"
             classNames={{
               popoverContent: 'w-[200px]',

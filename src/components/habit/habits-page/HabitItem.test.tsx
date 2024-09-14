@@ -44,7 +44,7 @@ describe(HabitItem.name, () => {
     createdAt: new Date().toISOString(),
     updatedAt: null,
     iconPath: 'icon-path',
-    traitId: 'uuid',
+    traitId: 1,
   };
   const mockOnEdit = jest.fn();
   const mockOnDelete = jest.fn();
@@ -64,7 +64,7 @@ describe(HabitItem.name, () => {
   it('should render good trait chip', async () => {
     (useTraits as jest.Mock).mockReturnValue({
       traitsMap: {
-        uuid: { slug: 'good', label: 'Good habit', color: 'green' },
+        1: { slug: 'good', label: 'Good habit', color: 'green' },
       },
     });
     (useHabitTraitChipColor as jest.Mock).mockReturnValue('green');
@@ -81,7 +81,7 @@ describe(HabitItem.name, () => {
 
   it('should render bad trait chip', () => {
     (useTraits as jest.Mock).mockReturnValue({
-      traitsMap: { uuid: { slug: 'bad', label: 'Bad habit', color: 'red' } },
+      traitsMap: { 1: { slug: 'bad', label: 'Bad habit', color: 'red' } },
     });
     (useHabitTraitChipColor as jest.Mock).mockReturnValue('red');
     const { getByRole } = render(<HabitItem {...props} />);
@@ -97,7 +97,7 @@ describe(HabitItem.name, () => {
 
   it('should render custom trait chip', () => {
     (useTraits as jest.Mock).mockReturnValue({
-      traitsMap: { uuid: { slug: 'custom-trait', label: 'Custom habit' } },
+      traitsMap: { 1: { slug: 'custom-trait', label: 'Custom habit' } },
     });
     const { getByRole } = render(<HabitItem {...props} />);
     const habitChipName = getByRole('habit-trait-chip-name');

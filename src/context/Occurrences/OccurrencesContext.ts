@@ -11,7 +11,10 @@ export const OccurrencesContext = React.createContext({
   addOccurrence: (_: AddOccurrence) => Promise.resolve(),
   removeOccurrence: (_: number) => Promise.resolve(),
   removeOccurrencesByHabitId: (_: number) => {},
-  filteredBy: { habitIds: [] as number[], traitIds: [] as (string | number)[] },
+  filteredBy: {
+    habitIds: new Set() as Set<string>,
+    traitIds: new Set() as Set<string>,
+  },
   filterBy: (_: OccurrenceFilters) => {},
 });
 
