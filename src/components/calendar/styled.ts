@@ -1,39 +1,13 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { Box, Chip, type Theme } from '@mui/joy';
+import { Box, Chip } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
 
 const calendarGap = 16;
-
-const getDarkNeutralColor = (theme: Theme) => theme.palette.neutral[300];
-
-const getLightNeutralColor = (theme: Theme) => theme.palette.neutral[600];
 
 const StyledWithGapDiv = styled('div')(({ theme }) => ({
   gap: calendarGap,
   [theme.breakpoints.down('lg')]: {
     gap: 0,
-  },
-}));
-
-export const StyledCalendarGridContainerDiv = styled(StyledWithGapDiv)(
-  ({ theme }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    margin: `${theme.spacing(2)} 0`,
-    flex: '1 1 0%',
-  })
-);
-
-export const StyledCalendarWeekDay = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flex: '1 1 0%',
-  [theme.getColorSchemeSelector('light')]: {
-    color: getLightNeutralColor(theme),
-  },
-  [theme.getColorSchemeSelector('dark')]: {
-    color: getDarkNeutralColor(theme),
   },
 }));
 
