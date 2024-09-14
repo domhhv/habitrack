@@ -32,7 +32,7 @@ const EditHabitDialog = ({
   const [isOpen, setIsOpen] = React.useState(false);
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [traitId, setTraitId] = React.useState<string>('choose-trait');
+  const [traitId, setTraitId] = React.useState<number>(0);
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { updateHabit } = useHabits();
   const user = useUser();
@@ -46,7 +46,7 @@ const EditHabitDialog = ({
     if (habit) {
       setName(habit.name);
       setDescription(habit.description);
-      setTraitId(habit.traitId as string);
+      setTraitId(habit.traitId);
     }
   }, [habit, traitsMap]);
 
@@ -69,7 +69,7 @@ const EditHabitDialog = ({
     setDescription(event.target.value);
   };
 
-  const handleTraitChange = (_: null, newValue: string) => {
+  const handleTraitChange = (_: null, newValue: number) => {
     setTraitId(newValue);
   };
 
@@ -133,7 +133,7 @@ const EditHabitDialog = ({
               value={traitId}
               variant="soft"
             >
-              <Option value="choose-trait" disabled>
+              <Option value={0} disabled>
                 Choose a trait
               </Option>
               {allTraits.map((trait) => (

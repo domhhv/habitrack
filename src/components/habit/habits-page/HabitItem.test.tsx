@@ -44,7 +44,7 @@ describe(HabitItem.name, () => {
     createdAt: new Date().toISOString(),
     updatedAt: null,
     iconPath: 'icon-path',
-    traitId: 'uuid',
+    traitId: 42,
   };
   const mockOnEdit = jest.fn();
   const mockOnDelete = jest.fn();

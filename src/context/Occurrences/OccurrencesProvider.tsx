@@ -20,8 +20,8 @@ type Props = {
 };
 
 export type OccurrenceFilters = {
-  habitIds: number[];
-  traitIds: (number | string)[];
+  habitIds: Set<string>;
+  traitIds: Set<string>;
 };
 
 const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
@@ -39,24 +39,30 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   const [occurrenceIdBeingDeleted, setOccurrenceIdBeingDeleted] =
     React.useState(0);
   const [filteredBy, setFilteredBy] = React.useState<OccurrenceFilters>({
-    habitIds: [],
-    traitIds: [],
+    habitIds: new Set([]),
+    traitIds: new Set([]),
   });
 
   React.useEffect(() => {
-    const filteredHabitIds = habits.map((habit) => habit.id);
-    const filteredTraitIds = allTraits.map((trait) => trait.id);
-    setFilteredBy({ habitIds: filteredHabitIds, traitIds: filteredTraitIds });
+    const initialFilteredHabitIds = habits.map((habit) => habit.id.toString());
+    const initialFilteredTraitIds = allTraits.map((trait) =>
+      trait.id.toString()
+    );
+    setFilteredBy({
+      habitIds: new Set(initialFilteredHabitIds),
+      traitIds: new Set(initialFilteredTraitIds),
+    });
   }, [habits, allTraits]);
 
   React.useEffect(() => {
     setOccurrences(
       allOccurrences.filter((occurrence) => {
         return (
-          filteredBy.habitIds.includes(occurrence.habitId) &&
-          filteredBy.traitIds.includes(
-            habits.find((habit) => habit.id === occurrence.habitId)
-              ?.traitId as number
+          filteredBy.habitIds.has(occurrence.habitId.toString()) &&
+          filteredBy.traitIds.has(
+            habits
+              .find((habit) => habit.id === occurrence.habitId)
+              ?.traitId.toString() ?? ''
           )
         );
       })
@@ -147,12 +153,15 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
         await destroyOccurrence(id);
 
         setOccurrences((prevOccurrences) => {
-          const nextOccurrence = [...prevOccurrences];
-          const indexToRemove = nextOccurrence.findIndex(
-            (event) => event.id === id
-          );
-          delete nextOccurrence[indexToRemove];
-          return nextOccurrence;
+          return prevOccurrences.filter((occurrence) => {
+            return occurrence.id !== id;
+          });
+        });
+
+        setAllOccurrences((prevOccurrences) => {
+          return prevOccurrences.filter((occurrence) => {
+            return occurrence.id !== id;
+          });
         });
 
         showSnackbar('Your habit entry has been deleted from the calendar.', {

@@ -16,6 +16,7 @@ export default defineConfig(({ _command, mode }) => {
   const isProduction = mode === 'production';
 
   return {
+    clearScreen: false,
     plugins: [
       react(),
       isProduction &&

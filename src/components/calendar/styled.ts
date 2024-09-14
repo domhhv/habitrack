@@ -157,7 +157,6 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     },
   },
   '&[data-is-today="true"]': {
-    borderBottom: '3px solid',
     '&[data-is-within-active-month="false"]': {
       [theme.getColorSchemeSelector('light')]: {
         borderColor: theme.palette.neutral[400],
@@ -188,7 +187,6 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     },
     [theme.getColorSchemeSelector('light')]: {
       borderColor: theme.palette.neutral[700],
-      backgroundColor: theme.palette.neutral[200],
       '& > div:first-of-type': {
         borderColor: theme.palette.neutral[700],
         '& p': {
@@ -198,7 +196,6 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     },
     [theme.getColorSchemeSelector('dark')]: {
       borderColor: theme.palette.neutral[300],
-      backgroundColor: theme.palette.neutral[800],
       '& > div:first-of-type': {
         borderColor: theme.palette.neutral[300],
         '& p': {

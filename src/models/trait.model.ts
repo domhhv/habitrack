@@ -1,7 +1,7 @@
 import { type PostEntity } from '@services';
 
 export type Trait = {
-  id: number | string;
+  id: number;
   label: string;
   description: string | null;
   slug: string;
@@ -15,7 +15,7 @@ type TraitId = number;
 export type TraitsMap = Record<TraitId, Trait>;
 
 export type ServerTrait = {
-  id: number | string;
+  id: number;
   name: string;
   description: string;
   user_id?: string;

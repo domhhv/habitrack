@@ -18,7 +18,7 @@ export type Habit = {
   userId: string;
   createdAt: string;
   updatedAt: string | null;
-  traitId: number | string;
+  traitId: number;
   iconPath: string | null;
 };
 

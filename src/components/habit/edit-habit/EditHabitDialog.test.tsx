@@ -45,7 +45,7 @@ describe(EditHabitDialog.name, () => {
       userId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
       name: 'Habit Name',
       description: 'Habit description',
-      traitId: 'uuid',
+      traitId: 42,
       iconPath: '',
     },
   };
