@@ -1,8 +1,4 @@
-import {
-  FloatingLabelInput,
-  FloatingLabelTextarea,
-  OccurrenceChip,
-} from '@components';
+import { OccurrenceChip } from '@components';
 import { useTraits } from '@context';
 import {
   Button,
@@ -14,8 +10,8 @@ import {
   ModalDialog,
   Box,
   Typography,
-  Input,
 } from '@mui/joy';
+import { Input, Textarea } from '@nextui-org/react';
 import { makeTestOccurrence } from '@tests';
 import React, { type FormEventHandler } from 'react';
 import { HexColorPicker } from 'react-colorful';
@@ -67,7 +63,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   };
 
   const handleTraitDescriptionChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setTraitDescription(event.target.value);
   };
@@ -90,26 +86,26 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
               &quot;Neutral&quot; or &quot;Moderately Bad&quot;.
             </Typography>
             <Box mb={2}>
-              <FloatingLabelInput
+              <Input
                 value={traitLabel}
                 onChange={handleTraitLabelChange}
-                disabled={addingTrait}
+                isDisabled={addingTrait}
                 label="Trait Label"
               />
             </Box>
             <Box mb={2}>
-              <FloatingLabelInput
+              <Input
                 value={traitSlug}
                 onChange={handleTraitSlugChange}
-                disabled={addingTrait}
+                isDisabled={addingTrait}
                 label="Trait Slug"
               />
             </Box>
             <Box mb={2}>
-              <FloatingLabelTextarea
+              <Textarea
                 value={traitDescription}
                 onChange={handleTraitDescriptionChange}
-                disabled={addingTrait}
+                isDisabled={addingTrait}
                 label="Trait Description"
               />
             </Box>
@@ -124,7 +120,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
                   onChange={(event) =>
                     handleTraitColorChange(event.target.value)
                   }
-                  startDecorator="#"
+                  startContent="#"
                 />
                 <Typography level="body-sm">
                   This is how habits of this trait will appear on your calendar
