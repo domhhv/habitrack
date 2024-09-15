@@ -1,4 +1,5 @@
 import { HabitsContext, useSnackbar } from '@context';
+import { useDataFetch } from '@hooks';
 import type { AddHabit, Habit, HabitsMap, ServerHabit } from '@models';
 import {
   createHabit,
@@ -9,7 +10,6 @@ import {
   patchHabit,
   StorageBuckets,
 } from '@services';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type HabitsProviderProps = {
@@ -17,7 +17,6 @@ type HabitsProviderProps = {
 };
 
 const HabitsProvider = ({ children }: HabitsProviderProps) => {
-  const supabase = useSupabaseClient();
   const { showSnackbar } = useSnackbar();
 
   const [addingHabit, setAddingHabit] = React.useState(false);
@@ -39,26 +38,15 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     setFetchingHabits(false);
   }, []);
 
-  React.useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') {
-        clearHabits();
-      }
-
-      if (event === 'SIGNED_IN') {
-        void fetchHabits();
-      }
-    });
-
-    return () => {
-      data.subscription.unsubscribe();
-    };
-  }, [supabase, fetchHabits]);
-
-  const clearHabits = () => {
+  const clearHabits = React.useCallback(() => {
     setHabits([]);
     setHabitsMap({});
-  };
+  }, []);
+
+  useDataFetch({
+    clear: clearHabits,
+    load: fetchHabits,
+  });
 
   const addHabit = async (habit: AddHabit) => {
     try {
