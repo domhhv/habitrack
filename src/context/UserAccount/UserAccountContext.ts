@@ -1,7 +1,15 @@
 import type { AuthUser } from '@supabase/supabase-js';
 import React from 'react';
 
-export const UserAccountContext = React.createContext({
+type UserAccountContextType = {
+  supabaseUser: AuthUser | null;
+  authenticating: boolean;
+  register: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  logout: (shouldShowSnackbar?: boolean) => void;
+};
+
+export const UserAccountContext = React.createContext<UserAccountContextType>({
   supabaseUser: { id: '', email: '', phone: '' } as AuthUser | null,
   authenticating: false,
   register: (_username: string, _password: string) => Promise.resolve(),

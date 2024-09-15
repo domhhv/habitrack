@@ -3,7 +3,22 @@ import React from 'react';
 
 import { type OccurrenceFilters } from './OccurrencesProvider';
 
-export const OccurrencesContext = React.createContext({
+type OccurrencesContextType = {
+  addingOccurrence: boolean;
+  fetchingOccurrences: boolean;
+  occurrenceIdBeingDeleted: number;
+  occurrencesByDate: OccurrencesDateMap;
+  addOccurrence: (occurrence: AddOccurrence) => Promise<void>;
+  removeOccurrence: (occurrenceId: number) => Promise<void>;
+  removeOccurrencesByHabitId: (habitId: number) => void;
+  filteredBy: {
+    habitIds: Set<string>;
+    traitIds: Set<string>;
+  };
+  filterBy: (filters: OccurrenceFilters) => void;
+};
+
+export const OccurrencesContext = React.createContext<OccurrencesContextType>({
   addingOccurrence: false,
   fetchingOccurrences: false,
   occurrenceIdBeingDeleted: 0,

@@ -16,7 +16,11 @@ export type SnackbarOptions = {
   dismissText?: string;
 };
 
-export const SnackbarContext = React.createContext({
+type SnackbarContextType = {
+  showSnackbar: (message: string, options?: SnackbarOptions) => void;
+};
+
+export const SnackbarContext = React.createContext<SnackbarContextType>({
   showSnackbar: (_: string, __: SnackbarOptions = {}) => {},
 });
 
