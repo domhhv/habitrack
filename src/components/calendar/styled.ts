@@ -1,5 +1,5 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { Box, Chip } from '@mui/joy';
+import { Box } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
 
 export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
@@ -180,12 +180,6 @@ export const StyledCalendarDayCellButtonIconsContainer = styled(Box)(
   })
 );
 
-export const StyledHabitChip = styled(Chip)(({ theme }) => ({
-  padding: theme.spacing(0.5, 1),
-  marginTop: theme.spacing(0.5),
-  marginRight: theme.spacing(0.5),
-}));
-
 export const StyledCalendarTodayIcon = styled(CalendarTodayIcon)(
   ({ theme }) => ({
     color: theme.palette.neutral[600],
@@ -193,9 +187,3 @@ export const StyledCalendarTodayIcon = styled(CalendarTodayIcon)(
     height: 20,
   })
 );
-
-export const StyledOccurrenceHabitImg = styled('img')({
-  width: 20,
-  height: 20,
-  borderRadius: 4,
-});
