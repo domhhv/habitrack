@@ -62,7 +62,6 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
           await updateHabit(habit.id, { ...habit, iconPath });
 
           showSnackbar('Icon replaced!', {
-            variant: 'soft',
             color: 'success',
           });
         } else {
@@ -79,13 +78,11 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
           await updateHabit(habit.id, { ...habit, iconPath: data.path });
 
           showSnackbar('Icon uploaded!', {
-            variant: 'soft',
             color: 'success',
           });
         }
       } catch (e) {
         showSnackbar((e as Error).message || 'Failed to upload icon', {
-          variant: 'soft',
           color: 'danger',
         });
       }

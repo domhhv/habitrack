@@ -70,7 +70,6 @@ const AddHabitDialogButton = () => {
       console.error(error);
 
       showSnackbar('Something went wrong while adding your habit', {
-        variant: 'soft',
         color: 'danger',
       });
     } finally {

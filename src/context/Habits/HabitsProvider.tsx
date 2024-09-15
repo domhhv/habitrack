@@ -33,6 +33,7 @@ const HabitsProvider = ({ children }: HabitsProviderProps) => {
     const habitsMap = habits.reduce((acc, habit) => {
       return { ...acc, [habit.id]: habit };
     }, {});
+
     setHabitsMap(habitsMap);
 
     setFetchingHabits(false);
