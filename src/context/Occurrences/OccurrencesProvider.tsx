@@ -4,13 +4,13 @@ import {
   useHabits,
   useTraits,
 } from '@context';
+import { useDataFetch } from '@hooks';
 import type { AddOccurrence, Occurrence, OccurrencesDateMap } from '@models';
 import {
   createOccurrence,
   destroyOccurrence,
   listOccurrences,
 } from '@services';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 type Props = {
@@ -26,7 +26,6 @@ export type OccurrenceFilters = {
 
 const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   const { showSnackbar } = useSnackbar();
-  const supabase = useSupabaseClient();
   const { habits } = useHabits();
   const { allTraits } = useTraits();
 
@@ -41,6 +40,24 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   const [filteredBy, setFilteredBy] = React.useState<OccurrenceFilters>({
     habitIds: new Set([]),
     traitIds: new Set([]),
+  });
+
+  const fetchOccurrences = React.useCallback(async () => {
+    setFetchingOccurrences(true);
+    const result = await listOccurrences([rangeStart, rangeEnd]);
+    setOccurrences(result);
+    setFetchingOccurrences(false);
+    setAllOccurrences(result);
+  }, [rangeStart, rangeEnd]);
+
+  const clearOccurrences = React.useCallback(() => {
+    setOccurrences([]);
+    setOccurrencesByDate({});
+  }, []);
+
+  useDataFetch({
+    clear: clearOccurrences,
+    load: fetchOccurrences,
   });
 
   React.useEffect(() => {
@@ -68,30 +85,6 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
       })
     );
   }, [filteredBy, allOccurrences, habits]);
-
-  const fetchOccurrences = React.useCallback(async () => {
-    setFetchingOccurrences(true);
-    const result = await listOccurrences([rangeStart, rangeEnd]);
-    setOccurrences(result);
-    setFetchingOccurrences(false);
-    setAllOccurrences(result);
-  }, [rangeStart, rangeEnd]);
-
-  React.useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') {
-        clearOccurrences();
-      }
-
-      if (event === 'SIGNED_IN') {
-        void fetchOccurrences();
-      }
-    });
-
-    return () => {
-      data.subscription.unsubscribe();
-    };
-  }, [supabase, fetchOccurrences]);
 
   React.useEffect(() => {
     const occurrencesByDate = occurrences.reduce(
@@ -189,11 +182,6 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
 
       return nextOccurrences;
     });
-  };
-
-  const clearOccurrences = () => {
-    setOccurrences([]);
-    setOccurrencesByDate({});
   };
 
   const value = React.useMemo(
