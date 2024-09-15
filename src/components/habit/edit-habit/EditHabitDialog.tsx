@@ -1,4 +1,3 @@
-import { FloatingLabelInput, FloatingLabelTextarea } from '@components';
 import { useHabits, useTraits } from '@context';
 import type { Habit } from '@models';
 import {
@@ -11,6 +10,7 @@ import {
   Option,
   Select,
 } from '@mui/joy';
+import { Input, Textarea } from '@nextui-org/react';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
@@ -64,7 +64,7 @@ const EditHabitDialog = ({
   };
 
   const handleDescriptionChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setDescription(event.target.value);
   };
@@ -105,23 +105,19 @@ const EditHabitDialog = ({
         <DialogTitle>Edit habit</DialogTitle>
         <DialogContent>
           <StyledForm onSubmit={handleSubmit} role="edit-habit-form">
-            <FloatingLabelInput
+            <Input
               value={name}
               onChange={handleNameChange}
               label="Name"
               placeholder="Edit habit name"
-              variant="soft"
-              color="neutral"
-              disabled={isUpdating}
+              isDisabled={isUpdating}
             />
-            <FloatingLabelTextarea
+            <Textarea
               value={description}
               onChange={handleDescriptionChange}
               label="Description (optional)"
               placeholder="Edit habit description"
-              variant="soft"
-              color="neutral"
-              disabled={isUpdating}
+              isDisabled={isUpdating}
             />
             <Select
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment

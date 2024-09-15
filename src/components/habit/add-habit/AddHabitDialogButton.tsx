@@ -1,8 +1,4 @@
-import {
-  FloatingLabelInput,
-  FloatingLabelTextarea,
-  AddCustomTraitModal,
-} from '@components';
+import { AddCustomTraitModal } from '@components';
 import { useHabits, useSnackbar, useTraits } from '@context';
 import {
   AddRounded,
@@ -22,6 +18,7 @@ import {
   Select,
   Typography,
 } from '@mui/joy';
+import { Input, Textarea } from '@nextui-org/react';
 import { StorageBuckets, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import React, { type FormEventHandler } from 'react';
@@ -88,7 +85,7 @@ const AddHabitDialogButton = () => {
   };
 
   const handleHabitDescriptionChange: React.ChangeEventHandler<
-    HTMLTextAreaElement
+    HTMLInputElement
   > = (event) => {
     setHabitDescription(event.target.value);
   };
@@ -140,7 +137,7 @@ const AddHabitDialogButton = () => {
           <DialogContent>
             <form onSubmit={handleAdd} role="add-habit-form">
               <Box mb={1}>
-                <FloatingLabelInput
+                <Input
                   required
                   value={habitName}
                   onChange={handleHabitNameChange}
@@ -149,7 +146,7 @@ const AddHabitDialogButton = () => {
                 />
               </Box>
               <Box mb={1}>
-                <FloatingLabelTextarea
+                <Textarea
                   value={habitDescription}
                   onChange={handleHabitDescriptionChange}
                   label="Description"

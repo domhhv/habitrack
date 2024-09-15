@@ -5,7 +5,7 @@ export * from './calendar';
 
 export * from './header';
 
-export * from './controls';
+export * from './common';
 
 export * from './habit';
 
