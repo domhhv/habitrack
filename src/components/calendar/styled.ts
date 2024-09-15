@@ -2,33 +2,6 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { Box, Chip } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
 
-const calendarGap = 16;
-
-const StyledWithGapDiv = styled('div')(({ theme }) => ({
-  gap: calendarGap,
-  [theme.breakpoints.down('lg')]: {
-    gap: 0,
-  },
-}));
-
-export const StyledCalendarMonthGrid = styled(StyledWithGapDiv)({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: '1 1 0%',
-});
-
-export const StyledCalendarWeekRow = styled(StyledWithGapDiv)(({ theme }) => ({
-  display: 'flex',
-  flex: 0,
-  justifyContent: 'space-between',
-  [theme.breakpoints.down('lg')]: {
-    height: 110,
-    '&:last-of-type': {
-      borderBottom: `3px solid ${theme.palette.neutral[700]}`,
-    },
-  },
-}));
-
 export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',

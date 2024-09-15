@@ -3,7 +3,6 @@ import React, { type ForwardedRef } from 'react';
 import { type CalendarState } from 'react-stately';
 
 import CalendarCell from './CalendarCell';
-import { StyledCalendarMonthGrid, StyledCalendarWeekRow } from './styled';
 
 type MonthProps = {
   weeksInMonth: number;
@@ -20,9 +19,12 @@ const Month = (
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   return (
-    <StyledCalendarMonthGrid ref={ref}>
+    <div ref={ref} className="flex flex-1 flex-col gap-0 lg:gap-4">
       {[...new Array(weeksInMonth).keys()].map((weekIndex) => (
-        <StyledCalendarWeekRow key={weekIndex}>
+        <div
+          key={weekIndex}
+          className="flex h-[110px] justify-between last-of-type:border-b-3 last-of-type:border-b-neutral-700 lg:h-auto lg:last-of-type:border-b-0"
+        >
           {state
             .getDatesInWeek(weekIndex)
             .map((calendarDate: CalendarDate | null) => {
@@ -52,9 +54,9 @@ const Month = (
                 />
               );
             })}
-        </StyledCalendarWeekRow>
+        </div>
       ))}
-    </StyledCalendarMonthGrid>
+    </div>
   );
 };
 
