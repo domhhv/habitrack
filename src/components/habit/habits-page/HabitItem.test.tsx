@@ -161,7 +161,6 @@ describe(HabitItem.name, () => {
         iconPath: `user-id/habit-id-123.png`,
       });
       expect(mockShowSnackbar).toHaveBeenCalledWith('Icon replaced!', {
-        variant: 'soft',
         color: 'success',
       });
     });
@@ -204,7 +203,6 @@ describe(HabitItem.name, () => {
         iconPath: `my-icon-path`,
       });
       expect(mockShowSnackbar).toHaveBeenCalledWith('Icon uploaded!', {
-        variant: 'soft',
         color: 'success',
       });
     });
@@ -234,7 +232,6 @@ describe(HabitItem.name, () => {
       expect(updateFile).not.toHaveBeenCalledWith();
       expect(mockUpdateHabit).not.toHaveBeenCalled();
       expect(mockShowSnackbar).toHaveBeenCalledWith('Custom update failure', {
-        variant: 'soft',
         color: 'danger',
       });
     });
@@ -266,7 +263,6 @@ describe(HabitItem.name, () => {
       expect(updateFile).not.toHaveBeenCalledWith();
       expect(mockUpdateHabit).not.toHaveBeenCalled();
       expect(mockShowSnackbar).toHaveBeenCalledWith('Custom upload failure', {
-        variant: 'soft',
         color: 'danger',
       });
     });
@@ -298,7 +294,6 @@ describe(HabitItem.name, () => {
       expect(updateFile).not.toHaveBeenCalledWith();
       expect(mockUpdateHabit).not.toHaveBeenCalled();
       expect(mockShowSnackbar).toHaveBeenCalledWith('Failed to upload icon', {
-        variant: 'soft',
         color: 'danger',
       });
     });
