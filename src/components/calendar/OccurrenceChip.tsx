@@ -1,13 +1,10 @@
 import { useHabits, useOccurrences } from '@context';
 import { useHabitTraitChipColor, useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import { ChipDelete, CircularProgress, Tooltip } from '@mui/joy';
+import { Spinner, Chip, Button, Tooltip } from '@nextui-org/react';
+import { X } from '@phosphor-icons/react';
+import { getHabitIconUrl } from '@utils';
 import React from 'react';
-
-import { getHabitIconUrl } from '../../utils/getHabitIconUrl';
-
-import { StyledHabitChip, StyledOccurrenceHabitImg } from './styled';
 
 export type OccurrenceChipProps = {
   occurrence: Occurrence;
@@ -34,35 +31,53 @@ const OccurrenceChip = ({
 
   const isBeingDeleted = occurrenceIdBeingDeleted === occurrence.id;
 
-  const endDecorator = isBeingDeleted ? (
-    <CircularProgress size="sm" role="habit-chip-delete-loader" />
-  ) : (
-    <ChipDelete
-      variant="soft"
-      onClick={(clickEvent) => onDelete(occurrence.id, clickEvent)}
-      role="habit-chip-delete-button"
-    >
-      <DeleteForeverIcon fontSize="large" />
-    </ChipDelete>
+  const chipStyle = {
+    backgroundColor: colorOverride || traitChipColor,
+  };
+
+  const startContent = (
+    <img
+      src={iconUrl}
+      alt={`${eventHabit.name} icon`}
+      className="h-4 w-4 rounded"
+    />
   );
 
+  const getEndContent = () => {
+    if (screenSize < 1025) {
+      return null;
+    }
+
+    if (isBeingDeleted) {
+      return <Spinner size="sm" role="habit-chip-delete-loader" />;
+    }
+
+    return (
+      <Button
+        isIconOnly
+        radius="full"
+        variant="solid"
+        size="sm"
+        onClick={(clickEvent) => onDelete(occurrence.id, clickEvent)}
+        role="habit-chip-delete-button"
+        className="h-4 w-4 min-w-0"
+      >
+        <X fontSize="large" size={12} />
+      </Button>
+    );
+  };
+
   return (
-    <Tooltip title={eventHabit.name} key={occurrence.id}>
-      <StyledHabitChip
-        sx={{
-          backgroundColor: colorOverride || traitChipColor,
-        }}
-        variant="soft"
-        key={occurrence.id}
+    <Tooltip content={eventHabit.name}>
+      <Chip
+        style={chipStyle}
+        className="mr-0.5 mt-0.5 min-w-0 px-1 py-0.5"
+        variant="solid"
+        size="sm"
         role="habit-chip"
-        startDecorator={
-          <StyledOccurrenceHabitImg
-            src={iconUrl}
-            alt={`${eventHabit.name} icon`}
-          />
-        }
-        disabled={isBeingDeleted}
-        endDecorator={screenSize < 1025 ? null : endDecorator}
+        startContent={startContent}
+        isDisabled={isBeingDeleted}
+        endContent={getEndContent()}
       />
     </Tooltip>
   );
