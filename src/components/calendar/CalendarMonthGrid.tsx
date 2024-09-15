@@ -19,11 +19,11 @@ const Month = (
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   return (
-    <div ref={ref} className="flex flex-1 flex-col gap-0 lg:gap-4">
+    <div ref={ref} className="flex flex-1 flex-col">
       {[...new Array(weeksInMonth).keys()].map((weekIndex) => (
         <div
           key={weekIndex}
-          className="flex h-[110px] justify-between last-of-type:border-b-3 last-of-type:border-b-neutral-700 lg:h-auto lg:last-of-type:border-b-0"
+          className="flex h-[110px] justify-between border-l-3 border-r-3 border-t-3 border-neutral-500 last-of-type:border-b-3 dark:border-neutral-400 lg:h-auto"
         >
           {state
             .getDatesInWeek(weekIndex)

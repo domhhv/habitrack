@@ -6,9 +6,9 @@ import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
 import { IconButton, ListItemDecorator, Tooltip, Typography } from '@mui/joy';
 import { StorageBuckets, updateFile, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
+import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
-import { getHabitIconUrl } from '../../../utils/getHabitIconUrl';
 import { VisuallyHiddenInput } from '../styled';
 
 import {

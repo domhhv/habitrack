@@ -2,11 +2,11 @@ import { useOccurrences } from '@context';
 import { useScreenSize } from '@hooks';
 import { CalendarBlank } from '@phosphor-icons/react';
 import { useUser } from '@supabase/auth-helpers-react';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 import React from 'react';
 
 import OccurrenceChip from './OccurrenceChip';
-import { StyledCalendarDayCellDiv } from './styled';
 
 type CalendarCellProps = {
   dateNumber: number;
@@ -114,8 +114,20 @@ const CalendarCell = ({
     return <p className="font-bold">Today</p>;
   };
 
+  const cellRootClassName = clsx(
+    'flex h-28 flex-1 flex-col border-r-3 border-neutral-500 last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800',
+    rangeStatus === 'below-range' && 'cursor-w-resize',
+    rangeStatus === 'above-range' && 'cursor-e-resize'
+  );
+
+  const cellHeaderClassName = clsx(
+    'flex items-center justify-between rounded-t px-1 py-0.5',
+    rangeStatus !== 'in-range' && 'text-neutral-400 dark:text-neutral-600'
+  );
+
   return (
-    <StyledCalendarDayCellDiv
+    <div
+      className={cellRootClassName}
       ref={cellRef}
       data-is-within-active-month={rangeStatus === 'in-range'}
       data-is-within-prev-month={rangeStatus === 'below-range'}
@@ -125,7 +137,7 @@ const CalendarCell = ({
       tabIndex={0}
       role="button"
     >
-      <div className="flex items-center justify-between rounded-t border-b-3 bg-neutral-100 px-1 py-0.5 dark:bg-neutral-900">
+      <div className={cellHeaderClassName}>
         <p className="font-bold">{dateNumber}</p>
         {renderToday()}
       </div>
@@ -140,7 +152,7 @@ const CalendarCell = ({
           );
         })}
       </div>
-    </StyledCalendarDayCellDiv>
+    </div>
   );
 };
 
