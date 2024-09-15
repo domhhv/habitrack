@@ -1,7 +1,17 @@
 import type { AddHabit, Habit, HabitsMap, UpdateHabit } from '@models';
 import React from 'react';
 
-export const HabitsContext = React.createContext({
+type HabitsContextType = {
+  addingHabit: boolean;
+  fetchingHabits: boolean;
+  habits: Habit[];
+  habitsMap: HabitsMap;
+  addHabit: (habit: AddHabit) => Promise<Habit>;
+  removeHabit: (habitId: number) => Promise<void>;
+  updateHabit: (habitId: number, habit: UpdateHabit) => Promise<Habit>;
+};
+
+export const HabitsContext = React.createContext<HabitsContextType>({
   addingHabit: false,
   fetchingHabits: false,
   habits: [] as Habit[],

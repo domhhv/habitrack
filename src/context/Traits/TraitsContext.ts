@@ -1,7 +1,17 @@
 import type { Trait, AddTrait } from '@models';
 import React from 'react';
 
-export const TraitsContext = React.createContext({
+type TraitsContextType = {
+  addingTrait: boolean;
+  addTrait: (trait: AddTrait) => Promise<void>;
+  allTraits: Trait[];
+  traitsMap: Record<string, Trait>;
+  publicTraits: Trait[];
+  userTraits: Trait[];
+  fetchingTraits: boolean;
+};
+
+export const TraitsContext = React.createContext<TraitsContextType>({
   addingTrait: false,
   addTrait: (_: AddTrait) => Promise.resolve(),
   allTraits: [] as Trait[],
