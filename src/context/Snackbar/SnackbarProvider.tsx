@@ -1,18 +1,14 @@
-import type { SnackbarOptions, Snackbar } from '@context';
+import type { SnackbarOptions, Snackbar, ButtonColor } from '@context';
 import { SnackbarContext } from '@context';
+import { Button } from '@nextui-org/react';
 import {
-  CheckCircleOutlined,
-  ErrorOutlined,
-  InfoOutlined,
-  WarningOutlined,
-  NotificationsOutlined,
-} from '@mui/icons-material';
-import { Alert, Button, Typography } from '@mui/joy';
-import { type ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
-import { type VariantProp } from '@mui/joy/styles/types/variants';
+  BellRinging,
+  CheckCircle,
+  Info,
+  Warning,
+  WarningCircle,
+} from '@phosphor-icons/react';
 import React from 'react';
-
-import { StyledSnackbarsWrapper } from './styled';
 
 type SnackbarProviderProps = {
   children: React.ReactNode;
@@ -34,22 +30,13 @@ const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
     );
   };
 
-  const ICONS_BY_COLOR: Record<ColorPaletteProp, React.ReactNode> = {
-    success: <CheckCircleOutlined />,
-    neutral: <InfoOutlined />,
-    warning: <WarningOutlined />,
-    danger: <ErrorOutlined />,
-    primary: <NotificationsOutlined />,
-  };
-
-  const BUTTON_VARIANTS_BY_ALERT_VARIANT: Record<
-    VariantProp,
-    VariantProp | undefined
-  > = {
-    soft: 'soft',
-    solid: 'soft',
-    outlined: 'plain',
-    plain: 'plain',
+  const ICONS_BY_COLOR: Record<ButtonColor, React.ReactNode> = {
+    secondary: null,
+    default: <Info weight="bold" size={18} />,
+    success: <CheckCircle weight="bold" size={18} />,
+    warning: <Warning weight="bold" size={18} />,
+    danger: <WarningCircle weight="bold" size={18} />,
+    primary: <BellRinging weight="bold" size={18} />,
   };
 
   const providerValue = React.useMemo(() => ({ showSnackbar }), []);
@@ -57,18 +44,12 @@ const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
   return (
     <SnackbarContext.Provider value={providerValue}>
       {children}
-      <StyledSnackbarsWrapper>
+      <div className="fixed bottom-2 left-2 z-50 flex flex-col gap-2">
         {snackbars.map(({ id, message, options }) => {
-          const color = options.color || 'neutral';
-          const variant = options.variant || 'soft';
+          const color = options.color || 'default';
 
           const endDecorator = options.dismissible ? (
-            <Button
-              onClick={() => hideSnackbar(id)}
-              size="sm"
-              variant={BUTTON_VARIANTS_BY_ALERT_VARIANT[variant]}
-              color={color}
-            >
+            <Button onClick={() => hideSnackbar(id)} size="sm" color={color}>
               {options.dismissText || 'Dismiss'}
             </Button>
           ) : null;
@@ -79,33 +60,20 @@ const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
 
           return (
             <div key={id}>
-              <Alert
+              <div
                 key={id}
-                startDecorator={ICONS_BY_COLOR[options.color || 'neutral']}
-                color={color}
-                variant={variant}
-                endDecorator={endDecorator}
+                className="flex items-center gap-4 rounded-md border border-neutral-300 bg-white px-4 py-2 dark:border-neutral-700 dark:bg-black"
                 data-testid="snackbar"
               >
-                <Typography
-                  level="title-md"
-                  sx={{ margin: 0, color: 'inherit' }}
-                >
-                  {message}
-                </Typography>
-                {options.description && (
-                  <Typography
-                    level="body-xs"
-                    sx={{ margin: 0, color: 'inherit' }}
-                  >
-                    {options.description}
-                  </Typography>
-                )}
-              </Alert>
+                {ICONS_BY_COLOR[color]}
+                <p>{message}</p>
+                {options.description && <span>{options.description}</span>}
+                {endDecorator}
+              </div>
             </div>
           );
         })}
-      </StyledSnackbarsWrapper>
+      </div>
     </SnackbarContext.Provider>
   );
 };

@@ -24,12 +24,10 @@ const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
         }
 
         showSnackbar('Account created!', {
-          variant: 'solid',
           color: 'success',
         });
       } catch (e) {
         showSnackbar((e as Error).message || 'Something went wrong', {
-          variant: 'solid',
           color: 'danger',
         });
         console.error(e);
@@ -51,14 +49,12 @@ const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
         }
 
         showSnackbar('Welcome back!', {
-          variant: 'solid',
           color: 'success',
         });
       } catch (e) {
         const message = (e as Error).message || 'Something went wrong';
 
         showSnackbar(message, {
-          variant: 'solid',
           color: 'danger',
         });
 
@@ -73,8 +69,7 @@ const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
   const logout = React.useCallback(async () => {
     await signOut();
     showSnackbar('Logged out', {
-      variant: 'soft',
-      color: 'neutral',
+      color: 'default',
       dismissible: true,
     });
   }, [showSnackbar]);

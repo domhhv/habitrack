@@ -10,11 +10,11 @@ const Header = () => {
     <header className="border-b border-b-neutral-400 bg-neutral-300 dark:border-b-neutral-700 dark:bg-neutral-900">
       <div className="mx-auto flex w-full flex-col items-center justify-between gap-2 p-4 sm:flex-row sm:gap-0 lg:w-[90%]">
         <div className="flex flex-col-reverse items-center gap-3 sm:flex-row">
-          <Button color="primary">
-            <Link to="/calendar">Calendar</Link>
+          <Button color="primary" as={Link} to="/calendar">
+            Calendar
           </Button>
-          <Button color="primary">
-            <Link to="/habits">Habits</Link>
+          <Button color="primary" as={Link} to="/habits">
+            Habits
           </Button>
           <ThemeToggle />
         </div>

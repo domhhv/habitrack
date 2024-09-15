@@ -26,7 +26,6 @@ const AuthForm = ({
       onSubmit(email, password);
     } catch (e) {
       showSnackbar((e as Error).message || 'Something went wrong', {
-        variant: 'solid',
         color: 'danger',
       });
       clearValues();

@@ -1,10 +1,15 @@
-import { type ColorPaletteProp } from '@mui/joy/styles/types/colorSystem';
-import { type VariantProp } from '@mui/joy/styles/types/variants';
 import React from 'react';
 
+export type ButtonColor =
+  | 'default'
+  | 'secondary'
+  | 'primary'
+  | 'success'
+  | 'warning'
+  | 'danger';
+
 export type SnackbarOptions = {
-  variant?: VariantProp;
-  color?: ColorPaletteProp;
+  color?: ButtonColor;
   autoHideDuration?: number;
   dismissible?: boolean;
   description?: string;
