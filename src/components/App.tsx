@@ -8,6 +8,14 @@ import Providers from './Providers';
 const App = () => {
   const { rangeStart, rangeEnd, state, weeksInMonth } = useCalendar();
 
+  React.useEffect(() => {
+    const root = document.getElementById('root');
+
+    if (!root) return;
+
+    root.style.height = '100%';
+  });
+
   return (
     <Providers rangeStart={rangeStart} rangeEnd={rangeEnd}>
       <AppHeader />

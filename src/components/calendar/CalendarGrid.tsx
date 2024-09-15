@@ -5,10 +5,6 @@ import { type CalendarState } from 'react-stately';
 
 import CalendarMonthGrid from './CalendarMonthGrid';
 import DayHabitModalDialog from './DayHabitModalDialog';
-import {
-  StyledCalendarGridContainerDiv,
-  StyledCalendarWeekDay,
-} from './styled';
 
 type CalendarGridProps = {
   state: CalendarState;
@@ -37,11 +33,14 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
   };
 
   return (
-    <StyledCalendarGridContainerDiv {...gridProps}>
+    <div {...gridProps} className="my-2 flex flex-1 flex-col gap-0 lg:gap-4">
       <Box display="flex" mb={0.25}>
         {[...Array(7)].map((_, index) => {
           return (
-            <StyledCalendarWeekDay key={index}>
+            <div
+              key={index}
+              className="flex flex-1 items-center justify-center text-neutral-600 dark:text-neutral-300"
+            >
               <Typography
                 key={`weekLabel-${index}`}
                 level="body-lg"
@@ -49,7 +48,7 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
               >
                 {WEEK_DAYS[index]}
               </Typography>
-            </StyledCalendarWeekDay>
+            </div>
           );
         })}
       </Box>
@@ -64,7 +63,7 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
         onClose={handleDayModalDialogClose}
         date={activeDate}
       />
-    </StyledCalendarGridContainerDiv>
+    </div>
   );
 };
 
