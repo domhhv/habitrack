@@ -141,7 +141,7 @@ const CalendarCell = ({
         <p className="font-bold">{dateNumber}</p>
         {renderToday()}
       </div>
-      <div className="flex flex-wrap overflow-auto px-1 py-0.5">
+      <div className="flex flex-wrap gap-1 overflow-auto px-1 py-0.5">
         {occurrences.map((occurrence) => {
           return (
             <OccurrenceChip

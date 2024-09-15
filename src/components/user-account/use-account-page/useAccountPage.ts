@@ -29,8 +29,6 @@ const useAccountPage = () => {
 
       const data = await getUserAccountByEmail(user.email || '');
 
-      console.log('data', data);
-
       setEmail(data.email || user.email || '');
       setPassword('');
       setName(data.name || '');

@@ -1,22 +1,17 @@
 import { useOccurrences, useHabits, useTraits } from '@context';
 import {
-  Box,
   Button,
-  DialogContent,
-  DialogTitle,
   Modal,
-  ModalClose,
-  ModalDialog,
-  Typography,
-  Option,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
   Select,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-} from '@mui/joy';
+  SelectItem,
+} from '@nextui-org/react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
-import React, { type FormEventHandler } from 'react';
+import React, { type MouseEventHandler } from 'react';
 
 type DayHabitModalDialogProps = {
   open: boolean;
@@ -32,22 +27,20 @@ const DayHabitModalDialog = ({
   const { habits } = useHabits();
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrences();
-  const [selectedHabitId, setSelectedHabitId] = React.useState<number | null>(
-    null
-  );
+  const [selectedHabitId, setSelectedHabitId] = React.useState<string>('');
   const { traitsMap } = useTraits();
 
   if (!date || !open) {
     return null;
   }
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
+  const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
     const occurrence = {
       day: date.toISOString().split('T')[0],
       timestamp: +date,
-      habitId: selectedHabitId as number,
+      habitId: +selectedHabitId,
       userId: user?.id as string,
       time: null, // TODO: Add time picker
     };
@@ -56,75 +49,60 @@ const DayHabitModalDialog = ({
     handleClose();
   };
 
-  const handleHabitSelect = (
-    _: React.SyntheticEvent | null,
-    newValue: number | null
-  ) => {
-    setSelectedHabitId(Number(newValue));
-  };
-
   const handleClose = () => {
-    setSelectedHabitId(0);
+    setSelectedHabitId('');
     onClose();
   };
 
   const hasHabits = habits.length > 0;
 
   return (
-    <Modal role="add-occurrence-modal" open={open} onClose={handleClose}>
-      <ModalDialog sx={{ width: 380 }}>
-        <ModalClose role="add-occurrence-modal-close" />
-        <DialogTitle>
-          Add habits for {format(date, 'iii, LLL d, y')}
-        </DialogTitle>
-        <DialogContent>Select from the habits provided below</DialogContent>
-        <form role="add-occurrence-form" onSubmit={handleSubmit}>
-          <FormControl>
-            <FormLabel id="habit-select-label" htmlFor="habit-select">
-              Select Habit
-            </FormLabel>
-            <Select
-              required
-              color={'neutral'}
-              placeholder="Select Habit"
-              value={hasHabits ? selectedHabitId : 0}
-              onChange={handleHabitSelect}
-              disabled={addingOccurrence}
-              role="habit-select"
-            >
-              {!hasHabits && (
-                <Option value={0} label="No habits found" disabled>
-                  No habits found
-                </Option>
-              )}
-              {hasHabits &&
-                habits.map((habit) => (
-                  <Option key={habit.id} value={habit.id} label={habit.name}>
-                    <span>{habit.name}</span>
-                    <Typography level="body-xs">
-                      {traitsMap[habit.traitId]?.label}
-                    </Typography>
-                  </Option>
-                ))}
-            </Select>
-            {!hasHabits && (
-              <FormHelperText id="select-field-demo-helper">
-                Add a habit or some first
-              </FormHelperText>
-            )}
-          </FormControl>
-          <Box mt={1}>
-            <Button
-              fullWidth
-              loading={addingOccurrence}
-              disabled={!hasHabits}
-              type="submit"
-            >
-              Submit
-            </Button>
-          </Box>
-        </form>
-      </ModalDialog>
+    <Modal
+      role="add-occurrence-modal"
+      isOpen={open}
+      onClose={handleClose}
+      isDismissable={false}
+    >
+      <ModalContent>
+        <ModalHeader>
+          Add a habit entry for {format(date, 'iii, LLL d, y')}
+        </ModalHeader>
+        <ModalBody>
+          <Select
+            required
+            label={hasHabits ? 'Habits' : 'No habits yet'}
+            selectedKeys={[selectedHabitId]}
+            description="Select from your habits"
+            data-testid="habit-select"
+          >
+            {habits.map((habit) => (
+              <SelectItem
+                key={habit.id.toString()}
+                onClick={() => {
+                  setSelectedHabitId(habit.id.toString());
+                }}
+                textValue={habit.name}
+              >
+                <span>{habit.name}</span>
+                <span className="font-regular ml-2 text-neutral-400">
+                  {traitsMap[habit.traitId]?.label}
+                </span>
+              </SelectItem>
+            ))}
+          </Select>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            type="submit"
+            color="primary"
+            isLoading={addingOccurrence}
+            disabled={!hasHabits}
+            onClick={handleSubmit}
+          >
+            Submit
+          </Button>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   );
 };
