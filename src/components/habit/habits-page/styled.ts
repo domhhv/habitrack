@@ -1,20 +1,5 @@
 import { Chip, IconButton, ListItem, ListItemContent, styled } from '@mui/joy';
 
-import { StyledAppWideContainer } from '../../styled';
-
-export const StyledPageDiv = styled(StyledAppWideContainer)({
-  margin: '24px auto 0',
-  padding: '0 16px',
-  textAlign: 'center',
-});
-
-export const StyledList = styled('ul')({
-  listStyle: 'none',
-  padding: 0,
-  maxWidth: 400,
-  margin: '0 auto 16px',
-});
-
 export const StyledHabitImage = styled('img')({
   width: 32,
   height: 32,

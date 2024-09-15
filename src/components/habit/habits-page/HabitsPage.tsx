@@ -5,11 +5,9 @@ import {
 } from '@components';
 import { useHabits, useOccurrences } from '@context';
 import { useDocumentTitle } from '@hooks';
-import { Typography } from '@mui/joy';
 import React from 'react';
 
 import HabitItem from './HabitItem';
-import { StyledList, StyledPageDiv } from './styled';
 
 const HabitsPage = () => {
   const { habits, habitsMap, removeHabit } = useHabits();
@@ -49,10 +47,12 @@ const HabitsPage = () => {
 
   return (
     <div className="flex w-full flex-col items-start justify-center self-start">
-      <StyledPageDiv>
-        <Typography level="h1">Your habits</Typography>
-        <Typography level="body-md">Count: {habits.length}</Typography>
-        <StyledList>
+      <div className="mx-auto mt-6 px-4 text-center">
+        <h1 className="text-3xl font-bold text-gray-800">Your habits</h1>
+        <p className="text-lg font-medium text-gray-600">
+          Count: {habits.length}
+        </p>
+        <ul className="mx-auto mb-4 max-w-[400px] list-none p-0">
           {habits.map((habit) => (
             <HabitItem
               key={habit.id}
@@ -61,7 +61,7 @@ const HabitsPage = () => {
               onDelete={() => handleRemovalConfirmOpen(habit.id)}
             />
           ))}
-        </StyledList>
+        </ul>
         {!!habitIdToEdit && (
           <EditHabitDialog
             open={isEditingHabit}
@@ -82,7 +82,7 @@ const HabitsPage = () => {
             <strong>{habitsMap[habitIdToRemove]?.name}</strong> habit?
           </div>
         </ConfirmDialog>
-      </StyledPageDiv>
+      </div>
     </div>
   );
 };

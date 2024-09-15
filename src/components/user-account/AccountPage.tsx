@@ -45,7 +45,7 @@ const AccountPage = () => {
         data-testid="account-page"
       >
         <div
-          className="flex items-center gap-4 rounded-md bg-white p-4 dark:bg-black"
+          className="flex items-center gap-4 rounded-md bg-neutral-100 p-4 dark:bg-neutral-800"
           data-testid="alert"
         >
           <ProhibitIcon size={24} weight="bold" />
