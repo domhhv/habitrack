@@ -1,3 +1,4 @@
+import { useDocumentTitle } from '@hooks';
 import { CalendarDate } from '@internationalized/date';
 import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
@@ -18,19 +19,16 @@ const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
 
   const [activeMonthLabel, activeYear] = title.split(' ');
 
+  useDocumentTitle(
+    `${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`
+  );
+
   const transformButtonProps = (
     buttonProps: Pick<AriaButtonProps<'button'>, 'isDisabled' | 'aria-label'>
   ) => ({
     'aria-label': buttonProps['aria-label'] || '',
     disabled: Boolean(buttonProps.isDisabled),
   });
-
-  React.useEffect(() => {
-    document.title = `${activeMonthLabel.slice(
-      0,
-      3
-    )} ${activeYear} | Habitrack Calendar`;
-  }, [activeMonthLabel, activeYear]);
 
   const setFocusedDate = (year: number, month: number, day: number) => {
     const nextFocusedDate = new CalendarDate(year, month, day);

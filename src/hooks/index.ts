@@ -15,3 +15,6 @@ export { default as useFormField } from './useFormField';
 
 export * from './useDataFetch';
 export { default as useDataFetch } from './useDataFetch';
+
+export * from './useDocumentTitle';
+export { default as useDocumentTitle } from './useDocumentTitle';

@@ -4,6 +4,7 @@ import {
   EditHabitDialog,
 } from '@components';
 import { useHabits, useOccurrences } from '@context';
+import { useDocumentTitle } from '@hooks';
 import { Typography } from '@mui/joy';
 import React from 'react';
 
@@ -18,9 +19,7 @@ const HabitsPage = () => {
   const [isRemovingHabit, setIsRemovingHabit] = React.useState(false);
   const { removeOccurrencesByHabitId } = useOccurrences();
 
-  React.useEffect(() => {
-    document.title = 'My Habits | Habitrack';
-  }, []);
+  useDocumentTitle('My Habits | Habitrack');
 
   const handleRemovalConfirmOpen = (id: number) => {
     setHabitIdToRemove(id);

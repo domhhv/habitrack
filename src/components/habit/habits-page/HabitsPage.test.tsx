@@ -39,6 +39,7 @@ jest.mock('@hooks', () => ({
   },
   useHabitIconUrl: jest.fn(),
   useHabitTraitChipColor: jest.fn(),
+  useDocumentTitle: jest.fn(),
 }));
 
 describe(HabitsPage.name, () => {

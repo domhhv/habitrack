@@ -1,4 +1,5 @@
 import { AuthModalButton } from '@components';
+import { useDocumentTitle } from '@hooks';
 import { Button, Input, Spinner } from '@nextui-org/react';
 import { Prohibit as ProhibitIcon } from '@phosphor-icons/react';
 import clsx from 'clsx';
@@ -9,6 +10,10 @@ import { useAccountPage } from './use-account-page';
 import { useEmailConfirmed } from './use-email-confirmed';
 
 const AccountPage = () => {
+  useEmailConfirmed();
+
+  useDocumentTitle('My Account | Habitrack');
+
   const {
     loading,
     forbidden,
@@ -20,12 +25,6 @@ const AccountPage = () => {
     handleNameChange,
     updateAccount,
   } = useAccountPage();
-
-  useEmailConfirmed();
-
-  React.useEffect(() => {
-    document.title = 'My Account | Habitrack';
-  }, []);
 
   const containerClassName = clsx(
     'mx-auto flex flex-col items-center justify-center'
