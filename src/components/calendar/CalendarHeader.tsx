@@ -154,7 +154,7 @@ const CalendarHeader = ({
               popoverContent: 'w-[200px]',
             }}
             popoverProps={{
-              placement: screenSize < 1280 ? 'bottom-end' : 'bottom-start',
+              crossOffset: screenSize < 1280 ? -75 : 0,
             }}
           >
             {habits.map((habit) => (
@@ -172,7 +172,7 @@ const CalendarHeader = ({
               popoverContent: 'w-[200px]',
             }}
             popoverProps={{
-              placement: screenSize < 1280 ? 'bottom-end' : 'bottom-start',
+              crossOffset: screenSize < 1280 ? -75 : 0,
             }}
           >
             {allTraits.map((trait) => (

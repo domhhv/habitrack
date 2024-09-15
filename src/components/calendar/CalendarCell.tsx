@@ -1,17 +1,12 @@
 import { useOccurrences } from '@context';
 import { useScreenSize } from '@hooks';
-import { Typography } from '@mui/joy';
+import { CalendarBlank } from '@phosphor-icons/react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
 import React from 'react';
 
 import OccurrenceChip from './OccurrenceChip';
-import {
-  StyledCalendarDayCellDiv,
-  StyledCalendarDayCellHeader,
-  StyledCalendarDayCellButtonIconsContainer,
-  StyledCalendarTodayIcon,
-} from './styled';
+import { StyledCalendarDayCellDiv } from './styled';
 
 type CalendarCellProps = {
   dateNumber: number;
@@ -113,14 +108,10 @@ const CalendarCell = ({
     const isMobile = screenSize < 768;
 
     if (isMobile) {
-      return <StyledCalendarTodayIcon />;
+      return <CalendarBlank weight="bold" size={18} />;
     }
 
-    return (
-      <Typography level="body-md" fontWeight={900}>
-        Today
-      </Typography>
-    );
+    return <p className="font-bold">Today</p>;
   };
 
   return (
@@ -134,13 +125,11 @@ const CalendarCell = ({
       tabIndex={0}
       role="button"
     >
-      <StyledCalendarDayCellHeader>
-        <Typography level="body-md" fontWeight={900}>
-          {dateNumber}
-        </Typography>
+      <div className="flex items-center justify-between rounded-t border-b-3 bg-neutral-100 px-1 py-0.5 dark:bg-neutral-900">
+        <p className="font-bold">{dateNumber}</p>
         {renderToday()}
-      </StyledCalendarDayCellHeader>
-      <StyledCalendarDayCellButtonIconsContainer>
+      </div>
+      <div className="flex flex-wrap overflow-auto px-1 py-0.5">
         {occurrences.map((occurrence) => {
           return (
             <OccurrenceChip
@@ -150,7 +139,7 @@ const CalendarCell = ({
             />
           );
         })}
-      </StyledCalendarDayCellButtonIconsContainer>
+      </div>
     </StyledCalendarDayCellDiv>
   );
 };

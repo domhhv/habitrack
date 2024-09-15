@@ -1,5 +1,3 @@
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { Box } from '@mui/joy';
 import { styled } from '@mui/joy/styles';
 
 export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
@@ -152,38 +150,3 @@ export const StyledCalendarDayCellDiv = styled('div')(({ theme }) => ({
     },
   },
 }));
-
-export const StyledCalendarDayCellHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: theme.spacing(0.25, 0.5),
-  width: '100%',
-  borderBottom: '3px solid',
-  boxSizing: 'border-box',
-  [theme.getColorSchemeSelector('light')]: {
-    borderColor: theme.palette.neutral[300],
-  },
-  [theme.getColorSchemeSelector('dark')]: {
-    borderColor: theme.palette.neutral[600],
-  },
-}));
-
-export const StyledCalendarDayCellButtonIconsContainer = styled(Box)(
-  ({ theme }) => ({
-    display: 'flex',
-    maxHeight: 141,
-    overflow: 'auto',
-    flexWrap: 'wrap',
-    padding: theme.spacing(0.25, 0.5),
-    textAlign: 'left',
-  })
-);
-
-export const StyledCalendarTodayIcon = styled(CalendarTodayIcon)(
-  ({ theme }) => ({
-    color: theme.palette.neutral[600],
-    width: 20,
-    height: 20,
-  })
-);

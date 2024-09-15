@@ -52,7 +52,7 @@
     "@mui/icons-material": "^5.15.2",
     "@mui/joy": "^5.0.0-beta.25",
     "@mui/material": "^5.15.11",
-    "@nextui-org/react": "^2.4.7",
+    "@nextui-org/react": "^2.4.8",
     "@phosphor-icons/react": "^2.1.7",
     "@supabase/auth-helpers-react": "^0.4.2",
     "@supabase/supabase-js": "^2.39.5",
