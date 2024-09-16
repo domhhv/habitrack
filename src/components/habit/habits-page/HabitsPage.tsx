@@ -48,8 +48,10 @@ const HabitsPage = () => {
   return (
     <div className="flex w-full flex-col items-start justify-center self-start">
       <div className="mx-auto mt-6 px-4 text-center">
-        <h1 className="text-3xl font-bold text-gray-800">Your habits</h1>
-        <p className="text-lg font-medium text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-300">
+          Your habits
+        </h1>
+        <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
           Count: {habits.length}
         </p>
         <ul className="mx-auto mb-4 max-w-[400px] list-none p-0">
