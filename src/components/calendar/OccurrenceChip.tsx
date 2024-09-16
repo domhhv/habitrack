@@ -22,12 +22,12 @@ const OccurrenceChip = ({
 }: OccurrenceChipProps) => {
   const { habitsMap } = useHabits();
   const { occurrenceIdBeingDeleted } = useOccurrences();
-  const eventHabit = habitsMap[occurrence.habitId!] || {};
+  const occurrenceHabit = habitsMap[occurrence.habitId!] || {};
   const traitChipColor = useHabitTraitChipColor(
     habitsMap[occurrence.habitId]?.traitId
   );
   const screenSize = useScreenSize();
-  const iconUrl = getHabitIconUrl(eventHabit.iconPath);
+  const iconUrl = getHabitIconUrl(occurrenceHabit.iconPath);
 
   const isBeingDeleted = occurrenceIdBeingDeleted === occurrence.id;
 
@@ -38,7 +38,7 @@ const OccurrenceChip = ({
   const startContent = (
     <img
       src={iconUrl}
-      alt={`${eventHabit.name} icon`}
+      alt={`${occurrenceHabit.name} icon`}
       className="h-4 w-4 rounded"
     />
   );
@@ -68,7 +68,7 @@ const OccurrenceChip = ({
   };
 
   return (
-    <Tooltip content={eventHabit.name}>
+    <Tooltip isDisabled={!occurrenceHabit.name} content={occurrenceHabit.name}>
       <Chip
         style={chipStyle}
         className="mr-0.5 mt-0.5 min-w-0 px-1 py-0.5"

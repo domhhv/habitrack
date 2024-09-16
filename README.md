@@ -7,6 +7,7 @@
 This app is designed to provide a simple and intuitive way to monitor habits. Track your habits with ease using this customizable and user-friendly React-based habits calendar tracker.
 
 The app is live [here]([https://habilify.io]). It uses:
+
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [Material Joy UI](https://mui.com/joy-ui/getting-started/) for the UI and styling solution
 - [Supabase](https://supabase.io) for Authentication, Database and Storage
@@ -26,29 +27,29 @@ The app uses Supabase for data storage and management. In order to run the app l
 
 1. **Create a Supabase project:**
 
-    - Go to [Supabase](https://supabase.io/) and create an account.
-    - Create a new project and database.
+   - Go to [Supabase](https://supabase.io/) and create an account.
+   - Create a new project and database.
 
 2. **Set up the database:**
 
 - Create the following tables with appropriate columns in your Supabase project:
   - `public.traits`:
-      - `id` (type: `int8`, primary key)
-      - `created_at` (type: `timestamp with time zone`)
-      - `updated_at` (type: `timestamp with time zone`)
-      - `name` (type: `text`)
-      - `slug` (type: `text`)
-      - `description` (type: `text`)
-      - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
+    - `id` (type: `int8`, primary key)
+    - `created_at` (type: `timestamp with time zone`)
+    - `updated_at` (type: `timestamp with time zone`)
+    - `name` (type: `text`)
+    - `slug` (type: `text`)
+    - `description` (type: `text`)
+    - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
   - `public.habits`:
-      - `id` (type: `int8`, primary key)
-      - `created_at` (type: `timestamp with time zone`)
-      - `updated_at` (type: `timestamp with time zone`)
-      - `name` (type: `text`)
-      - `description` (type: `text`)
-      - `trait_id` (type: `int8`, foreign key to `public.traits`)
-      - `icon_path` (type: `text`)
-      - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
+    - `id` (type: `int8`, primary key)
+    - `created_at` (type: `timestamp with time zone`)
+    - `updated_at` (type: `timestamp with time zone`)
+    - `name` (type: `text`)
+    - `description` (type: `text`)
+    - `trait_id` (type: `int8`, foreign key to `public.traits`)
+    - `icon_path` (type: `text`)
+    - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
   - `public.occurrences`:
     - `id` (type: `int8`, primary key)
     - `created_at` (type: `timestamp with time zone`)
@@ -59,12 +60,12 @@ The app uses Supabase for data storage and management. In order to run the app l
     - `habit_id` (type: `int8`, foreign key to `public.habits`)
     - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
   - `public.accounts`:
-      - `id` (type: `uuid`, primary key)
-      - `created_at` (type: `timestamp with time zone`)
-      - `updated_at` (type: `timestamp with time zone`)
-      - `name` (type: `text`)
-      - `email` (type: `text`)
-      - `phone_number` (type: `text`)
+    - `id` (type: `uuid`, primary key)
+    - `created_at` (type: `timestamp with time zone`)
+    - `updated_at` (type: `timestamp with time zone`)
+    - `name` (type: `text`)
+    - `email` (type: `text`)
+    - `phone_number` (type: `text`)
 
 Initially, a designated server application was built to handle the backend and database. The code for the server can be found [here](https://github.com/domhhv/nest-habits-calendar-tracker).
 
@@ -95,27 +96,27 @@ Follow these steps to get the project up and running on your local machine.
 
 1. **Clone the repository:**
 
-    ```bash
-    git clone https://github.com/domhhv/react-habits-calendar-tracker.git
-    ```
+   ```bash
+   git clone https://github.com/domhhv/react-habits-calendar-tracker.git
+   ```
 
 2. **Navigate to the project directory:**
 
-    ```bash
-    cd habilify
-    ```
+   ```bash
+   cd habilify
+   ```
 
 3. **Install dependencies:**
 
-    ```bash
-    yarn install
-    ```
+   ```bash
+   yarn install
+   ```
 
 4. **Run the application:**
 
-    ```bash
-    yarn start
-    ```
+   ```bash
+   yarn start
+   ```
 
 5. **Open your browser and go to [http://localhost:8080](http://localhost:8080).**
 

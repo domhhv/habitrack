@@ -2,21 +2,17 @@ import { OccurrenceChip } from '@components';
 import { useTraits } from '@context';
 import {
   Button,
-  DialogContent,
-  DialogActions,
-  DialogTitle,
+  Input,
   Modal,
-  ModalClose,
-  ModalDialog,
-  Box,
-  Typography,
-} from '@mui/joy';
-import { Input, Textarea } from '@nextui-org/react';
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Textarea,
+} from '@nextui-org/react';
 import { makeTestOccurrence } from '@tests';
-import React, { type FormEventHandler } from 'react';
+import React from 'react';
 import { HexColorPicker } from 'react-colorful';
-
-import { StyledColorPickerContainerDiv } from './styled';
 
 export type AddCustomTraitModalProps = {
   open: boolean;
@@ -40,8 +36,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
     onClose();
   };
 
-  const handleAdd: FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
+  const handleAdd = async () => {
     await addTrait({
       label: traitLabel,
       description: traitDescription,
@@ -49,6 +44,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
       color: traitColor,
       userId: null,
     });
+
     handleDialogClose();
   };
 
@@ -75,71 +71,66 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   };
 
   return (
-    <Modal open={open} onClose={handleDialogClose}>
-      <ModalDialog sx={{ width: 400 }}>
-        <ModalClose onClick={handleDialogClose} />
-        <DialogTitle>Add Custom Trait</DialogTitle>
-        <DialogContent>
-          <form onSubmit={handleAdd}>
-            <Typography gutterBottom>
-              You can define custom trait for your habits. For example,
-              &quot;Neutral&quot; or &quot;Moderately Bad&quot;.
-            </Typography>
-            <Box mb={2}>
+    <Modal isOpen={open} onClose={handleDialogClose}>
+      <ModalContent>
+        <ModalHeader>Add Custom Trait</ModalHeader>
+        <ModalBody className="gap-4">
+          <p>
+            You can define custom trait for your habits. For example,
+            &quot;Neutral&quot; or &quot;Moderately Bad&quot;.
+          </p>
+          <Input
+            value={traitLabel}
+            onChange={handleTraitLabelChange}
+            isDisabled={addingTrait}
+            label="Trait Label"
+          />
+          <Input
+            value={traitSlug}
+            onChange={handleTraitSlugChange}
+            isDisabled={addingTrait}
+            label="Trait Slug"
+          />
+          <Textarea
+            value={traitDescription}
+            onChange={handleTraitDescriptionChange}
+            isDisabled={addingTrait}
+            label="Trait Description"
+          />
+          <div className="flex gap-2">
+            <HexColorPicker
+              color={traitColor}
+              onChange={handleTraitColorChange}
+            />
+            <div className="flex w-1/2 flex-col gap-2">
               <Input
-                value={traitLabel}
-                onChange={handleTraitLabelChange}
-                isDisabled={addingTrait}
-                label="Trait Label"
+                value={traitColor}
+                onChange={(event) => handleTraitColorChange(event.target.value)}
+                startContent="#"
               />
-            </Box>
-            <Box mb={2}>
-              <Input
-                value={traitSlug}
-                onChange={handleTraitSlugChange}
-                isDisabled={addingTrait}
-                label="Trait Slug"
+              <p className="text-sm">
+                This is how habits of this trait will appear on your calendar
+              </p>
+              <OccurrenceChip
+                occurrence={makeTestOccurrence()}
+                onDelete={() => null}
+                colorOverride={`#${traitColor}`}
               />
-            </Box>
-            <Box mb={2}>
-              <Textarea
-                value={traitDescription}
-                onChange={handleTraitDescriptionChange}
-                isDisabled={addingTrait}
-                label="Trait Description"
-              />
-            </Box>
-            <StyledColorPickerContainerDiv>
-              <HexColorPicker
-                color={traitColor}
-                onChange={handleTraitColorChange}
-              />
-              <div>
-                <Input
-                  value={traitColor}
-                  onChange={(event) =>
-                    handleTraitColorChange(event.target.value)
-                  }
-                  startContent="#"
-                />
-                <Typography level="body-sm">
-                  This is how habits of this trait will appear on your calendar
-                </Typography>
-                <OccurrenceChip
-                  occurrence={makeTestOccurrence()}
-                  onDelete={() => null}
-                  colorOverride={`#${traitColor}`}
-                />
-              </div>
-            </StyledColorPickerContainerDiv>
-            <DialogActions>
-              <Button type="submit" disabled={addingTrait}>
-                Add Trait
-              </Button>
-            </DialogActions>
-          </form>
-        </DialogContent>
-      </ModalDialog>
+            </div>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            fullWidth
+            color="primary"
+            type="submit"
+            disabled={addingTrait}
+            onClick={handleAdd}
+          >
+            Add Trait
+          </Button>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   );
 };

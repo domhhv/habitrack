@@ -1,4 +1,4 @@
-import { Occurrence } from '@models';
+import { type Occurrence } from '@models';
 
 const makeTestOccurrence = (override: Partial<Occurrence> = {}): Occurrence => {
   return {
