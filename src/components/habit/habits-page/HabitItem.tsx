@@ -1,26 +1,13 @@
+import { VisuallyHiddenInput } from '@components';
 import { useHabits, useSnackbar, useTraits } from '@context';
 import { useHabitTraitChipColor } from '@hooks';
 import type { Habit } from '@models';
-import { DeleteForever } from '@mui/icons-material';
-import ModeRoundedIcon from '@mui/icons-material/ModeRounded';
-import { IconButton, ListItemDecorator, Tooltip, Typography } from '@mui/joy';
+import { Button, Chip, Tooltip } from '@nextui-org/react';
+import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { StorageBuckets, updateFile, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
-
-import { VisuallyHiddenInput } from '../styled';
-
-import {
-  StyledEditIconButton,
-  StyledHabitTitleWrapper,
-  StyledListItemContent,
-  StyledHabitImage,
-  StyledListItem,
-  StyledImageIconButton,
-  StyledHabitTraitColorIndicator,
-  StyledHabitTraitChip,
-} from './styled';
 
 export type HabitItemProps = {
   habit: Habit;
@@ -90,79 +77,79 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
   };
 
   return (
-    <StyledListItem>
-      <ListItemDecorator>
-        <Tooltip title="Upload new icon">
-          <StyledImageIconButton
-            size="lg"
-            variant="plain"
-            color="primary"
-            as="label"
-          >
-            <StyledHabitImage
-              src={iconUrl}
-              alt={habit.name}
-              role="habit-icon"
-            />
-            <VisuallyHiddenInput
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              role="habit-icon-input"
-            />
-          </StyledImageIconButton>
-        </Tooltip>
-      </ListItemDecorator>
-      <StyledListItemContent>
+    <li className="flex items-center border-b-gray-300 pb-1.5 pt-2 dark:border-b-gray-600 [&:not(:last-of-type)]:border-b">
+      <Tooltip content="Upload new icon">
+        <Button
+          isIconOnly
+          size="lg"
+          variant="light"
+          as="label"
+          className="mr-1 flex h-12 w-12 cursor-pointer p-1"
+        >
+          <img
+            src={iconUrl}
+            alt={habit.name}
+            role="habit-icon"
+            className="h-8 w-8"
+          />
+          <VisuallyHiddenInput onChange={handleFileChange} />
+        </Button>
+      </Tooltip>
+      <div className="flex w-full items-center justify-between">
         <div>
-          <StyledHabitTitleWrapper>
-            <Typography level="title-sm">{habit.name}</Typography>
-            <StyledHabitTraitChip size="sm" variant="outlined">
-              <StyledHabitTraitColorIndicator
-                role="habit-trait-chip-color-indicator"
-                sx={{
-                  backgroundColor: traitChipColor,
-                }}
-              />
-              <Typography level="body-xs" role="habit-trait-chip-name">
-                {traitsMap[habit.traitId]?.label || 'Unknown'}
-              </Typography>
-            </StyledHabitTraitChip>
-          </StyledHabitTitleWrapper>
+          <div className="mb-0.5 flex items-center">
+            <p>{habit.name}</p>
+            <Chip size="sm" variant="faded" className="ml-2 h-5 border-1">
+              <div className="flex items-center gap-1">
+                <span
+                  className="mr-0.5 inline-block h-1 w-1 rounded-full"
+                  role="habit-trait-chip-color-indicator"
+                  style={{
+                    backgroundColor: traitChipColor,
+                  }}
+                />
+                <p role="habit-trait-chip-name">
+                  {traitsMap[habit.traitId]?.label || 'Unknown'}
+                </p>
+              </div>
+            </Chip>
+          </div>
           {habit.description && (
-            <Typography level="body-xs" textAlign="left">
+            <p className="text-left text-sm">
               <i>{habit.description}</i>
-            </Typography>
+            </p>
           )}
         </div>
-        <div>
-          <Tooltip title="Edit habit">
-            <StyledEditIconButton
+        <div className="flex gap-2">
+          <Tooltip content="Edit habit">
+            <Button
+              isIconOnly
               size="sm"
-              variant="soft"
+              variant="solid"
               color="primary"
               onClick={onEdit}
               role="edit-habit-button"
               data-testid={`edit-habit-id-${habit.id}-button`}
             >
-              <ModeRoundedIcon fontSize="small" />
-            </StyledEditIconButton>
+              <PencilSimple weight="bold" size={16} />
+            </Button>
           </Tooltip>
-          <Tooltip title="Delete habit">
-            <IconButton
+          <Tooltip content="Delete habit">
+            <Button
+              isIconOnly
               size="sm"
               color="danger"
-              variant="soft"
+              variant="solid"
               onClick={onDelete}
               role="delete-habit-button"
               data-testid={`delete-habit-id-${habit.id}-button`}
             >
-              <DeleteForever />
-            </IconButton>
+              <TrashSimple weight="bold" size={16} />
+            </Button>
           </Tooltip>
         </div>
-      </StyledListItemContent>
-    </StyledListItem>
+      </div>
+    </li>
   );
 };
 

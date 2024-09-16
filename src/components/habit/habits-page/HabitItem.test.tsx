@@ -22,6 +22,11 @@ jest.mock('@supabase/auth-helpers-react', () => ({
 jest.mock('@hooks', () => ({
   useHabitIconUrl: jest.fn(),
   useHabitTraitChipColor: jest.fn(),
+  ThemeMode: {
+    LIGHT: 'light',
+    SYSTEM: 'system',
+    DARK: 'dark',
+  },
 }));
 
 import { useHabits, useSnackbar, useTraits } from '@context';
