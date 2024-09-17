@@ -6,7 +6,6 @@ type ReturnValue = [
   FormValue,
   React.ChangeEventHandler<HTMLInputElement>,
   () => void,
-  (value: FormValue) => void,
 ];
 
 const useFileField = (initialValue: FormValue = null): ReturnValue => {
@@ -21,7 +20,7 @@ const useFileField = (initialValue: FormValue = null): ReturnValue => {
     setValue(null);
   };
 
-  return [value, handleChange, clearValue, setValue];
+  return [value, handleChange, clearValue];
 };
 
 export default useFileField;

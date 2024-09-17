@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ChangeEvent } from 'react';
 
 type ReturnValue = [
   string,
@@ -7,10 +7,11 @@ type ReturnValue = [
   (value: string) => void,
 ];
 
-const useTextField = (initialValue: string = ''): ReturnValue => {
-  const [value, setValue] = React.useState<string>(initialValue);
+const useTextField = (initialValue = ''): ReturnValue => {
+  const [value, setValue] = React.useState(initialValue);
+  console.log('useTextField, value:', value);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
   };
 
