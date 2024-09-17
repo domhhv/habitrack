@@ -18,7 +18,7 @@ export type ServerTrait = {
   id: number;
   name: string;
   description: string;
-  user_id?: string;
+  user_id: string | null;
   slug: string;
   created_at: string;
   updated_at: string;

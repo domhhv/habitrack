@@ -1,5 +1,6 @@
 import { OccurrenceChip } from '@components';
 import { useTraits } from '@context';
+import { useTextField } from '@hooks';
 import {
   Button,
   Input,
@@ -20,54 +21,36 @@ export type AddCustomTraitModalProps = {
 };
 
 const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
-  const [traitLabel, setTraitLabel] = React.useState('');
-  const [traitSlug, setTraitSlug] = React.useState('');
-  const [traitDescription, setTraitDescription] = React.useState('');
-  const [traitColor, setTraitColor] = React.useState('94a3b8');
+  const [label, handleLabelChange, clearTraitLabel] = useTextField();
+  const [slug, handleSlugChange, , setTraitSlug] = useTextField();
+  const [description, handleDescriptionChange] = useTextField();
+  const [color, setTraitColor] = React.useState('94a3b8');
   const { addingTrait, addTrait } = useTraits();
 
   React.useEffect(() => {
-    setTraitSlug(traitLabel.toLowerCase().replace(/\s/g, '-') || '');
-  }, [traitLabel]);
+    setTraitSlug(label.toLowerCase().replace(/\s/g, '-') || '');
+  }, [label, setTraitSlug]);
 
   const handleDialogClose = () => {
-    setTraitLabel('');
+    clearTraitLabel();
     setTraitColor('');
     onClose();
   };
 
   const handleAdd = async () => {
     await addTrait({
-      label: traitLabel,
-      description: traitDescription,
-      slug: traitSlug,
-      color: traitColor,
+      label,
+      description,
+      slug,
+      color,
       userId: null,
     });
 
     handleDialogClose();
   };
 
-  const handleTraitLabelChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setTraitLabel(event.target.value);
-  };
-
   const handleTraitColorChange = (color: string) => {
     setTraitColor(color.slice(1));
-  };
-
-  const handleTraitDescriptionChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setTraitDescription(event.target.value);
-  };
-
-  const handleTraitSlugChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setTraitSlug(event.target.value);
   };
 
   return (
@@ -80,31 +63,28 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             &quot;Neutral&quot; or &quot;Moderately Bad&quot;.
           </p>
           <Input
-            value={traitLabel}
-            onChange={handleTraitLabelChange}
+            value={label}
+            onChange={handleLabelChange}
             isDisabled={addingTrait}
             label="Trait Label"
           />
           <Input
-            value={traitSlug}
-            onChange={handleTraitSlugChange}
+            value={slug}
+            onChange={handleSlugChange}
             isDisabled={addingTrait}
             label="Trait Slug"
           />
           <Textarea
-            value={traitDescription}
-            onChange={handleTraitDescriptionChange}
+            value={description}
+            onChange={handleDescriptionChange}
             isDisabled={addingTrait}
             label="Trait Description"
           />
           <div className="flex gap-2">
-            <HexColorPicker
-              color={traitColor}
-              onChange={handleTraitColorChange}
-            />
+            <HexColorPicker color={color} onChange={handleTraitColorChange} />
             <div className="flex w-1/2 flex-col gap-2">
               <Input
-                value={traitColor}
+                value={color}
                 onChange={(event) => handleTraitColorChange(event.target.value)}
                 startContent="#"
               />
@@ -114,7 +94,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
               <OccurrenceChip
                 occurrence={makeTestOccurrence()}
                 onDelete={() => null}
-                colorOverride={`#${traitColor}`}
+                colorOverride={`#${color}`}
               />
             </div>
           </div>

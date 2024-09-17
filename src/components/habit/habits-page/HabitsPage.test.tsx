@@ -40,6 +40,10 @@ jest.mock('@hooks', () => ({
   useHabitIconUrl: jest.fn(),
   useHabitTraitChipColor: jest.fn(),
   useDocumentTitle: jest.fn(),
+  useTextField: jest
+    .fn()
+    .mockReturnValue(['', jest.fn(), jest.fn(), jest.fn()]),
+  useFileField: jest.fn().mockReturnValue([null, jest.fn(), jest.fn()]),
 }));
 
 describe(HabitsPage.name, () => {

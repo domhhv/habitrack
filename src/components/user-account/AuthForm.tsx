@@ -1,5 +1,5 @@
 import { useSnackbar } from '@context';
-import { useFormField } from '@hooks';
+import { useTextField } from '@hooks';
 import { Input, Button } from '@nextui-org/react';
 import React from 'react';
 
@@ -16,8 +16,8 @@ const AuthForm = ({
   onCancel,
   disabled,
 }: AuthFormProps) => {
-  const [email, handleEmailChange, clearEmail] = useFormField();
-  const [password, handlePasswordChange, clearPassword] = useFormField();
+  const [email, handleEmailChange, clearEmail] = useTextField();
+  const [password, handlePasswordChange, clearPassword] = useTextField();
   const { showSnackbar } = useSnackbar();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

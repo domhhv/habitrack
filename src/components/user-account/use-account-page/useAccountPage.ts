@@ -1,4 +1,5 @@
 import { useSnackbar } from '@context';
+import { useTextField } from '@hooks';
 import {
   getUserAccountByEmail,
   updateUserAccount,
@@ -6,16 +7,16 @@ import {
 } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { transformClientEntity } from '@utils';
-import React, { type ChangeEventHandler } from 'react';
+import React from 'react';
 
 const useAccountPage = () => {
   const user = useUser();
   const { showSnackbar } = useSnackbar();
   const [forbidden, setForbidden] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [name, setName] = React.useState('');
+  const [email, handleEmailChange, , setEmail] = useTextField();
+  const [password, handlePasswordChange, clearPassword] = useTextField();
+  const [name, handleNameChange, , setName] = useTextField();
 
   React.useEffect(() => {
     setLoading(true);
@@ -30,31 +31,17 @@ const useAccountPage = () => {
       const data = await getUserAccountByEmail(user.email || '');
 
       setEmail(data.email || user.email || '');
-      setPassword('');
+      clearPassword();
       setName(data.name || '');
       setLoading(false);
     };
 
     void loadUserProfile();
-  }, [user, user?.email, user?.phone]);
+  }, [user, user?.email, user?.phone, clearPassword, setEmail, setName]);
 
   React.useEffect(() => {
     setForbidden(!user?.id && !loading);
   }, [user, loading]);
-
-  const handleEmailChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    setEmail(event.target.value);
-  };
-
-  const handlePasswordChange: ChangeEventHandler<HTMLInputElement> = (
-    event
-  ) => {
-    setPassword(event.target.value);
-  };
-
-  const handleNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    setName(event.target.value);
-  };
 
   const updateAccount = async () => {
     if (!user?.id) return;
