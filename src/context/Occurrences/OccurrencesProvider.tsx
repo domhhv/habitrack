@@ -100,7 +100,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
       {} as Record<string, Occurrence[]>
     );
 
-    setOccurrencesByDate(occurrencesByDate);
+    setOccurrencesByDate((prev) => ({ ...prev, ...occurrencesByDate }));
   }, [occurrences]);
 
   const filterBy = React.useCallback((options: OccurrenceFilters) => {

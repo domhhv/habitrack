@@ -1,4 +1,5 @@
 import { useHabits, useTraits } from '@context';
+import { useTextField } from '@hooks';
 import type { Habit } from '@models';
 import {
   Button,
@@ -30,8 +31,9 @@ const EditHabitDialog = ({
   onClose,
 }: EditHabitDialogProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [name, setName] = React.useState('');
-  const [description, setDescription] = React.useState('');
+  const [name, handleNameChange, , setName] = useTextField();
+  const [description, handleDescriptionChange, , setDescription] =
+    useTextField();
   const [traitId, setTraitId] = React.useState<number>(0);
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { updateHabit } = useHabits();
@@ -48,7 +50,7 @@ const EditHabitDialog = ({
       setDescription(habit.description);
       setTraitId(habit.traitId);
     }
-  }, [habit, traitsMap]);
+  }, [habit, traitsMap, setName, setDescription]);
 
   if (!isOpen || !habit) {
     return null;
@@ -57,16 +59,6 @@ const EditHabitDialog = ({
   const handleClose = () => {
     setIsOpen(false);
     onClose?.();
-  };
-
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value);
-  };
-
-  const handleDescriptionChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setDescription(event.target.value);
   };
 
   const handleTraitChange = (_: null, newValue: number) => {

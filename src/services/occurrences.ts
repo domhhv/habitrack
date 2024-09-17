@@ -4,6 +4,7 @@ import {
   transformServerEntities,
   transformServerEntity,
 } from '@utils';
+import { cache } from '@utils';
 
 import {
   Collections,
@@ -24,13 +25,21 @@ export const createOccurrence = async (occurrence: AddOccurrence) => {
 };
 
 export const listOccurrences = async (range: [number, number]) => {
+  if (cache.has(range.toString())) {
+    return cache.get(range.toString()) as Occurrence[];
+  }
+
   const occurrences = await getInRange<ServerOccurrence>(
     Collections.OCCURRENCES,
     'timestamp',
     range
   );
 
-  return transformServerEntities(occurrences) as unknown as Occurrence[];
+  const result = transformServerEntities(
+    occurrences
+  ) as unknown as Occurrence[];
+
+  return result;
 };
 
 export const updateOccurrence = async (

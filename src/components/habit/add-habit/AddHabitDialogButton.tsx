@@ -1,5 +1,7 @@
 import { AddCustomTraitModal } from '@components';
 import { useHabits, useSnackbar, useTraits } from '@context';
+import { useTextField } from '@hooks';
+import { useFileField } from '@hooks';
 import {
   AddRounded,
   CheckCircleOutline,
@@ -31,10 +33,11 @@ const AddHabitDialogButton = () => {
   const { allTraits, traitsMap } = useTraits();
   const { fetchingHabits, addingHabit, addHabit, updateHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
-  const [habitName, setHabitName] = React.useState('');
-  const [habitDescription, setHabitDescription] = React.useState('');
-  const [habitTraitId, setHabitTraitId] = React.useState('choose-trait');
-  const [habitIcon, setHabitIcon] = React.useState<File | null>(null);
+  const [name, handleNameChange, clearName] = useTextField();
+  const [description, handleDescriptionChange, clearDescription] =
+    useTextField();
+  const [icon, handleIconChange, clearIcon] = useFileField();
+  const [traitId, setTraitId] = React.useState('choose-trait');
   const [addTraitModalOpen, setAddTraitModalOpen] = React.useState(false);
 
   const handleDialogOpen = () => {
@@ -42,9 +45,10 @@ const AddHabitDialogButton = () => {
   };
 
   const handleDialogClose = () => {
-    setHabitName('');
-    setHabitDescription('');
-    setHabitTraitId('');
+    clearName();
+    clearDescription();
+    setTraitId('');
+    clearIcon();
     setOpen(false);
   };
 
@@ -52,18 +56,18 @@ const AddHabitDialogButton = () => {
     event.preventDefault();
     try {
       const habit = {
-        name: habitName,
-        description: habitDescription,
+        name,
+        description,
         userId: user?.id || '',
-        traitId: habitTraitId as unknown as number,
+        traitId: traitId as unknown as number,
       };
 
       const { id } = await addHabit(habit);
 
-      if (habitIcon) {
-        const [, extension] = habitIcon.name.split('.');
+      if (icon) {
+        const [, extension] = icon.name.split('.');
         const iconPath = `${user?.id}/habit-id-${id}.${extension}`;
-        await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, habitIcon);
+        await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, icon);
         void updateHabit(id, { ...habit, iconPath });
       }
     } catch (error) {
@@ -77,18 +81,6 @@ const AddHabitDialogButton = () => {
     }
   };
 
-  const handleHabitNameChange: React.ChangeEventHandler<HTMLInputElement> = (
-    event
-  ) => {
-    setHabitName(event.target.value);
-  };
-
-  const handleHabitDescriptionChange: React.ChangeEventHandler<
-    HTMLInputElement
-  > = (event) => {
-    setHabitDescription(event.target.value);
-  };
-
   const handleHabitTraitChange = (
     _: null,
     newTraitId: string | 'add-custom-trait'
@@ -97,16 +89,7 @@ const AddHabitDialogButton = () => {
       return setAddTraitModalOpen(true);
     }
 
-    setHabitTraitId(newTraitId);
-  };
-
-  const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
-    event
-  ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setHabitIcon(file);
-    }
+    setTraitId(newTraitId);
   };
 
   return (
@@ -138,16 +121,16 @@ const AddHabitDialogButton = () => {
               <Box mb={1}>
                 <Input
                   required
-                  value={habitName}
-                  onChange={handleHabitNameChange}
+                  value={name}
+                  onChange={handleNameChange}
                   label="Name"
                   placeholder="Enter habit name"
                 />
               </Box>
               <Box mb={1}>
                 <Textarea
-                  value={habitDescription}
-                  onChange={handleHabitDescriptionChange}
+                  value={description}
+                  onChange={handleDescriptionChange}
                   label="Description"
                   placeholder="Enter habit description (optional)"
                 />
@@ -160,12 +143,12 @@ const AddHabitDialogButton = () => {
                   required
                   data-testid="habit-trait-select"
                   placeholder="Choose a trait"
-                  value={habitTraitId}
+                  value={traitId}
                   endDecorator={
                     <>
-                      {traitsMap[habitTraitId]?.slug === 'good' ? (
+                      {traitsMap[traitId]?.slug === 'good' ? (
                         <CheckCircleOutline color="success" fontSize="small" />
-                      ) : traitsMap[habitTraitId]?.slug === 'bad' ? (
+                      ) : traitsMap[traitId]?.slug === 'bad' ? (
                         <WarningAmber color="warning" fontSize="small" />
                       ) : null}
                     </>
@@ -203,13 +186,11 @@ const AddHabitDialogButton = () => {
                   <VisuallyHiddenInput
                     type="file"
                     accept="image/*"
-                    onChange={handleFileChange}
+                    onChange={handleIconChange}
                     role="habit-icon-input"
                   />
                 </Button>
-                {habitIcon && (
-                  <Typography level="body-md">{habitIcon.name}</Typography>
-                )}
+                {icon && <Typography level="body-md">{icon.name}</Typography>}
               </Box>
               <Box mt={1}>
                 <Button fullWidth loading={addingHabit} type="submit">
