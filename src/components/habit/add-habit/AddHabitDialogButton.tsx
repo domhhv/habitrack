@@ -1,31 +1,23 @@
-import { AddCustomTraitModal } from '@components';
+import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
 import { useHabits, useSnackbar, useTraits } from '@context';
 import { useTextField } from '@hooks';
 import { useFileField } from '@hooks';
 import {
-  AddRounded,
-  CheckCircleOutline,
-  WarningAmber,
-} from '@mui/icons-material';
-import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
-import {
-  Box,
   Button,
-  DialogContent,
-  DialogTitle,
+  Input,
   Modal,
-  ModalClose,
-  ModalDialog,
-  Option,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Select,
-  Typography,
-} from '@mui/joy';
-import { Input, Textarea } from '@nextui-org/react';
+  SelectItem,
+  Textarea,
+} from '@nextui-org/react';
+import { CloudArrowUp, Plus } from '@phosphor-icons/react';
 import { StorageBuckets, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
-import React, { type FormEventHandler } from 'react';
-
-import { StyledTraitColorIndicator, VisuallyHiddenInput } from '../styled';
+import React from 'react';
 
 const AddHabitDialogButton = () => {
   const user = useUser();
@@ -37,7 +29,7 @@ const AddHabitDialogButton = () => {
   const [description, handleDescriptionChange, clearDescription] =
     useTextField();
   const [icon, handleIconChange, clearIcon] = useFileField();
-  const [traitId, setTraitId] = React.useState('choose-trait');
+  const [traitId, setTraitId] = React.useState('');
   const [addTraitModalOpen, setAddTraitModalOpen] = React.useState(false);
 
   const handleDialogOpen = () => {
@@ -52,8 +44,7 @@ const AddHabitDialogButton = () => {
     setOpen(false);
   };
 
-  const handleAdd: FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
+  const handleAdd = async () => {
     try {
       const habit = {
         name,
@@ -81,24 +72,13 @@ const AddHabitDialogButton = () => {
     }
   };
 
-  const handleHabitTraitChange = (
-    _: null,
-    newTraitId: string | 'add-custom-trait'
-  ) => {
-    if (newTraitId === 'add-custom-trait') {
-      return setAddTraitModalOpen(true);
-    }
-
-    setTraitId(newTraitId);
-  };
-
   return (
     <>
       <Button
-        sx={{ width: 400, maxWidth: '100%' }}
+        fullWidth
         color="primary"
         variant="solid"
-        startDecorator={<AddRounded />}
+        startContent={<Plus />}
         onClick={handleDialogOpen}
         disabled={fetchingHabits || !user?.id}
         data-testid="add-habit-button"
@@ -109,97 +89,77 @@ const AddHabitDialogButton = () => {
         open={addTraitModalOpen}
         onClose={() => setAddTraitModalOpen(false)}
       />
-      <Modal open={open} onClose={handleDialogClose} role="add-habit-dialog">
-        <ModalDialog>
-          <ModalClose
-            role="close-add-habit-dialog-button"
-            onClick={handleDialogClose}
-          />
-          <DialogTitle>Add New Habit</DialogTitle>
-          <DialogContent>
-            <form onSubmit={handleAdd} role="add-habit-form">
-              <Box mb={1}>
-                <Input
-                  required
-                  value={name}
-                  onChange={handleNameChange}
-                  label="Name"
-                  placeholder="Enter habit name"
-                />
-              </Box>
-              <Box mb={1}>
-                <Textarea
-                  value={description}
-                  onChange={handleDescriptionChange}
-                  label="Description"
-                  placeholder="Enter habit description (optional)"
-                />
-              </Box>
-              <Box mb={1}>
-                <Select
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  onChange={handleHabitTraitChange}
-                  required
-                  data-testid="habit-trait-select"
-                  placeholder="Choose a trait"
-                  value={traitId}
-                  endDecorator={
-                    <>
-                      {traitsMap[traitId]?.slug === 'good' ? (
-                        <CheckCircleOutline color="success" fontSize="small" />
-                      ) : traitsMap[traitId]?.slug === 'bad' ? (
-                        <WarningAmber color="warning" fontSize="small" />
-                      ) : null}
-                    </>
-                  }
+      <Modal isOpen={open} onClose={handleDialogClose} role="add-habit-dialog">
+        <ModalContent>
+          <ModalHeader>Add New Habit</ModalHeader>
+          <ModalBody>
+            <Input
+              required
+              value={name}
+              onChange={handleNameChange}
+              label="Name"
+              placeholder="Enter habit name"
+            />
+            <Textarea
+              value={description}
+              onChange={handleDescriptionChange}
+              label="Description"
+              placeholder="Enter habit description (optional)"
+            />
+            <Select
+              required
+              label="Choose a trait"
+              selectedKeys={[traitId]}
+              data-testid="habit-select"
+            >
+              {allTraits.map((trait) => (
+                <SelectItem
+                  key={trait.id.toString()}
+                  onClick={() => {
+                    setTraitId(trait.id.toString());
+                  }}
+                  textValue={trait.label}
                 >
-                  <Option value="choose-trait" disabled>
-                    Choose a trait
-                  </Option>
-                  {allTraits.map((trait) => (
-                    <Option
-                      key={trait.id}
-                      value={trait.id}
-                      data-testid={`habit-trait-id-${trait.id}-option`}
-                    >
-                      {trait.label}
-                      <StyledTraitColorIndicator
-                        sx={{ backgroundColor: trait.color }}
-                      />
-                    </Option>
-                  ))}
-                  <Option value="add-custom-trait">
-                    <AddRounded /> Add Custom Trait
-                  </Option>
-                </Select>
-              </Box>
-              <Box mb={1}>
-                <Button
-                  fullWidth
-                  component="label"
-                  variant="outlined"
-                  color="neutral"
-                  startDecorator={<CloudUploadOutlinedIcon />}
-                >
-                  Upload Icon
-                  <VisuallyHiddenInput
-                    type="file"
-                    accept="image/*"
-                    onChange={handleIconChange}
-                    role="habit-icon-input"
-                  />
-                </Button>
-                {icon && <Typography level="body-md">{icon.name}</Typography>}
-              </Box>
-              <Box mt={1}>
-                <Button fullWidth loading={addingHabit} type="submit">
-                  Submit
-                </Button>
-              </Box>
-            </form>
-          </DialogContent>
-        </ModalDialog>
+                  <span>{trait.label}</span>
+                  <span className="font-regular ml-2 text-neutral-400">
+                    {traitsMap[trait.id]?.label}
+                  </span>
+                </SelectItem>
+              ))}
+            </Select>
+            <Button
+              variant="bordered"
+              size="sm"
+              startContent={<Plus />}
+              onClick={() => setAddTraitModalOpen(true)}
+            >
+              Or add a custom trait
+            </Button>
+            <Button
+              fullWidth
+              as="label"
+              variant="flat"
+              size="sm"
+              color="primary"
+              startContent={<CloudArrowUp />}
+            >
+              Upload Icon
+              <VisuallyHiddenInput onChange={handleIconChange} />
+            </Button>
+            {icon && <p>{icon.name}</p>}
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              fullWidth
+              isLoading={addingHabit}
+              type="submit"
+              color="primary"
+              onClick={handleAdd}
+            >
+              Submit
+            </Button>
+          </ModalFooter>
+        </ModalContent>
       </Modal>
     </>
   );

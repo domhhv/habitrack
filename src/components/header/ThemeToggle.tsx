@@ -1,5 +1,4 @@
 import { ThemeMode, useThemeMode } from '@hooks';
-import { useColorScheme } from '@mui/joy';
 import { ButtonGroup, Button } from '@nextui-org/react';
 import {
   SunDim as SunIcon,
@@ -41,11 +40,9 @@ const modesToIcons = {
 };
 
 const ThemeToggle = () => {
-  const { setMode } = useColorScheme();
   const { themeMode, changeThemeMode } = useThemeMode();
 
   const handleThemeChange = (newThemeMode: ThemeMode) => () => {
-    setMode(newThemeMode);
     changeThemeMode(newThemeMode);
   };
 
