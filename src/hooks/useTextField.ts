@@ -9,7 +9,6 @@ type ReturnValue = [
 
 const useTextField = (initialValue = ''): ReturnValue => {
   const [value, setValue] = React.useState(initialValue);
-  console.log('useTextField, value:', value);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);

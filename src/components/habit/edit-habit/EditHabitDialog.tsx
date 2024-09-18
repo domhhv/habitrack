@@ -3,21 +3,18 @@ import { useTextField } from '@hooks';
 import type { Habit } from '@models';
 import {
   Button,
-  DialogContent,
-  DialogTitle,
+  Input,
   Modal,
-  ModalClose,
-  ModalDialog,
-  Option,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Select,
-} from '@mui/joy';
-import { Input, Textarea } from '@nextui-org/react';
+  SelectItem,
+  Textarea,
+} from '@nextui-org/react';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
-
-import { StyledTraitColorIndicator } from '../styled';
-
-import { StyledForm } from './styled';
 
 export type EditHabitDialogProps = {
   open: boolean;
@@ -34,7 +31,7 @@ const EditHabitDialog = ({
   const [name, handleNameChange, , setName] = useTextField();
   const [description, handleDescriptionChange, , setDescription] =
     useTextField();
-  const [traitId, setTraitId] = React.useState<number>(0);
+  const [traitId, setTraitId] = React.useState('');
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { updateHabit } = useHabits();
   const user = useUser();
@@ -48,7 +45,7 @@ const EditHabitDialog = ({
     if (habit) {
       setName(habit.name);
       setDescription(habit.description);
-      setTraitId(habit.traitId);
+      setTraitId(habit.traitId.toString());
     }
   }, [habit, traitsMap, setName, setDescription]);
 
@@ -61,20 +58,15 @@ const EditHabitDialog = ({
     onClose?.();
   };
 
-  const handleTraitChange = (_: null, newValue: number) => {
-    setTraitId(newValue);
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async () => {
     const updatedAt = new Date();
     updatedAt.setMilliseconds(0);
     updatedAt.setSeconds(0);
-    event.preventDefault();
     setIsUpdating(true);
     const newHabit = {
       name,
       description,
-      traitId,
+      traitId: +traitId,
       userId: user?.id as string,
       iconPath: habit.iconPath,
       createdAt: habit.createdAt,
@@ -87,65 +79,63 @@ const EditHabitDialog = ({
 
   return (
     <Modal
-      open={open}
+      isOpen={open}
       onClose={handleClose}
       role="edit-habit-modal"
       data-visible={isOpen.toString()}
     >
-      <ModalDialog>
-        <ModalClose data-testid="close-icon" onClick={handleClose} />
-        <DialogTitle>Edit habit</DialogTitle>
-        <DialogContent>
-          <StyledForm onSubmit={handleSubmit} role="edit-habit-form">
-            <Input
-              value={name}
-              onChange={handleNameChange}
-              label="Name"
-              placeholder="Edit habit name"
-              isDisabled={isUpdating}
-            />
-            <Textarea
-              value={description}
-              onChange={handleDescriptionChange}
-              label="Description (optional)"
-              placeholder="Edit habit description"
-              isDisabled={isUpdating}
-            />
-            <Select
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              onChange={handleTraitChange}
-              required
-              disabled={isUpdating}
-              placeholder="Choose a trait"
-              value={traitId}
-              variant="soft"
-            >
-              <Option value={0} disabled>
-                Choose a trait
-              </Option>
-              {allTraits.map((trait) => (
-                <Option key={trait.id} value={trait.id}>
-                  {trait.label}
-                  <StyledTraitColorIndicator
-                    sx={{
-                      backgroundColor: traitsMap[trait.id]?.color,
-                    }}
-                  />
-                </Option>
-              ))}
-            </Select>
-            <Button
-              role="submit-edited-habit-button"
-              type="submit"
-              fullWidth
-              loading={isUpdating}
-            >
-              Done
-            </Button>
-          </StyledForm>
-        </DialogContent>
-      </ModalDialog>
+      <ModalContent>
+        <ModalHeader>Edit habit</ModalHeader>
+        <ModalBody>
+          <Input
+            value={name}
+            onChange={handleNameChange}
+            label="Name"
+            placeholder="Edit habit name"
+            isDisabled={isUpdating}
+          />
+          <Textarea
+            value={description}
+            onChange={handleDescriptionChange}
+            label="Description (optional)"
+            placeholder="Edit habit description"
+            isDisabled={isUpdating}
+          />
+          <Select
+            required
+            label="Trait"
+            selectedKeys={[traitId]}
+            data-testid="habit-select"
+          >
+            {allTraits.map((trait) => (
+              <SelectItem
+                key={trait.id.toString()}
+                onClick={() => {
+                  setTraitId(trait.id.toString());
+                }}
+                textValue={trait.label}
+              >
+                <span>{trait.label}</span>
+                <span className="font-regular ml-2 text-neutral-400">
+                  {traitsMap[trait.id].label}
+                </span>
+              </SelectItem>
+            ))}
+          </Select>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            fullWidth
+            type="submit"
+            color="primary"
+            isLoading={isUpdating}
+            role="submit-edited-habit-button"
+            onClick={handleSubmit}
+          >
+            Done
+          </Button>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   );
 };
