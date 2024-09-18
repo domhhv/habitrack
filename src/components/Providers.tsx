@@ -5,8 +5,7 @@ import {
   TraitsProvider,
   UserAccountProvider,
 } from '@context';
-import { supabaseClient, theme } from '@helpers';
-import { CssVarsProvider } from '@mui/joy';
+import { supabaseClient } from '@helpers';
 import { NextUIProvider } from '@nextui-org/react';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import React from 'react';
@@ -23,24 +22,22 @@ const Providers = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
 
   return (
     <NextUIProvider navigate={navigate}>
-      <CssVarsProvider defaultMode="system" theme={theme}>
-        <SessionContextProvider supabaseClient={supabaseClient}>
-          <SnackbarProvider>
-            <UserAccountProvider>
-              <TraitsProvider>
-                <HabitsProvider>
-                  <OccurrencesProvider
-                    rangeStart={rangeStart}
-                    rangeEnd={rangeEnd}
-                  >
-                    {children}
-                  </OccurrencesProvider>
-                </HabitsProvider>
-              </TraitsProvider>
-            </UserAccountProvider>
-          </SnackbarProvider>
-        </SessionContextProvider>
-      </CssVarsProvider>
+      <SessionContextProvider supabaseClient={supabaseClient}>
+        <SnackbarProvider>
+          <UserAccountProvider>
+            <TraitsProvider>
+              <HabitsProvider>
+                <OccurrencesProvider
+                  rangeStart={rangeStart}
+                  rangeEnd={rangeEnd}
+                >
+                  {children}
+                </OccurrencesProvider>
+              </HabitsProvider>
+            </TraitsProvider>
+          </UserAccountProvider>
+        </SnackbarProvider>
+      </SessionContextProvider>
     </NextUIProvider>
   );
 };

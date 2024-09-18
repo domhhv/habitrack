@@ -95,7 +95,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
           <VisuallyHiddenInput onChange={handleFileChange} />
         </Button>
       </Tooltip>
-      <div className="flex w-full items-center justify-between">
+      <div className="flex w-full items-center justify-between gap-16">
         <div>
           <div className="mb-0.5 flex items-center">
             <p>{habit.name}</p>
