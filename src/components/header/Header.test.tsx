@@ -1,4 +1,3 @@
-import { CssVarsProvider } from '@mui/joy';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
@@ -22,11 +21,9 @@ Object.defineProperty(window, 'matchMedia', {
 describe(Header.name, () => {
   it('should render habits and calendar links', () => {
     const { getByText } = render(
-      <CssVarsProvider>
-        <BrowserRouter>
-          <Header />
-        </BrowserRouter>
-      </CssVarsProvider>
+      <BrowserRouter>
+        <Header />
+      </BrowserRouter>
     );
     expect(getByText('Calendar')).toBeDefined();
     expect(getByText('Habits')).toBeDefined();
