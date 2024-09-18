@@ -85,7 +85,7 @@ const DayHabitModalDialog = ({
               >
                 <span>{habit.name}</span>
                 <span className="font-regular ml-2 text-neutral-400">
-                  {traitsMap[habit.traitId]?.label}
+                  {traitsMap[habit.traitId]?.name}
                 </span>
               </SelectItem>
             ))}

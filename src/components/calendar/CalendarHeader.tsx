@@ -176,7 +176,7 @@ const CalendarHeader = ({
             }}
           >
             {allTraits.map((trait) => (
-              <SelectItem key={trait.id}>{trait.label}</SelectItem>
+              <SelectItem key={trait.id}>{trait.name}</SelectItem>
             ))}
           </Select>
         </div>

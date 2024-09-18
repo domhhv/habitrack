@@ -109,7 +109,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
                   }}
                 />
                 <p role="habit-trait-chip-name">
-                  {traitsMap[habit.traitId]?.label || 'Unknown'}
+                  {traitsMap[habit.traitId]?.name || 'Unknown'}
                 </p>
               </div>
             </Chip>

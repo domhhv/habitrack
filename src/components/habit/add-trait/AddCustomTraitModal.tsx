@@ -39,7 +39,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
 
   const handleAdd = async () => {
     await addTrait({
-      label,
+      name: label,
       description,
       slug,
       color,
