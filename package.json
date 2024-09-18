@@ -16,10 +16,12 @@
     "vite",
     "eslint",
     "prettier",
-    "emotion",
-    "mui",
+    "react-aria",
+    "nextui",
+    "tailwind",
     "date-fns",
-    "supabase"
+    "supabase",
+    "jest"
   ],
   "scripts": {
     "prepare": "husky install",
@@ -46,12 +48,7 @@
     ]
   },
   "dependencies": {
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
     "@internationalized/date": "^3.5.5",
-    "@mui/icons-material": "^5.15.2",
-    "@mui/joy": "^5.0.0-beta.25",
-    "@mui/material": "^5.15.11",
     "@nextui-org/react": "^2.4.8",
     "@phosphor-icons/react": "^2.1.7",
     "@supabase/auth-helpers-react": "^0.4.2",
