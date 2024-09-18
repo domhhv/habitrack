@@ -2,7 +2,7 @@ import { type PostEntity } from '@services';
 
 export type Trait = {
   id: number;
-  label: string;
+  name: string;
   description: string | null;
   slug: string;
   userId: string | null;

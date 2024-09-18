@@ -113,11 +113,11 @@ const EditHabitDialog = ({
                 onClick={() => {
                   setTraitId(trait.id.toString());
                 }}
-                textValue={trait.label}
+                textValue={trait.name}
               >
-                <span>{trait.label}</span>
+                <span>{trait.name}</span>
                 <span className="font-regular ml-2 text-neutral-400">
-                  {traitsMap[trait.id].label}
+                  {traitsMap[trait.id].name}
                 </span>
               </SelectItem>
             ))}

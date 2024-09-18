@@ -69,7 +69,7 @@ describe(HabitItem.name, () => {
   it('should render good trait chip', async () => {
     (useTraits as jest.Mock).mockReturnValue({
       traitsMap: {
-        1: { slug: 'good', label: 'Good habit', color: 'green' },
+        1: { slug: 'good', name: 'Good habit', color: 'green' },
       },
     });
     (useHabitTraitChipColor as jest.Mock).mockReturnValue('green');
@@ -86,7 +86,7 @@ describe(HabitItem.name, () => {
 
   it('should render bad trait chip', () => {
     (useTraits as jest.Mock).mockReturnValue({
-      traitsMap: { 1: { slug: 'bad', label: 'Bad habit', color: 'red' } },
+      traitsMap: { 1: { slug: 'bad', name: 'Bad habit', color: 'red' } },
     });
     (useHabitTraitChipColor as jest.Mock).mockReturnValue('red');
     const { getByRole } = render(<HabitItem {...props} />);
@@ -102,7 +102,7 @@ describe(HabitItem.name, () => {
 
   it('should render custom trait chip', () => {
     (useTraits as jest.Mock).mockReturnValue({
-      traitsMap: { 1: { slug: 'custom-trait', label: 'Custom habit' } },
+      traitsMap: { 1: { slug: 'custom-trait', name: 'Custom habit' } },
     });
     const { getByRole } = render(<HabitItem {...props} />);
     const habitChipName = getByRole('habit-trait-chip-name');
