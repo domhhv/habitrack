@@ -13,11 +13,11 @@ const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
   const supabaseUser = useUser();
 
   const register = React.useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string, name: string) => {
       setAuthenticating(true);
 
       try {
-        const signUpRes = await signUp(email, password);
+        const signUpRes = await signUp(email, password, name);
 
         if (signUpRes.error) {
           throw signUpRes.error;

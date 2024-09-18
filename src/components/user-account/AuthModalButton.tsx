@@ -36,12 +36,16 @@ const AuthModalButton = () => {
     setMode(key as 'login' | 'register');
   };
 
-  const handleSubmit = async (username: string, password: string) => {
+  const handleSubmit = async (
+    username: string,
+    password: string,
+    name: string
+  ) => {
     try {
       if (mode === 'login') {
         await login(username, password);
       } else {
-        await register(username, password);
+        await register(username, password, name);
       }
 
       handleClose();
@@ -49,6 +53,7 @@ const AuthModalButton = () => {
   };
 
   const authFormProps = {
+    mode,
     onSubmit: handleSubmit,
     onCancel: handleClose,
     disabled: authenticating,

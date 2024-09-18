@@ -12,6 +12,7 @@ describe(AuthForm.name, () => {
     const submitButtonLabel = 'Submit';
     const { getByLabelText, getByTestId } = render(
       <AuthForm
+        mode="login"
         onSubmit={onSubmit}
         onCancel={onCancel}
         disabled={disabled}
@@ -30,7 +31,7 @@ describe(AuthForm.name, () => {
     });
 
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith('email', 'password');
+      expect(onSubmit).toHaveBeenCalledWith('email', 'password', '');
     });
   });
 
@@ -41,6 +42,7 @@ describe(AuthForm.name, () => {
     const submitButtonLabel = 'Submit';
     const { getByText } = render(
       <AuthForm
+        mode="login"
         onSubmit={onSubmit}
         onCancel={onCancel}
         disabled={disabled}
@@ -66,6 +68,7 @@ describe(AuthForm.name, () => {
     const { getByTestId } = render(
       <SnackbarProvider>
         <AuthForm
+          mode="login"
           onSubmit={() => {
             throw new Error('My error message');
           }}
@@ -97,6 +100,7 @@ describe(AuthForm.name, () => {
     const { getByTestId } = render(
       <SnackbarProvider>
         <AuthForm
+          mode="login"
           onSubmit={() => {
             throw new Error('');
           }}
