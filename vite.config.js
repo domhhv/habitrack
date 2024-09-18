@@ -51,7 +51,7 @@ export default defineConfig(({ _command, mode }) => {
               return 'supabase';
             }
 
-            if (id.includes('@mui')) {
+            if (id.includes('@mui') || id.includes('@emotion')) {
               return 'material-ui';
             }
 

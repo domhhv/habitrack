@@ -15,7 +15,7 @@ const useDataFetch = ({ clear, load }: Args) => {
         clear();
       }
 
-      if (['INITIAL_SESSION', 'TOKEN_REFRESHED', 'SIGNED_IN'].includes(event)) {
+      if (['TOKEN_REFRESHED', 'SIGNED_IN'].includes(event)) {
         void load();
       }
     });

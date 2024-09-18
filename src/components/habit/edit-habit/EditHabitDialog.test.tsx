@@ -88,12 +88,12 @@ describe(EditHabitDialog.name, () => {
 
   it('should call onClose when closed', async () => {
     const onClose = jest.fn();
-    const { getByTestId } = render(
+    const { getByLabelText } = render(
       <TraitsProvider>
         <EditHabitDialog {...props} onClose={onClose} />
       </TraitsProvider>
     );
-    const closeIcon = getByTestId('close-icon');
+    const closeIcon = getByLabelText('Close');
     fireEvent.click(closeIcon);
     expect(onClose).toHaveBeenCalled();
   });
@@ -112,7 +112,7 @@ describe(EditHabitDialog.name, () => {
     );
     const nameInput = getByLabelText('Name');
     const descriptionInput = getByLabelText('Description (optional)');
-    const form = getByRole('edit-habit-form');
+    const submitButton = getByRole('submit-edited-habit-button');
     const updatedAt = new Date();
     updatedAt.setMilliseconds(0);
     updatedAt.setSeconds(0);
@@ -121,7 +121,7 @@ describe(EditHabitDialog.name, () => {
       fireEvent.change(descriptionInput, {
         target: { value: 'New habit description' },
       });
-      fireEvent.submit(form);
+      fireEvent.click(submitButton);
     });
     await waitFor(() =>
       expect(mockUpdateHabit).toHaveBeenCalledWith(7, {

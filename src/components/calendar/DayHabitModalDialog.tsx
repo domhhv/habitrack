@@ -27,7 +27,7 @@ const DayHabitModalDialog = ({
   const { habits } = useHabits();
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrences();
-  const [selectedHabitId, setSelectedHabitId] = React.useState<string>('');
+  const [selectedHabitId, setSelectedHabitId] = React.useState('');
   const { traitsMap } = useTraits();
 
   if (!date || !open) {

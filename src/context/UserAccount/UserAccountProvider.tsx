@@ -86,4 +86,4 @@ const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
   );
 };
 
-export default UserAccountProvider;
+export default React.memo(UserAccountProvider);

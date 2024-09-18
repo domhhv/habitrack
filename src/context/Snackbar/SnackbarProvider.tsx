@@ -78,4 +78,4 @@ const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
   );
 };
 
-export default SnackbarProvider;
+export default React.memo(SnackbarProvider);
