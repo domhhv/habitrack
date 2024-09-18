@@ -4,7 +4,7 @@ import React from 'react';
 type UserAccountContextType = {
   supabaseUser: AuthUser | null;
   authenticating: boolean;
-  register: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string, name: string) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: (shouldShowSnackbar?: boolean) => void;
 };

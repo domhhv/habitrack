@@ -10,13 +10,17 @@ import { Collections, getByField, patch, type PatchEntity } from './supabase';
 
 export const signUp = async (
   email: string,
-  password: string
+  password: string,
+  name: string
 ): Promise<AuthResponse> => {
   return supabaseClient.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${window.location.origin}/account?emailConfirmed=true`,
+      data: {
+        name,
+      },
     },
   });
 };

@@ -4,10 +4,11 @@ import { Input, Button } from '@nextui-org/react';
 import React from 'react';
 
 type AuthFormProps = {
-  onSubmit: (username: string, password: string) => void;
+  onSubmit: (username: string, password: string, name: string) => void;
   onCancel: () => void;
   disabled: boolean;
   submitButtonLabel: string;
+  mode: 'login' | 'register';
 };
 
 const AuthForm = ({
@@ -15,15 +16,17 @@ const AuthForm = ({
   onSubmit,
   onCancel,
   disabled,
+  mode,
 }: AuthFormProps) => {
   const [email, handleEmailChange, clearEmail] = useTextField();
+  const [name, handleNameChange, clearName] = useTextField();
   const [password, handlePasswordChange, clearPassword] = useTextField();
   const { showSnackbar } = useSnackbar();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     try {
       event.preventDefault();
-      onSubmit(email, password);
+      onSubmit(email, password, name);
     } catch (e) {
       showSnackbar((e as Error).message || 'Something went wrong', {
         color: 'danger',
@@ -35,6 +38,7 @@ const AuthForm = ({
   const clearValues = () => {
     clearEmail();
     clearPassword();
+    clearName();
   };
 
   const handleCancel = () => {
@@ -52,6 +56,14 @@ const AuthForm = ({
           label="Email"
           disabled={disabled}
         />
+        {mode === 'register' && (
+          <Input
+            value={name}
+            onChange={handleNameChange}
+            label="Name (optional)"
+            disabled={disabled}
+          />
+        )}
         <Input
           value={password}
           onChange={handlePasswordChange}
