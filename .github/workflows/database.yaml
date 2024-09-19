@@ -1,7 +1,7 @@
 name: Deploy Migrations to Production
 
-on: # event list
-  pull_request: # on a pull request to each of these branches
+on:
+  push:
     branches:
       - main
   workflow_dispatch:
