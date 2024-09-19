@@ -1,7 +1,7 @@
 name: Deploy Migrations to Production
 
-on:
-  pull_request:
+on: # event list
+  pull_request: # on a pull request to each of these branches
     branches:
       - main
   workflow_dispatch:
@@ -10,6 +10,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
     steps:
       - uses: actions/checkout@v3
 
@@ -17,13 +22,5 @@ jobs:
         with:
           version: latest
 
-      - run: echo "SUPABASE_PROJECT_ID is $SUPABASE_PROJECT_ID"
-        env:
-          SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_PROJECT_ID }}
-
-      - run: supabase link --debug --project-ref $SUPABASE_PROJECT_ID
-        env:
-          SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_PROJECT_ID }}
+      - run: supabase link --project-ref $SUPABASE_PROJECT_ID
       - run: supabase db push
-        env:
-          SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_PROJECT_ID }}
