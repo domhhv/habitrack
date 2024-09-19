@@ -1,86 +1,85 @@
-# .github/workflows/code-health.yml
+name: Code health checks
 
-name: Code health checks # name of the action (displayed in the github interface)
-
-on: # event list
-  pull_request: # on a pull request to each of these branches
+on:
+  pull_request:
     branches:
       - main
 
-env: # environment variables (available in any part of the action)
+env:
   NODE_VERSION: 20
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
   SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
-jobs: # list of things to do
-  typecheck:
-    name: Type Check # job name (unique id)
-    runs-on: ubuntu-latest # on which machine to run
-    steps: # list of steps
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
       - name: Install NodeJS
         uses: actions/setup-node@v2
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Code Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Cache Yarn Dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.yarn/cache
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Install Dependencies
         run: yarn install
+
+      - name: Save Node Modules
+        id: save-node-modules
+        run: echo "::set-output name=dir::$(pwd)/node_modules"
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Use Node Modules
+        run: cp -r ${{ needs.setup.outputs.dir }} ./node_modules
 
       - name: Type Checking
         run: yarn typecheck
 
   linting:
-    name: Linting # job name (unique id)
-    runs-on: ubuntu-latest # on which machine to run
-    steps: # list of steps
-      - name: Install NodeJS
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Code Checkout
-        uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: yarn install
+    name: Linting
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Use Node Modules
+        run: cp -r ${{ needs.setup.outputs.dir }} ./node_modules
 
       - name: Code Linting
         run: yarn eslint:check
 
   formatting:
-    name: Formatting # job name (unique id)
-    runs-on: ubuntu-latest # on which machine to run
-    steps: # list of steps
-      - name: Install NodeJS
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Code Checkout
-        uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: yarn install
+    name: Formatting
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Use Node Modules
+        run: cp -r ${{ needs.setup.outputs.dir }} ./node_modules
 
       - name: Code Formatting
         run: yarn prettier:check
 
   testing:
-    name: Testing # job name (unique id)
-    runs-on: ubuntu-latest # on which machine to run
-    steps: # list of steps
-      - name: Install NodeJS
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Code Checkout
-        uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: yarn install
+    name: Testing
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Use Node Modules
+        run: cp -r ${{ needs.setup.outputs.dir }} ./node_modules
 
       - name: Unit Tests
         run: yarn test
