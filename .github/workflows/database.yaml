@@ -1,7 +1,11 @@
 name: Deploy Migrations to Production
 
-on:
-  push:
+#on:
+#  push:
+#    branches:
+#      - main
+on: # event list
+  pull_request: # on a pull request to each of these branches
     branches:
       - main
   workflow_dispatch:
@@ -22,5 +26,5 @@ jobs:
         with:
           version: latest
 
-      - run: supabase link --project-ref $SUPABASE_PROJECT_ID --debug
+      - run: supabase link --debug --project-ref $SUPABASE_PROJECT_ID
       - run: supabase db push
