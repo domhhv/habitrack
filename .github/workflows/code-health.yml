@@ -31,6 +31,10 @@ jobs: # list of things to do
       - name: Type Checking
         run: yarn typecheck
 
+      - run: echo "SUPABASE_URL is $SUPABASE_URL"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+
   linting:
     name: Linting # job name (unique id)
     runs-on: ubuntu-latest # on which machine to run
