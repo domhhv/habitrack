@@ -26,5 +26,13 @@ jobs:
         with:
           version: latest
 
+      - run: echo "SUPABASE_PROJECT_ID is $SUPABASE_PROJECT_ID"
+        env:
+          SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_PROJECT_ID }}
+
       - run: supabase link --debug --project-ref $SUPABASE_PROJECT_ID
+        env:
+          SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_PROJECT_ID }}
       - run: supabase db push
+        env:
+          SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_PROJECT_ID }}
