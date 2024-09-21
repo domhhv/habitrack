@@ -23,6 +23,10 @@ jobs:
       - name: Code Checkout
         uses: actions/checkout@v3
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
       - name: Cache Yarn Dependencies
         uses: actions/cache@v2
         with:
@@ -46,7 +50,7 @@ jobs:
     needs: setup
     steps:
       - name: Use Node Modules
-        run: cp -r ${{ needs.setup.outputs.dir }} ./node_modules
+        run: cp -r ${{ steps.yarn-cache-dir-path.outputs.dir  }} ./node_modules
 
       - name: Type Checking
         run: yarn typecheck
@@ -57,7 +61,7 @@ jobs:
     needs: setup
     steps:
       - name: Use Node Modules
-        run: cp -r ${{ needs.setup.outputs.dir }} ./node_modules
+        run: cp -r ${{ steps.yarn-cache-dir-path.outputs.dir  }} ./node_modules
 
       - name: Code Linting
         run: yarn eslint:check
@@ -68,7 +72,7 @@ jobs:
     needs: setup
     steps:
       - name: Use Node Modules
-        run: cp -r ${{ needs.setup.outputs.dir }} ./node_modules
+        run: cp -r ${{ steps.yarn-cache-dir-path.outputs.dir  }} ./node_modules
 
       - name: Code Formatting
         run: yarn prettier:check
@@ -79,7 +83,7 @@ jobs:
     needs: setup
     steps:
       - name: Use Node Modules
-        run: cp -r ${{ needs.setup.outputs.dir }} ./node_modules
+        run: cp -r ${{ steps.yarn-cache-dir-path.outputs.dir  }} ./node_modules
 
       - name: Unit Tests
         run: yarn test
