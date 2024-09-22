@@ -104,7 +104,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             fullWidth
             color="primary"
             type="submit"
-            disabled={addingTrait}
+            isDisabled={addingTrait}
             onClick={handleAdd}
           >
             Add Trait

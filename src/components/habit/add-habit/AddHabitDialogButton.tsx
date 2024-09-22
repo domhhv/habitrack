@@ -80,7 +80,7 @@ const AddHabitDialogButton = () => {
         variant="solid"
         startContent={<Plus />}
         onClick={handleDialogOpen}
-        disabled={fetchingHabits || !user?.id}
+        isDisabled={fetchingHabits || !user?.id}
         data-testid="add-habit-button"
       >
         Add habit

@@ -61,6 +61,10 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   });
 
   React.useEffect(() => {
+    void fetchOccurrences();
+  }, [rangeStart, rangeEnd, fetchOccurrences]);
+
+  React.useEffect(() => {
     const initialFilteredHabitIds = habits.map((habit) => habit.id.toString());
     const initialFilteredTraitIds = allTraits.map((trait) =>
       trait.id.toString()

@@ -76,7 +76,7 @@ const AccountPage = () => {
                 variant="bordered"
                 value={email}
                 onChange={handleEmailChange}
-                disabled={loading}
+                isDisabled={loading}
                 label="Email"
                 data-testid="email-input"
               />
@@ -87,7 +87,7 @@ const AccountPage = () => {
                 type="password"
                 value={password}
                 onChange={handlePasswordChange}
-                disabled={loading}
+                isDisabled={loading}
                 label="Set new password"
                 data-testid="password-input"
               />
@@ -97,7 +97,7 @@ const AccountPage = () => {
                 variant="bordered"
                 value={name}
                 onChange={handleNameChange}
-                disabled={loading}
+                isDisabled={loading}
                 label="Name"
                 data-testid="name-input"
               />
