@@ -35,7 +35,7 @@ const ConfirmDialog = ({
               color="primary"
               variant="bordered"
               onClick={onCancel}
-              disabled={loading}
+              isDisabled={loading}
               role="confirm-dialog-cancel"
             >
               Cancel

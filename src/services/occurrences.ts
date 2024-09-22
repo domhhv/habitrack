@@ -39,6 +39,8 @@ export const listOccurrences = async (range: [number, number]) => {
     occurrences
   ) as unknown as Occurrence[];
 
+  cache.set(range.toString(), result);
+
   return result;
 };
 

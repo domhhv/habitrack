@@ -96,7 +96,7 @@ const DayHabitModalDialog = ({
             type="submit"
             color="primary"
             isLoading={addingOccurrence}
-            disabled={!hasHabits}
+            isDisabled={!hasHabits}
             onClick={handleSubmit}
           >
             Submit

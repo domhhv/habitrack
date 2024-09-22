@@ -103,10 +103,10 @@ const AuthModalButton = () => {
               color="primary"
               fullWidth
             >
-              <Tab disabled={authenticating} key="login" title="Login">
+              <Tab isDisabled={authenticating} key="login" title="Login">
                 <AuthForm {...authFormProps} submitButtonLabel="Log In" />
               </Tab>
-              <Tab disabled={authenticating} key="register" title="Register">
+              <Tab isDisabled={authenticating} key="register" title="Register">
                 <AuthForm
                   {...authFormProps}
                   submitButtonLabel="Create Account"

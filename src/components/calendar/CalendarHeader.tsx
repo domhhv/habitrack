@@ -119,7 +119,7 @@ const CalendarHeader = ({
           <Button
             isIconOnly
             variant="light"
-            disabled={prevButtonProps.disabled}
+            isDisabled={prevButtonProps.disabled}
             aria-label={prevButtonProps['aria-label']}
             onClick={onNavigateBack}
             role="navigate-back"
@@ -132,7 +132,7 @@ const CalendarHeader = ({
           <Button
             isIconOnly
             variant="light"
-            disabled={nextButtonProps.disabled}
+            isDisabled={nextButtonProps.disabled}
             aria-label={nextButtonProps['aria-label']}
             onClick={onNavigateForward}
             role="navigate-forward"
