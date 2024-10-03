@@ -67,11 +67,24 @@ const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
   );
 
   const logout = React.useCallback(async () => {
-    await signOut();
-    showSnackbar('Logged out', {
-      color: 'default',
-      dismissible: true,
-    });
+    try {
+      const { error } = await signOut();
+
+      if (error) {
+        throw error;
+      }
+
+      showSnackbar('Logged out', {
+        color: 'default',
+        dismissible: true,
+      });
+    } catch (e) {
+      const message = (e as Error).message || 'Something went wrong';
+
+      showSnackbar(message, {
+        color: 'danger',
+      });
+    }
   }, [showSnackbar]);
 
   const value = React.useMemo(

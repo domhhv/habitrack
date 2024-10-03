@@ -21,9 +21,10 @@ export const fetch = (collection: Collections) =>
   supabaseClient.from(collection);
 
 export const get = async <T extends object>(
-  collection: Collections
+  collection: Collections,
+  columnName?: keyof T & string
 ): Promise<T[]> => {
-  const { error, data } = await fetch(collection).select('*');
+  const { error, data } = await fetch(collection).select(columnName || '*');
 
   if (error) {
     throw new Error(error.message);

@@ -10,13 +10,9 @@ import {
   patchHabit,
   StorageBuckets,
 } from '@services';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-type HabitsProviderProps = {
-  children: React.ReactNode;
-};
-
-const HabitsProvider = ({ children }: HabitsProviderProps) => {
+const HabitsProvider = ({ children }: { children: ReactNode }) => {
   const { showSnackbar } = useSnackbar();
 
   const [addingHabit, setAddingHabit] = React.useState(false);

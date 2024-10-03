@@ -3,7 +3,6 @@ import { supabaseClient } from '@helpers';
 export enum StorageBuckets {
   HABIT_ICONS = 'habit_icons',
 }
-
 export const listFiles = async (bucket: StorageBuckets, path: string) => {
   return supabaseClient.storage.from(bucket).list(path, {
     limit: 100,

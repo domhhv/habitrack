@@ -21,6 +21,7 @@ jest.mock('@context', () => ({
   }),
   useOccurrences: jest.fn().mockReturnValue({
     removeOccurrencesByHabitId: jest.fn(),
+    allOccurrences: [],
   }),
 }));
 
@@ -95,7 +96,7 @@ describe(HabitsPage.name, () => {
     });
   });
 
-  it.skip('should open edit dialog on edit icon button click', async () => {
+  it('should open edit dialog on edit icon button click', async () => {
     const habits: Habit[] = [
       {
         id: 1,
@@ -137,9 +138,9 @@ describe(HabitsPage.name, () => {
         </HabitsProvider>
       </TraitsProvider>
     );
-    expect(queryByRole('edit-habit-modal')).toBeNull();
+    expect(queryByRole('submit-edited-habit-button')).toBeNull();
     fireEvent.click(getByTestId('edit-habit-id-2-button'));
-    expect(getByRole('edit-habit-modal')).toBeDefined();
+    expect(getByRole('submit-edited-habit-button')).toBeDefined();
   });
 
   it('should open confirm dialog on remove icon button click', async () => {

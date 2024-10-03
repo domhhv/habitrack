@@ -54,14 +54,14 @@ const AuthForm = ({
           onChange={handleEmailChange}
           type="email"
           label="Email"
-          disabled={disabled}
+          isDisabled={disabled}
         />
         {mode === 'register' && (
           <Input
             value={name}
             onChange={handleNameChange}
             label="Name (optional)"
-            disabled={disabled}
+            isDisabled={disabled}
           />
         )}
         <Input
@@ -69,11 +69,11 @@ const AuthForm = ({
           onChange={handlePasswordChange}
           label="Password"
           type="password"
-          disabled={disabled}
+          isDisabled={disabled}
         />
       </div>
       <div className="mt-4 flex justify-end gap-2">
-        <Button onClick={handleCancel} disabled={disabled} variant="flat">
+        <Button onClick={handleCancel} isDisabled={disabled} variant="flat">
           Cancel
         </Button>
         <Button

@@ -1,6 +1,7 @@
 jest.mock('@context', () => ({
   useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
   useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
+  useOccurrences: jest.fn().mockReturnValue({ allOccurrences: [] }),
   useTraits: jest
     .fn()
     .mockReturnValue({ traitsMap: { 1: { slug: 'trait-slug' } } }),
@@ -29,12 +30,13 @@ jest.mock('@hooks', () => ({
   },
 }));
 
-import { useHabits, useSnackbar, useTraits } from '@context';
+import { useHabits, useOccurrences, useSnackbar, useTraits } from '@context';
 import { useHabitTraitChipColor } from '@hooks';
 import type { Habit } from '@models';
 import { StorageBuckets, updateFile, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import { makeTestOccurrence } from '@tests';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
@@ -314,5 +316,18 @@ describe(HabitItem.name, () => {
     const { getByRole } = render(<HabitItem {...props} />);
     fireEvent.click(getByRole('delete-habit-button'));
     expect(mockOnEdit).toHaveBeenCalled();
+  });
+
+  it('should display latest entry submission', () => {
+    const date1 = new Date(2024, 8, 1);
+    const date2 = new Date(2024, 8, 10);
+    (useOccurrences as jest.Mock).mockReturnValueOnce({
+      allOccurrences: [
+        makeTestOccurrence({ habitId: 123, timestamp: +date1 }),
+        { habitId: 123, timestamp: +date2 },
+      ],
+    });
+    const { getByText } = render(<HabitItem {...props} />);
+    expect(getByText(`Latest entry added on Sep 10, 2024`));
   });
 });

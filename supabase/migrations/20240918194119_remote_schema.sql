@@ -31,8 +31,8 @@ create or replace trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 
-insert into storage.buckets (id, name)
-  values ('habit_icons', 'habit_icons');
+insert into storage.buckets (id, name, public)
+  values ('habit_icons', 'habit_icons', true);
 
 create policy "Habit icon images are publicly accessible." on storage.objects
   for select using (bucket_id = 'habit_icons');

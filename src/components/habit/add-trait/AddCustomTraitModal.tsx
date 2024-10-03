@@ -23,8 +23,9 @@ export type AddCustomTraitModalProps = {
 const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   const [label, handleLabelChange, clearTraitLabel] = useTextField();
   const [slug, handleSlugChange, , setTraitSlug] = useTextField();
-  const [description, handleDescriptionChange] = useTextField();
-  const [color, setTraitColor] = React.useState('94a3b8');
+  const [description, handleDescriptionChange, clearDescription] =
+    useTextField();
+  const [color, setTraitColor] = React.useState('#94a3b8');
   const { addingTrait, addTrait } = useTraits();
 
   React.useEffect(() => {
@@ -33,7 +34,8 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
 
   const handleDialogClose = () => {
     clearTraitLabel();
-    setTraitColor('');
+    clearDescription();
+    setTraitColor('#94a3b8');
     onClose();
   };
 
@@ -50,7 +52,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   };
 
   const handleTraitColorChange = (color: string) => {
-    setTraitColor(color.slice(1));
+    setTraitColor(color);
   };
 
   return (
@@ -84,7 +86,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             <HexColorPicker color={color} onChange={handleTraitColorChange} />
             <div className="flex w-1/2 flex-col gap-2">
               <Input
-                value={color}
+                value={color.slice(1)}
                 onChange={(event) => handleTraitColorChange(event.target.value)}
                 startContent="#"
               />
@@ -104,7 +106,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             fullWidth
             color="primary"
             type="submit"
-            disabled={addingTrait}
+            isDisabled={addingTrait}
             onClick={handleAdd}
           >
             Add Trait

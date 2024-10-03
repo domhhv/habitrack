@@ -81,6 +81,7 @@ const EditHabitDialog = ({
     <Modal
       isOpen={open}
       onClose={handleClose}
+      isDismissable={false}
       role="edit-habit-modal"
       data-visible={isOpen.toString()}
     >
