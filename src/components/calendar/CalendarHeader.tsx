@@ -37,9 +37,7 @@ const MONTHS = [
   'December',
 ];
 
-const YEARS = [
-  2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024,
-];
+const YEARS = Array.from({ length: 31 }, (_, i) => 2000 + i);
 
 const CalendarHeader = ({
   activeMonthLabel,

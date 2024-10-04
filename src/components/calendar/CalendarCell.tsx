@@ -4,6 +4,7 @@ import { CalendarBlank } from '@phosphor-icons/react';
 import { useUser } from '@supabase/auth-helpers-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
 import React from 'react';
 
 import OccurrenceChip from './OccurrenceChip';
@@ -144,11 +145,16 @@ const CalendarCell = ({
       <div className="flex flex-wrap gap-1 overflow-auto px-1 py-0.5">
         {occurrences.map((occurrence) => {
           return (
-            <OccurrenceChip
+            <motion.div
               key={occurrence.id}
-              occurrence={occurrence}
-              onDelete={handleOccurrenceDelete}
-            />
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <OccurrenceChip
+                occurrence={occurrence}
+                onDelete={handleOccurrenceDelete}
+              />
+            </motion.div>
           );
         })}
       </div>

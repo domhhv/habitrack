@@ -11,11 +11,11 @@ import HabitItem from './HabitItem';
 
 const HabitsPage = () => {
   const { habits, habitsMap, removeHabit } = useHabits();
+  const { removeOccurrencesByHabitId } = useOccurrences();
   const [isEditingHabit, setIsEditingHabit] = React.useState(false);
   const [habitIdToEdit, setHabitIdToEdit] = React.useState(0);
   const [habitIdToRemove, setHabitIdToRemove] = React.useState(0);
   const [isRemovingHabit, setIsRemovingHabit] = React.useState(false);
-  const { removeOccurrencesByHabitId } = useOccurrences();
 
   useDocumentTitle('My Habits | Habitrack');
 

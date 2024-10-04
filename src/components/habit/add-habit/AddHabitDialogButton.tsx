@@ -89,7 +89,12 @@ const AddHabitDialogButton = () => {
         open={addTraitModalOpen}
         onClose={() => setAddTraitModalOpen(false)}
       />
-      <Modal isOpen={open} onClose={handleDialogClose} role="add-habit-dialog">
+      <Modal
+        isOpen={open}
+        onClose={handleDialogClose}
+        role="add-habit-dialog"
+        isDismissable={false}
+      >
         <ModalContent>
           <ModalHeader>Add New Habit</ModalHeader>
           <ModalBody>

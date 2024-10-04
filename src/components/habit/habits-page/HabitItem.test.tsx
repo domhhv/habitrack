@@ -1,6 +1,7 @@
 jest.mock('@context', () => ({
   useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
   useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
+  useOccurrences: jest.fn().mockReturnValue({ allOccurrences: [] }),
   useTraits: jest
     .fn()
     .mockReturnValue({ traitsMap: { 1: { slug: 'trait-slug' } } }),
@@ -13,6 +14,7 @@ jest.mock('@services', () => ({
   updateFile: jest.fn(),
   uploadFile: jest.fn(),
   createSignedUrl: jest.fn(),
+  getLatestHabitOccurrenceTimestamp: jest.fn().mockResolvedValue(0),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
@@ -32,7 +34,12 @@ jest.mock('@hooks', () => ({
 import { useHabits, useSnackbar, useTraits } from '@context';
 import { useHabitTraitChipColor } from '@hooks';
 import type { Habit } from '@models';
-import { StorageBuckets, updateFile, uploadFile } from '@services';
+import {
+  getLatestHabitOccurrenceTimestamp,
+  StorageBuckets,
+  updateFile,
+  uploadFile,
+} from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { getHabitIconUrl } from '@utils';
@@ -314,5 +321,16 @@ describe(HabitItem.name, () => {
     const { getByRole } = render(<HabitItem {...props} />);
     fireEvent.click(getByRole('delete-habit-button'));
     expect(mockOnEdit).toHaveBeenCalled();
+  });
+
+  it('should display latest entry submission', async () => {
+    const date = new Date(2024, 8, 10);
+    (getLatestHabitOccurrenceTimestamp as jest.Mock).mockResolvedValueOnce(
+      +date
+    );
+    const { getByText } = render(<HabitItem {...props} />);
+    await waitFor(() => {
+      expect(getByText(`Latest entry added on Sep 10, 2024`));
+    });
   });
 });

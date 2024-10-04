@@ -11,13 +11,15 @@ describe(AuthForm.name, () => {
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByLabelText, getByTestId } = render(
-      <AuthForm
-        mode="login"
-        onSubmit={onSubmit}
-        onCancel={onCancel}
-        disabled={disabled}
-        submitButtonLabel={submitButtonLabel}
-      />
+      <SnackbarProvider>
+        <AuthForm
+          mode="login"
+          onSubmit={onSubmit}
+          onCancel={onCancel}
+          disabled={disabled}
+          submitButtonLabel={submitButtonLabel}
+        />
+      </SnackbarProvider>
     );
 
     const email = getByLabelText('Email');
@@ -41,13 +43,15 @@ describe(AuthForm.name, () => {
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByText } = render(
-      <AuthForm
-        mode="login"
-        onSubmit={onSubmit}
-        onCancel={onCancel}
-        disabled={disabled}
-        submitButtonLabel={submitButtonLabel}
-      />
+      <SnackbarProvider>
+        <AuthForm
+          mode="login"
+          onSubmit={onSubmit}
+          onCancel={onCancel}
+          disabled={disabled}
+          submitButtonLabel={submitButtonLabel}
+        />
+      </SnackbarProvider>
     );
 
     const cancelButton = getByText('Cancel');

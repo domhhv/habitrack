@@ -9,18 +9,13 @@ type UserAccountContextType = {
   logout: (shouldShowSnackbar?: boolean) => void;
 };
 
-export const UserAccountContext = React.createContext<UserAccountContextType>({
-  supabaseUser: { id: '', email: '', phone: '' } as AuthUser | null,
-  authenticating: false,
-  register: (_username: string, _password: string) => Promise.resolve(),
-  login: (_username: string, _password: string) => Promise.resolve(),
-  logout: (_shouldShowSnackbar?: boolean) => {},
-});
+export const UserAccountContext =
+  React.createContext<UserAccountContextType | null>(null);
 
 export const useUserAccount = () => {
   const context = React.useContext(UserAccountContext);
 
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useUserAccount must be used within a UserAccountProvider');
   }
 

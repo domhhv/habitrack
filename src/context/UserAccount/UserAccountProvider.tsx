@@ -1,13 +1,9 @@
 import { useSnackbar, UserAccountContext } from '@context';
 import { signIn, signOut, signUp } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-type UserAccountProviderProps = {
-  children: React.ReactNode;
-};
-
-const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
+const UserAccountProvider = ({ children }: { children: ReactNode }) => {
   const { showSnackbar } = useSnackbar();
   const [authenticating, setAuthenticating] = React.useState(false);
   const supabaseUser = useUser();
@@ -67,11 +63,24 @@ const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
   );
 
   const logout = React.useCallback(async () => {
-    await signOut();
-    showSnackbar('Logged out', {
-      color: 'default',
-      dismissible: true,
-    });
+    try {
+      const { error } = await signOut();
+
+      if (error) {
+        throw error;
+      }
+
+      showSnackbar('Logged out', {
+        color: 'default',
+        dismissible: true,
+      });
+    } catch (e) {
+      const message = (e as Error).message || 'Something went wrong';
+
+      showSnackbar(message, {
+        color: 'danger',
+      });
+    }
   }, [showSnackbar]);
 
   const value = React.useMemo(

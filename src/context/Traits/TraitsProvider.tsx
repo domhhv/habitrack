@@ -3,13 +3,9 @@ import { useDataFetch } from '@hooks';
 import type { Trait, TraitsMap, AddTrait } from '@models';
 import { listTraits, createTrait } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-type TraitsProviderProps = {
-  children: React.ReactNode;
-};
-
-const TraitsProvider = ({ children }: TraitsProviderProps) => {
+const TraitsProvider = ({ children }: { children: ReactNode }) => {
   const [publicTraits, setPublicTraits] = React.useState<Trait[]>([]);
   const [userTraits, setUserTraits] = React.useState<Trait[]>([]);
   const [traitsMap, setTraitsMap] = React.useState<TraitsMap>({});

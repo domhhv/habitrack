@@ -4,9 +4,15 @@ import { useHabitTraitChipColor } from '@hooks';
 import type { Habit } from '@models';
 import { Button, Chip, Tooltip } from '@nextui-org/react';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
-import { StorageBuckets, updateFile, uploadFile } from '@services';
+import {
+  getLatestHabitOccurrenceTimestamp,
+  StorageBuckets,
+  updateFile,
+  uploadFile,
+} from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
+import { format } from 'date-fns';
 import React from 'react';
 
 export type HabitItemProps = {
@@ -22,6 +28,14 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
   const { updateHabit } = useHabits();
   const traitChipColor = useHabitTraitChipColor(habit.traitId);
   const iconUrl = getHabitIconUrl(habit.iconPath);
+  const [latestOccurrenceTimestamp, setLatestOccurrenceTimestamp] =
+    React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    getLatestHabitOccurrenceTimestamp(habit.id).then(
+      setLatestOccurrenceTimestamp
+    );
+  }, [habit.id]);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     event
@@ -115,8 +129,14 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
             </Chip>
           </div>
           {habit.description && (
-            <p className="text-left text-sm">
+            <p className="text-left text-xs">
               <i>{habit.description}</i>
+            </p>
+          )}
+          {!!latestOccurrenceTimestamp && (
+            <p className="text-left text-xs">
+              Latest entry added on{' '}
+              {format(latestOccurrenceTimestamp, 'LLL d, y')}
             </p>
           )}
         </div>

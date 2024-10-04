@@ -11,27 +11,15 @@ type OccurrencesContextType = {
   addOccurrence: (occurrence: AddOccurrence) => Promise<void>;
   removeOccurrence: (occurrenceId: number) => Promise<void>;
   removeOccurrencesByHabitId: (habitId: number) => void;
+  filterBy: (filters: OccurrenceFilters) => void;
   filteredBy: {
     habitIds: Set<string>;
     traitIds: Set<string>;
   };
-  filterBy: (filters: OccurrenceFilters) => void;
 };
 
-export const OccurrencesContext = React.createContext<OccurrencesContextType>({
-  addingOccurrence: false,
-  fetchingOccurrences: false,
-  occurrenceIdBeingDeleted: 0,
-  occurrencesByDate: {} as OccurrencesDateMap,
-  addOccurrence: (_: AddOccurrence) => Promise.resolve(),
-  removeOccurrence: (_: number) => Promise.resolve(),
-  removeOccurrencesByHabitId: (_: number) => {},
-  filteredBy: {
-    habitIds: new Set() as Set<string>,
-    traitIds: new Set() as Set<string>,
-  },
-  filterBy: (_: OccurrenceFilters) => {},
-});
+export const OccurrencesContext =
+  React.createContext<OccurrencesContextType | null>(null);
 
 export const useOccurrences = () => {
   const context = React.useContext(OccurrencesContext);

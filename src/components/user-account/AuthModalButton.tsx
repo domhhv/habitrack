@@ -41,15 +41,13 @@ const AuthModalButton = () => {
     password: string,
     name: string
   ) => {
-    try {
-      if (mode === 'login') {
-        await login(username, password);
-      } else {
-        await register(username, password, name);
-      }
+    if (mode === 'login') {
+      await login(username, password);
+    } else {
+      await register(username, password, name);
+    }
 
-      handleClose();
-    } catch (e) {} // eslint-disable-line no-empty
+    handleClose();
   };
 
   const authFormProps = {

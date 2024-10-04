@@ -11,15 +11,9 @@ type HabitsContextType = {
   updateHabit: (habitId: number, habit: UpdateHabit) => Promise<Habit>;
 };
 
-export const HabitsContext = React.createContext<HabitsContextType>({
-  addingHabit: false,
-  fetchingHabits: false,
-  habits: [] as Habit[],
-  habitsMap: {} as HabitsMap,
-  addHabit: (_: AddHabit) => Promise.resolve({} as Habit),
-  removeHabit: (_: number) => Promise.resolve(),
-  updateHabit: (_: number, __: UpdateHabit) => Promise.resolve({} as Habit),
-});
+export const HabitsContext = React.createContext<HabitsContextType | null>(
+  null
+);
 
 export const useHabits = () => {
   const context = React.useContext(HabitsContext);

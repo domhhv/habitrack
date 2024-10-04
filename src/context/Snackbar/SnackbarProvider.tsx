@@ -8,19 +8,17 @@ import {
   Warning,
   WarningCircle,
 } from '@phosphor-icons/react';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-type SnackbarProviderProps = {
-  children: React.ReactNode;
-};
-
-const SnackbarProvider = ({ children }: SnackbarProviderProps) => {
+const SnackbarProvider = ({ children }: { children: ReactNode }) => {
   const [snackbars, setSnackbars] = React.useState<Snackbar[]>([]);
 
   const showSnackbar = (message: string, options: SnackbarOptions = {}) => {
+    const id = crypto.randomUUID?.() || +new Date();
+
     setSnackbars((prevSnackbars) => [
       ...prevSnackbars,
-      { id: crypto.randomUUID?.() || +new Date(), message, options },
+      { id, message, options },
     ]);
   };
 

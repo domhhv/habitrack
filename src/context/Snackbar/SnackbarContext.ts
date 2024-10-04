@@ -16,13 +16,19 @@ export type SnackbarOptions = {
   dismissText?: string;
 };
 
+export type Snackbar = {
+  id: string;
+  message: string;
+  options: SnackbarOptions;
+};
+
 type SnackbarContextType = {
   showSnackbar: (message: string, options?: SnackbarOptions) => void;
 };
 
-export const SnackbarContext = React.createContext<SnackbarContextType>({
-  showSnackbar: (_: string, __: SnackbarOptions = {}) => {},
-});
+export const SnackbarContext = React.createContext<SnackbarContextType | null>(
+  null
+);
 
 export const useSnackbar = () => {
   const context = React.useContext(SnackbarContext);
@@ -32,10 +38,4 @@ export const useSnackbar = () => {
   }
 
   return context;
-};
-
-export type Snackbar = {
-  id: string;
-  message: string;
-  options: SnackbarOptions;
 };
