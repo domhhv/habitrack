@@ -32,11 +32,9 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
     React.useState<number | null>(null);
 
   React.useEffect(() => {
-    const loadLatestOccurrence = async () => {
-      return getLatestHabitOccurrenceTimestamp(habit.id);
-    };
-
-    loadLatestOccurrence().then(setLatestOccurrenceTimestamp);
+    getLatestHabitOccurrenceTimestamp(habit.id).then(
+      setLatestOccurrenceTimestamp
+    );
   }, [habit.id]);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (

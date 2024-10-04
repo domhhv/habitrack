@@ -1,13 +1,9 @@
 import { useSnackbar, UserAccountContext } from '@context';
 import { signIn, signOut, signUp } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-type UserAccountProviderProps = {
-  children: React.ReactNode;
-};
-
-const UserAccountProvider = ({ children }: UserAccountProviderProps) => {
+const UserAccountProvider = ({ children }: { children: ReactNode }) => {
   const { showSnackbar } = useSnackbar();
   const [authenticating, setAuthenticating] = React.useState(false);
   const supabaseUser = useUser();

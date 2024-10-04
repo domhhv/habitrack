@@ -14,6 +14,7 @@ jest.mock('@services', () => ({
   updateFile: jest.fn(),
   uploadFile: jest.fn(),
   createSignedUrl: jest.fn(),
+  getLatestHabitOccurrenceTimestamp: jest.fn().mockResolvedValue(0),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
@@ -30,13 +31,17 @@ jest.mock('@hooks', () => ({
   },
 }));
 
-import { useHabits, useOccurrences, useSnackbar, useTraits } from '@context';
+import { useHabits, useSnackbar, useTraits } from '@context';
 import { useHabitTraitChipColor } from '@hooks';
 import type { Habit } from '@models';
-import { StorageBuckets, updateFile, uploadFile } from '@services';
+import {
+  getLatestHabitOccurrenceTimestamp,
+  StorageBuckets,
+  updateFile,
+  uploadFile,
+} from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { makeTestOccurrence } from '@tests';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
@@ -318,16 +323,14 @@ describe(HabitItem.name, () => {
     expect(mockOnEdit).toHaveBeenCalled();
   });
 
-  it('should display latest entry submission', () => {
-    const date1 = new Date(2024, 8, 1);
-    const date2 = new Date(2024, 8, 10);
-    (useOccurrences as jest.Mock).mockReturnValueOnce({
-      allOccurrences: [
-        makeTestOccurrence({ habitId: 123, timestamp: +date1 }),
-        { habitId: 123, timestamp: +date2 },
-      ],
-    });
+  it('should display latest entry submission', async () => {
+    const date = new Date(2024, 8, 10);
+    (getLatestHabitOccurrenceTimestamp as jest.Mock).mockResolvedValueOnce(
+      +date
+    );
     const { getByText } = render(<HabitItem {...props} />);
-    expect(getByText(`Latest entry added on Sep 10, 2024`));
+    await waitFor(() => {
+      expect(getByText(`Latest entry added on Sep 10, 2024`));
+    });
   });
 });

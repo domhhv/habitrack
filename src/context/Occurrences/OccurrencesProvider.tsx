@@ -11,10 +11,10 @@ import {
   destroyOccurrence,
   listOccurrences,
 } from '@services';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 type Props = {
-  children: React.ReactNode;
+  children: ReactNode;
   rangeStart: number;
   rangeEnd: number;
 };

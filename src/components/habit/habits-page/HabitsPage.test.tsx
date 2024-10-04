@@ -30,6 +30,7 @@ jest.mock('@services', () => ({
     HABIT_ICONS: 'habit-icons',
   },
   listHabits: jest.fn().mockReturnValue(() => []),
+  getLatestHabitOccurrenceTimestamp: jest.fn().mockResolvedValue(0),
 }));
 
 jest.mock('@hooks', () => ({
