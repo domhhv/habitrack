@@ -155,7 +155,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
               <PencilSimple weight="bold" size={16} />
             </Button>
           </Tooltip>
-          <Tooltip content="Delete habit">
+          <Tooltip content="Delete habit" color="danger">
             <Button
               isIconOnly
               size="sm"

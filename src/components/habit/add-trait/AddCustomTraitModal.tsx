@@ -11,6 +11,7 @@ import {
   ModalHeader,
   Textarea,
 } from '@nextui-org/react';
+import { useUser } from '@supabase/auth-helpers-react';
 import { makeTestOccurrence } from '@tests';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
@@ -27,6 +28,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
     useTextField();
   const [color, setTraitColor] = React.useState('#94a3b8');
   const { addingTrait, addTrait } = useTraits();
+  const user = useUser();
 
   React.useEffect(() => {
     setTraitSlug(label.toLowerCase().replace(/\s/g, '-') || '');
@@ -61,8 +63,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
         <ModalHeader>Add Custom Trait</ModalHeader>
         <ModalBody className="gap-4">
           <p>
-            You can define custom trait for your habits. For example,
-            &quot;Neutral&quot; or &quot;Moderately Bad&quot;.
+            You can define a custom trait for your habits (e g. Moderately Bad)
           </p>
           <Input
             value={label}
@@ -106,7 +107,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             fullWidth
             color="primary"
             type="submit"
-            isDisabled={addingTrait}
+            isDisabled={addingTrait || !user?.id}
             onClick={handleAdd}
           >
             Add Trait
