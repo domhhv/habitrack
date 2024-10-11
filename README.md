@@ -57,9 +57,11 @@ Follow these steps to get the project up and running on your local machine.
 
    This command starts the development server and opens the app in your default browser.
 
-#### Database setup
+#### Database setup (optional)
 
-The project uses Supabase for database operations. Habitrack UI is still runnable locally without a Supabase instance, but you won't be able to sign in/up or retain your habits and entries.
+The project uses Supabase for database operations.
+
+Habitrack UI is **still runnable** without a local Supabase instance, but you won't be able to sign in/up or retain your habits and entries.
 
 The Supabase project configuration, seeds and migrations live under the `supabase` directory.
 
