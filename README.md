@@ -2,7 +2,7 @@
 
 Habitrack is a simple and intuitive app designed to help users build better habits by visualizing their progress on a calendar. With Habitrack, you can easily log daily habits, track your consistency, and see your streaks at a glance. This tool is perfect for anyone looking to stay motivated and committed to personal goals, whether it’s fitness, learning, or self-improvement. By providing a clear overview of your habit performance over time, Habitrack helps you stay on course and maintain accountability.
 
-The app is live [here]([https://habitrack.io]). It uses:
+The app is live [here](https://habitrack.io). It uses:
 
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [NextUI](https://nextui.org) for the UI components
@@ -74,7 +74,7 @@ To set up a local Supabase instance, run the following commands (Docker required
    # API URL: http://127.0.0.1:54321
    # DB URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
    # Studio URL: http://127.0.0.1:54323
-   # anon key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+   # anon key: <your-anon-key>
    # ...
    ```
 
