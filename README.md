@@ -54,7 +54,7 @@ Follow these steps to get the project up and running on your local machine.
    ```bash
    yarn dev
    ```
-   
+
    This command starts the development server and opens the app in your default browser.
 
 ### Database setup
@@ -75,17 +75,17 @@ To set up a local Supabase instance, run the following commands (Docker required
    # anon key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
    # ...
    ```
-   
+
    This command starts Supabase Docker containers based on `supabase/config.toml` and creates a local Postgres database and services.
-   
+
    It should output the API URL, DB URL, Studio URL, and an anonymous key, among other info. Use the Studio URL to access the local Supabase dashboard in the browser, and DB URL to connect to the local database directly.
-   
+
    API URL and anon key are needed in the next step to set up the local environment variables.
 
 2. **Environment variables**
 
    Create a `.env.development` file in the root directory of the project and add the following environment variables:
-   
+
    ```
    SUPABASE_URL=<API URL>
    SUPABASE_ANON_KEY=<anon key>
@@ -96,7 +96,7 @@ To set up a local Supabase instance, run the following commands (Docker required
    ```bash
    yarn db:reset
    ```
-   
+
    This command resets the local database to a clean state, applies migrations from `supabase/migrations` and seeds the db with essential initial data based on `supabase/seed.sql`.
 
 4. **Check status of the local Supabase instance:**
