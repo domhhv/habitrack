@@ -82,6 +82,12 @@ const HabitsPage = () => {
           <div>
             Are you sure you want to delete{' '}
             <strong>{habitsMap[habitIdToRemove]?.name}</strong> habit?
+            <br />
+            <br />
+            <i className="text-sm">
+              This action deletes all related calendar entries and can&apos;t be
+              undone
+            </i>
           </div>
         </ConfirmDialog>
       </div>

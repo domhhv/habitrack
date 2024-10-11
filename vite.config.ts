@@ -1,19 +1,14 @@
 import { resolve } from 'path';
 
 import react from '@vitejs/plugin-react';
-import dotenv from 'dotenv';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { loadEnv, type UserConfig } from 'vite';
 import { defineConfig } from 'vite';
 
-const envPaths = {
-  development: './.env.development',
-  production: './.env.production',
-};
-
-dotenv.config({ path: envPaths[process.env.NODE_ENV] });
-
-export default defineConfig(({ _command, mode }) => {
+export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
+
+  const env = loadEnv(mode, process.cwd(), '');
 
   return {
     clearScreen: false,
@@ -22,14 +17,11 @@ export default defineConfig(({ _command, mode }) => {
       isProduction &&
         visualizer({
           filename: 'dist/stats.html',
-          open: true,
         }),
     ],
     define: {
-      'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL),
-      'process.env.SUPABASE_ANON_KEY': JSON.stringify(
-        process.env.SUPABASE_ANON_KEY
-      ),
+      'process.env.SUPABASE_URL': JSON.stringify(env.SUPABASE_URL),
+      'process.env.SUPABASE_ANON_KEY': JSON.stringify(env.SUPABASE_ANON_KEY),
     },
     resolve: {
       alias: {
@@ -56,7 +48,7 @@ export default defineConfig(({ _command, mode }) => {
             }
 
             if (id.includes('nextui')) {
-              return 'next-ui';
+              return 'nextui';
             }
 
             if (id.includes('node_modules')) {
@@ -68,8 +60,5 @@ export default defineConfig(({ _command, mode }) => {
         },
       },
     },
-    server: {
-      historyApiFallback: true,
-    },
-  };
+  } satisfies UserConfig;
 });

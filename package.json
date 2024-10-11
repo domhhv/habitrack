@@ -34,7 +34,7 @@
     "eslint:fix": "eslint --fix .",
     "prettier:check": "prettier --check .",
     "prettier:write": "prettier --write .",
-    "test": "DEBUG_PRINT_LIMIT=30000 DOTENV_CONFIG_PATH=./.env.test jest --runInBand --setupFiles dotenv/config --config tests/jest.config.js --no-cache",
+    "test": "DEBUG_PRINT_LIMIT=30000 jest --runInBand --config tests/jest.config.js --no-cache",
     "test:watch": "yarn test --watch",
     "test:coverage": "yarn test --coverage",
     "test:clear-cache": "jest --clearCache",
