@@ -42,7 +42,7 @@ const LowerProviders = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
 };
 
 const PotentialSupabaseProvider = ({ children }: { children: ReactNode }) => {
-  if (!supabaseClient) {
+  if (!Object.keys(supabaseClient).length) {
     return children;
   }
 

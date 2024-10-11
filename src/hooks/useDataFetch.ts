@@ -10,6 +10,10 @@ const useDataFetch = ({ clear, load }: Args) => {
   const supabase = useSupabaseClient();
 
   React.useEffect(() => {
+    if (!supabase.auth) {
+      return;
+    }
+
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         clear();
