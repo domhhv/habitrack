@@ -1,4 +1,3 @@
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -10,35 +9,21 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-CREATE SCHEMA IF NOT EXISTS "public";
+CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
 
-ALTER SCHEMA "public" OWNER TO "pg_database_owner";
+COMMENT ON SCHEMA "public" IS 'standard public schema';
 
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer set search_path = public
-as $$
-begin
-  insert into public.accounts (id, email, name)
-  values (new.id, new.email, new.raw_user_meta_data->>'name');
-  return new;
-end;
-$$;
+CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
 
-create or replace trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
 
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
 
-insert into storage.buckets (id, name, public)
-  values ('habit_icons', 'habit_icons', true);
+CREATE EXTENSION IF NOT EXISTS "pgjwt" WITH SCHEMA "extensions";
 
-create policy "Habit icon images are publicly accessible." on storage.objects
-  for select using (bucket_id = 'habit_icons');
+CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
 
-create policy "Anyone can upload a habit icon." on storage.objects
-  for insert with check (bucket_id = 'habit_icons');
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 SET default_tablespace = '';
 
@@ -122,7 +107,7 @@ CREATE TABLE IF NOT EXISTS "public"."traits" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone,
-    "label" "text" NOT NULL,
+    "name" "text" NOT NULL,
     "description" "text",
     "slug" "text" NOT NULL,
     "user_id" "uuid",
@@ -198,6 +183,8 @@ CREATE POLICY "Enable insert for authenticated users only" ON "public"."occurren
 
 CREATE POLICY "Enable insert for users based on user_id" ON "public"."notes" FOR INSERT WITH CHECK (true);
 
+CREATE POLICY "Enable insert for users based on user_id" ON "public"."traits" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
+
 CREATE POLICY "Enable read access for all users" ON "public"."accounts" FOR SELECT USING (true);
 
 CREATE POLICY "Enable read access for all users" ON "public"."traits" FOR SELECT USING (true);
@@ -217,23 +204,17 @@ CREATE POLICY "Users can insert own account" ON "public"."accounts" FOR INSERT W
 CREATE POLICY "Users can update own account" ON "public"."accounts" FOR UPDATE USING (("auth"."uid"() = "id"));
 
 ALTER TABLE "public"."accounts" ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE "public"."habits" ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE "public"."notes" ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE "public"."occurrences" ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE "public"."traits" ENABLE ROW LEVEL SECURITY;
+
+ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
 
 GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
-
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
 
 GRANT ALL ON TABLE "public"."accounts" TO "anon";
 GRANT ALL ON TABLE "public"."accounts" TO "authenticated";

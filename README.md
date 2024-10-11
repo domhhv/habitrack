@@ -1,15 +1,12 @@
-# Habilify
+<h1 align="center">Habitrack</h1>
 
-### Habits Calendar Tracker
+Habitrack is a simple and intuitive app designed to help users build better habits by visualizing their progress on a calendar. With Habitrack, you can easily log daily habits, track your consistency, and see your streaks at a glance. This tool is perfect for anyone looking to stay motivated and committed to personal goals, whether it’s fitness, learning, or self-improvement. By providing a clear overview of your habit performance over time, Habitrack helps you stay on course and maintain accountability.
 
-![Habits Calendar Tracker](https://i.ibb.co/HGKsdk5/screencapture-localhost-8081-calendar-2024-02-23-16-01-26.png)
-
-This app is designed to provide a simple and intuitive way to monitor habits. Track your habits with ease using this customizable and user-friendly React-based habits calendar tracker.
-
-The app is live [here]([https://habilify.io]). It uses:
+The app is live [here]([https://habitrack.io]). It uses:
 
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
-- [Material Joy UI](https://mui.com/joy-ui/getting-started/) for the UI and styling solution
+- [NextUI](https://nextui.org) for the UI components
+- [Tailwind CSS](https://tailwindcss.com) for styling
 - [Supabase](https://supabase.io) for Authentication, Database and Storage
 
 ## Features
@@ -17,78 +14,18 @@ The app is live [here]([https://habilify.io]). It uses:
 - **Calendar View**: Visualize your habits on a monthly calendar.
 - **Customizable Habits**: Add, remove, and customize habits to fit your routine. Associate your habits with traits and icons.
 - **Daily Tracking**: Easily add daily entries of your habits.
-- **User Authentication**: Sign up and log in to your account to save your habits and entries.
+- **User Authentication**: Sign up and log in to your account to retain your habits and entries.
 
-## Running locally
+_This app is under active development. More features coming soon!_
 
-### Data storage and management
-
-The app uses Supabase for data storage and management. In order to run the app locally, you'll need to set up a Supabase project and provide the necessary environment variables.
-
-1. **Create a Supabase project:**
-
-   - Go to [Supabase](https://supabase.io/) and create an account.
-   - Create a new project and database.
-
-2. **Set up the database:**
-
-- Create the following tables with appropriate columns in your Supabase project:
-  - `public.traits`:
-    - `id` (type: `int8`, primary key)
-    - `created_at` (type: `timestamp with time zone`)
-    - `updated_at` (type: `timestamp with time zone`)
-    - `name` (type: `text`)
-    - `slug` (type: `text`)
-    - `description` (type: `text`)
-    - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
-  - `public.habits`:
-    - `id` (type: `int8`, primary key)
-    - `created_at` (type: `timestamp with time zone`)
-    - `updated_at` (type: `timestamp with time zone`)
-    - `name` (type: `text`)
-    - `description` (type: `text`)
-    - `trait_id` (type: `int8`, foreign key to `public.traits`)
-    - `icon_path` (type: `text`)
-    - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
-  - `public.occurrences`:
-    - `id` (type: `int8`, primary key)
-    - `created_at` (type: `timestamp with time zone`)
-    - `updated_at` (type: `timestamp with time zone`)
-    - `timestamp` (type: `int8`)
-    - `day` (type: `date`)
-    - `time` (type: `time with time zone`)
-    - `habit_id` (type: `int8`, foreign key to `public.habits`)
-    - `user_id` (type: `uuid`, foreign key to `auth.users.id`)
-  - `public.accounts`:
-    - `id` (type: `uuid`, primary key)
-    - `created_at` (type: `timestamp with time zone`)
-    - `updated_at` (type: `timestamp with time zone`)
-    - `name` (type: `text`)
-    - `email` (type: `text`)
-    - `phone_number` (type: `text`)
-
-Initially, a designated server application was built to handle the backend and database. The code for the server can be found [here](https://github.com/domhhv/nest-habits-calendar-tracker).
-
-To use it, make sure to `checkout` the commit hash below. Then, follow the instructions in the README to get the server up and running.
-
-```bash
-git checkout 8e8740097cdcdb6502a1ae540c13e33e1707aac0
-```
-
-Also, set up the necessary environment variables in the `.env.development` file in the client application.
-
-```bash
-API_BASE_URL=http://localhost:3000
-NODE_ENV=development
-```
-
-Alternatively, you can use your own server and database.
+## Local development
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/en/) (v14.17.0 or higher)
-- [Yarn](https://yarnpkg.com/) (v1.22.10 or higher)
 - [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/en/) (LTS)
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (latest Classic Stable release or higher)
+- [Docker](https://docs.docker.com/get-started/get-docker/) (optional, for running a local Supabase instance)
 
 ### Installation
 
@@ -97,13 +34,13 @@ Follow these steps to get the project up and running on your local machine.
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/domhhv/react-habits-calendar-tracker.git
+   git clone https://github.com/domhhv/habitrack.git
    ```
 
 2. **Navigate to the project directory:**
 
    ```bash
-   cd habilify
+   cd habitrack
    ```
 
 3. **Install dependencies:**
@@ -115,39 +52,80 @@ Follow these steps to get the project up and running on your local machine.
 4. **Run the application:**
 
    ```bash
-   yarn start
+   yarn dev
+   ```
+   
+   This command starts the development server and opens the app in your default browser.
+
+### Database setup
+
+The project uses Supabase for database operations. This app is still runnable locally without a Supabase instance, but you won't be able to sign in/up or retain your habits and entries.
+
+The Supabase project configuration, seeds and migrations live under the `supabase` directory.
+
+To set up a local Supabase instance, run the following commands (Docker required).
+
+1. **Start the local Supabase instance:**
+
+   ```bash
+   yarn db:start
+   # API URL: http://127.0.0.1:54321
+   # DB URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+   # Studio URL: http://127.0.0.1:54323
+   # anon key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+   # ...
+   ```
+   
+   This command starts Supabase Docker containers based on `supabase/config.toml` and creates a local Postgres database and services.
+   
+   It should output the API URL, DB URL, Studio URL, and an anonymous key, among other info. Use the Studio URL to access the local Supabase dashboard in the browser, and DB URL to connect to the local database directly.
+   
+   API URL and anon key are needed in the next step to set up the local environment variables.
+
+2. **Environment variables**
+
+   Create a `.env.development` file in the root directory of the project and add the following environment variables:
+   
+   ```
+   SUPABASE_URL=<API URL>
+   SUPABASE_ANON_KEY=<anon key>
    ```
 
-5. **Open your browser and go to [http://localhost:8080](http://localhost:8080).**
+3. **Apply migrations and seed the database:**
 
-### Environment variables
+   ```bash
+   yarn db:reset
+   ```
+   
+   This command resets the local database to a clean state, applies migrations from `supabase/migrations` and seeds the db with essential initial data based on `supabase/seed.sql`.
 
-The following environment variables are used in the project:
+4. **Check status of the local Supabase instance:**
 
-- `SUPABASE_URL`: The URL of the Supabase project.
-- `SUPABASE_ANON_KEY`: The anonymous key of the Supabase project.
-- `NODE_ENV`: The environment the application is running in. Either `development` (for `yarn start`) or `production` (for `yarn build`).
+   ```bash
+   yarn db:status
+   # the same output as when starting the local Supabase instance
+   ```
 
-Create a `.env.development` file in the root directory of the project and add the environment variables there. For example:
+5. **Stop the local Supabase instance:**
 
-```bash
-SUPABASE_URL=https://<your-supabase-url>.supabase.co
-SUPABASE_ANON_KEY=<your-supabase-anon-key>
-NODE_ENV=development
-```
+   ```bash
+   yarn db:stop
+   ```
 
 ### Testing
 
-The project uses [Jest](https://jestjs.io/) for testing. To run the tests, use the following command:
+The project uses [Jest](https://jestjs.io/) for unit testing. To run the tests, use the following command:
 
 ```bash
 yarn test
 ```
 
-To run the tests with coverage, use the following command:
+Other test related commands include:
 
 ```bash
-yarn test:coverage
+yarn test:coverage # Run all tests and generate coverage report
+yarn test:watch # Run all tests in watch mode
+yarn test:clear-cache # Clear Jest cache
 ```
 
 ### Linting
