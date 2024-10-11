@@ -10,6 +10,7 @@ import {
   patchHabit,
   StorageBuckets,
 } from '@services';
+import { makeTestHabit } from '@tests';
 import React, { type ReactNode } from 'react';
 
 const HabitsProvider = ({ children }: { children: ReactNode }) => {
@@ -17,7 +18,7 @@ const HabitsProvider = ({ children }: { children: ReactNode }) => {
 
   const [addingHabit, setAddingHabit] = React.useState(false);
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
-  const [habits, setHabits] = React.useState<Habit[]>([]);
+  const [habits, setHabits] = React.useState<Habit[]>([makeTestHabit()]);
   const [habitsMap, setHabitsMap] = React.useState<HabitsMap>({});
 
   const fetchHabits = React.useCallback(async () => {
@@ -44,6 +45,14 @@ const HabitsProvider = ({ children }: { children: ReactNode }) => {
     clear: clearHabits,
     load: fetchHabits,
   });
+
+  React.useEffect(() => {
+    setHabitsMap(
+      habits.reduce((acc, habit) => {
+        return { ...acc, [habit.id]: habit };
+      }, {})
+    );
+  }, [habits]);
 
   const addHabit = async (habit: AddHabit) => {
     try {

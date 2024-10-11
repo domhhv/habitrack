@@ -99,6 +99,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
           variant="light"
           as="label"
           className="mr-1 flex h-12 w-12 cursor-pointer p-1"
+          isDisabled={!user?.id}
         >
           <img
             src={iconUrl}
@@ -161,6 +162,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
               color="danger"
               variant="solid"
               onClick={onDelete}
+              isDisabled={!user?.id}
               role="delete-habit-button"
               data-testid={`delete-habit-id-${habit.id}-button`}
             >

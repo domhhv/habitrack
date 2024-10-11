@@ -8,37 +8,68 @@ import {
 import { supabaseClient } from '@helpers';
 import { NextUIProvider } from '@nextui-org/react';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { type ReactNode } from 'react';
+import { I18nProvider } from 'react-aria';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 
-type ProviderProps = {
-  children: React.ReactNode;
+type BaseProviderProps = {
+  children: ReactNode;
+};
+
+type ProviderProps = BaseProviderProps & {
   rangeStart: number;
   rangeEnd: number;
 };
 
-const Providers = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
+const LowerProviders = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
   const navigate = useNavigate();
 
   return (
     <NextUIProvider navigate={navigate}>
-      <SessionContextProvider supabaseClient={supabaseClient}>
-        <SnackbarProvider>
-          <UserAccountProvider>
-            <TraitsProvider>
-              <HabitsProvider>
-                <OccurrencesProvider
-                  rangeStart={rangeStart}
-                  rangeEnd={rangeEnd}
-                >
-                  {children}
-                </OccurrencesProvider>
-              </HabitsProvider>
-            </TraitsProvider>
-          </UserAccountProvider>
-        </SnackbarProvider>
-      </SessionContextProvider>
+      <SnackbarProvider>
+        <UserAccountProvider>
+          <TraitsProvider>
+            <HabitsProvider>
+              <OccurrencesProvider rangeStart={rangeStart} rangeEnd={rangeEnd}>
+                {children}
+              </OccurrencesProvider>
+            </HabitsProvider>
+          </TraitsProvider>
+        </UserAccountProvider>
+      </SnackbarProvider>
     </NextUIProvider>
+  );
+};
+
+const PotentialSupabaseProvider = ({ children }: { children: ReactNode }) => {
+  if (!supabaseClient) {
+    return children;
+  }
+
+  return (
+    <SessionContextProvider supabaseClient={supabaseClient}>
+      {children}
+    </SessionContextProvider>
+  );
+};
+
+const UpperProviders = ({ children }: BaseProviderProps) => {
+  return (
+    <BrowserRouter>
+      <I18nProvider locale="en-GB">{children}</I18nProvider>
+    </BrowserRouter>
+  );
+};
+
+const Providers = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
+  return (
+    <UpperProviders>
+      <PotentialSupabaseProvider>
+        <LowerProviders rangeStart={rangeStart} rangeEnd={rangeEnd}>
+          {children}
+        </LowerProviders>
+      </PotentialSupabaseProvider>
+    </UpperProviders>
   );
 };
 

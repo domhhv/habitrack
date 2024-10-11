@@ -9,7 +9,7 @@ const makeTestHabit = (override: Partial<Habit> = {}): Habit => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     userId: '1',
-    iconPath: 'path/to/test/icon.png',
+    iconPath: './public/android-chrome-192x192.png',
     ...override,
   };
 };

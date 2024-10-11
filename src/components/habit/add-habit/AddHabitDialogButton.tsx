@@ -22,7 +22,7 @@ import React from 'react';
 const AddHabitDialogButton = () => {
   const user = useUser();
   const { showSnackbar } = useSnackbar();
-  const { allTraits, traitsMap } = useTraits();
+  const { allTraits } = useTraits();
   const { fetchingHabits, addingHabit, addHabit, updateHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [name, handleNameChange, clearName] = useTextField();
@@ -37,11 +37,11 @@ const AddHabitDialogButton = () => {
   };
 
   const handleDialogClose = () => {
+    setOpen(false);
     clearName();
     clearDescription();
     setTraitId('');
     clearIcon();
-    setOpen(false);
   };
 
   const handleAdd = async () => {
@@ -78,9 +78,9 @@ const AddHabitDialogButton = () => {
         fullWidth
         color="primary"
         variant="solid"
-        startContent={<Plus />}
+        startContent={<Plus weight="bold" />}
         onClick={handleDialogOpen}
-        isDisabled={fetchingHabits || !user?.id}
+        isDisabled={fetchingHabits}
         data-testid="add-habit-button"
       >
         Add habit
@@ -91,8 +91,8 @@ const AddHabitDialogButton = () => {
       />
       <Modal
         isOpen={open}
-        onClose={handleDialogClose}
         role="add-habit-dialog"
+        onClose={handleDialogClose}
         isDismissable={false}
       >
         <ModalContent>
@@ -120,15 +120,13 @@ const AddHabitDialogButton = () => {
               {allTraits.map((trait) => (
                 <SelectItem
                   key={trait.id.toString()}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     setTraitId(trait.id.toString());
                   }}
                   textValue={trait.name}
                 >
-                  <span>{trait.name}</span>
-                  <span className="font-regular ml-2 text-neutral-400">
-                    {traitsMap[trait.id]?.name}
-                  </span>
+                  {trait.name}
                 </SelectItem>
               ))}
             </Select>
@@ -156,6 +154,7 @@ const AddHabitDialogButton = () => {
           <ModalFooter>
             <Button
               fullWidth
+              isDisabled={!user?.id}
               isLoading={addingHabit}
               type="submit"
               color="primary"
