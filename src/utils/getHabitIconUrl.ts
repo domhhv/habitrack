@@ -1,7 +1,7 @@
 import { StorageBuckets } from '@services';
 
 export const getHabitIconUrl = (habitIconPath: string | null) => {
-  if (habitIconPath?.startsWith('./')) {
+  if (habitIconPath?.startsWith('http')) {
     return habitIconPath;
   }
 

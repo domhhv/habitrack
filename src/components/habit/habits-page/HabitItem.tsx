@@ -98,7 +98,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
           size="lg"
           variant="light"
           as="label"
-          className="mr-1 flex h-12 w-12 cursor-pointer p-1"
+          className="mr-1 flex h-12 w-12 cursor-pointer p-1 opacity-100"
           isDisabled={!user?.id}
         >
           <img
