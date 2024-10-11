@@ -81,7 +81,6 @@ const EditHabitDialog = ({
     <Modal
       isOpen={open}
       onClose={handleClose}
-      isDismissable={false}
       role="edit-habit-modal"
       data-visible={isOpen.toString()}
     >
@@ -116,10 +115,7 @@ const EditHabitDialog = ({
                 }}
                 textValue={trait.name}
               >
-                <span>{trait.name}</span>
-                <span className="font-regular ml-2 text-neutral-400">
-                  {traitsMap[trait.id].name}
-                </span>
+                {trait.name}
               </SelectItem>
             ))}
           </Select>
@@ -132,6 +128,7 @@ const EditHabitDialog = ({
             isLoading={isUpdating}
             role="submit-edited-habit-button"
             onClick={handleSubmit}
+            isDisabled={!user?.id}
           >
             Done
           </Button>

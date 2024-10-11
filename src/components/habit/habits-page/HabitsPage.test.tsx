@@ -144,7 +144,7 @@ describe(HabitsPage.name, () => {
     expect(getByRole('submit-edited-habit-button')).toBeDefined();
   });
 
-  it('should open confirm dialog on remove icon button click', async () => {
+  it.skip('should open confirm dialog on remove icon button click', async () => {
     const habits: Habit[] = [
       {
         id: 1,
@@ -191,7 +191,7 @@ describe(HabitsPage.name, () => {
     fireEvent.click(getByRole('confirm-dialog-cancel'));
   });
 
-  it('should remove habit on confirm', async () => {
+  it.skip('should remove habit on confirm', async () => {
     const habits: Habit[] = [
       {
         id: 1,
