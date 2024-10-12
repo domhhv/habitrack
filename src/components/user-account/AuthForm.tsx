@@ -12,6 +12,7 @@ type AuthFormProps = {
   submitButtonLabel: string;
   mode: AuthMode;
   onModeChange: (mode: AuthMode) => void;
+  goBackToLogin: () => void;
 };
 
 const AuthForm = ({
@@ -21,6 +22,7 @@ const AuthForm = ({
   disabled,
   mode,
   onModeChange,
+  goBackToLogin,
 }: AuthFormProps) => {
   const [email, handleEmailChange, clearEmail] = useTextField();
   const [name, handleNameChange, clearName] = useTextField();
@@ -71,6 +73,20 @@ const AuthForm = ({
           type="email"
           label="Email"
           isDisabled={disabled}
+          classNames={{
+            description: 'text-right',
+          }}
+          description={
+            mode === 'reset-password' && (
+              <Button
+                className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
+                onClick={goBackToLogin}
+                disableAnimation
+              >
+                Back to login
+              </Button>
+            )
+          }
         />
         {mode === 'register' && (
           <Input

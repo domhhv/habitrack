@@ -82,6 +82,7 @@ const AuthModalButton = () => {
     onCancel: handleClose,
     disabled: authenticating,
     submitButtonLabel: actionLabels[mode],
+    goBackToLogin: () => setMode('login'),
   };
 
   return (

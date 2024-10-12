@@ -19,6 +19,7 @@ describe(AuthForm.name, () => {
           disabled={disabled}
           submitButtonLabel={submitButtonLabel}
           onModeChange={() => {}}
+          goBackToLogin={() => {}}
         />
       </SnackbarProvider>
     );
@@ -52,6 +53,7 @@ describe(AuthForm.name, () => {
           disabled={disabled}
           submitButtonLabel={submitButtonLabel}
           onModeChange={() => {}}
+          goBackToLogin={() => {}}
         />
       </SnackbarProvider>
     );
@@ -82,6 +84,7 @@ describe(AuthForm.name, () => {
           disabled={disabled}
           submitButtonLabel={submitButtonLabel}
           onModeChange={() => {}}
+          goBackToLogin={() => {}}
         />
       </SnackbarProvider>
     );
@@ -115,6 +118,7 @@ describe(AuthForm.name, () => {
           disabled={disabled}
           submitButtonLabel={submitButtonLabel}
           onModeChange={() => {}}
+          goBackToLogin={() => {}}
         />
       </SnackbarProvider>
     );

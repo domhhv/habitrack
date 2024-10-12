@@ -123,13 +123,13 @@ secure_password_change = false
 max_frequency = "1s"
 
 # Use a production-ready SMTP server
-[auth.email.smtp]
-host = "pro.turbo-smtp.com"
-port = 587
-user = "dom@habilify.io"
-pass = "mkaCyZMs"
-admin_email = "dom@habitrack.io"
-sender_name = "Dom (Habitrack)"
+# [auth.email.smtp]
+# host = "smtp.sendgrid.net"
+# port = 587
+# user = "apikey"
+# pass = "env(SENDGRID_API_KEY)"
+# admin_email = "admin@email.com"
+# sender_name = "Admin"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
