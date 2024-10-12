@@ -1,7 +1,6 @@
 import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
 import { useHabits, useSnackbar, useTraits } from '@context';
-import { useTextField } from '@hooks';
-import { useFileField } from '@hooks';
+import { useTextField, useFileField } from '@hooks';
 import {
   Button,
   Input,

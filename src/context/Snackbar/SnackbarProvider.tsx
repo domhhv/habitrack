@@ -1,5 +1,9 @@
-import type { SnackbarOptions, Snackbar, ButtonColor } from '@context';
-import { SnackbarContext } from '@context';
+import {
+  SnackbarContext,
+  type SnackbarOptions,
+  type Snackbar,
+  type ButtonColor,
+} from '@context';
 import { Button } from '@nextui-org/react';
 import {
   BellRinging,

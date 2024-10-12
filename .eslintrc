@@ -31,6 +31,7 @@
   "rules": {
     "object-shorthand": "error",
     "no-undef": "off",
+    "no-duplicate-imports": "error",
     "@typescript-eslint/consistent-type-imports": [
       "error",
       {
