@@ -1,28 +1,47 @@
 import { useSnackbar } from '@context';
+import { supabaseClient } from '@helpers';
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 
 const useAuthSearchParams = () => {
   const { showSnackbar } = useSnackbar();
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const { hash } = useLocation();
+
+  const accessToken = hash?.split('access_token=')[1]?.split('&')[0];
+  const refreshToken = hash?.split('refresh_token=')[1]?.split('&')[0];
 
   React.useEffect(() => {
     if (searchParams.get('emailConfirmed')) {
-      showSnackbar(`Email confirmed! You're now logged in 🎉`, {
-        color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
-      });
+      supabaseClient.auth
+        .setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        })
+        .then(() => {
+          showSnackbar(`Email confirmed! You're now logged in 🎉`, {
+            color: 'success',
+            dismissible: true,
+            dismissText: 'Done',
+          });
+        });
     }
 
     if (searchParams.get('passwordReset')) {
-      showSnackbar(`You're now logged in to Habitrack`, {
-        description: 'You can update your password on this page',
-        color: 'success',
-        dismissible: true,
-        dismissText: 'Dismiss',
-      });
+      supabaseClient.auth
+        .setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        })
+        .then(() => {
+          showSnackbar(`You're now logged in to Habitrack`, {
+            description: 'You can update your password on this page',
+            color: 'success',
+            dismissible: true,
+            dismissText: 'Dismiss',
+          });
+        });
     }
 
     setSearchParams({});
