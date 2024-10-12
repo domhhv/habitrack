@@ -2,8 +2,7 @@ import { resolve } from 'path';
 
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { loadEnv, type UserConfig } from 'vite';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv, type UserConfig } from 'vite';
 
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
