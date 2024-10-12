@@ -5,7 +5,7 @@ import React from 'react';
 import AuthForm from './AuthForm';
 
 describe(AuthForm.name, () => {
-  it('should call onSubmit with username and password', async () => {
+  it('should call onSubmit with email and password', async () => {
     const onSubmit = jest.fn();
     const onCancel = jest.fn();
     const disabled = false;
@@ -18,6 +18,8 @@ describe(AuthForm.name, () => {
           onCancel={onCancel}
           disabled={disabled}
           submitButtonLabel={submitButtonLabel}
+          onModeChange={() => {}}
+          goBackToLogin={() => {}}
         />
       </SnackbarProvider>
     );
@@ -50,6 +52,8 @@ describe(AuthForm.name, () => {
           onCancel={onCancel}
           disabled={disabled}
           submitButtonLabel={submitButtonLabel}
+          onModeChange={() => {}}
+          goBackToLogin={() => {}}
         />
       </SnackbarProvider>
     );
@@ -79,6 +83,8 @@ describe(AuthForm.name, () => {
           onCancel={onCancel}
           disabled={disabled}
           submitButtonLabel={submitButtonLabel}
+          onModeChange={() => {}}
+          goBackToLogin={() => {}}
         />
       </SnackbarProvider>
     );
@@ -91,7 +97,7 @@ describe(AuthForm.name, () => {
 
     await waitFor(() => {
       expect(getByTestId('snackbar')).toBeDefined();
-      expect(getByTestId('snackbar').querySelector('p')?.innerHTML).toContain(
+      expect(getByTestId('snackbar-message')).toHaveTextContent(
         'My error message'
       );
     });
@@ -111,6 +117,8 @@ describe(AuthForm.name, () => {
           onCancel={onCancel}
           disabled={disabled}
           submitButtonLabel={submitButtonLabel}
+          onModeChange={() => {}}
+          goBackToLogin={() => {}}
         />
       </SnackbarProvider>
     );
@@ -123,7 +131,7 @@ describe(AuthForm.name, () => {
 
     await waitFor(() => {
       expect(getByTestId('snackbar')).toBeDefined();
-      expect(getByTestId('snackbar').querySelector('p')?.innerHTML).toContain(
+      expect(getByTestId('snackbar-message')).toHaveTextContent(
         'Something went wrong'
       );
     });

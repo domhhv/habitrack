@@ -45,6 +45,12 @@ export const updateUserPassword = async (password: string) => {
   });
 };
 
+export const sendPasswordResetEmail = async (email: string) => {
+  return supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/account?passwordReset=true`,
+  });
+};
+
 export const getUserAccountByEmail = async (supabaseUserEmail: string) => {
   const [serverAccount] = await getByField<ServerAccount>(
     Collections.ACCOUNTS,

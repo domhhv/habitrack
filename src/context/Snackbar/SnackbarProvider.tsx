@@ -68,8 +68,16 @@ const SnackbarProvider = ({ children }: { children: ReactNode }) => {
                 data-testid="snackbar"
               >
                 {ICONS_BY_COLOR[color]}
-                <p>{message}</p>
-                {options.description && <span>{options.description}</span>}
+                <div className="gap2 flex flex-col">
+                  <h6 className="font-semibold" data-testid="snackbar-message">
+                    {message}
+                  </h6>
+                  {options.description && (
+                    <p className="text-sm text-gray-700">
+                      {options.description}
+                    </p>
+                  )}
+                </div>
                 {endDecorator}
               </div>
             </div>

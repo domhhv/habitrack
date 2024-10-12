@@ -1,6 +1,6 @@
 export default {
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/tests/testing-library.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.js'],
   verbose: true,
   roots: ['<rootDir>'],
   modulePaths: ['<rootDir>'],

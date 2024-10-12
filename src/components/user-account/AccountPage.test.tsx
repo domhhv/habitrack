@@ -5,9 +5,9 @@ jest.mock('@supabase/auth-helpers-react', () => ({
   useUser: jest.fn().mockReturnValue({ id: '123' }),
 }));
 jest.mock('@services');
-jest.mock('./use-email-confirmed', () => ({
+jest.mock('./use-auth-search-params', () => ({
   __esModule: true,
-  useEmailConfirmed: jest.fn(),
+  useAuthSearchParams: jest.fn(),
 }));
 
 import { SnackbarProvider, UserAccountProvider } from '@context';

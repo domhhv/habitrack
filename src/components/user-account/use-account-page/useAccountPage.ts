@@ -59,7 +59,7 @@ const useAccountPage = () => {
 
     await updateUserAccount(user.id, serverUpdates);
 
-    showSnackbar('Profile updated');
+    showSnackbar('Account updated', { color: 'success' });
 
     setLoading(false);
   };

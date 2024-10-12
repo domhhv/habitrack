@@ -5,7 +5,7 @@ export const getHabitIconUrl = (habitIconPath: string | null) => {
     return habitIconPath;
   }
 
-  return `${process.env.SUPABASE_URL}/storage/v1/object/public/${
+  return `${SUPABASE_URL}/storage/v1/object/public/${
     StorageBuckets.HABIT_ICONS
   }/${habitIconPath || 'default.png'}`;
 };

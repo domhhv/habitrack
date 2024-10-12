@@ -1,5 +1,5 @@
 import { useSnackbar, UserAccountContext } from '@context';
-import { signIn, signOut, signUp } from '@services';
+import { sendPasswordResetEmail, signIn, signOut, signUp } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import React, { type ReactNode } from 'react';
 
@@ -83,9 +83,43 @@ const UserAccountProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [showSnackbar]);
 
+  const resetPassword = React.useCallback(
+    async (email: string) => {
+      setAuthenticating(true);
+
+      try {
+        const { error } = await sendPasswordResetEmail(email);
+
+        if (error) {
+          throw error;
+        }
+
+        showSnackbar('Password reset email sent!', {
+          color: 'success',
+        });
+      } catch (e) {
+        const message = (e as Error).message || 'Something went wrong';
+
+        showSnackbar(message, {
+          color: 'danger',
+        });
+      } finally {
+        setAuthenticating(false);
+      }
+    },
+    [showSnackbar]
+  );
+
   const value = React.useMemo(
-    () => ({ supabaseUser, authenticating, register, login, logout }),
-    [supabaseUser, authenticating, register, login, logout]
+    () => ({
+      supabaseUser,
+      authenticating,
+      register,
+      login,
+      logout,
+      resetPassword,
+    }),
+    [supabaseUser, authenticating, register, login, logout, resetPassword]
   );
 
   return (
