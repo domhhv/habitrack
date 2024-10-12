@@ -21,11 +21,19 @@ import { Link } from 'react-router-dom';
 
 import AuthForm from './AuthForm';
 
+export type AuthMode = 'login' | 'register' | 'reset-password';
+
 const AuthModalButton = () => {
-  const { login, logout, register, authenticating, supabaseUser } =
-    useUserAccount();
+  const {
+    login,
+    logout,
+    register,
+    resetPassword,
+    authenticating,
+    supabaseUser,
+  } = useUserAccount();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  const [mode, setMode] = React.useState<'login' | 'register'>('login');
+  const [mode, setMode] = React.useState<AuthMode>('login');
 
   const handleClose = () => {
     setMode('login');
@@ -36,28 +44,45 @@ const AuthModalButton = () => {
     setMode(key as 'login' | 'register');
   };
 
+  const actions: Record<
+    AuthMode,
+    (email: string, password: string, name: string) => Promise<void>
+  > = {
+    login,
+    register,
+    'reset-password': resetPassword,
+  };
+
+  const actionLabels: Record<AuthMode, string> = {
+    login: 'Log in',
+    register: 'Create account',
+    'reset-password': 'Send link',
+  };
+
+  const headerTitles: Record<AuthMode, string> = {
+    login: 'Log in with an email and a password',
+    register: 'Register with an email and a password',
+    'reset-password': 'Reset your password',
+  };
+
   const handleSubmit = async (
-    username: string,
+    email: string,
     password: string,
     name: string
   ) => {
-    if (mode === 'login') {
-      await login(username, password);
-    } else {
-      await register(username, password, name);
-    }
+    await actions[mode](email, password, name);
 
     handleClose();
   };
 
   const authFormProps = {
     mode,
+    onModeChange: (nextMode: AuthMode) => setMode(nextMode),
     onSubmit: handleSubmit,
     onCancel: handleClose,
     disabled: authenticating,
+    submitButtonLabel: actionLabels[mode],
   };
-
-  const actionLabel = mode === 'login' ? 'Log in' : 'Register';
 
   return (
     <>
@@ -93,24 +118,27 @@ const AuthModalButton = () => {
       )}
       <Modal isOpen={isOpen} onClose={handleClose} onOpenChange={onOpenChange}>
         <ModalContent>
-          <ModalHeader>{`${actionLabel} with a username and a password`}</ModalHeader>
+          <ModalHeader>{headerTitles[mode]}</ModalHeader>
           <ModalBody>
-            <Tabs
-              onSelectionChange={handleTabChange}
-              radius="full"
-              color="primary"
-              fullWidth
-            >
-              <Tab isDisabled={authenticating} key="login" title="Login">
-                <AuthForm {...authFormProps} submitButtonLabel="Log In" />
-              </Tab>
-              <Tab isDisabled={authenticating} key="register" title="Register">
-                <AuthForm
-                  {...authFormProps}
-                  submitButtonLabel="Create Account"
-                />
-              </Tab>
-            </Tabs>
+            {mode !== 'reset-password' && (
+              <Tabs
+                onSelectionChange={handleTabChange}
+                color="primary"
+                fullWidth
+              >
+                <Tab isDisabled={authenticating} key="login" title="Login">
+                  <AuthForm {...authFormProps} />
+                </Tab>
+                <Tab
+                  isDisabled={authenticating}
+                  key="register"
+                  title="Register"
+                >
+                  <AuthForm {...authFormProps} />
+                </Tab>
+              </Tabs>
+            )}
+            {mode === 'reset-password' && <AuthForm {...authFormProps} />}
           </ModalBody>
         </ModalContent>
       </Modal>

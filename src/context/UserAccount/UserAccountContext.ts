@@ -4,9 +4,10 @@ import React from 'react';
 type UserAccountContextType = {
   supabaseUser: AuthUser | null;
   authenticating: boolean;
-  register: (username: string, password: string, name: string) => Promise<void>;
-  login: (username: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: (shouldShowSnackbar?: boolean) => void;
+  resetPassword: (email: string) => Promise<void>;
 };
 
 export const UserAccountContext =

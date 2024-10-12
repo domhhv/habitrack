@@ -1,14 +1,17 @@
+import { PasswordInput, type AuthMode } from '@components';
 import { useSnackbar } from '@context';
 import { useTextField } from '@hooks';
 import { Input, Button } from '@nextui-org/react';
+import clsx from 'clsx';
 import React from 'react';
 
 type AuthFormProps = {
-  onSubmit: (username: string, password: string, name: string) => void;
+  onSubmit: (email: string, password: string, name: string) => void;
   onCancel: () => void;
   disabled: boolean;
   submitButtonLabel: string;
-  mode: 'login' | 'register';
+  mode: AuthMode;
+  onModeChange: (mode: AuthMode) => void;
 };
 
 const AuthForm = ({
@@ -17,6 +20,7 @@ const AuthForm = ({
   onCancel,
   disabled,
   mode,
+  onModeChange,
 }: AuthFormProps) => {
   const [email, handleEmailChange, clearEmail] = useTextField();
   const [name, handleNameChange, clearName] = useTextField();
@@ -46,9 +50,21 @@ const AuthForm = ({
     onCancel();
   };
 
+  const formClassName = clsx(mode === 'reset-password' && 'py-3');
+
   return (
-    <form onSubmit={handleSubmit} data-testid="submit-form">
+    <form
+      onSubmit={handleSubmit}
+      data-testid="submit-form"
+      className={formClassName}
+    >
       <div className="flex flex-col gap-4">
+        {mode === 'reset-password' && (
+          <p>
+            Enter your email address below and we will send you a link to reset
+            your password.
+          </p>
+        )}
         <Input
           value={email}
           onChange={handleEmailChange}
@@ -64,13 +80,19 @@ const AuthForm = ({
             isDisabled={disabled}
           />
         )}
-        <Input
-          value={password}
-          onChange={handlePasswordChange}
-          label="Password"
-          type="password"
-          isDisabled={disabled}
-        />
+        {['login', 'register'].includes(mode) && (
+          <PasswordInput
+            value={password}
+            onChange={handlePasswordChange}
+            label="Password"
+            isDisabled={disabled}
+            onReset={
+              mode === 'login'
+                ? () => onModeChange('reset-password')
+                : undefined
+            }
+          />
+        )}
       </div>
       <div className="mt-4 flex justify-end gap-2">
         <Button onClick={handleCancel} isDisabled={disabled} variant="flat">

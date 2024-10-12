@@ -6,11 +6,13 @@ import clsx from 'clsx';
 import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
 
+import PasswordInput from '../common/PasswordInput/PasswordInput';
+
 import { useAccountPage } from './use-account-page';
-import { useEmailConfirmed } from './use-email-confirmed';
+import { useAuthSearchParams } from './use-auth-search-params';
 
 const AccountPage = () => {
-  useEmailConfirmed();
+  useAuthSearchParams();
 
   useDocumentTitle('My Account | Habitrack');
 
@@ -82,14 +84,13 @@ const AccountPage = () => {
               />
             </div>
             <div>
-              <Input
+              <PasswordInput
                 variant="bordered"
-                type="password"
                 value={password}
                 onChange={handlePasswordChange}
-                isDisabled={loading}
                 label="Set new password"
-                data-testid="password-input"
+                isDisabled={loading}
+                testId="password-input"
               />
             </div>
             <div>
@@ -109,7 +110,7 @@ const AccountPage = () => {
                 isLoading={loading}
                 color="primary"
               >
-                Save
+                Submit
               </Button>
             </div>
           </div>

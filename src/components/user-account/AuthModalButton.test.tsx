@@ -41,7 +41,7 @@ describe(AuthModalButton.name, () => {
     act(() => {
       fireEvent.click(button);
     });
-    const modal = getByText('Log in with a username and a password');
+    const modal = getByText('Log in with a email and a password');
     expect(modal).toBeDefined();
   });
 
@@ -58,7 +58,7 @@ describe(AuthModalButton.name, () => {
     act(() => {
       fireEvent.click(button);
     });
-    const modal = queryByText('Log in with a username and a password');
+    const modal = queryByText('Log in with a email and a password');
     expect(modal).toBeNull();
   });
 
@@ -79,7 +79,7 @@ describe(AuthModalButton.name, () => {
     act(() => {
       fireEvent.click(registerTab);
     });
-    const modal = getByText('Register with a username and a password');
+    const modal = getByText('Register with a email and a password');
     expect(modal).toBeDefined();
   });
 
@@ -98,7 +98,7 @@ describe(AuthModalButton.name, () => {
       fireEvent.click(cancel);
     });
     await waitFor(() => {
-      const modal = queryByText('Log in with a username and a password');
+      const modal = queryByText('Log in with a email and a password');
       expect(modal).toBeNull();
     });
   });
