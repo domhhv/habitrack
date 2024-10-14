@@ -1,12 +1,10 @@
-import { AuthModalButton } from '@components';
+import { AuthModalButton, PasswordInput } from '@components';
 import { useDocumentTitle } from '@hooks';
 import { Button, Input, Spinner } from '@nextui-org/react';
 import { Prohibit as ProhibitIcon } from '@phosphor-icons/react';
 import clsx from 'clsx';
 import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
-
-import PasswordInput from '../common/PasswordInput/PasswordInput';
 
 import { useAccountPage } from './use-account-page';
 import { useAuthSearchParams } from './use-auth-search-params';

@@ -31,6 +31,7 @@ jest.mock('@services', () => ({
   },
   listHabits: jest.fn().mockReturnValue(() => []),
   getLatestHabitOccurrenceTimestamp: jest.fn().mockResolvedValue(0),
+  getLongestHabitStreak: jest.fn().mockResolvedValue(0),
 }));
 
 jest.mock('@hooks', () => ({
