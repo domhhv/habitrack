@@ -11,5 +11,9 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: [nextui()],
+  plugins: [
+    nextui({
+      addCommonColors: true,
+    }),
+  ],
 };

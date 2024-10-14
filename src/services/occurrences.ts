@@ -46,18 +46,26 @@ export const getLatestHabitOccurrenceTimestamp = async (
 
 export const getLongestHabitStreak = async (
   habitId: number
-): Promise<number> => {
+): Promise<number | null> => {
   const { data } = await supabaseClient.rpc('get_longest_streak', {
     habit_identifier: habitId,
   });
 
   if (!data?.length) {
-    return 0;
+    return null;
   }
 
   const [{ streak_length: streakLength }] = data;
 
   return streakLength;
+};
+
+export const getHabitTotalEntries = async (habitId: number) => {
+  const { data } = await fetch(Collections.OCCURRENCES)
+    .select('id')
+    .eq('habit_id', habitId);
+
+  return data?.length || null;
 };
 
 export const listOccurrences = async (range: [number, number]) => {

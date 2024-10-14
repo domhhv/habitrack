@@ -32,6 +32,7 @@ jest.mock('@services', () => ({
   listHabits: jest.fn().mockReturnValue(() => []),
   getLatestHabitOccurrenceTimestamp: jest.fn().mockResolvedValue(0),
   getLongestHabitStreak: jest.fn().mockResolvedValue(0),
+  getHabitTotalEntries: jest.fn().mockResolvedValue(0),
 }));
 
 jest.mock('@hooks', () => ({
@@ -90,7 +91,6 @@ describe(HabitsPage.name, () => {
     );
     await waitFor(() => {
       expect(getByText('Your habits'));
-      expect(getByText('Count: 2'));
       expect(getByText('Habit name #1'));
       expect(getByText('Habit name #2'));
       expect(getByText('Habit description #1'));

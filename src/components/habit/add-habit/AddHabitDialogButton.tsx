@@ -74,13 +74,13 @@ const AddHabitDialogButton = () => {
   return (
     <>
       <Button
-        fullWidth
         color="primary"
         variant="solid"
         startContent={<Plus weight="bold" />}
         onClick={handleDialogOpen}
         isDisabled={fetchingHabits}
         data-testid="add-habit-button"
+        className="self-end"
       >
         Add habit
       </Button>
