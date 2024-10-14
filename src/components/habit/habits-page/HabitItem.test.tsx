@@ -1,3 +1,19 @@
+import { useHabits, useSnackbar, useTraits } from '@context';
+import { useHabitTraitChipColor } from '@hooks';
+import type { Habit } from '@models';
+import {
+  getLatestHabitOccurrenceTimestamp,
+  StorageBuckets,
+  updateFile,
+  uploadFile,
+} from '@services';
+import { useUser } from '@supabase/auth-helpers-react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import { getHabitIconUrl } from '@utils';
+import React from 'react';
+
+import HabitItem, { type HabitItemProps } from './HabitItem';
+
 jest.mock('@context', () => ({
   useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
   useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
@@ -15,6 +31,7 @@ jest.mock('@services', () => ({
   uploadFile: jest.fn(),
   createSignedUrl: jest.fn(),
   getLatestHabitOccurrenceTimestamp: jest.fn().mockResolvedValue(0),
+  getLongestHabitStreak: jest.fn().mockResolvedValue(0),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
@@ -30,22 +47,6 @@ jest.mock('@hooks', () => ({
     DARK: 'dark',
   },
 }));
-
-import { useHabits, useSnackbar, useTraits } from '@context';
-import { useHabitTraitChipColor } from '@hooks';
-import type { Habit } from '@models';
-import {
-  getLatestHabitOccurrenceTimestamp,
-  StorageBuckets,
-  updateFile,
-  uploadFile,
-} from '@services';
-import { useUser } from '@supabase/auth-helpers-react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import { getHabitIconUrl } from '@utils';
-import React from 'react';
-
-import HabitItem, { type HabitItemProps } from './HabitItem';
 
 describe(HabitItem.name, () => {
   const habit: Habit = {
@@ -324,13 +325,14 @@ describe(HabitItem.name, () => {
   });
 
   it('should display latest entry submission', async () => {
-    const date = new Date(2024, 8, 10);
+    const date = new Date();
+    date.setDate(date.getDate() - 8);
     (getLatestHabitOccurrenceTimestamp as jest.Mock).mockResolvedValueOnce(
       +date
     );
     const { getByText } = render(<HabitItem {...props} />);
     await waitFor(() => {
-      expect(getByText(`Latest entry added on Sep 10, 2024`));
+      expect(getByText(`Latest entry added 8 days ago`));
     });
   });
 });
