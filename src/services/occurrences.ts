@@ -1,3 +1,4 @@
+import { supabaseClient } from '@helpers';
 import type { AddOccurrence, Occurrence, ServerOccurrence } from '@models';
 import {
   cache,
@@ -41,6 +42,22 @@ export const getLatestHabitOccurrenceTimestamp = async (
   const [{ timestamp }] = data;
 
   return timestamp;
+};
+
+export const getLongestHabitStreak = async (
+  habitId: number
+): Promise<number> => {
+  const { data } = await supabaseClient.rpc('get_longest_streak', {
+    habit_identifier: habitId,
+  });
+
+  if (!data?.length) {
+    return 0;
+  }
+
+  const [{ streak_length: streakLength }] = data;
+
+  return streakLength;
 };
 
 export const listOccurrences = async (range: [number, number]) => {

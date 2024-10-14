@@ -1,9 +1,13 @@
 import { AppHeader, Calendar, AccountPage, HabitsPage } from '@components';
 import { useCalendar } from '@hooks';
+import { setDefaultOptions } from 'date-fns';
+import { enGB } from 'date-fns/locale';
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import Providers from './Providers';
+
+setDefaultOptions({ locale: enGB });
 
 const App = () => {
   const { rangeStart, rangeEnd, state, weeksInMonth } = useCalendar();

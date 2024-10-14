@@ -6,19 +6,30 @@ import { Button, Chip, Tooltip } from '@nextui-org/react';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import {
   getLatestHabitOccurrenceTimestamp,
+  getLongestHabitStreak,
   StorageBuckets,
   updateFile,
   uploadFile,
 } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
-import { format } from 'date-fns';
+import { formatDistanceStrict, formatRelative, isThisWeek } from 'date-fns';
+import { enGB } from 'date-fns/locale';
 import React from 'react';
 
 export type HabitItemProps = {
   habit: Habit;
   onEdit: () => void;
   onDelete: () => void;
+};
+
+const formatRelativeLocale: Record<string, string> = {
+  yesterday: `'yesterday'`,
+  today: `'today'`,
+  tomorrow: `'tomorrow'`,
+  lastWeek: `'this' EEEE`,
+  nextWeek: `'next' EEEE`,
+  other: `'on' LLL d, y`,
 };
 
 const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
@@ -35,7 +46,10 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
     getLatestHabitOccurrenceTimestamp(habit.id).then(
       setLatestOccurrenceTimestamp
     );
-  }, [habit.id]);
+    getLongestHabitStreak(habit.id).then((streakLength) => {
+      console.log({ [habit.name]: streakLength });
+    });
+  }, [habit.id, habit.name]);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     event
@@ -90,6 +104,23 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
     }
   };
 
+  const formatRelativeDate = (timestamp: number) => {
+    if (isThisWeek(timestamp)) {
+      return formatRelative(timestamp, new Date(), {
+        locale: {
+          ...enGB,
+          formatRelative: (token: string) => formatRelativeLocale[token],
+        },
+      });
+    }
+
+    return formatDistanceStrict(timestamp, new Date(), {
+      locale: enGB,
+      addSuffix: true,
+      unit: 'day',
+    });
+  };
+
   return (
     <li className="flex items-center border-b-gray-300 pb-1.5 pt-2 dark:border-b-gray-600 [&:not(:last-of-type)]:border-b">
       <Tooltip content="Upload new icon">
@@ -136,8 +167,7 @@ const HabitItem = ({ habit, onEdit, onDelete }: HabitItemProps) => {
           )}
           {!!latestOccurrenceTimestamp && (
             <p className="text-left text-xs">
-              Latest entry added on{' '}
-              {format(latestOccurrenceTimestamp, 'LLL d, y')}
+              Latest entry added {formatRelativeDate(latestOccurrenceTimestamp)}
             </p>
           )}
         </div>

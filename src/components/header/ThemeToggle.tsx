@@ -51,8 +51,8 @@ const ThemeToggle = () => {
       {Object.values(ThemeMode).map((mode) => {
         const isSelected = themeMode === mode;
         const buttonClassName = clsx(
-          'bg-gray-100 dark:bg-gray-800',
-          isSelected && 'bg-gray-400 dark:bg-gray-600'
+          'bg-slate-100 dark:bg-slate-800',
+          isSelected && 'bg-slate-400 dark:bg-slate-600'
         );
 
         const iconClassName = clsx(isSelected && 'text-white');
