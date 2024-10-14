@@ -1,5 +1,5 @@
 import { AuthModalButton } from '@components';
-import { Button } from '@nextui-org/react';
+import { Button, Tooltip } from '@nextui-org/react';
 import { GithubLogo } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -18,16 +18,24 @@ const Header = () => {
             Habits
           </Button>
           <ThemeToggle />
-          <Button
-            variant="light"
-            isIconOnly
-            as={Link}
-            to="https://github.com/domhhv/habitrack"
-            target="_blank"
-            className="text-slate-600 hover:!bg-slate-400 hover:text-white dark:text-slate-400 dark:hover:!bg-slate-600 dark:hover:text-white"
+          <Tooltip
+            showArrow
+            content="View source code on GitHub"
+            delay={1000}
+            color="primary"
+            placement="right"
           >
-            <GithubLogo size={20} />
-          </Button>
+            <Button
+              variant="light"
+              isIconOnly
+              as={Link}
+              to="https://github.com/domhhv/habitrack"
+              target="_blank"
+              className="text-slate-500 hover:!bg-blue-500 hover:text-white dark:text-slate-400 dark:hover:!bg-blue-500 dark:hover:text-white"
+            >
+              <GithubLogo size={20} />
+            </Button>
+          </Tooltip>
         </div>
         <AuthModalButton />
       </div>
