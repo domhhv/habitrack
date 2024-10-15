@@ -1,5 +1,17 @@
 <h1 align="center">Habitrack</h1>
 
+<div align="center">
+<a href="https://react.dev/" title="React"><img src="https://i.ibb.co/DzpWrw3/react.png" alt="React" width="32" height="32" /></a>
+&nbsp;
+<a href="https://www.typescriptlang.org/" title="TypeScript"><img src="https://i.ibb.co/Kq8DY4f/typescript.png" alt="TypeScript" width="32" height="32"></a>
+&nbsp;
+<a href="https://tailwindcss.com/" title="TailwindCSS"><img src="https://i.ibb.co/mR0BWJx/Tailwind-CSS.png" alt="Tailwind" width="32" height="32" /></a>
+&nbsp;
+<a href="https://nextui.org" title="NextUI"><img src="https://i.ibb.co/xYjF5K6/nextui.png" alt="NextUI" width="32" height="32"></a>
+&nbsp;
+<a href="https://supabase.com/" title="Supabase"><img src="https://i.ibb.co/WnJ9m8k/supabase-logo-icon.png" alt="Supabase" width="32" height="32"></a>
+</div>
+
 Habitrack is a simple and intuitive app designed to help users build better habits by visualizing their progress on a calendar. With Habitrack, you can easily log daily habits, track your consistency, and see your streaks at a glance. This tool is perfect for anyone looking to stay motivated and committed to personal goals, whether it’s fitness, learning, or self-improvement. By providing a clear overview of your habit performance over time, Habitrack helps you stay on course and maintain accountability.
 
 The app is live [here](https://habitrack.io). It uses:
@@ -11,12 +23,12 @@ The app is live [here](https://habitrack.io). It uses:
 
 ## Features
 
-- **Calendar View**: Visualize your habits on a monthly calendar.
+> _This app is under active development. Many more features coming soon!_
+
 - **Customizable Habits**: Add, remove, and customize habits to fit your routine. Associate your habits with traits and icons.
+- **Calendar View**: Visualize your habits on a monthly calendar.
 - **Daily Tracking**: Easily add daily entries of your habits.
 - **User Authentication**: Sign up and log in to your account to retain your habits and entries.
-
-_This app is under active development. More features coming soon!_
 
 ## Local development
 
