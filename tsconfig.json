@@ -28,5 +28,5 @@
       "@tests": ["../tests"]
     }
   },
-  "include": ["src", "./tests/jest.setup.js", "globals.d.ts"]
+  "include": ["src", "./tests/jest.setup.js"]
 }
