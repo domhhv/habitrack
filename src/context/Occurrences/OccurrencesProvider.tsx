@@ -122,12 +122,6 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
           ...prevOccurrences,
           nextOccurrence,
         ]);
-
-        showSnackbar('Your habit entry has been added to the calendar!', {
-          color: 'success',
-          dismissible: true,
-          dismissText: 'Done',
-        });
       } catch (e) {
         showSnackbar('Something went wrong while adding your habit', {
           color: 'danger',

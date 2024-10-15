@@ -1,4 +1,4 @@
-import { useOccurrences, useHabits, useTraits } from '@context';
+import { useOccurrences, useHabits, useTraits, useSnackbar } from '@context';
 import {
   Button,
   Modal,
@@ -24,10 +24,11 @@ const DayHabitModalDialog = ({
   onClose,
   date,
 }: DayHabitModalDialogProps) => {
+  const { showSnackbar } = useSnackbar();
   const { habits } = useHabits();
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrences();
-  const [selectedHabitId, setSelectedHabitId] = React.useState('');
+  const [selectedHabitIds, setSelectedHabitIds] = React.useState<string[]>([]);
   const { traitsMap } = useTraits();
 
   if (!date || !open) {
@@ -37,21 +38,38 @@ const DayHabitModalDialog = ({
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
-    const occurrence = {
-      day: date.toISOString().split('T')[0],
-      timestamp: +date,
-      habitId: +selectedHabitId,
-      userId: user?.id as string,
-      time: null, // TODO: Add time picker
-    };
-    await addOccurrence(occurrence);
+    const addOccurrences = selectedHabitIds.map((id) => {
+      return addOccurrence({
+        day: date.toISOString().split('T')[0],
+        timestamp: +date,
+        habitId: +id,
+        userId: user?.id as string,
+        time: null, // TODO: Add time picker
+      });
+    });
+
+    await Promise.all(addOccurrences);
+
+    showSnackbar('Habit entries are added to the calendar', {
+      color: 'success',
+      dismissible: true,
+      dismissText: 'Done',
+    });
 
     handleClose();
   };
 
   const handleClose = () => {
-    setSelectedHabitId('');
+    setSelectedHabitIds([]);
     onClose();
+  };
+
+  const handleHabitSelect = (habitId: string) => {
+    if (selectedHabitIds.includes(habitId)) {
+      setSelectedHabitIds(selectedHabitIds.filter((id) => id !== habitId));
+    } else {
+      setSelectedHabitIds([...selectedHabitIds, habitId]);
+    }
   };
 
   const hasHabits = habits.length > 0;
@@ -65,22 +83,20 @@ const DayHabitModalDialog = ({
     >
       <ModalContent>
         <ModalHeader>
-          Add a habit entry for {format(date, 'iii, LLL d, y')}
+          Add habit entries for {format(date, 'iii, LLL d, y')}
         </ModalHeader>
         <ModalBody>
           <Select
-            required
+            selectionMode="multiple"
             label={hasHabits ? 'Habits' : 'No habits yet'}
-            selectedKeys={[selectedHabitId]}
+            selectedKeys={selectedHabitIds}
             description="Select from your habits"
             data-testid="habit-select"
           >
             {habits.map((habit) => (
               <SelectItem
                 key={habit.id.toString()}
-                onClick={() => {
-                  setSelectedHabitId(habit.id.toString());
-                }}
+                onClick={() => handleHabitSelect(habit.id.toString())}
                 textValue={habit.name}
               >
                 <span>{habit.name}</span>
