@@ -11,6 +11,7 @@ jest.mock('@context', () => ({
   useOccurrences: jest.fn(),
   useHabits: jest.fn(),
   useTraits: jest.fn(),
+  useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
@@ -45,7 +46,7 @@ describe(DayHabitModalDialog.name, () => {
       addingOccurrence: false,
     });
     const { getByText } = render(<DayHabitModalDialog {...props} />);
-    expect(getByText('Add a habit entry for 2021-01-01')).toBeInTheDocument();
+    expect(getByText('Add habit entries for 2021-01-01')).toBeInTheDocument();
   });
 
   it('should not render if date is null', () => {
