@@ -20,16 +20,19 @@ jest.mock('@context', () => ({
 describe(OccurrenceChip.name, () => {
   const mockOnDelete = jest.fn();
   const props: OccurrenceChipProps = {
-    occurrence: {
-      id: 1,
-      createdAt: '2021-01-01T00:00:00Z',
-      updatedAt: '2021-01-02T00:00:00Z',
-      timestamp: 1612137600000,
-      day: '2021-02-01',
-      time: null,
-      habitId: 2,
-      userId: '3',
-    },
+    occurrences: [
+      {
+        id: 1,
+        createdAt: '2021-01-01T00:00:00Z',
+        updatedAt: '2021-01-02T00:00:00Z',
+        timestamp: 1612137600000,
+        day: '2021-02-01',
+        time: null,
+        habitId: 2,
+        userId: '3',
+      },
+    ],
+    habitId: 2,
     onDelete: mockOnDelete,
   };
 

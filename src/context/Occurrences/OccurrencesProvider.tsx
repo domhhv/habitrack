@@ -11,6 +11,7 @@ import {
   destroyOccurrence,
   listOccurrences,
 } from '@services';
+import { cache } from '@utils';
 import React, { type ReactNode } from 'react';
 
 type Props = {
@@ -45,7 +46,6 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   const fetchOccurrences = React.useCallback(async () => {
     setFetchingOccurrences(true);
     const result = await listOccurrences([rangeStart, rangeEnd]);
-    setOccurrences(result);
     setFetchingOccurrences(false);
     setAllOccurrences(result);
   }, [rangeStart, rangeEnd]);
@@ -91,7 +91,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   }, [filteredBy, allOccurrences, habits]);
 
   React.useEffect(() => {
-    const occurrencesByDate = occurrences.reduce(
+    const nextOccurrencesByDate = occurrences.reduce(
       (acc, occurrence) => {
         const { day } = occurrence;
         if (!acc[day]) {
@@ -104,7 +104,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
       {} as Record<string, Occurrence[]>
     );
 
-    setOccurrencesByDate((prev) => ({ ...prev, ...occurrencesByDate }));
+    setOccurrencesByDate(nextOccurrencesByDate);
   }, [occurrences]);
 
   const filterBy = React.useCallback((options: OccurrenceFilters) => {
@@ -118,8 +118,13 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
 
         const nextOccurrence = await createOccurrence(occurrence);
 
-        setOccurrences((prevOccurrences) => [
+        setAllOccurrences((prevOccurrences) => [
           ...prevOccurrences,
+          nextOccurrence,
+        ]);
+
+        cache.set([rangeStart, rangeEnd].toString(), [
+          ...cache.get([rangeStart, rangeEnd].toString()),
           nextOccurrence,
         ]);
       } catch (e) {
@@ -133,7 +138,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
         setAddingOccurrence(false);
       }
     },
-    [showSnackbar]
+    [showSnackbar, rangeStart, rangeEnd]
   );
 
   const removeOccurrence = React.useCallback(
@@ -143,17 +148,20 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
 
         await destroyOccurrence(id);
 
-        setOccurrences((prevOccurrences) => {
-          return prevOccurrences.filter((occurrence) => {
-            return occurrence.id !== id;
-          });
-        });
-
         setAllOccurrences((prevOccurrences) => {
           return prevOccurrences.filter((occurrence) => {
             return occurrence.id !== id;
           });
         });
+
+        const cachedOccurrences = cache.get([rangeStart, rangeEnd].toString());
+
+        cache.set(
+          [rangeStart, rangeEnd].toString(),
+          cachedOccurrences.filter((occurrence: Occurrence) => {
+            return occurrence.id !== id;
+          })
+        );
 
         showSnackbar('Your habit entry has been deleted from the calendar.', {
           dismissible: true,
@@ -169,7 +177,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
         setOccurrenceIdBeingDeleted(0);
       }
     },
-    [showSnackbar]
+    [showSnackbar, rangeStart, rangeEnd]
   );
 
   const removeOccurrencesByHabitId = (habitId: number) => {

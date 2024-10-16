@@ -95,7 +95,8 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
                 This is how habits of this trait will appear on your calendar
               </p>
               <OccurrenceChip
-                occurrence={makeTestOccurrence()}
+                occurrences={[makeTestOccurrence()]}
+                habitId={1}
                 onDelete={() => null}
                 colorOverride={`#${color}`}
               />
