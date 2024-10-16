@@ -30,19 +30,21 @@ const CalendarCell = ({
 }: CalendarCellProps) => {
   const cellRef = React.useRef<HTMLDivElement>(null);
   const user = useUser();
-  const { removeOccurrence, fetchingOccurrences } = useOccurrences();
+  const { removeOccurrence, fetchingOccurrences, occurrencesByDate } =
+    useOccurrences();
   const today = new Date();
   const isToday =
     today.getDate() === dateNumber &&
     today.getMonth() + 1 === monthIndex &&
     today.getFullYear() === fullYear;
   const screenSize = useScreenSize();
-  const { occurrencesByDate } = useOccurrences();
   const date = format(
     new Date(fullYear, monthIndex - 1, dateNumber),
     'yyyy-MM-dd'
   );
   const occurrences = occurrencesByDate[date] || [];
+
+  const groupedOccurrences = Object.groupBy(occurrences, (o) => o.habitId);
 
   const handleClick = React.useCallback(() => {
     if (fetchingOccurrences || !user?.id) {
@@ -142,21 +144,24 @@ const CalendarCell = ({
         <p className="font-bold">{dateNumber}</p>
         {renderToday()}
       </div>
-      <div className="flex flex-wrap gap-1 overflow-auto px-1 py-0.5">
-        {occurrences.map((occurrence) => {
-          return (
-            <motion.div
-              key={occurrence.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <OccurrenceChip
-                occurrence={occurrence}
-                onDelete={handleOccurrenceDelete}
-              />
-            </motion.div>
-          );
-        })}
+      <div className="flex flex-wrap gap-1 overflow-auto px-2 py-0.5 pb-1">
+        {Object.entries(groupedOccurrences).map(
+          ([habitId, habitOccurrences]) => {
+            return (
+              <motion.div
+                key={habitId}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <OccurrenceChip
+                  occurrences={habitOccurrences!}
+                  habitId={+habitId}
+                  onDelete={handleOccurrenceDelete}
+                />
+              </motion.div>
+            );
+          }
+        )}
       </div>
     </div>
   );

@@ -1,13 +1,14 @@
 import { useHabits, useOccurrences } from '@context';
 import { useHabitTraitChipColor, useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
-import { Spinner, Chip, Button, Tooltip } from '@nextui-org/react';
+import { Spinner, Chip, Button, Tooltip, Badge } from '@nextui-org/react';
 import { X } from '@phosphor-icons/react';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
 export type OccurrenceChipProps = {
-  occurrence: Occurrence;
+  occurrences: Occurrence[];
+  habitId: number;
   onDelete: (
     occurrenceId: number,
     clickEvent: React.MouseEvent<HTMLButtonElement>
@@ -16,20 +17,19 @@ export type OccurrenceChipProps = {
 };
 
 const OccurrenceChip = ({
-  occurrence,
+  occurrences,
+  habitId,
   onDelete,
   colorOverride,
 }: OccurrenceChipProps) => {
   const { habitsMap } = useHabits();
   const { occurrenceIdBeingDeleted } = useOccurrences();
-  const occurrenceHabit = habitsMap[occurrence.habitId!] || {};
-  const traitChipColor = useHabitTraitChipColor(
-    habitsMap[occurrence.habitId]?.traitId
-  );
+  const occurrenceHabit = habitsMap[habitId] || {};
+  const traitChipColor = useHabitTraitChipColor(occurrenceHabit.traitId);
   const screenSize = useScreenSize();
   const iconUrl = getHabitIconUrl(occurrenceHabit.iconPath);
 
-  const isBeingDeleted = occurrenceIdBeingDeleted === occurrence.id;
+  const isBeingDeleted = occurrenceIdBeingDeleted === occurrences[0].id;
 
   const chipStyle = {
     backgroundColor: colorOverride || traitChipColor,
@@ -58,7 +58,7 @@ const OccurrenceChip = ({
         radius="full"
         variant="solid"
         size="sm"
-        onClick={(clickEvent) => onDelete(occurrence.id, clickEvent)}
+        onClick={(clickEvent) => onDelete(occurrences[0].id, clickEvent)}
         role="habit-chip-delete-button"
         className="h-4 w-4 min-w-0"
       >
@@ -67,11 +67,11 @@ const OccurrenceChip = ({
     );
   };
 
-  return (
-    <Tooltip isDisabled={!occurrenceHabit.name} content={occurrenceHabit.name}>
+  const renderChip = () => {
+    const chip = (
       <Chip
         style={chipStyle}
-        className="mr-0.5 mt-0.5 min-w-0 px-1 py-0.5"
+        className="mr-1 mt-1 min-w-0 px-1 py-0.5"
         variant="solid"
         size="sm"
         role="habit-chip"
@@ -79,6 +79,28 @@ const OccurrenceChip = ({
         isDisabled={isBeingDeleted}
         endContent={getEndContent()}
       />
+    );
+
+    if (occurrences.length > 1) {
+      return (
+        <Badge
+          size="sm"
+          content={occurrences.length}
+          variant="solid"
+          placement="bottom-right"
+          color="primary"
+        >
+          {chip}
+        </Badge>
+      );
+    }
+
+    return chip;
+  };
+
+  return (
+    <Tooltip isDisabled={!occurrenceHabit.name} content={occurrenceHabit.name}>
+      {renderChip()}
     </Tooltip>
   );
 };
