@@ -1,12 +1,15 @@
+import { TraitsProvider, useHabits, useTraits } from '@context';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import EditHabitDialog, { type EditHabitDialogProps } from './EditHabitDialog';
+
 jest.mock('@hooks', () => ({
   ThemeMode: {
     LIGHT: 'light',
     DARK: 'dark',
     SYSTEM: 'system',
   },
-  useTraits: jest
-    .fn()
-    .mockReturnValue({ traitsMap: { 1: { slug: 'trait-slug' } } }),
   useTextField: jest
     .fn()
     .mockReturnValue(['', jest.fn(), jest.fn(), jest.fn()]),
@@ -16,7 +19,6 @@ jest.mock('@hooks', () => ({
 jest.mock('@context', () => ({
   useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
   useTraits: jest.fn().mockReturnValue({
-    traitsMap: { 1: { label: 'Trait label', slug: 'trait-slug' } },
     allTraits: [{ id: 1, label: 'Trait label', slug: 'trait-slug' }],
   }),
   TraitsProvider: jest.fn(({ children }) => children),
@@ -27,12 +29,6 @@ jest.mock('@supabase/auth-helpers-react', () => ({
     .fn()
     .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
 }));
-
-import { TraitsProvider, useHabits, useTraits } from '@context';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import React from 'react';
-
-import EditHabitDialog, { type EditHabitDialogProps } from './EditHabitDialog';
 
 describe(EditHabitDialog.name, () => {
   beforeEach(() => {
@@ -51,6 +47,10 @@ describe(EditHabitDialog.name, () => {
       description: 'Habit description',
       traitId: 42,
       iconPath: '',
+      trait: {
+        name: 'Trait name',
+        color: 'blue',
+      },
     },
   };
 
@@ -102,7 +102,6 @@ describe(EditHabitDialog.name, () => {
     const mockUpdateHabit = jest.fn();
     (useHabits as jest.Mock).mockReturnValue({ updateHabit: mockUpdateHabit });
     (useTraits as jest.Mock).mockReturnValue({
-      traitsMap: { 1: { label: 'Trait label', slug: 'trait-slug' } },
       allTraits: [{ id: 1, label: 'Trait label', slug: 'trait-slug' }],
     });
     const { getByRole, getByLabelText } = render(

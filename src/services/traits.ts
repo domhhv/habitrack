@@ -1,41 +1,38 @@
-import type { ServerTrait, Trait, AddTrait } from '@models';
+import { supabaseClient } from '@helpers';
+import { type Trait } from '@models';
 import {
   transformClientEntity,
   transformServerEntities,
   transformServerEntity,
 } from '@utils';
+import type { CamelCasedPropertiesDeep } from 'type-fest';
 
-import {
-  Collections,
-  destroy,
-  get,
-  patch,
-  post,
-  type PatchEntity,
-} from './supabase';
+import type { TablesInsert } from '../../supabase/database.types';
 
-export const createTrait = async (body: AddTrait) => {
-  const serverBody: ServerTrait = transformClientEntity(body);
+export type TraitsInsert = CamelCasedPropertiesDeep<TablesInsert<'traits'>>;
 
-  const trait = await post<ServerTrait>(Collections.TRAITS, serverBody);
+export const createTrait = async (body: TraitsInsert): Promise<Trait> => {
+  const serverBody = transformClientEntity(body);
 
-  return transformServerEntity(trait) as unknown as Trait;
+  const { error, data } = await supabaseClient
+    .from('traits')
+    .insert(serverBody)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformServerEntity(data);
 };
 
 export const listTraits = async () => {
-  const traits = await get<Trait[]>(Collections.TRAITS);
+  const { error, data } = await supabaseClient.from('traits').select();
 
-  return transformServerEntities(traits) as unknown as Trait[];
-};
+  if (error) {
+    throw new Error(error.message);
+  }
 
-export const patchTrait = async (id: number, body: PatchEntity<Trait>) => {
-  const serverUpdates: ServerTrait = transformClientEntity(body);
-  const trait = await patch<Trait>(Collections.TRAITS, id, serverUpdates);
-  return transformServerEntity(trait);
-};
-
-export const destroyTrait = async (id: number) => {
-  const serverTrait = await destroy<Trait>(Collections.TRAITS, id);
-
-  return transformServerEntity(serverTrait) as unknown as Trait;
+  return transformServerEntities(data);
 };

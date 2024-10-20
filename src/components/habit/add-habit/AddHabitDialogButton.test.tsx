@@ -1,8 +1,15 @@
+import { useHabits, useSnackbar } from '@context';
+import { StorageBuckets, uploadFile } from '@services';
+import { useUser } from '@supabase/auth-helpers-react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import AddHabitDialogButton from './AddHabitDialogButton';
+
 jest.mock('@context', () => ({
   useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
   useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
   useTraits: jest.fn().mockReturnValue({
-    traitsMap: { 1: { slug: 'trait-slug', name: 'Trait' } },
     allTraits: [{ id: 1, slug: 'trait-slug', name: 'Trait' }],
   }),
 }));
@@ -18,14 +25,6 @@ jest.mock('@supabase/auth-helpers-react', () => ({
   useUser: jest.fn(),
   useSession: jest.fn(),
 }));
-
-import { useHabits, useSnackbar } from '@context';
-import { StorageBuckets, uploadFile } from '@services';
-import { useUser } from '@supabase/auth-helpers-react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import React from 'react';
-
-import AddHabitDialogButton from './AddHabitDialogButton';
 
 describe(AddHabitDialogButton.name, () => {
   it.skip('should handle data enter and dialog close', () => {

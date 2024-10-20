@@ -1,5 +1,5 @@
-import { useHabits, useOccurrences } from '@context';
-import { useHabitTraitChipColor, useScreenSize } from '@hooks';
+import { useOccurrences } from '@context';
+import { useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
 import { Spinner, Chip, Button, Tooltip, Badge } from '@nextui-org/react';
 import { X } from '@phosphor-icons/react';
@@ -8,7 +8,6 @@ import React from 'react';
 
 export type OccurrenceChipProps = {
   occurrences: Occurrence[];
-  habitId: number;
   onDelete: (
     occurrenceId: number,
     clickEvent: React.MouseEvent<HTMLButtonElement>
@@ -18,29 +17,27 @@ export type OccurrenceChipProps = {
 
 const OccurrenceChip = ({
   occurrences,
-  habitId,
   onDelete,
   colorOverride,
 }: OccurrenceChipProps) => {
-  const { habitsMap } = useHabits();
   const { occurrenceIdBeingDeleted } = useOccurrences();
-  const occurrenceHabit = habitsMap[habitId] || {};
-  const traitChipColor = useHabitTraitChipColor(occurrenceHabit.traitId);
+  const [{ id, habit }] = occurrences;
+  const { name: habitName, iconPath, trait } = habit || {};
+  const { color: traitColor } = trait || {};
   const screenSize = useScreenSize();
-  const iconUrl = getHabitIconUrl(occurrenceHabit.iconPath);
+  const iconUrl = getHabitIconUrl(iconPath);
 
-  const isBeingDeleted = occurrenceIdBeingDeleted === occurrences[0].id;
+  const isBeingDeleted = occurrenceIdBeingDeleted === id;
+
+  console.log({ iconPath });
+  console.log({ occurrences });
 
   const chipStyle = {
-    backgroundColor: colorOverride || traitChipColor,
+    backgroundColor: colorOverride || traitColor,
   };
 
   const startContent = (
-    <img
-      src={iconUrl}
-      alt={`${occurrenceHabit.name} icon`}
-      className="h-4 w-4 rounded"
-    />
+    <img src={iconUrl} alt={`${habitName} icon`} className="h-4 w-4 rounded" />
   );
 
   const getEndContent = () => {
@@ -99,7 +96,7 @@ const OccurrenceChip = ({
   };
 
   return (
-    <Tooltip isDisabled={!occurrenceHabit.name} content={occurrenceHabit.name}>
+    <Tooltip isDisabled={!habitName} content={habitName}>
       {renderChip()}
     </Tooltip>
   );

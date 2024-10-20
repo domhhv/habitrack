@@ -1,6 +1,6 @@
-import { HabitsProvider, TraitsProvider, useHabits, useTraits } from '@context';
-import type { Habit } from '@models';
+import { HabitsProvider, TraitsProvider, useHabits } from '@context';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import { makeTestHabit } from '@tests';
 import React from 'react';
 
 import HabitsPage from './HabitsPage';
@@ -8,17 +8,11 @@ import HabitsPage from './HabitsPage';
 jest.mock('@context', () => ({
   TraitsProvider: jest.fn(({ children }) => children),
   HabitsProvider: jest.fn(({ children }) => children),
-  useHabits: jest.fn().mockImplementation(() => ({
-    habits: [],
-    habitsMap: {},
-    removeHabit: jest.fn(),
-  })),
-  useSnackbar: jest.fn().mockReturnValue({}),
   useTraits: jest.fn().mockReturnValue({
-    traitsMap: {},
-    traits: [],
     allTraits: [],
   }),
+  useHabits: jest.fn(),
+  useSnackbar: jest.fn().mockReturnValue({}),
   useOccurrences: jest.fn().mockReturnValue({
     removeOccurrencesByHabitId: jest.fn(),
     allOccurrences: [],
@@ -41,8 +35,6 @@ jest.mock('@hooks', () => ({
     DARK: 'dark',
     SYSTEM: 'system',
   },
-  useHabitIconUrl: jest.fn(),
-  useHabitTraitChipColor: jest.fn(),
   useDocumentTitle: jest.fn(),
   useTextField: jest
     .fn()
@@ -52,35 +44,17 @@ jest.mock('@hooks', () => ({
 
 describe(HabitsPage.name, () => {
   it('should display habits', async () => {
-    const habits: Habit[] = [
-      {
-        id: 1,
-        name: 'Habit name #1',
-        description: 'Habit description #1',
-        userId: 'uuid-42',
-        createdAt: '2021-01-01T00:00:00Z',
-        updatedAt: '2021-01-01T00:00:00Z',
-        iconPath: 'icon-path-2',
-        traitId: 1,
-      },
-      {
-        id: 2,
-        name: 'Habit name #2',
-        description: 'Habit description #2',
-        userId: 'uuid-43',
-        createdAt: '2021-01-01T00:00:00Z',
-        updatedAt: '2021-01-01T00:00:00Z',
-        iconPath: 'icon-path-2',
-        traitId: 2,
-      },
-    ];
     (useHabits as jest.Mock).mockImplementation(() => ({
-      habits,
-      habitsMap: {
-        1: habits[0],
-        2: habits[1],
-      },
-      removeHabit: jest.fn(),
+      habits: [
+        makeTestHabit({
+          name: 'Habit name #1',
+          description: 'Habit description #1',
+        }),
+        makeTestHabit({
+          name: 'Habit name #2',
+          description: 'Habit description #2',
+        }),
+      ],
     }));
     const { getByText } = render(
       <TraitsProvider>
@@ -99,39 +73,18 @@ describe(HabitsPage.name, () => {
   });
 
   it('should open edit dialog on edit icon button click', async () => {
-    const habits: Habit[] = [
-      {
-        id: 1,
-        name: 'Habit name #1',
-        description: 'Habit description #1',
-        userId: 'uuid-42',
-        createdAt: '2021-01-01T00:00:00Z',
-        updatedAt: '2021-01-01T00:00:00Z',
-        iconPath: 'icon-path-2',
-        traitId: 1,
-      },
-      {
-        id: 2,
-        name: 'Habit name #2',
-        description: 'Habit description #2',
-        userId: 'uuid-43',
-        createdAt: '2021-01-01T00:00:00Z',
-        updatedAt: '2021-01-01T00:00:00Z',
-        iconPath: 'icon-path-2',
-        traitId: 2,
-      },
-    ];
     (useHabits as jest.Mock).mockImplementation(() => ({
-      habits,
-      habitsMap: {
-        1: habits[0],
-        2: habits[1],
-      },
-      removeHabit: jest.fn(),
-    }));
-    (useTraits as jest.Mock).mockImplementation(() => ({
-      traitsMap: { 1: {}, 2: {} },
-      allTraits: [],
+      habits: [
+        makeTestHabit({
+          id: 42,
+          name: 'Habit name #1',
+          description: 'Habit description #1',
+        }),
+        makeTestHabit({
+          name: 'Habit name #2',
+          description: 'Habit description #2',
+        }),
+      ],
     }));
     const { queryByRole, getByRole, getByTestId } = render(
       <TraitsProvider>
@@ -141,45 +94,11 @@ describe(HabitsPage.name, () => {
       </TraitsProvider>
     );
     expect(queryByRole('submit-edited-habit-button')).toBeNull();
-    fireEvent.click(getByTestId('edit-habit-id-2-button'));
+    fireEvent.click(getByTestId('edit-habit-id-42-button'));
     expect(getByRole('submit-edited-habit-button')).toBeDefined();
   });
 
   it.skip('should open confirm dialog on remove icon button click', async () => {
-    const habits: Habit[] = [
-      {
-        id: 1,
-        name: 'Habit name #1',
-        description: 'Habit description #1',
-        userId: 'uuid-42',
-        createdAt: '2021-01-01T00:00:00Z',
-        updatedAt: '2021-01-01T00:00:00Z',
-        iconPath: 'icon-path-2',
-        traitId: 1,
-      },
-      {
-        id: 2,
-        name: 'Habit name #2',
-        description: 'Habit description #2',
-        userId: 'uuid-43',
-        createdAt: '2021-01-01T00:00:00Z',
-        updatedAt: '2021-01-01T00:00:00Z',
-        iconPath: 'icon-path-2',
-        traitId: 2,
-      },
-    ];
-    (useHabits as jest.Mock).mockImplementation(() => ({
-      habits,
-      habitsMap: {
-        1: habits[0],
-        2: habits[1],
-      },
-      removeHabit: jest.fn(),
-    }));
-    (useTraits as jest.Mock).mockImplementation(() => ({
-      traitsMap: { 1: {}, 2: {} },
-      allTraits: [],
-    }));
     const { getByRole, getByTestId } = render(
       <TraitsProvider>
         <HabitsProvider>
@@ -193,40 +112,19 @@ describe(HabitsPage.name, () => {
   });
 
   it.skip('should remove habit on confirm', async () => {
-    const habits: Habit[] = [
-      {
-        id: 1,
-        name: 'Habit name #1',
-        description: 'Habit description #1',
-        userId: 'uuid-42',
-        createdAt: '2021-01-01T00:00:00Z',
-        updatedAt: '2021-01-01T00:00:00Z',
-        iconPath: 'icon-path-2',
-        traitId: 1,
-      },
-      {
-        id: 2,
-        name: 'Habit name #2',
-        description: 'Habit description #2',
-        userId: 'uuid-43',
-        createdAt: '2021-01-01T00:00:00Z',
-        updatedAt: '2021-01-01T00:00:00Z',
-        iconPath: 'icon-path-2',
-        traitId: 2,
-      },
-    ];
     const mockRemoveHabit = jest.fn();
     (useHabits as jest.Mock).mockImplementation(() => ({
-      habits,
-      habitsMap: {
-        1: habits[0],
-        2: habits[1],
-      },
+      habits: [
+        makeTestHabit({
+          name: 'Habit name #1',
+          description: 'Habit description #1',
+        }),
+        makeTestHabit({
+          name: 'Habit name #2',
+          description: 'Habit description #2',
+        }),
+      ],
       removeHabit: mockRemoveHabit,
-    }));
-    (useTraits as jest.Mock).mockImplementation(() => ({
-      traitsMap: { 1: {}, 2: {} },
-      allTraits: [],
     }));
     const { queryByRole, getByRole, getByTestId } = render(
       <TraitsProvider>

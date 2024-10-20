@@ -28,5 +28,5 @@
       "@tests": ["../tests"]
     }
   },
-  "include": ["src", "./tests/jest.setup.js"]
+  "include": ["src", "tests", "./supabase/database.types.ts"]
 }

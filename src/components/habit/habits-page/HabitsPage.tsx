@@ -3,8 +3,9 @@ import {
   ConfirmDialog,
   EditHabitDialog,
 } from '@components';
-import { useHabits, useOccurrences, useTraits } from '@context';
+import { useHabits, useOccurrences } from '@context';
 import { useDocumentTitle } from '@hooks';
+import { type Habit } from '@models';
 import {
   Button,
   Chip,
@@ -63,40 +64,40 @@ const habitColumns = [
 
 const HabitsPage = () => {
   const user = useUser();
-  const { traitsMap } = useTraits();
-  const { habits, habitsMap, removeHabit } = useHabits();
+  const { habits, removeHabit } = useHabits();
   const { removeOccurrencesByHabitId } = useOccurrences();
-  const [isEditingHabit, setIsEditingHabit] = React.useState(false);
-  const [habitIdToEdit, setHabitIdToEdit] = React.useState(0);
-  const [habitIdToRemove, setHabitIdToRemove] = React.useState(0);
+  const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
+  const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
   const [isRemovingHabit, setIsRemovingHabit] = React.useState(false);
 
   useDocumentTitle('My Habits | Habitrack');
 
-  const handleRemovalConfirmOpen = (id: number) => {
-    setHabitIdToRemove(id);
+  const handleRemovalConfirmOpen = (habit: Habit) => {
+    setHabitToRemove(habit);
   };
 
   const handleRemovalCancel = () => {
-    setHabitIdToRemove(0);
+    setHabitToRemove(null);
   };
 
   const handleRemovalConfirmed = async () => {
+    if (!habitToRemove) {
+      return null;
+    }
+
     setIsRemovingHabit(true);
-    await removeHabit(habitIdToRemove);
-    removeOccurrencesByHabitId(habitIdToRemove);
-    setHabitIdToRemove(0);
+    await removeHabit(habitToRemove.id);
+    removeOccurrencesByHabitId(habitToRemove.id);
+    setHabitToRemove(null);
     setIsRemovingHabit(false);
   };
 
-  const handleEditStart = (habitId: number) => {
-    setIsEditingHabit(true);
-    setHabitIdToEdit(habitId);
+  const handleEditStart = (habit: Habit) => {
+    setHabitToEdit(habit);
   };
 
   const handleEditEnd = () => {
-    setIsEditingHabit(false);
-    setHabitIdToEdit(0);
+    setHabitToEdit(null);
   };
 
   return (
@@ -134,12 +135,11 @@ const HabitsPage = () => {
                       className="mr-0.5 inline-block h-1 w-1 rounded-full"
                       role="habit-trait-chip-color-indicator"
                       style={{
-                        backgroundColor:
-                          traitsMap[habit.traitId]?.color || 'black',
+                        backgroundColor: habit.trait?.color || 'black',
                       }}
                     />
                     <p role="habit-trait-chip-name">
-                      {traitsMap[habit.traitId]?.name || 'Unknown'}
+                      {habit.trait?.name || 'Unknown trait'}
                     </p>
                   </div>
                 </Chip>
@@ -162,7 +162,7 @@ const HabitsPage = () => {
                       size="sm"
                       variant="bordered"
                       color="primary"
-                      onClick={() => handleEditStart(habit.id)}
+                      onClick={() => handleEditStart(habit)}
                       role="edit-habit-button"
                       data-testid={`edit-habit-id-${habit.id}-button`}
                     >
@@ -175,7 +175,7 @@ const HabitsPage = () => {
                       size="sm"
                       color="danger"
                       variant="bordered"
-                      onClick={() => handleRemovalConfirmOpen(habit.id)}
+                      onClick={() => handleRemovalConfirmOpen(habit)}
                       isDisabled={!user?.id}
                       role="delete-habit-button"
                       data-testid={`delete-habit-id-${habit.id}-button`}
@@ -190,24 +190,22 @@ const HabitsPage = () => {
           ))}
         </TableBody>
       </Table>
-      {!!habitIdToEdit && (
-        <EditHabitDialog
-          open={isEditingHabit}
-          onClose={handleEditEnd}
-          habit={habitsMap[habitIdToEdit]}
-        />
-      )}
+      <EditHabitDialog
+        open={!!habitToEdit}
+        onClose={handleEditEnd}
+        habit={habitToEdit}
+      />
       <AddHabitDialogButton />
       <ConfirmDialog
-        open={!!habitIdToRemove}
+        open={!!habitToRemove}
         heading="Delete habit"
         onConfirm={handleRemovalConfirmed}
         onCancel={handleRemovalCancel}
         loading={isRemovingHabit}
       >
         <div>
-          Are you sure you want to delete{' '}
-          <strong>{habitsMap[habitIdToRemove]?.name}</strong> habit?
+          Are you sure you want to delete <strong>{habitToRemove?.name}</strong>{' '}
+          habit?
           <br />
           <br />
           <i className="text-sm">

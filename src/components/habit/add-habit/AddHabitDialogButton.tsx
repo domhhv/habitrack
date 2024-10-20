@@ -22,7 +22,7 @@ const AddHabitDialogButton = () => {
   const user = useUser();
   const { showSnackbar } = useSnackbar();
   const { allTraits } = useTraits();
-  const { fetchingHabits, addingHabit, addHabit, updateHabit } = useHabits();
+  const { fetchingHabits, addingHabit, addHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [name, handleNameChange, clearName] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
@@ -52,14 +52,14 @@ const AddHabitDialogButton = () => {
         traitId: traitId as unknown as number,
       };
 
-      const { id } = await addHabit(habit);
+      let iconPath = '';
 
       if (icon) {
-        const [, extension] = icon.name.split('.');
-        const iconPath = `${user?.id}/habit-id-${id}.${extension}`;
+        iconPath = `${user?.id}/icon.name`;
         await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, icon);
-        void updateHabit(id, { ...habit, iconPath });
       }
+
+      await addHabit(habit);
     } catch (error) {
       console.error(error);
 

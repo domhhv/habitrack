@@ -1,30 +1,16 @@
-import type { PatchEntity, PostEntity } from '@services';
-
-export type ServerHabit = {
-  id: number;
-  name: string;
-  description: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string | null;
-  trait_id: number;
-  icon_path: string | null;
-};
+import { type Trait } from './trait.model';
 
 export type Habit = {
   id: number;
   name: string;
-  description: string;
+  description: string | null;
   userId: string;
   createdAt: string;
   updatedAt: string | null;
   traitId: number;
+  trait: Pick<Trait, 'name' | 'color'> | null;
   iconPath: string | null;
 };
 
 type HabitId = string;
 export type HabitsMap = Record<HabitId, Habit>;
-
-export type AddHabit = PostEntity<Omit<Habit, 'iconPath'>>;
-
-export type UpdateHabit = PatchEntity<Habit>;

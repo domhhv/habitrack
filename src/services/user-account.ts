@@ -1,12 +1,15 @@
 import { supabaseClient } from '@helpers';
-import { type ServerAccount } from '@models';
+import { type Account } from '@models';
 import type {
   AuthResponse,
   AuthTokenResponsePassword,
 } from '@supabase/supabase-js';
-import { transformServerEntity } from '@utils';
+import { transformClientEntity, transformServerEntity } from '@utils';
+import type { CamelCasedPropertiesDeep, SetOptional } from 'type-fest';
 
-import { Collections, getByField, patch, type PatchEntity } from './supabase';
+import type { TablesInsert } from '../../supabase/database.types';
+
+export type AccountUpdate = CamelCasedPropertiesDeep<TablesInsert<'accounts'>>;
 
 export const signUp = async (
   email: string,
@@ -35,12 +38,13 @@ export const signIn = async (
   });
 };
 
-export const signOut = async () => {
+export const signOut = () => {
   return supabaseClient.auth.signOut();
 };
 
-export const updateUserPassword = async (password: string) => {
+export const updateUserPassword = async (email: string, password: string) => {
   return supabaseClient.auth.updateUser({
+    email,
     password,
   });
 };
@@ -51,19 +55,38 @@ export const sendPasswordResetEmail = async (email: string) => {
   });
 };
 
-export const getUserAccountByEmail = async (supabaseUserEmail: string) => {
-  const [serverAccount] = await getByField<ServerAccount>(
-    Collections.ACCOUNTS,
-    'email',
-    supabaseUserEmail
-  );
+export const getUserAccountByEmail = async (
+  supabaseUserEmail: string
+): Promise<Account> => {
+  const { error, data } = await supabaseClient
+    .from('accounts')
+    .select()
+    .eq('email', supabaseUserEmail)
+    .single();
 
-  return transformServerEntity(serverAccount);
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformServerEntity(data);
 };
 
 export const updateUserAccount = async (
   id: string,
-  account: PatchEntity<ServerAccount>
+  account: SetOptional<AccountUpdate, 'id' | 'email'>
 ) => {
-  return patch(Collections.ACCOUNTS, id, account);
+  const serverBody = transformClientEntity(account);
+
+  const { error, data } = await supabaseClient
+    .from('accounts')
+    .update({ ...serverBody, updated_at: new Date().toString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformServerEntity(data);
 };

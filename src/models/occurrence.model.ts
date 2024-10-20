@@ -1,28 +1,21 @@
-import type { PostEntity } from '@services';
+import { type Habit } from './habit.model';
+import { type Trait } from './trait.model';
 
 export type Occurrence = {
   id: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string | null;
   timestamp: number;
   day: string;
   time: string | null;
-  habitId: number;
   userId: string;
+  habitId: number;
+  habit:
+    | (Pick<Habit, 'name' | 'iconPath'> & {
+        trait: Pick<Trait, 'id' | 'name' | 'color'> | null;
+      })
+    | null;
 };
 
 type OccurrenceDate = string;
 export type OccurrencesDateMap = Record<OccurrenceDate, Occurrence[]>;
-
-export type ServerOccurrence = {
-  id: number;
-  created_at: string;
-  updated_at: string;
-  timestamp: number;
-  day: string;
-  time: string | null;
-  habit_id: number | null;
-  user_id: string;
-};
-
-export type AddOccurrence = PostEntity<Occurrence>;

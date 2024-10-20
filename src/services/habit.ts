@@ -1,43 +1,76 @@
-import { type AddHabit, type Habit, type ServerHabit } from '@models';
+import { supabaseClient } from '@helpers';
+import { type Habit } from '@models';
 import {
   transformClientEntity,
   transformServerEntities,
   transformServerEntity,
 } from '@utils';
+import { type CamelCasedPropertiesDeep } from 'type-fest';
 
-import {
-  Collections,
-  destroy,
-  get,
-  patch,
-  post,
-  type PatchEntity,
-} from './supabase';
+import type { TablesInsert, TablesUpdate } from '../../supabase/database.types';
 
-export const createHabit = async (body: AddHabit): Promise<Habit> => {
-  const serverBody: ServerHabit = transformClientEntity(body);
+export type HabitsInsert = CamelCasedPropertiesDeep<TablesInsert<'habits'>>;
+export type HabitsUpdate = CamelCasedPropertiesDeep<TablesUpdate<'habits'>>;
 
-  const habit = await post<ServerHabit>(Collections.HABITS, serverBody);
+export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
+  const serverBody = transformClientEntity(body);
 
-  return transformServerEntity(habit) as unknown as Habit;
+  const { error, data } = await supabaseClient
+    .from('habits')
+    .insert(serverBody)
+    .select('*, trait:traits(name, color)')
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformServerEntity(data);
 };
 
 export const listHabits = async () => {
-  const habits = await get<ServerHabit>(Collections.HABITS);
+  const { error, data } = await supabaseClient
+    .from('habits')
+    .select('*, trait:traits(id, name, color)');
 
-  return transformServerEntities(habits) as unknown as Habit[];
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformServerEntities(data);
 };
 
-export const patchHabit = async (id: number, body: PatchEntity<Habit>) => {
-  const serverUpdates: ServerHabit = transformClientEntity(body);
+export const patchHabit = async (
+  id: number,
+  body: HabitsUpdate
+): Promise<Habit> => {
+  const serverUpdates = transformClientEntity(body);
 
-  const habit = await patch<ServerHabit>(Collections.HABITS, id, serverUpdates);
+  const { error, data } = await supabaseClient
+    .from('habits')
+    .update({ ...serverUpdates, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('*, trait:traits(id, name, color)')
+    .single();
 
-  return transformServerEntity(habit) as unknown as Habit;
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformServerEntity(data);
 };
 
-export const destroyHabit = async (id: number) => {
-  const serverHabit = await destroy<ServerHabit>(Collections.HABITS, id);
+export const destroyHabit = async (id: number): Promise<Habit> => {
+  const { error, data } = await supabaseClient
+    .from('habits')
+    .delete()
+    .eq('id', id)
+    .select('*, trait:traits(id, name, color)')
+    .single();
 
-  return transformServerEntity(serverHabit) as unknown as Habit;
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformServerEntity(data);
 };

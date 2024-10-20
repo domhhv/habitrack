@@ -155,7 +155,6 @@ const CalendarCell = ({
               >
                 <OccurrenceChip
                   occurrences={habitOccurrences!}
-                  habitId={+habitId}
                   onDelete={handleOccurrenceDelete}
                 />
               </motion.div>

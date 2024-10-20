@@ -1,3 +1,11 @@
+import { getUserAccountByEmail, updateUserAccount } from '@services';
+import { useUser } from '@supabase/auth-helpers-react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { transformClientEntity, transformServerEntities } from '@utils';
+import type React from 'react';
+
+import useAccountPage from './useAccountPage';
+
 jest.mock('@context', () => ({
   useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
 }));
@@ -16,14 +24,6 @@ jest.mock('@utils', () => ({
   transformClientEntity: jest.fn(),
   transformServerEntities: jest.fn().mockImplementation(() => ({})),
 }));
-
-import { getUserAccountByEmail, updateUserAccount } from '@services';
-import { useUser } from '@supabase/auth-helpers-react';
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { transformClientEntity, transformServerEntities } from '@utils';
-import type React from 'react';
-
-import useAccountPage from './useAccountPage';
 
 describe('useAccountPage', () => {
   beforeEach(() => {
@@ -86,9 +86,7 @@ describe('useAccountPage', () => {
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
       expect(updateUserAccount).toHaveBeenCalledWith('123', {
-        email: 'user-email',
         name: 'user-name',
-        'updated-at': '2021-01-01T00:00:00.000Z',
       });
     });
   });
