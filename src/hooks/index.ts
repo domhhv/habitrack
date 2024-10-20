@@ -1,6 +1,3 @@
-export * from './useHabitTraitColor';
-export { default as useHabitTraitChipColor } from './useHabitTraitColor';
-
 export * from './useScreenSize';
 export { default as useScreenSize } from './useScreenSize';
 

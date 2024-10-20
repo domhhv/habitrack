@@ -1,12 +1,13 @@
 import { HabitsContext, useSnackbar } from '@context';
 import { useDataFetch } from '@hooks';
-import type { AddHabit, Habit, HabitsMap, ServerHabit } from '@models';
+import type { Habit, HabitsMap } from '@models';
 import {
   createHabit,
   deleteFile,
   destroyHabit,
+  type HabitsInsert,
+  type HabitsUpdate,
   listHabits,
-  type PatchEntity,
   patchHabit,
   StorageBuckets,
 } from '@services';
@@ -54,7 +55,7 @@ const HabitsProvider = ({ children }: { children: ReactNode }) => {
     );
   }, [habits]);
 
-  const addHabit = async (habit: AddHabit) => {
+  const addHabit = async (habit: HabitsInsert) => {
     try {
       setAddingHabit(true);
 
@@ -86,7 +87,7 @@ const HabitsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateHabit = async (id: number, habit: PatchEntity<ServerHabit>) => {
+  const updateHabit = async (id: number, habit: HabitsUpdate) => {
     try {
       const updatedHabit = await patchHabit(id, habit);
 

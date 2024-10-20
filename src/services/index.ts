@@ -1,4 +1,3 @@
-export * from './supabase';
 export * from './habit';
 export * from './occurrences';
 export * from './user-account';

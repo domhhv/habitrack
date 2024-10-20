@@ -34,8 +34,8 @@ const EditHabitDialog = ({
   const [traitId, setTraitId] = React.useState('');
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { updateHabit } = useHabits();
+  const { allTraits } = useTraits();
   const user = useUser();
-  const { allTraits, traitsMap } = useTraits();
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -44,10 +44,10 @@ const EditHabitDialog = ({
   React.useEffect(() => {
     if (habit) {
       setName(habit.name);
-      setDescription(habit.description);
+      setDescription(habit.description || '');
       setTraitId(habit.traitId.toString());
     }
-  }, [habit, traitsMap, setName, setDescription]);
+  }, [habit, setName, setDescription]);
 
   if (!isOpen || !habit) {
     return null;

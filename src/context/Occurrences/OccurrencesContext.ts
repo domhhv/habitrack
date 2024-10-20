@@ -1,4 +1,5 @@
-import type { AddOccurrence, OccurrencesDateMap } from '@models';
+import type { OccurrencesDateMap } from '@models';
+import { type OccurrencesInsert } from '@services';
 import React from 'react';
 
 import { type OccurrenceFilters } from './OccurrencesProvider';
@@ -8,7 +9,7 @@ type OccurrencesContextType = {
   fetchingOccurrences: boolean;
   occurrenceIdBeingDeleted: number;
   occurrencesByDate: OccurrencesDateMap;
-  addOccurrence: (occurrence: AddOccurrence) => Promise<void>;
+  addOccurrence: (occurrence: OccurrencesInsert) => Promise<void>;
   removeOccurrence: (occurrenceId: number) => Promise<void>;
   removeOccurrencesByHabitId: (habitId: number) => void;
   filterBy: (filters: OccurrenceFilters) => void;

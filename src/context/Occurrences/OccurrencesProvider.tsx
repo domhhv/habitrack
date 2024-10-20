@@ -5,11 +5,12 @@ import {
   useTraits,
 } from '@context';
 import { useDataFetch } from '@hooks';
-import type { AddOccurrence, Occurrence, OccurrencesDateMap } from '@models';
+import type { Occurrence, OccurrencesDateMap } from '@models';
 import {
   createOccurrence,
   destroyOccurrence,
   listOccurrences,
+  type OccurrencesInsert,
 } from '@services';
 import { cache } from '@utils';
 import React, { type ReactNode } from 'react';
@@ -112,7 +113,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   }, []);
 
   const addOccurrence = React.useCallback(
-    async (occurrence: AddOccurrence) => {
+    async (occurrence: OccurrencesInsert) => {
       try {
         setAddingOccurrence(true);
 

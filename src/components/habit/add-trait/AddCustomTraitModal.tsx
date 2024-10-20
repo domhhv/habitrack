@@ -96,9 +96,8 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
               </p>
               <OccurrenceChip
                 occurrences={[makeTestOccurrence()]}
-                habitId={1}
                 onDelete={() => null}
-                colorOverride={`#${color}`}
+                colorOverride={color}
               />
             </div>
           </div>

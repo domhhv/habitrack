@@ -1,4 +1,10 @@
-const transformServerKey = (key: string) => {
+import {
+  type CamelCasedPropertiesDeep,
+  type SnakeCase,
+  type SnakeCasedPropertiesDeep,
+} from 'type-fest';
+
+const transformServerKey = (key: SnakeCase<string>) => {
   return key
     .split('_')
     .map((word, index) => {
@@ -24,8 +30,16 @@ const transformClientKey = (key: string) => {
     .join('');
 };
 
-export const transformServerEntity = <T extends object>(entity: T): T => {
+export const transformServerEntity = <T extends object>(
+  entity: T
+): CamelCasedPropertiesDeep<T> => {
   const serverEntries = Object.entries(entity || {}).map(([key, value]) => {
+    if (typeof value === 'object' && value !== null) {
+      return {
+        [transformServerKey(key)]: transformServerEntity(value),
+      };
+    }
+
     return {
       [transformServerKey(key)]: value,
     };
@@ -34,8 +48,16 @@ export const transformServerEntity = <T extends object>(entity: T): T => {
   return Object.assign({}, ...serverEntries);
 };
 
-export const transformClientEntity = <T extends object>(entity: T) => {
+export const transformClientEntity = <T extends object>(
+  entity: T
+): SnakeCasedPropertiesDeep<T> => {
   const clientEntries = Object.entries(entity || {}).map(([key, value]) => {
+    if (typeof value === 'object' && value !== null) {
+      return {
+        [transformClientKey(key)]: transformClientEntity(value),
+      };
+    }
+
     return {
       [transformClientKey(key)]: value,
     };
@@ -46,12 +68,12 @@ export const transformClientEntity = <T extends object>(entity: T) => {
 
 export const transformServerEntities = <T extends object>(
   entities: T[]
-): T[] => {
+): CamelCasedPropertiesDeep<T>[] => {
   return entities.map(transformServerEntity);
 };
 
 export const transformClientEntities = <T extends object>(
   entities: T[]
-): T[] => {
+): SnakeCasedPropertiesDeep<T>[] => {
   return entities.map(transformClientEntity);
 };

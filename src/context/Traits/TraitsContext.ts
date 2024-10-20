@@ -1,11 +1,11 @@
-import type { Trait, AddTrait } from '@models';
+import type { Trait } from '@models';
+import { type TraitsInsert } from '@services';
 import React from 'react';
 
 type TraitsContextType = {
   addingTrait: boolean;
-  addTrait: (trait: AddTrait) => Promise<void>;
+  addTrait: (trait: TraitsInsert) => Promise<void>;
   allTraits: Trait[];
-  traitsMap: Record<string, Trait>;
   publicTraits: Trait[];
   userTraits: Trait[];
   fetchingTraits: boolean;

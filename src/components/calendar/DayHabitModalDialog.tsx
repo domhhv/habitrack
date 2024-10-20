@@ -1,4 +1,4 @@
-import { useOccurrences, useHabits, useTraits, useSnackbar } from '@context';
+import { useOccurrences, useHabits, useSnackbar } from '@context';
 import {
   Button,
   Modal,
@@ -29,7 +29,6 @@ const DayHabitModalDialog = ({
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrences();
   const [selectedHabitIds, setSelectedHabitIds] = React.useState<string[]>([]);
-  const { traitsMap } = useTraits();
 
   if (!date || !open) {
     return null;
@@ -100,9 +99,11 @@ const DayHabitModalDialog = ({
                 textValue={habit.name}
               >
                 <span>{habit.name}</span>
-                <span className="font-regular ml-2 text-neutral-400">
-                  {traitsMap[habit.traitId]?.name}
-                </span>
+                {habit.trait && (
+                  <span className="font-regular ml-2 text-neutral-400">
+                    {habit.trait.name}
+                  </span>
+                )}
               </SelectItem>
             ))}
           </Select>

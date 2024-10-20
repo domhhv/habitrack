@@ -6,7 +6,6 @@ import {
   updateUserPassword,
 } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
-import { transformClientEntity } from '@utils';
 import React from 'react';
 
 const useAccountPage = () => {
@@ -47,17 +46,14 @@ const useAccountPage = () => {
     if (!user?.id) return;
 
     setLoading(true);
-    const serverUpdates = transformClientEntity({
-      name,
-      email,
-      updatedAt: new Date().toISOString(),
-    });
 
-    if (password) {
-      await updateUserPassword(password);
+    if (email || password) {
+      await updateUserPassword(email, password);
     }
 
-    await updateUserAccount(user.id, serverUpdates);
+    await updateUserAccount(user.id, {
+      name,
+    });
 
     showSnackbar('Account updated', { color: 'success' });
 

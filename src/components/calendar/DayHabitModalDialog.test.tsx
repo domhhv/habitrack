@@ -1,4 +1,4 @@
-import { useHabits, useOccurrences, useTraits } from '@context';
+import { useHabits, useOccurrences } from '@context';
 import { useUser } from '@supabase/auth-helpers-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
@@ -10,7 +10,6 @@ import DayHabitModalDialog from './DayHabitModalDialog';
 jest.mock('@context', () => ({
   useOccurrences: jest.fn(),
   useHabits: jest.fn(),
-  useTraits: jest.fn(),
   useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
 }));
 
@@ -40,7 +39,6 @@ describe(DayHabitModalDialog.name, () => {
     (useHabits as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
@@ -53,7 +51,6 @@ describe(DayHabitModalDialog.name, () => {
     (useHabits as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
@@ -68,7 +65,6 @@ describe(DayHabitModalDialog.name, () => {
     (useHabits as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
@@ -83,7 +79,6 @@ describe(DayHabitModalDialog.name, () => {
     (useHabits as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
@@ -98,7 +93,6 @@ describe(DayHabitModalDialog.name, () => {
     (useHabits as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
@@ -113,7 +107,6 @@ describe(DayHabitModalDialog.name, () => {
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
@@ -128,7 +121,6 @@ describe(DayHabitModalDialog.name, () => {
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
@@ -150,7 +142,6 @@ describe(DayHabitModalDialog.name, () => {
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
@@ -166,7 +157,6 @@ describe(DayHabitModalDialog.name, () => {
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
@@ -189,7 +179,6 @@ describe(DayHabitModalDialog.name, () => {
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue(date.toISOString().split('T')[0]);
-    (useTraits as jest.Mock).mockReturnValue({ traitsMap: {} });
     const mockAddOccurrence = jest.fn();
     (useOccurrences as jest.Mock).mockReturnValue({
       addOccurrence: mockAddOccurrence,
