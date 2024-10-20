@@ -29,9 +29,6 @@ const OccurrenceChip = ({
 
   const isBeingDeleted = occurrenceIdBeingDeleted === id;
 
-  console.log({ iconPath });
-  console.log({ occurrences });
-
   const chipStyle = {
     backgroundColor: colorOverride || traitColor,
   };
