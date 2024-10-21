@@ -34,7 +34,7 @@ const EditHabitDialog = ({
   const [traitId, setTraitId] = React.useState('');
   const [isUpdating, setIsUpdating] = React.useState(false);
   const { updateHabit } = useHabits();
-  const { allTraits } = useTraits();
+  const { traits } = useTraits();
   const user = useUser();
 
   React.useEffect(() => {
@@ -108,7 +108,7 @@ const EditHabitDialog = ({
             selectedKeys={[traitId]}
             data-testid="habit-select"
           >
-            {allTraits.map((trait) => (
+            {traits.map((trait) => (
               <SelectItem
                 key={trait.id.toString()}
                 onClick={() => {

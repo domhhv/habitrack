@@ -3,12 +3,10 @@ import { type TraitsInsert } from '@services';
 import React from 'react';
 
 type TraitsContextType = {
+  traits: Trait[];
+  fetchingTraits: boolean;
   addingTrait: boolean;
   addTrait: (trait: TraitsInsert) => Promise<void>;
-  allTraits: Trait[];
-  publicTraits: Trait[];
-  userTraits: Trait[];
-  fetchingTraits: boolean;
 };
 
 export const TraitsContext = React.createContext<TraitsContextType | null>(

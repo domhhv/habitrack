@@ -19,7 +19,7 @@ jest.mock('@hooks', () => ({
 jest.mock('@context', () => ({
   useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
   useTraits: jest.fn().mockReturnValue({
-    allTraits: [{ id: 1, label: 'Trait label', slug: 'trait-slug' }],
+    traits: [{ id: 1, label: 'Trait label', slug: 'trait-slug' }],
   }),
   TraitsProvider: jest.fn(({ children }) => children),
 }));
@@ -102,7 +102,7 @@ describe(EditHabitDialog.name, () => {
     const mockUpdateHabit = jest.fn();
     (useHabits as jest.Mock).mockReturnValue({ updateHabit: mockUpdateHabit });
     (useTraits as jest.Mock).mockReturnValue({
-      allTraits: [{ id: 1, label: 'Trait label', slug: 'trait-slug' }],
+      traits: [{ id: 1, label: 'Trait label', slug: 'trait-slug' }],
     });
     const { getByRole, getByLabelText } = render(
       <TraitsProvider>

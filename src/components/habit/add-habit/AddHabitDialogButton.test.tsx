@@ -10,7 +10,7 @@ jest.mock('@context', () => ({
   useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
   useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
   useTraits: jest.fn().mockReturnValue({
-    allTraits: [{ id: 1, slug: 'trait-slug', name: 'Trait' }],
+    traits: [{ id: 1, slug: 'trait-slug', name: 'Trait' }],
   }),
 }));
 

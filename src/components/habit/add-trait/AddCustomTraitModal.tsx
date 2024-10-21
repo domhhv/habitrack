@@ -42,12 +42,16 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   };
 
   const handleAdd = async () => {
+    if (!user) {
+      return null;
+    }
+
     await addTrait({
       name: label,
       description,
       slug,
       color,
-      userId: null,
+      userId: user.id,
     });
 
     handleDialogClose();

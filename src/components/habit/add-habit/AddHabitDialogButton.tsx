@@ -21,7 +21,7 @@ import React from 'react';
 const AddHabitDialogButton = () => {
   const user = useUser();
   const { showSnackbar } = useSnackbar();
-  const { allTraits } = useTraits();
+  const { traits } = useTraits();
   const { fetchingHabits, addingHabit, addHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [name, handleNameChange, clearName] = useTextField();
@@ -116,7 +116,7 @@ const AddHabitDialogButton = () => {
               selectedKeys={[traitId]}
               data-testid="habit-select"
             >
-              {allTraits.map((trait) => (
+              {traits.map((trait) => (
                 <SelectItem
                   key={trait.id.toString()}
                   onClick={(e) => {
