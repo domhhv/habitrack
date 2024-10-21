@@ -51,13 +51,12 @@ const CalendarHeader = ({
   onResetFocusedDate,
 }: CalendarHeaderProps) => {
   const { habits } = useHabits();
-  const { allTraits } = useTraits();
+  const { traits } = useTraits();
   const { filteredBy, filterBy } = useOccurrences();
   const user = useUser();
   const screenSize = useScreenSize();
 
-  const shouldRenderFilters =
-    !!user && habits.length > 0 && allTraits.length > 0;
+  const shouldRenderFilters = !!user && habits.length > 0 && traits.length > 0;
 
   const handleMonthChange: React.ChangeEventHandler<HTMLSelectElement> = (
     event
@@ -173,7 +172,7 @@ const CalendarHeader = ({
               crossOffset: screenSize < 1280 ? -75 : 0,
             }}
           >
-            {allTraits.map((trait) => (
+            {traits.map((trait) => (
               <SelectItem key={trait.id}>{trait.name}</SelectItem>
             ))}
           </Select>

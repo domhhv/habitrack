@@ -29,7 +29,7 @@ export type OccurrenceFilters = {
 const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   const { showSnackbar } = useSnackbar();
   const { habits } = useHabits();
-  const { allTraits } = useTraits();
+  const { traits } = useTraits();
 
   const [addingOccurrence, setAddingOccurrence] = React.useState(false);
   const [fetchingOccurrences, setFetchingOccurrences] = React.useState(false);
@@ -67,14 +67,12 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
 
   React.useEffect(() => {
     const initialFilteredHabitIds = habits.map((habit) => habit.id.toString());
-    const initialFilteredTraitIds = allTraits.map((trait) =>
-      trait.id.toString()
-    );
+    const initialFilteredTraitIds = traits.map((trait) => trait.id.toString());
     setFilteredBy({
       habitIds: new Set(initialFilteredHabitIds),
       traitIds: new Set(initialFilteredTraitIds),
     });
-  }, [habits, allTraits]);
+  }, [habits, traits]);
 
   React.useEffect(() => {
     setOccurrences(

@@ -9,7 +9,7 @@ jest.mock('@context', () => ({
   TraitsProvider: jest.fn(({ children }) => children),
   HabitsProvider: jest.fn(({ children }) => children),
   useTraits: jest.fn().mockReturnValue({
-    allTraits: [],
+    traits: [],
   }),
   useHabits: jest.fn(),
   useSnackbar: jest.fn().mockReturnValue({}),

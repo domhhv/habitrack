@@ -1,7 +1,5 @@
-export type Account = {
-  id: string;
-  email: string;
-  createdAt: string;
-  updatedAt: string | null;
-  name: string | null;
-};
+import { type CamelCasedPropertiesDeep } from 'type-fest';
+
+import { type Tables } from '../../supabase/database.types';
+
+export type Account = CamelCasedPropertiesDeep<Tables<'accounts'>>;
