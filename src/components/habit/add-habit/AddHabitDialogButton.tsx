@@ -1,5 +1,5 @@
 import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
-import { useHabits, useSnackbar, useTraits } from '@context';
+import { useHabits, useTraits } from '@context';
 import { useTextField, useFileField } from '@hooks';
 import {
   Button,
@@ -14,13 +14,11 @@ import {
   Textarea,
 } from '@nextui-org/react';
 import { CloudArrowUp, Plus } from '@phosphor-icons/react';
-import { StorageBuckets, uploadFile } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 const AddHabitDialogButton = () => {
   const user = useUser();
-  const { showSnackbar } = useSnackbar();
   const { traits } = useTraits();
   const { fetchingHabits, addingHabit, addHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
@@ -44,31 +42,21 @@ const AddHabitDialogButton = () => {
   };
 
   const handleAdd = async () => {
-    try {
-      const habit = {
+    if (!user) {
+      return null;
+    }
+
+    await addHabit(
+      {
         name,
         description,
-        userId: user?.id || '',
-        traitId: traitId as unknown as number,
-      };
+        userId: user.id,
+        traitId: +traitId,
+      },
+      icon
+    );
 
-      let iconPath = '';
-
-      if (icon) {
-        iconPath = `${user?.id}/icon.name`;
-        await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, icon);
-      }
-
-      await addHabit(habit);
-    } catch (error) {
-      console.error(error);
-
-      showSnackbar('Something went wrong while adding your habit', {
-        color: 'danger',
-      });
-    } finally {
-      handleDialogClose();
-    }
+    handleDialogClose();
   };
 
   return (

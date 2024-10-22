@@ -1,8 +1,9 @@
 import { TraitsContext, useSnackbar } from '@context';
 import { useDataFetch } from '@hooks';
-import type { Trait } from '@models';
-import { listTraits, createTrait, type TraitsInsert } from '@services';
+import type { Trait, TraitsInsert } from '@models';
+import { listTraits, createTrait } from '@services';
 import { makeTestTrait } from '@tests';
+import { getErrorMessage } from '@utils';
 import React, { type ReactNode } from 'react';
 
 const testTraits = [
@@ -11,21 +12,33 @@ const testTraits = [
 ];
 
 const TraitsProvider = ({ children }: { children: ReactNode }) => {
+  const { showSnackbar } = useSnackbar();
   const [traits, setTraits] = React.useState<Trait[]>(testTraits);
   const [fetchingTraits, setFetchingTraits] = React.useState(false);
   const [addingTrait, setAddingTrait] = React.useState(false);
-  const { showSnackbar } = useSnackbar();
 
   const clearTraits = React.useCallback(() => {
     setTraits([]);
   }, []);
 
   const fetchTraits = React.useCallback(async () => {
-    setFetchingTraits(true);
-    const traits = await listTraits();
-    setTraits(traits);
-    setFetchingTraits(false);
-  }, []);
+    try {
+      setFetchingTraits(true);
+      setTraits(await listTraits());
+    } catch (error) {
+      console.error(error);
+      showSnackbar(
+        'Something went wrong while fetching your traits. Please try reloading the page.',
+        {
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+          dismissible: true,
+        }
+      );
+    } finally {
+      setFetchingTraits(false);
+    }
+  }, [showSnackbar]);
 
   useDataFetch({
     load: fetchTraits,
@@ -48,14 +61,11 @@ const TraitsProvider = ({ children }: { children: ReactNode }) => {
         });
       } catch (error) {
         console.error(error);
-        showSnackbar(
-          (error as Error).message ||
-            'Something went wrong while adding your trait',
-          {
-            color: 'danger',
-            dismissible: true,
-          }
-        );
+        showSnackbar('Something went wrong while adding your trait', {
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+          dismissible: true,
+        });
       } finally {
         setAddingTrait(false);
       }

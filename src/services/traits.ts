@@ -1,15 +1,10 @@
 import { supabaseClient } from '@helpers';
-import { type Trait } from '@models';
+import type { Trait, TraitsInsert } from '@models';
 import {
   transformClientEntity,
   transformServerEntities,
   transformServerEntity,
 } from '@utils';
-import type { CamelCasedPropertiesDeep } from 'type-fest';
-
-import type { TablesInsert } from '../../supabase/database.types';
-
-export type TraitsInsert = CamelCasedPropertiesDeep<TablesInsert<'traits'>>;
 
 export const createTrait = async (body: TraitsInsert): Promise<Trait> => {
   const serverBody = transformClientEntity(body);

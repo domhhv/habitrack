@@ -1,15 +1,20 @@
-import type { Habit, HabitsMap } from '@models';
-import { type HabitsInsert, type HabitsUpdate } from '@services';
+import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
 import React from 'react';
 
 type HabitsContextType = {
+  habitIdBeingUpdated: number | null;
+  habitIdBeingDeleted: number | null;
   addingHabit: boolean;
   fetchingHabits: boolean;
   habits: Habit[];
-  habitsMap: HabitsMap;
-  addHabit: (habit: HabitsInsert) => Promise<Habit>;
-  removeHabit: (habitId: number) => Promise<void>;
-  updateHabit: (habitId: number, habit: HabitsUpdate) => Promise<Habit>;
+  addHabit: (habit: HabitsInsert, icon?: File | null) => Promise<void>;
+  removeHabit: (habit: Habit) => Promise<void>;
+  updateHabit: (
+    habitId: number,
+    userId: string,
+    habit: HabitsUpdate,
+    icon?: File | null
+  ) => Promise<void>;
 };
 
 export const HabitsContext = React.createContext<HabitsContextType | null>(
