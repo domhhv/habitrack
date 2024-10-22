@@ -1,4 +1,4 @@
-import { SnackbarProvider, UserAccountProvider } from '@context';
+import { SnackbarProvider } from '@context';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
@@ -24,9 +24,7 @@ describe(Header.name, () => {
     const { getByText } = render(
       <BrowserRouter>
         <SnackbarProvider>
-          <UserAccountProvider>
-            <Header />
-          </UserAccountProvider>
+          <Header />
         </SnackbarProvider>
       </BrowserRouter>
     );

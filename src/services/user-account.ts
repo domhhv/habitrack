@@ -1,9 +1,5 @@
 import { supabaseClient } from '@helpers';
 import { type Account } from '@models';
-import type {
-  AuthResponse,
-  AuthTokenResponsePassword,
-} from '@supabase/supabase-js';
 import { transformClientEntity, transformServerEntity } from '@utils';
 import type { CamelCasedPropertiesDeep, SetOptional } from 'type-fest';
 
@@ -11,12 +7,8 @@ import type { TablesInsert } from '../../supabase/database.types';
 
 export type AccountUpdate = CamelCasedPropertiesDeep<TablesInsert<'accounts'>>;
 
-export const signUp = async (
-  email: string,
-  password: string,
-  name: string
-): Promise<AuthResponse> => {
-  return supabaseClient.auth.signUp({
+export const signUp = async (email: string, password: string, name: string) => {
+  const { error } = await supabaseClient.auth.signUp({
     email,
     password,
     options: {
@@ -26,20 +18,29 @@ export const signUp = async (
       },
     },
   });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 };
 
-export const signIn = async (
-  email: string,
-  password: string
-): Promise<AuthTokenResponsePassword> => {
-  return supabaseClient.auth.signInWithPassword({
+export const signIn = async (email: string, password: string) => {
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email,
     password,
   });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 };
 
-export const signOut = () => {
-  return supabaseClient.auth.signOut();
+export const signOut = async () => {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    throw new Error(error.message);
+  }
 };
 
 export const updateUserPassword = async (email: string, password: string) => {
@@ -50,9 +51,13 @@ export const updateUserPassword = async (email: string, password: string) => {
 };
 
 export const sendPasswordResetEmail = async (email: string) => {
-  return supabaseClient.auth.resetPasswordForEmail(email, {
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/account?passwordReset=true`,
   });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 };
 
 export const getUserAccountByEmail = async (
