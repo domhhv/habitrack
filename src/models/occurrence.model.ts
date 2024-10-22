@@ -7,9 +7,9 @@ import { type Trait } from './trait.model';
 
 type BaseOccurrence = CamelCasedPropertiesDeep<Tables<'occurrences'>>;
 
-type HabitTrait = Pick<Habit, 'name' | 'iconPath'>;
+type OccurrenceHabit = Pick<Habit, 'name' | 'iconPath'>;
 
-type HabitWithTrait = HabitTrait & {
+type HabitWithTrait = OccurrenceHabit & {
   trait: Pick<Trait, 'id' | 'name' | 'color'> | null;
 };
 
