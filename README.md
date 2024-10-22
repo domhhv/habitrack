@@ -139,7 +139,7 @@ Other test related commands include:
 ```bash
 yarn test:coverage # Run all tests and generate coverage report
 yarn test:watch # Run all tests in watch mode
-yarn test:clear-cache # Clear Jest cache
+yarn test:clear-occurrencesCache # Clear Jest occurrencesCache
 ```
 
 ### Linting

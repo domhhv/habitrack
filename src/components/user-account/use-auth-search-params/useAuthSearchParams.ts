@@ -45,7 +45,7 @@ const useAuthSearchParams = () => {
     }
 
     setSearchParams({});
-  }, [showSnackbar, searchParams, setSearchParams]);
+  }, [showSnackbar, searchParams, setSearchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 };
 
 export default useAuthSearchParams;

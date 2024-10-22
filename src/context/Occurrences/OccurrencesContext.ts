@@ -1,5 +1,4 @@
-import type { OccurrencesDateMap } from '@models';
-import { type OccurrencesInsert } from '@services';
+import type { OccurrencesDateMap, OccurrencesInsert } from '@models';
 import React from 'react';
 
 import { type OccurrenceFilters } from './OccurrencesProvider';

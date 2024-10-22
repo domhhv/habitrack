@@ -1,18 +1,10 @@
-import { supabaseClient } from '@helpers';
-import type { Occurrence } from '@models';
+import { cacheOccurrences, occurrencesCache, supabaseClient } from '@helpers';
+import type { Occurrence, OccurrencesInsert } from '@models';
 import {
-  cache,
   transformClientEntity,
   transformServerEntities,
   transformServerEntity,
 } from '@utils';
-import { type CamelCasedPropertiesDeep } from 'type-fest';
-
-import type { TablesInsert } from '../../supabase/database.types';
-
-export type OccurrencesInsert = CamelCasedPropertiesDeep<
-  TablesInsert<'occurrences'>
->;
 
 export const createOccurrence = async (
   body: OccurrencesInsert
@@ -32,9 +24,13 @@ export const createOccurrence = async (
   return transformServerEntity(data);
 };
 
-export const listOccurrences = async (range: [number, number]) => {
-  if (cache.has(range.toString())) {
-    return cache.get(range.toString()) as Occurrence[];
+export const listOccurrences = async (
+  range: [number, number]
+): Promise<Occurrence[]> => {
+  const cachedOccurrences = occurrencesCache.get(range.toString());
+
+  if (cachedOccurrences) {
+    return cachedOccurrences;
   }
 
   const { error, data } = await supabaseClient
@@ -49,7 +45,7 @@ export const listOccurrences = async (range: [number, number]) => {
 
   const result = transformServerEntities(data);
 
-  cache.set(range.toString(), result);
+  cacheOccurrences(range, result);
 
   return result;
 };
@@ -69,9 +65,7 @@ export const destroyOccurrence = async (id: number) => {
   return transformServerEntity(data);
 };
 
-export const getLatestHabitOccurrenceTimestamp = async (
-  habitId: number
-): Promise<number | null> => {
+export const getLatestHabitOccurrenceTimestamp = async (habitId: number) => {
   const { error, data } = await supabaseClient
     .from('occurrences')
     .select('timestamp')
@@ -92,12 +86,14 @@ export const getLatestHabitOccurrenceTimestamp = async (
   return timestamp;
 };
 
-export const getLongestHabitStreak = async (
-  habitId: number
-): Promise<number | null> => {
-  const { data } = await supabaseClient.rpc('get_longest_streak', {
+export const getLongestHabitStreak = async (habitId: number) => {
+  const { error, data } = await supabaseClient.rpc('get_longest_streak', {
     habit_identifier: habitId,
   });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 
   if (!data?.length) {
     return null;
@@ -109,13 +105,17 @@ export const getLongestHabitStreak = async (
 };
 
 export const getHabitTotalEntries = async (habitId: number) => {
-  const { count } = await supabaseClient
+  const { error, count } = await supabaseClient
     .from('occurrences')
     .select('*', {
       count: 'exact',
       head: true,
     })
     .eq('habit_id', habitId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 
   return count;
 };

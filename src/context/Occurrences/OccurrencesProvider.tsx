@@ -4,15 +4,19 @@ import {
   useHabits,
   useTraits,
 } from '@context';
+import { cacheOccurrence, uncacheOccurrence } from '@helpers';
 import { useDataFetch } from '@hooks';
-import type { Occurrence, OccurrencesDateMap } from '@models';
+import type {
+  Occurrence,
+  OccurrencesDateMap,
+  OccurrencesInsert,
+} from '@models';
 import {
   createOccurrence,
   destroyOccurrence,
   listOccurrences,
-  type OccurrencesInsert,
 } from '@services';
-import { cache } from '@utils';
+import { getErrorMessage } from '@utils';
 import React, { type ReactNode } from 'react';
 
 type Props = {
@@ -45,11 +49,23 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
   });
 
   const fetchOccurrences = React.useCallback(async () => {
-    setFetchingOccurrences(true);
-    const result = await listOccurrences([rangeStart, rangeEnd]);
-    setFetchingOccurrences(false);
-    setAllOccurrences(result);
-  }, [rangeStart, rangeEnd]);
+    try {
+      setFetchingOccurrences(true);
+      setAllOccurrences(await listOccurrences([rangeStart, rangeEnd]));
+    } catch (error) {
+      console.error(error);
+      showSnackbar(
+        'Something went wrong while fetching your habit entries. Please try reloading the page.',
+        {
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+          dismissible: true,
+        }
+      );
+    } finally {
+      setFetchingOccurrences(false);
+    }
+  }, [rangeStart, rangeEnd, showSnackbar]);
 
   const clearOccurrences = React.useCallback(() => {
     setOccurrences([]);
@@ -117,22 +133,29 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
 
         const nextOccurrence = await createOccurrence(occurrence);
 
+        cacheOccurrence([rangeStart, rangeEnd], nextOccurrence);
+
         setAllOccurrences((prevOccurrences) => [
           ...prevOccurrences,
           nextOccurrence,
         ]);
 
-        cache.set([rangeStart, rangeEnd].toString(), [
-          ...cache.get([rangeStart, rangeEnd].toString()),
-          nextOccurrence,
-        ]);
-      } catch (e) {
-        showSnackbar('Something went wrong while adding your habit', {
-          color: 'danger',
+        showSnackbar('Habit entry(s) are added to the calendar', {
+          color: 'success',
           dismissible: true,
+          dismissText: 'Done',
         });
+      } catch (error) {
+        showSnackbar(
+          'Something went wrong while adding your habit entry. Please try again.',
+          {
+            description: `Error details: ${getErrorMessage(error)}`,
+            color: 'danger',
+            dismissible: true,
+          }
+        );
 
-        console.error(e);
+        console.error(error);
       } finally {
         setAddingOccurrence(false);
       }
@@ -153,23 +176,20 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
           });
         });
 
-        const cachedOccurrences = cache.get([rangeStart, rangeEnd].toString());
-
-        cache.set(
-          [rangeStart, rangeEnd].toString(),
-          cachedOccurrences.filter((occurrence: Occurrence) => {
-            return occurrence.id !== id;
-          })
-        );
+        uncacheOccurrence([rangeStart, rangeEnd], id);
 
         showSnackbar('Your habit entry has been deleted from the calendar.', {
           dismissible: true,
         });
       } catch (error) {
-        showSnackbar('Something went wrong while removing your habit entry', {
-          color: 'danger',
-          dismissible: true,
-        });
+        showSnackbar(
+          'Something went wrong while deleting your habit entry. Please try again.',
+          {
+            description: `Error details: ${getErrorMessage(error)}`,
+            color: 'danger',
+            dismissible: true,
+          }
+        );
 
         console.error(error);
       } finally {
@@ -181,11 +201,9 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
 
   const removeOccurrencesByHabitId = (habitId: number) => {
     setOccurrences((prevOccurrences) => {
-      const nextOccurrences = prevOccurrences.filter((occurrence) => {
+      return prevOccurrences.filter((occurrence) => {
         return occurrence.habitId !== habitId;
       });
-
-      return nextOccurrences;
     });
   };
 
