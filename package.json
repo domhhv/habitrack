@@ -46,7 +46,7 @@
     "db:diff": "supabase db diff",
     "db:migration:up": "supabase migration up",
     "db:migration:new": "supabase migration new",
-    "db:gen-types": "supabase gen types --lang=typescript --schema public auth storage --local > supabase/database.types.ts"
+    "db:gen-types": "supabase gen types --lang=typescript --schema public --schema auth --schema storage --local > supabase/database.types.ts"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [

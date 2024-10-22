@@ -1,21 +1,25 @@
+import type { CamelCasedPropertiesDeep } from 'type-fest';
+
+import type { TablesInsert, Tables } from '../../supabase/database.types';
+
 import { type Habit } from './habit.model';
 import { type Trait } from './trait.model';
 
-export type Occurrence = {
-  id: number;
-  createdAt: string;
-  updatedAt: string | null;
-  timestamp: number;
-  day: string;
-  time: string | null;
-  userId: string;
-  habitId: number;
-  habit:
-    | (Pick<Habit, 'name' | 'iconPath'> & {
-        trait: Pick<Trait, 'id' | 'name' | 'color'> | null;
-      })
-    | null;
+type BaseOccurrence = CamelCasedPropertiesDeep<Tables<'occurrences'>>;
+
+type OccurrenceHabit = Pick<Habit, 'name' | 'iconPath'>;
+
+type HabitWithTrait = OccurrenceHabit & {
+  trait: Pick<Trait, 'id' | 'name' | 'color'> | null;
+};
+
+export type Occurrence = BaseOccurrence & {
+  habit: HabitWithTrait | null;
 };
 
 type OccurrenceDate = string;
 export type OccurrencesDateMap = Record<OccurrenceDate, Occurrence[]>;
+
+export type OccurrencesInsert = CamelCasedPropertiesDeep<
+  TablesInsert<'occurrences'>
+>;

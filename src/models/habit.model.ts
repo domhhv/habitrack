@@ -8,9 +8,9 @@ import type {
 
 import { type Trait } from './trait.model';
 
-type RawHabit = CamelCasedPropertiesDeep<Tables<'habits'>>;
+type BaseHabit = CamelCasedPropertiesDeep<Tables<'habits'>>;
 
-export type Habit = RawHabit & {
+export type Habit = BaseHabit & {
   trait: Pick<Trait, 'name' | 'color'> | null;
 };
 

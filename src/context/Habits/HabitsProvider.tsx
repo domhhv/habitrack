@@ -153,8 +153,9 @@ const HabitsProvider = ({ children }: { children: ReactNode }) => {
           await deleteFile(StorageBuckets.HABIT_ICONS, iconPath);
         }
 
-        const nextHabits = habits.filter((habit) => habit.id !== id);
-        setHabits(nextHabits);
+        setHabits((prevHabits) => {
+          return prevHabits.filter((habit) => habit.id !== id);
+        });
 
         showSnackbar('Your habit has been deleted.', {
           dismissible: true,
@@ -174,7 +175,7 @@ const HabitsProvider = ({ children }: { children: ReactNode }) => {
         setHabitIdBeingDeleted(null);
       }
     },
-    [habits, showSnackbar]
+    [showSnackbar]
   );
 
   const value = React.useMemo(() => {

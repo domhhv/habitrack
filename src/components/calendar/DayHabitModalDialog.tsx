@@ -1,4 +1,4 @@
-import { useOccurrences, useHabits, useSnackbar } from '@context';
+import { useOccurrences, useHabits } from '@context';
 import {
   Button,
   Modal,
@@ -24,7 +24,6 @@ const DayHabitModalDialog = ({
   onClose,
   date,
 }: DayHabitModalDialogProps) => {
-  const { showSnackbar } = useSnackbar();
   const { habits } = useHabits();
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrences();
@@ -37,6 +36,10 @@ const DayHabitModalDialog = ({
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
+    if (!user) {
+      return null;
+    }
+
     const addOccurrences = selectedHabitIds.map((id) => {
       return addOccurrence({
         day: date.toISOString().split('T')[0],
@@ -48,12 +51,6 @@ const DayHabitModalDialog = ({
     });
 
     await Promise.all(addOccurrences);
-
-    showSnackbar('Habit entries are added to the calendar', {
-      color: 'success',
-      dismissible: true,
-      dismissText: 'Done',
-    });
 
     handleClose();
   };
