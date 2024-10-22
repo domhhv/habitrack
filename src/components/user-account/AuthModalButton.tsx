@@ -1,4 +1,4 @@
-import { useUserAccount } from '@context';
+import { useSnackbar } from '@context';
 import {
   Button,
   ButtonGroup,
@@ -16,6 +16,9 @@ import {
   SignOut as SignOutIcon,
   User as UserIcon,
 } from '@phosphor-icons/react';
+import { sendPasswordResetEmail, signIn, signOut, signUp } from '@services';
+import { useUser } from '@supabase/auth-helpers-react';
+import { getErrorMessage } from '@utils';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -24,15 +27,10 @@ import AuthForm from './AuthForm';
 export type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
-  const {
-    login,
-    logout,
-    register,
-    resetPassword,
-    authenticating,
-    supabaseUser,
-  } = useUserAccount();
+  const user = useUser();
+  const { showSnackbar } = useSnackbar();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
 
   const handleClose = () => {
@@ -48,9 +46,9 @@ const AuthModalButton = () => {
     AuthMode,
     (email: string, password: string, name: string) => Promise<void>
   > = {
-    login,
-    register,
-    'reset-password': resetPassword,
+    login: signIn,
+    register: signUp,
+    'reset-password': sendPasswordResetEmail,
   };
 
   const actionLabels: Record<AuthMode, string> = {
@@ -65,14 +63,40 @@ const AuthModalButton = () => {
     'reset-password': 'Reset your password',
   };
 
+  const successfulMessages: Record<AuthMode, string> = {
+    login: 'Welcome back!',
+    register: 'Account created!',
+    'reset-password': 'Password reset email sent!',
+  };
+
   const handleSubmit = async (
     email: string,
     password: string,
     name: string
   ) => {
-    await actions[mode](email, password, name);
+    try {
+      setAuthenticating(true);
 
-    handleClose();
+      await actions[mode](email, password, name);
+
+      setAuthenticating(false);
+
+      handleClose();
+
+      showSnackbar(successfulMessages[mode], {
+        color: 'success',
+        dismissible: true,
+        dismissText: 'Done',
+      });
+    } catch (error) {
+      showSnackbar('Something went wrong. Please try again.', {
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+        dismissible: true,
+      });
+    } finally {
+      setAuthenticating(false);
+    }
   };
 
   const authFormProps = {
@@ -87,7 +111,7 @@ const AuthModalButton = () => {
 
   return (
     <>
-      {supabaseUser?.id ? (
+      {user?.id ? (
         <ButtonGroup>
           <Button
             as={Link}
@@ -100,7 +124,7 @@ const AuthModalButton = () => {
           </Button>
           <Tooltip content="Log out">
             <Button
-              onPress={() => logout()}
+              onPress={signOut}
               isIconOnly
               color="primary"
               className="border-l"

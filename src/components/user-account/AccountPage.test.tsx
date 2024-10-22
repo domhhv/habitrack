@@ -1,3 +1,12 @@
+import { SnackbarProvider } from '@context';
+import { useUser } from '@supabase/auth-helpers-react';
+import { act, fireEvent, render } from '@testing-library/react';
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+
+import AccountPage from './AccountPage';
+import { useAccountPage } from './use-account-page';
+
 jest.mock('./use-account-page');
 jest.mock('@supabase/auth-helpers-react', () => ({
   ...jest.requireActual('@supabase/auth-helpers-react'),
@@ -9,15 +18,6 @@ jest.mock('./use-auth-search-params', () => ({
   __esModule: true,
   useAuthSearchParams: jest.fn(),
 }));
-
-import { SnackbarProvider, UserAccountProvider } from '@context';
-import { useUser } from '@supabase/auth-helpers-react';
-import { act, fireEvent, render } from '@testing-library/react';
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-
-import AccountPage from './AccountPage';
-import { useAccountPage } from './use-account-page';
 
 describe(AccountPage.name, () => {
   it('should show loader', () => {
@@ -53,9 +53,7 @@ describe(AccountPage.name, () => {
     const { getByTestId } = render(
       <BrowserRouter>
         <SnackbarProvider>
-          <UserAccountProvider>
-            <AccountPage />
-          </UserAccountProvider>
+          <AccountPage />
         </SnackbarProvider>
       </BrowserRouter>
     );
