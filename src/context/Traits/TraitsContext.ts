@@ -1,5 +1,4 @@
-import type { Trait } from '@models';
-import { type TraitsInsert } from '@services';
+import type { Trait, TraitsInsert } from '@models';
 import React from 'react';
 
 type TraitsContextType = {

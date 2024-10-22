@@ -32,8 +32,7 @@ const EditHabitDialog = ({
   const [description, handleDescriptionChange, , setDescription] =
     useTextField();
   const [traitId, setTraitId] = React.useState('');
-  const [isUpdating, setIsUpdating] = React.useState(false);
-  const { updateHabit } = useHabits();
+  const { updateHabit, habitIdBeingUpdated } = useHabits();
   const { traits } = useTraits();
   const user = useUser();
 
@@ -59,23 +58,20 @@ const EditHabitDialog = ({
   };
 
   const handleSubmit = async () => {
-    const updatedAt = new Date();
-    updatedAt.setMilliseconds(0);
-    updatedAt.setSeconds(0);
-    setIsUpdating(true);
-    const newHabit = {
+    if (!user) {
+      return null;
+    }
+
+    await updateHabit(habit.id, user.id, {
       name,
       description,
       traitId: +traitId,
-      userId: user?.id as string,
-      iconPath: habit.iconPath,
-      createdAt: habit.createdAt,
-      updatedAt: updatedAt.toISOString(),
-    };
-    await updateHabit(habit.id, newHabit);
-    setIsUpdating(false);
+    });
+
     handleClose();
   };
+
+  const isUpdating = habitIdBeingUpdated === habit.id;
 
   return (
     <Modal

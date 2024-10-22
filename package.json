@@ -46,7 +46,7 @@
     "db:diff": "supabase db diff",
     "db:migration:up": "supabase migration up",
     "db:migration:new": "supabase migration new",
-    "db:gen-types": "supabase gen types --lang=typescript --local > supabase/database.types.ts"
+    "db:gen-types": "supabase gen types --lang=typescript --schema public auth storage --local > supabase/database.types.ts"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [
@@ -109,7 +109,7 @@
     "prettier": "3.1.1",
     "prettier-plugin-tailwindcss": "^0.6.6",
     "rollup-plugin-visualizer": "^5.12.0",
-    "supabase": "1.206.0",
+    "supabase": "1.207.9",
     "tailwindcss": "^3.4.10",
     "ts-jest": "^29.1.2",
     "typescript": "5.6.3",

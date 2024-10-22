@@ -1,10 +1,9 @@
 import {
   type CamelCasedPropertiesDeep,
-  type SnakeCase,
   type SnakeCasedPropertiesDeep,
 } from 'type-fest';
 
-const transformServerKey = (key: SnakeCase<string>) => {
+const transformServerKey = (key: string) => {
   return key
     .split('_')
     .map((word, index) => {

@@ -1,45 +1,52 @@
 import { HabitsContext, useSnackbar } from '@context';
 import { useDataFetch } from '@hooks';
-import type { Habit, HabitsMap } from '@models';
+import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
 import {
   createHabit,
   deleteFile,
   destroyHabit,
-  type HabitsInsert,
-  type HabitsUpdate,
   listHabits,
   patchHabit,
   StorageBuckets,
+  uploadFile,
 } from '@services';
 import { makeTestHabit } from '@tests';
+import { getErrorMessage } from '@utils';
 import React, { type ReactNode } from 'react';
 
 const HabitsProvider = ({ children }: { children: ReactNode }) => {
   const { showSnackbar } = useSnackbar();
-
   const [addingHabit, setAddingHabit] = React.useState(false);
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<Habit[]>([makeTestHabit()]);
-  const [habitsMap, setHabitsMap] = React.useState<HabitsMap>({});
+  const [habitIdBeingUpdated, setHabitIdBeingUpdated] = React.useState<
+    number | null
+  >(null);
+  const [habitIdBeingDeleted, setHabitIdBeingDeleted] = React.useState<
+    number | null
+  >(null);
 
   const fetchHabits = React.useCallback(async () => {
-    setFetchingHabits(true);
-
-    const habits = await listHabits();
-    setHabits(habits);
-
-    const habitsMap = habits.reduce((acc, habit) => {
-      return { ...acc, [habit.id]: habit };
-    }, {});
-
-    setHabitsMap(habitsMap);
-
-    setFetchingHabits(false);
-  }, []);
+    try {
+      setFetchingHabits(true);
+      setHabits(await listHabits());
+    } catch (error) {
+      console.error(error);
+      showSnackbar(
+        'Something went wrong while fetching your habits. Please try reloading the page.',
+        {
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+          dismissible: true,
+        }
+      );
+    } finally {
+      setFetchingHabits(false);
+    }
+  }, [showSnackbar]);
 
   const clearHabits = React.useCallback(() => {
     setHabits([]);
-    setHabitsMap({});
   }, []);
 
   useDataFetch({
@@ -47,116 +54,150 @@ const HabitsProvider = ({ children }: { children: ReactNode }) => {
     load: fetchHabits,
   });
 
-  React.useEffect(() => {
-    setHabitsMap(
-      habits.reduce((acc, habit) => {
-        return { ...acc, [habit.id]: habit };
-      }, {})
-    );
-  }, [habits]);
+  const uploadHabitIcon = async (userId: string, icon?: File | null) => {
+    let iconPath = '';
 
-  const addHabit = async (habit: HabitsInsert) => {
-    try {
-      setAddingHabit(true);
-
-      const newHabit = await createHabit(habit);
-
-      setHabits((prevHabits) => [...prevHabits, newHabit]);
-      setHabitsMap((prevHabits) => ({
-        ...prevHabits,
-        [newHabit.id]: newHabit,
-      }));
-      showSnackbar('Your habit has been added!', {
-        color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
-      });
-
-      return newHabit as Habit;
-    } catch (error) {
-      showSnackbar('Something went wrong while adding your habit', {
-        color: 'danger',
-        dismissible: true,
-      });
-
-      console.error(error);
-
-      return Promise.resolve({} as Habit);
-    } finally {
-      setAddingHabit(false);
+    if (icon) {
+      iconPath = `${userId}/${Date.now()}-${icon.name}`;
+      await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, icon);
     }
+
+    return iconPath;
   };
 
-  const updateHabit = async (id: number, habit: HabitsUpdate) => {
-    try {
-      const updatedHabit = await patchHabit(id, habit);
+  const addHabit = React.useCallback(
+    async (habit: HabitsInsert, icon?: File | null) => {
+      try {
+        setAddingHabit(true);
 
-      setHabits((prevHabits) => {
-        const habitIndex = prevHabits.findIndex((h) => h.id === id);
-        const nextHabits = [...prevHabits];
-        nextHabits[habitIndex] = updatedHabit;
-        return nextHabits;
-      });
-      setHabitsMap((prevHabits) => ({ ...prevHabits, [id]: updatedHabit }));
+        const iconPath = await uploadHabitIcon(habit.userId, icon);
 
-      showSnackbar('Your habit has been updated!', {
-        color: 'success',
-        dismissible: true,
-      });
+        const newHabit = await createHabit({ ...habit, iconPath });
 
-      return updatedHabit;
-    } catch (error) {
-      showSnackbar('Something went wrong while updating your habit', {
-        color: 'danger',
-        dismissible: true,
-      });
+        setHabits((prevHabits) => [...prevHabits, newHabit]);
 
-      console.error(error);
+        showSnackbar('Your habit has been added!', {
+          color: 'success',
+          dismissible: true,
+          dismissText: 'Done',
+        });
+      } catch (error) {
+        showSnackbar(
+          'Something went wrong while adding your habit. Please try again.',
+          {
+            description: `Error details: ${getErrorMessage(error)}`,
+            color: 'danger',
+            dismissible: true,
+          }
+        );
 
-      return Promise.resolve({} as Habit);
-    }
-  };
-
-  const removeHabit = async (id: number) => {
-    try {
-      await destroyHabit(id);
-
-      if (habitsMap[id]?.iconPath) {
-        await deleteFile(StorageBuckets.HABIT_ICONS, habitsMap[id].iconPath!);
+        console.error(error);
+      } finally {
+        setAddingHabit(false);
       }
+    },
+    [showSnackbar]
+  );
 
-      const nextHabits = habits.filter((habit) => habit.id !== id);
-      setHabits(nextHabits);
+  const updateHabit = React.useCallback(
+    async (
+      id: number,
+      userId: string,
+      habit: HabitsUpdate,
+      icon?: File | null
+    ) => {
+      try {
+        setHabitIdBeingUpdated(id);
 
-      const nextHabitsMap = { ...habitsMap };
-      delete nextHabitsMap[id];
-      setHabitsMap(nextHabitsMap);
+        const iconPath = await uploadHabitIcon(userId, icon);
 
-      showSnackbar('Your habit has been deleted!', {
-        dismissible: true,
-      });
-    } catch (error) {
-      showSnackbar('Something went wrong while deleting your habit', {
-        color: 'danger',
-        dismissible: true,
-      });
+        const updatedHabit = await patchHabit(id, { ...habit, iconPath });
 
-      console.error(error);
-    }
-  };
+        setHabits((prevHabits) => {
+          const habitIndex = prevHabits.findIndex((h) => h.id === id);
+          const nextHabits = [...prevHabits];
+          nextHabits[habitIndex] = updatedHabit;
+          return nextHabits;
+        });
 
-  const value = React.useMemo(
-    () => ({
+        showSnackbar('Your habit has been updated!', {
+          color: 'success',
+          dismissible: true,
+        });
+      } catch (error) {
+        showSnackbar(
+          'Something went wrong while updating your habit. Please try again.',
+          {
+            description: `Error details: ${getErrorMessage(error)}`,
+            color: 'danger',
+            dismissible: true,
+          }
+        );
+
+        console.error(error);
+      } finally {
+        setHabitIdBeingUpdated(null);
+      }
+    },
+    [showSnackbar]
+  );
+
+  const removeHabit = React.useCallback(
+    async ({ id, iconPath }: Habit) => {
+      try {
+        setHabitIdBeingDeleted(id);
+
+        await destroyHabit(id);
+
+        if (iconPath) {
+          await deleteFile(StorageBuckets.HABIT_ICONS, iconPath);
+        }
+
+        const nextHabits = habits.filter((habit) => habit.id !== id);
+        setHabits(nextHabits);
+
+        showSnackbar('Your habit has been deleted.', {
+          dismissible: true,
+        });
+      } catch (error) {
+        showSnackbar(
+          'Something went wrong while deleting your habit. Please try again.',
+          {
+            description: `Error details: ${getErrorMessage(error)}`,
+            color: 'danger',
+            dismissible: true,
+          }
+        );
+
+        console.error(error);
+      } finally {
+        setHabitIdBeingDeleted(null);
+      }
+    },
+    [habits, showSnackbar]
+  );
+
+  const value = React.useMemo(() => {
+    return {
+      habitIdBeingUpdated,
+      habitIdBeingDeleted,
       addingHabit,
       fetchingHabits,
       habits,
-      habitsMap,
       addHabit,
       removeHabit,
       updateHabit,
-    }),
-    [addingHabit, fetchingHabits, habits, habitsMap] // eslint-disable-line react-hooks/exhaustive-deps
-  );
+    };
+  }, [
+    habitIdBeingUpdated,
+    habitIdBeingDeleted,
+    addingHabit,
+    fetchingHabits,
+    habits,
+    addHabit,
+    removeHabit,
+    updateHabit,
+  ]);
 
   return (
     <HabitsContext.Provider value={value}>{children}</HabitsContext.Provider>

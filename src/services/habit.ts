@@ -1,16 +1,10 @@
 import { supabaseClient } from '@helpers';
-import { type Habit } from '@models';
+import { type Habit, type HabitsInsert, type HabitsUpdate } from '@models';
 import {
   transformClientEntity,
   transformServerEntities,
   transformServerEntity,
 } from '@utils';
-import { type CamelCasedPropertiesDeep } from 'type-fest';
-
-import type { TablesInsert, TablesUpdate } from '../../supabase/database.types';
-
-export type HabitsInsert = CamelCasedPropertiesDeep<TablesInsert<'habits'>>;
-export type HabitsUpdate = CamelCasedPropertiesDeep<TablesUpdate<'habits'>>;
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
   const serverBody = transformClientEntity(body);

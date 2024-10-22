@@ -64,11 +64,10 @@ const habitColumns = [
 
 const HabitsPage = () => {
   const user = useUser();
-  const { habits, removeHabit } = useHabits();
+  const { habits, removeHabit, habitIdBeingDeleted } = useHabits();
   const { removeOccurrencesByHabitId } = useOccurrences();
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
-  const [isRemovingHabit, setIsRemovingHabit] = React.useState(false);
 
   useDocumentTitle('My Habits | Habitrack');
 
@@ -85,11 +84,9 @@ const HabitsPage = () => {
       return null;
     }
 
-    setIsRemovingHabit(true);
-    await removeHabit(habitToRemove.id);
+    await removeHabit(habitToRemove);
     removeOccurrencesByHabitId(habitToRemove.id);
     setHabitToRemove(null);
-    setIsRemovingHabit(false);
   };
 
   const handleEditStart = (habit: Habit) => {
@@ -201,7 +198,7 @@ const HabitsPage = () => {
         heading="Delete habit"
         onConfirm={handleRemovalConfirmed}
         onCancel={handleRemovalCancel}
-        loading={isRemovingHabit}
+        loading={habitIdBeingDeleted === habitToRemove?.id}
       >
         <div>
           Are you sure you want to delete <strong>{habitToRemove?.name}</strong>{' '}
