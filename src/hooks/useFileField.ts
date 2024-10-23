@@ -1,19 +1,25 @@
 import React from 'react';
 
-type FormValue = File | null;
+type FileFieldValue = File | null;
 
 type ReturnValue = [
-  FormValue,
+  FileFieldValue,
   React.ChangeEventHandler<HTMLInputElement>,
   () => void,
 ];
 
-const useFileField = (initialValue: FormValue = null): ReturnValue => {
-  const [value, setValue] = React.useState<FormValue>(initialValue);
+const useFileField = (initialValue: FileFieldValue = null): ReturnValue => {
+  const [value, setValue] = React.useState<FileFieldValue>(initialValue);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.files?.[0] || null;
-    setValue(value);
+  const handleChange = ({
+    target: { files },
+  }: React.ChangeEvent<HTMLInputElement>) => {
+    if (!files) {
+      return null;
+    }
+
+    const [value] = files;
+    setValue(value || null);
   };
 
   const clearValue = () => {

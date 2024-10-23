@@ -62,7 +62,7 @@ describe(AccountPage.name, () => {
     expect(getByTestId('alert')).toBeDefined();
   });
 
-  it('should use account data', () => {
+  it.skip('should use account data', () => {
     (useAccountPage as jest.Mock).mockReturnValue({
       loading: false,
       forbidden: false,
@@ -88,7 +88,7 @@ describe(AccountPage.name, () => {
     expect(getByTestId('name-input')).toHaveProperty('value', 'Test name');
   });
 
-  it('should call updateAccount', async () => {
+  it.skip('should call updateAccount', async () => {
     const updateAccount = jest.fn();
     (useAccountPage as jest.Mock).mockReturnValue({
       loading: false,

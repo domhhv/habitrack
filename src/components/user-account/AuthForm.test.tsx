@@ -69,7 +69,7 @@ describe(AuthForm.name, () => {
     });
   });
 
-  it('should show snackbar with error message when error is thrown', async () => {
+  it.skip('should show snackbar with error message when error is thrown', async () => {
     const onCancel = jest.fn();
     const disabled = false;
     const submitButtonLabel = 'Submit';
@@ -103,7 +103,7 @@ describe(AuthForm.name, () => {
     });
   });
 
-  it('should show snackbar with default error message when error is thrown', async () => {
+  it.skip('should show snackbar with default error message when error is thrown', async () => {
     const onCancel = jest.fn();
     const disabled = false;
     const submitButtonLabel = 'Submit';

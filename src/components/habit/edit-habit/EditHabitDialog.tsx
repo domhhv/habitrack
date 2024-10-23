@@ -14,6 +14,7 @@ import {
   Textarea,
 } from '@nextui-org/react';
 import { useUser } from '@supabase/auth-helpers-react';
+import { toEventLike } from '@utils';
 import React from 'react';
 
 export type EditHabitDialogProps = {
@@ -28,9 +29,8 @@ const EditHabitDialog = ({
   onClose,
 }: EditHabitDialogProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [name, handleNameChange, , setName] = useTextField();
-  const [description, handleDescriptionChange, , setDescription] =
-    useTextField();
+  const [name, handleNameChange] = useTextField();
+  const [description, handleDescriptionChange] = useTextField();
   const [traitId, setTraitId] = React.useState('');
   const { updateHabit, habitIdBeingUpdated } = useHabits();
   const { traits } = useTraits();
@@ -42,11 +42,11 @@ const EditHabitDialog = ({
 
   React.useEffect(() => {
     if (habit) {
-      setName(habit.name);
-      setDescription(habit.description || '');
+      handleNameChange(toEventLike(habit.name));
+      handleDescriptionChange(toEventLike(habit.description || ''));
       setTraitId(habit.traitId.toString());
     }
-  }, [habit, setName, setDescription]);
+  }, [habit, handleNameChange, handleDescriptionChange]);
 
   if (!isOpen || !habit) {
     return null;

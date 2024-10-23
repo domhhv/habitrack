@@ -1,66 +1,91 @@
 import { useSnackbar } from '@context';
-import { useTextField } from '@hooks';
-import {
-  getUserAccountByEmail,
-  updateUserAccount,
-  updateUserPassword,
-} from '@services';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useDataFetch, useTextField } from '@hooks';
+import { fetchUser, updateUser } from '@services';
+import { getErrorMessage, toEventLike } from '@utils';
 import React from 'react';
 
+type User = Awaited<ReturnType<typeof fetchUser>>;
+
 const useAccountPage = () => {
-  const user = useUser();
+  const [user, setUser] = React.useState<User>();
   const { showSnackbar } = useSnackbar();
   const [forbidden, setForbidden] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
-  const [email, handleEmailChange, , setEmail] = useTextField();
-  const [password, handlePasswordChange, clearPassword] = useTextField();
-  const [name, handleNameChange, , setName] = useTextField();
+  const [email, handleEmailChange] = useTextField();
+  const [password, handlePasswordChange] = useTextField();
+  const [name, handleNameChange] = useTextField();
 
-  React.useEffect(() => {
-    setLoading(true);
+  const fillInputs = React.useCallback(
+    (user?: User) => {
+      handleEmailChange(toEventLike(user?.email));
+      handleNameChange(toEventLike(user?.userMetadata.name || ''));
+    },
+    [handleEmailChange, handleNameChange]
+  );
 
-    const loadUserProfile = async () => {
-      if (!user?.id) {
-        setForbidden(true);
-        setLoading(false);
-        return;
-      }
-
-      const data = await getUserAccountByEmail(user.email || '');
-
-      setEmail(data.email || user.email || '');
-      clearPassword();
-      setName(data.name || '');
+  const loadUser = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      const user = await fetchUser();
+      setUser(user);
+      fillInputs(user);
+    } finally {
       setLoading(false);
-    };
+    }
+  }, [fillInputs]);
 
-    void loadUserProfile();
-  }, [user, user?.email, user?.phone, clearPassword, setEmail, setName]);
+  useDataFetch({
+    load: loadUser,
+    clear: () => {
+      fillInputs();
+      setForbidden(true);
+    },
+  });
 
   React.useEffect(() => {
-    setForbidden(!user?.id && !loading);
-  }, [user, loading]);
+    void loadUser();
+  }, [loadUser]);
+
+  React.useEffect(() => {
+    setForbidden(!loading && !user);
+  }, [user, loading, fillInputs]);
 
   const updateAccount = async () => {
-    if (!user?.id) return;
+    try {
+      if (!user) {
+        return null;
+      }
 
-    setLoading(true);
+      setLoading(true);
 
-    if (email || password) {
-      await updateUserPassword(email, password);
+      const updatedUser = await updateUser(email, password, name);
+      console.log('updatedUser', updatedUser);
+
+      setUser(updatedUser);
+
+      showSnackbar('Account updated!', {
+        color: 'success',
+        dismissible: true,
+        dismissText: 'Done',
+      });
+    } catch (error) {
+      showSnackbar(
+        'Something went wrong while updating your account. Please try again.',
+        {
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+          dismissible: true,
+        }
+      );
+
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-
-    await updateUserAccount(user.id, {
-      name,
-    });
-
-    showSnackbar('Account updated', { color: 'success' });
-
-    setLoading(false);
   };
 
   return {
+    user,
     loading,
     forbidden,
     email,
