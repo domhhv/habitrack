@@ -1,29 +1,14 @@
+import { type AlertOptions } from '@components';
 import React from 'react';
-
-export type ButtonColor =
-  | 'default'
-  | 'secondary'
-  | 'primary'
-  | 'success'
-  | 'warning'
-  | 'danger';
-
-export type SnackbarOptions = {
-  color?: ButtonColor;
-  autoHideDuration?: number;
-  dismissible?: boolean;
-  description?: string;
-  dismissText?: string;
-};
 
 export type Snackbar = {
   id: string;
   message: string;
-  options: SnackbarOptions;
+  options: AlertOptions;
 };
 
 type SnackbarContextType = {
-  showSnackbar: (message: string, options?: SnackbarOptions) => void;
+  showSnackbar: (message: string, options?: AlertOptions) => void;
 };
 
 export const SnackbarContext = React.createContext<SnackbarContextType | null>(
