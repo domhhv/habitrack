@@ -20,6 +20,7 @@ jest.mock('@components', () => ({
   HabitsPage: jest.fn(),
   AppHeader: jest.fn(),
   AccountPage: jest.fn(),
+  Snackbars: jest.fn(),
 }));
 
 jest.mock('react-aria', () => ({
@@ -31,8 +32,6 @@ jest.mock('react-aria', () => ({
 }));
 
 jest.mock('@context', () => ({
-  SnackbarProvider: jest.fn().mockImplementation(({ children }) => children),
-  UserAccountProvider: jest.fn().mockImplementation(({ children }) => children),
   TraitsProvider: jest.fn().mockImplementation(({ children }) => children),
   HabitsProvider: jest.fn().mockImplementation(({ children }) => children),
   OccurrencesProvider: jest.fn().mockImplementation(({ children }) => children),

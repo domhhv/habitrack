@@ -1,4 +1,3 @@
-import { SnackbarProvider } from '@context';
 import { useUser } from '@supabase/auth-helpers-react';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
@@ -52,9 +51,7 @@ describe(AccountPage.name, () => {
     (useUser as jest.Mock).mockReturnValue({ id: null });
     const { getByTestId } = render(
       <BrowserRouter>
-        <SnackbarProvider>
-          <AccountPage />
-        </SnackbarProvider>
+        <AccountPage />
       </BrowserRouter>
     );
 

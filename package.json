@@ -74,7 +74,8 @@
     "react-stately": "^3.32.2",
     "sort-by": "^1.2.0",
     "tailwind-merge": "^2.5.2",
-    "type-fest": "^4.26.1"
+    "type-fest": "^4.26.1",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",

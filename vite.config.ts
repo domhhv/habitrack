@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
         '@utils': resolve(__dirname, './src/utils'),
         '@helpers': resolve(__dirname, './src/helpers'),
         '@models': resolve(__dirname, './src/models'),
+        '@stores': resolve(__dirname, './src/stores'),
         '@tests': resolve(__dirname, './tests'),
       },
     },

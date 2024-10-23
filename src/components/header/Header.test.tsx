@@ -1,4 +1,3 @@
-import { SnackbarProvider } from '@context';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
@@ -23,9 +22,7 @@ describe(Header.name, () => {
   it('should render habits and calendar links', () => {
     const { getByText } = render(
       <BrowserRouter>
-        <SnackbarProvider>
-          <Header />
-        </SnackbarProvider>
+        <Header />
       </BrowserRouter>
     );
     expect(getByText('Calendar')).toBeDefined();

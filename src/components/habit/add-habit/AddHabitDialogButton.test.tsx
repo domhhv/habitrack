@@ -1,5 +1,6 @@
-import { useHabits, useSnackbar } from '@context';
+import { useHabits } from '@context';
 import { StorageBuckets, uploadFile } from '@services';
+// import { useSnackbarsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -12,6 +13,10 @@ jest.mock('@context', () => ({
   useTraits: jest.fn().mockReturnValue({
     traits: [{ id: 1, slug: 'trait-slug', name: 'Trait' }],
   }),
+}));
+
+jest.mock('@stores', () => ({
+  useSnackbarsStore: jest.fn(),
 }));
 
 jest.mock('@services', () => ({
@@ -115,7 +120,7 @@ describe(AddHabitDialogButton.name, () => {
       .fn()
       .mockReturnValue(Promise.resolve({ id: 1234 }));
     const mockUpdateHabit = jest.fn().mockReturnValue(Promise.resolve({}));
-    const mockShowSnackbar = jest.fn();
+    // const mockShowSnackbar = jest.fn();
     (uploadFile as jest.Mock).mockReturnValue(
       Promise.resolve({ data: { path: 'icon-path' } })
     );
@@ -126,9 +131,9 @@ describe(AddHabitDialogButton.name, () => {
     (useUser as jest.Mock).mockReturnValue({
       id: 'uuid-42',
     });
-    (useSnackbar as jest.Mock).mockReturnValue({
-      showSnackbar: mockShowSnackbar,
-    });
+    // (useSnackbarsStore as jest.Mock).mockReturnValue({
+    //   showSnackbar: mockShowSnackbar,
+    // });
 
     const { getByRole, getByTestId, getByLabelText } = render(
       <AddHabitDialogButton />

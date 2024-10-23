@@ -1,9 +1,4 @@
-import {
-  useSnackbar,
-  OccurrencesContext,
-  useHabits,
-  useTraits,
-} from '@context';
+import { OccurrencesContext, useHabits, useTraits } from '@context';
 import { cacheOccurrence, uncacheOccurrence } from '@helpers';
 import { useDataFetch } from '@hooks';
 import type {
@@ -16,6 +11,7 @@ import {
   destroyOccurrence,
   listOccurrences,
 } from '@services';
+import { useSnackbarsStore } from '@stores';
 import { getErrorMessage } from '@utils';
 import React, { type ReactNode } from 'react';
 
@@ -31,7 +27,7 @@ export type OccurrenceFilters = {
 };
 
 const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
-  const { showSnackbar } = useSnackbar();
+  const { showSnackbar } = useSnackbarsStore();
   const { habits } = useHabits();
   const { traits } = useTraits();
 

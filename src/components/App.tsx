@@ -1,4 +1,10 @@
-import { AppHeader, Calendar, AccountPage, HabitsPage } from '@components';
+import {
+  AppHeader,
+  Calendar,
+  AccountPage,
+  HabitsPage,
+  Snackbars,
+} from '@components';
 import { useCalendar } from '@hooks';
 import { setDefaultOptions } from 'date-fns';
 import { enGB } from 'date-fns/locale';
@@ -32,6 +38,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/calendar" replace />} />
         </Routes>
       </div>
+      <Snackbars />
     </Providers>
   );
 };

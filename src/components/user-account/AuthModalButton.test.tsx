@@ -1,4 +1,3 @@
-import { SnackbarProvider } from '@context';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
@@ -32,11 +31,7 @@ jest.mock('@context', () => ({
 
 describe(AuthModalButton.name, () => {
   it.skip('should open modal if user is not logged out', () => {
-    const { getByTestId, getByText } = render(
-      <SnackbarProvider>
-        <AuthModalButton />
-      </SnackbarProvider>
-    );
+    const { getByTestId, getByText } = render(<AuthModalButton />);
     const button = getByTestId('auth-button');
     act(() => {
       fireEvent.click(button);
@@ -66,11 +61,7 @@ describe(AuthModalButton.name, () => {
     // (useUserAccount as jest.Mock).mockReturnValue({
     //   supabaseUser: { id: null },
     // });
-    const { getByTestId, getByText } = render(
-      <SnackbarProvider>
-        <AuthModalButton />
-      </SnackbarProvider>
-    );
+    const { getByTestId, getByText } = render(<AuthModalButton />);
     const button = getByTestId('auth-button');
     act(() => {
       fireEvent.click(button);
@@ -84,11 +75,7 @@ describe(AuthModalButton.name, () => {
   });
 
   it.skip('should close modal on cancel', async () => {
-    const { getByTestId, getByText, queryByText } = render(
-      <SnackbarProvider>
-        <AuthModalButton />
-      </SnackbarProvider>
-    );
+    const { getByTestId, getByText, queryByText } = render(<AuthModalButton />);
     const button = getByTestId('auth-button');
     act(() => {
       fireEvent.click(button);
@@ -108,11 +95,7 @@ describe(AuthModalButton.name, () => {
     //   supabaseUser: { id: null },
     //   login: jest.fn(),
     // });
-    const { getByTestId } = render(
-      <SnackbarProvider>
-        <AuthModalButton />
-      </SnackbarProvider>
-    );
+    const { getByTestId } = render(<AuthModalButton />);
     const button = getByTestId('auth-button');
     fireEvent.click(button);
     const submit = getByTestId('submit-button');
@@ -127,11 +110,7 @@ describe(AuthModalButton.name, () => {
     //   supabaseUser: { id: null },
     //   register: jest.fn(),
     // });
-    const { getByTestId, getByText } = render(
-      <SnackbarProvider>
-        <AuthModalButton />
-      </SnackbarProvider>
-    );
+    const { getByTestId, getByText } = render(<AuthModalButton />);
     const authButton = getByTestId('auth-button');
     fireEvent.click(authButton);
     const registerTab = getByText('Register');
@@ -147,11 +126,7 @@ describe(AuthModalButton.name, () => {
     // (useUserAccount as jest.Mock).mockReturnValue({
     //   supabaseUser: { id: '123' },
     // });
-    const { getByTestId, queryByTestId } = render(
-      <SnackbarProvider>
-        <AuthModalButton />
-      </SnackbarProvider>
-    );
+    const { getByTestId, queryByTestId } = render(<AuthModalButton />);
     const userIcon = getByTestId('user-icon');
     const signOutIcon = queryByTestId('sign-out-icon');
     expect(userIcon).toBeDefined();
@@ -166,9 +141,7 @@ describe(AuthModalButton.name, () => {
     // });
     const { getByTestId } = render(
       <BrowserRouter>
-        <SnackbarProvider>
-          <AuthModalButton />
-        </SnackbarProvider>
+        <AuthModalButton />
       </BrowserRouter>
     );
     const signOutIcon = getByTestId('sign-out-icon');
