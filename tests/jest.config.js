@@ -13,6 +13,7 @@ export default {
     '@helpers': '<rootDir>/src/helpers',
     '@models': '<rootDir>/src/models',
     '@context': '<rootDir>/src/context',
+    '@stores': '<rootDir>/src/stores',
     '@tests': '<rootDir>/tests',
   },
   transform: {

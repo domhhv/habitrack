@@ -1,4 +1,4 @@
-import { HabitsContext, useSnackbar } from '@context';
+import { HabitsContext } from '@context';
 import { useDataFetch } from '@hooks';
 import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
 import {
@@ -10,12 +10,13 @@ import {
   StorageBuckets,
   uploadFile,
 } from '@services';
+import { useSnackbarsStore } from '@stores';
 import { makeTestHabit } from '@tests';
 import { getErrorMessage } from '@utils';
 import React, { type ReactNode } from 'react';
 
 const HabitsProvider = ({ children }: { children: ReactNode }) => {
-  const { showSnackbar } = useSnackbar();
+  const { showSnackbar } = useSnackbarsStore();
   const [addingHabit, setAddingHabit] = React.useState(false);
   const [fetchingHabits, setFetchingHabits] = React.useState(false);
   const [habits, setHabits] = React.useState<Habit[]>([makeTestHabit()]);

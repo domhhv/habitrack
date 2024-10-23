@@ -1,4 +1,3 @@
-import { useSnackbar } from '@context';
 import {
   Button,
   ButtonGroup,
@@ -17,6 +16,7 @@ import {
   User as UserIcon,
 } from '@phosphor-icons/react';
 import { sendPasswordResetEmail, signIn, signOut, signUp } from '@services';
+import { useSnackbarsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getErrorMessage } from '@utils';
 import React from 'react';
@@ -28,7 +28,7 @@ export type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
   const user = useUser();
-  const { showSnackbar } = useSnackbar();
+  const { showSnackbar } = useSnackbarsStore();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');

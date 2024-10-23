@@ -1,7 +1,8 @@
-import { TraitsContext, useSnackbar } from '@context';
+import { TraitsContext } from '@context';
 import { useDataFetch } from '@hooks';
 import type { Trait, TraitsInsert } from '@models';
 import { listTraits, createTrait } from '@services';
+import { useSnackbarsStore } from '@stores';
 import { makeTestTrait } from '@tests';
 import { getErrorMessage } from '@utils';
 import React, { type ReactNode } from 'react';
@@ -12,7 +13,7 @@ const testTraits = [
 ];
 
 const TraitsProvider = ({ children }: { children: ReactNode }) => {
-  const { showSnackbar } = useSnackbar();
+  const { showSnackbar } = useSnackbarsStore();
   const [traits, setTraits] = React.useState<Trait[]>(testTraits);
   const [fetchingTraits, setFetchingTraits] = React.useState(false);
   const [addingTrait, setAddingTrait] = React.useState(false);

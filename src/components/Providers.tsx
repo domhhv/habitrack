@@ -1,9 +1,4 @@
-import {
-  HabitsProvider,
-  OccurrencesProvider,
-  SnackbarProvider,
-  TraitsProvider,
-} from '@context';
+import { HabitsProvider, OccurrencesProvider, TraitsProvider } from '@context';
 import { supabaseClient } from '@helpers';
 import { NextUIProvider } from '@nextui-org/react';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
@@ -25,15 +20,13 @@ const LowerProviders = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
 
   return (
     <NextUIProvider navigate={navigate}>
-      <SnackbarProvider>
-        <TraitsProvider>
-          <HabitsProvider>
-            <OccurrencesProvider rangeStart={rangeStart} rangeEnd={rangeEnd}>
-              {children}
-            </OccurrencesProvider>
-          </HabitsProvider>
-        </TraitsProvider>
-      </SnackbarProvider>
+      <TraitsProvider>
+        <HabitsProvider>
+          <OccurrencesProvider rangeStart={rangeStart} rangeEnd={rangeEnd}>
+            {children}
+          </OccurrencesProvider>
+        </HabitsProvider>
+      </TraitsProvider>
     </NextUIProvider>
   );
 };

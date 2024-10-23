@@ -25,6 +25,7 @@
       "@hooks": ["hooks"],
       "@helpers": ["helpers"],
       "@models": ["models"],
+      "@stores": ["stores"],
       "@tests": ["../tests"]
     }
   },

@@ -1,10 +1,10 @@
-import { useSnackbar } from '@context';
 import { supabaseClient } from '@helpers';
+import { useSnackbarsStore } from '@stores';
 import React from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 
 const useAuthSearchParams = () => {
-  const { showSnackbar } = useSnackbar();
+  const { showSnackbar } = useSnackbarsStore();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const { hash } = useLocation();

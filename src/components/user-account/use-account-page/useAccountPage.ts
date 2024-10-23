@@ -1,6 +1,6 @@
-import { useSnackbar } from '@context';
 import { useDataFetch, useTextField } from '@hooks';
 import { fetchUser, updateUser } from '@services';
+import { useSnackbarsStore } from '@stores';
 import { getErrorMessage, toEventLike } from '@utils';
 import React from 'react';
 
@@ -8,7 +8,7 @@ type User = Awaited<ReturnType<typeof fetchUser>>;
 
 const useAccountPage = () => {
   const [user, setUser] = React.useState<User>();
-  const { showSnackbar } = useSnackbar();
+  const { showSnackbar } = useSnackbarsStore();
   const [forbidden, setForbidden] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [email, handleEmailChange] = useTextField();

@@ -1,4 +1,3 @@
-import { SnackbarProvider } from '@context';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -11,17 +10,15 @@ describe(AuthForm.name, () => {
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByLabelText, getByTestId } = render(
-      <SnackbarProvider>
-        <AuthForm
-          mode="login"
-          onSubmit={onSubmit}
-          onCancel={onCancel}
-          disabled={disabled}
-          submitButtonLabel={submitButtonLabel}
-          onModeChange={() => {}}
-          goBackToLogin={() => {}}
-        />
-      </SnackbarProvider>
+      <AuthForm
+        mode="login"
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        disabled={disabled}
+        submitButtonLabel={submitButtonLabel}
+        onModeChange={() => {}}
+        goBackToLogin={() => {}}
+      />
     );
 
     const email = getByLabelText('Email');
@@ -45,17 +42,15 @@ describe(AuthForm.name, () => {
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByText } = render(
-      <SnackbarProvider>
-        <AuthForm
-          mode="login"
-          onSubmit={onSubmit}
-          onCancel={onCancel}
-          disabled={disabled}
-          submitButtonLabel={submitButtonLabel}
-          onModeChange={() => {}}
-          goBackToLogin={() => {}}
-        />
-      </SnackbarProvider>
+      <AuthForm
+        mode="login"
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        disabled={disabled}
+        submitButtonLabel={submitButtonLabel}
+        onModeChange={() => {}}
+        goBackToLogin={() => {}}
+      />
     );
 
     const cancelButton = getByText('Cancel');
@@ -74,19 +69,17 @@ describe(AuthForm.name, () => {
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByTestId } = render(
-      <SnackbarProvider>
-        <AuthForm
-          mode="login"
-          onSubmit={() => {
-            throw new Error('My error message');
-          }}
-          onCancel={onCancel}
-          disabled={disabled}
-          submitButtonLabel={submitButtonLabel}
-          onModeChange={() => {}}
-          goBackToLogin={() => {}}
-        />
-      </SnackbarProvider>
+      <AuthForm
+        mode="login"
+        onSubmit={() => {
+          throw new Error('My error message');
+        }}
+        onCancel={onCancel}
+        disabled={disabled}
+        submitButtonLabel={submitButtonLabel}
+        onModeChange={() => {}}
+        goBackToLogin={() => {}}
+      />
     );
 
     const submitForm = getByTestId('submit-form');
@@ -108,19 +101,17 @@ describe(AuthForm.name, () => {
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByTestId } = render(
-      <SnackbarProvider>
-        <AuthForm
-          mode="login"
-          onSubmit={() => {
-            throw new Error('');
-          }}
-          onCancel={onCancel}
-          disabled={disabled}
-          submitButtonLabel={submitButtonLabel}
-          onModeChange={() => {}}
-          goBackToLogin={() => {}}
-        />
-      </SnackbarProvider>
+      <AuthForm
+        mode="login"
+        onSubmit={() => {
+          throw new Error('');
+        }}
+        onCancel={onCancel}
+        disabled={disabled}
+        submitButtonLabel={submitButtonLabel}
+        onModeChange={() => {}}
+        goBackToLogin={() => {}}
+      />
     );
 
     const submitForm = getByTestId('submit-form');
