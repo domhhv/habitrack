@@ -1,5 +1,4 @@
 import { PasswordInput, type AuthMode } from '@components';
-import { useSnackbar } from '@context';
 import { useTextField } from '@hooks';
 import { Input, Button } from '@nextui-org/react';
 import clsx from 'clsx';
@@ -27,18 +26,10 @@ const AuthForm = ({
   const [email, handleEmailChange, clearEmail] = useTextField();
   const [name, handleNameChange, clearName] = useTextField();
   const [password, handlePasswordChange, clearPassword] = useTextField();
-  const { showSnackbar } = useSnackbar();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    try {
-      event.preventDefault();
-      onSubmit(email, password, name);
-    } catch (e) {
-      showSnackbar((e as Error).message || 'Something went wrong', {
-        color: 'danger',
-      });
-      clearValues();
-    }
+    event.preventDefault();
+    onSubmit(email, password, name);
   };
 
   const clearValues = () => {

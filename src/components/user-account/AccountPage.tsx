@@ -15,6 +15,7 @@ const AccountPage = () => {
   useDocumentTitle('My Account | Habitrack');
 
   const {
+    user,
     loading,
     forbidden,
     email,
@@ -30,15 +31,18 @@ const AccountPage = () => {
     'mx-auto flex flex-col items-center justify-center'
   );
 
-  if (loading) {
+  if (!user && loading) {
     return (
-      <div className={containerClassName} data-testid="account-page">
+      <div
+        className={twMerge(containerClassName, 'pt-16')}
+        data-testid="account-page"
+      >
         <Spinner data-testid="loader" aria-label="Loading..." />
       </div>
     );
   }
 
-  if (forbidden) {
+  if (forbidden || (!user && !forbidden)) {
     return (
       <div
         className={twMerge(containerClassName, 'items-start pt-16')}
@@ -73,12 +77,13 @@ const AccountPage = () => {
           <div className="flex flex-col gap-2">
             <div>
               <Input
+                isDisabled // TODO: Implement a flow for updating email
                 variant="bordered"
                 value={email}
                 onChange={handleEmailChange}
-                isDisabled={loading}
                 label="Email"
                 data-testid="email-input"
+                description="Updating an email is coming soon"
               />
             </div>
             <div>

@@ -13,6 +13,7 @@ import {
 } from '@nextui-org/react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { makeTestOccurrence } from '@tests';
+import { toEventLike } from '@utils';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
@@ -23,7 +24,7 @@ export type AddCustomTraitModalProps = {
 
 const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   const [label, handleLabelChange, clearTraitLabel] = useTextField();
-  const [slug, handleSlugChange, , setTraitSlug] = useTextField();
+  const [slug, handleSlugChange] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
     useTextField();
   const [color, setTraitColor] = React.useState('#94a3b8');
@@ -31,8 +32,8 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   const user = useUser();
 
   React.useEffect(() => {
-    setTraitSlug(label.toLowerCase().replace(/\s/g, '-') || '');
-  }, [label, setTraitSlug]);
+    handleSlugChange(toEventLike(label.toLowerCase().replace(/\s/g, '-')));
+  }, [label, handleSlugChange]);
 
   const handleDialogClose = () => {
     clearTraitLabel();

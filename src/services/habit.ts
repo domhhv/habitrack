@@ -38,11 +38,14 @@ export const patchHabit = async (
   id: number,
   body: HabitsUpdate
 ): Promise<Habit> => {
-  const serverUpdates = transformClientEntity(body);
+  const serverUpdates = transformClientEntity({
+    ...body,
+    updatedAt: new Date().toISOString(),
+  });
 
   const { error, data } = await supabaseClient
     .from('habits')
-    .update({ ...serverUpdates, updated_at: new Date().toISOString() })
+    .update(serverUpdates)
     .eq('id', id)
     .select('*, trait:traits(id, name, color)')
     .single();

@@ -20,14 +20,17 @@ import React, { type ReactNode } from 'react';
 const SnackbarProvider = ({ children }: { children: ReactNode }) => {
   const [snackbars, setSnackbars] = React.useState<Snackbar[]>([]);
 
-  const showSnackbar = (message: string, options: SnackbarOptions = {}) => {
-    const id = crypto.randomUUID?.() || +new Date();
+  const showSnackbar = React.useCallback(
+    (message: string, options: SnackbarOptions = {}) => {
+      const id = crypto.randomUUID?.() || +new Date();
 
-    setSnackbars((prevSnackbars) => [
-      ...prevSnackbars,
-      { id, message, options },
-    ]);
-  };
+      setSnackbars((prevSnackbars) => [
+        ...prevSnackbars,
+        { id, message, options },
+      ]);
+    },
+    []
+  );
 
   const hideSnackbar = (id: string) => {
     setSnackbars((prevSnackbars) =>
@@ -44,7 +47,7 @@ const SnackbarProvider = ({ children }: { children: ReactNode }) => {
     primary: BellRinging,
   };
 
-  const providerValue = React.useMemo(() => ({ showSnackbar }), []);
+  const providerValue = React.useMemo(() => ({ showSnackbar }), [showSnackbar]);
 
   return (
     <SnackbarContext.Provider value={providerValue}>
