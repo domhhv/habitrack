@@ -1,8 +1,8 @@
-import { useOccurrences } from '@context';
 import { useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
 import { Spinner, Chip, Button, Tooltip, Badge } from '@nextui-org/react';
 import { X } from '@phosphor-icons/react';
+import { useOccurrencesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
@@ -20,7 +20,7 @@ const OccurrenceChip = ({
   onDelete,
   colorOverride,
 }: OccurrenceChipProps) => {
-  const { occurrenceIdBeingDeleted } = useOccurrences();
+  const { occurrenceIdBeingDeleted } = useOccurrencesStore();
   const [{ id, habit }] = occurrences;
   const { name: habitName, iconPath, trait } = habit || {};
   const { color: traitColor } = trait || {};

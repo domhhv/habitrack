@@ -12,7 +12,6 @@ export default {
     '@utils': '<rootDir>/src/utils',
     '@helpers': '<rootDir>/src/helpers',
     '@models': '<rootDir>/src/models',
-    '@context': '<rootDir>/src/context',
     '@stores': '<rootDir>/src/stores',
     '@tests': '<rootDir>/tests',
   },

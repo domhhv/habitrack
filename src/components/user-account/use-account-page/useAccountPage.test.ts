@@ -6,10 +6,6 @@ import type React from 'react';
 
 import useAccountPage from './useAccountPage';
 
-jest.mock('@context', () => ({
-  useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
-}));
-
 jest.mock('@services', () => ({
   getUserAccountByEmail: jest.fn(),
   updateUserAccount: jest.fn(),

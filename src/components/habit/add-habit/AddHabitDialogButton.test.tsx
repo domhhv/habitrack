@@ -6,10 +6,6 @@ import React from 'react';
 
 import AddHabitDialogButton from './AddHabitDialogButton';
 
-jest.mock('@context', () => ({
-  useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
-}));
-
 jest.mock('@stores', () => ({
   useSnackbarsStore: jest.fn(),
   useHabitsStore: jest.fn(),

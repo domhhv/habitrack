@@ -1,4 +1,3 @@
-import { OccurrencesProvider } from '@context';
 import { supabaseClient } from '@helpers';
 import { NextUIProvider } from '@nextui-org/react';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
@@ -13,11 +12,7 @@ type ProviderProps = {
 const LowerProviders = ({ children }: ProviderProps) => {
   const navigate = useNavigate();
 
-  return (
-    <NextUIProvider navigate={navigate}>
-      <OccurrencesProvider>{children}</OccurrencesProvider>
-    </NextUIProvider>
-  );
+  return <NextUIProvider navigate={navigate}>{children}</NextUIProvider>;
 };
 
 const PotentialSupabaseProvider = ({ children }: { children: ReactNode }) => {

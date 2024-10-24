@@ -5,13 +5,6 @@ import React from 'react';
 
 import HabitsPage from './HabitsPage';
 
-jest.mock('@context', () => ({
-  useOccurrences: jest.fn().mockReturnValue({
-    removeOccurrencesByHabitId: jest.fn(),
-    allOccurrences: [],
-  }),
-}));
-
 jest.mock('@services', () => ({
   StorageBuckets: {
     HABIT_ICONS: 'habit-icons',
@@ -26,6 +19,9 @@ jest.mock('@stores', () => ({
   useHabitsStore: jest.fn(),
   useTraitsStore: jest.fn().mockReturnValue({
     traits: [],
+  }),
+  useOccurrencesStore: jest.fn().mockReturnValue({
+    removeOccurrencesByHabitId: jest.fn(),
   }),
 }));
 

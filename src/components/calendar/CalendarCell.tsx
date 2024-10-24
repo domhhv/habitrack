@@ -1,6 +1,6 @@
-import { useOccurrences } from '@context';
 import { useScreenSize } from '@hooks';
 import { CalendarBlank } from '@phosphor-icons/react';
+import { useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
@@ -31,7 +31,7 @@ const CalendarCell = ({
   const cellRef = React.useRef<HTMLDivElement>(null);
   const user = useUser();
   const { removeOccurrence, fetchingOccurrences, occurrencesByDate } =
-    useOccurrences();
+    useOccurrencesStore();
   const today = new Date();
   const isToday =
     today.getDate() === dateNumber &&

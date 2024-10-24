@@ -1,6 +1,6 @@
 import type { Trait, TraitsInsert } from '@models';
 import { listTraits, createTrait } from '@services';
-import { useSnackbarsStore } from '@stores';
+import { useOccurrencesStore, useSnackbarsStore } from '@stores';
 import { makeTestTrait } from '@tests';
 import { getErrorMessage } from '@utils';
 import { create } from 'zustand';
@@ -69,5 +69,15 @@ const useTraitsStore = create<TraitsState>((set) => ({
     set({ traits: [] });
   },
 }));
+
+useTraitsStore.subscribe((state, prevState) => {
+  const { updateFilteredBy } = useOccurrencesStore.getState();
+
+  if (prevState.traits.length !== state.traits.length) {
+    updateFilteredBy({
+      traitIds: new Set(state.traits.map((trait) => trait.id.toString())),
+    });
+  }
+});
 
 export default useTraitsStore;

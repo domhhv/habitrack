@@ -2,7 +2,7 @@ import { type AlertProps } from '@components';
 import { type ReactNode } from 'react';
 import { create } from 'zustand';
 
-export type SnackbarOptions = Omit<AlertProps, 'message'> & {
+type SnackbarOptions = Omit<AlertProps, 'message'> & {
   action?: ReactNode;
   autoHideDuration?: number;
   dismissible?: boolean;

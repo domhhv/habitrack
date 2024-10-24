@@ -1,3 +1,12 @@
+import { generateCalendarRange } from '@helpers';
+import { getWeeksInMonth } from '@internationalized/date';
+import { act, render } from '@testing-library/react';
+import React from 'react';
+import { useCalendar } from 'react-aria';
+import { useCalendarState } from 'react-stately';
+
+import App from './App';
+
 jest.mock('react-aria', () => ({
   useLocale: jest.fn(),
   useCalendar: jest.fn(),
@@ -29,20 +38,6 @@ jest.mock('react-aria', () => ({
   })),
   I18nProvider: jest.fn().mockImplementation(({ children }) => children),
 }));
-
-jest.mock('@context', () => ({
-  HabitsProvider: jest.fn().mockImplementation(({ children }) => children),
-  OccurrencesProvider: jest.fn().mockImplementation(({ children }) => children),
-}));
-
-import { generateCalendarRange } from '@helpers';
-import { getWeeksInMonth } from '@internationalized/date';
-import { act, render } from '@testing-library/react';
-import React from 'react';
-import { useCalendar } from 'react-aria';
-import { useCalendarState } from 'react-stately';
-
-import App from './App';
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
