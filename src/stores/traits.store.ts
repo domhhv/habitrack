@@ -19,12 +19,13 @@ const testTraits = [
   makeTestTrait({ name: 'Test Bad Trait', color: '#F6F6F6' }),
 ];
 
+const { showSnackbar } = useSnackbarsStore.getState();
+
 const useTraitsStore = create<TraitsState>((set) => ({
   traits: testTraits,
   fetchingTraits: false,
   addingTrait: false,
   fetchTraits: async () => {
-    const { showSnackbar } = useSnackbarsStore.getState();
     try {
       set({ fetchingTraits: true });
       const traits = await listTraits();
@@ -44,7 +45,6 @@ const useTraitsStore = create<TraitsState>((set) => ({
     }
   },
   addTrait: async (trait: TraitsInsert) => {
-    const { showSnackbar } = useSnackbarsStore.getState();
     try {
       set({ addingTrait: true });
       const newTrait = await createTrait(trait);

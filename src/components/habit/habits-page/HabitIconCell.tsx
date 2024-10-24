@@ -1,7 +1,7 @@
 import { VisuallyHiddenInput } from '@components';
-import { useHabits } from '@context';
 import { type Habit } from '@models';
 import { Button, Tooltip } from '@nextui-org/react';
+import { useHabitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
@@ -11,7 +11,7 @@ type HabitIconCellProps = {
 };
 
 const HabitIconCell = ({ habit }: HabitIconCellProps) => {
-  const { updateHabit } = useHabits();
+  const { updateHabit } = useHabitsStore();
   const user = useUser();
   const iconUrl = getHabitIconUrl(habit.iconPath);
 

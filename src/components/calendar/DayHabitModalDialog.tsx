@@ -1,4 +1,4 @@
-import { useOccurrences, useHabits } from '@context';
+import { useOccurrences } from '@context';
 import {
   Button,
   Modal,
@@ -9,6 +9,7 @@ import {
   Select,
   SelectItem,
 } from '@nextui-org/react';
+import { useHabitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
 import React, { type MouseEventHandler } from 'react';
@@ -24,7 +25,7 @@ const DayHabitModalDialog = ({
   onClose,
   date,
 }: DayHabitModalDialogProps) => {
-  const { habits } = useHabits();
+  const { habits } = useHabitsStore();
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrences();
   const [selectedHabitIds, setSelectedHabitIds] = React.useState<string[]>([]);
