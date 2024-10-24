@@ -1,15 +1,23 @@
-import { type AlertOptions } from '@components';
+import { type AlertProps } from '@components';
+import { type ReactNode } from 'react';
 import { create } from 'zustand';
+
+export type SnackbarOptions = Omit<AlertProps, 'message'> & {
+  action?: ReactNode;
+  autoHideDuration?: number;
+  dismissible?: boolean;
+  dismissText?: string;
+};
 
 type Snackbar = {
   id: string;
   message: string;
-  options: AlertOptions;
+  options: SnackbarOptions;
 };
 
 type SnackbarState = {
   snackbars: Snackbar[];
-  showSnackbar: (message: string, options?: AlertOptions) => void;
+  showSnackbar: (message: string, options?: SnackbarOptions) => void;
   hideSnackbar: (id: string) => void;
 };
 

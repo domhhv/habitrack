@@ -1,5 +1,5 @@
-import { OccurrencesContext, useHabits, useTraits } from '@context';
-import { cacheOccurrence, uncacheOccurrence } from '@helpers';
+import { OccurrencesContext, useHabits } from '@context';
+import { cacheOccurrence, occurrencesCache, uncacheOccurrence } from '@helpers';
 import { useDataFetch } from '@hooks';
 import type {
   Occurrence,
@@ -11,14 +11,12 @@ import {
   destroyOccurrence,
   listOccurrences,
 } from '@services';
-import { useSnackbarsStore } from '@stores';
+import { useSnackbarsStore, useTraitsStore } from '@stores';
 import { getErrorMessage } from '@utils';
 import React, { type ReactNode } from 'react';
 
 type Props = {
   children: ReactNode;
-  rangeStart: number;
-  rangeEnd: number;
 };
 
 export type OccurrenceFilters = {
@@ -26,10 +24,10 @@ export type OccurrenceFilters = {
   traitIds: Set<string>;
 };
 
-const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
+const OccurrencesProvider = ({ children }: Props) => {
   const { showSnackbar } = useSnackbarsStore();
   const { habits } = useHabits();
-  const { traits } = useTraits();
+  const { traits } = useTraitsStore();
 
   const [addingOccurrence, setAddingOccurrence] = React.useState(false);
   const [fetchingOccurrences, setFetchingOccurrences] = React.useState(false);
@@ -43,11 +41,18 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
     habitIds: new Set([]),
     traitIds: new Set([]),
   });
+  const [range, setRange] = React.useState<[number, number]>([0, 0]);
+
+  const handleRangeChange = React.useCallback((range: [number, number]) => {
+    setRange(range);
+  }, []);
 
   const fetchOccurrences = React.useCallback(async () => {
     try {
-      setFetchingOccurrences(true);
-      setAllOccurrences(await listOccurrences([rangeStart, rangeEnd]));
+      if (range.every(Boolean)) {
+        setFetchingOccurrences(true);
+        setAllOccurrences(await listOccurrences(range));
+      }
     } catch (error) {
       console.error(error);
       showSnackbar(
@@ -61,11 +66,11 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
     } finally {
       setFetchingOccurrences(false);
     }
-  }, [rangeStart, rangeEnd, showSnackbar]);
+  }, [range, showSnackbar]);
 
   const clearOccurrences = React.useCallback(() => {
     setOccurrences([]);
-    setOccurrencesByDate({});
+    occurrencesCache.clear();
   }, []);
 
   useDataFetch({
@@ -75,7 +80,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
 
   React.useEffect(() => {
     void fetchOccurrences();
-  }, [rangeStart, rangeEnd, fetchOccurrences]);
+  }, [fetchOccurrences]);
 
   React.useEffect(() => {
     const initialFilteredHabitIds = habits.map((habit) => habit.id.toString());
@@ -91,11 +96,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
       allOccurrences.filter((occurrence) => {
         return (
           filteredBy.habitIds.has(occurrence.habitId.toString()) &&
-          filteredBy.traitIds.has(
-            habits
-              .find((habit) => habit.id === occurrence.habitId)
-              ?.traitId.toString() ?? ''
-          )
+          filteredBy.traitIds.has(occurrence.habit?.trait?.id.toString() || '')
         );
       })
     );
@@ -129,7 +130,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
 
         const nextOccurrence = await createOccurrence(occurrence);
 
-        cacheOccurrence([rangeStart, rangeEnd], nextOccurrence);
+        cacheOccurrence(range, nextOccurrence);
 
         setAllOccurrences((prevOccurrences) => [
           ...prevOccurrences,
@@ -156,7 +157,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
         setAddingOccurrence(false);
       }
     },
-    [showSnackbar, rangeStart, rangeEnd]
+    [showSnackbar, range]
   );
 
   const removeOccurrence = React.useCallback(
@@ -172,7 +173,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
           });
         });
 
-        uncacheOccurrence([rangeStart, rangeEnd], id);
+        uncacheOccurrence(range, id);
 
         showSnackbar('Your habit entry has been deleted from the calendar.', {
           dismissible: true,
@@ -192,7 +193,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
         setOccurrenceIdBeingDeleted(0);
       }
     },
-    [showSnackbar, rangeStart, rangeEnd]
+    [showSnackbar, range]
   );
 
   const removeOccurrencesByHabitId = (habitId: number) => {
@@ -215,6 +216,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
       removeOccurrencesByHabitId,
       filterBy,
       filteredBy,
+      onRangeChange: handleRangeChange,
     }),
     [
       addingOccurrence,
@@ -226,6 +228,7 @@ const OccurrencesProvider = ({ children, rangeStart, rangeEnd }: Props) => {
       removeOccurrence,
       filterBy,
       filteredBy,
+      handleRangeChange,
     ]
   );
 

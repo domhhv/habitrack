@@ -1,11 +1,11 @@
-import { type CalendarDate } from '@internationalized/date';
+import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
 import React, { type ForwardedRef } from 'react';
+import { useLocale } from 'react-aria';
 import { type CalendarState } from 'react-stately';
 
 import CalendarCell from './CalendarCell';
 
 type MonthProps = {
-  weeksInMonth: number;
   state: CalendarState;
   onDayModalDialogOpen: (
     dateNumber: number,
@@ -15,12 +15,17 @@ type MonthProps = {
 };
 
 const Month = (
-  { weeksInMonth, state, onDayModalDialogOpen }: MonthProps,
+  { state, onDayModalDialogOpen }: MonthProps,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
+  const { locale } = useLocale();
+  const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
+  const weekIndexes = [...new Array(weeksInMonthCount).keys()];
+  const { month: activeMonth } = state.visibleRange.start;
+
   return (
     <div ref={ref} className="flex flex-1 flex-col">
-      {[...new Array(weeksInMonth).keys()].map((weekIndex) => (
+      {weekIndexes.map((weekIndex) => (
         <div
           key={weekIndex}
           className="flex h-[110px] justify-between border-l-3 border-r-3 border-t-3 border-neutral-500 last-of-type:border-b-3 dark:border-neutral-400 lg:h-auto"
@@ -32,21 +37,23 @@ const Month = (
                 return null;
               }
 
+              const { month, day, year } = calendarDate;
+
               const rangeStatus =
-                calendarDate.month < state.visibleRange.start.month
+                month < activeMonth
                   ? 'below-range'
-                  : calendarDate.month > state.visibleRange.start.month
+                  : month > activeMonth
                     ? 'above-range'
                     : 'in-range';
 
-              const day = calendarDate.toString().split('T')[0];
+              const [dayKey] = calendarDate.toString().split('T');
 
               return (
                 <CalendarCell
-                  key={day}
-                  dateNumber={calendarDate.day}
-                  monthIndex={calendarDate.month}
-                  fullYear={calendarDate.year}
+                  key={dayKey}
+                  dateNumber={day}
+                  monthIndex={month}
+                  fullYear={year}
                   onClick={onDayModalDialogOpen}
                   rangeStatus={rangeStatus}
                   onNavigateBack={state.focusPreviousPage}

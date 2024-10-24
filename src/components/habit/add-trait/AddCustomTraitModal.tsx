@@ -1,5 +1,4 @@
 import { OccurrenceChip } from '@components';
-import { useTraits } from '@context';
 import { useTextField } from '@hooks';
 import {
   Button,
@@ -11,6 +10,7 @@ import {
   ModalHeader,
   Textarea,
 } from '@nextui-org/react';
+import { useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { makeTestOccurrence } from '@tests';
 import { toEventLike } from '@utils';
@@ -28,7 +28,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   const [description, handleDescriptionChange, clearDescription] =
     useTextField();
   const [color, setTraitColor] = React.useState('#94a3b8');
-  const { addingTrait, addTrait } = useTraits();
+  const { addingTrait, addTrait } = useTraitsStore();
   const user = useUser();
 
   React.useEffect(() => {

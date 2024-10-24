@@ -1,21 +1,46 @@
+import { useOccurrences } from '@context';
+import { generateCalendarRange } from '@helpers';
 import { useDocumentTitle } from '@hooks';
-import { CalendarDate } from '@internationalized/date';
+import { CalendarDate, GregorianCalendar } from '@internationalized/date';
 import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
-import { type AriaButtonProps, useCalendar } from 'react-aria';
-import { type CalendarState } from 'react-stately';
+import { type AriaButtonProps, useCalendar, useLocale } from 'react-aria';
+import { useCalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';
 
-type CalendarProps = {
-  state: CalendarState;
-  weeksInMonth: number;
+const createCalendar = (identifier: string) => {
+  switch (identifier) {
+    case 'gregory':
+      return new GregorianCalendar();
+    default:
+      throw new Error(`Unsupported calendar ${identifier}`);
+  }
 };
 
-const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
+const Calendar = () => {
+  const { onRangeChange } = useOccurrences();
+  const { locale } = useLocale();
+  const state = useCalendarState({
+    locale,
+    createCalendar,
+  });
   const { calendarProps, prevButtonProps, nextButtonProps, title } =
     useCalendar({}, state);
+
+  React.useEffect(() => {
+    onRangeChange(
+      generateCalendarRange(
+        state.visibleRange.start.year,
+        state.visibleRange.start.month
+      )
+    );
+  }, [
+    state.visibleRange.start.year,
+    state.visibleRange.start.month,
+    onRangeChange,
+  ]);
 
   const [activeMonthLabel, activeYear] = title.split(' ');
 
@@ -70,7 +95,7 @@ const Calendar = ({ weeksInMonth, state }: CalendarProps) => {
           onNavigateToYear={navigateToYear}
           onResetFocusedDate={resetFocusedDate}
         />
-        <CalendarGrid state={state} weeksInMonth={weeksInMonth} />
+        <CalendarGrid state={state} />
       </div>
     </div>
   );

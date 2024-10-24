@@ -1,4 +1,4 @@
-import { Button, type ButtonProps } from '@nextui-org/react';
+import { type ButtonProps } from '@nextui-org/react';
 import {
   BellRinging,
   CheckCircle,
@@ -9,22 +9,12 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 import clsx from 'clsx';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { type SetRequired, type ValueOf } from 'type-fest';
 
 export type ButtonColor = ValueOf<
   SetRequired<Pick<ButtonProps, 'color'>, 'color'>
 >;
-
-export type AlertOptions = {
-  color?: ButtonColor;
-  autoHideDuration?: number;
-  dismissible?: boolean;
-  description?: string;
-  dismissText?: string;
-  onDismiss?: () => void;
-  testId?: string;
-};
 
 const ICONS_BY_COLOR: Record<ButtonColor, Icon> = {
   secondary: Question,
@@ -35,27 +25,23 @@ const ICONS_BY_COLOR: Record<ButtonColor, Icon> = {
   primary: BellRinging,
 };
 
-type AlertProps = AlertOptions & {
+export type AlertProps = {
   message: string;
+  actions?: ReactNode[];
+  color?: ButtonColor;
+  description?: string;
+  testId?: string;
 };
 
 const Alert = ({
   message,
   description,
-  dismissible,
-  onDismiss,
-  dismissText = 'Dismiss',
+  actions = [],
   color = 'default',
   testId = 'alert',
 }: AlertProps) => {
-  const endDecorator = dismissible ? (
-    <Button onClick={onDismiss} size="sm" color={color} variant="flat">
-      {dismissText}
-    </Button>
-  ) : null;
-
   const alertClassName = clsx(
-    'flex items-center gap-4 rounded-md border px-4 py-2',
+    'flex items-center gap-2 rounded-md border px-4 py-2',
     color === 'default' &&
       'border-neutral-300 bg-slate-50 text-slate-700 dark:border-neutral-700 dark:bg-slate-900 dark:text-slate-100',
     color === 'primary' &&
@@ -77,12 +63,12 @@ const Alert = ({
       <Icon weight="bold" size={18} />
       <div className="flex w-full items-center justify-between gap-8">
         <div className="flex flex-col">
-          <h6 className="font-semibold" data-testid="snackbar-message">
+          <h6 className="font-semibold" data-testid="alert-message">
             {message}
           </h6>
           {description && <p className="text-sm">{description}</p>}
         </div>
-        {endDecorator}
+        {actions}
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ export const listOccurrences = async (
 ): Promise<Occurrence[]> => {
   const cachedOccurrences = occurrencesCache.get(range.toString());
 
-  if (cachedOccurrences) {
+  if (cachedOccurrences?.length) {
     return cachedOccurrences;
   }
 
@@ -45,7 +45,9 @@ export const listOccurrences = async (
 
   const result = transformServerEntities(data);
 
-  cacheOccurrences(range, result);
+  if (result.length) {
+    cacheOccurrences(range, result);
+  }
 
   return result;
 };

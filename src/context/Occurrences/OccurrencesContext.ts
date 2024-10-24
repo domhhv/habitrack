@@ -16,6 +16,7 @@ type OccurrencesContextType = {
     habitIds: Set<string>;
     traitIds: Set<string>;
   };
+  onRangeChange: (range: [number, number]) => void;
 };
 
 export const OccurrencesContext =
