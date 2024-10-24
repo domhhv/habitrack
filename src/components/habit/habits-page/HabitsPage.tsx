@@ -3,7 +3,6 @@ import {
   ConfirmDialog,
   EditHabitDialog,
 } from '@components';
-import { useOccurrences } from '@context';
 import { useDocumentTitle } from '@hooks';
 import { type Habit } from '@models';
 import {
@@ -18,7 +17,7 @@ import {
   Tooltip,
 } from '@nextui-org/react';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
-import { useHabitsStore } from '@stores';
+import { useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
 import React from 'react';
@@ -66,7 +65,7 @@ const habitColumns = [
 const HabitsPage = () => {
   const user = useUser();
   const { habits, removeHabit, habitIdBeingDeleted } = useHabitsStore();
-  const { removeOccurrencesByHabitId } = useOccurrences();
+  const { removeOccurrencesByHabitId } = useOccurrencesStore();
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
 

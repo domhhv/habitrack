@@ -17,18 +17,6 @@ jest.mock('react-router-dom', () => ({
   ),
 }));
 
-jest.mock('@context', () => ({
-  ...jest.requireActual('@context'),
-  __esModule: true,
-  // useUserAccount: jest.fn().mockReturnValue({
-  //   supabaseUser: { id: null },
-  //   login: jest.fn(),
-  //   logout: jest.fn(),
-  //   register: jest.fn(),
-  //   authenticating: false,
-  // }),
-}));
-
 describe(AuthModalButton.name, () => {
   it.skip('should open modal if user is not logged out', () => {
     const { getByTestId, getByText } = render(<AuthModalButton />);

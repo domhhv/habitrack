@@ -1,4 +1,3 @@
-import { OccurrencesProvider } from '@context';
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -24,54 +23,38 @@ describe(CalendarHeader.name, () => {
   };
 
   it.skip('should render month and year', () => {
-    const { getByText } = render(
-      <OccurrencesProvider>
-        <CalendarHeader {...props} />
-      </OccurrencesProvider>
-    );
+    const { getByText } = render(<CalendarHeader {...props} />);
     expect(getByText('January 2022')).toBeInTheDocument();
   });
 
   it.skip('should disable previous button', () => {
     const { getByRole } = render(
-      <OccurrencesProvider>
-        <CalendarHeader
-          {...props}
-          prevButtonProps={{ ...props.prevButtonProps, disabled: true }}
-        />
-      </OccurrencesProvider>
+      <CalendarHeader
+        {...props}
+        prevButtonProps={{ ...props.prevButtonProps, disabled: true }}
+      />
     );
     expect(getByRole('navigate-back')).toBeDisabled();
   });
 
   it.skip('should disable next button', () => {
     const { getByRole } = render(
-      <OccurrencesProvider>
-        <CalendarHeader
-          {...props}
-          nextButtonProps={{ ...props.nextButtonProps, disabled: true }}
-        />
-      </OccurrencesProvider>
+      <CalendarHeader
+        {...props}
+        nextButtonProps={{ ...props.nextButtonProps, disabled: true }}
+      />
     );
     expect(getByRole('navigate-forward')).toBeDisabled();
   });
 
   it.skip('should call onNavigateBack', () => {
-    const { getByRole } = render(
-      <OccurrencesProvider>
-        <CalendarHeader {...props} />
-      </OccurrencesProvider>
-    );
+    const { getByRole } = render(<CalendarHeader {...props} />);
     getByRole('navigate-back').click();
     expect(props.onNavigateBack).toHaveBeenCalled();
   });
 
   it.skip('should call onNavigateForward', () => {
-    const { getByRole } = render(
-      <OccurrencesProvider>
-        <CalendarHeader {...props} />
-      </OccurrencesProvider>
-    );
+    const { getByRole } = render(<CalendarHeader {...props} />);
     getByRole('navigate-forward').click();
     expect(props.onNavigateForward).toHaveBeenCalled();
   });

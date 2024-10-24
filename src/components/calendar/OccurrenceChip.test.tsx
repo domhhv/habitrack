@@ -1,5 +1,5 @@
-import { useOccurrences } from '@context';
 import { useScreenSize } from '@hooks';
+import { useOccurrencesStore } from '@stores';
 import { render, waitFor } from '@testing-library/react';
 import { makeTestOccurrence } from '@tests';
 import { getHabitIconUrl } from '@utils';
@@ -11,8 +11,8 @@ jest.mock('@hooks', () => ({
   useScreenSize: jest.fn(),
 }));
 
-jest.mock('@context', () => ({
-  useOccurrences: jest.fn(),
+jest.mock('@stores', () => ({
+  useOccurrencesStore: jest.fn(),
 }));
 
 describe(OccurrenceChip.name, () => {
@@ -23,7 +23,7 @@ describe(OccurrenceChip.name, () => {
   };
 
   it('should render img with habit icon', async () => {
-    (useOccurrences as jest.Mock).mockReturnValue({
+    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
       occurrenceIdBeingDeleted: null,
     });
     const { getByAltText } = render(<OccurrenceChip {...props} />);
@@ -38,7 +38,7 @@ describe(OccurrenceChip.name, () => {
   });
 
   it('should call onDelete when delete button is clicked', () => {
-    (useOccurrences as jest.Mock).mockReturnValue({
+    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
       occurrenceIdBeingDeleted: null,
     });
     const { getByRole } = render(<OccurrenceChip {...props} />);
@@ -48,7 +48,7 @@ describe(OccurrenceChip.name, () => {
   });
 
   it('should render CircularProgress when occurrence is being deleted', () => {
-    (useOccurrences as jest.Mock).mockReturnValue({
+    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
       occurrenceIdBeingDeleted: 1,
     });
     const { getByRole, queryByRole } = render(<OccurrenceChip {...props} />);
@@ -59,7 +59,7 @@ describe(OccurrenceChip.name, () => {
   });
 
   it('should not render delete button on small screens', () => {
-    (useOccurrences as jest.Mock).mockReturnValue({
+    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
       occurrenceIdBeingDeleted: null,
     });
     (useScreenSize as jest.Mock).mockReturnValue(1024);

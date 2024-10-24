@@ -1,7 +1,7 @@
-import { useOccurrences } from '@context';
 import { generateCalendarRange } from '@helpers';
 import { useDocumentTitle } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
+import { useOccurrencesStore } from '@stores';
 import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
 import { type AriaButtonProps, useCalendar, useLocale } from 'react-aria';
@@ -20,7 +20,7 @@ const createCalendar = (identifier: string) => {
 };
 
 const Calendar = () => {
-  const { onRangeChange } = useOccurrences();
+  const { onRangeChange } = useOccurrencesStore();
   const { locale } = useLocale();
   const state = useCalendarState({
     locale,
