@@ -1,7 +1,6 @@
-import { AuthModalButton, PasswordInput } from '@components';
+import { Alert, PasswordInput } from '@components';
 import { useDocumentTitle } from '@hooks';
 import { Button, Input, Spinner } from '@nextui-org/react';
-import { Prohibit as ProhibitIcon } from '@phosphor-icons/react';
 import clsx from 'clsx';
 import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -48,14 +47,7 @@ const AccountPage = () => {
         className={twMerge(containerClassName, 'items-start pt-16')}
         data-testid="account-page"
       >
-        <div
-          className="flex items-center gap-4 rounded-md bg-neutral-100 p-4 dark:bg-neutral-800"
-          data-testid="alert"
-        >
-          <ProhibitIcon size={24} weight="bold" />
-          <h4 className="font-semibold">Please log in to your account first</h4>
-          <AuthModalButton />
-        </div>
+        <Alert message="Please log in to your account first" color="danger" />
       </div>
     );
   }

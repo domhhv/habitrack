@@ -1,4 +1,5 @@
 import { AuthModalButton } from '@components';
+import { useFetchOnAuth } from '@hooks';
 import { Button, Tooltip } from '@nextui-org/react';
 import { GithubLogo } from '@phosphor-icons/react';
 import React from 'react';
@@ -7,6 +8,8 @@ import { Link } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
+  useFetchOnAuth();
+
   return (
     <header className="border-b border-b-neutral-300 bg-neutral-200 dark:border-b-neutral-800 dark:bg-neutral-900">
       <div className="mx-auto flex w-full flex-col items-center justify-between gap-2 p-4 sm:flex-row sm:gap-0 lg:w-[90%]">

@@ -1,4 +1,4 @@
-import { useHabits, useTraits } from '@context';
+import { useHabits } from '@context';
 import { useTextField } from '@hooks';
 import type { Habit } from '@models';
 import {
@@ -13,6 +13,7 @@ import {
   SelectItem,
   Textarea,
 } from '@nextui-org/react';
+import { useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { toEventLike } from '@utils';
 import React from 'react';
@@ -33,7 +34,7 @@ const EditHabitDialog = ({
   const [description, handleDescriptionChange] = useTextField();
   const [traitId, setTraitId] = React.useState('');
   const { updateHabit, habitIdBeingUpdated } = useHabits();
-  const { traits } = useTraits();
+  const { traits } = useTraitsStore();
   const user = useUser();
 
   React.useEffect(() => {

@@ -59,7 +59,6 @@ const useAccountPage = () => {
       setLoading(true);
 
       const updatedUser = await updateUser(email, password, name);
-      console.log('updatedUser', updatedUser);
 
       setUser(updatedUser);
 

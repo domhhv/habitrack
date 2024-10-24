@@ -1,5 +1,5 @@
 import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
-import { useHabits, useTraits } from '@context';
+import { useHabits } from '@context';
 import { useTextField, useFileField } from '@hooks';
 import {
   Button,
@@ -14,12 +14,13 @@ import {
   Textarea,
 } from '@nextui-org/react';
 import { CloudArrowUp, Plus } from '@phosphor-icons/react';
+import { useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
 const AddHabitDialogButton = () => {
   const user = useUser();
-  const { traits } = useTraits();
+  const { traits } = useTraitsStore();
   const { fetchingHabits, addingHabit, addHabit } = useHabits();
   const [open, setOpen] = React.useState(false);
   const [name, handleNameChange, clearName] = useTextField();

@@ -1,4 +1,4 @@
-import { HabitsProvider, OccurrencesProvider, TraitsProvider } from '@context';
+import { HabitsProvider, OccurrencesProvider } from '@context';
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -26,11 +26,9 @@ describe(CalendarHeader.name, () => {
   it.skip('should render month and year', () => {
     const { getByText } = render(
       <HabitsProvider>
-        <TraitsProvider>
-          <OccurrencesProvider rangeStart={0} rangeEnd={0}>
-            <CalendarHeader {...props} />
-          </OccurrencesProvider>
-        </TraitsProvider>
+        <OccurrencesProvider>
+          <CalendarHeader {...props} />
+        </OccurrencesProvider>
       </HabitsProvider>
     );
     expect(getByText('January 2022')).toBeInTheDocument();
@@ -39,14 +37,12 @@ describe(CalendarHeader.name, () => {
   it.skip('should disable previous button', () => {
     const { getByRole } = render(
       <HabitsProvider>
-        <TraitsProvider>
-          <OccurrencesProvider rangeStart={0} rangeEnd={0}>
-            <CalendarHeader
-              {...props}
-              prevButtonProps={{ ...props.prevButtonProps, disabled: true }}
-            />
-          </OccurrencesProvider>
-        </TraitsProvider>
+        <OccurrencesProvider>
+          <CalendarHeader
+            {...props}
+            prevButtonProps={{ ...props.prevButtonProps, disabled: true }}
+          />
+        </OccurrencesProvider>
       </HabitsProvider>
     );
     expect(getByRole('navigate-back')).toBeDisabled();
@@ -55,14 +51,12 @@ describe(CalendarHeader.name, () => {
   it.skip('should disable next button', () => {
     const { getByRole } = render(
       <HabitsProvider>
-        <TraitsProvider>
-          <OccurrencesProvider rangeStart={0} rangeEnd={0}>
-            <CalendarHeader
-              {...props}
-              nextButtonProps={{ ...props.nextButtonProps, disabled: true }}
-            />
-          </OccurrencesProvider>
-        </TraitsProvider>
+        <OccurrencesProvider>
+          <CalendarHeader
+            {...props}
+            nextButtonProps={{ ...props.nextButtonProps, disabled: true }}
+          />
+        </OccurrencesProvider>
       </HabitsProvider>
     );
     expect(getByRole('navigate-forward')).toBeDisabled();
@@ -71,11 +65,9 @@ describe(CalendarHeader.name, () => {
   it.skip('should call onNavigateBack', () => {
     const { getByRole } = render(
       <HabitsProvider>
-        <TraitsProvider>
-          <OccurrencesProvider rangeStart={0} rangeEnd={0}>
-            <CalendarHeader {...props} />
-          </OccurrencesProvider>
-        </TraitsProvider>
+        <OccurrencesProvider>
+          <CalendarHeader {...props} />
+        </OccurrencesProvider>
       </HabitsProvider>
     );
     getByRole('navigate-back').click();
@@ -85,11 +77,9 @@ describe(CalendarHeader.name, () => {
   it.skip('should call onNavigateForward', () => {
     const { getByRole } = render(
       <HabitsProvider>
-        <TraitsProvider>
-          <OccurrencesProvider rangeStart={0} rangeEnd={0}>
-            <CalendarHeader {...props} />
-          </OccurrencesProvider>
-        </TraitsProvider>
+        <OccurrencesProvider>
+          <CalendarHeader {...props} />
+        </OccurrencesProvider>
       </HabitsProvider>
     );
     getByRole('navigate-forward').click();

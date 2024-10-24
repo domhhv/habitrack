@@ -1,4 +1,4 @@
-import { HabitsProvider, OccurrencesProvider, TraitsProvider } from '@context';
+import { HabitsProvider, OccurrencesProvider } from '@context';
 import { supabaseClient } from '@helpers';
 import { NextUIProvider } from '@nextui-org/react';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
@@ -6,27 +6,18 @@ import React, { type ReactNode } from 'react';
 import { I18nProvider } from 'react-aria';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
 
-type BaseProviderProps = {
+type ProviderProps = {
   children: ReactNode;
 };
 
-type ProviderProps = BaseProviderProps & {
-  rangeStart: number;
-  rangeEnd: number;
-};
-
-const LowerProviders = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
+const LowerProviders = ({ children }: ProviderProps) => {
   const navigate = useNavigate();
 
   return (
     <NextUIProvider navigate={navigate}>
-      <TraitsProvider>
-        <HabitsProvider>
-          <OccurrencesProvider rangeStart={rangeStart} rangeEnd={rangeEnd}>
-            {children}
-          </OccurrencesProvider>
-        </HabitsProvider>
-      </TraitsProvider>
+      <HabitsProvider>
+        <OccurrencesProvider>{children}</OccurrencesProvider>
+      </HabitsProvider>
     </NextUIProvider>
   );
 };
@@ -43,7 +34,7 @@ const PotentialSupabaseProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const UpperProviders = ({ children }: BaseProviderProps) => {
+const UpperProviders = ({ children }: ProviderProps) => {
   return (
     <BrowserRouter>
       <I18nProvider locale="en-GB">{children}</I18nProvider>
@@ -51,13 +42,11 @@ const UpperProviders = ({ children }: BaseProviderProps) => {
   );
 };
 
-const Providers = ({ children, rangeStart, rangeEnd }: ProviderProps) => {
+const Providers = ({ children }: ProviderProps) => {
   return (
     <UpperProviders>
       <PotentialSupabaseProvider>
-        <LowerProviders rangeStart={rangeStart} rangeEnd={rangeEnd}>
-          {children}
-        </LowerProviders>
+        <LowerProviders>{children}</LowerProviders>
       </PotentialSupabaseProvider>
     </UpperProviders>
   );

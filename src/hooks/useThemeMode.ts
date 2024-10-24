@@ -21,6 +21,8 @@ const useThemeMode = () => {
   };
 
   React.useEffect(() => {
+    localStorage.theme = themeMode;
+    applyTheme(themeMode);
     const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handleMediaQueryListChange = (e: MediaQueryListEvent) => {
@@ -36,16 +38,7 @@ const useThemeMode = () => {
     };
   }, [themeMode]);
 
-  React.useEffect(() => {
-    localStorage.theme = themeMode;
-    applyTheme(themeMode);
-  }, [themeMode]);
-
-  const changeThemeMode = (mode: ThemeMode) => {
-    setThemeMode(mode);
-  };
-
-  return { themeMode, changeThemeMode };
+  return { themeMode, setThemeMode };
 };
 
 export default useThemeMode;

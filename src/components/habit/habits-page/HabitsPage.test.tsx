@@ -1,4 +1,4 @@
-import { HabitsProvider, TraitsProvider, useHabits } from '@context';
+import { HabitsProvider, useHabits } from '@context';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import React from 'react';
@@ -6,7 +6,6 @@ import React from 'react';
 import HabitsPage from './HabitsPage';
 
 jest.mock('@context', () => ({
-  TraitsProvider: jest.fn(({ children }) => children),
   HabitsProvider: jest.fn(({ children }) => children),
   useTraits: jest.fn().mockReturnValue({
     traits: [],
@@ -57,11 +56,9 @@ describe(HabitsPage.name, () => {
       ],
     }));
     const { getByText } = render(
-      <TraitsProvider>
-        <HabitsProvider>
-          <HabitsPage />
-        </HabitsProvider>
-      </TraitsProvider>
+      <HabitsProvider>
+        <HabitsPage />
+      </HabitsProvider>
     );
     await waitFor(() => {
       expect(getByText('Your habits'));
@@ -87,11 +84,9 @@ describe(HabitsPage.name, () => {
       ],
     }));
     const { queryByRole, getByRole, getByTestId } = render(
-      <TraitsProvider>
-        <HabitsProvider>
-          <HabitsPage />
-        </HabitsProvider>
-      </TraitsProvider>
+      <HabitsProvider>
+        <HabitsPage />
+      </HabitsProvider>
     );
     expect(queryByRole('submit-edited-habit-button')).toBeNull();
     fireEvent.click(getByTestId('edit-habit-id-42-button'));
@@ -100,11 +95,9 @@ describe(HabitsPage.name, () => {
 
   it.skip('should open confirm dialog on remove icon button click', async () => {
     const { getByRole, getByTestId } = render(
-      <TraitsProvider>
-        <HabitsProvider>
-          <HabitsPage />
-        </HabitsProvider>
-      </TraitsProvider>
+      <HabitsProvider>
+        <HabitsPage />
+      </HabitsProvider>
     );
     fireEvent.click(getByTestId('delete-habit-id-2-button'));
     expect(getByRole('dialog')).toBeDefined();
@@ -127,11 +120,9 @@ describe(HabitsPage.name, () => {
       removeHabit: mockRemoveHabit,
     }));
     const { queryByRole, getByRole, getByTestId } = render(
-      <TraitsProvider>
-        <HabitsProvider>
-          <HabitsPage />
-        </HabitsProvider>
-      </TraitsProvider>
+      <HabitsProvider>
+        <HabitsPage />
+      </HabitsProvider>
     );
     expect(queryByRole('dialog')).toBeNull();
     fireEvent.click(getByTestId('delete-habit-id-2-button'));

@@ -1,7 +1,8 @@
-import { useHabits, useOccurrences, useTraits } from '@context';
+import { useHabits, useOccurrences } from '@context';
 import { useScreenSize } from '@hooks';
 import { Select, SelectItem, Button } from '@nextui-org/react';
 import { ArrowFatLeft, ArrowFatRight } from '@phosphor-icons/react';
+import { useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import React from 'react';
 
@@ -51,7 +52,7 @@ const CalendarHeader = ({
   onResetFocusedDate,
 }: CalendarHeaderProps) => {
   const { habits } = useHabits();
-  const { traits } = useTraits();
+  const { traits } = useTraitsStore();
   const { filteredBy, filterBy } = useOccurrences();
   const user = useUser();
   const screenSize = useScreenSize();

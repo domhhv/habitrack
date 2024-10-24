@@ -7,12 +7,11 @@ import DayHabitModalDialog from './DayHabitModalDialog';
 
 type CalendarGridProps = {
   state: CalendarState;
-  weeksInMonth: number;
 };
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
+const CalendarGrid = ({ state }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
   const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
@@ -48,7 +47,6 @@ const CalendarGrid = ({ weeksInMonth, state }: CalendarGridProps) => {
 
       <CalendarMonthGrid
         onDayModalDialogOpen={handleDayModalDialogOpen}
-        weeksInMonth={weeksInMonth}
         state={state}
       />
 
