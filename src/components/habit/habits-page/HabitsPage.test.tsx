@@ -1,4 +1,4 @@
-import { HabitsProvider, useHabits } from '@context';
+import { useHabitsStore } from '@stores';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import React from 'react';
@@ -6,12 +6,6 @@ import React from 'react';
 import HabitsPage from './HabitsPage';
 
 jest.mock('@context', () => ({
-  HabitsProvider: jest.fn(({ children }) => children),
-  useTraits: jest.fn().mockReturnValue({
-    traits: [],
-  }),
-  useHabits: jest.fn(),
-  useSnackbar: jest.fn().mockReturnValue({}),
   useOccurrences: jest.fn().mockReturnValue({
     removeOccurrencesByHabitId: jest.fn(),
     allOccurrences: [],
@@ -26,6 +20,13 @@ jest.mock('@services', () => ({
   getLatestHabitOccurrenceTimestamp: jest.fn().mockResolvedValue(0),
   getLongestHabitStreak: jest.fn().mockResolvedValue(0),
   getHabitTotalEntries: jest.fn().mockResolvedValue(0),
+}));
+
+jest.mock('@stores', () => ({
+  useHabitsStore: jest.fn(),
+  useTraitsStore: jest.fn().mockReturnValue({
+    traits: [],
+  }),
 }));
 
 jest.mock('@hooks', () => ({
@@ -43,7 +44,7 @@ jest.mock('@hooks', () => ({
 
 describe(HabitsPage.name, () => {
   it('should display habits', async () => {
-    (useHabits as jest.Mock).mockImplementation(() => ({
+    (useHabitsStore as unknown as jest.Mock).mockImplementation(() => ({
       habits: [
         makeTestHabit({
           name: 'Habit name #1',
@@ -55,11 +56,7 @@ describe(HabitsPage.name, () => {
         }),
       ],
     }));
-    const { getByText } = render(
-      <HabitsProvider>
-        <HabitsPage />
-      </HabitsProvider>
-    );
+    const { getByText } = render(<HabitsPage />);
     await waitFor(() => {
       expect(getByText('Your habits'));
       expect(getByText('Habit name #1'));
@@ -70,7 +67,7 @@ describe(HabitsPage.name, () => {
   });
 
   it('should open edit dialog on edit icon button click', async () => {
-    (useHabits as jest.Mock).mockImplementation(() => ({
+    (useHabitsStore as unknown as jest.Mock).mockImplementation(() => ({
       habits: [
         makeTestHabit({
           id: 42,
@@ -83,22 +80,14 @@ describe(HabitsPage.name, () => {
         }),
       ],
     }));
-    const { queryByRole, getByRole, getByTestId } = render(
-      <HabitsProvider>
-        <HabitsPage />
-      </HabitsProvider>
-    );
+    const { queryByRole, getByRole, getByTestId } = render(<HabitsPage />);
     expect(queryByRole('submit-edited-habit-button')).toBeNull();
     fireEvent.click(getByTestId('edit-habit-id-42-button'));
     expect(getByRole('submit-edited-habit-button')).toBeDefined();
   });
 
   it.skip('should open confirm dialog on remove icon button click', async () => {
-    const { getByRole, getByTestId } = render(
-      <HabitsProvider>
-        <HabitsPage />
-      </HabitsProvider>
-    );
+    const { getByRole, getByTestId } = render(<HabitsPage />);
     fireEvent.click(getByTestId('delete-habit-id-2-button'));
     expect(getByRole('dialog')).toBeDefined();
     fireEvent.click(getByRole('confirm-dialog-cancel'));
@@ -106,7 +95,7 @@ describe(HabitsPage.name, () => {
 
   it.skip('should remove habit on confirm', async () => {
     const mockRemoveHabit = jest.fn();
-    (useHabits as jest.Mock).mockImplementation(() => ({
+    (useHabitsStore as unknown as jest.Mock).mockImplementation(() => ({
       habits: [
         makeTestHabit({
           name: 'Habit name #1',
@@ -119,11 +108,7 @@ describe(HabitsPage.name, () => {
       ],
       removeHabit: mockRemoveHabit,
     }));
-    const { queryByRole, getByRole, getByTestId } = render(
-      <HabitsProvider>
-        <HabitsPage />
-      </HabitsProvider>
-    );
+    const { queryByRole, getByRole, getByTestId } = render(<HabitsPage />);
     expect(queryByRole('dialog')).toBeNull();
     fireEvent.click(getByTestId('delete-habit-id-2-button'));
     expect(getByRole('dialog')).toBeDefined();

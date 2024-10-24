@@ -1,4 +1,4 @@
-import { HabitsProvider, OccurrencesProvider } from '@context';
+import { OccurrencesProvider } from '@context';
 import { supabaseClient } from '@helpers';
 import { NextUIProvider } from '@nextui-org/react';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
@@ -15,9 +15,7 @@ const LowerProviders = ({ children }: ProviderProps) => {
 
   return (
     <NextUIProvider navigate={navigate}>
-      <HabitsProvider>
-        <OccurrencesProvider>{children}</OccurrencesProvider>
-      </HabitsProvider>
+      <OccurrencesProvider>{children}</OccurrencesProvider>
     </NextUIProvider>
   );
 };

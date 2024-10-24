@@ -1,4 +1,5 @@
-import { useHabits, useOccurrences } from '@context';
+import { useOccurrences } from '@context';
+import { useHabitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
@@ -9,8 +10,11 @@ import DayHabitModalDialog from './DayHabitModalDialog';
 
 jest.mock('@context', () => ({
   useOccurrences: jest.fn(),
-  useHabits: jest.fn(),
   useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
+}));
+
+jest.mock('@stores', () => ({
+  useHabitsStore: jest.fn(),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
@@ -36,7 +40,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it('should render', () => {
-    (useHabits as jest.Mock).mockReturnValue({ habits: [] });
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrences as jest.Mock).mockReturnValue({
@@ -48,7 +52,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it('should not render if date is null', () => {
-    (useHabits as jest.Mock).mockReturnValue({ habits: [] });
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrences as jest.Mock).mockReturnValue({
@@ -62,7 +66,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it('should not render if open is false', () => {
-    (useHabits as jest.Mock).mockReturnValue({ habits: [] });
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrences as jest.Mock).mockReturnValue({
@@ -76,7 +80,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it('should not render if date is null', () => {
-    (useHabits as jest.Mock).mockReturnValue({ habits: [] });
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrences as jest.Mock).mockReturnValue({
@@ -90,7 +94,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it('if no habits are available, should show a message', () => {
-    (useHabits as jest.Mock).mockReturnValue({ habits: [] });
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrences as jest.Mock).mockReturnValue({
@@ -102,7 +106,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it('should render habit options', () => {
-    (useHabits as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       habits: [makeTestHabit()],
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
@@ -116,7 +120,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it.skip('should select habit', async () => {
-    (useHabits as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       habits: [makeTestHabit({ id: 42 })],
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
@@ -137,7 +141,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it('on close, should call onClose', () => {
-    (useHabits as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       habits: [makeTestHabit()],
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
@@ -152,7 +156,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it.skip('on close, should unselect habit', () => {
-    (useHabits as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       habits: [makeTestHabit()],
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
@@ -174,7 +178,7 @@ describe(DayHabitModalDialog.name, () => {
   });
 
   it.skip('on submit, should call addOccurrence with proper arguments', () => {
-    (useHabits as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       habits: [makeTestHabit()],
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });

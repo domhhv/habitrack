@@ -1,4 +1,4 @@
-import { OccurrencesContext, useHabits } from '@context';
+import { OccurrencesContext } from '@context';
 import { cacheOccurrence, occurrencesCache, uncacheOccurrence } from '@helpers';
 import { useDataFetch } from '@hooks';
 import type {
@@ -11,7 +11,7 @@ import {
   destroyOccurrence,
   listOccurrences,
 } from '@services';
-import { useSnackbarsStore, useTraitsStore } from '@stores';
+import { useHabitsStore, useSnackbarsStore, useTraitsStore } from '@stores';
 import { getErrorMessage } from '@utils';
 import React, { type ReactNode } from 'react';
 
@@ -26,7 +26,7 @@ export type OccurrenceFilters = {
 
 const OccurrencesProvider = ({ children }: Props) => {
   const { showSnackbar } = useSnackbarsStore();
-  const { habits } = useHabits();
+  const { habits } = useHabitsStore();
   const { traits } = useTraitsStore();
 
   const [addingOccurrence, setAddingOccurrence] = React.useState(false);
@@ -69,7 +69,7 @@ const OccurrencesProvider = ({ children }: Props) => {
   }, [range, showSnackbar]);
 
   const clearOccurrences = React.useCallback(() => {
-    setOccurrences([]);
+    setAllOccurrences([]);
     occurrencesCache.clear();
   }, []);
 
@@ -197,7 +197,7 @@ const OccurrencesProvider = ({ children }: Props) => {
   );
 
   const removeOccurrencesByHabitId = (habitId: number) => {
-    setOccurrences((prevOccurrences) => {
+    setAllOccurrences((prevOccurrences) => {
       return prevOccurrences.filter((occurrence) => {
         return occurrence.habitId !== habitId;
       });

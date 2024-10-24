@@ -1,7 +1,6 @@
-import { useHabits } from '@context';
-// import { useTraitsStore } from '@stores';
+import { useHabitsStore, useTraitsStore } from '@stores';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
-// import { makeTestTrait } from '@tests';
+import { makeTestTrait } from '@tests';
 import React from 'react';
 
 import EditHabitDialog, { type EditHabitDialogProps } from './EditHabitDialog';
@@ -18,8 +17,12 @@ jest.mock('@hooks', () => ({
   useFileField: jest.fn().mockReturnValue([null, jest.fn(), jest.fn()]),
 }));
 
-jest.mock('@context', () => ({
-  useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
+jest.mock('@stores', () => ({
+  useHabitsStore: jest.fn().mockReturnValue({
+    updateHabit: jest.fn(),
+    habitIdBeingUpdated: null,
+  }),
+  useTraitsStore: jest.fn().mockReturnValue({ traits: [] }),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
@@ -86,10 +89,12 @@ describe(EditHabitDialog.name, () => {
 
   it.skip('should call updateHabit when submitted', async () => {
     const mockUpdateHabit = jest.fn();
-    (useHabits as jest.Mock).mockReturnValue({ updateHabit: mockUpdateHabit });
-    // (useTraitsStore as jest.Mock).mockReturnValue({
-    //   traits: [makeTestTrait()],
-    // });
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+      updateHabit: mockUpdateHabit,
+    });
+    (useTraitsStore as unknown as jest.Mock).mockReturnValue({
+      traits: [makeTestTrait()],
+    });
     const { getByRole, getByLabelText } = render(
       <EditHabitDialog {...props} />
     );

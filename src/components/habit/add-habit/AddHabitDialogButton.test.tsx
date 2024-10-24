@@ -1,6 +1,5 @@
-import { useHabits } from '@context';
 import { StorageBuckets, uploadFile } from '@services';
-// import { useSnackbarsStore } from '@stores';
+import { useSnackbarsStore, useHabitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -8,15 +7,13 @@ import React from 'react';
 import AddHabitDialogButton from './AddHabitDialogButton';
 
 jest.mock('@context', () => ({
-  useHabits: jest.fn().mockReturnValue({ updateHabit: jest.fn() }),
   useSnackbar: jest.fn().mockReturnValue({ showSnackbar: jest.fn() }),
-  useTraits: jest.fn().mockReturnValue({
-    traits: [{ id: 1, slug: 'trait-slug', name: 'Trait' }],
-  }),
 }));
 
 jest.mock('@stores', () => ({
   useSnackbarsStore: jest.fn(),
+  useHabitsStore: jest.fn(),
+  useTraitsStore: jest.fn(),
 }));
 
 jest.mock('@services', () => ({
@@ -33,7 +30,7 @@ jest.mock('@supabase/auth-helpers-react', () => ({
 
 describe(AddHabitDialogButton.name, () => {
   it.skip('should handle data enter and dialog close', () => {
-    (useHabits as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       updateHabit: jest.fn(),
       fetchingHabits: false,
     });
@@ -78,7 +75,7 @@ describe(AddHabitDialogButton.name, () => {
   });
 
   it.skip('should not set habit icon if empty file uploaded', () => {
-    (useHabits as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       updateHabit: jest.fn(),
       fetchingHabits: false,
     });
@@ -98,7 +95,9 @@ describe(AddHabitDialogButton.name, () => {
 
   it.skip('should call addHabit on form submit', () => {
     const mockAddHabit = jest.fn().mockReturnValue(Promise.resolve({ id: 1 }));
-    (useHabits as jest.Mock).mockReturnValue({ addHabit: mockAddHabit });
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+      addHabit: mockAddHabit,
+    });
     (useUser as jest.Mock).mockReturnValue({
       id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
     });
@@ -120,20 +119,20 @@ describe(AddHabitDialogButton.name, () => {
       .fn()
       .mockReturnValue(Promise.resolve({ id: 1234 }));
     const mockUpdateHabit = jest.fn().mockReturnValue(Promise.resolve({}));
-    // const mockShowSnackbar = jest.fn();
+    const mockShowSnackbar = jest.fn();
     (uploadFile as jest.Mock).mockReturnValue(
       Promise.resolve({ data: { path: 'icon-path' } })
     );
-    (useHabits as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       addHabit: mockAddHabit,
       updateHabit: mockUpdateHabit,
     });
     (useUser as jest.Mock).mockReturnValue({
       id: 'uuid-42',
     });
-    // (useSnackbarsStore as jest.Mock).mockReturnValue({
-    //   showSnackbar: mockShowSnackbar,
-    // });
+    (useSnackbarsStore as unknown as jest.Mock).mockReturnValue({
+      showSnackbar: mockShowSnackbar,
+    });
 
     const { getByRole, getByTestId, getByLabelText } = render(
       <AddHabitDialogButton />
