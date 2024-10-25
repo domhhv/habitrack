@@ -9,6 +9,13 @@ import React from 'react';
 
 import OccurrenceChip from './OccurrenceChip';
 
+export type CellPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | '';
+
 type CalendarCellProps = {
   dateNumber: number;
   monthNumber: number;
@@ -17,6 +24,7 @@ type CalendarCellProps = {
   onNavigateBack?: () => void;
   onNavigateForward?: () => void;
   rangeStatus: 'below-range' | 'in-range' | 'above-range';
+  position: CellPosition;
 };
 
 const CalendarCell = ({
@@ -27,6 +35,7 @@ const CalendarCell = ({
   onNavigateForward,
   onClick,
   rangeStatus,
+  position,
 }: CalendarCellProps) => {
   const cellRef = React.useRef<HTMLDivElement>(null);
   const user = useUser();
@@ -121,12 +130,16 @@ const CalendarCell = ({
     'flex h-28 flex-1 flex-col border-r-2 border-neutral-500 last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800',
     rangeStatus === 'below-range' && 'cursor-w-resize',
     rangeStatus === 'above-range' && 'cursor-e-resize',
+    position === 'top-left' && 'rounded-tl-md',
+    position === 'top-right' && 'rounded-tr-md',
+    position === 'bottom-left' && 'rounded-bl-md',
+    position === 'bottom-right' && 'rounded-br-md',
     isToday &&
       'bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700'
   );
 
   const cellHeaderClassName = clsx(
-    'flex items-center justify-between rounded-t px-1 py-0.5',
+    'flex items-center justify-between rounded-t px-1.5 py-0.5',
     rangeStatus !== 'in-range' && 'text-neutral-400 dark:text-neutral-600'
   );
 

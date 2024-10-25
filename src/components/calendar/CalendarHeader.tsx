@@ -90,10 +90,10 @@ const CalendarHeader = ({
 
   return (
     <div className="mb-2 flex flex-col items-center justify-between gap-2 md:flex-row md:gap-0">
-      <div className="flex flex-col items-center justify-between gap-2 md:flex-row md:gap-0">
+      <div className="flex flex-col items-center justify-between gap-2 md:flex-row md:gap-2">
         <div className="mr-2 flex flex-col items-center gap-2 md:flex-row">
           <Select
-            variant="bordered"
+            variant="flat"
             selectedKeys={new Set([activeMonthLabel])}
             onChange={handleMonthChange}
             className="w-[250px]"
@@ -103,7 +103,7 @@ const CalendarHeader = ({
             ))}
           </Select>
           <Select
-            variant="bordered"
+            variant="flat"
             selectedKeys={new Set([activeYear])}
             onChange={handleYearChange}
           >
@@ -112,7 +112,7 @@ const CalendarHeader = ({
             ))}
           </Select>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <Button
             isIconOnly
             variant="light"
@@ -123,7 +123,7 @@ const CalendarHeader = ({
           >
             <ArrowFatLeft size="20" />
           </Button>
-          <Button variant="light" onClick={onResetFocusedDate}>
+          <Button variant="bordered" onClick={onResetFocusedDate}>
             Today
           </Button>
           <Button
@@ -141,7 +141,7 @@ const CalendarHeader = ({
       {shouldRenderFilters && (
         <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
           <Select
-            variant="bordered"
+            variant="flat"
             label={screenSize < 1280 ? null : 'Filter by habits'}
             selectedKeys={filteredBy.habitIds}
             onChange={handleHabitsFilterChange}
@@ -159,7 +159,7 @@ const CalendarHeader = ({
             ))}
           </Select>
           <Select
-            variant="bordered"
+            variant="flat"
             label={screenSize < 1280 ? null : 'Filter by traits'}
             selectedKeys={filteredBy.traitIds}
             onChange={handleTraitsFilterChange}
