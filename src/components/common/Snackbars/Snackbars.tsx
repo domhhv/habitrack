@@ -9,7 +9,7 @@ const Snackbars = () => {
 
   return (
     <div className="fixed bottom-2 left-2 z-[99] flex flex-col gap-2">
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync">
         {snackbars.map(({ id, message, options }) => {
           const {
             action,

@@ -4,16 +4,16 @@ import { useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 
 import OccurrenceChip from './OccurrenceChip';
 
 type CalendarCellProps = {
   dateNumber: number;
-  monthIndex: number;
+  monthNumber: number;
   fullYear: number;
-  onClick: (dateNumber: number, monthIndex: number, fullYear: number) => void;
+  onClick: (dateNumber: number, monthNumber: number, fullYear: number) => void;
   onNavigateBack?: () => void;
   onNavigateForward?: () => void;
   rangeStatus: 'below-range' | 'in-range' | 'above-range';
@@ -21,7 +21,7 @@ type CalendarCellProps = {
 
 const CalendarCell = ({
   dateNumber,
-  monthIndex,
+  monthNumber,
   fullYear,
   onNavigateBack,
   onNavigateForward,
@@ -35,11 +35,11 @@ const CalendarCell = ({
   const today = new Date();
   const isToday =
     today.getDate() === dateNumber &&
-    today.getMonth() + 1 === monthIndex &&
+    today.getMonth() + 1 === monthNumber &&
     today.getFullYear() === fullYear;
   const screenSize = useScreenSize();
   const date = format(
-    new Date(fullYear, monthIndex - 1, dateNumber),
+    new Date(fullYear, monthNumber - 1, dateNumber),
     'yyyy-MM-dd'
   );
   const occurrences = occurrencesByDate[date] || [];
@@ -47,7 +47,7 @@ const CalendarCell = ({
   const groupedOccurrences = Object.groupBy(occurrences, (o) => o.habitId);
 
   const handleClick = React.useCallback(() => {
-    if (fetchingOccurrences || !user?.id) {
+    if (fetchingOccurrences || !user) {
       return null;
     }
 
@@ -61,18 +61,18 @@ const CalendarCell = ({
       }
     }
 
-    return onClick(dateNumber, monthIndex, fullYear);
+    return onClick(dateNumber, monthNumber, fullYear);
   }, [
     isToday,
     dateNumber,
     fetchingOccurrences,
     fullYear,
-    monthIndex,
+    monthNumber,
     onClick,
     onNavigateBack,
     onNavigateForward,
     rangeStatus,
-    user?.id,
+    user,
   ]);
 
   React.useEffect(() => {
@@ -120,7 +120,9 @@ const CalendarCell = ({
   const cellRootClassName = clsx(
     'flex h-28 flex-1 flex-col border-r-3 border-neutral-500 last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800',
     rangeStatus === 'below-range' && 'cursor-w-resize',
-    rangeStatus === 'above-range' && 'cursor-e-resize'
+    rangeStatus === 'above-range' && 'cursor-e-resize',
+    isToday &&
+      'bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700'
   );
 
   const cellHeaderClassName = clsx(
@@ -132,10 +134,6 @@ const CalendarCell = ({
     <div
       className={cellRootClassName}
       ref={cellRef}
-      data-is-within-active-month={rangeStatus === 'in-range'}
-      data-is-within-prev-month={rangeStatus === 'below-range'}
-      data-is-within-next-month={rangeStatus === 'above-range'}
-      data-is-today={isToday}
       onClick={handleClick}
       tabIndex={0}
       role="button"
@@ -145,23 +143,29 @@ const CalendarCell = ({
         {renderToday()}
       </div>
       <div className="flex flex-wrap gap-1 overflow-auto px-2 py-0.5 pb-1">
-        {Object.entries(groupedOccurrences).map(
-          ([habitId, habitOccurrences]) => {
-            return (
-              <motion.div
-                key={habitId}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <OccurrenceChip
-                  occurrences={habitOccurrences!}
-                  onDelete={handleOccurrenceDelete}
-                />
-              </motion.div>
-            );
-          }
-        )}
+        <AnimatePresence mode="sync">
+          {Object.entries(groupedOccurrences).map(
+            ([habitId, habitOccurrences]) => {
+              if (!habitOccurrences) {
+                return null;
+              }
+
+              return (
+                <motion.div
+                  key={habitId}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <OccurrenceChip
+                    occurrences={habitOccurrences}
+                    onDelete={handleOccurrenceDelete}
+                  />
+                </motion.div>
+              );
+            }
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

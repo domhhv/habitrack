@@ -15,7 +15,7 @@ const LowerProviders = ({ children }: ProviderProps) => {
   return <NextUIProvider navigate={navigate}>{children}</NextUIProvider>;
 };
 
-const PotentialSupabaseProvider = ({ children }: { children: ReactNode }) => {
+const PotentialSupabaseProvider = ({ children }: ProviderProps) => {
   if (!Object.keys(supabaseClient).length) {
     return children;
   }
