@@ -52,7 +52,7 @@ const Month = (
                 <CalendarCell
                   key={dayKey}
                   dateNumber={day}
-                  monthIndex={month}
+                  monthNumber={month}
                   fullYear={year}
                   onClick={onDayModalDialogOpen}
                   rangeStatus={rangeStatus}

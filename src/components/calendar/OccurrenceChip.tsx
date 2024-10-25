@@ -1,8 +1,7 @@
 import { useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
-import { Spinner, Chip, Button, Tooltip, Badge } from '@nextui-org/react';
+import { Chip, Button, Tooltip, Badge } from '@nextui-org/react';
 import { X } from '@phosphor-icons/react';
-import { useOccurrencesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
@@ -20,14 +19,11 @@ const OccurrenceChip = ({
   onDelete,
   colorOverride,
 }: OccurrenceChipProps) => {
-  const { occurrenceIdBeingDeleted } = useOccurrencesStore();
-  const [{ id, habit }] = occurrences;
+  const [{ habit }] = occurrences;
   const { name: habitName, iconPath, trait } = habit || {};
   const { color: traitColor } = trait || {};
   const screenSize = useScreenSize();
   const iconUrl = getHabitIconUrl(iconPath);
-
-  const isBeingDeleted = occurrenceIdBeingDeleted === id;
 
   const chipStyle = {
     backgroundColor: colorOverride || traitColor,
@@ -40,10 +36,6 @@ const OccurrenceChip = ({
   const getEndContent = () => {
     if (screenSize < 1025) {
       return null;
-    }
-
-    if (isBeingDeleted) {
-      return <Spinner size="sm" role="habit-chip-delete-loader" />;
     }
 
     return (
@@ -70,7 +62,6 @@ const OccurrenceChip = ({
         size="sm"
         role="habit-chip"
         startContent={startContent}
-        isDisabled={isBeingDeleted}
         endContent={getEndContent()}
       />
     );

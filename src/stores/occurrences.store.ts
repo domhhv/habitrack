@@ -24,7 +24,6 @@ type OccurrencesState = {
   allOccurrences: Occurrence[];
   occurrences: Occurrence[];
   occurrencesByDate: OccurrencesDateMap;
-  occurrenceIdBeingDeleted: number;
   filteredBy: OccurrenceFilters;
   range: [number, number];
   fetchOccurrences: () => Promise<void>;
@@ -53,7 +52,6 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
     allOccurrences: [],
     occurrences: [],
     occurrencesByDate: {},
-    occurrenceIdBeingDeleted: 0,
     filteredBy: {
       habitIds: new Set(habits.map((habit) => habit.id.toString())),
       traitIds: new Set(traits.map((trait) => trait.id.toString())),
@@ -118,7 +116,6 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
     removeOccurrence: async (id: number) => {
       const { range } = get();
       try {
-        set({ occurrenceIdBeingDeleted: id });
         await destroyOccurrence(id);
         set((state) => ({
           allOccurrences: state.allOccurrences.filter(
@@ -139,8 +136,6 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
           }
         );
         console.error(error);
-      } finally {
-        set({ occurrenceIdBeingDeleted: 0 });
       }
     },
     removeOccurrencesByHabitId: (habitId: number) => {
@@ -212,6 +207,10 @@ useOccurrencesStore.subscribe((state, prevState) => {
     prevState.filteredBy !== state.filteredBy
   ) {
     state.updateOccurrences(state.allOccurrences, state.filteredBy);
+  }
+
+  if (prevState.range !== state.range) {
+    void state.fetchOccurrences();
   }
 });
 
