@@ -118,7 +118,7 @@ const CalendarCell = ({
   };
 
   const cellRootClassName = clsx(
-    'flex h-28 flex-1 flex-col border-r-3 border-neutral-500 last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800',
+    'flex h-28 flex-1 flex-col border-r-2 border-neutral-500 last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800',
     rangeStatus === 'below-range' && 'cursor-w-resize',
     rangeStatus === 'above-range' && 'cursor-e-resize',
     isToday &&
@@ -156,6 +156,7 @@ const CalendarCell = ({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
                 >
                   <OccurrenceChip
                     occurrences={habitOccurrences}
