@@ -99,7 +99,7 @@ const HabitsPage = () => {
 
   return (
     <div className="mx-auto mt-16 flex flex-col gap-8 text-center">
-      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-300">
+      <h1 className="font-bold text-3xl text-gray-800 dark:text-gray-300">
         Your habits
       </h1>
       <Table>
