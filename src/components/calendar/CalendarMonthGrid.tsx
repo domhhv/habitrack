@@ -28,7 +28,7 @@ const Month = (
       {weekIndexes.map((weekIndex) => (
         <div
           key={weekIndex}
-          className="flex h-[110px] justify-between border-l-3 border-r-3 border-t-3 border-neutral-500 last-of-type:border-b-3 dark:border-neutral-400 lg:h-auto"
+          className="flex h-[110px] justify-between border-l-2 border-r-2 border-t-2 border-neutral-500 last-of-type:border-b-2 dark:border-neutral-400 lg:h-auto"
         >
           {state
             .getDatesInWeek(weekIndex)
