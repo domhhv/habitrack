@@ -1,4 +1,4 @@
-import { ThemeMode, useThemeMode } from '@hooks';
+import { ThemeMode, useScreenSize, useThemeMode } from '@hooks';
 import { ButtonGroup, Button } from '@nextui-org/react';
 import {
   SunDim as SunIcon,
@@ -17,6 +17,7 @@ const modesToIcons = {
 
 const ThemeToggle = () => {
   const { themeMode, setThemeMode } = useThemeMode();
+  const screenSize = useScreenSize();
 
   const handleThemeChange = (newThemeMode: ThemeMode) => () => {
     setThemeMode(newThemeMode);
@@ -40,6 +41,7 @@ const ThemeToggle = () => {
             className={buttonClassName}
             onPress={handleThemeChange(mode)}
             isIconOnly
+            size={screenSize > 1024 ? 'md' : 'sm'}
           >
             <Icon
               className={twMerge('dark:text-neutral-200', iconClassName)}

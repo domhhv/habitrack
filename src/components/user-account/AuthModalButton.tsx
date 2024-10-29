@@ -1,3 +1,4 @@
+import { useScreenSize } from '@hooks';
 import {
   Button,
   ButtonGroup,
@@ -28,6 +29,7 @@ export type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
   const user = useUser();
+  const screenSize = useScreenSize();
   const { showSnackbar } = useSnackbarsStore();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [authenticating, setAuthenticating] = React.useState(false);
@@ -112,15 +114,16 @@ const AuthModalButton = () => {
   return (
     <>
       {user?.id ? (
-        <ButtonGroup>
+        <ButtonGroup size={screenSize > 1024 ? 'md' : 'sm'}>
           <Button
+            isIconOnly={screenSize < 1024}
             as={Link}
             to="/account"
             data-testid="auth-button"
             color="primary"
             startContent={<UserIcon data-testid="user-icon" weight="bold" />}
           >
-            Account
+            {screenSize > 1024 && 'Account'}
           </Button>
           <Tooltip content="Log out">
             <Button

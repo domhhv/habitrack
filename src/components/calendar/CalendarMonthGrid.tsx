@@ -71,13 +71,13 @@ const Month = (
                       ? 'above-range'
                       : 'in-range';
 
-                const [dayKey] = calendarDate.toString().split('T');
+                const [cellKey] = calendarDate.toString().split('T');
 
                 const position = getCellPosition(weekIndex, dayIndex);
 
                 return (
                   <CalendarCell
-                    key={dayKey}
+                    key={cellKey}
                     dateNumber={day}
                     monthNumber={month}
                     fullYear={year}

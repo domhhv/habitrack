@@ -1,5 +1,5 @@
 import { useScreenSize } from '@hooks';
-import { Select, SelectItem, Button } from '@nextui-org/react';
+import { Select, SelectItem, Button, SelectSection } from '@nextui-org/react';
 import { ArrowFatLeft, ArrowFatRight } from '@phosphor-icons/react';
 import { useTraitsStore, useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -89,14 +89,18 @@ const CalendarHeader = ({
   };
 
   return (
-    <div className="mb-2 flex flex-col items-center justify-between gap-2 md:flex-row md:gap-0">
-      <div className="flex flex-col items-center justify-between gap-2 md:flex-row md:gap-2">
-        <div className="mr-2 flex flex-col items-center gap-2 md:flex-row">
+    <div className="flex items-center justify-between px-2 pt-2 lg:pt-0">
+      <div className="flex items-center justify-between gap-0 lg:gap-2">
+        <div className="mr-0 flex items-center gap-2 lg:mr-2">
           <Select
             variant="flat"
+            size={screenSize > 1024 ? 'md' : 'sm'}
             selectedKeys={new Set([activeMonthLabel])}
             onChange={handleMonthChange}
-            className="w-[250px]"
+            className="w-[75px] md:w-[250px]"
+            classNames={{
+              popoverContent: 'w-[250px]',
+            }}
           >
             {MONTHS.map((month) => (
               <SelectItem key={month}>{month}</SelectItem>
@@ -104,77 +108,93 @@ const CalendarHeader = ({
           </Select>
           <Select
             variant="flat"
+            size={screenSize > 1024 ? 'md' : 'sm'}
             selectedKeys={new Set([activeYear])}
             onChange={handleYearChange}
+            classNames={{
+              popoverContent: 'w-[100px]',
+            }}
           >
             {YEARS.map((year) => (
               <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
             ))}
           </Select>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0 lg:gap-2">
           <Button
             isIconOnly
+            size={screenSize > 1024 ? 'md' : 'sm'}
             variant="light"
             isDisabled={prevButtonProps.disabled}
             aria-label={prevButtonProps['aria-label']}
             onClick={onNavigateBack}
             role="navigate-back"
           >
-            <ArrowFatLeft size="20" />
+            <ArrowFatLeft size={screenSize > 1024 ? 20 : 16} />
           </Button>
-          <Button variant="bordered" onClick={onResetFocusedDate}>
-            Today
-          </Button>
+          {screenSize > 768 && (
+            <Button
+              size={screenSize > 1024 ? 'md' : 'sm'}
+              variant="bordered"
+              onClick={onResetFocusedDate}
+            >
+              Today
+            </Button>
+          )}
           <Button
             isIconOnly
+            size={screenSize > 1024 ? 'md' : 'sm'}
             variant="light"
             isDisabled={nextButtonProps.disabled}
             aria-label={nextButtonProps['aria-label']}
             onClick={onNavigateForward}
             role="navigate-forward"
           >
-            <ArrowFatRight size="20" />
+            <ArrowFatRight size={screenSize > 1024 ? 20 : 16} />
           </Button>
         </div>
       </div>
       {shouldRenderFilters && (
-        <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
+        <div className="flex items-center justify-between gap-2">
           <Select
             variant="flat"
-            label={screenSize < 1280 ? null : 'Filter by habits'}
+            size={screenSize > 1024 ? 'md' : 'sm'}
             selectedKeys={filteredBy.habitIds}
             onChange={handleHabitsFilterChange}
-            className="w-[125px] xl:w-[200px]"
+            className="w-[75px] sm:w-[125px] xl:w-[200px]"
             selectionMode="multiple"
             classNames={{
-              popoverContent: 'w-[200px]',
+              popoverContent: 'w-[125px]',
             }}
             popoverProps={{
-              crossOffset: screenSize < 1280 ? -75 : 0,
+              crossOffset: screenSize < 1280 ? -50 : 0,
             }}
           >
-            {habits.map((habit) => (
-              <SelectItem key={habit.id}>{habit.name}</SelectItem>
-            ))}
+            <SelectSection title="Filter by habits">
+              {habits.map((habit) => (
+                <SelectItem key={habit.id}>{habit.name}</SelectItem>
+              ))}
+            </SelectSection>
           </Select>
           <Select
             variant="flat"
-            label={screenSize < 1280 ? null : 'Filter by traits'}
+            size={screenSize > 1024 ? 'md' : 'sm'}
             selectedKeys={filteredBy.traitIds}
             onChange={handleTraitsFilterChange}
-            className="w-[125px] xl:w-[200px]"
+            className="w-[75px] sm:w-[125px] xl:w-[200px]"
             selectionMode="multiple"
             classNames={{
-              popoverContent: 'w-[200px]',
+              popoverContent: 'w-[125px]',
             }}
             popoverProps={{
-              crossOffset: screenSize < 1280 ? -75 : 0,
+              crossOffset: screenSize < 1280 ? -50 : 0,
             }}
           >
-            {traits.map((trait) => (
-              <SelectItem key={trait.id}>{trait.name}</SelectItem>
-            ))}
+            <SelectSection title="Filter by traits">
+              {traits.map((trait) => (
+                <SelectItem key={trait.id}>{trait.name}</SelectItem>
+              ))}
+            </SelectSection>
           </Select>
         </div>
       )}
