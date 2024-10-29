@@ -1,7 +1,6 @@
-import { useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
-import { Chip, Button, Tooltip, Badge } from '@nextui-org/react';
-import { X } from '@phosphor-icons/react';
+import { Badge, Button, Tooltip } from '@nextui-org/react';
+import { Trash } from '@phosphor-icons/react';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
@@ -22,48 +21,41 @@ const OccurrenceChip = ({
   const [{ habit }] = occurrences;
   const { name: habitName, iconPath, trait } = habit || {};
   const { color: traitColor } = trait || {};
-  const screenSize = useScreenSize();
   const iconUrl = getHabitIconUrl(iconPath);
 
   const chipStyle = {
-    backgroundColor: colorOverride || traitColor,
+    borderColor: colorOverride || traitColor,
   };
 
-  const startContent = (
-    <img src={iconUrl} alt={`${habitName} icon`} className="h-4 w-4 rounded" />
-  );
-
-  const getEndContent = () => {
-    if (screenSize < 1025) {
-      return null;
-    }
-
-    return (
+  const tooltipContent = (
+    <div className="flex items-center justify-between gap-2">
+      {habitName}
       <Button
         isIconOnly
-        radius="full"
         variant="solid"
-        size="sm"
+        color="danger"
         onClick={(clickEvent) => onDelete(occurrences[0].id, clickEvent)}
         role="habit-chip-delete-button"
-        className="h-4 w-4 min-w-0"
+        className="h-6 w-6 min-w-0 rounded-lg"
       >
-        <X fontSize="large" size={12} />
+        <Trash size={14} fill="bold" className="fill-white" />
       </Button>
-    );
-  };
+    </div>
+  );
 
   const renderChip = () => {
     const chip = (
-      <Chip
+      <div
         style={chipStyle}
-        className="mr-1 mt-1 min-w-0 px-1 py-0.5"
-        variant="solid"
-        size="sm"
+        className="mr-1 mt-1 min-w-0 rounded-full border-1 p-1.5"
         role="habit-chip"
-        startContent={startContent}
-        endContent={getEndContent()}
-      />
+      >
+        <img
+          src={iconUrl}
+          alt={`${habitName} icon`}
+          className="h-4 w-4 rounded"
+        />
+      </div>
     );
 
     if (occurrences.length > 1) {
@@ -84,7 +76,14 @@ const OccurrenceChip = ({
   };
 
   return (
-    <Tooltip isDisabled={!habitName} content={habitName}>
+    <Tooltip
+      isDisabled={!habitName}
+      content={tooltipContent}
+      radius="sm"
+      classNames={{
+        content: 'px-2 py-1.5',
+      }}
+    >
       {renderChip()}
     </Tooltip>
   );

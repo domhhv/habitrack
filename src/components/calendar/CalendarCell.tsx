@@ -127,7 +127,7 @@ const CalendarCell = ({
   };
 
   const cellRootClassName = clsx(
-    'flex h-28 flex-1 flex-col border-r-2 border-neutral-500 last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800',
+    'flex h-auto flex-1 flex-col border-r-2 border-neutral-500 last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-28',
     rangeStatus === 'below-range' && 'cursor-w-resize',
     rangeStatus === 'above-range' && 'cursor-e-resize',
     position === 'top-left' && 'rounded-tl-md',
@@ -155,7 +155,7 @@ const CalendarCell = ({
         <p className="font-bold">{dateNumber}</p>
         {renderToday()}
       </div>
-      <div className="flex flex-wrap gap-1 overflow-auto px-2 py-0.5 pb-1">
+      <div className="flex flex-wrap gap-1 overflow-auto px-2 py-0.5 pb-2">
         <AnimatePresence mode="sync">
           {Object.entries(groupedOccurrences).map(
             ([habitId, habitOccurrences]) => {
@@ -168,7 +168,7 @@ const CalendarCell = ({
                   key={habitId}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  exit={{ scale: 0 }}
                   transition={{ duration: 0.5 }}
                 >
                   <OccurrenceChip

@@ -79,24 +79,22 @@ const Calendar = () => {
   };
 
   return (
-    <div className="flex h-full w-full flex-1 flex-col p-0 lg:p-4">
-      <div
-        {...calendarProps}
-        className="mt-2 flex max-w-full flex-1 flex-col px-0 lg:px-16"
-      >
-        <CalendarHeader
-          activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
-          activeYear={activeYear}
-          prevButtonProps={transformButtonProps(prevButtonProps)}
-          nextButtonProps={transformButtonProps(nextButtonProps)}
-          onNavigateBack={state.focusPreviousPage}
-          onNavigateForward={state.focusNextPage}
-          onNavigateToMonth={navigateToMonth}
-          onNavigateToYear={navigateToYear}
-          onResetFocusedDate={resetFocusedDate}
-        />
-        <CalendarGrid state={state} />
-      </div>
+    <div
+      {...calendarProps}
+      className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 lg:gap-4 lg:px-16 lg:py-4"
+    >
+      <CalendarHeader
+        activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
+        activeYear={activeYear}
+        prevButtonProps={transformButtonProps(prevButtonProps)}
+        nextButtonProps={transformButtonProps(nextButtonProps)}
+        onNavigateBack={state.focusPreviousPage}
+        onNavigateForward={state.focusNextPage}
+        onNavigateToMonth={navigateToMonth}
+        onNavigateToYear={navigateToYear}
+        onResetFocusedDate={resetFocusedDate}
+      />
+      <CalendarGrid state={state} />
     </div>
   );
 };

@@ -31,7 +31,7 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
   };
 
   return (
-    <div {...gridProps} className="my-4 flex flex-1 flex-col gap-0 lg:gap-4">
+    <div {...gridProps} className="flex flex-1 flex-col gap-0 lg:gap-4">
       <div className="mb-1 flex">
         {[...Array(7)].map((_, index) => {
           return (
