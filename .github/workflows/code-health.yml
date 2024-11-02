@@ -1,86 +1,65 @@
-# .github/workflows/code-health.yml
+name: Code Health Checks
 
-name: Code health checks # name of the action (displayed in the github interface)
-
-on: # event list
-  pull_request: # on a pull request to each of these branches
+on:
+  pull_request:
     branches:
       - main
 
-env: # environment variables (available in any part of the action)
+env:
   NODE_VERSION: 20
-  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-  SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
-jobs: # list of things to do
-  typecheck:
-    name: Type Check # job name (unique id)
-    runs-on: ubuntu-latest # on which machine to run
-    steps: # list of steps
-      - name: Install NodeJS
-        uses: actions/setup-node@v2
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
 
-      - name: Code Checkout
-        uses: actions/checkout@v2
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('yarn.lock') }}
 
       - name: Install Dependencies
-        run: yarn install
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile
 
-      - name: Type Checking
-        run: yarn typecheck
+  checks:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        check:
+          - name: Typecheck
+            command: typecheck
+          - name: Lint
+            command: eslint:check
+          - name: Formatting
+            command: prettier:check
+          - name: Unit Tests
+            command: test
+      fail-fast: false
+    name: ${{ matrix.check.name }}
 
-  linting:
-    name: Linting # job name (unique id)
-    runs-on: ubuntu-latest # on which machine to run
-    steps: # list of steps
-      - name: Install NodeJS
-        uses: actions/setup-node@v2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
 
-      - name: Code Checkout
-        uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: yarn install
-
-      - name: Code Linting
-        run: yarn eslint:check
-
-  formatting:
-    name: Formatting # job name (unique id)
-    runs-on: ubuntu-latest # on which machine to run
-    steps: # list of steps
-      - name: Install NodeJS
-        uses: actions/setup-node@v2
+      - name: Restore node_modules
+        uses: actions/cache@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          path: node_modules
+          key: node-modules-${{ hashFiles('yarn.lock') }}
 
-      - name: Code Checkout
-        uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: yarn install
-
-      - name: Code Formatting
-        run: yarn prettier:check
-
-  testing:
-    name: Testing # job name (unique id)
-    runs-on: ubuntu-latest # on which machine to run
-    steps: # list of steps
-      - name: Install NodeJS
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Code Checkout
-        uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: yarn install
-
-      - name: Unit Tests
-        run: yarn test
+      - run: yarn ${{ matrix.check.command }}
