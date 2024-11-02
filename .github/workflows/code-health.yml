@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  NODE_VERSION: 20 # Changed to latest LTS version
+  NODE_VERSION: 20
 
 jobs:
   setup:
