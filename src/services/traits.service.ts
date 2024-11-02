@@ -1,5 +1,6 @@
-import { supabaseClient } from '@helpers';
 import type { Trait, TraitsInsert } from '@models';
+
+import { supabaseClient } from '@helpers';
 import {
   transformClientEntity,
   transformServerEntities,

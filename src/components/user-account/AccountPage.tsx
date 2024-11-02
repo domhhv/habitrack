@@ -1,9 +1,10 @@
-import { Alert, PasswordInput } from '@components';
-import { useDocumentTitle } from '@hooks';
+import React, { type FormEventHandler } from 'react';
 import { Button, Input, Spinner } from '@nextui-org/react';
 import clsx from 'clsx';
-import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
+
+import { Alert, PasswordInput } from '@components';
+import { useDocumentTitle } from '@hooks';
 
 import { useAccountPage } from './use-account-page';
 import { useAuthSearchParams } from './use-auth-search-params';

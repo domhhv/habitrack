@@ -1,7 +1,7 @@
-import { useUser } from '@supabase/auth-helpers-react';
-import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import { useUser } from '@supabase/auth-helpers-react';
+import { act, fireEvent, render } from '@testing-library/react';
 
 import AccountPage from './AccountPage';
 import { useAccountPage } from './use-account-page';

@@ -1,6 +1,7 @@
-import { useTraitsStore, useHabitsStore, useOccurrencesStore } from '@stores';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React from 'react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+
+import { useHabitsStore, useOccurrencesStore, useTraitsStore } from '@stores';
 
 const useFetchOnAuth = () => {
   const supabase = useSupabaseClient();

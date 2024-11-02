@@ -1,4 +1,5 @@
-import { useScreenSize } from '@hooks';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   Button,
   ButtonGroup,
@@ -8,20 +9,20 @@ import {
   ModalHeader,
   Tab,
   Tabs,
+  Tooltip,
   useDisclosure,
   VisuallyHidden,
-  Tooltip,
 } from '@nextui-org/react';
 import {
   SignOut as SignOutIcon,
   User as UserIcon,
 } from '@phosphor-icons/react';
+import { useUser } from '@supabase/auth-helpers-react';
+
+import { useScreenSize } from '@hooks';
 import { sendPasswordResetEmail, signIn, signOut, signUp } from '@services';
 import { useSnackbarsStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { getErrorMessage } from '@utils';
-import React from 'react';
-import { Link } from 'react-router-dom';
 
 import AuthForm from './AuthForm';
 

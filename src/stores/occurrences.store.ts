@@ -1,9 +1,11 @@
-import { cacheOccurrence, occurrencesCache, uncacheOccurrence } from '@helpers';
 import type {
   Occurrence,
   OccurrencesDateMap,
   OccurrencesInsert,
 } from '@models';
+import { create } from 'zustand';
+
+import { cacheOccurrence, occurrencesCache, uncacheOccurrence } from '@helpers';
 import {
   createOccurrence,
   destroyOccurrence,
@@ -11,7 +13,6 @@ import {
 } from '@services';
 import { useHabitsStore, useSnackbarsStore, useTraitsStore } from '@stores';
 import { getErrorMessage } from '@utils';
-import { create } from 'zustand';
 
 type OccurrenceFilters = {
   habitIds?: Set<string>;

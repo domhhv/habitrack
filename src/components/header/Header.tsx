@@ -1,9 +1,10 @@
-import { AuthModalButton } from '@components';
-import { useFetchOnAuth, useScreenSize } from '@hooks';
-import { Button, Tooltip } from '@nextui-org/react';
-import { GithubLogo } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Button, Tooltip } from '@nextui-org/react';
+import { GithubLogo } from '@phosphor-icons/react';
+
+import { AuthModalButton } from '@components';
+import { useFetchOnAuth, useScreenSize } from '@hooks';
 
 import ThemeToggle from './ThemeToggle';
 

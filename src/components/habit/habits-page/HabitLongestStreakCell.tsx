@@ -1,5 +1,6 @@
-import { getLongestHabitStreak } from '@services';
 import React from 'react';
+
+import { getLongestHabitStreak } from '@services';
 
 const HabitLongestStreakCell = ({ id }: { id: number }) => {
   const [longestStreakLength, setLongestStreakLength] = React.useState<

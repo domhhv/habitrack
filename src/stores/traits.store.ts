@@ -1,9 +1,10 @@
 import type { Trait, TraitsInsert } from '@models';
-import { listTraits, createTrait } from '@services';
+import { create } from 'zustand';
+
+import { createTrait, listTraits } from '@services';
 import { useOccurrencesStore, useSnackbarsStore } from '@stores';
 import { makeTestTrait } from '@tests';
 import { getErrorMessage } from '@utils';
-import { create } from 'zustand';
 
 type TraitsState = {
   traits: Trait[];

@@ -1,8 +1,9 @@
-import { Alert } from '@components';
-import { Button } from '@nextui-org/react';
-import { useSnackbarsStore } from '@stores';
-import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
+import { Button } from '@nextui-org/react';
+import { AnimatePresence, motion } from 'framer-motion';
+
+import { Alert } from '@components';
+import { useSnackbarsStore } from '@stores';
 
 const Snackbars = () => {
   const { snackbars, hideSnackbar } = useSnackbarsStore();

@@ -1,6 +1,5 @@
-import { resolve } from 'path';
-
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
 
