@@ -1,4 +1,4 @@
-name: Code Health Checks
+name: Code health checks
 
 on:
   pull_request:
@@ -10,18 +10,20 @@ env:
 
 jobs:
   setup:
-    name: Setup
     runs-on: ubuntu-latest
     outputs:
-      cache-hit: ${{ steps.cache.outputs.cache-hit }}
+      cache-key: ${{ steps.cache.outputs.cache-key }}
     steps:
       - name: Install NodeJS
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Code Checkout
+        uses: actions/checkout@v4
+
       - name: Cache Yarn Dependencies
-        id: cache
+        id: yarn-cache
         uses: actions/cache@v3
         with:
           path: |
@@ -31,26 +33,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Code Checkout
-        uses: actions/checkout@v4
-
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: yarn install
 
-      - name: Post Cache Yarn Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: yarn cache clean --force
-
   typecheck:
-    name: Types
     needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Code Checkout
         uses: actions/checkout@v4
 
-      - name: Use Cache
+      - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
@@ -62,14 +55,13 @@ jobs:
         run: yarn typecheck
 
   linting:
-    name: Lint
     needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Code Checkout
         uses: actions/checkout@v4
 
-      - name: Use Cache
+      - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
@@ -81,14 +73,13 @@ jobs:
         run: yarn eslint:check
 
   formatting:
-    name: Formatting
     needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Code Checkout
         uses: actions/checkout@v4
 
-      - name: Use Cache
+      - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
@@ -100,14 +91,13 @@ jobs:
         run: yarn prettier:check
 
   testing:
-    name: Unit Tests
     needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Code Checkout
         uses: actions/checkout@v4
 
-      - name: Use Cache
+      - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
