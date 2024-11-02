@@ -11,28 +11,33 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    outputs:
+      cache-hash: ${{ hashFiles('**/yarn.lock') }}
     steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+
       - name: Install NodeJS
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Code Checkout
-        uses: actions/checkout@v4
+      - name: Get Yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - name: Cache Yarn Dependencies
-        id: yarn-cache
         uses: actions/cache@v3
         with:
           path: |
-            ~/.yarn-cache
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
             node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
 
       - name: Install Dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile --prefer-offline
 
   typecheck:
     needs: setup
@@ -46,13 +51,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Get Yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
       - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
-            ~/.yarn-cache
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
             node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ needs.setup.outputs.cache-hash }}
 
       - name: Type Checking
         run: yarn typecheck
@@ -69,13 +78,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Get Yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
       - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
-            ~/.yarn-cache
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
             node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ needs.setup.outputs.cache-hash }}
 
       - name: Code Linting
         run: yarn eslint:check
@@ -92,13 +105,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Get Yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
       - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
-            ~/.yarn-cache
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
             node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ needs.setup.outputs.cache-hash }}
 
       - name: Code Formatting
         run: yarn prettier:check
@@ -115,13 +132,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Get Yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
       - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
-            ~/.yarn-cache
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
             node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ needs.setup.outputs.cache-hash }}
 
       - name: Unit Tests
         run: yarn test
