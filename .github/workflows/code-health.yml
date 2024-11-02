@@ -6,13 +6,11 @@ on:
       - main
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 20 # Changed to latest LTS version
 
 jobs:
   setup:
     runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.cache.outputs.cache-key }}
     steps:
       - name: Install NodeJS
         uses: actions/setup-node@v4
@@ -43,13 +41,18 @@ jobs:
       - name: Code Checkout
         uses: actions/checkout@v4
 
+      - name: Install NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.yarn-cache
             node_modules
-          key: ${{ needs.setup.outputs.cache-key }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Type Checking
         run: yarn typecheck
@@ -61,13 +64,18 @@ jobs:
       - name: Code Checkout
         uses: actions/checkout@v4
 
+      - name: Install NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.yarn-cache
             node_modules
-          key: ${{ needs.setup.outputs.cache-key }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Code Linting
         run: yarn eslint:check
@@ -79,13 +87,18 @@ jobs:
       - name: Code Checkout
         uses: actions/checkout@v4
 
+      - name: Install NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.yarn-cache
             node_modules
-          key: ${{ needs.setup.outputs.cache-key }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Code Formatting
         run: yarn prettier:check
@@ -97,13 +110,18 @@ jobs:
       - name: Code Checkout
         uses: actions/checkout@v4
 
+      - name: Install NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Restore Yarn Cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.yarn-cache
             node_modules
-          key: ${{ needs.setup.outputs.cache-key }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Unit Tests
         run: yarn test
