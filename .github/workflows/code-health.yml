@@ -6,11 +6,16 @@ on:
       - main
 
 env:
-  NODE_VERSION: 22.11.0
+  NODE_VERSION: 20.11.0
 
 jobs:
-  setup:
+  checks:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        check: ['typecheck', 'eslint:check', 'prettier:check', 'test']
+      fail-fast: false
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,58 +26,4 @@ jobs:
 
       - run: yarn install --frozen-lockfile
 
-  typecheck:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - run: yarn install --frozen-lockfile
-      - run: yarn typecheck
-
-  linting:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - run: yarn install --frozen-lockfile
-      - run: yarn eslint:check
-
-  formatting:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - run: yarn install --frozen-lockfile
-      - run: yarn prettier:check
-
-  testing:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - run: yarn install --frozen-lockfile
-      - run: yarn test
+      - run: yarn ${{ matrix.check }}
