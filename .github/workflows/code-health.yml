@@ -1,4 +1,4 @@
-name: Code health checks
+name: Code Health Checks
 
 on:
   pull_request:
@@ -6,10 +6,11 @@ on:
       - main
 
 env:
-  NODE_VERSION: 20.11.0
+  NODE_VERSION: 20
 
 jobs:
-  install:
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,12 +32,21 @@ jobs:
         run: yarn install --frozen-lockfile
 
   checks:
-    needs: install
+    needs: setup
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        check: ['typecheck', 'eslint:check', 'prettier:check', 'test']
+        check:
+          - name: Typecheck
+            command: typecheck
+          - name: Lint
+            command: eslint:check
+          - name: Formatting
+            command: prettier:check
+          - name: Unit Tests
+            command: test
       fail-fast: false
+    name: ${{ matrix.check.name }}
 
     steps:
       - uses: actions/checkout@v4
@@ -52,4 +62,4 @@ jobs:
           path: node_modules
           key: node-modules-${{ hashFiles('yarn.lock') }}
 
-      - run: yarn ${{ matrix.check }}
+      - run: yarn ${{ matrix.check.command }}
