@@ -7,6 +7,12 @@ import { transformClientEntity, transformServerEntities } from '@utils';
 
 import useAccountPage from './useAccountPage';
 
+jest.mock('@stores', () => ({
+  useHabitsStore: jest.fn(),
+  useOccurrencesStore: jest.fn(),
+  useTraitsStore: jest.fn(),
+}));
+
 jest.mock('@services', () => ({
   getUserAccountByEmail: jest.fn(),
   updateUserAccount: jest.fn(),

@@ -2,9 +2,11 @@ import type { Trait, TraitsInsert } from '@models';
 import { create } from 'zustand';
 
 import { createTrait, listTraits } from '@services';
-import { useOccurrencesStore, useSnackbarsStore } from '@stores';
 import { makeTestTrait } from '@tests';
 import { getErrorMessage } from '@utils';
+
+import useOccurrencesStore from './occurrences.store';
+import useSnackbarsStore from './snackbars.store';
 
 type TraitsState = {
   traits: Trait[];

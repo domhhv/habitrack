@@ -6,6 +6,11 @@ import { act, fireEvent, render } from '@testing-library/react';
 import AccountPage from './AccountPage';
 import { useAccountPage } from './use-account-page';
 
+jest.mock('@stores', () => ({
+  useHabitsStore: jest.fn(),
+  useOccurrencesStore: jest.fn(),
+  useTraitsStore: jest.fn(),
+}));
 jest.mock('./use-account-page');
 jest.mock('@supabase/auth-helpers-react', () => ({
   ...jest.requireActual('@supabase/auth-helpers-react'),

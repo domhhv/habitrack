@@ -3,6 +3,12 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 import AuthForm from './AuthForm';
 
+jest.mock('@stores', () => ({
+  useHabitsStore: jest.fn(),
+  useOccurrencesStore: jest.fn(),
+  useTraitsStore: jest.fn(),
+}));
+
 describe(AuthForm.name, () => {
   it('should call onSubmit with email and password', async () => {
     const onSubmit = jest.fn();

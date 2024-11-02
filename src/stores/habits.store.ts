@@ -13,7 +13,8 @@ import {
 import { makeTestHabit } from '@tests';
 import { getErrorMessage } from '@utils';
 
-import { useOccurrencesStore, useSnackbarsStore } from './index';
+import useOccurrencesStore from './occurrences.store';
+import useSnackbarsStore from './snackbars.store';
 
 type HabitsState = {
   habits: Habit[];

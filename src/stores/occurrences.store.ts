@@ -11,8 +11,11 @@ import {
   destroyOccurrence,
   listOccurrences,
 } from '@services';
-import { useHabitsStore, useSnackbarsStore, useTraitsStore } from '@stores';
 import { getErrorMessage } from '@utils';
+
+import useHabitsStore from './habits.store';
+import useSnackbarsStore from './snackbars.store';
+import useTraitsStore from './traits.store';
 
 type OccurrenceFilters = {
   habitIds?: Set<string>;
