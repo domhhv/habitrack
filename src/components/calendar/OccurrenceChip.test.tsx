@@ -1,8 +1,9 @@
-import { useScreenSize } from '@hooks';
+import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+
+import { useScreenSize } from '@hooks';
 import { makeTestOccurrence } from '@tests';
 import { getHabitIconUrl } from '@utils';
-import React from 'react';
 
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
 

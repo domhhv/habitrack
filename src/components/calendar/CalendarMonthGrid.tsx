@@ -1,8 +1,8 @@
-import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
-import clsx from 'clsx';
 import React, { type ForwardedRef } from 'react';
 import { useLocale } from 'react-aria';
 import { type CalendarState } from 'react-stately';
+import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
+import clsx from 'clsx';
 
 import CalendarCell from './CalendarCell';
 

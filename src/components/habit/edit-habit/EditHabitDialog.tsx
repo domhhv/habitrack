@@ -1,4 +1,4 @@
-import { useTextField } from '@hooks';
+import React from 'react';
 import type { Habit } from '@models';
 import {
   Button,
@@ -12,10 +12,11 @@ import {
   SelectItem,
   Textarea,
 } from '@nextui-org/react';
-import { useHabitsStore, useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
+
+import { useTextField } from '@hooks';
+import { useHabitsStore, useTraitsStore } from '@stores';
 import { toEventLike } from '@utils';
-import React from 'react';
 
 export type EditHabitDialogProps = {
   open: boolean;

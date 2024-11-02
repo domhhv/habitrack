@@ -1,13 +1,14 @@
-import { ThemeMode, useScreenSize, useThemeMode } from '@hooks';
-import { ButtonGroup, Button } from '@nextui-org/react';
+import React from 'react';
+import { Button, ButtonGroup } from '@nextui-org/react';
 import {
-  SunDim as SunIcon,
   Desktop as DesktopIcon,
   Moon as MoonIcon,
+  SunDim as SunIcon,
 } from '@phosphor-icons/react';
 import clsx from 'clsx';
-import React from 'react';
 import { twMerge } from 'tailwind-merge';
+
+import { ThemeMode, useScreenSize, useThemeMode } from '@hooks';
 
 const modesToIcons = {
   [ThemeMode.LIGHT]: SunIcon,

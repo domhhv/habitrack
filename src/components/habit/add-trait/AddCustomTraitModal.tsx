@@ -1,5 +1,5 @@
-import { OccurrenceChip } from '@components';
-import { useTextField } from '@hooks';
+import React from 'react';
+import { HexColorPicker } from 'react-colorful';
 import {
   Button,
   Input,
@@ -10,12 +10,13 @@ import {
   ModalHeader,
   Textarea,
 } from '@nextui-org/react';
-import { useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
+
+import { OccurrenceChip } from '@components';
+import { useTextField } from '@hooks';
+import { useTraitsStore } from '@stores';
 import { makeTestOccurrence } from '@tests';
 import { toEventLike } from '@utils';
-import React from 'react';
-import { HexColorPicker } from 'react-colorful';
 
 export type AddCustomTraitModalProps = {
   open: boolean;

@@ -1,8 +1,9 @@
+import React from 'react';
+
 import { useDataFetch, useTextField } from '@hooks';
 import { fetchUser, updateUser } from '@services';
 import { useSnackbarsStore } from '@stores';
 import { getErrorMessage, toEventLike } from '@utils';
-import React from 'react';
 
 type User = Awaited<ReturnType<typeof fetchUser>>;
 

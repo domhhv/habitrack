@@ -1,8 +1,8 @@
 import {
-  transformClientEntity,
-  transformServerEntity,
   transformClientEntities,
+  transformClientEntity,
   transformServerEntities,
+  transformServerEntity,
 } from './transformEntity';
 
 describe('transformEntity', () => {

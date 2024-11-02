@@ -1,7 +1,8 @@
-import { useHabitsStore } from '@stores';
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import { makeTestHabit } from '@tests';
 import React from 'react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+
+import { useHabitsStore } from '@stores';
+import { makeTestHabit } from '@tests';
 
 import HabitsPage from './HabitsPage';
 

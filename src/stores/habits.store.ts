@@ -1,4 +1,6 @@
 import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
+import { create } from 'zustand';
+
 import {
   createHabit,
   deleteFile,
@@ -10,9 +12,9 @@ import {
 } from '@services';
 import { makeTestHabit } from '@tests';
 import { getErrorMessage } from '@utils';
-import { create } from 'zustand';
 
-import { useSnackbarsStore, useOccurrencesStore } from './index';
+import useOccurrencesStore from './occurrences.store';
+import useSnackbarsStore from './snackbars.store';
 
 type HabitsState = {
   habits: Habit[];

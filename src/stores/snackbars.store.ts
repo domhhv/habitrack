@@ -1,6 +1,7 @@
-import { type AlertProps } from '@components';
 import { type ReactNode } from 'react';
 import { create } from 'zustand';
+
+import { type AlertProps } from '@components';
 
 type SnackbarOptions = Omit<AlertProps, 'message'> & {
   action?: ReactNode;

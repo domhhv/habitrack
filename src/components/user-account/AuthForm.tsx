@@ -1,8 +1,9 @@
-import { PasswordInput, type AuthMode } from '@components';
-import { useTextField } from '@hooks';
-import { Input, Button } from '@nextui-org/react';
-import clsx from 'clsx';
 import React from 'react';
+import { Button, Input } from '@nextui-org/react';
+import clsx from 'clsx';
+
+import { type AuthMode, PasswordInput } from '@components';
+import { useTextField } from '@hooks';
 
 type AuthFormProps = {
   onSubmit: (email: string, password: string, name: string) => void;

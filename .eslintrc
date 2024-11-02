@@ -21,7 +21,8 @@
     "react-hooks",
     "jsx-a11y",
     "import",
-    "unused-imports"
+    "unused-imports",
+    "simple-import-sort"
   ],
   "settings": {
     "react": {
@@ -32,6 +33,23 @@
     "object-shorthand": "error",
     "no-undef": "off",
     "no-duplicate-imports": "error",
+    "import/first": "error",
+    "import/newline-after-import": "error",
+    "import/no-duplicates": "error",
+    "simple-import-sort/exports": "error",
+    "simple-import-sort/imports": [
+      "error",
+      {
+        "groups": [
+          ["^react", "^@?\\w"],
+          ["^(@components|@models|@services|@stores|@hooks|@helpers|@utils|@tests)(/.*|$)"],
+          ["^\\u0000"],
+          ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
+          ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
+          ["^.+\\.s?css$"]
+        ]
+      }
+    ],
     "@typescript-eslint/consistent-type-imports": [
       "error",
       {
@@ -43,22 +61,6 @@
       {
         "argsIgnorePattern": "^_",
         "varsIgnorePattern": "^_"
-      }
-    ],
-    "import/order": [
-      "error",
-      {
-        "newlines-between": "always",
-        "alphabetize": {
-          "order": "asc"
-        },
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          "parent",
-          ["index", "sibling"]
-        ]
       }
     ]
   }

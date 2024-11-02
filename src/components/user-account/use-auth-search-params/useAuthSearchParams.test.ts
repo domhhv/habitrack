@@ -1,6 +1,7 @@
-import { useSnackbarsStore } from '@stores';
-import { renderHook, waitFor } from '@testing-library/react';
 import { useSearchParams } from 'react-router-dom';
+import { renderHook, waitFor } from '@testing-library/react';
+
+import { useSnackbarsStore } from '@stores';
 
 import useAuthSearchParams from './useAuthSearchParams';
 

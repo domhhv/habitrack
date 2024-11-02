@@ -1,7 +1,13 @@
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import CalendarHeader, { type CalendarHeaderProps } from './CalendarHeader';
+
+jest.mock('@stores', () => ({
+  useHabitsStore: jest.fn(),
+  useOccurrencesStore: jest.fn(),
+  useTraitsStore: jest.fn(),
+}));
 
 describe(CalendarHeader.name, () => {
   const props: CalendarHeaderProps = {
