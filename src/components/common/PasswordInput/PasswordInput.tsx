@@ -1,6 +1,6 @@
-import React, { type ChangeEventHandler } from 'react';
 import { Button, Input } from '@nextui-org/react';
 import { Eye, EyeSlash } from '@phosphor-icons/react';
+import React, { type ChangeEventHandler } from 'react';
 
 type PasswordInputProps = {
   variant?: 'flat' | 'bordered' | 'faded' | 'underlined';

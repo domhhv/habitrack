@@ -1,17 +1,10 @@
-import type React from 'react';
+import { getUserAccountByEmail, updateUserAccount } from '@services';
 import { useUser } from '@supabase/auth-helpers-react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-
-import { getUserAccountByEmail, updateUserAccount } from '@services';
 import { transformClientEntity, transformServerEntities } from '@utils';
+import type React from 'react';
 
 import useAccountPage from './useAccountPage';
-
-jest.mock('@stores', () => ({
-  useHabitsStore: jest.fn(),
-  useOccurrencesStore: jest.fn(),
-  useTraitsStore: jest.fn(),
-}));
 
 jest.mock('@services', () => ({
   getUserAccountByEmail: jest.fn(),

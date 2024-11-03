@@ -1,10 +1,9 @@
-import React from 'react';
-import { Button, Select, SelectItem, SelectSection } from '@nextui-org/react';
-import { ArrowFatLeft, ArrowFatRight } from '@phosphor-icons/react';
-import { useUser } from '@supabase/auth-helpers-react';
-
 import { useScreenSize } from '@hooks';
-import { useHabitsStore, useOccurrencesStore, useTraitsStore } from '@stores';
+import { Select, SelectItem, Button, SelectSection } from '@nextui-org/react';
+import { ArrowFatLeft, ArrowFatRight } from '@phosphor-icons/react';
+import { useTraitsStore, useHabitsStore, useOccurrencesStore } from '@stores';
+import { useUser } from '@supabase/auth-helpers-react';
+import React from 'react';
 
 type NavigationButtonProps = {
   disabled: boolean;

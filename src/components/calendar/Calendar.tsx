@@ -1,12 +1,11 @@
+import { generateCalendarRange } from '@helpers';
+import { useDocumentTitle } from '@hooks';
+import { CalendarDate, GregorianCalendar } from '@internationalized/date';
+import { useOccurrencesStore } from '@stores';
+import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
 import { type AriaButtonProps, useCalendar, useLocale } from 'react-aria';
 import { useCalendarState } from 'react-stately';
-import { CalendarDate, GregorianCalendar } from '@internationalized/date';
-
-import { generateCalendarRange } from '@helpers';
-import { useDocumentTitle } from '@hooks';
-import { useOccurrencesStore } from '@stores';
-import { capitalizeFirstLetter } from '@utils';
 
 import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';

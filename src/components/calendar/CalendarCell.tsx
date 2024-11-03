@@ -1,12 +1,11 @@
-import React from 'react';
+import { useScreenSize } from '@hooks';
 import { CalendarBlank } from '@phosphor-icons/react';
+import { useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
-
-import { useScreenSize } from '@hooks';
-import { useOccurrencesStore } from '@stores';
+import React from 'react';
 
 import OccurrenceChip from './OccurrenceChip';
 

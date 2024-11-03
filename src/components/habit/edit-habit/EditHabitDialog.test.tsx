@@ -1,8 +1,7 @@
-import React from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-
 import { useHabitsStore, useTraitsStore } from '@stores';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestTrait } from '@tests';
+import React from 'react';
 
 import EditHabitDialog, { type EditHabitDialogProps } from './EditHabitDialog';
 

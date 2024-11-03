@@ -1,4 +1,5 @@
-import React from 'react';
+import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
+import { useTextField, useFileField } from '@hooks';
 import {
   Button,
   Input,
@@ -12,11 +13,9 @@ import {
   Textarea,
 } from '@nextui-org/react';
 import { CloudArrowUp, Plus } from '@phosphor-icons/react';
-import { useUser } from '@supabase/auth-helpers-react';
-
-import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
-import { useFileField, useTextField } from '@hooks';
 import { useHabitsStore, useTraitsStore } from '@stores';
+import { useUser } from '@supabase/auth-helpers-react';
+import React from 'react';
 
 const AddHabitDialogButton = () => {
   const user = useUser();

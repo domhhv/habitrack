@@ -1,14 +1,8 @@
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 import AuthModalButton from './AuthModalButton';
-
-jest.mock('@stores', () => ({
-  useHabitsStore: jest.fn(),
-  useOccurrencesStore: jest.fn(),
-  useTraitsStore: jest.fn(),
-}));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
   useUser: jest.fn().mockReturnValue({ id: null }),

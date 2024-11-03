@@ -1,15 +1,14 @@
-import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import { setDefaultOptions } from 'date-fns';
-import { enGB } from 'date-fns/locale';
-
 import {
-  AccountPage,
   AppHeader,
   Calendar,
+  AccountPage,
   HabitsPage,
   Snackbars,
 } from '@components';
+import { setDefaultOptions } from 'date-fns';
+import { enGB } from 'date-fns/locale';
+import React from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import Providers from './Providers';
 

@@ -1,26 +1,8 @@
+import { render } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { render } from '@testing-library/react';
 
 import Header from './Header';
-
-jest.mock('@stores', () => ({
-  useHabitsStore: jest.fn(() => ({
-    fetchHabits: jest.fn(),
-    clearHabits: jest.fn(),
-  })),
-  useOccurrencesStore: jest.fn(() => ({
-    fetchOccurrences: jest.fn(),
-    clearOccurrences: jest.fn(),
-  })),
-  useTraitsStore: jest.fn(() => ({
-    fetchTraits: jest.fn(),
-    clearTraits: jest.fn(),
-  })),
-  useSnackbarsStore: jest.fn(() => ({
-    showSnackbar: jest.fn(),
-  })),
-}));
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

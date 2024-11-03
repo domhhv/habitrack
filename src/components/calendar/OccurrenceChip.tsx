@@ -1,9 +1,8 @@
-import React from 'react';
 import type { Occurrence } from '@models';
 import { Badge, Button, Tooltip } from '@nextui-org/react';
 import { Trash } from '@phosphor-icons/react';
-
 import { getHabitIconUrl } from '@utils';
+import React from 'react';
 
 export type OccurrenceChipProps = {
   occurrences: Occurrence[];

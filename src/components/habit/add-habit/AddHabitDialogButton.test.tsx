@@ -1,9 +1,8 @@
-import React from 'react';
+import { StorageBuckets, uploadFile } from '@services';
+import { useSnackbarsStore, useHabitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
-
-import { StorageBuckets, uploadFile } from '@services';
-import { useHabitsStore, useSnackbarsStore } from '@stores';
+import React from 'react';
 
 import AddHabitDialogButton from './AddHabitDialogButton';
 

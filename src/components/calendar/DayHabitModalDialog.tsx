@@ -1,18 +1,17 @@
-import React, { type MouseEventHandler } from 'react';
 import {
   Button,
   Modal,
-  ModalBody,
   ModalContent,
-  ModalFooter,
   ModalHeader,
+  ModalBody,
+  ModalFooter,
   Select,
   SelectItem,
 } from '@nextui-org/react';
+import { useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
-
-import { useHabitsStore, useOccurrencesStore } from '@stores';
+import React, { type MouseEventHandler } from 'react';
 
 type DayHabitModalDialogProps = {
   open: boolean;

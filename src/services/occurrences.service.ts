@@ -1,6 +1,5 @@
-import type { Occurrence, OccurrencesInsert } from '@models';
-
 import { cacheOccurrences, occurrencesCache, supabaseClient } from '@helpers';
+import type { Occurrence, OccurrencesInsert } from '@models';
 import {
   transformClientEntity,
   transformServerEntities,

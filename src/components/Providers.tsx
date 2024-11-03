@@ -1,10 +1,9 @@
+import { supabaseClient } from '@helpers';
+import { NextUIProvider } from '@nextui-org/react';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import React, { type ReactNode } from 'react';
 import { I18nProvider } from 'react-aria';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
-import { NextUIProvider } from '@nextui-org/react';
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
-
-import { supabaseClient } from '@helpers';
 
 type ProviderProps = {
   children: ReactNode;
