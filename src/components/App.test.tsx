@@ -1,10 +1,9 @@
+import { generateCalendarRange } from '@helpers';
+import { getWeeksInMonth } from '@internationalized/date';
+import { act, render } from '@testing-library/react';
 import React from 'react';
 import { useCalendar } from 'react-aria';
 import { useCalendarState } from 'react-stately';
-import { getWeeksInMonth } from '@internationalized/date';
-import { act, render } from '@testing-library/react';
-
-import { generateCalendarRange } from '@helpers';
 
 import App from './App';
 

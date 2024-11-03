@@ -1,9 +1,8 @@
-import React from 'react';
-import { formatDistanceStrict, formatRelative, isThisWeek } from 'date-fns';
-import { enGB } from 'date-fns/locale';
-
 import { getLatestHabitOccurrenceTimestamp } from '@services';
 import { capitalizeFirstLetter } from '@utils';
+import { formatDistanceStrict, formatRelative, isThisWeek } from 'date-fns';
+import { enGB } from 'date-fns/locale';
+import React from 'react';
 
 const formatRelativeLocale: Record<string, string> = {
   yesterday: `'yesterday'`,

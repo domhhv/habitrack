@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { getHabitTotalEntries } from '@services';
+import React from 'react';
 
 const HabitsTotalEntriesCell = ({ id }: { id: number }) => {
   const [entriesCount, setEntriesCount] = React.useState<number | null>(null);

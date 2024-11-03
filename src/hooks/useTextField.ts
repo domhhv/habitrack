@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { type ChangeEventLike } from '@utils';
+import React from 'react';
 
 type ReturnValue = [string, (event: ChangeEventLike) => void, () => void];
 

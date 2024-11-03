@@ -1,7 +1,6 @@
-import { type UserAttributes } from '@supabase/supabase-js';
-
 import { supabaseClient } from '@helpers';
 import { type Account, type AccountUpdate } from '@models';
+import { type UserAttributes } from '@supabase/supabase-js';
 import { transformClientEntity, transformServerEntity } from '@utils';
 
 export const fetchUser = async () => {

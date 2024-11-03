@@ -1,4 +1,10 @@
-import React from 'react';
+import {
+  AddHabitDialogButton,
+  ConfirmDialog,
+  EditHabitDialog,
+} from '@components';
+import { useDocumentTitle } from '@hooks';
+import { type Habit } from '@models';
 import {
   Button,
   Chip,
@@ -11,17 +17,10 @@ import {
   Tooltip,
 } from '@nextui-org/react';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
+import { useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
-
-import {
-  AddHabitDialogButton,
-  ConfirmDialog,
-  EditHabitDialog,
-} from '@components';
-import { useDocumentTitle } from '@hooks';
-import { type Habit } from '@models';
-import { useHabitsStore, useOccurrencesStore } from '@stores';
+import React from 'react';
 
 import HabitIconCell from './HabitIconCell';
 import HabitLastEntryCell from './HabitLastEntryCell';

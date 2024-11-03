@@ -1,11 +1,11 @@
-import React from 'react';
 import {
   Button,
-  Modal,
   ModalBody,
-  ModalContent,
   ModalHeader,
+  Modal,
+  ModalContent,
 } from '@nextui-org/react';
+import React from 'react';
 
 type ConfirmDialogProps = {
   open: boolean;

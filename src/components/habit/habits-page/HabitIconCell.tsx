@@ -1,11 +1,10 @@
-import React from 'react';
-import { Button, Tooltip } from '@nextui-org/react';
-import { useUser } from '@supabase/auth-helpers-react';
-
 import { VisuallyHiddenInput } from '@components';
 import { type Habit } from '@models';
+import { Button, Tooltip } from '@nextui-org/react';
 import { useHabitsStore } from '@stores';
+import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
+import React from 'react';
 
 type HabitIconCellProps = {
   habit: Habit;
