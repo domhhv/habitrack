@@ -98,11 +98,11 @@ const HabitsPage = () => {
   };
 
   return (
-    <div className="mx-auto mt-16 flex flex-col gap-8 text-center">
-      <h1 className="font-bold text-3xl text-gray-800 dark:text-gray-300">
+    <div className="contents">
+      <h1 className="font-bold mx-auto my-4 text-3xl text-gray-800 dark:text-gray-300">
         Your habits
       </h1>
-      <Table>
+      <Table className="m-auto w-[95%] lg:w-[80%]">
         <TableHeader columns={habitColumns}>
           {(column) => (
             <TableColumn key={column.key}>{column.label}</TableColumn>

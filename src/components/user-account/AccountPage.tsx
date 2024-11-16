@@ -58,7 +58,7 @@ const AccountPage = () => {
   };
 
   return (
-    <div className="flex w-full flex-col items-start justify-center self-start pt-16">
+    <div className="flex h-lvh w-full flex-col items-start self-start pt-8">
       <div className={containerClassName} data-testid="account-page">
         <h1 className="font-semibold text-xl">Your Account Info</h1>
         <form

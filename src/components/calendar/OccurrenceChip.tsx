@@ -47,7 +47,7 @@ const OccurrenceChip = ({
     const chip = (
       <div
         style={chipStyle}
-        className="mr-1 mt-1 min-w-0 rounded-full border-1 p-1.5"
+        className="mr-1 mt-1 min-w-0 rounded-full border-1 bg-slate-100 p-1.5 dark:bg-slate-800"
         role="habit-chip"
       >
         <img

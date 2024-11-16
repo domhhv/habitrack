@@ -12,7 +12,7 @@ const Header = () => {
   const screenSize = useScreenSize();
 
   return (
-    <header className="border-b border-b-neutral-300 bg-neutral-200 dark:border-b-neutral-800 dark:bg-neutral-900">
+    <header className="border-b border-b-slate-300 bg-slate-200 dark:border-b-slate-800 dark:bg-black">
       <div className="mx-auto flex w-full items-center justify-between gap-2 px-2 py-2 lg:px-16 lg:py-4">
         <div className="flex items-center gap-2">
           <Button
