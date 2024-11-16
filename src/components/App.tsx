@@ -15,10 +15,14 @@ import Providers from './Providers';
 setDefaultOptions({ locale: enGB });
 
 const App = () => {
+  React.useEffect(() => {
+    document.getElementById('root')?.classList.add('initialized');
+  });
+
   return (
     <Providers>
       <AppHeader />
-      <div className="flex h-full flex-1 items-start">
+      <div className="flex h-full flex-1 flex-col items-start bg-slate-50 dark:bg-slate-950">
         <Routes>
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/habits" element={<HabitsPage />} />

@@ -81,7 +81,7 @@ const Calendar = () => {
   return (
     <div
       {...calendarProps}
-      className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 lg:gap-4 lg:px-16 lg:py-4"
+      className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 pb-8 lg:gap-4 lg:px-16 lg:py-4"
     >
       <CalendarHeader
         activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}

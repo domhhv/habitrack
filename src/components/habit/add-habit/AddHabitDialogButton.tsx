@@ -61,17 +61,19 @@ const AddHabitDialogButton = () => {
 
   return (
     <>
-      <Button
-        color="primary"
-        variant="solid"
-        startContent={<Plus weight="bold" />}
-        onClick={handleDialogOpen}
-        isDisabled={fetchingHabits}
-        data-testid="add-habit-button"
-        className="self-end"
-      >
-        Add habit
-      </Button>
+      <div className="m-auto my-4 flex w-[95%] justify-end lg:w-[80%]">
+        <Button
+          color="primary"
+          variant="solid"
+          startContent={<Plus weight="bold" />}
+          onClick={handleDialogOpen}
+          isDisabled={fetchingHabits}
+          data-testid="add-habit-button"
+          className="w-full lg:w-auto"
+        >
+          Add habit
+        </Button>
+      </div>
       <AddCustomTraitModal
         open={addTraitModalOpen}
         onClose={() => setAddTraitModalOpen(false)}

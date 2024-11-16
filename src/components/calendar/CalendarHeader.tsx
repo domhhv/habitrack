@@ -89,7 +89,7 @@ const CalendarHeader = ({
   };
 
   return (
-    <div className="flex items-center justify-between px-2 pt-2 lg:pt-0">
+    <div className="flex items-center justify-between px-2 pt-2 lg:px-0 lg:pt-0">
       <div className="flex items-center justify-between gap-0 lg:gap-2">
         <div className="mr-0 flex items-center gap-2 lg:mr-2">
           <Select
