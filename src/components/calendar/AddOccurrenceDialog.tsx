@@ -5,38 +5,46 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Select,
-  SelectItem,
+  Listbox,
+  ListboxSection,
+  ListboxItem,
 } from '@nextui-org/react';
 import { useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
 import React, { type MouseEventHandler } from 'react';
+import { Link } from 'react-router-dom';
 
-type DayHabitModalDialogProps = {
+type AddOccurrenceDialogProps = {
   open: boolean;
   onClose: () => void;
   date: Date | null;
 };
 
-const DayHabitModalDialog = ({
+const AddOccurrenceDialog = ({
   open,
   onClose,
   date,
-}: DayHabitModalDialogProps) => {
+}: AddOccurrenceDialogProps) => {
   const { habits } = useHabitsStore();
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrencesStore();
   const [selectedHabitIds, setSelectedHabitIds] = React.useState<string[]>([]);
 
+  const habitsByTraitName = React.useMemo(() => {
+    return Object.groupBy(habits, (habit) => habit.trait?.name || 'Unknown');
+  }, [habits]);
+
   if (!date || !open) {
     return null;
   }
 
+  const hasHabits = habits.length > 0;
+
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
-    if (!user) {
+    if (!user || !hasHabits) {
       return null;
     }
 
@@ -68,8 +76,6 @@ const DayHabitModalDialog = ({
     }
   };
 
-  const hasHabits = habits.length > 0;
-
   return (
     <Modal
       role="add-occurrence-modal"
@@ -82,38 +88,45 @@ const DayHabitModalDialog = ({
           Add habit entries for {format(date, 'iii, LLL d, y')}
         </ModalHeader>
         <ModalBody>
-          <Select
+          <Listbox
+            variant="flat"
+            color="primary"
             selectionMode="multiple"
-            label={hasHabits ? 'Habits' : 'No habits yet'}
             selectedKeys={selectedHabitIds}
-            description="Select from your habits"
-            data-testid="habit-select"
+            disabledKeys={['none']}
+            emptyContent="No habits yet. Create a habit to get started."
+            className="max-h-80 overflow-auto rounded border border-neutral-200 p-2 dark:border-neutral-800"
           >
-            {habits.map((habit) => (
-              <SelectItem
-                key={habit.id.toString()}
-                onClick={() => handleHabitSelect(habit.id.toString())}
-                textValue={habit.name}
-              >
-                <span>{habit.name}</span>
-                {habit.trait && (
-                  <span className="font-regular ml-2 text-neutral-400">
-                    {habit.trait.name}
-                  </span>
+            {Object.keys(habitsByTraitName).map((traitName) => (
+              <ListboxSection key={traitName} showDivider title={traitName}>
+                {habitsByTraitName[traitName] ? (
+                  habitsByTraitName[traitName].map((habit) => (
+                    <ListboxItem
+                      key={habit.id.toString()}
+                      onClick={() => handleHabitSelect(habit.id.toString())}
+                    >
+                      {habit.name}
+                    </ListboxItem>
+                  ))
+                ) : (
+                  <ListboxItem key="none">No habits</ListboxItem>
                 )}
-              </SelectItem>
+              </ListboxSection>
             ))}
-          </Select>
+          </Listbox>
         </ModalBody>
         <ModalFooter>
           <Button
+            as={hasHabits ? Button : Link}
             type="submit"
             color="primary"
             isLoading={addingOccurrence}
-            isDisabled={!hasHabits}
-            onClick={handleSubmit}
+            onClick={hasHabits ? handleSubmit : undefined}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            to={hasHabits ? undefined : '/habits'}
           >
-            Submit
+            {hasHabits ? 'Add' : 'Go to Habits'}
           </Button>
         </ModalFooter>
       </ModalContent>
@@ -121,4 +134,4 @@ const DayHabitModalDialog = ({
   );
 };
 
-export default DayHabitModalDialog;
+export default AddOccurrenceDialog;

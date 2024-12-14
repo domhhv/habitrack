@@ -2,8 +2,8 @@ import React from 'react';
 import { useCalendarGrid } from 'react-aria';
 import { type CalendarState } from 'react-stately';
 
+import AddOccurrenceDialog from './AddOccurrenceDialog';
 import CalendarMonthGrid from './CalendarMonthGrid';
-import DayHabitModalDialog from './DayHabitModalDialog';
 
 type CalendarGridProps = {
   state: CalendarState;
@@ -50,7 +50,7 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
         state={state}
       />
 
-      <DayHabitModalDialog
+      <AddOccurrenceDialog
         open={dayModalDialogOpen}
         onClose={handleDayModalDialogClose}
         date={activeDate}
