@@ -4,8 +4,9 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import { format } from 'date-fns';
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
 
-import DayHabitModalDialog from './DayHabitModalDialog';
+import AddOccurrenceDialog from './AddOccurrenceDialog';
 
 jest.mock('@stores', () => ({
   useHabitsStore: jest.fn(),
@@ -20,7 +21,7 @@ jest.mock('date-fns', () => ({
   format: jest.fn(),
 }));
 
-describe(DayHabitModalDialog.name, () => {
+describe(AddOccurrenceDialog.name, () => {
   const mockOnClose = jest.fn();
   const date = new Date(2021, 1, 1, 12);
 
@@ -42,7 +43,11 @@ describe(DayHabitModalDialog.name, () => {
       addOccurrence: jest.fn(),
       addingOccurrence: false,
     });
-    const { getByText } = render(<DayHabitModalDialog {...props} />);
+    const { getByText } = render(
+      <BrowserRouter>
+        <AddOccurrenceDialog {...props} />
+      </BrowserRouter>
+    );
     expect(getByText('Add habit entries for 2021-01-01')).toBeInTheDocument();
   });
 
@@ -55,7 +60,7 @@ describe(DayHabitModalDialog.name, () => {
       addingOccurrence: false,
     });
     const { container } = render(
-      <DayHabitModalDialog {...props} date={null} />
+      <AddOccurrenceDialog {...props} date={null} />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -69,7 +74,7 @@ describe(DayHabitModalDialog.name, () => {
       addingOccurrence: false,
     });
     const { container } = render(
-      <DayHabitModalDialog {...props} open={false} />
+      <AddOccurrenceDialog {...props} open={false} />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -83,7 +88,7 @@ describe(DayHabitModalDialog.name, () => {
       addingOccurrence: false,
     });
     const { container } = render(
-      <DayHabitModalDialog {...props} date={null} />
+      <AddOccurrenceDialog {...props} date={null} />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -96,8 +101,14 @@ describe(DayHabitModalDialog.name, () => {
       addOccurrence: jest.fn(),
       addingOccurrence: false,
     });
-    const { getAllByText } = render(<DayHabitModalDialog {...props} />);
-    expect(getAllByText('No habits yet')).toHaveLength(2);
+    const { getByText } = render(
+      <BrowserRouter>
+        <AddOccurrenceDialog {...props} />
+      </BrowserRouter>
+    );
+    expect(
+      getByText('No habits yet. Create a habit to get started.')
+    ).toBeInTheDocument();
   });
 
   it('should render habit options', () => {
@@ -110,7 +121,7 @@ describe(DayHabitModalDialog.name, () => {
       addOccurrence: jest.fn(),
       addingOccurrence: false,
     });
-    const { getByText } = render(<DayHabitModalDialog {...props} />);
+    const { getByText } = render(<AddOccurrenceDialog {...props} />);
     expect(getByText('Test Habit')).toBeInTheDocument();
   });
 
@@ -125,7 +136,7 @@ describe(DayHabitModalDialog.name, () => {
       addingOccurrence: false,
     });
     const { container, getAllByText, getByTestId } = render(
-      <DayHabitModalDialog {...props} />
+      <AddOccurrenceDialog {...props} />
     );
     fireEvent.click(getByTestId('habit-select'));
     fireEvent.click(getAllByText('Test Habit')[1]);
@@ -145,7 +156,7 @@ describe(DayHabitModalDialog.name, () => {
       addOccurrence: jest.fn(),
       addingOccurrence: false,
     });
-    const { getByRole } = render(<DayHabitModalDialog {...props} />);
+    const { getByRole } = render(<AddOccurrenceDialog {...props} />);
     fireEvent.click(getByRole('button', { name: 'Close' }));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
@@ -160,7 +171,7 @@ describe(DayHabitModalDialog.name, () => {
       addOccurrence: jest.fn(),
       addingOccurrence: false,
     });
-    const { getByRole, getByText } = render(<DayHabitModalDialog {...props} />);
+    const { getByRole, getByText } = render(<AddOccurrenceDialog {...props} />);
     fireEvent.click(getByRole('habit-select'));
     fireEvent.click(getByText('Test Habit'));
     expect(
@@ -183,7 +194,7 @@ describe(DayHabitModalDialog.name, () => {
       addOccurrence: mockAddOccurrence,
       addingOccurrence: false,
     });
-    const { getByRole, getByText } = render(<DayHabitModalDialog {...props} />);
+    const { getByRole, getByText } = render(<AddOccurrenceDialog {...props} />);
     fireEvent.click(getByRole('habit-select'));
     fireEvent.click(getByText('Test Habit'));
     expect(
