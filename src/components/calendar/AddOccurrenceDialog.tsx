@@ -31,10 +31,8 @@ const AddOccurrenceDialog = ({
   const { addOccurrence, addingOccurrence } = useOccurrencesStore();
   const [selectedHabitIds, setSelectedHabitIds] = React.useState<string[]>([]);
 
-  const habitsByTrait = React.useMemo(() => {
-    return Object.entries(
-      Object.groupBy(habits, (habit) => habit.trait?.name || 'Unknown')
-    );
+  const habitsByTraitName = React.useMemo(() => {
+    return Object.groupBy(habits, (habit) => habit.trait?.name || 'Unknown');
   }, [habits]);
 
   if (!date || !open) {
@@ -95,19 +93,24 @@ const AddOccurrenceDialog = ({
             color="primary"
             selectionMode="multiple"
             selectedKeys={selectedHabitIds}
+            disabledKeys={['none']}
             emptyContent="No habits yet. Create a habit to get started."
             className="max-h-80 overflow-auto rounded border border-neutral-200 p-2 dark:border-neutral-800"
           >
-            {habitsByTrait.map(([trait, habits]) => (
-              <ListboxSection key={trait} showDivider title={trait}>
-                {habits!.map((habit) => (
-                  <ListboxItem
-                    key={habit.id.toString()}
-                    onClick={() => handleHabitSelect(habit.id.toString())}
-                  >
-                    {habit.name}
-                  </ListboxItem>
-                ))}
+            {Object.keys(habitsByTraitName).map((traitName) => (
+              <ListboxSection key={traitName} showDivider title={traitName}>
+                {habitsByTraitName[traitName] ? (
+                  habitsByTraitName[traitName].map((habit) => (
+                    <ListboxItem
+                      key={habit.id.toString()}
+                      onClick={() => handleHabitSelect(habit.id.toString())}
+                    >
+                      {habit.name}
+                    </ListboxItem>
+                  ))
+                ) : (
+                  <ListboxItem key="none">No habits</ListboxItem>
+                )}
               </ListboxSection>
             ))}
           </Listbox>
