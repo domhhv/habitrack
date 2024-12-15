@@ -8,6 +8,7 @@ import {
   Listbox,
   ListboxSection,
   ListboxItem,
+  ScrollShadow,
 } from '@nextui-org/react';
 import { useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -76,59 +77,65 @@ const AddOccurrenceDialog = ({
     }
   };
 
+  const renderSubmitButton = () => {
+    if (hasHabits) {
+      return (
+        <Button
+          type="submit"
+          color="primary"
+          isLoading={addingOccurrence}
+          onClick={handleSubmit}
+        >
+          Add
+        </Button>
+      );
+    }
+
+    return (
+      <Button as={Link} color="primary" to={'/habits'}>
+        {hasHabits ? 'Add' : 'Go to Habits'}
+      </Button>
+    );
+  };
+
   return (
-    <Modal
-      role="add-occurrence-modal"
-      isOpen={open}
-      onClose={handleClose}
-      isDismissable={false}
-    >
+    <Modal role="add-occurrence-modal" isOpen={open} onClose={handleClose}>
       <ModalContent>
         <ModalHeader>
           Add habit entries for {format(date, 'iii, LLL d, y')}
         </ModalHeader>
         <ModalBody>
-          <Listbox
-            variant="flat"
-            color="primary"
-            selectionMode="multiple"
-            selectedKeys={selectedHabitIds}
-            disabledKeys={['none']}
-            emptyContent="No habits yet. Create a habit to get started."
-            className="max-h-80 overflow-auto rounded border border-neutral-200 p-2 dark:border-neutral-800"
-          >
-            {Object.keys(habitsByTraitName).map((traitName) => (
-              <ListboxSection key={traitName} showDivider title={traitName}>
-                {habitsByTraitName[traitName] ? (
-                  habitsByTraitName[traitName].map((habit) => (
-                    <ListboxItem
-                      key={habit.id.toString()}
-                      onClick={() => handleHabitSelect(habit.id.toString())}
-                    >
-                      {habit.name}
-                    </ListboxItem>
-                  ))
-                ) : (
-                  <ListboxItem key="none">No habits</ListboxItem>
-                )}
-              </ListboxSection>
-            ))}
-          </Listbox>
+          <div className="rounded border border-neutral-200 px-1 dark:border-neutral-800">
+            <ScrollShadow className="max-h-80" size={100}>
+              <Listbox
+                variant="flat"
+                color="primary"
+                selectionMode="multiple"
+                selectedKeys={selectedHabitIds}
+                disabledKeys={['none']}
+                emptyContent="No habits yet. Create a habit to get started."
+              >
+                {Object.keys(habitsByTraitName).map((traitName) => (
+                  <ListboxSection key={traitName} showDivider title={traitName}>
+                    {habitsByTraitName[traitName] ? (
+                      habitsByTraitName[traitName].map((habit) => (
+                        <ListboxItem
+                          key={habit.id.toString()}
+                          onClick={() => handleHabitSelect(habit.id.toString())}
+                        >
+                          {habit.name}
+                        </ListboxItem>
+                      ))
+                    ) : (
+                      <ListboxItem key="none">No habits</ListboxItem>
+                    )}
+                  </ListboxSection>
+                ))}
+              </Listbox>
+            </ScrollShadow>
+          </div>
         </ModalBody>
-        <ModalFooter>
-          <Button
-            as={hasHabits ? Button : Link}
-            type="submit"
-            color="primary"
-            isLoading={addingOccurrence}
-            onClick={hasHabits ? handleSubmit : undefined}
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            to={hasHabits ? undefined : '/habits'}
-          >
-            {hasHabits ? 'Add' : 'Go to Habits'}
-          </Button>
-        </ModalFooter>
+        <ModalFooter>{renderSubmitButton()}</ModalFooter>
       </ModalContent>
     </Modal>
   );

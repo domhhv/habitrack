@@ -99,11 +99,13 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
               <p className="text-sm">
                 This is how habits of this trait will appear on your calendar
               </p>
-              <OccurrenceChip
-                occurrences={[makeTestOccurrence()]}
-                onDelete={() => null}
-                colorOverride={color}
-              />
+              <div className="self-start">
+                <OccurrenceChip
+                  occurrences={[makeTestOccurrence()]}
+                  onDelete={() => null}
+                  colorOverride={color}
+                />
+              </div>
             </div>
           </div>
         </ModalBody>
