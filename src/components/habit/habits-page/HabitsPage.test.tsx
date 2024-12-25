@@ -23,6 +23,10 @@ jest.mock('@stores', () => ({
   useOccurrencesStore: jest.fn().mockReturnValue({
     removeOccurrencesByHabitId: jest.fn(),
   }),
+  useNotesStore: jest.fn().mockReturnValue({
+    addingNote: false,
+    addNote: jest.fn(),
+  }),
 }));
 
 jest.mock('@hooks', () => ({

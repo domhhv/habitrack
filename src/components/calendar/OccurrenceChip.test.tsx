@@ -12,6 +12,9 @@ jest.mock('@hooks', () => ({
 
 jest.mock('@stores', () => ({
   useOccurrencesStore: jest.fn(),
+  useNotesStore: jest.fn().mockReturnValue({
+    notes: [],
+  }),
 }));
 
 describe(OccurrenceChip.name, () => {

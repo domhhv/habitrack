@@ -53,7 +53,7 @@ describe(AddOccurrenceDialog.name, () => {
         <AddOccurrenceDialog {...props} />
       </BrowserRouter>
     );
-    expect(getByText('Add habit entries for 2021-01-01')).toBeInTheDocument();
+    expect(getByText('Add habit entry for 2021-01-01')).toBeInTheDocument();
   });
 
   it('should not render if date is null', () => {
