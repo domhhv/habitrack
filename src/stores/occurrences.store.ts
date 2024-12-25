@@ -94,7 +94,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         set((state) => ({
           allOccurrences: [...state.allOccurrences, nextOccurrence],
         }));
-        showSnackbar('Habit entry(s) are added to the calendar', {
+        showSnackbar('Habit entry added to the calendar', {
           color: 'success',
           dismissible: true,
           dismissText: 'Done',

@@ -90,6 +90,7 @@ const EditHabitDialog = ({
             label="Name"
             placeholder="Edit habit name"
             isDisabled={isUpdating}
+            variant="faded"
           />
           <Textarea
             value={description}
@@ -97,12 +98,14 @@ const EditHabitDialog = ({
             label="Description (optional)"
             placeholder="Edit habit description"
             isDisabled={isUpdating}
+            variant="faded"
           />
           <Select
             required
             label="Trait"
             selectedKeys={[traitId]}
             data-testid="habit-select"
+            variant="faded"
           >
             {traits.map((trait) => (
               <SelectItem

@@ -1,4 +1,9 @@
-import { useTraitsStore, useHabitsStore, useOccurrencesStore } from '@stores';
+import {
+  useTraitsStore,
+  useHabitsStore,
+  useOccurrencesStore,
+  useNotesStore,
+} from '@stores';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React from 'react';
 
@@ -7,6 +12,7 @@ const useFetchOnAuth = () => {
   const { fetchTraits, clearTraits } = useTraitsStore();
   const { fetchHabits, clearHabits } = useHabitsStore();
   const { fetchOccurrences, clearOccurrences } = useOccurrencesStore();
+  const { fetchNotes, clearNotes } = useNotesStore();
 
   React.useEffect(() => {
     if (!supabase.auth) {
@@ -18,12 +24,14 @@ const useFetchOnAuth = () => {
         clearTraits();
         clearHabits();
         clearOccurrences();
+        clearNotes();
       }
 
       if (['TOKEN_REFRESHED', 'SIGNED_IN'].includes(event)) {
         void fetchTraits();
         void fetchHabits();
         void fetchOccurrences();
+        void fetchNotes();
       }
     });
 
@@ -35,9 +43,11 @@ const useFetchOnAuth = () => {
     fetchTraits,
     clearTraits,
     fetchHabits,
+    fetchNotes,
     clearHabits,
     fetchOccurrences,
     clearOccurrences,
+    clearNotes,
   ]);
 };
 

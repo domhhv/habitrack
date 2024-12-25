@@ -92,12 +92,12 @@ const AddOccurrenceDialog = ({
     >
       <ModalContent>
         <ModalHeader>
-          Add habit entries for {format(date, 'iii, LLL d, y')}
+          Add habit entry for {format(date, 'iii, LLL d, y')}
         </ModalHeader>
         <ModalBody>
           <Select
             disableSelectorIconRotation
-            variant="flat"
+            variant="faded"
             selectedKeys={selectedHabitId}
             label={
               hasHabits
@@ -138,7 +138,12 @@ const AddOccurrenceDialog = ({
               </SelectSection>
             ))}
           </Select>
-          <Textarea onValueChange={setNote} value={note} placeholder="Note" />
+          <Textarea
+            onValueChange={setNote}
+            value={note}
+            placeholder="Note"
+            variant="faded"
+          />
         </ModalBody>
         <ModalFooter>
           <Button
