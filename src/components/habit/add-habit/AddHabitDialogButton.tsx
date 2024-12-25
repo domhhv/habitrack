@@ -93,18 +93,21 @@ const AddHabitDialogButton = () => {
               onChange={handleNameChange}
               label="Name"
               placeholder="Enter habit name"
+              variant="faded"
             />
             <Textarea
               value={description}
               onChange={handleDescriptionChange}
               label="Description"
               placeholder="Enter habit description (optional)"
+              variant="faded"
             />
             <Select
               required
               label="Choose a trait"
               selectedKeys={[traitId]}
               data-testid="habit-select"
+              variant="faded"
             >
               {traits.map((trait) => (
                 <SelectItem
