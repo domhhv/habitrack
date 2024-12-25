@@ -2,33 +2,21 @@ import React from 'react';
 import { useCalendarGrid } from 'react-aria';
 import { type CalendarState } from 'react-stately';
 
-import AddOccurrenceDialog from './AddOccurrenceDialog';
 import CalendarMonthGrid from './CalendarMonthGrid';
 
 type CalendarGridProps = {
   state: CalendarState;
+  onDayModalDialogOpen: (
+    dateNumber: number,
+    monthIndex: number,
+    fullYear: number
+  ) => void;
 };
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const CalendarGrid = ({ state }: CalendarGridProps) => {
+const CalendarGrid = ({ state, onDayModalDialogOpen }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
-  const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
-  const [activeDate, setActiveDate] = React.useState<Date | null>(null);
-
-  const handleDayModalDialogOpen = (
-    dateNumber: number,
-    monthIndex: number,
-    fullYear: number
-  ) => {
-    setDayModalDialogOpen(true);
-    setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
-  };
-
-  const handleDayModalDialogClose = () => {
-    setActiveDate(null);
-    setDayModalDialogOpen(false);
-  };
 
   return (
     <div {...gridProps} className="flex flex-1 flex-col gap-0 lg:gap-4">
@@ -46,14 +34,8 @@ const CalendarGrid = ({ state }: CalendarGridProps) => {
       </div>
 
       <CalendarMonthGrid
-        onDayModalDialogOpen={handleDayModalDialogOpen}
+        onDayModalDialogOpen={onDayModalDialogOpen}
         state={state}
-      />
-
-      <AddOccurrenceDialog
-        open={dayModalDialogOpen}
-        onClose={handleDayModalDialogClose}
-        date={activeDate}
       />
     </div>
   );
