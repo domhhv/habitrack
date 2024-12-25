@@ -5,12 +5,16 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Listbox,
-  ListboxSection,
   ListboxItem,
+  Textarea,
+  Select,
+  SelectItem,
+  SelectSection,
 } from '@nextui-org/react';
-import { useHabitsStore, useOccurrencesStore } from '@stores';
+import { ArrowsClockwise } from '@phosphor-icons/react';
+import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
+import { getHabitIconUrl } from '@utils';
 import { format } from 'date-fns';
 import React, { type MouseEventHandler } from 'react';
 import { Link } from 'react-router-dom';
@@ -29,7 +33,9 @@ const AddOccurrenceDialog = ({
   const { habits } = useHabitsStore();
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrencesStore();
-  const [selectedHabitIds, setSelectedHabitIds] = React.useState<string[]>([]);
+  const [selectedHabitId, setSelectedHabitId] = React.useState('');
+  const [note, setNote] = React.useState('');
+  const { addNote, addingNote } = useNotesStore();
 
   const habitsByTraitName = React.useMemo(() => {
     return Object.groupBy(habits, (habit) => habit.trait?.name || 'Unknown');
@@ -44,36 +50,37 @@ const AddOccurrenceDialog = ({
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
-    if (!user || !hasHabits) {
+    if (!user || !hasHabits || !selectedHabitId) {
       return null;
     }
 
-    const addOccurrences = selectedHabitIds.map((id) => {
-      return addOccurrence({
-        day: date.toISOString().split('T')[0],
-        timestamp: +date,
-        habitId: +id,
-        userId: user?.id as string,
-        time: null, // TODO: Add time picker
-      });
+    const newOccurrence = await addOccurrence({
+      day: date.toISOString().split('T')[0],
+      timestamp: +date,
+      habitId: +selectedHabitId,
+      userId: user?.id as string,
+      time: null, // TODO: Add time picker
     });
 
-    await Promise.all(addOccurrences);
+    if (note) {
+      await addNote({
+        content: note,
+        occurrenceId: newOccurrence.id,
+        userId: user.id,
+      });
+    }
 
     handleClose();
   };
 
   const handleClose = () => {
-    setSelectedHabitIds([]);
+    setSelectedHabitId('');
+    setNote('');
     onClose();
   };
 
   const handleHabitSelect = (habitId: string) => {
-    if (selectedHabitIds.includes(habitId)) {
-      setSelectedHabitIds(selectedHabitIds.filter((id) => id !== habitId));
-    } else {
-      setSelectedHabitIds([...selectedHabitIds, habitId]);
-    }
+    setSelectedHabitId(habitId);
   };
 
   return (
@@ -88,39 +95,57 @@ const AddOccurrenceDialog = ({
           Add habit entries for {format(date, 'iii, LLL d, y')}
         </ModalHeader>
         <ModalBody>
-          <Listbox
+          <Select
+            disableSelectorIconRotation
             variant="flat"
-            color="primary"
-            selectionMode="multiple"
-            selectedKeys={selectedHabitIds}
-            disabledKeys={['none']}
-            emptyContent="No habits yet. Create a habit to get started."
-            className="max-h-80 overflow-auto rounded border border-neutral-200 p-2 dark:border-neutral-800"
+            selectedKeys={selectedHabitId}
+            label={
+              hasHabits
+                ? 'Habits'
+                : 'No habits yet. Create a habit to get started.'
+            }
+            description="Select from your habits"
+            data-testid="habit-select"
+            selectorIcon={<ArrowsClockwise />}
           >
             {Object.keys(habitsByTraitName).map((traitName) => (
-              <ListboxSection key={traitName} showDivider title={traitName}>
+              <SelectSection key={traitName} title={traitName} showDivider>
                 {habitsByTraitName[traitName] ? (
-                  habitsByTraitName[traitName].map((habit) => (
-                    <ListboxItem
-                      key={habit.id.toString()}
-                      onClick={() => handleHabitSelect(habit.id.toString())}
-                    >
-                      {habit.name}
-                    </ListboxItem>
-                  ))
+                  habitsByTraitName[traitName].map((habit) => {
+                    const iconUrl = getHabitIconUrl(habit.iconPath);
+
+                    return (
+                      <SelectItem
+                        key={habit.id.toString()}
+                        textValue={habit.name}
+                        onClick={() => handleHabitSelect(habit.id.toString())}
+                      >
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={iconUrl}
+                            alt={habit.name}
+                            role="habit-icon"
+                            className="h-4 w-4"
+                          />
+                          <span>{habit.name}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })
                 ) : (
                   <ListboxItem key="none">No habits</ListboxItem>
                 )}
-              </ListboxSection>
+              </SelectSection>
             ))}
-          </Listbox>
+          </Select>
+          <Textarea onValueChange={setNote} value={note} placeholder="Note" />
         </ModalBody>
         <ModalFooter>
           <Button
             as={hasHabits ? Button : Link}
             type="submit"
             color="primary"
-            isLoading={addingOccurrence}
+            isLoading={addingOccurrence || addingNote}
             onClick={hasHabits ? handleSubmit : undefined}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore

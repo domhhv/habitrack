@@ -1,4 +1,4 @@
-import { useHabitsStore, useOccurrencesStore } from '@stores';
+import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
@@ -11,6 +11,7 @@ import AddOccurrenceDialog from './AddOccurrenceDialog';
 jest.mock('@stores', () => ({
   useHabitsStore: jest.fn(),
   useOccurrencesStore: jest.fn(),
+  useNotesStore: jest.fn(),
 }));
 
 jest.mock('@supabase/auth-helpers-react', () => ({
@@ -37,6 +38,10 @@ describe(AddOccurrenceDialog.name, () => {
 
   it('should render', () => {
     (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
+    (useNotesStore as unknown as jest.Mock).mockReturnValue({
+      addNote: jest.fn(),
+      addingNote: false,
+    });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
@@ -53,6 +58,10 @@ describe(AddOccurrenceDialog.name, () => {
 
   it('should not render if date is null', () => {
     (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
+    (useNotesStore as unknown as jest.Mock).mockReturnValue({
+      addNote: jest.fn(),
+      addingNote: false,
+    });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
@@ -67,6 +76,10 @@ describe(AddOccurrenceDialog.name, () => {
 
   it('should not render if open is false', () => {
     (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
+    (useNotesStore as unknown as jest.Mock).mockReturnValue({
+      addNote: jest.fn(),
+      addingNote: false,
+    });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
@@ -81,6 +94,10 @@ describe(AddOccurrenceDialog.name, () => {
 
   it('should not render if date is null', () => {
     (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
+    (useNotesStore as unknown as jest.Mock).mockReturnValue({
+      addNote: jest.fn(),
+      addingNote: false,
+    });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
@@ -95,25 +112,33 @@ describe(AddOccurrenceDialog.name, () => {
 
   it('if no habits are available, should show a message', () => {
     (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
+    (useNotesStore as unknown as jest.Mock).mockReturnValue({
+      addNote: jest.fn(),
+      addingNote: false,
+    });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
     (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
       addOccurrence: jest.fn(),
       addingOccurrence: false,
     });
-    const { getByText } = render(
+    const { getAllByText } = render(
       <BrowserRouter>
         <AddOccurrenceDialog {...props} />
       </BrowserRouter>
     );
     expect(
-      getByText('No habits yet. Create a habit to get started.')
+      getAllByText('No habits yet. Create a habit to get started.')[0]
     ).toBeInTheDocument();
   });
 
   it('should render habit options', () => {
     (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       habits: [makeTestHabit()],
+    });
+    (useNotesStore as unknown as jest.Mock).mockReturnValue({
+      addNote: jest.fn(),
+      addingNote: false,
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');
@@ -149,6 +174,10 @@ describe(AddOccurrenceDialog.name, () => {
   it('on close, should call onClose', () => {
     (useHabitsStore as unknown as jest.Mock).mockReturnValue({
       habits: [makeTestHabit()],
+    });
+    (useNotesStore as unknown as jest.Mock).mockReturnValue({
+      addNote: jest.fn(),
+      addingNote: false,
     });
     (useUser as jest.Mock).mockReturnValue({ id: '1' });
     (format as jest.Mock).mockReturnValue('2021-01-01');

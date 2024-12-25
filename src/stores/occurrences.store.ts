@@ -29,7 +29,7 @@ type OccurrencesState = {
   fetchOccurrences: () => Promise<void>;
   clearOccurrences: () => void;
   filterBy: (options: OccurrenceFilters) => void;
-  addOccurrence: (occurrence: OccurrencesInsert) => Promise<void>;
+  addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
   removeOccurrence: (id: number) => Promise<void>;
   removeOccurrencesByHabitId: (habitId: number) => void;
   onRangeChange: (range: [number, number]) => void;
@@ -99,6 +99,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
           dismissible: true,
           dismissText: 'Done',
         });
+        return nextOccurrence;
       } catch (error) {
         showSnackbar(
           'Something went wrong while adding your habit entry. Please try again.',
@@ -109,6 +110,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
           }
         );
         console.error(error);
+        return Promise.resolve({} as Occurrence);
       } finally {
         set({ addingOccurrence: false });
       }
