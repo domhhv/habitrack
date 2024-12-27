@@ -37,7 +37,6 @@ describe(EditHabitDialog.name, () => {
   });
 
   const props: EditHabitDialogProps = {
-    open: true,
     onClose: jest.fn(),
     habit: {
       id: 7,
@@ -69,11 +68,6 @@ describe(EditHabitDialog.name, () => {
 
   it('should not render if habit is not provided', () => {
     const { queryByRole } = render(<EditHabitDialog {...props} habit={null} />);
-    expect(queryByRole('dialog')).toBeNull();
-  });
-
-  it('should not render if open is false', () => {
-    const { queryByRole } = render(<EditHabitDialog {...props} open={false} />);
     expect(queryByRole('dialog')).toBeNull();
   });
 

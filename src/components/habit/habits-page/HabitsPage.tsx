@@ -187,11 +187,7 @@ const HabitsPage = () => {
           ))}
         </TableBody>
       </Table>
-      <EditHabitDialog
-        open={!!habitToEdit}
-        onClose={handleEditEnd}
-        habit={habitToEdit}
-      />
+      <EditHabitDialog onClose={handleEditEnd} habit={habitToEdit} />
       <AddHabitDialogButton />
       <ConfirmDialog
         open={!!habitToRemove}

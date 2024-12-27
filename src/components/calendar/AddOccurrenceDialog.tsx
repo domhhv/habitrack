@@ -56,7 +56,9 @@ const AddOccurrenceDialog = ({
     const newOccurrence = await addOccurrence({
       day: date!.toISOString().split('T')[0],
       timestamp: +date!,
-      habitId: +selectedHabitId,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      habitId: +selectedHabitId.currentKey,
       userId: user?.id as string,
       time: null, // TODO: Add time picker
     });

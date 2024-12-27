@@ -11,6 +11,7 @@ import {
   Select,
   SelectItem,
   Textarea,
+  useDisclosure,
 } from '@nextui-org/react';
 import { useHabitsStore, useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -18,17 +19,12 @@ import { toEventLike } from '@utils';
 import React from 'react';
 
 export type EditHabitDialogProps = {
-  open: boolean;
   habit: Habit | null;
   onClose?: () => void;
 };
 
-const EditHabitDialog = ({
-  open = false,
-  habit,
-  onClose,
-}: EditHabitDialogProps) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
+  const { isOpen, onOpen, onClose: onDisclosureClose } = useDisclosure();
   const [name, handleNameChange] = useTextField();
   const [description, handleDescriptionChange] = useTextField();
   const [traitId, setTraitId] = React.useState('');
@@ -37,8 +33,12 @@ const EditHabitDialog = ({
   const user = useUser();
 
   React.useEffect(() => {
-    setIsOpen(open);
-  }, [open]);
+    if (habit) {
+      onOpen();
+    } else {
+      onClose?.();
+    }
+  }, [habit, onOpen, onClose]);
 
   React.useEffect(() => {
     if (habit) {
@@ -48,12 +48,12 @@ const EditHabitDialog = ({
     }
   }, [habit, handleNameChange, handleDescriptionChange]);
 
-  if (!isOpen || !habit) {
+  if (!habit) {
     return null;
   }
 
   const handleClose = () => {
-    setIsOpen(false);
+    onDisclosureClose();
     onClose?.();
   };
 
@@ -75,7 +75,7 @@ const EditHabitDialog = ({
 
   return (
     <Modal
-      isOpen={open}
+      isOpen={isOpen}
       onClose={handleClose}
       role="edit-habit-modal"
       data-visible={isOpen.toString()}
