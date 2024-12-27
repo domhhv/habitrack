@@ -27,7 +27,7 @@ describe(AddOccurrenceDialog.name, () => {
   const date = new Date(2021, 1, 1, 12);
 
   const props = {
-    open: true,
+    isOpen: true,
     onClose: mockOnClose,
     date,
   };
@@ -87,7 +87,7 @@ describe(AddOccurrenceDialog.name, () => {
       addingOccurrence: false,
     });
     const { container } = render(
-      <AddOccurrenceDialog {...props} open={false} />
+      <AddOccurrenceDialog {...props} isOpen={false} />
     );
     expect(container.firstChild).toBeNull();
   });

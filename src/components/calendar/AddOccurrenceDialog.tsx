@@ -21,13 +21,13 @@ import React, { type MouseEventHandler } from 'react';
 import { Link } from 'react-router-dom';
 
 type AddOccurrenceDialogProps = {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
   date: Date | null;
 };
 
 const AddOccurrenceDialog = ({
-  open,
+  isOpen,
   onClose,
   date,
 }: AddOccurrenceDialogProps) => {
@@ -44,10 +44,6 @@ const AddOccurrenceDialog = ({
     return Object.groupBy(habits, (habit) => habit.trait?.name || 'Unknown');
   }, [habits]);
 
-  if (!date || !open) {
-    return null;
-  }
-
   const hasHabits = habits.length > 0;
 
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
@@ -58,8 +54,8 @@ const AddOccurrenceDialog = ({
     }
 
     const newOccurrence = await addOccurrence({
-      day: date.toISOString().split('T')[0],
-      timestamp: +date,
+      day: date!.toISOString().split('T')[0],
+      timestamp: +date!,
       habitId: +selectedHabitId,
       userId: user?.id as string,
       time: null, // TODO: Add time picker
@@ -85,13 +81,15 @@ const AddOccurrenceDialog = ({
   return (
     <Modal
       role="add-occurrence-modal"
-      isOpen={open}
+      isOpen={isOpen}
       onClose={handleClose}
       isDismissable={false}
+      placement="center"
+      onClick={(e) => e.stopPropagation()}
     >
       <ModalContent>
         <ModalHeader>
-          Add habit entry for {format(date, 'iii, LLL d, y')}
+          {date && `Add habit entry for ${format(date || '', 'iii, LLL d, y')}`}
         </ModalHeader>
         <ModalBody>
           <Select
