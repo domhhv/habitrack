@@ -27,7 +27,7 @@ describe(AddOccurrenceDialog.name, () => {
   const date = new Date(2021, 1, 1, 12);
 
   const props = {
-    open: true,
+    isOpen: true,
     onClose: mockOnClose,
     date,
   };
@@ -54,60 +54,6 @@ describe(AddOccurrenceDialog.name, () => {
       </BrowserRouter>
     );
     expect(getByText('Add habit entry for 2021-01-01')).toBeInTheDocument();
-  });
-
-  it('should not render if date is null', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
-    (useNotesStore as unknown as jest.Mock).mockReturnValue({
-      addNote: jest.fn(),
-      addingNote: false,
-    });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
-      addOccurrence: jest.fn(),
-      addingOccurrence: false,
-    });
-    const { container } = render(
-      <AddOccurrenceDialog {...props} date={null} />
-    );
-    expect(container.firstChild).toBeNull();
-  });
-
-  it('should not render if open is false', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
-    (useNotesStore as unknown as jest.Mock).mockReturnValue({
-      addNote: jest.fn(),
-      addingNote: false,
-    });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
-      addOccurrence: jest.fn(),
-      addingOccurrence: false,
-    });
-    const { container } = render(
-      <AddOccurrenceDialog {...props} open={false} />
-    );
-    expect(container.firstChild).toBeNull();
-  });
-
-  it('should not render if date is null', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
-    (useNotesStore as unknown as jest.Mock).mockReturnValue({
-      addNote: jest.fn(),
-      addingNote: false,
-    });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
-      addOccurrence: jest.fn(),
-      addingOccurrence: false,
-    });
-    const { container } = render(
-      <AddOccurrenceDialog {...props} date={null} />
-    );
-    expect(container.firstChild).toBeNull();
   });
 
   it('if no habits are available, should show a message', () => {

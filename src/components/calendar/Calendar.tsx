@@ -1,8 +1,10 @@
 import { generateCalendarRange } from '@helpers';
 import { useDocumentTitle } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
+import { useDisclosure } from '@nextui-org/react';
 import { useOccurrencesStore } from '@stores';
 import { capitalizeFirstLetter } from '@utils';
+import clsx from 'clsx';
 import React from 'react';
 import { type AriaButtonProps, useCalendar, useLocale } from 'react-aria';
 import { useCalendarState } from 'react-stately';
@@ -29,7 +31,11 @@ const Calendar = () => {
   });
   const { calendarProps, prevButtonProps, nextButtonProps, title } =
     useCalendar({}, state);
-  const [dayModalDialogOpen, setDayModalDialogOpen] = React.useState(false);
+  const {
+    isOpen: isAddOccurrenceDialogOpen,
+    onOpen: openAddOccurrenceDialog,
+    onClose: closeDayOccurrenceDialog,
+  } = useDisclosure();
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
 
   React.useEffect(() => {
@@ -86,21 +92,25 @@ const Calendar = () => {
     monthIndex: number,
     fullYear: number
   ) => {
-    setDayModalDialogOpen(true);
+    openAddOccurrenceDialog();
     setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
   };
 
   const handleDayModalDialogClose = () => {
-    setActiveDate(null);
-    setDayModalDialogOpen(false);
+    window.setTimeout(() => {
+      closeDayOccurrenceDialog();
+      setActiveDate(null);
+    }, 0);
   };
+
+  const calendarContainerClassName = clsx(
+    'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 pb-8 lg:gap-4 lg:px-16 lg:py-4',
+    isAddOccurrenceDialogOpen && 'pointer-events-none'
+  );
 
   return (
     <>
-      <div
-        {...calendarProps}
-        className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 pb-8 lg:gap-4 lg:px-16 lg:py-4"
-      >
+      <div {...calendarProps} className={calendarContainerClassName}>
         <CalendarHeader
           activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
           activeYear={activeYear}
@@ -119,7 +129,7 @@ const Calendar = () => {
       </div>
 
       <AddOccurrenceDialog
-        open={dayModalDialogOpen}
+        isOpen={isAddOccurrenceDialogOpen}
         onClose={handleDayModalDialogClose}
         date={activeDate}
       />
