@@ -10,6 +10,7 @@ import {
   Select,
   SelectItem,
   SelectSection,
+  type Selection,
 } from '@nextui-org/react';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
@@ -33,7 +34,9 @@ const AddOccurrenceDialog = ({
   const { habits } = useHabitsStore();
   const user = useUser();
   const { addOccurrence, addingOccurrence } = useOccurrencesStore();
-  const [selectedHabitId, setSelectedHabitId] = React.useState('');
+  const [selectedHabitId, setSelectedHabitId] = React.useState<Selection>(
+    new Set<number>([])
+  );
   const [note, setNote] = React.useState('');
   const { addNote, addingNote } = useNotesStore();
 
@@ -74,13 +77,9 @@ const AddOccurrenceDialog = ({
   };
 
   const handleClose = () => {
-    setSelectedHabitId('');
+    setSelectedHabitId(new Set([]));
     setNote('');
     onClose();
-  };
-
-  const handleHabitSelect = (habitId: string) => {
-    setSelectedHabitId(habitId);
   };
 
   return (
@@ -99,6 +98,7 @@ const AddOccurrenceDialog = ({
             disableSelectorIconRotation
             variant="faded"
             selectedKeys={selectedHabitId}
+            onSelectionChange={setSelectedHabitId}
             label={
               hasHabits
                 ? 'Habits'
@@ -115,11 +115,7 @@ const AddOccurrenceDialog = ({
                     const iconUrl = getHabitIconUrl(habit.iconPath);
 
                     return (
-                      <SelectItem
-                        key={habit.id.toString()}
-                        textValue={habit.name}
-                        onClick={() => handleHabitSelect(habit.id.toString())}
-                      >
+                      <SelectItem key={habit.id} textValue={habit.name}>
                         <div className="flex items-center gap-2">
                           <img
                             src={iconUrl}
