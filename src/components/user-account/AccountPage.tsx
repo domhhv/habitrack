@@ -60,7 +60,7 @@ const AccountPage = () => {
   return (
     <div className="flex h-lvh w-full flex-col items-start self-start pt-8">
       <div className={containerClassName} data-testid="account-page">
-        <h1 className="font-semibold text-xl">Your Account Info</h1>
+        <h1 className="text-xl font-semibold">Your Account Info</h1>
         <form
           className="mt-4 w-[400px]"
           onSubmit={handleSubmit}
