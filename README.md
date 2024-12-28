@@ -18,6 +18,8 @@
 <a href="https://testing-library.com/" title="React Testing Library"><img src="https://i.ibb.co/YLnX0VY/octopus-64x64.png" alt="React Testing Library" width="32" height="32"></a>
 </div>
 
+<br />
+
 Habitrack is a simple and intuitive web app designed for logging habits and visualizing them on a calendar view.
 
 This app showcases the use of the following tools and technologies:
@@ -157,10 +159,6 @@ To set up a local Supabase instance, run the following commands (Docker required
     yarn db:restart
    ```
 
-````bash
-yarn db:restart # Restart the local Supabase instance
-
-
 ##### Migrations
 
 There are a few ways to create and run migrations in the project.
@@ -171,7 +169,7 @@ _Do the necessary changes in the local Supabase studio and then run the followin
 
 ```bash
 yarn db:diff
-````
+```
 
 - Creating a new migration file manually:
 
@@ -227,6 +225,20 @@ The project uses [Prettier](https://prettier.io/) for formatting. To run Prettie
 ```bash
 yarn prettier:check # Check for formatting errors
 yarn prettier:fix # Fix formatting errors
+```
+
+### Building
+
+To create a local production-like build of the app, run the following command:
+
+```bash
+yarn build
+```
+
+You can run the production build locally using the following command:
+
+```bash
+yarn preview
 ```
 
 ## Contributing
