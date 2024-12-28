@@ -1,3 +1,4 @@
+import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import {
   Button,
   Modal,
@@ -10,8 +11,9 @@ import {
   Select,
   SelectItem,
   SelectSection,
-  type Selection,
+  TimeInput,
 } from '@nextui-org/react';
+import type { TimeInputValue, Selection } from '@nextui-org/react';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -31,14 +33,15 @@ const AddOccurrenceDialog = ({
   onClose,
   date,
 }: AddOccurrenceDialogProps) => {
-  const { habits } = useHabitsStore();
   const user = useUser();
-  const { addOccurrence, addingOccurrence } = useOccurrencesStore();
-  const [selectedHabitId, setSelectedHabitId] = React.useState<Selection>(
-    new Set<number>([])
-  );
-  const [note, setNote] = React.useState('');
+  const { habits } = useHabitsStore();
   const { addNote, addingNote } = useNotesStore();
+  const { addOccurrence, addingOccurrence } = useOccurrencesStore();
+  const [note, setNote] = React.useState('');
+  const [selectedHabitId, setSelectedHabitId] = React.useState<
+    Selection & { currentKey?: string }
+  >(new Set<number>([]));
+  const [time, setTime] = React.useState<TimeInputValue | null>(null);
 
   const habitsByTraitName = React.useMemo(() => {
     return Object.groupBy(habits, (habit) => habit.trait?.name || 'Unknown');
@@ -46,17 +49,37 @@ const AddOccurrenceDialog = ({
 
   const hasHabits = habits.length > 0;
 
+  React.useEffect(() => {
+    if (!date) {
+      setTime(parseAbsoluteToLocal(new Date().toISOString()));
+      return;
+    }
+
+    const occurrenceDateTime = new Date();
+
+    occurrenceDateTime.setFullYear(date.getFullYear());
+    occurrenceDateTime.setMonth(date.getMonth());
+    occurrenceDateTime.setDate(date.getDate());
+
+    setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
+  }, [date]);
+
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
-    if (!user || !hasHabits || !selectedHabitId) {
+    if (!user || !date || !hasHabits || !selectedHabitId.currentKey) {
       return null;
     }
 
+    const occurrenceDateTime = new Date(date);
+
+    if (time instanceof ZonedDateTime) {
+      occurrenceDateTime.setHours(time.hour);
+      occurrenceDateTime.setMinutes(time.minute);
+    }
+
     const newOccurrence = await addOccurrence({
-      timestamp: +date!,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      timestamp: +occurrenceDateTime,
       habitId: +selectedHabitId.currentKey,
       userId: user?.id as string,
     });
@@ -138,6 +161,15 @@ const AddOccurrenceDialog = ({
             placeholder="Note"
             variant="faded"
           />
+          <div className="flex w-full flex-col gap-y-2">
+            <TimeInput
+              label="Time"
+              value={time}
+              onChange={setTime}
+              variant="faded"
+              maxValue={parseAbsoluteToLocal(new Date().toISOString())}
+            />
+          </div>
         </ModalBody>
         <ModalFooter>
           <Button
@@ -146,6 +178,7 @@ const AddOccurrenceDialog = ({
             color="primary"
             isLoading={addingOccurrence || addingNote}
             onClick={hasHabits ? handleSubmit : undefined}
+            isDisabled={hasHabits && !selectedHabitId.currentKey}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             to={hasHabits ? undefined : '/habits'}
