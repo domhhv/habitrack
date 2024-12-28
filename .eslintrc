@@ -29,16 +29,12 @@
     }
   },
   "rules": {
-    "object-shorthand": "error",
     "no-undef": "off",
-    "no-duplicate-imports": "error",
+    "no-useless-rename": "error",
     "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "@typescript-eslint/consistent-type-imports": [
-      "error",
-      {
-        "fixStyle": "inline-type-imports"
-      }
-    ],
+    "object-shorthand": "error",
+    "import/no-duplicates": "error",
+    "@typescript-eslint/consistent-type-imports": "error",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
