@@ -5,30 +5,55 @@
 &nbsp;
 <a href="https://www.typescriptlang.org/" title="TypeScript"><img src="https://i.ibb.co/Kq8DY4f/typescript.png" alt="TypeScript" width="32" height="32"></a>
 &nbsp;
+<a href="https://vite.dev/" title="Vite"><img src="https://i.ibb.co/FWtjy8J/Vite-js.png" alt="Vite" width="32" height="32"></a>
+&nbsp;
 <a href="https://tailwindcss.com/" title="TailwindCSS"><img src="https://i.ibb.co/mR0BWJx/Tailwind-CSS.png" alt="Tailwind" width="32" height="32" /></a>
 &nbsp;
 <a href="https://nextui.org" title="NextUI"><img src="https://i.ibb.co/xYjF5K6/nextui.png" alt="NextUI" width="32" height="32"></a>
 &nbsp;
 <a href="https://supabase.com/" title="Supabase"><img src="https://i.ibb.co/WnJ9m8k/supabase-logo-icon.png" alt="Supabase" width="32" height="32"></a>
+&nbsp;
+<a href="https://jestjs.io/" title="Jest"><img src="https://i.ibb.co/M50R4zP/Jest.png" alt="Jest" width="32" height="32"></a>
+&nbsp;
+<a href="https://testing-library.com/" title="React Testing Library"><img src="https://i.ibb.co/YLnX0VY/octopus-64x64.png" alt="React Testing Library" width="32" height="32"></a>
 </div>
 
-Habitrack is a simple and intuitive app designed to help users build better habits by visualizing their progress on a calendar. With Habitrack, you can easily log daily habits, track your consistency, and see your streaks at a glance. This tool is perfect for anyone looking to stay motivated and committed to personal goals, whether it’s fitness, learning, or self-improvement. By providing a clear overview of your habit performance over time, Habitrack helps you stay on course and maintain accountability.
+Habitrack is a simple and intuitive web app designed for logging habits and visualizing them on a calendar view.
 
-The app is live [here](https://habitrack.io). It uses:
+This app showcases the use of the following tools and technologies:
 
-- React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
-- [NextUI](https://nextui.org) for the UI components
+- React with TypeScript, bundled with [Vite](https://vite.dev/)
+- [Zustand](https://zustand.docs.pmnd.rs/) for global state management
 - [Tailwind CSS](https://tailwindcss.com) for styling
+- [NextUI](https://nextui.org) for the UI components
+- React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [Supabase](https://supabase.io) for Authentication, Database and Storage
+- [Jest](https://jestjs.io) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit-testing
+- ESLint, Prettier, and Husky for linting and formatting
+- Docker for running a local Supabase instance
+- GitHub Actions for CI/CD and Vercel for deployment
 
 ## Features
-
-> _This app is under active development. Many more features coming soon!_
 
 - **Customizable Habits**: Add, remove, and customize habits to fit your routine. Associate your habits with traits and icons.
 - **Calendar View**: Visualize your habits on a monthly calendar.
 - **Daily Tracking**: Easily add daily entries of your habits.
-- **User Authentication**: Sign up and log in to your account to retain your habits and entries.
+- **User Authentication**: Sign up and log in to your account to retain your habits and entries.'
+- **Responsive Design**: Enjoy a seamless experience on any device.
+- **PWA**: Install the app on your device for quick access.
+
+## Roadmap
+
+- [x] **Dark Mode**: Switch between light and dark themes.
+- [ ] **Export**: Export your habits and entries.
+- [ ] **Environments**: Associate habits with environments where they occur.
+- [ ] **Categories**: Group habits into categories.
+- [ ] **Weekly View**: View your habits on a weekly calendar.
+- [ ] **Daily View**: Dive into your habits on a daily calendar.
+- [ ] **Sharing**: Share your calendar with trusted people.
+- [ ] **Statistics**: Track your progress with insightful statistics.
+- [ ] **Notifications**: Get reminders to log your habits.
+- [ ] **Local Storage**: Save your habits and entries locally.
 
 ## Local development
 
