@@ -148,8 +148,52 @@ To set up a local Supabase instance, run the following commands (Docker required
 5. **Stop the local Supabase instance:**
 
    ```bash
-   yarn db:stop
+    yarn db:stop
    ```
+
+6. **Restart the local Supabase instance:**
+
+   ```bash
+    yarn db:restart
+   ```
+
+````bash
+yarn db:restart # Restart the local Supabase instance
+
+
+##### Migrations
+
+There are a few ways to create and run migrations in the project.
+
+- Diffing the database schema:
+
+_Do the necessary changes in the local Supabase studio and then run the following to automatically generate a new migration file:_
+
+```bash
+yarn db:diff
+````
+
+- Creating a new migration file manually:
+
+_To create a new migration file manually, run the following command:_
+
+```bash
+yarn db:migration:new <your-migration-name>
+```
+
+Either way, the new migration file will be created in the `supabase/migrations` directory. You can then apply the migration by running:
+
+```bash
+yarn db:migration:up
+```
+
+After applying the migration, you also need to regenerate Supabase types by running:
+
+```bash
+yarn db:gen-types
+```
+
+Once the migration ends up in the `main` branch, it will be automatically applied to the production database.
 
 ### Testing
 

@@ -833,30 +833,24 @@ export type Database = {
       occurrences: {
         Row: {
           created_at: string
-          day: string
           habit_id: number
           id: number
-          time: string | null
           timestamp: number
           updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
-          day: string
           habit_id: number
           id?: number
-          time?: string | null
           timestamp: number
           updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
-          day?: string
           habit_id?: number
           id?: number
-          time?: string | null
           timestamp?: number
           updated_at?: string | null
           user_id?: string

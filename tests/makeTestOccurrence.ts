@@ -9,8 +9,6 @@ const makeTestOccurrence = () => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       timestamp: new Date().getTime(),
-      day: '2021-01-01',
-      time: '12:00',
       habitId: 1,
       userId: '1',
       habit: {
