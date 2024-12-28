@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+th,
+td,
+tr,
+button,
+[role='button'],
+[data-slot='value'],
+[data-slot='input'],
+[data-label='true'] {
+  font-weight: 600 !important;
+}

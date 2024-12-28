@@ -9,9 +9,9 @@ export default {
     './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    fontWeight: {
-      normal: 600,
-    },
+    // fontWeight: {
+    //   normal: 600,
+    // },
     extend: {},
   },
   plugins: [

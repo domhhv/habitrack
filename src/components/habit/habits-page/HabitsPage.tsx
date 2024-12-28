@@ -99,7 +99,7 @@ const HabitsPage = () => {
 
   return (
     <div className="contents">
-      <h1 className="font-bold mx-auto my-4 text-3xl text-gray-800 dark:text-gray-300">
+      <h1 className="mx-auto my-4 text-3xl font-bold text-gray-800 dark:text-gray-300">
         Your habits
       </h1>
       <Table className="m-auto w-[95%] lg:w-[80%]">
@@ -127,7 +127,7 @@ const HabitsPage = () => {
               </TableCell>
               <TableCell>
                 <Chip size="sm" variant="faded" className="ml-2 h-5 border-1">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 font-semibold">
                     <span
                       className="mr-0.5 inline-block h-1 w-1 rounded-full"
                       role="habit-trait-chip-color-indicator"
