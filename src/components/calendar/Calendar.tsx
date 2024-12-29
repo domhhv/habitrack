@@ -123,6 +123,8 @@ const Calendar = () => {
           onResetFocusedDate={resetFocusedDate}
         />
         <CalendarGrid
+          activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
+          activeYear={Number(activeYear)}
           state={state}
           onDayModalDialogOpen={handleDayModalDialogOpen}
         />

@@ -16,6 +16,8 @@ export type CellPosition =
   | 'bottom-right'
   | '';
 
+export type CellRangeStatus = 'below-range' | 'in-range' | 'above-range';
+
 type CalendarCellProps = {
   dateNumber: number;
   monthNumber: number;
@@ -23,7 +25,7 @@ type CalendarCellProps = {
   onClick: (dateNumber: number, monthNumber: number, fullYear: number) => void;
   onNavigateBack?: () => void;
   onNavigateForward?: () => void;
-  rangeStatus: 'below-range' | 'in-range' | 'above-range';
+  rangeStatus: CellRangeStatus;
   position: CellPosition;
 };
 
