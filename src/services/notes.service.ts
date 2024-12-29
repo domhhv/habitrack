@@ -1,5 +1,5 @@
 import { supabaseClient } from '@helpers';
-import { type Note, type NotesInsert } from '@models';
+import type { NotesUpdate, Note, NotesInsert } from '@models';
 import {
   transformClientEntity,
   transformServerEntities,
@@ -30,4 +30,37 @@ export const listNotes = async (): Promise<Note[]> => {
   }
 
   return transformServerEntities(data);
+};
+
+export const updateNote = async (
+  id: number,
+  note: NotesUpdate
+): Promise<Note> => {
+  const serverNote = transformClientEntity({
+    ...note,
+    updatedAt: new Date().toISOString(),
+  });
+
+  const { error, data } = await supabaseClient
+    .from('notes')
+    .update(serverNote)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformServerEntity(data);
+};
+
+export const destroyNote = async (id: number) => {
+  const { error } = await supabaseClient.from('notes').delete().eq('id', id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return Promise.resolve();
 };

@@ -28,7 +28,7 @@ type AddOccurrenceDialogProps = {
   date: Date | null;
 };
 
-const AddOccurrenceDialog = ({
+const OccurrenceDialog = ({
   isOpen,
   onClose,
   date,
@@ -96,8 +96,10 @@ const AddOccurrenceDialog = ({
   };
 
   const handleClose = () => {
-    setSelectedHabitId(new Set([]));
-    setNote('');
+    setTimeout(() => {
+      setSelectedHabitId(new Set([]));
+      setNote('');
+    });
     onClose();
   };
 
@@ -191,4 +193,4 @@ const AddOccurrenceDialog = ({
   );
 };
 
-export default AddOccurrenceDialog;
+export default OccurrenceDialog;

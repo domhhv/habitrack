@@ -9,9 +9,9 @@ const HabitsTotalEntriesCell = ({ id }: { id: number }) => {
   }, [id]);
 
   return entriesCount ? (
-    <p className="text-right">{entriesCount}</p>
+    <p>{entriesCount}</p>
   ) : (
-    <p className="text-right text-gray-400">–</p>
+    <p className="text-gray-400">–</p>
   );
 };
 

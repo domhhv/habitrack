@@ -88,18 +88,24 @@ const CalendarHeader = ({
     });
   };
 
+  const isMobile = screenSize < 768;
+  const isDesktop = screenSize > 1024;
+
   return (
-    <div className="flex items-center justify-between px-2 pt-2 lg:px-0 lg:pt-0">
+    <div className="flex items-center justify-between px-0 pt-2 lg:px-0 lg:pt-0">
       <div className="flex items-center justify-between gap-0 lg:gap-2">
         <div className="mr-0 flex items-center gap-2 lg:mr-2">
           <Select
             variant="flat"
-            size={screenSize > 1024 ? 'md' : 'sm'}
+            size={isDesktop ? 'md' : 'sm'}
             selectedKeys={new Set([activeMonthLabel])}
             onChange={handleMonthChange}
-            className="w-[75px] md:w-[250px]"
             classNames={{
-              popoverContent: 'w-[250px]',
+              base: 'w-[75px] md:w-[125px]',
+              popoverContent: 'w-[125px]',
+              selectorIcon: isMobile && 'hidden',
+              innerWrapper: isMobile && 'w-full',
+              value: isMobile && 'text-tiny',
             }}
           >
             {MONTHS.map((month) => (
@@ -108,11 +114,15 @@ const CalendarHeader = ({
           </Select>
           <Select
             variant="flat"
-            size={screenSize > 1024 ? 'md' : 'sm'}
+            size={isDesktop ? 'md' : 'sm'}
             selectedKeys={new Set([activeYear])}
             onChange={handleYearChange}
             classNames={{
-              popoverContent: 'w-[100px]',
+              base: 'w-[50px] md:w-[100px]',
+              popoverContent: isMobile ? 'w-[50px]' : 'w-[100px]',
+              selectorIcon: isMobile && 'hidden',
+              innerWrapper: isMobile && 'w-full',
+              value: isMobile && 'text-tiny',
             }}
           >
             {YEARS.map((year) => (
@@ -123,18 +133,18 @@ const CalendarHeader = ({
         <div className="flex items-center gap-0 lg:gap-2">
           <Button
             isIconOnly
-            size={screenSize > 1024 ? 'md' : 'sm'}
+            size={isDesktop ? 'md' : 'sm'}
             variant="light"
             isDisabled={prevButtonProps.disabled}
             aria-label={prevButtonProps['aria-label']}
             onClick={onNavigateBack}
             role="navigate-back"
           >
-            <ArrowFatLeft size={screenSize > 1024 ? 20 : 16} />
+            <ArrowFatLeft size={isDesktop ? 20 : 16} />
           </Button>
-          {screenSize > 768 && (
+          {!isMobile && (
             <Button
-              size={screenSize > 1024 ? 'md' : 'sm'}
+              size={isDesktop ? 'md' : 'sm'}
               variant="bordered"
               onClick={onResetFocusedDate}
             >
@@ -143,14 +153,14 @@ const CalendarHeader = ({
           )}
           <Button
             isIconOnly
-            size={screenSize > 1024 ? 'md' : 'sm'}
+            size={isDesktop ? 'md' : 'sm'}
             variant="light"
             isDisabled={nextButtonProps.disabled}
             aria-label={nextButtonProps['aria-label']}
             onClick={onNavigateForward}
             role="navigate-forward"
           >
-            <ArrowFatRight size={screenSize > 1024 ? 20 : 16} />
+            <ArrowFatRight size={isDesktop ? 20 : 16} />
           </Button>
         </div>
       </div>
@@ -158,16 +168,19 @@ const CalendarHeader = ({
         <div className="flex items-center justify-between gap-2">
           <Select
             variant="flat"
-            size={screenSize > 1024 ? 'md' : 'sm'}
+            size={isDesktop ? 'md' : 'sm'}
             selectedKeys={filteredBy.habitIds}
             onChange={handleHabitsFilterChange}
-            className="w-[75px] sm:w-[125px] xl:w-[200px]"
+            className="w-[75px] md:w-[250px]"
             selectionMode="multiple"
             classNames={{
-              popoverContent: 'w-[125px]',
+              popoverContent: isMobile ? 'w-[150px]' : 'w-[250px]',
+              selectorIcon: isMobile && 'hidden',
+              innerWrapper: isMobile && 'w-full',
+              value: isMobile && 'text-tiny',
             }}
             popoverProps={{
-              crossOffset: screenSize < 1280 ? -50 : 0,
+              crossOffset: isMobile ? -75 : 0,
             }}
           >
             <SelectSection title="Filter by habits">
@@ -178,16 +191,19 @@ const CalendarHeader = ({
           </Select>
           <Select
             variant="flat"
-            size={screenSize > 1024 ? 'md' : 'sm'}
+            size={isDesktop ? 'md' : 'sm'}
             selectedKeys={filteredBy.traitIds}
             onChange={handleTraitsFilterChange}
-            className="w-[75px] sm:w-[125px] xl:w-[200px]"
+            className="w-[75px] md:w-[250px]"
             selectionMode="multiple"
             classNames={{
-              popoverContent: 'w-[125px]',
+              popoverContent: isMobile ? 'w-[150px]' : 'w-[250px]',
+              selectorIcon: isMobile && 'hidden',
+              innerWrapper: isMobile && 'w-full',
+              value: isMobile && 'text-tiny',
             }}
             popoverProps={{
-              crossOffset: screenSize < 1280 ? -50 : 0,
+              crossOffset: screenSize < 768 ? -75 : 0,
             }}
           >
             <SelectSection title="Filter by traits">

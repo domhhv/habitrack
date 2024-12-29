@@ -40,7 +40,7 @@ const OccurrenceChip = ({
   };
 
   const tooltipContent = (
-    <div className="max-h-96 space-y-2 overflow-x-hidden p-1">
+    <div className="max-h-96 space-y-2 overflow-x-hidden overflow-y-visible p-1">
       <span className="font-bold">{habitName}</span>
       <ul className="space-y-2 italic">
         {occurrenceTimes.map((t) => {
@@ -88,17 +88,17 @@ const OccurrenceChip = ({
     >
       <div
         style={chipStyle}
-        className="relative mr-1 mt-1 min-w-0 rounded-full border-2 bg-slate-100 p-2 dark:bg-slate-800"
+        className="relative mt-0 min-w-0 rounded-full border-2 bg-slate-100 p-2 dark:bg-slate-800 md:mr-1 md:mt-1"
         role="habit-chip"
         onClick={(e) => {
           e.stopPropagation();
-          alert('Habit entry modal is coming soon!');
+          alert('Habit entry modl');
         }}
       >
         <img
           src={iconUrl}
           alt={`${habitName} icon`}
-          className="h-5 w-5 rounded"
+          className="h-3 w-3 rounded"
         />
       </div>
     </Tooltip>
@@ -122,7 +122,7 @@ const OccurrenceChip = ({
     chipTooltip = (
       <Badge
         size="sm"
-        content={<Note size={16} />}
+        content={<Note />}
         placement="top-right"
         className="top-1 border-none bg-transparent"
       >

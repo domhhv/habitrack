@@ -40,6 +40,7 @@ jest.mock('@hooks', () => ({
     .fn()
     .mockReturnValue(['', jest.fn(), jest.fn(), jest.fn()]),
   useFileField: jest.fn().mockReturnValue([null, jest.fn(), jest.fn()]),
+  useScreenSize: jest.fn(),
 }));
 
 describe(HabitsPage.name, () => {

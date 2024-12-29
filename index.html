@@ -41,10 +41,29 @@
         justify-content: center;
         align-items: center;
         height: 100%;
+
+        span {
+          font-size: 1.2rem;
+        }
+
+        img {
+          width: 24px;
+          height: 24px;
+          margin-right: 8px;
+        }
       }
 
-      .loader-container img {
-        margin-right: 8px;
+      .loader-logo {
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
@@ -55,10 +74,9 @@
         <img
           src="/android-chrome-192x192.png"
           alt="Habilify logo"
-          width="16"
-          height="16"
+          class="loader-logo"
         />
-        We're preparing the app...
+        <span>We're preparing the app...</span>
       </div>
     </div>
   </body>

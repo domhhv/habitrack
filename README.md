@@ -163,12 +163,12 @@ To set up a local Supabase instance, run the following commands (Docker required
 
 There are a few ways to create and run migrations in the project.
 
-- Diffing the database schema:
+- Diffing the database schema to automatically generate a new migration file:
 
 _Do the necessary changes in the local Supabase studio and then run the following to automatically generate a new migration file:_
 
 ```bash
-yarn db:diff
+yarn db:diff -f <your-migration-name>
 ```
 
 - Creating a new migration file manually:
@@ -179,7 +179,7 @@ _To create a new migration file manually, run the following command:_
 yarn db:migration:new <your-migration-name>
 ```
 
-Either way, the new migration file will be created in the `supabase/migrations` directory. You can then apply the migration by running:
+Either way, the new migration file will be created in the `supabase/migrations` directory. Write/change the SQL queries in the migration file to reflect the changes you want to make to the database schema. Then, apply the migration by running:
 
 ```bash
 yarn db:migration:up

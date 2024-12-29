@@ -8,7 +8,6 @@ import {
   StorageBuckets,
   uploadFile,
 } from '@services';
-import { makeTestHabit } from '@tests';
 import { getErrorMessage } from '@utils';
 import { create } from 'zustand';
 
@@ -36,7 +35,7 @@ const useHabitsStore = create<HabitsState>((set) => {
   const { showSnackbar } = useSnackbarsStore.getState();
 
   return {
-    habits: [makeTestHabit()],
+    habits: [],
     addingHabit: false,
     fetchingHabits: false,
     habitIdBeingUpdated: null,

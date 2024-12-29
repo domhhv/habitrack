@@ -1,9 +1,14 @@
-import type { Note, NotesInsert } from '@models';
+import type { Note, NotesInsert, NotesUpdate } from '@models';
 import { useSnackbarsStore } from '@stores';
 import { getErrorMessage } from '@utils';
 import { create } from 'zustand';
 
-import { createNote, listNotes } from '../services/notes.service';
+import {
+  createNote,
+  destroyNote,
+  listNotes,
+  updateNote,
+} from '../services/notes.service';
 
 type NotesState = {
   notes: Note[];
@@ -11,6 +16,10 @@ type NotesState = {
   addingNote: boolean;
   fetchNotes: () => Promise<void>;
   addNote: (note: NotesInsert) => Promise<void>;
+  updateNote: (id: number, note: NotesUpdate) => Promise<void>;
+  updatingNote: boolean;
+  deleteNote: (id: number) => Promise<void>;
+  deletingNote: boolean;
   clearNotes: () => void;
 };
 
@@ -20,6 +29,8 @@ const useNotesStore = create<NotesState>((set) => ({
   notes: [],
   fetchingNotes: false,
   addingNote: false,
+  updatingNote: false,
+  deletingNote: false,
   fetchNotes: async () => {
     try {
       set({ fetchingNotes: true });
@@ -55,6 +66,54 @@ const useNotesStore = create<NotesState>((set) => ({
       });
     } finally {
       set({ addingNote: false });
+    }
+  },
+  updateNote: async (id: number, note: NotesUpdate) => {
+    try {
+      set({ updatingNote: true });
+      const updatedNote = await updateNote(id, note);
+      set((state) => ({
+        notes: state.notes.map((n) =>
+          n.id === updatedNote.id ? updatedNote : n
+        ),
+      }));
+      showSnackbar('Note updated successfully', {
+        color: 'success',
+        dismissible: true,
+        dismissText: 'Done',
+      });
+    } catch (error) {
+      console.error(error);
+      showSnackbar('Something went wrong while updating your note', {
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+        dismissible: true,
+      });
+    } finally {
+      set({ updatingNote: false });
+    }
+  },
+  deleteNote: async (id: number) => {
+    try {
+      set({ deletingNote: true });
+      await destroyNote(id);
+      set((state) => ({
+        notes: state.notes.filter((note) => note.id !== id),
+      }));
+      showSnackbar('Note deleted successfully', {
+        color: 'success',
+        dismissible: true,
+        dismissText: 'Done',
+      });
+    } catch (error) {
+      console.error(error);
+      showSnackbar('Something went wrong while deleting your note', {
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+        dismissible: true,
+      });
+    } finally {
+      set({ deletingNote: false });
     }
   },
   clearNotes: () => {
