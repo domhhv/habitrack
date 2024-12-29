@@ -1,3 +1,4 @@
+import { capitalizeFirstLetter } from '@utils';
 import React from 'react';
 import { useCalendarGrid } from 'react-aria';
 import { type CalendarState } from 'react-stately';
@@ -11,11 +12,18 @@ type CalendarGridProps = {
     monthIndex: number,
     fullYear: number
   ) => void;
+  activeMonthLabel: string;
+  activeYear: number;
 };
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const CalendarGrid = ({ state, onDayModalDialogOpen }: CalendarGridProps) => {
+const CalendarGrid = ({
+  state,
+  onDayModalDialogOpen,
+  activeMonthLabel,
+  activeYear,
+}: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
 
   return (
@@ -36,6 +44,8 @@ const CalendarGrid = ({ state, onDayModalDialogOpen }: CalendarGridProps) => {
       <CalendarMonthGrid
         onDayModalDialogOpen={onDayModalDialogOpen}
         state={state}
+        activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
+        activeYear={activeYear}
       />
     </div>
   );

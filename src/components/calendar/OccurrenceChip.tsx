@@ -1,6 +1,6 @@
 import type { Occurrence } from '@models';
 import { Badge, Button, Tooltip } from '@nextui-org/react';
-import { Trash } from '@phosphor-icons/react';
+import { Note, Trash } from '@phosphor-icons/react';
 import { useNotesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import { format } from 'date-fns';
@@ -40,67 +40,42 @@ const OccurrenceChip = ({
   };
 
   const tooltipContent = (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-bold">{habitName}</span>
-        <Button
-          isIconOnly
-          variant="solid"
-          color="danger"
-          onClick={(clickEvent) => onDelete(occurrences[0].id, clickEvent)}
-          role="habit-chip-delete-button"
-          className="h-6 w-6 min-w-0 rounded-lg"
-        >
-          <Trash size={14} fill="bold" className="fill-white" />
-        </Button>
-      </div>
-      <ul className="italic">
-        {occurrenceTimes.map((t) => (
-          <li key={t.occurrenceId}>
-            <span className="font-semibold">{t.time}</span>:{' '}
-            <span className="font-normal">
-              {occurrenceNotes.find((n) => n.occurrenceId === t.occurrenceId)
-                ?.content || 'No note'}
-            </span>
-          </li>
-        ))}
+    <div className="max-h-96 space-y-2 overflow-x-hidden p-1">
+      <span className="font-bold">{habitName}</span>
+      <ul className="space-y-2 italic">
+        {occurrenceTimes.map((t) => {
+          const note = occurrenceNotes.find(
+            (n) => n.occurrenceId === t.occurrenceId
+          );
+          return (
+            <li
+              key={t.occurrenceId}
+              className="mb-2 flex items-start justify-between gap-4 border-b border-neutral-500 py-2"
+            >
+              <div className="w-48">
+                <span className="font-semibold">{t.time}</span>
+                {!!note && (
+                  <span className="font-normal">: {note.content}</span>
+                )}
+              </div>
+              <Button
+                isIconOnly
+                variant="solid"
+                color="danger"
+                onClick={(clickEvent) => onDelete(t.occurrenceId, clickEvent)}
+                role="habit-chip-delete-button"
+                className="h-6 w-6 min-w-0 rounded-lg"
+              >
+                <Trash size={14} fill="bold" className="fill-white" />
+              </Button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
 
-  const renderChip = () => {
-    const chip = (
-      <div
-        style={chipStyle}
-        className="relative mr-1 mt-1 min-w-0 rounded-full border-2 bg-slate-100 p-2 dark:bg-slate-800"
-        role="habit-chip"
-      >
-        <img
-          src={iconUrl}
-          alt={`${habitName} icon`}
-          className="h-5 w-5 rounded"
-        />
-      </div>
-    );
-
-    if (occurrences.length > 1) {
-      return (
-        <Badge
-          size="sm"
-          content={occurrences.length}
-          variant="solid"
-          placement="bottom-right"
-          color="primary"
-        >
-          {chip}
-        </Badge>
-      );
-    }
-
-    return chip;
-  };
-
-  return (
+  let chipTooltip = (
     <Tooltip
       isDisabled={!habitName}
       content={tooltipContent}
@@ -108,10 +83,55 @@ const OccurrenceChip = ({
       classNames={{
         content: 'px-2 py-1.5',
       }}
+      delay={0}
+      closeDelay={0}
     >
-      {renderChip()}
+      <div
+        style={chipStyle}
+        className="relative mr-1 mt-1 min-w-0 rounded-full border-2 bg-slate-100 p-2 dark:bg-slate-800"
+        role="habit-chip"
+        onClick={(e) => {
+          e.stopPropagation();
+          alert('Habit entry modal is coming soon!');
+        }}
+      >
+        <img
+          src={iconUrl}
+          alt={`${habitName} icon`}
+          className="h-5 w-5 rounded"
+        />
+      </div>
     </Tooltip>
   );
+
+  if (occurrences.length > 1) {
+    chipTooltip = (
+      <Badge
+        size="sm"
+        content={occurrences.length}
+        variant="solid"
+        placement="bottom-right"
+        color="primary"
+      >
+        {chipTooltip}
+      </Badge>
+    );
+  }
+
+  if (occurrenceNotes.length) {
+    chipTooltip = (
+      <Badge
+        size="sm"
+        content={<Note size={16} />}
+        placement="top-right"
+        className="top-1 border-none bg-transparent"
+      >
+        {chipTooltip}
+      </Badge>
+    );
+  }
+
+  return chipTooltip;
 };
 
 export default OccurrenceChip;
