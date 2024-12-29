@@ -3,7 +3,7 @@ import {
   ConfirmDialog,
   EditHabitDialog,
 } from '@components';
-import { useDocumentTitle } from '@hooks';
+import { useDocumentTitle, useScreenSize } from '@hooks';
 import { type Habit } from '@models';
 import {
   Button,
@@ -19,6 +19,7 @@ import {
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -68,6 +69,7 @@ const HabitsPage = () => {
   const { removeOccurrencesByHabitId } = useOccurrencesStore();
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
+  const screenSize = useScreenSize();
 
   useDocumentTitle('My Habits | Habitrack');
 
@@ -97,12 +99,24 @@ const HabitsPage = () => {
     setHabitToEdit(null);
   };
 
+  const isMobile = screenSize < 768;
+
   return (
-    <div className="contents">
+    <>
       <h1 className="mx-auto my-4 text-3xl font-bold text-gray-800 dark:text-gray-300">
         Your habits
       </h1>
-      <Table className="m-auto w-[95%] lg:w-[80%]">
+      <Table
+        shadow="none"
+        isHeaderSticky
+        className="mx-auto w-[95%] lg:w-[80%]"
+        classNames={{
+          base: clsx(
+            'overflow-scroll',
+            isMobile ? 'max-h-[400px]' : 'max-h-[600px]'
+          ),
+        }}
+      >
         <TableHeader columns={habitColumns}>
           {(column) => (
             <TableColumn key={column.key}>{column.label}</TableColumn>
@@ -141,7 +155,9 @@ const HabitsPage = () => {
                   </div>
                 </Chip>
               </TableCell>
-              <TableCell>{format(habit.createdAt, 'LLLL do, y')}</TableCell>
+              <TableCell>
+                {format(habit.createdAt, isMobile ? 'MMM d, y' : 'LLLL do, y')}
+              </TableCell>
               <TableCell>
                 <HabitLastEntryCell id={habit.id} />
               </TableCell>
@@ -207,7 +223,7 @@ const HabitsPage = () => {
           </i>
         </div>
       </ConfirmDialog>
-    </div>
+    </>
   );
 };
 

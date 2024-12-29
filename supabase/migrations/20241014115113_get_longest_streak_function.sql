@@ -7,7 +7,7 @@ AS $function$
 BEGIN
   RETURN QUERY
   WITH consecutive_days AS (
-    SELECT 
+    SELECT
       o.habit_id,
       o.day,
       o.day - INTERVAL '1 day' * ROW_NUMBER() OVER (PARTITION BY o.habit_id ORDER BY o.day) AS streak_id

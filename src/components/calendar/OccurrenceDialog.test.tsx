@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 
-import AddOccurrenceDialog from './AddOccurrenceDialog';
+import OccurrenceDialog from './OccurrenceDialog';
 
 jest.mock('@stores', () => ({
   useHabitsStore: jest.fn(),
@@ -22,7 +22,7 @@ jest.mock('date-fns', () => ({
   format: jest.fn(),
 }));
 
-describe(AddOccurrenceDialog.name, () => {
+describe(OccurrenceDialog.name, () => {
   const mockOnClose = jest.fn();
   const date = new Date(2021, 1, 1, 12);
 
@@ -50,7 +50,7 @@ describe(AddOccurrenceDialog.name, () => {
     });
     const { getByText } = render(
       <BrowserRouter>
-        <AddOccurrenceDialog {...props} />
+        <OccurrenceDialog {...props} />
       </BrowserRouter>
     );
     expect(getByText('Add habit entry for 2021-01-01')).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe(AddOccurrenceDialog.name, () => {
     });
     const { getAllByText } = render(
       <BrowserRouter>
-        <AddOccurrenceDialog {...props} />
+        <OccurrenceDialog {...props} />
       </BrowserRouter>
     );
     expect(
@@ -92,7 +92,7 @@ describe(AddOccurrenceDialog.name, () => {
       addOccurrence: jest.fn(),
       addingOccurrence: false,
     });
-    const { getByText } = render(<AddOccurrenceDialog {...props} />);
+    const { getByText } = render(<OccurrenceDialog {...props} />);
     expect(getByText('Test Habit')).toBeInTheDocument();
   });
 
@@ -107,7 +107,7 @@ describe(AddOccurrenceDialog.name, () => {
       addingOccurrence: false,
     });
     const { container, getAllByText, getByTestId } = render(
-      <AddOccurrenceDialog {...props} />
+      <OccurrenceDialog {...props} />
     );
     fireEvent.click(getByTestId('habit-select'));
     fireEvent.click(getAllByText('Test Habit')[1]);
@@ -131,7 +131,7 @@ describe(AddOccurrenceDialog.name, () => {
       addOccurrence: jest.fn(),
       addingOccurrence: false,
     });
-    const { getByRole } = render(<AddOccurrenceDialog {...props} />);
+    const { getByRole } = render(<OccurrenceDialog {...props} />);
     fireEvent.click(getByRole('button', { name: 'Close' }));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
@@ -146,7 +146,7 @@ describe(AddOccurrenceDialog.name, () => {
       addOccurrence: jest.fn(),
       addingOccurrence: false,
     });
-    const { getByRole, getByText } = render(<AddOccurrenceDialog {...props} />);
+    const { getByRole, getByText } = render(<OccurrenceDialog {...props} />);
     fireEvent.click(getByRole('habit-select'));
     fireEvent.click(getByText('Test Habit'));
     expect(
@@ -169,7 +169,7 @@ describe(AddOccurrenceDialog.name, () => {
       addOccurrence: mockAddOccurrence,
       addingOccurrence: false,
     });
-    const { getByRole, getByText } = render(<AddOccurrenceDialog {...props} />);
+    const { getByRole, getByText } = render(<OccurrenceDialog {...props} />);
     fireEvent.click(getByRole('habit-select'));
     fireEvent.click(getByText('Test Habit'));
     expect(

@@ -1,6 +1,12 @@
 import { useScreenSize } from '@hooks';
-import { CalendarBlank } from '@phosphor-icons/react';
-import { useOccurrencesStore } from '@stores';
+import { Button, Tooltip } from '@nextui-org/react';
+import {
+  CalendarBlank,
+  CalendarPlus,
+  NoteBlank,
+  NotePencil,
+} from '@phosphor-icons/react';
+import { useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
@@ -22,7 +28,16 @@ type CalendarCellProps = {
   dateNumber: number;
   monthNumber: number;
   fullYear: number;
-  onClick: (dateNumber: number, monthNumber: number, fullYear: number) => void;
+  onAddNote: (
+    dateNumber: number,
+    monthNumber: number,
+    fullYear: number
+  ) => void;
+  onAddOccurrence: (
+    dateNumber: number,
+    monthNumber: number,
+    fullYear: number
+  ) => void;
   onNavigateBack?: () => void;
   onNavigateForward?: () => void;
   rangeStatus: CellRangeStatus;
@@ -35,7 +50,8 @@ const CalendarCell = ({
   fullYear,
   onNavigateBack,
   onNavigateForward,
-  onClick,
+  onAddNote,
+  onAddOccurrence,
   rangeStatus,
   position,
 }: CalendarCellProps) => {
@@ -43,6 +59,7 @@ const CalendarCell = ({
   const user = useUser();
   const { removeOccurrence, fetchingOccurrences, occurrencesByDate } =
     useOccurrencesStore();
+  const { notes, fetchingNotes } = useNotesStore();
   const today = new Date();
   const isToday =
     today.getDate() === dateNumber &&
@@ -54,10 +71,20 @@ const CalendarCell = ({
     'yyyy-MM-dd'
   );
   const occurrences = occurrencesByDate[date] || [];
+  const isMobile = screenSize < 768;
+  const hasNote = notes.some((note) => note.day === date);
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => o.habitId);
 
-  const handleClick = React.useCallback(() => {
+  const handleAddNoteClick = React.useCallback(() => {
+    if (fetchingOccurrences || !user) {
+      return null;
+    }
+
+    return onAddNote(dateNumber, monthNumber, fullYear);
+  }, [fetchingOccurrences, user, dateNumber, monthNumber, fullYear, onAddNote]);
+
+  const handleAddOccurrenceClick = React.useCallback(() => {
     if (fetchingOccurrences || !user) {
       return null;
     }
@@ -72,14 +99,14 @@ const CalendarCell = ({
       }
     }
 
-    return onClick(dateNumber, monthNumber, fullYear);
+    return onAddOccurrence(dateNumber, monthNumber, fullYear);
   }, [
     isToday,
     dateNumber,
     fetchingOccurrences,
     fullYear,
     monthNumber,
-    onClick,
+    onAddOccurrence,
     onNavigateBack,
     onNavigateForward,
     rangeStatus,
@@ -95,7 +122,7 @@ const CalendarCell = ({
 
     const enterHandler = (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
-        handleClick();
+        handleAddOccurrenceClick();
       }
     };
 
@@ -104,7 +131,7 @@ const CalendarCell = ({
     return () => {
       cell.removeEventListener('keydown', enterHandler);
     };
-  }, [cellRef, handleClick]);
+  }, [cellRef, handleAddOccurrenceClick]);
 
   const handleOccurrenceDelete = async (
     occurrenceId: number,
@@ -119,17 +146,15 @@ const CalendarCell = ({
       return null;
     }
 
-    const isMobile = screenSize < 768;
-
     if (isMobile) {
-      return <CalendarBlank weight="bold" size={18} />;
+      return <CalendarBlank size={14} weight="bold" />;
     }
 
     return <p className="font-bold">Today</p>;
   };
 
   const cellRootClassName = clsx(
-    'flex h-auto flex-1 flex-col border-r-2 border-neutral-500 last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-28',
+    'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-28',
     rangeStatus === 'below-range' && 'cursor-w-resize',
     rangeStatus === 'above-range' && 'cursor-e-resize',
     position === 'top-left' && 'rounded-tl-md',
@@ -141,23 +166,58 @@ const CalendarCell = ({
   );
 
   const cellHeaderClassName = clsx(
-    'flex items-center justify-between rounded-t px-1.5 py-0.5',
-    rangeStatus !== 'in-range' && 'text-neutral-400 dark:text-neutral-600'
+    'flex w-full items-center justify-between border-b-1 border-neutral-500 px-1.5 py-0.5 text-sm dark:border-neutral-400 md:text-base',
+    rangeStatus !== 'in-range' && 'text-neutral-400 dark:text-neutral-600',
+    isToday ? 'w-full self-auto md:self-start' : 'w-full'
   );
 
   return (
     <div
       className={cellRootClassName}
       ref={cellRef}
-      onClick={handleClick}
       tabIndex={0}
-      role="button"
+      onClick={isMobile ? handleAddOccurrenceClick : undefined}
     >
       <div className={cellHeaderClassName}>
         <p className="font-bold">{dateNumber}</p>
-        {renderToday()}
+        <div className="flex items-center justify-between gap-2">
+          {rangeStatus === 'in-range' && !isMobile && (
+            <div className="flex items-center gap-1 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0">
+              <Tooltip content="Log habit" closeDelay={0}>
+                <Button
+                  className="h-5 min-w-fit px-2"
+                  radius="sm"
+                  onClick={handleAddOccurrenceClick}
+                  color="primary"
+                  isDisabled={fetchingOccurrences || !user}
+                >
+                  <CalendarPlus weight="bold" size={14} />
+                </Button>
+              </Tooltip>
+              <Tooltip
+                content={hasNote ? 'Edit note' : 'Add note'}
+                closeDelay={0}
+              >
+                <Button
+                  className="h-5 min-w-fit px-2"
+                  radius="sm"
+                  onClick={handleAddNoteClick}
+                  color="primary"
+                  isDisabled={fetchingNotes || !user}
+                >
+                  {hasNote ? (
+                    <NotePencil weight="bold" size={14} />
+                  ) : (
+                    <NoteBlank weight="bold" size={14} />
+                  )}
+                </Button>
+              </Tooltip>
+            </div>
+          )}
+          {renderToday()}
+        </div>
       </div>
-      <div className="flex flex-wrap gap-1 overflow-auto px-2 py-0.5 pb-2">
+      <div className="flex flex-wrap justify-center gap-1 overflow-x-auto overflow-y-visible px-0 py-0.5 pb-2 md:justify-start md:px-2">
         <AnimatePresence mode="sync">
           {Object.entries(groupedOccurrences).map(
             ([habitId, habitOccurrences]) => {

@@ -146,7 +146,7 @@ const AddHabitDialogButton = () => {
           <ModalFooter>
             <Button
               fullWidth
-              isDisabled={!user?.id}
+              isDisabled={!user?.id || !name || !traitId}
               isLoading={addingHabit}
               type="submit"
               color="primary"

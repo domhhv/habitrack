@@ -62,7 +62,7 @@ const AccountPage = () => {
       <div className={containerClassName} data-testid="account-page">
         <h1 className="text-xl font-semibold">Your Account Info</h1>
         <form
-          className="mt-4 w-[400px]"
+          className="mt-4 md:w-[400px]"
           onSubmit={handleSubmit}
           data-testid="account-form"
         >

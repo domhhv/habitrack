@@ -9,9 +9,10 @@ import React from 'react';
 import { type AriaButtonProps, useCalendar, useLocale } from 'react-aria';
 import { useCalendarState } from 'react-stately';
 
-import AddOccurrenceDialog from './AddOccurrenceDialog';
 import CalendarGrid from './CalendarGrid';
 import CalendarHeader from './CalendarHeader';
+import NoteDialog from './NoteDialog';
+import OccurrenceDialog from './OccurrenceDialog';
 
 const createCalendar = (identifier: string) => {
   switch (identifier) {
@@ -32,9 +33,14 @@ const Calendar = () => {
   const { calendarProps, prevButtonProps, nextButtonProps, title } =
     useCalendar({}, state);
   const {
-    isOpen: isAddOccurrenceDialogOpen,
-    onOpen: openAddOccurrenceDialog,
-    onClose: closeDayOccurrenceDialog,
+    isOpen: isNoteDialogOpen,
+    onOpen: openNoteDialog,
+    onClose: closeNoteDialog,
+  } = useDisclosure();
+  const {
+    isOpen: isOccurrenceDialogOpen,
+    onOpen: openOccurrenceDialog,
+    onClose: closeOccurrenceDialog,
   } = useDisclosure();
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
 
@@ -87,26 +93,42 @@ const Calendar = () => {
     setFocusedDate(year, month + 1, day);
   };
 
-  const handleDayModalDialogOpen = (
-    dateNumber: number,
-    monthIndex: number,
-    fullYear: number
-  ) => {
-    openAddOccurrenceDialog();
-    setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
-  };
+  const calendarContainerClassName = clsx(
+    'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-2 pb-8 lg:gap-4 lg:px-0 lg:px-16 lg:py-4',
+    isOccurrenceDialogOpen && 'pointer-events-none'
+  );
 
-  const handleDayModalDialogClose = () => {
+  const handleOccurrenceModalClose = () => {
     window.setTimeout(() => {
-      closeDayOccurrenceDialog();
+      closeOccurrenceDialog();
       setActiveDate(null);
     }, 0);
   };
 
-  const calendarContainerClassName = clsx(
-    'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 pb-8 lg:gap-4 lg:px-16 lg:py-4',
-    isAddOccurrenceDialogOpen && 'pointer-events-none'
-  );
+  const handleOccurrenceModalOpen = (
+    dateNumber: number,
+    monthIndex: number,
+    fullYear: number
+  ) => {
+    openOccurrenceDialog();
+    setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
+  };
+
+  const handleNoteModalClose = () => {
+    window.setTimeout(() => {
+      closeNoteDialog();
+      setActiveDate(null);
+    }, 0);
+  };
+
+  const handleNoteModalOpen = (
+    dateNumber: number,
+    monthIndex: number,
+    fullYear: number
+  ) => {
+    openNoteDialog();
+    setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
+  };
 
   return (
     <>
@@ -126,13 +148,20 @@ const Calendar = () => {
           activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
           activeYear={Number(activeYear)}
           state={state}
-          onDayModalDialogOpen={handleDayModalDialogOpen}
+          onAddOccurrence={handleOccurrenceModalOpen}
+          onAddNote={handleNoteModalOpen}
         />
       </div>
 
-      <AddOccurrenceDialog
-        isOpen={isAddOccurrenceDialogOpen}
-        onClose={handleDayModalDialogClose}
+      <OccurrenceDialog
+        isOpen={isOccurrenceDialogOpen}
+        onClose={handleOccurrenceModalClose}
+        date={activeDate}
+      />
+
+      <NoteDialog
+        open={isNoteDialogOpen}
+        onClose={handleNoteModalClose}
         date={activeDate}
       />
     </>
