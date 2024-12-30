@@ -119,7 +119,7 @@ const CalendarHeader = ({
             onChange={handleYearChange}
             classNames={{
               base: 'w-[50px] md:w-[100px]',
-              popoverContent: isMobile ? 'w-[50px]' : 'w-[100px]',
+              popoverContent: isMobile ? 'w-[75px]' : 'w-[100px]',
               selectorIcon: isMobile && 'hidden',
               innerWrapper: isMobile && 'w-full',
               value: isMobile && 'text-tiny',
@@ -138,6 +138,7 @@ const CalendarHeader = ({
             isDisabled={prevButtonProps.disabled}
             aria-label={prevButtonProps['aria-label']}
             onClick={onNavigateBack}
+            className={isMobile ? 'w-6 min-w-fit p-0' : ''}
             role="navigate-back"
           >
             <ArrowFatLeft size={isDesktop ? 20 : 16} />
@@ -158,6 +159,7 @@ const CalendarHeader = ({
             isDisabled={nextButtonProps.disabled}
             aria-label={nextButtonProps['aria-label']}
             onClick={onNavigateForward}
+            className={isMobile ? 'w-6 min-w-fit p-0' : ''}
             role="navigate-forward"
           >
             <ArrowFatRight size={isDesktop ? 20 : 16} />

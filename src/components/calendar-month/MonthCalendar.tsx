@@ -7,6 +7,7 @@ import { capitalizeFirstLetter } from '@utils';
 import clsx from 'clsx';
 import React from 'react';
 import { type AriaButtonProps, useCalendar, useLocale } from 'react-aria';
+import { useNavigate } from 'react-router-dom';
 import { useCalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
@@ -23,7 +24,7 @@ const createCalendar = (identifier: string) => {
   }
 };
 
-const Calendar = () => {
+const MonthCalendar = () => {
   const { onRangeChange } = useOccurrencesStore();
   const { locale } = useLocale();
   const state = useCalendarState({
@@ -43,6 +44,7 @@ const Calendar = () => {
     onClose: closeOccurrenceDialog,
   } = useDisclosure();
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     onRangeChange(
@@ -62,13 +64,6 @@ const Calendar = () => {
   useDocumentTitle(
     `${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`
   );
-
-  const transformButtonProps = (
-    buttonProps: Pick<AriaButtonProps<'button'>, 'isDisabled' | 'aria-label'>
-  ) => ({
-    'aria-label': buttonProps['aria-label'] || '',
-    disabled: Boolean(buttonProps.isDisabled),
-  });
 
   const setFocusedDate = (year: number, month: number, day: number) => {
     const nextFocusedDate = new CalendarDate(year, month, day);
@@ -92,11 +87,6 @@ const Calendar = () => {
     const year = now.getFullYear();
     setFocusedDate(year, month + 1, day);
   };
-
-  const calendarContainerClassName = clsx(
-    'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-2 pb-8 lg:gap-4 lg:px-0 lg:px-16 lg:py-4',
-    isOccurrenceDialogOpen && 'pointer-events-none'
-  );
 
   const handleOccurrenceModalClose = () => {
     window.setTimeout(() => {
@@ -130,6 +120,22 @@ const Calendar = () => {
     setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
   };
 
+  const handleWeekClick = (weekNumber: number) => {
+    navigate('/calendar/week', { state: { weekNumber } });
+  };
+
+  const transformButtonProps = (
+    buttonProps: Pick<AriaButtonProps<'button'>, 'isDisabled' | 'aria-label'>
+  ) => ({
+    'aria-label': buttonProps['aria-label'] || '',
+    disabled: Boolean(buttonProps.isDisabled),
+  });
+
+  const calendarContainerClassName = clsx(
+    'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-2 pb-8 lg:gap-4 lg:px-0 lg:px-16 lg:py-4',
+    isOccurrenceDialogOpen && 'pointer-events-none'
+  );
+
   return (
     <>
       <div {...calendarProps} className={calendarContainerClassName}>
@@ -150,6 +156,7 @@ const Calendar = () => {
           state={state}
           onAddOccurrence={handleOccurrenceModalOpen}
           onAddNote={handleNoteModalOpen}
+          onWeekClick={handleWeekClick}
         />
       </div>
 
@@ -168,4 +175,4 @@ const Calendar = () => {
   );
 };
 
-export default Calendar;
+export default MonthCalendar;

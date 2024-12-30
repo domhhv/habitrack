@@ -13,7 +13,7 @@ button,
   font-weight: 600 !important;
 }
 
-[data-overlay-container='true'] {
+#root:has([data-overlay-container='true']) [data-overlay-container='true'] {
   min-height: 100vh;
   display: flex;
   flex-direction: column;

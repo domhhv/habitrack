@@ -20,6 +20,7 @@ const Header = () => {
             as={Link}
             to="/calendar"
             size={screenSize > 1024 ? 'md' : 'sm'}
+            className={screenSize < 339 ? 'min-w-fit px-2' : ''}
           >
             Calendar
           </Button>
@@ -28,6 +29,7 @@ const Header = () => {
             as={Link}
             to="/habits"
             size={screenSize > 1024 ? 'md' : 'sm'}
+            className={screenSize < 339 ? 'min-w-fit px-2' : ''}
           >
             Habits
           </Button>

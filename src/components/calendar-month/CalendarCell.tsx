@@ -146,11 +146,7 @@ const CalendarCell = ({
       return null;
     }
 
-    if (isMobile) {
-      return <CalendarBlank size={14} weight="bold" />;
-    }
-
-    return <p className="font-bold">Today</p>;
+    return <CalendarBlank size={14} weight="bold" />;
   };
 
   const cellRootClassName = clsx(
@@ -182,10 +178,10 @@ const CalendarCell = ({
         <p className="font-bold">{dateNumber}</p>
         <div className="flex items-center justify-between gap-2">
           {rangeStatus === 'in-range' && !isMobile && (
-            <div className="flex items-center gap-1 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0">
+            <div className="flex items-center gap-1">
               <Tooltip content="Log habit" closeDelay={0}>
                 <Button
-                  className="h-5 min-w-fit px-2"
+                  className="h-5 min-w-fit px-2 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0"
                   radius="sm"
                   onClick={handleAddOccurrenceClick}
                   color="primary"
@@ -199,10 +195,13 @@ const CalendarCell = ({
                 closeDelay={0}
               >
                 <Button
-                  className="h-5 min-w-fit px-2"
+                  className={clsx(
+                    'h-5 min-w-fit px-2 opacity-0 transition-opacity group-hover/cell:opacity-100',
+                    hasNote && 'opacity-100'
+                  )}
                   radius="sm"
                   onClick={handleAddNoteClick}
-                  color="primary"
+                  color={hasNote ? 'success' : 'primary'}
                   isDisabled={fetchingNotes || !user}
                 >
                   {hasNote ? (
