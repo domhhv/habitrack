@@ -1,7 +1,7 @@
 export * from './App';
 export { default as App } from './App';
 
-export * from './calendar';
+export * from './calendar-month';
 
 export * from './header';
 

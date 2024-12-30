@@ -20,6 +20,7 @@ type CalendarGridProps = {
   ) => void;
   activeMonthLabel: string;
   activeYear: number;
+  onWeekClick: (weekNum: number) => void;
 };
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -30,6 +31,7 @@ const CalendarGrid = ({
   onAddOccurrence,
   activeMonthLabel,
   activeYear,
+  onWeekClick,
 }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
   const { locale } = useLocale();
@@ -98,6 +100,7 @@ const CalendarGrid = ({
                     'hidden' // TODO: show the week number button, open weekly view (WIP) on click
                   )}
                   variant="ghost"
+                  onClick={() => onWeekClick(weekNum)}
                 >
                   {weekNum}
                 </Button>
