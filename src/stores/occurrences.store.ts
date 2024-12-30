@@ -11,6 +11,7 @@ import {
 } from '@services';
 import { useHabitsStore, useSnackbarsStore, useTraitsStore } from '@stores';
 import { getErrorMessage } from '@utils';
+import { format } from 'date-fns';
 import { create } from 'zustand';
 
 type OccurrenceFilters = {
@@ -48,7 +49,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
 
   return {
     addingOccurrence: false,
-    fetchingOccurrences: false,
+    fetchingOccurrences: true,
     allOccurrences: [],
     occurrences: [],
     occurrencesByDate: {},
@@ -176,11 +177,8 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
       const nextOccurrencesByDate = occurrences.reduce(
         (acc, occurrence) => {
           const { timestamp } = occurrence;
-          const date = new Date(timestamp);
-          const dateNumber = date.getDate();
-          const month = date.getMonth();
-          const year = date.getFullYear();
-          const day = `${year}-${month + 1}-${dateNumber}`;
+          const day = format(new Date(timestamp), 'yyyy-MM-d');
+
           if (!acc[day]) {
             acc[day] = [occurrence];
           } else {

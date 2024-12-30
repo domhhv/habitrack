@@ -37,7 +37,7 @@ const useHabitsStore = create<HabitsState>((set) => {
   return {
     habits: [],
     addingHabit: false,
-    fetchingHabits: false,
+    fetchingHabits: true,
     habitIdBeingUpdated: null,
     habitIdBeingDeleted: null,
 

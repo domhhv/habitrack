@@ -27,7 +27,7 @@ const { showSnackbar } = useSnackbarsStore.getState();
 
 const useNotesStore = create<NotesState>((set) => ({
   notes: [],
-  fetchingNotes: false,
+  fetchingNotes: true,
   addingNote: false,
   updatingNote: false,
   deletingNote: false,
