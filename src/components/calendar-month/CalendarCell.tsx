@@ -69,8 +69,9 @@ const CalendarCell = ({
   const screenSize = useScreenSize();
   const date = format(
     new Date(fullYear, monthNumber - 1, dateNumber),
-    'yyyy-MM-d'
+    'yyyy-MM-dd'
   );
+
   const occurrences = isCalendarDay(date) ? occurrencesByDate[date] || [] : [];
   const isMobile = screenSize < 768;
   const hasNote = notes.some((note) => note.day === date);
