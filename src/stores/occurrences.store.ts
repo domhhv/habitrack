@@ -177,7 +177,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
       const nextOccurrencesByDate = occurrences.reduce(
         (acc, occurrence) => {
           const { timestamp } = occurrence;
-          const day = format(new Date(timestamp), 'yyyy-MM-d');
+          const day = format(new Date(timestamp), 'yyyy-MM-dd');
 
           if (!acc[day]) {
             acc[day] = [occurrence];

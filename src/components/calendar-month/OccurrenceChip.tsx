@@ -1,8 +1,10 @@
+import { useScreenSize } from '@hooks';
 import type { Occurrence } from '@models';
 import { Badge, Button, Tooltip } from '@nextui-org/react';
 import { Note, Trash } from '@phosphor-icons/react';
 import { useNotesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -34,6 +36,7 @@ const OccurrenceChip = ({
   const occurrenceNotes = notes.filter(
     (n) => n.occurrenceId && occurrenceIds.includes(n.occurrenceId)
   );
+  const screenSize = useScreenSize();
 
   const chipStyle = {
     borderColor: colorOverride || traitColor,
@@ -88,17 +91,20 @@ const OccurrenceChip = ({
     >
       <div
         style={chipStyle}
-        className="relative mt-0 min-w-0 rounded-full border-2 bg-slate-100 p-2 dark:bg-slate-800 md:mr-1 md:mt-1"
+        className={clsx(
+          'relative mt-0 min-w-0 rounded-full border-2 bg-slate-100 p-1.5 dark:bg-slate-800 md:mr-1 md:mt-1',
+          screenSize < 400 && 'p-1'
+        )}
         role="habit-chip"
         onClick={(e) => {
           e.stopPropagation();
-          alert('Habit entry modl');
+          alert('Habit entry modal is coming soon!');
         }}
       >
         <img
           src={iconUrl}
           alt={`${habitName} icon`}
-          className="h-3 w-3 rounded"
+          className={clsx('h-4 w-4 rounded', screenSize < 400 && 'h-3 w-3')}
         />
       </div>
     </Tooltip>

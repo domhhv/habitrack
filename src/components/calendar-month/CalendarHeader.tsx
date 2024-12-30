@@ -55,6 +55,7 @@ const CalendarHeader = ({
   const { filteredBy, filterBy } = useOccurrencesStore();
   const user = useUser();
   const screenSize = useScreenSize();
+  const isOnCurrentMonth = activeMonthLabel === MONTHS[new Date().getMonth()];
 
   const shouldRenderFilters = !!user && habits.length > 0 && traits.length > 0;
 
@@ -96,7 +97,7 @@ const CalendarHeader = ({
       <div className="flex items-center justify-between gap-0 lg:gap-2">
         <div className="mr-0 flex items-center gap-2 lg:mr-2">
           <Select
-            variant="flat"
+            variant="bordered"
             size={isDesktop ? 'md' : 'sm'}
             selectedKeys={new Set([activeMonthLabel])}
             onChange={handleMonthChange}
@@ -113,7 +114,7 @@ const CalendarHeader = ({
             ))}
           </Select>
           <Select
-            variant="flat"
+            variant="bordered"
             size={isDesktop ? 'md' : 'sm'}
             selectedKeys={new Set([activeYear])}
             onChange={handleYearChange}
@@ -143,7 +144,7 @@ const CalendarHeader = ({
           >
             <ArrowFatLeft size={isDesktop ? 20 : 16} />
           </Button>
-          {!isMobile && (
+          {!isMobile && !isOnCurrentMonth && (
             <Button
               size={isDesktop ? 'md' : 'sm'}
               variant="bordered"
@@ -169,7 +170,7 @@ const CalendarHeader = ({
       {shouldRenderFilters && (
         <div className="flex items-center justify-between gap-2">
           <Select
-            variant="flat"
+            variant="bordered"
             size={isDesktop ? 'md' : 'sm'}
             selectedKeys={filteredBy.habitIds}
             onChange={handleHabitsFilterChange}
@@ -192,7 +193,7 @@ const CalendarHeader = ({
             </SelectSection>
           </Select>
           <Select
-            variant="flat"
+            variant="bordered"
             size={isDesktop ? 'md' : 'sm'}
             selectedKeys={filteredBy.traitIds}
             onChange={handleTraitsFilterChange}

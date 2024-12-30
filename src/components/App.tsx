@@ -18,7 +18,7 @@ setDefaultOptions({ locale: enGB });
 const App = () => {
   React.useEffect(() => {
     document.getElementById('root')?.classList.add('initialized');
-  });
+  }, []);
 
   return (
     <Providers>
