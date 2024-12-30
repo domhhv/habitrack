@@ -50,7 +50,6 @@ type Day =
 export type CalendarDay = `${Year}-${Month}-${Day}`;
 
 export const isCalendarDay = (value: string): value is CalendarDay => {
-  // Basic regex to validate the `YYYY-MM-DD` format
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 };
 

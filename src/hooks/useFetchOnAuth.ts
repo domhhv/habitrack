@@ -9,22 +9,17 @@ import React from 'react';
 
 const useFetchOnAuth = () => {
   const supabase = useSupabaseClient();
-  const { fetchTraits, clearTraits } = useTraitsStore();
-  const fetchingTraits = useTraitsStore((state) => state.fetchingTraits);
+  const { fetchTraits, fetchingTraits, clearTraits } = useTraitsStore();
   const { fetchHabits, fetchingHabits, clearHabits } = useHabitsStore();
   const { fetchOccurrences, fetchingOccurrences, clearOccurrences } =
     useOccurrencesStore();
   const { fetchNotes, fetchingNotes, clearNotes } = useNotesStore();
-  const [hasFetched, setHasFetched] = React.useState(false);
 
-  React.useEffect(() => {
-    setHasFetched(
-      !fetchingTraits &&
-        !fetchingHabits &&
-        !fetchingOccurrences &&
-        !fetchingNotes
-    );
-  }, [fetchingTraits, fetchingHabits, fetchingOccurrences, fetchingNotes]);
+  const hasFetched =
+    !fetchingTraits &&
+    !fetchingHabits &&
+    !fetchingOccurrences &&
+    !fetchingNotes;
 
   React.useEffect(() => {
     if (!supabase.auth) {
