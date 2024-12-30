@@ -1,3 +1,4 @@
+import type { CalendarDay } from '@helpers';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 import type { TablesInsert, Tables } from '../../supabase/database.types';
@@ -17,8 +18,7 @@ export type Occurrence = BaseOccurrence & {
   habit: HabitWithTrait | null;
 };
 
-type OccurrenceDate = string;
-export type OccurrencesDateMap = Record<OccurrenceDate, Occurrence[]>;
+export type OccurrencesDateMap = Record<CalendarDay, Occurrence[]>;
 
 export type OccurrencesInsert = CamelCasedPropertiesDeep<
   TablesInsert<'occurrences'>

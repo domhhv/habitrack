@@ -1,6 +1,6 @@
 import { AuthModalButton } from '@components';
 import { useFetchOnAuth, useScreenSize } from '@hooks';
-import { Button, Tooltip } from '@nextui-org/react';
+import { Button, Spinner, Tooltip } from '@nextui-org/react';
 import { GithubLogo } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -8,11 +8,26 @@ import { Link } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
-  useFetchOnAuth();
+  const { hasFetched } = useFetchOnAuth();
   const screenSize = useScreenSize();
 
   return (
     <header className="border-b border-b-slate-300 bg-slate-200 dark:border-b-slate-800 dark:bg-black">
+      {!hasFetched && (
+        <div className="absolute bottom-0 left-0 right-0 top-0 z-50 flex h-full flex-1 items-center justify-center bg-slate-50 opacity-90 dark:bg-slate-950">
+          <div className="flex -translate-y-[73px] items-center justify-center">
+            <Spinner
+              color="primary"
+              size="lg"
+              label="Please wait"
+              classNames={{
+                circle1: 'border-b-white',
+                circle2: 'border-b-white',
+              }}
+            />
+          </div>
+        </div>
+      )}
       <div className="mx-auto flex w-full items-center justify-between gap-2 px-2 py-2 lg:px-16 lg:py-4">
         <div className="flex items-center gap-2">
           <Button

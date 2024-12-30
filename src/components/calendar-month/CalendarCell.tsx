@@ -1,3 +1,4 @@
+import { isCalendarDay } from '@helpers';
 import { useScreenSize } from '@hooks';
 import { Button, Tooltip } from '@nextui-org/react';
 import {
@@ -68,9 +69,9 @@ const CalendarCell = ({
   const screenSize = useScreenSize();
   const date = format(
     new Date(fullYear, monthNumber - 1, dateNumber),
-    'yyyy-MM-dd'
+    'yyyy-MM-d'
   );
-  const occurrences = occurrencesByDate[date] || [];
+  const occurrences = isCalendarDay(date) ? occurrencesByDate[date] || [] : [];
   const isMobile = screenSize < 768;
   const hasNote = notes.some((note) => note.day === date);
 

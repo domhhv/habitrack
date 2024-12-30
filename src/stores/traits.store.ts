@@ -23,7 +23,7 @@ const { showSnackbar } = useSnackbarsStore.getState();
 
 const useTraitsStore = create<TraitsState>((set) => ({
   traits: testTraits,
-  fetchingTraits: false,
+  fetchingTraits: true,
   addingTrait: false,
   fetchTraits: async () => {
     try {
