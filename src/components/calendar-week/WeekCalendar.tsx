@@ -94,7 +94,6 @@ const WeekCalendar = () => {
         to="/calendar/month"
         className="absolute left-6 top-0"
         variant="flat"
-        // color="secondary"
       >
         <ArrowFatLeft size={20} />
         Back

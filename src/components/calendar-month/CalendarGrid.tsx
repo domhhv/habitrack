@@ -112,8 +112,7 @@ const CalendarGrid = ({
               >
                 <Button
                   className={clsx(
-                    'absolute -left-[24px] bottom-0 h-[107px] w-[20px] min-w-fit p-0 md:-left-[48px] md:w-[40px]',
-                    'hhidden' // TODO: show the week number button, open weekly view (WIP) on click
+                    'absolute -left-[24px] bottom-0 h-[107px] w-[20px] min-w-fit p-0 md:-left-[48px] md:w-[40px]'
                   )}
                   variant="light"
                   onClick={() => handleWeekClick(dates[0])}

@@ -3,6 +3,8 @@ export { default as App } from './App';
 
 export * from './calendar-month';
 
+export * from './calendar-week';
+
 export * from './header';
 
 export * from './common';
