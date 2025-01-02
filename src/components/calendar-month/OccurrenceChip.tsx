@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import React from 'react';
 
 export type OccurrenceChipProps = {
+  interactable?: boolean;
   occurrences: Occurrence[];
   onDelete?: (
     occurrenceId: number,
@@ -18,6 +19,7 @@ export type OccurrenceChipProps = {
 };
 
 const OccurrenceChip = ({
+  interactable = true,
   occurrences,
   onDelete,
   colorOverride,
@@ -82,7 +84,7 @@ const OccurrenceChip = ({
 
   let chipTooltip = (
     <Tooltip
-      isDisabled={!habitName}
+      isDisabled={!habitName || !interactable}
       content={tooltipContent}
       radius="sm"
       classNames={{
@@ -94,19 +96,22 @@ const OccurrenceChip = ({
       <div
         style={chipStyle}
         className={clsx(
-          'relative mt-0 min-w-0 rounded-full border-2 bg-slate-100 p-1.5 dark:bg-slate-800 md:mr-1 md:mt-1',
+          'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 dark:bg-slate-800 md:mb-1 md:mr-1',
           screenSize < 400 && 'p-1'
         )}
         role="habit-chip"
         onClick={(e) => {
           e.stopPropagation();
-          alert('Habit entry modal is coming soon!');
+
+          if (interactable) {
+            alert('Habit entry modal is coming soon!');
+          }
         }}
       >
         <img
           src={iconUrl}
           alt={`${habitName} icon`}
-          className={clsx('h-4 w-4 rounded', screenSize < 400 && 'h-3 w-3')}
+          className={clsx('h-4 w-4', screenSize < 400 && 'h-3 w-3')}
         />
       </div>
     </Tooltip>

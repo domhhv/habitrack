@@ -29,8 +29,7 @@ const ThemeToggle = () => {
         const isSelected = themeMode === mode;
         const iconClassName = clsx(isSelected && 'text-white');
         const buttonClassName = clsx(
-          'bg-slate-200 dark:bg-slate-800',
-          isSelected && 'bg-slate-400 dark:bg-slate-600'
+          isSelected && 'bg-secondary-500 dark:bg-secondary-600'
         );
 
         const Icon = modesToIcons[mode];
@@ -41,11 +40,14 @@ const ThemeToggle = () => {
             className={buttonClassName}
             onPress={handleThemeChange(mode)}
             isIconOnly
+            variant="flat"
+            color="secondary"
             size={screenSize > 1024 ? 'md' : 'sm'}
           >
             <Icon
               className={twMerge('dark:text-neutral-200', iconClassName)}
               weight={isSelected ? 'bold' : 'regular'}
+              size={16}
             />
           </Button>
         );

@@ -7,10 +7,11 @@ import { capitalizeFirstLetter } from '@utils';
 import clsx from 'clsx';
 import React from 'react';
 import { type AriaButtonProps, useCalendar, useLocale } from 'react-aria';
+import { useLocation } from 'react-router-dom';
 import { useCalendarState } from 'react-stately';
 
-import CalendarGrid from './CalendarGrid';
-import CalendarHeader from './CalendarHeader';
+import MonthCalendarGrid from './MonthCalendarGrid';
+import MonthCalendarHeader from './MonthCalendarHeader';
 import NoteDialog from './NoteDialog';
 import OccurrenceDialog from './OccurrenceDialog';
 
@@ -26,12 +27,12 @@ const createCalendar = (identifier: string) => {
 const MonthCalendar = () => {
   const { onRangeChange } = useOccurrencesStore();
   const { locale } = useLocale();
-  const state = useCalendarState({
+  const calendarState = useCalendarState({
     locale,
     createCalendar,
   });
   const { calendarProps, prevButtonProps, nextButtonProps, title } =
-    useCalendar({}, state);
+    useCalendar({}, calendarState);
   const {
     isOpen: isNoteDialogOpen,
     onOpen: openNoteDialog,
@@ -43,17 +44,36 @@ const MonthCalendar = () => {
     onClose: closeOccurrenceDialog,
   } = useDisclosure();
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
+  const { state: locationState } = useLocation();
+
+  const setFocusedDate = React.useCallback(
+    (year: number, month: number, day: number) => {
+      const nextFocusedDate = new CalendarDate(year, month, day);
+      calendarState.setFocusedDate(nextFocusedDate);
+    },
+    [calendarState]
+  );
+
+  React.useEffect(() => {
+    if (!locationState) {
+      return;
+    }
+
+    const { year, month } = locationState;
+
+    setFocusedDate(year, month, 1);
+  }, [locationState, setFocusedDate]);
 
   React.useEffect(() => {
     onRangeChange(
       generateCalendarRange(
-        state.visibleRange.start.year,
-        state.visibleRange.start.month
+        calendarState.visibleRange.start.year,
+        calendarState.visibleRange.start.month
       )
     );
   }, [
-    state.visibleRange.start.year,
-    state.visibleRange.start.month,
+    calendarState.visibleRange.start.year,
+    calendarState.visibleRange.start.month,
     onRangeChange,
   ]);
 
@@ -63,18 +83,13 @@ const MonthCalendar = () => {
     `${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`
   );
 
-  const setFocusedDate = (year: number, month: number, day: number) => {
-    const nextFocusedDate = new CalendarDate(year, month, day);
-    state.setFocusedDate(nextFocusedDate);
-  };
-
   const navigateToMonth = (month: number) => {
-    const { year, day } = state.focusedDate;
+    const { year, day } = calendarState.focusedDate;
     setFocusedDate(year, month, day);
   };
 
   const navigateToYear = (year: number) => {
-    const { month, day } = state.focusedDate;
+    const { month, day } = calendarState.focusedDate;
     setFocusedDate(year, month, day);
   };
 
@@ -133,21 +148,21 @@ const MonthCalendar = () => {
   return (
     <>
       <div {...calendarProps} className={calendarContainerClassName}>
-        <CalendarHeader
+        <MonthCalendarHeader
           activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
           activeYear={activeYear}
           prevButtonProps={transformButtonProps(prevButtonProps)}
           nextButtonProps={transformButtonProps(nextButtonProps)}
-          onNavigateBack={state.focusPreviousPage}
-          onNavigateForward={state.focusNextPage}
+          onNavigateBack={calendarState.focusPreviousPage}
+          onNavigateForward={calendarState.focusNextPage}
           onNavigateToMonth={navigateToMonth}
           onNavigateToYear={navigateToYear}
           onResetFocusedDate={resetFocusedDate}
         />
-        <CalendarGrid
+        <MonthCalendarGrid
           activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
           activeYear={Number(activeYear)}
-          state={state}
+          state={calendarState}
           onAddOccurrence={handleOccurrenceModalOpen}
           onAddNote={handleNoteModalOpen}
         />

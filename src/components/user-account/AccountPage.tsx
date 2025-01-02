@@ -1,7 +1,6 @@
 import { Alert, PasswordInput } from '@components';
 import { useDocumentTitle } from '@hooks';
 import { Button, Input, Spinner } from '@nextui-org/react';
-import clsx from 'clsx';
 import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -26,9 +25,8 @@ const AccountPage = () => {
     updateAccount,
   } = useAccountPage();
 
-  const containerClassName = clsx(
-    'mx-auto flex flex-col items-center justify-center'
-  );
+  const containerClassName =
+    'w-full mt-8 flex flex-col items-center justify-center';
 
   if (!user && loading) {
     return (
@@ -58,11 +56,11 @@ const AccountPage = () => {
   };
 
   return (
-    <div className="flex h-lvh w-full flex-col items-start self-start pt-8">
+    <div className="flex h-lvh w-full flex-col items-start self-start px-8 py-2 lg:px-16 lg:py-4">
       <div className={containerClassName} data-testid="account-page">
         <h1 className="text-xl font-semibold">Your Account Info</h1>
         <form
-          className="mt-4 md:w-[400px]"
+          className="mt-4 w-full md:w-96"
           onSubmit={handleSubmit}
           data-testid="account-form"
         >

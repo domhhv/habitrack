@@ -1,10 +1,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import CalendarHeader, { type CalendarHeaderProps } from './CalendarHeader';
+import MonthCalendarHeader, {
+  type MonthCalendarHeaderProps,
+} from './MonthCalendarHeader';
 
-describe(CalendarHeader.name, () => {
-  const props: CalendarHeaderProps = {
+describe(MonthCalendarHeader.name, () => {
+  const props: MonthCalendarHeaderProps = {
     activeMonthLabel: 'January',
     activeYear: '2022',
     prevButtonProps: {
@@ -23,13 +25,13 @@ describe(CalendarHeader.name, () => {
   };
 
   it.skip('should render month and year', () => {
-    const { getByText } = render(<CalendarHeader {...props} />);
+    const { getByText } = render(<MonthCalendarHeader {...props} />);
     expect(getByText('January 2022')).toBeInTheDocument();
   });
 
   it.skip('should disable previous button', () => {
     const { getByRole } = render(
-      <CalendarHeader
+      <MonthCalendarHeader
         {...props}
         prevButtonProps={{ ...props.prevButtonProps, disabled: true }}
       />
@@ -39,7 +41,7 @@ describe(CalendarHeader.name, () => {
 
   it.skip('should disable next button', () => {
     const { getByRole } = render(
-      <CalendarHeader
+      <MonthCalendarHeader
         {...props}
         nextButtonProps={{ ...props.nextButtonProps, disabled: true }}
       />
@@ -48,13 +50,13 @@ describe(CalendarHeader.name, () => {
   });
 
   it.skip('should call onNavigateBack', () => {
-    const { getByRole } = render(<CalendarHeader {...props} />);
+    const { getByRole } = render(<MonthCalendarHeader {...props} />);
     getByRole('navigate-back').click();
     expect(props.onNavigateBack).toHaveBeenCalled();
   });
 
   it.skip('should call onNavigateForward', () => {
-    const { getByRole } = render(<CalendarHeader {...props} />);
+    const { getByRole } = render(<MonthCalendarHeader {...props} />);
     getByRole('navigate-forward').click();
     expect(props.onNavigateForward).toHaveBeenCalled();
   });

@@ -120,7 +120,7 @@ const AuthModalButton = () => {
             as={Link}
             to="/account"
             data-testid="auth-button"
-            color="primary"
+            variant="flat"
             startContent={<UserIcon data-testid="user-icon" weight="bold" />}
           >
             {screenSize > 1024 && 'Account'}
@@ -129,8 +129,9 @@ const AuthModalButton = () => {
             <Button
               onPress={signOut}
               isIconOnly
-              color="primary"
-              className="border-l"
+              color="secondary"
+              variant="flat"
+              className="border-l dark:border-secondary-400 dark:text-secondary-800"
               startContent={
                 <SignOutIcon data-testid="sign-out-icon" weight="bold" />
               }
