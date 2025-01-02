@@ -9,17 +9,10 @@ import React from 'react';
 
 const useFetchOnAuth = () => {
   const supabase = useSupabaseClient();
-  const { fetchTraits, fetchingTraits, clearTraits } = useTraitsStore();
-  const { fetchHabits, fetchingHabits, clearHabits } = useHabitsStore();
-  const { fetchOccurrences, fetchingOccurrences, clearOccurrences } =
-    useOccurrencesStore();
-  const { fetchNotes, fetchingNotes, clearNotes } = useNotesStore();
-
-  const hasFetched =
-    !fetchingTraits &&
-    !fetchingHabits &&
-    !fetchingOccurrences &&
-    !fetchingNotes;
+  const { fetchTraits, clearTraits } = useTraitsStore();
+  const { fetchHabits, clearHabits } = useHabitsStore();
+  const { fetchNotes, clearNotes } = useNotesStore();
+  const { fetchOccurrences, clearOccurrences } = useOccurrencesStore();
 
   React.useEffect(() => {
     if (!supabase.auth) {
@@ -50,14 +43,12 @@ const useFetchOnAuth = () => {
     fetchTraits,
     clearTraits,
     fetchHabits,
-    fetchNotes,
     clearHabits,
     fetchOccurrences,
     clearOccurrences,
+    fetchNotes,
     clearNotes,
   ]);
-
-  return { hasFetched };
 };
 
 export default useFetchOnAuth;

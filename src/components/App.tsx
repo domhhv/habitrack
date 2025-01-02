@@ -4,6 +4,7 @@ import {
   AccountPage,
   HabitsPage,
   Snackbars,
+  WeekCalendar,
 } from '@components';
 import { setDefaultOptions } from 'date-fns';
 import { enGB } from 'date-fns/locale';
@@ -11,7 +12,6 @@ import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import Providers from './Providers';
-import WeekCalendar from './calendar-week/WeekCalendar';
 
 setDefaultOptions({ locale: enGB });
 

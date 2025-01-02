@@ -65,6 +65,7 @@ const CalendarCell = ({
   const cellDate = new Date(fullYear, monthNumber - 1, dateNumber);
   const isTodayCell = isToday(cellDate);
   const date = format(cellDate, 'yyyy-MM-dd');
+  const isDesktop = screenSize >= 1024;
 
   const occurrences = isCalendarDay(date) ? occurrencesByDate[date] || [] : [];
   const isMobile = screenSize < 768;
@@ -80,33 +81,40 @@ const CalendarCell = ({
     return onAddNote(dateNumber, monthNumber, fullYear);
   }, [fetchingOccurrences, user, dateNumber, monthNumber, fullYear, onAddNote]);
 
-  const handleAddOccurrenceClick = React.useCallback(() => {
-    if (fetchingOccurrences || !user) {
-      return null;
-    }
-
-    if (!isToday) {
-      if (rangeStatus === 'below-range') {
-        return onNavigateBack?.();
+  const handleAddOccurrenceClick = React.useCallback(
+    (e?: React.MouseEvent) => {
+      if (fetchingOccurrences || !user) {
+        return null;
       }
 
-      if (rangeStatus === 'above-range') {
-        return onNavigateForward?.();
-      }
-    }
+      if (!isTodayCell) {
+        if (rangeStatus === 'below-range') {
+          return onNavigateBack?.();
+        }
 
-    return onAddOccurrence(dateNumber, monthNumber, fullYear);
-  }, [
-    dateNumber,
-    fetchingOccurrences,
-    fullYear,
-    monthNumber,
-    onAddOccurrence,
-    onNavigateBack,
-    onNavigateForward,
-    rangeStatus,
-    user,
-  ]);
+        if (rangeStatus === 'above-range') {
+          return onNavigateForward?.();
+        }
+      }
+
+      if (isMobile || e?.currentTarget instanceof HTMLButtonElement) {
+        return onAddOccurrence(dateNumber, monthNumber, fullYear);
+      }
+    },
+    [
+      dateNumber,
+      fetchingOccurrences,
+      fullYear,
+      monthNumber,
+      onAddOccurrence,
+      onNavigateBack,
+      onNavigateForward,
+      rangeStatus,
+      user,
+      isMobile,
+      isTodayCell,
+    ]
+  );
 
   React.useEffect(() => {
     const cell = cellRef.current;
@@ -137,11 +145,11 @@ const CalendarCell = ({
   };
 
   const renderToday = () => {
-    if (!isToday) {
+    if (!isTodayCell) {
       return null;
     }
 
-    return <CalendarBlank size={14} weight="bold" />;
+    return <CalendarBlank size={20} weight="fill" />;
   };
 
   const cellRootClassName = clsx(
@@ -167,7 +175,7 @@ const CalendarCell = ({
       className={cellRootClassName}
       ref={cellRef}
       tabIndex={0}
-      onClick={isMobile ? handleAddOccurrenceClick : undefined}
+      onClick={handleAddOccurrenceClick}
     >
       <div className={cellHeaderClassName}>
         <p className="font-bold">{dateNumber}</p>
@@ -177,13 +185,13 @@ const CalendarCell = ({
               {!isFuture(cellDate) && (
                 <Tooltip content="Log habit" closeDelay={0}>
                   <Button
-                    className="h-6 min-w-fit px-4 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0"
+                    className="h-5 min-w-fit px-2 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0 lg:h-6 lg:px-4"
                     radius="sm"
                     onClick={handleAddOccurrenceClick}
                     color="primary"
                     isDisabled={fetchingOccurrences || !user}
                   >
-                    <CalendarPlus weight="bold" size={18} />
+                    <CalendarPlus weight="bold" size={isDesktop ? 18 : 14} />
                   </Button>
                 </Tooltip>
               )}
@@ -193,7 +201,7 @@ const CalendarCell = ({
               >
                 <Button
                   className={clsx(
-                    'h-6 min-w-fit px-4 opacity-0 transition-opacity group-hover/cell:opacity-100',
+                    'h-5 min-w-fit px-2 opacity-0 transition-opacity group-hover/cell:opacity-100 lg:h-6 lg:px-4',
                     hasNote && 'opacity-100'
                   )}
                   radius="sm"
@@ -202,9 +210,9 @@ const CalendarCell = ({
                   isDisabled={fetchingNotes || !user}
                 >
                   {hasNote ? (
-                    <NotePencil weight="bold" size={18} />
+                    <NotePencil weight="bold" size={isDesktop ? 18 : 14} />
                   ) : (
-                    <NoteBlank weight="bold" size={14} />
+                    <NoteBlank weight="bold" size={isDesktop ? 18 : 14} />
                   )}
                 </Button>
               </Tooltip>
