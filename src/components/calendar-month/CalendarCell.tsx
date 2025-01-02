@@ -71,6 +71,8 @@ const CalendarCell = ({
     new Date(fullYear, monthNumber - 1, dateNumber),
     'yyyy-MM-dd'
   );
+  const isFutureDate =
+    new Date() < new Date(fullYear, monthNumber - 1, dateNumber);
 
   const occurrences = isCalendarDay(date) ? occurrencesByDate[date] || [] : [];
   const isMobile = screenSize < 768;
@@ -152,7 +154,7 @@ const CalendarCell = ({
   };
 
   const cellRootClassName = clsx(
-    'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-28',
+    'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-36',
     rangeStatus === 'below-range' && 'cursor-w-resize',
     rangeStatus === 'above-range' && 'cursor-e-resize',
     position === 'top-left' && 'rounded-tl-md',
@@ -160,11 +162,11 @@ const CalendarCell = ({
     position === 'bottom-left' && 'rounded-bl-md',
     position === 'bottom-right' && 'rounded-br-md',
     isToday &&
-      'bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700'
+      'bg-background-200 hover:bg-background-300 dark:bg-background-800 dark:hover:bg-background-700'
   );
 
   const cellHeaderClassName = clsx(
-    'flex w-full items-center justify-between border-b-1 border-neutral-500 px-1.5 py-0.5 text-sm dark:border-neutral-400 md:text-base',
+    'flex w-full items-center justify-between border-b-1 border-neutral-500 px-1.5 py-1.5 text-sm dark:border-neutral-400 md:text-base',
     rangeStatus !== 'in-range' && 'text-neutral-400 dark:text-neutral-600',
     isToday ? 'w-full self-auto md:self-start' : 'w-full'
   );
@@ -181,24 +183,26 @@ const CalendarCell = ({
         <div className="flex items-center justify-between gap-2">
           {rangeStatus === 'in-range' && !isMobile && (
             <div className="flex items-center gap-1">
-              <Tooltip content="Log habit" closeDelay={0}>
-                <Button
-                  className="h-5 min-w-fit px-2 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0"
-                  radius="sm"
-                  onClick={handleAddOccurrenceClick}
-                  color="primary"
-                  isDisabled={fetchingOccurrences || !user}
-                >
-                  <CalendarPlus weight="bold" size={14} />
-                </Button>
-              </Tooltip>
+              {!isFutureDate && (
+                <Tooltip content="Log habit" closeDelay={0}>
+                  <Button
+                    className="h-6 min-w-fit px-4 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0"
+                    radius="sm"
+                    onClick={handleAddOccurrenceClick}
+                    color="primary"
+                    isDisabled={fetchingOccurrences || !user}
+                  >
+                    <CalendarPlus weight="bold" size={18} />
+                  </Button>
+                </Tooltip>
+              )}
               <Tooltip
                 content={hasNote ? 'Edit note' : 'Add note'}
                 closeDelay={0}
               >
                 <Button
                   className={clsx(
-                    'h-5 min-w-fit px-2 opacity-0 transition-opacity group-hover/cell:opacity-100',
+                    'h-6 min-w-fit px-4 opacity-0 transition-opacity group-hover/cell:opacity-100',
                     hasNote && 'opacity-100'
                   )}
                   radius="sm"
@@ -207,7 +211,7 @@ const CalendarCell = ({
                   isDisabled={fetchingNotes || !user}
                 >
                   {hasNote ? (
-                    <NotePencil weight="bold" size={14} />
+                    <NotePencil weight="bold" size={18} />
                   ) : (
                     <NoteBlank weight="bold" size={14} />
                   )}

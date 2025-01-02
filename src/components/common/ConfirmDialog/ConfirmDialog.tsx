@@ -32,7 +32,7 @@ const ConfirmDialog = ({
           {children}
           <div className="mb-4 mt-2 flex flex-row justify-end gap-4">
             <Button
-              color="primary"
+              color="default"
               variant="bordered"
               onClick={onCancel}
               isDisabled={loading}

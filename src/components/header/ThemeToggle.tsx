@@ -29,7 +29,7 @@ const ThemeToggle = () => {
         const isSelected = themeMode === mode;
         const iconClassName = clsx(isSelected && 'text-white');
         const buttonClassName = clsx(
-          'bg-slate-100 dark:bg-slate-800',
+          'bg-slate-200 dark:bg-slate-800',
           isSelected && 'bg-slate-400 dark:bg-slate-600'
         );
 

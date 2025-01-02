@@ -17,7 +17,7 @@ const Header = () => {
   const screenSize = useScreenSize();
 
   return (
-    <header className="border-b border-b-slate-300 bg-slate-200 dark:border-b-slate-800 dark:bg-black">
+    <header className="border-b border-b-slate-300 bg-background brightness-[95%] dark:border-b-slate-800 dark:brightness-[90%]">
       {/*{!hasFetched && (*/}
       {/*  <div className="absolute bottom-0 left-0 right-0 top-0 z-50 flex h-full flex-1 items-center justify-center bg-slate-50 opacity-90 dark:bg-slate-950">*/}
       {/*    <div className="flex -translate-y-[73px] items-center justify-center">*/}
@@ -38,7 +38,7 @@ const Header = () => {
           <Button
             color="primary"
             as={Link}
-            to="/calendar"
+            to="/calendar/month"
             size={screenSize > 1024 ? 'md' : 'sm'}
             className={screenSize < 339 ? 'min-w-fit px-2' : ''}
           >
@@ -59,7 +59,7 @@ const Header = () => {
               showArrow
               content="View source code on GitHub"
               delay={1000}
-              color="primary"
+              color="secondary"
               placement="right"
             >
               <Button
@@ -69,7 +69,7 @@ const Header = () => {
                 as={Link}
                 to="https://github.com/domhhv/habitrack"
                 target="_blank"
-                className="text-slate-500 hover:!bg-blue-500 hover:text-white dark:text-slate-400 dark:hover:!bg-blue-500 dark:hover:text-white"
+                className=""
                 size={screenSize > 1024 ? 'md' : 'sm'}
               >
                 <GithubLogo size={screenSize > 1024 ? 20 : 16} />

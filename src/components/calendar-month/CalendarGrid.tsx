@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
+import { useNavigate } from 'react-router-dom';
 import { type CalendarState } from 'react-stately';
 
 import type { CellPosition, CellRangeStatus } from './CalendarCell';
@@ -20,7 +21,6 @@ type CalendarGridProps = {
   ) => void;
   activeMonthLabel: string;
   activeYear: number;
-  onWeekClick: (weekNum: number) => void;
 };
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -31,13 +31,27 @@ const CalendarGrid = ({
   onAddOccurrence,
   activeMonthLabel,
   activeYear,
-  onWeekClick,
 }: CalendarGridProps) => {
+  const navigate = useNavigate();
   const { gridProps } = useCalendarGrid({}, state);
   const { locale } = useLocale();
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const { month: activeMonth } = state.visibleRange.start;
+
+  console.log({ activeMonth });
+
+  const handleWeekClick = (startDate: CalendarDate | null) => {
+    if (!startDate) {
+      return;
+    }
+
+    navigate('/calendar/week', {
+      state: {
+        startDate: new Date(startDate.year, startDate.month - 1, startDate.day),
+      },
+    });
+  };
 
   const getCellPosition = (
     weekIndex: number,
@@ -86,23 +100,24 @@ const CalendarGrid = ({
           exit={{ opacity: 0 }}
         >
           {weekIndexes.map((weekIndex) => {
-            const weekNum = getYearWeekNumberFromMonthWeek(
+            const { week } = getYearWeekNumberFromMonthWeek(
               activeMonthLabel,
               activeYear,
               weekIndex
             );
+            const dates = state.getDatesInWeek(weekIndex);
 
             return (
-              <div key={weekIndex} className="group flex items-center gap-4">
+              <div key={weekIndex} className="group flex items-center gap-2">
                 <Button
                   className={clsx(
-                    'h-[110px] basis-[40px]',
+                    'h-[110px] min-w-fit basis-[40px] p-0',
                     'hidden' // TODO: show the week number button, open weekly view (WIP) on click
                   )}
-                  variant="ghost"
-                  onClick={() => onWeekClick(weekNum)}
+                  variant="light"
+                  onClick={() => handleWeekClick(dates[0])}
                 >
-                  {weekNum}
+                  {week}
                 </Button>
                 <div
                   className={clsx(
@@ -120,10 +135,15 @@ const CalendarGrid = ({
 
                       const { month, day, year } = calendarDate;
 
+                      console.log({ month2: month });
+
                       const rangeStatus: CellRangeStatus =
-                        month < activeMonth
+                        (month < activeMonth ||
+                          (month === 12 && activeMonth === 1)) &&
+                        month !== 1
                           ? 'below-range'
-                          : month > activeMonth
+                          : month > activeMonth ||
+                              (month === 1 && activeMonth === 12)
                             ? 'above-range'
                             : 'in-range';
 

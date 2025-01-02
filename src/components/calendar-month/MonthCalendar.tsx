@@ -7,7 +7,6 @@ import { capitalizeFirstLetter } from '@utils';
 import clsx from 'clsx';
 import React from 'react';
 import { type AriaButtonProps, useCalendar, useLocale } from 'react-aria';
-import { useNavigate } from 'react-router-dom';
 import { useCalendarState } from 'react-stately';
 
 import CalendarGrid from './CalendarGrid';
@@ -44,7 +43,6 @@ const MonthCalendar = () => {
     onClose: closeOccurrenceDialog,
   } = useDisclosure();
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
-  const navigate = useNavigate();
 
   React.useEffect(() => {
     onRangeChange(
@@ -120,10 +118,6 @@ const MonthCalendar = () => {
     setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
   };
 
-  const handleWeekClick = (weekNumber: number) => {
-    navigate('/calendar/week', { state: { weekNumber } });
-  };
-
   const transformButtonProps = (
     buttonProps: Pick<AriaButtonProps<'button'>, 'isDisabled' | 'aria-label'>
   ) => ({
@@ -156,7 +150,6 @@ const MonthCalendar = () => {
           state={state}
           onAddOccurrence={handleOccurrenceModalOpen}
           onAddNote={handleNoteModalOpen}
-          onWeekClick={handleWeekClick}
         />
       </div>
 
