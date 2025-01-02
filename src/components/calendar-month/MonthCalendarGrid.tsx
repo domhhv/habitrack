@@ -1,15 +1,16 @@
 import { getYearWeekNumberFromMonthWeek } from '@helpers';
 import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
 import { Button } from '@nextui-org/react';
+import { isTruthy } from '@utils';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { type CalendarState } from 'react-stately';
 
-import type { CellPosition, CellRangeStatus } from './CalendarCell';
-import CalendarCell from './CalendarCell';
+import type { CellPosition, CellRangeStatus } from './MonthCalendarCell';
+import MonthCalendarCell from './MonthCalendarCell';
 
 type CalendarGridProps = {
   state: CalendarState;
@@ -25,31 +26,19 @@ type CalendarGridProps = {
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const CalendarGrid = ({
+const MonthCalendarGrid = ({
   state,
   onAddNote,
   onAddOccurrence,
   activeMonthLabel,
   activeYear,
 }: CalendarGridProps) => {
-  const navigate = useNavigate();
   const { gridProps } = useCalendarGrid({}, state);
   const { locale } = useLocale();
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const { month: activeMonth } = state.visibleRange.start;
-
-  const handleWeekClick = (startDate: CalendarDate | null) => {
-    if (!startDate) {
-      return;
-    }
-
-    navigate('/calendar/week', {
-      state: {
-        startDate: new Date(startDate.year, startDate.month - 1, startDate.day),
-      },
-    });
-  };
+  const { pathname } = useLocation();
 
   const getCellPosition = (
     weekIndex: number,
@@ -103,7 +92,8 @@ const CalendarGrid = ({
               activeYear,
               weekIndex
             );
-            const dates = state.getDatesInWeek(weekIndex);
+            const dates = state.getDatesInWeek(weekIndex).filter(isTruthy);
+            const [firstDate] = dates;
 
             return (
               <div
@@ -111,11 +101,22 @@ const CalendarGrid = ({
                 className="group relative flex items-end gap-1 md:gap-2"
               >
                 <Button
+                  as={Link}
                   className={clsx(
                     'absolute -left-[24px] bottom-0 h-[107px] w-[20px] min-w-fit p-0 md:-left-[48px] md:w-[40px]'
                   )}
                   variant="light"
-                  onClick={() => handleWeekClick(dates[0])}
+                  to="/calendar/week"
+                  state={{
+                    prevPathname: pathname,
+                    month: activeMonth,
+                    year: activeYear,
+                    startDate: new Date(
+                      firstDate.year,
+                      firstDate.month - 1,
+                      firstDate.day
+                    ),
+                  }}
                 >
                   {week}
                 </Button>
@@ -150,7 +151,7 @@ const CalendarGrid = ({
                       const position = getCellPosition(weekIndex, dayIndex);
 
                       return (
-                        <CalendarCell
+                        <MonthCalendarCell
                           key={cellKey}
                           dateNumber={day}
                           monthNumber={month}
@@ -174,4 +175,4 @@ const CalendarGrid = ({
   );
 };
 
-export default CalendarGrid;
+export default MonthCalendarGrid;

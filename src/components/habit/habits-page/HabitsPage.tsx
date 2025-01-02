@@ -2,12 +2,12 @@ import {
   AddHabitDialogButton,
   ConfirmDialog,
   EditHabitDialog,
+  TraitChip,
 } from '@components';
 import { useDocumentTitle, useScreenSize } from '@hooks';
 import { type Habit } from '@models';
 import {
   Button,
-  Chip,
   Table,
   TableBody,
   TableCell,
@@ -109,10 +109,9 @@ const HabitsPage = () => {
       <Table
         shadow="none"
         isHeaderSticky
-        className="px-4 lg:px-16 lg:py-4"
         classNames={{
           base: clsx(
-            'overflow-scroll [&>div]:bg-background-50 [&>div]:dark:bg-background-800',
+            'overflow-scroll px-8 py-2 lg:px-16 lg:py-4 [&>div]:bg-white [&>div]:dark:bg-background-800',
             isMobile ? 'max-h-[400px]' : 'max-h-[600px]'
           ),
         }}
@@ -122,10 +121,7 @@ const HabitsPage = () => {
             <TableColumn key={column.key}>{column.label}</TableColumn>
           )}
         </TableHeader>
-        <TableBody
-          emptyContent="No habits yet"
-          // items={habits.map(({ id, ...habit }) => ({ ...habit, key: id }))}
-        >
+        <TableBody emptyContent="No habits yet">
           {habits.map((habit) => (
             <TableRow key={habit.id}>
               <TableCell>
@@ -140,25 +136,7 @@ const HabitsPage = () => {
                 )}
               </TableCell>
               <TableCell>
-                <Chip
-                  size="sm"
-                  variant="faded"
-                  className="ml-2 h-5 border-1"
-                  color="secondary"
-                >
-                  <div className="flex items-center gap-1 font-semibold">
-                    <span
-                      className="mr-0.5 inline-block h-1 w-1 rounded-full"
-                      role="habit-trait-chip-color-indicator"
-                      style={{
-                        backgroundColor: habit.trait?.color || 'black',
-                      }}
-                    />
-                    <p role="habit-trait-chip-name">
-                      {habit.trait?.name || 'Unknown trait'}
-                    </p>
-                  </div>
-                </Chip>
+                <TraitChip trait={habit.trait} />
               </TableCell>
               <TableCell>
                 {format(habit.createdAt, isMobile ? 'MMM d, y' : 'LLLL do, y')}

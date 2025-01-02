@@ -45,7 +45,7 @@ type CalendarCellProps = {
   position: CellPosition;
 };
 
-const CalendarCell = ({
+const MonthCalendarCell = ({
   dateNumber,
   monthNumber,
   fullYear,
@@ -64,6 +64,7 @@ const CalendarCell = ({
   const screenSize = useScreenSize();
   const cellDate = new Date(fullYear, monthNumber - 1, dateNumber);
   const isTodayCell = isToday(cellDate);
+  const isFutureCell = isFuture(cellDate);
   const date = format(cellDate, 'yyyy-MM-dd');
   const isDesktop = screenSize >= 1024;
 
@@ -97,7 +98,10 @@ const CalendarCell = ({
         }
       }
 
-      if (isMobile || e?.currentTarget instanceof HTMLButtonElement) {
+      if (
+        !isFutureCell &&
+        (isMobile || e?.currentTarget instanceof HTMLButtonElement)
+      ) {
         return onAddOccurrence(dateNumber, monthNumber, fullYear);
       }
     },
@@ -113,6 +117,7 @@ const CalendarCell = ({
       user,
       isMobile,
       isTodayCell,
+      isFutureCell,
     ]
   );
 
@@ -161,7 +166,7 @@ const CalendarCell = ({
     position === 'bottom-left' && 'rounded-bl-md',
     position === 'bottom-right' && 'rounded-br-md',
     isTodayCell &&
-      'bg-background-200 hover:bg-background-300 dark:bg-background-800 dark:hover:bg-background-700'
+      'bg-background-100 hover:bg-background-300 dark:bg-background-700 dark:hover:bg-background-700'
   );
 
   const cellHeaderClassName = clsx(
@@ -182,13 +187,13 @@ const CalendarCell = ({
         <div className="flex items-center justify-between gap-2">
           {rangeStatus === 'in-range' && !isMobile && (
             <div className="flex items-center gap-1">
-              {!isFuture(cellDate) && (
+              {!isFutureCell && (
                 <Tooltip content="Log habit" closeDelay={0}>
                   <Button
                     className="h-5 min-w-fit px-2 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0 lg:h-6 lg:px-4"
                     radius="sm"
                     onClick={handleAddOccurrenceClick}
-                    color="primary"
+                    color="secondary"
                     isDisabled={fetchingOccurrences || !user}
                   >
                     <CalendarPlus weight="bold" size={isDesktop ? 18 : 14} />
@@ -206,7 +211,7 @@ const CalendarCell = ({
                   )}
                   radius="sm"
                   onClick={handleAddNoteClick}
-                  color={hasNote ? 'success' : 'primary'}
+                  color={hasNote ? 'success' : 'secondary'}
                   isDisabled={fetchingNotes || !user}
                 >
                   {hasNote ? (
@@ -251,4 +256,4 @@ const CalendarCell = ({
   );
 };
 
-export default CalendarCell;
+export default MonthCalendarCell;

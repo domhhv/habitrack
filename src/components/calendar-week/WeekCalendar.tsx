@@ -1,5 +1,5 @@
-/* eslint-disable */
-
+import { Button } from '@nextui-org/react';
+import { ArrowFatLeft } from '@phosphor-icons/react';
 import { useOccurrencesStore } from '@stores';
 import {
   addDays,
@@ -18,8 +18,6 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import OccurrenceChip from '../calendar-month/OccurrenceChip';
-import { Button } from '@nextui-org/react';
-import { ArrowFatLeft } from '@phosphor-icons/react';
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -36,20 +34,6 @@ const WeekCalendar = () => {
     setStartOfTheWeek(startOfWeek(startOfDay(state.startDate || new Date())));
   }, [state]);
 
-  if (!state) {
-    return (
-      <div className="flex h-full w-full max-w-full flex-1 flex-col p-4">
-        <h1 className="mt-2 text-center text-xl font-bold">Week Calendar</h1>
-        <p className="mb-4 text-center text-sm italic text-stone-400 dark:text-stone-500">
-          Weekly calendar is only available when navigating from the month
-          calendar for now
-        </p>
-      </div>
-    );
-  }
-
-  const { startDate }: { startDate: Date } = state;
-
   const days = eachDayOfInterval<Date>({
     start: startOfTheWeek,
     end: addDays(startOfTheWeek, 6),
@@ -65,7 +49,7 @@ const WeekCalendar = () => {
       const date = new Date(o.timestamp);
       return date >= occurrencesRange[0] && date <= occurrencesRange[1];
     });
-  }, [days]);
+  }, [days, occurrences, startOfTheWeek]);
 
   const groupOccurrences = React.useCallback(
     (dayIndex: number, hour: number) => {
@@ -84,14 +68,32 @@ const WeekCalendar = () => {
         Object.groupBy(relatedOccurrences, (o) => o.habitId)
       );
     },
-    [days]
+    [days, occurrencesInWeek]
   );
+
+  if (!state) {
+    return (
+      <div className="flex h-full w-full max-w-full flex-1 flex-col p-4">
+        <h1 className="mt-2 text-center text-xl font-bold">Week Calendar</h1>
+        <p className="mb-4 text-center text-sm italic text-stone-400 dark:text-stone-500">
+          Weekly calendar is only available when navigating from the month
+          calendar for now
+        </p>
+      </div>
+    );
+  }
+
+  const { prevPathname, month, year } = state;
 
   return (
     <div className="relative my-8 flex h-full w-full max-w-full flex-1 flex-col space-y-8 px-5 py-2 lg:px-16 lg:py-4">
       <Button
         as={Link}
-        to="/calendar/month"
+        to={prevPathname}
+        state={{
+          year,
+          month,
+        }}
         className="absolute left-6 top-0"
         variant="flat"
       >
@@ -100,10 +102,10 @@ const WeekCalendar = () => {
       </Button>
       <div className="space-y-2 text-center">
         <h1 className="text-xl font-bold">
-          Week {getWeek(startDate)} of {getISOWeekYear(startDate)}
+          Week {getWeek(startOfTheWeek)} of {getISOWeekYear(startOfTheWeek)}
         </h1>
         <p className="text-sm italic text-stone-400 dark:text-stone-500">
-          Editing coming soon
+          Logging & navigation coming soon
         </p>
       </div>
       <div className="flex justify-around">
@@ -111,7 +113,7 @@ const WeekCalendar = () => {
           const weekDayName = WEEK_DAYS[getDay(day) - 1] || WEEK_DAYS[6];
 
           return (
-            <div className="group flex flex-1 flex-col gap-2">
+            <div key={dayIndex} className="group flex flex-1 flex-col gap-2">
               <h3 className="text-center text-stone-600 dark:text-stone-300">
                 {weekDayName}
               </h3>
@@ -126,7 +128,10 @@ const WeekCalendar = () => {
                   const hour = minute.getHours();
 
                   return (
-                    <div className="group/minutes-cell relative flex gap-4">
+                    <div
+                      key={`${dayIndex}-${hour}`}
+                      className="group/minutes-cell relative flex gap-4"
+                    >
                       {dayIndex === 0 && (
                         <p className="absolute -left-4 -top-1 w-3 basis-0 -translate-y-3 self-start text-right text-stone-600 dark:text-stone-200 md:static md:text-base">
                           {hour !== 0 && hour}
