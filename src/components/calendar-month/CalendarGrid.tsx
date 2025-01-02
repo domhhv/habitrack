@@ -39,8 +39,6 @@ const CalendarGrid = ({
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const { month: activeMonth } = state.visibleRange.start;
 
-  console.log({ activeMonth });
-
   const handleWeekClick = (startDate: CalendarDate | null) => {
     if (!startDate) {
       return;

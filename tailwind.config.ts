@@ -13,7 +13,6 @@ export default {
   },
   plugins: [
     nextui({
-      // addCommonColors: true,
       themes: {
         light: {
           colors: {
@@ -199,52 +198,3 @@ export default {
     }),
   ],
 } satisfies Config;
-
-// Dark:
-// {
-//   "color-primary-100": "#D5FCE6",
-//   "color-primary-200": "#ACFAD5",
-//   "color-primary-300": "#81F1C6",
-//   "color-primary-400": "#5FE4BD",
-//   "color-primary-500": "#2FD3B3",
-//   "color-primary-600": "#22B5A6",
-//   "color-primary-700": "#179797",
-//   "color-primary-800": "#0E707A",
-//   "color-primary-900": "#095465",
-//   "color-success-100": "#F1FBD2",
-//   "color-success-200": "#E1F8A7",
-//   "color-success-300": "#C5EA78",
-//   "color-success-400": "#A6D553",
-//   "color-success-500": "#7DBA23",
-//   "color-success-600": "#649F19",
-//   "color-success-700": "#4D8511",
-//   "color-success-800": "#386B0B",
-//   "color-success-900": "#2A5906",
-//   "color-info-100": "#CEF4FF",
-//   "color-info-200": "#9CE4FF",
-//   "color-info-300": "#6CCFFF",
-//   "color-info-400": "#47B8FF",
-//   "color-info-500": "#0A94FF",
-//   "color-info-600": "#0772DB",
-//   "color-info-700": "#0555B7",
-//   "color-info-800": "#033C93",
-//   "color-info-900": "#012A7A",
-//   "color-warning-100": "#FEF8D0",
-//   "color-warning-200": "#FEEEA1",
-//   "color-warning-300": "#FEE272",
-//   "color-warning-400": "#FDD64F",
-//   "color-warning-500": "#FCC316",
-//   "color-warning-600": "#D8A110",
-//   "color-warning-700": "#B5820B",
-//   "color-warning-800": "#926407",
-//   "color-warning-900": "#785004",
-//   "color-danger-100": "#FFE7D5",
-//   "color-danger-200": "#FFC8AC",
-//   "color-danger-300": "#FFA382",
-//   "color-danger-400": "#FF8063",
-//   "color-danger-500": "#FF4530",
-//   "color-danger-600": "#DB2623",
-//   "color-danger-700": "#B71821",
-//   "color-danger-800": "#930F22",
-//   "color-danger-900": "#7A0922"
-// }

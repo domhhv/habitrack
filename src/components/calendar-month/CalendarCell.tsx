@@ -10,7 +10,7 @@ import {
 import { useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import clsx from 'clsx';
-import { format } from 'date-fns';
+import { format, isToday, isFuture } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 
@@ -61,18 +61,10 @@ const CalendarCell = ({
   const { removeOccurrence, fetchingOccurrences, occurrencesByDate } =
     useOccurrencesStore();
   const { notes, fetchingNotes } = useNotesStore();
-  const today = new Date();
-  const isToday =
-    today.getDate() === dateNumber &&
-    today.getMonth() + 1 === monthNumber &&
-    today.getFullYear() === fullYear;
   const screenSize = useScreenSize();
-  const date = format(
-    new Date(fullYear, monthNumber - 1, dateNumber),
-    'yyyy-MM-dd'
-  );
-  const isFutureDate =
-    new Date() < new Date(fullYear, monthNumber - 1, dateNumber);
+  const cellDate = new Date(fullYear, monthNumber - 1, dateNumber);
+  const isTodayCell = isToday(cellDate);
+  const date = format(cellDate, 'yyyy-MM-dd');
 
   const occurrences = isCalendarDay(date) ? occurrencesByDate[date] || [] : [];
   const isMobile = screenSize < 768;
@@ -105,7 +97,6 @@ const CalendarCell = ({
 
     return onAddOccurrence(dateNumber, monthNumber, fullYear);
   }, [
-    isToday,
     dateNumber,
     fetchingOccurrences,
     fullYear,
@@ -161,14 +152,14 @@ const CalendarCell = ({
     position === 'top-right' && 'rounded-tr-md',
     position === 'bottom-left' && 'rounded-bl-md',
     position === 'bottom-right' && 'rounded-br-md',
-    isToday &&
+    isTodayCell &&
       'bg-background-200 hover:bg-background-300 dark:bg-background-800 dark:hover:bg-background-700'
   );
 
   const cellHeaderClassName = clsx(
     'flex w-full items-center justify-between border-b-1 border-neutral-500 px-1.5 py-1.5 text-sm dark:border-neutral-400 md:text-base',
     rangeStatus !== 'in-range' && 'text-neutral-400 dark:text-neutral-600',
-    isToday ? 'w-full self-auto md:self-start' : 'w-full'
+    isTodayCell ? 'w-full self-auto md:self-start' : 'w-full'
   );
 
   return (
@@ -183,7 +174,7 @@ const CalendarCell = ({
         <div className="flex items-center justify-between gap-2">
           {rangeStatus === 'in-range' && !isMobile && (
             <div className="flex items-center gap-1">
-              {!isFutureDate && (
+              {!isFuture(cellDate) && (
                 <Tooltip content="Log habit" closeDelay={0}>
                   <Button
                     className="h-6 min-w-fit px-4 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0"
