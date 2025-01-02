@@ -126,7 +126,7 @@ const MonthCalendar = () => {
   });
 
   const calendarContainerClassName = clsx(
-    'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-2 pb-8 lg:gap-4 lg:px-0 lg:px-16 lg:py-4',
+    'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 lg:gap-4 lg:px-16 lg:py-4',
     isOccurrenceDialogOpen && 'pointer-events-none'
   );
 

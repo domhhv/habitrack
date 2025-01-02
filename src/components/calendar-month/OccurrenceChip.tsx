@@ -10,7 +10,7 @@ import React from 'react';
 
 export type OccurrenceChipProps = {
   occurrences: Occurrence[];
-  onDelete: (
+  onDelete?: (
     occurrenceId: number,
     clickEvent: React.MouseEvent<HTMLButtonElement>
   ) => void;
@@ -61,16 +61,18 @@ const OccurrenceChip = ({
                   <span className="font-normal">: {note.content}</span>
                 )}
               </div>
-              <Button
-                isIconOnly
-                variant="solid"
-                color="danger"
-                onClick={(clickEvent) => onDelete(t.occurrenceId, clickEvent)}
-                role="habit-chip-delete-button"
-                className="h-6 w-6 min-w-0 rounded-lg"
-              >
-                <Trash size={14} fill="bold" className="fill-white" />
-              </Button>
+              {onDelete && (
+                <Button
+                  isIconOnly
+                  variant="solid"
+                  color="danger"
+                  onClick={(clickEvent) => onDelete(t.occurrenceId, clickEvent)}
+                  role="habit-chip-delete-button"
+                  className="h-6 w-6 min-w-0 rounded-lg"
+                >
+                  <Trash size={14} fill="bold" className="fill-white" />
+                </Button>
+              )}
             </li>
           );
         })}

@@ -106,11 +106,14 @@ const CalendarGrid = ({
             const dates = state.getDatesInWeek(weekIndex);
 
             return (
-              <div key={weekIndex} className="group flex items-center gap-2">
+              <div
+                key={weekIndex}
+                className="group relative flex items-end gap-1 md:gap-2"
+              >
                 <Button
                   className={clsx(
-                    'h-[110px] min-w-fit basis-[40px] p-0',
-                    'hidden' // TODO: show the week number button, open weekly view (WIP) on click
+                    'absolute -left-[24px] bottom-0 h-[107px] w-[20px] min-w-fit p-0 md:-left-[48px] md:w-[40px]',
+                    'hhidden' // TODO: show the week number button, open weekly view (WIP) on click
                   )}
                   variant="light"
                   onClick={() => handleWeekClick(dates[0])}
@@ -132,8 +135,6 @@ const CalendarGrid = ({
                       }
 
                       const { month, day, year } = calendarDate;
-
-                      console.log({ month2: month });
 
                       const rangeStatus: CellRangeStatus =
                         (month < activeMonth ||
