@@ -23,7 +23,7 @@ const App = () => {
   return (
     <Providers>
       <AppHeader />
-      <div className="flex h-full flex-1 flex-col items-start bg-slate-50 dark:bg-slate-950">
+      <main className="flex h-full flex-1 flex-col items-start bg-background">
         <Routes>
           <Route path="/calendar/month" element={<MonthCalendar />} />
           <Route path="/calendar/week" element={<WeekCalendar />} />
@@ -31,7 +31,7 @@ const App = () => {
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/calendar/month" replace />} />
         </Routes>
-      </div>
+      </main>
       <Snackbars />
     </Providers>
   );

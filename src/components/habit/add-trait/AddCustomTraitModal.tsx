@@ -71,18 +71,21 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             You can define a custom trait for your habits (e g. Moderately Bad)
           </p>
           <Input
+            variant="bordered"
             value={label}
             onChange={handleLabelChange}
             isDisabled={addingTrait}
             label="Trait Label"
           />
           <Input
+            variant="bordered"
             value={slug}
             onChange={handleSlugChange}
             isDisabled={addingTrait}
             label="Trait Slug"
           />
           <Textarea
+            variant="bordered"
             value={description}
             onChange={handleDescriptionChange}
             isDisabled={addingTrait}
@@ -92,6 +95,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             <HexColorPicker color={color} onChange={handleTraitColorChange} />
             <div className="flex w-1/2 flex-col gap-2">
               <Input
+                variant="bordered"
                 value={color.slice(1)}
                 onChange={(event) => handleTraitColorChange(event.target.value)}
                 startContent="#"

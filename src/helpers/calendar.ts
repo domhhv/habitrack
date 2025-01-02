@@ -93,7 +93,7 @@ const monthNames = [
   'December',
 ];
 
-function getMonthIndex(monthLabel: string): number {
+export function getMonthIndex(monthLabel: string): number {
   return monthNames.indexOf(monthLabel);
 }
 
@@ -122,24 +122,26 @@ function shiftSundayToSeven(day: number): number {
   return day === 0 ? 7 : day;
 }
 
-function getISOWeekNumber(date: Date): number {
+function getISOWeekYearAndNumber(date: Date): { year: number; week: number } {
   const utcDate = new Date(
     Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
   );
   const dayNum = shiftSundayToSeven(utcDate.getUTCDay());
   utcDate.setUTCDate(utcDate.getUTCDate() + (4 - dayNum));
-  const startOfYear = new Date(Date.UTC(utcDate.getUTCFullYear(), 0, 1));
+  const isoYear = utcDate.getUTCFullYear();
+  const startOfIsoYear = new Date(Date.UTC(isoYear, 0, 1));
   const daysSinceYearStart =
-    (utcDate.getTime() - startOfYear.getTime()) / 86400000 + 1;
-  return Math.ceil(daysSinceYearStart / 7);
+    (utcDate.getTime() - startOfIsoYear.getTime()) / 86400000 + 1;
+  const weekNumber = Math.ceil(daysSinceYearStart / 7);
+  return { year: isoYear, week: weekNumber };
 }
 
 export function getYearWeekNumberFromMonthWeek(
   monthLabel: string,
   year: number,
   weekIndex: number
-): number {
+): { year: number; week: number } {
   const monthIndex = getMonthIndex(monthLabel);
   const date = getDateForMonthWeek(year, monthIndex, weekIndex);
-  return getISOWeekNumber(date);
+  return getISOWeekYearAndNumber(date);
 }

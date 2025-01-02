@@ -61,19 +61,17 @@ const AddHabitDialogButton = () => {
 
   return (
     <>
-      <div className="m-auto my-4 flex w-[95%] justify-end lg:w-[80%]">
-        <Button
-          color="primary"
-          variant="solid"
-          startContent={<Plus weight="bold" />}
-          onClick={handleDialogOpen}
-          isDisabled={fetchingHabits}
-          data-testid="add-habit-button"
-          className="w-full lg:w-auto"
-        >
-          Add habit
-        </Button>
-      </div>
+      <Button
+        color="primary"
+        variant="solid"
+        startContent={<Plus weight="bold" />}
+        onClick={handleDialogOpen}
+        isDisabled={fetchingHabits}
+        data-testid="add-habit-button"
+        className="w-full lg:w-auto"
+      >
+        Add habit
+      </Button>
       <AddCustomTraitModal
         open={addTraitModalOpen}
         onClose={() => setAddTraitModalOpen(false)}
@@ -125,6 +123,7 @@ const AddHabitDialogButton = () => {
             <Button
               variant="bordered"
               size="sm"
+              color="secondary"
               startContent={<Plus />}
               onClick={() => setAddTraitModalOpen(true)}
             >
@@ -135,7 +134,7 @@ const AddHabitDialogButton = () => {
               as="label"
               variant="flat"
               size="sm"
-              color="primary"
+              color="secondary"
               startContent={<CloudArrowUp />}
             >
               Upload Icon

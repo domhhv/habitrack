@@ -109,10 +109,10 @@ const HabitsPage = () => {
       <Table
         shadow="none"
         isHeaderSticky
-        className="mx-auto w-[95%] lg:w-[80%]"
+        className="px-4 lg:px-16 lg:py-4"
         classNames={{
           base: clsx(
-            'overflow-scroll',
+            'overflow-scroll [&>div]:bg-background-50 [&>div]:dark:bg-background-800',
             isMobile ? 'max-h-[400px]' : 'max-h-[600px]'
           ),
         }}
@@ -124,7 +124,7 @@ const HabitsPage = () => {
         </TableHeader>
         <TableBody
           emptyContent="No habits yet"
-          items={habits.map(({ id, ...habit }) => ({ ...habit, key: id }))}
+          // items={habits.map(({ id, ...habit }) => ({ ...habit, key: id }))}
         >
           {habits.map((habit) => (
             <TableRow key={habit.id}>
@@ -140,7 +140,12 @@ const HabitsPage = () => {
                 )}
               </TableCell>
               <TableCell>
-                <Chip size="sm" variant="faded" className="ml-2 h-5 border-1">
+                <Chip
+                  size="sm"
+                  variant="faded"
+                  className="ml-2 h-5 border-1"
+                  color="secondary"
+                >
                   <div className="flex items-center gap-1 font-semibold">
                     <span
                       className="mr-0.5 inline-block h-1 w-1 rounded-full"
@@ -174,7 +179,7 @@ const HabitsPage = () => {
                       isIconOnly
                       size="sm"
                       variant="bordered"
-                      color="primary"
+                      color="secondary"
                       onClick={() => handleEditStart(habit)}
                       role="edit-habit-button"
                       data-testid={`edit-habit-id-${habit.id}-button`}
@@ -204,7 +209,9 @@ const HabitsPage = () => {
         </TableBody>
       </Table>
       <EditHabitDialog onClose={handleEditEnd} habit={habitToEdit} />
-      <AddHabitDialogButton />
+      <div className="m-auto my-4 flex w-full justify-end px-4 lg:px-16 lg:py-4">
+        <AddHabitDialogButton />
+      </div>
       <ConfirmDialog
         open={!!habitToRemove}
         heading="Delete habit"
