@@ -26,7 +26,8 @@
       "@helpers": ["helpers"],
       "@models": ["models"],
       "@stores": ["stores"],
-      "@tests": ["../tests"]
+      "@tests": ["../tests"],
+      "@root/*": ["../*"]
     }
   },
   "include": ["src", "tests", "./supabase/database.types.ts"]

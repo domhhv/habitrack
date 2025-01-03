@@ -4,7 +4,7 @@ import {
   EditHabitDialog,
   TraitChip,
 } from '@components';
-import { useDocumentTitle, useScreenSize } from '@hooks';
+import { useDocumentTitle, useScreenWidth } from '@hooks';
 import { type Habit } from '@models';
 import {
   Button,
@@ -69,7 +69,7 @@ const HabitsPage = () => {
   const { removeOccurrencesByHabitId } = useOccurrencesStore();
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
-  const screenSize = useScreenSize();
+  const { isMobile } = useScreenWidth();
 
   useDocumentTitle('My Habits | Habitrack');
 
@@ -98,8 +98,6 @@ const HabitsPage = () => {
   const handleEditEnd = () => {
     setHabitToEdit(null);
   };
-
-  const isMobile = screenSize < 768;
 
   return (
     <>

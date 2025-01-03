@@ -1,5 +1,5 @@
 import { AuthModalButton } from '@components';
-import { useScreenSize, useFetchOnAuth } from '@hooks';
+import { useScreenWidth, useFetchOnAuth } from '@hooks';
 import { Button, Tooltip, Spinner } from '@nextui-org/react';
 import { GithubLogo } from '@phosphor-icons/react';
 import { useSessionContext } from '@supabase/auth-helpers-react';
@@ -11,7 +11,7 @@ import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   useFetchOnAuth();
-  const screenSize = useScreenSize();
+  const { screenWidth, isMobile, isDesktop } = useScreenWidth();
   const session = useSessionContext();
 
   return (
@@ -36,8 +36,8 @@ const Header = () => {
               color="primary"
               as={Link}
               to="/calendar/month"
-              size={screenSize > 1024 ? 'md' : 'sm'}
-              className={screenSize < 339 ? 'min-w-fit px-2' : ''}
+              size={isDesktop ? 'md' : 'sm'}
+              className={screenWidth < 339 ? 'min-w-fit px-2' : ''}
             >
               Calendar
             </Button>
@@ -46,16 +46,16 @@ const Header = () => {
               variant="flat"
               as={Link}
               to="/habits"
-              size={screenSize > 1024 ? 'md' : 'sm'}
+              size={isDesktop ? 'md' : 'sm'}
               className={clsx(
                 'dark:text-secondary-800',
-                screenSize < 339 && 'min-w-fit px-2'
+                screenWidth < 339 && 'min-w-fit px-2'
               )}
             >
               Habits
             </Button>
             <ThemeToggle />
-            {screenSize > 768 && (
+            {!isMobile && (
               <Tooltip
                 showArrow
                 content="View source code on GitHub"
@@ -70,9 +70,9 @@ const Header = () => {
                   as={Link}
                   to="https://github.com/domhhv/habitrack"
                   target="_blank"
-                  size={screenSize > 1024 ? 'md' : 'sm'}
+                  size={isDesktop ? 'md' : 'sm'}
                 >
-                  <GithubLogo size={screenSize > 1024 ? 20 : 16} />
+                  <GithubLogo size={isDesktop ? 20 : 16} />
                 </Button>
               </Tooltip>
             )}

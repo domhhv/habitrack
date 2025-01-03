@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
         '@models': resolve(__dirname, './src/models'),
         '@stores': resolve(__dirname, './src/stores'),
         '@tests': resolve(__dirname, './tests'),
+        '@root': resolve(__dirname, './'),
       },
     },
     build: {

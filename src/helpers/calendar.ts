@@ -78,7 +78,7 @@ export const generateCalendarRange = (
   return [+rangeStart, +rangeEnd];
 };
 
-const monthNames = [
+const MONTH = [
   'January',
   'February',
   'March',
@@ -94,7 +94,7 @@ const monthNames = [
 ];
 
 export function getMonthIndex(monthLabel: string): number {
-  return monthNames.indexOf(monthLabel);
+  return MONTH.indexOf(monthLabel);
 }
 
 function getMondayOffset(day: number): number {

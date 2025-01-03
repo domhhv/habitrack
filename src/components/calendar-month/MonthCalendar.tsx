@@ -1,14 +1,15 @@
-import { generateCalendarRange } from '@helpers';
 import { useDocumentTitle } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
 import { useDisclosure } from '@nextui-org/react';
 import { useOccurrencesStore } from '@stores';
 import { capitalizeFirstLetter } from '@utils';
 import clsx from 'clsx';
+import { endOfMonth, endOfWeek, startOfMonth, startOfWeek } from 'date-fns';
 import React from 'react';
-import { type AriaButtonProps, useCalendar, useLocale } from 'react-aria';
-import { useLocation } from 'react-router-dom';
+import { useCalendar, useLocale } from 'react-aria';
+import { useParams } from 'react-router-dom';
 import { useCalendarState } from 'react-stately';
+import { useShallow } from 'zustand/react/shallow';
 
 import MonthCalendarGrid from './MonthCalendarGrid';
 import MonthCalendarHeader from './MonthCalendarHeader';
@@ -25,14 +26,15 @@ const createCalendar = (identifier: string) => {
 };
 
 const MonthCalendar = () => {
-  const { onRangeChange } = useOccurrencesStore();
+  const onRangeChange = useOccurrencesStore(
+    useShallow((state) => state.onRangeChange)
+  );
   const { locale } = useLocale();
   const calendarState = useCalendarState({
     locale,
     createCalendar,
   });
-  const { calendarProps, prevButtonProps, nextButtonProps, title } =
-    useCalendar({}, calendarState);
+  const { calendarProps, title } = useCalendar({}, calendarState);
   const {
     isOpen: isNoteDialogOpen,
     onOpen: openNoteDialog,
@@ -44,62 +46,41 @@ const MonthCalendar = () => {
     onClose: closeOccurrenceDialog,
   } = useDisclosure();
   const [activeDate, setActiveDate] = React.useState<Date | null>(null);
-  const { state: locationState } = useLocation();
-
-  const setFocusedDate = React.useCallback(
-    (year: number, month: number, day: number) => {
-      const nextFocusedDate = new CalendarDate(year, month, day);
-      calendarState.setFocusedDate(nextFocusedDate);
-    },
-    [calendarState]
-  );
+  const params = useParams();
 
   React.useEffect(() => {
-    if (!locationState) {
+    const { year, month, day } = params;
+
+    if (!year || !month || !day) {
       return;
     }
 
-    const { year, month } = locationState;
+    const focusedDate = new Date(Number(year), Number(month) - 1, 1);
 
-    setFocusedDate(year, month, 1);
-  }, [locationState, setFocusedDate]);
+    const rangeStart = startOfWeek(startOfMonth(focusedDate));
+    const rangeEnd = endOfWeek(endOfMonth(focusedDate));
 
-  React.useEffect(() => {
-    onRangeChange(
-      generateCalendarRange(
-        calendarState.visibleRange.start.year,
-        calendarState.visibleRange.start.month
-      )
+    onRangeChange([+rangeStart, +rangeEnd]);
+
+    const nextFocusedDate = new CalendarDate(
+      focusedDate.getFullYear(),
+      focusedDate.getMonth() + 1,
+      focusedDate.getDate()
     );
-  }, [
-    calendarState.visibleRange.start.year,
-    calendarState.visibleRange.start.month,
-    onRangeChange,
-  ]);
+
+    const hasFocusedDateChanged =
+      calendarState.focusedDate.toString() !== nextFocusedDate.toString();
+
+    if (hasFocusedDateChanged) {
+      calendarState.setFocusedDate(nextFocusedDate);
+    }
+  }, [params, calendarState, onRangeChange]);
 
   const [activeMonthLabel, activeYear] = title.split(' ');
 
   useDocumentTitle(
     `${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`
   );
-
-  const navigateToMonth = (month: number) => {
-    const { year, day } = calendarState.focusedDate;
-    setFocusedDate(year, month, day);
-  };
-
-  const navigateToYear = (year: number) => {
-    const { month, day } = calendarState.focusedDate;
-    setFocusedDate(year, month, day);
-  };
-
-  const resetFocusedDate = () => {
-    const now = new Date();
-    const day = now.getDate();
-    const month = now.getMonth();
-    const year = now.getFullYear();
-    setFocusedDate(year, month + 1, day);
-  };
 
   const handleOccurrenceModalClose = () => {
     window.setTimeout(() => {
@@ -133,13 +114,6 @@ const MonthCalendar = () => {
     setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
   };
 
-  const transformButtonProps = (
-    buttonProps: Pick<AriaButtonProps<'button'>, 'isDisabled' | 'aria-label'>
-  ) => ({
-    'aria-label': buttonProps['aria-label'] || '',
-    disabled: Boolean(buttonProps.isDisabled),
-  });
-
   const calendarContainerClassName = clsx(
     'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 lg:gap-4 lg:px-16 lg:py-4',
     isOccurrenceDialogOpen && 'pointer-events-none'
@@ -151,13 +125,6 @@ const MonthCalendar = () => {
         <MonthCalendarHeader
           activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
           activeYear={activeYear}
-          prevButtonProps={transformButtonProps(prevButtonProps)}
-          nextButtonProps={transformButtonProps(nextButtonProps)}
-          onNavigateBack={calendarState.focusPreviousPage}
-          onNavigateForward={calendarState.focusNextPage}
-          onNavigateToMonth={navigateToMonth}
-          onNavigateToYear={navigateToYear}
-          onResetFocusedDate={resetFocusedDate}
         />
         <MonthCalendarGrid
           activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}

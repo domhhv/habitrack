@@ -1,5 +1,3 @@
-import { Button } from '@nextui-org/react';
-import { ArrowFatLeft } from '@phosphor-icons/react';
 import { useOccurrencesStore } from '@stores';
 import {
   addDays,
@@ -15,24 +13,26 @@ import {
 } from 'date-fns';
 import { motion } from 'framer-motion';
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import OccurrenceChip from '../calendar-month/OccurrenceChip';
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const WeekCalendar = () => {
-  const { state } = useLocation();
+  const { year, month, day } = useParams();
   const { occurrences } = useOccurrencesStore();
   const [startOfTheWeek, setStartOfTheWeek] = React.useState(new Date());
 
   React.useEffect(() => {
-    if (!state) {
+    if (!year || !month || !day) {
       return;
     }
 
-    setStartOfTheWeek(startOfWeek(startOfDay(state.startDate || new Date())));
-  }, [state]);
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+    setStartOfTheWeek(startOfWeek(startOfDay(date)));
+  }, [year, month, day]);
 
   const days = eachDayOfInterval<Date>({
     start: startOfTheWeek,
@@ -71,35 +71,8 @@ const WeekCalendar = () => {
     [days, occurrencesInWeek]
   );
 
-  if (!state) {
-    return (
-      <div className="flex h-full w-full max-w-full flex-1 flex-col p-4">
-        <h1 className="mt-2 text-center text-xl font-bold">Week Calendar</h1>
-        <p className="mb-4 text-center text-sm italic text-stone-400 dark:text-stone-500">
-          Weekly calendar is only available when navigating from the month
-          calendar for now
-        </p>
-      </div>
-    );
-  }
-
-  const { prevPathname, month, year } = state;
-
   return (
-    <div className="relative my-8 flex h-full w-full max-w-full flex-1 flex-col space-y-8 px-5 py-2 lg:px-16 lg:py-4">
-      <Button
-        as={Link}
-        to={prevPathname}
-        state={{
-          year,
-          month,
-        }}
-        className="absolute left-6 top-0"
-        variant="flat"
-      >
-        <ArrowFatLeft size={20} />
-        Back
-      </Button>
+    <div className="relative my-8 flex h-full w-full max-w-full flex-1 flex-col space-y-8 px-8 py-2 lg:px-16 lg:py-4">
       <div className="space-y-2 text-center">
         <h1 className="text-xl font-bold">
           Week {getWeek(startOfTheWeek)} of {getISOWeekYear(startOfTheWeek)}
@@ -113,10 +86,15 @@ const WeekCalendar = () => {
           const weekDayName = WEEK_DAYS[getDay(day) - 1] || WEEK_DAYS[6];
 
           return (
-            <div key={dayIndex} className="group flex flex-1 flex-col gap-2">
-              <h3 className="text-center text-stone-600 dark:text-stone-300">
-                {weekDayName}
-              </h3>
+            <div key={dayIndex} className="group flex flex-1 flex-col gap-4">
+              <div className="space-y-2 text-center">
+                <h3 className="text-stone-600 dark:text-stone-300">
+                  {weekDayName}
+                </h3>
+                <h6 className="text-stone-600 dark:text-stone-300">
+                  {day.getDate()}
+                </h6>
+              </div>
               <div className="flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600">
                 {eachMinuteOfInterval<Date>(
                   {
@@ -133,11 +111,11 @@ const WeekCalendar = () => {
                       className="group/minutes-cell relative flex gap-4"
                     >
                       {dayIndex === 0 && (
-                        <p className="absolute -left-4 -top-1 w-3 basis-0 -translate-y-3 self-start text-right text-stone-600 dark:text-stone-200 md:static md:text-base">
+                        <p className="translate-0 absolute -left-[23px] -top-[13px] w-3 basis-0 self-start text-right text-stone-600 dark:text-stone-200 md:static md:-translate-y-3 md:text-base">
                           {hour !== 0 && hour}
                         </p>
                       )}
-                      <div className="flex h-20 w-full overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500">
+                      <div className="flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500">
                         {groupOccurrences(dayIndex, hour).map(
                           ([habitId, habitOccurrences]) => {
                             if (!habitOccurrences) {

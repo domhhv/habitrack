@@ -9,13 +9,17 @@ type ProviderProps = {
   children: ReactNode;
 };
 
-const LowerProviders = ({ children }: ProviderProps) => {
+const LowerProviders = React.memo(function WrappedProvider({
+  children,
+}: ProviderProps) {
   const navigate = useNavigate();
 
   return <NextUIProvider navigate={navigate}>{children}</NextUIProvider>;
-};
+});
 
-const PotentialSupabaseProvider = ({ children }: ProviderProps) => {
+const PotentialSupabaseProvider = React.memo(function WrappedProvider({
+  children,
+}: ProviderProps) {
   if (!Object.keys(supabaseClient).length) {
     return children;
   }
@@ -25,17 +29,21 @@ const PotentialSupabaseProvider = ({ children }: ProviderProps) => {
       {children}
     </SessionContextProvider>
   );
-};
+});
 
-const UpperProviders = ({ children }: ProviderProps) => {
+const UpperProviders = React.memo(function WrappedProvider({
+  children,
+}: ProviderProps) {
   return (
     <BrowserRouter>
       <I18nProvider locale="en-GB">{children}</I18nProvider>
     </BrowserRouter>
   );
-};
+});
 
-const Providers = ({ children }: ProviderProps) => {
+const Providers = React.memo(function WrappedProviders({
+  children,
+}: ProviderProps) {
   return (
     <UpperProviders>
       <PotentialSupabaseProvider>
@@ -43,6 +51,6 @@ const Providers = ({ children }: ProviderProps) => {
       </PotentialSupabaseProvider>
     </UpperProviders>
   );
-};
+});
 
 export default Providers;
