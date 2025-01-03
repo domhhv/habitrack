@@ -47,11 +47,11 @@ This app showcases the use of the following tools and technologies:
 ## Roadmap
 
 - [x] **Dark Mode**: Switch between light and dark themes.
+- [ ] **Weekly View**: View your habits on a weekly calendar.
+- [ ] **Daily View**: Dive into your habits on a daily calendar.
 - [ ] **Export**: Export your habits and entries.
 - [ ] **Environments**: Associate habits with environments where they occur.
 - [ ] **Categories**: Group habits into categories.
-- [ ] **Weekly View**: View your habits on a weekly calendar.
-- [ ] **Daily View**: Dive into your habits on a daily calendar.
 - [ ] **Sharing**: Share your calendar with trusted people.
 - [ ] **Statistics**: Track your progress with insightful statistics.
 - [ ] **Notifications**: Get reminders to log your habits.

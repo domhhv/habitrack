@@ -1,5 +1,6 @@
 import { isCalendarDay } from '@helpers';
-import { useScreenSize } from '@hooks';
+import { useScreenWidth } from '@hooks';
+import type { CalendarDate } from '@internationalized/date';
 import { Button, Tooltip } from '@nextui-org/react';
 import {
   CalendarBlank,
@@ -10,9 +11,12 @@ import {
 import { useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import clsx from 'clsx';
-import { format, isToday, isFuture } from 'date-fns';
+import { format, isToday, isFuture, startOfMonth, addMonths } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
+// import { useCalendarCell } from 'react-aria';
+import { useNavigate } from 'react-router-dom';
+import type { CalendarState } from 'react-stately';
 
 import OccurrenceChip from './OccurrenceChip';
 
@@ -23,54 +27,44 @@ export type CellPosition =
   | 'bottom-right'
   | '';
 
-export type CellRangeStatus = 'below-range' | 'in-range' | 'above-range';
+export type CellRangeStatus = 'below-range' | 'in-range' | 'above-range' | '';
 
 type CalendarCellProps = {
-  dateNumber: number;
-  monthNumber: number;
-  fullYear: number;
-  onAddNote: (
-    dateNumber: number,
-    monthNumber: number,
-    fullYear: number
-  ) => void;
-  onAddOccurrence: (
-    dateNumber: number,
-    monthNumber: number,
-    fullYear: number
-  ) => void;
-  onNavigateBack?: () => void;
-  onNavigateForward?: () => void;
+  state: CalendarState;
+  date: CalendarDate;
+  visibleMonth: Date;
+  onAddNote: () => void;
+  onAddOccurrence: () => void;
   rangeStatus: CellRangeStatus;
   position: CellPosition;
 };
 
 const MonthCalendarCell = ({
-  dateNumber,
-  monthNumber,
-  fullYear,
-  onNavigateBack,
-  onNavigateForward,
+  // state,
+  date,
+  visibleMonth,
   onAddNote,
   onAddOccurrence,
   rangeStatus,
   position,
 }: CalendarCellProps) => {
   const cellRef = React.useRef<HTMLDivElement>(null);
+  // const cellProps = useCalendarCell({ date }, state, cellRef);
   const user = useUser();
   const { removeOccurrence, fetchingOccurrences, occurrencesByDate } =
     useOccurrencesStore();
   const { notes, fetchingNotes } = useNotesStore();
-  const screenSize = useScreenSize();
-  const cellDate = new Date(fullYear, monthNumber - 1, dateNumber);
+  const { isDesktop, isMobile } = useScreenWidth();
+  const cellDate = new Date(date.year, date.month - 1, date.day);
   const isTodayCell = isToday(cellDate);
   const isFutureCell = isFuture(cellDate);
-  const date = format(cellDate, 'yyyy-MM-dd');
-  const isDesktop = screenSize >= 1024;
+  const formattedDay = format(cellDate, 'yyyy-MM-dd');
+  const navigate = useNavigate();
 
-  const occurrences = isCalendarDay(date) ? occurrencesByDate[date] || [] : [];
-  const isMobile = screenSize < 768;
-  const hasNote = notes.some((note) => note.day === date);
+  const occurrences = isCalendarDay(formattedDay)
+    ? occurrencesByDate[formattedDay] || []
+    : [];
+  const hasNote = notes.some((note) => note.day === formattedDay);
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => o.habitId);
 
@@ -79,45 +73,46 @@ const MonthCalendarCell = ({
       return null;
     }
 
-    return onAddNote(dateNumber, monthNumber, fullYear);
-  }, [fetchingOccurrences, user, dateNumber, monthNumber, fullYear, onAddNote]);
+    return onAddNote();
+  }, [fetchingOccurrences, user, onAddNote]);
 
   const handleAddOccurrenceClick = React.useCallback(
-    (e?: React.MouseEvent) => {
+    (e?: React.MouseEvent, forceOpenDialog = false) => {
       if (fetchingOccurrences || !user) {
         return null;
       }
 
       if (!isTodayCell) {
         if (rangeStatus === 'below-range') {
-          return onNavigateBack?.();
+          const prevMonth = startOfMonth(addMonths(visibleMonth, -1));
+
+          return navigate(
+            `/calendar/month/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}/1`
+          );
         }
 
         if (rangeStatus === 'above-range') {
-          return onNavigateForward?.();
+          const nextMonth = startOfMonth(addMonths(visibleMonth, 1));
+
+          return navigate(
+            `/calendar/month/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}/1`
+          );
         }
       }
 
-      if (
-        !isFutureCell &&
-        (isMobile || e?.currentTarget instanceof HTMLButtonElement)
-      ) {
-        return onAddOccurrence(dateNumber, monthNumber, fullYear);
+      if (!isFutureCell || forceOpenDialog) {
+        return onAddOccurrence();
       }
     },
     [
-      dateNumber,
       fetchingOccurrences,
-      fullYear,
-      monthNumber,
       onAddOccurrence,
-      onNavigateBack,
-      onNavigateForward,
       rangeStatus,
       user,
-      isMobile,
       isTodayCell,
       isFutureCell,
+      visibleMonth,
+      navigate,
     ]
   );
 
@@ -130,7 +125,7 @@ const MonthCalendarCell = ({
 
     const enterHandler = (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
-        handleAddOccurrenceClick();
+        handleAddOccurrenceClick(undefined, true);
       }
     };
 
@@ -177,13 +172,14 @@ const MonthCalendarCell = ({
 
   return (
     <div
+      // {...cellProps}
       className={cellRootClassName}
       ref={cellRef}
       tabIndex={0}
-      onClick={handleAddOccurrenceClick}
+      onClick={(e) => handleAddOccurrenceClick(e)}
     >
       <div className={cellHeaderClassName}>
-        <p className="font-bold">{dateNumber}</p>
+        <p className="font-bold">{date.day}</p>
         <div className="flex items-center justify-between gap-2">
           {rangeStatus === 'in-range' && !isMobile && (
             <div className="flex items-center gap-1">
@@ -192,7 +188,7 @@ const MonthCalendarCell = ({
                   <Button
                     className="h-5 min-w-fit px-2 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0 lg:h-6 lg:px-4"
                     radius="sm"
-                    onClick={handleAddOccurrenceClick}
+                    onClick={(e) => handleAddOccurrenceClick(e, true)}
                     color="secondary"
                     isDisabled={fetchingOccurrences || !user}
                   >

@@ -1,5 +1,5 @@
 import { TraitChip } from '@components';
-import { useScreenSize } from '@hooks';
+import { useScreenWidth } from '@hooks';
 import type { Habit, Trait } from '@models';
 import type { SelectedItems } from '@nextui-org/react';
 import {
@@ -9,28 +9,22 @@ import {
   Button,
   SelectSection,
 } from '@nextui-org/react';
-import { ArrowFatLeft, ArrowFatRight } from '@phosphor-icons/react';
+import {
+  ArrowFatLeft,
+  ArrowFatRight,
+  ArrowsClockwise,
+} from '@phosphor-icons/react';
 import { useTraitsStore, useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
 import clsx from 'clsx';
+import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
-
-type NavigationButtonProps = {
-  disabled: boolean;
-  'aria-label': string;
-};
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 export type MonthCalendarHeaderProps = {
   activeMonthLabel: string;
   activeYear: string;
-  prevButtonProps: NavigationButtonProps;
-  nextButtonProps: NavigationButtonProps;
-  onNavigateBack: () => void;
-  onNavigateForward: () => void;
-  onNavigateToMonth: (month: number) => void;
-  onNavigateToYear: (year: number) => void;
-  onResetFocusedDate: () => void;
 };
 
 const MONTHS = [
@@ -53,20 +47,29 @@ const YEARS = Array.from({ length: 31 }, (_, i) => 2000 + i);
 const MonthCalendarHeader = ({
   activeMonthLabel,
   activeYear,
-  prevButtonProps,
-  nextButtonProps,
-  onNavigateBack,
-  onNavigateForward,
-  onNavigateToMonth,
-  onNavigateToYear,
-  onResetFocusedDate,
 }: MonthCalendarHeaderProps) => {
   const { habits } = useHabitsStore();
   const { traits } = useTraitsStore();
   const { filteredBy, filterBy } = useOccurrencesStore();
   const user = useUser();
-  const screenSize = useScreenSize();
-  const isOnCurrentMonth = activeMonthLabel === MONTHS[new Date().getMonth()];
+  const { screenWidth, isDesktop, isMobile } = useScreenWidth();
+  const isOnCurrentMonth =
+    activeMonthLabel === MONTHS[new Date().getMonth()] &&
+    activeYear === new Date().getFullYear().toString();
+  const { year, month, day } = useParams();
+  const navigate = useNavigate();
+
+  const focusedDate = React.useMemo(() => {
+    if (!year || !month || !day) {
+      return new Date();
+    }
+
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }, [year, month, day]);
+
+  const prevMonth = startOfMonth(addMonths(focusedDate, -1));
+  const nextMonth = startOfMonth(addMonths(focusedDate, 1));
+  const today = startOfToday();
 
   const shouldRenderFilters = !!user && habits.length > 0 && traits.length > 0;
 
@@ -77,13 +80,17 @@ const MonthCalendarHeader = ({
   const handleMonthChange: React.ChangeEventHandler<HTMLSelectElement> = (
     event
   ) => {
-    onNavigateToMonth(MONTHS.indexOf(event.target.value) + 1);
+    navigate(
+      `/calendar/month/${focusedDate.getFullYear()}/${MONTHS.indexOf(event.target.value) + 1}/${focusedDate.getDate()}`
+    );
   };
 
   const handleYearChange: React.ChangeEventHandler<HTMLSelectElement> = (
     event
   ) => {
-    onNavigateToYear(+event.target.value);
+    navigate(
+      `/calendar/month/${event.target.value}/${focusedDate.getMonth() + 1}/${focusedDate.getDate()}`
+    );
   };
 
   const handleHabitsFilterChange: React.ChangeEventHandler<
@@ -103,9 +110,6 @@ const MonthCalendarHeader = ({
       traitIds: new Set(event.target.value.split(',')),
     });
   };
-
-  const isMobile = screenSize < 768;
-  const isDesktop = screenSize > 1024;
 
   return (
     <div className="flex items-stretch justify-between px-0 pt-2 lg:px-0 lg:pt-0">
@@ -148,20 +152,21 @@ const MonthCalendarHeader = ({
             }}
           >
             {YEARS.map((year) => (
-              <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
+              <SelectItem as={Link} key={year.toString()}>
+                {year.toString()}
+              </SelectItem>
             ))}
           </Select>
         </div>
         <div className="flex items-stretch gap-0 lg:gap-2">
           <Button
             isIconOnly
+            as={Link}
+            to={`/calendar/month/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}/${prevMonth.getDate()}`}
             size={isDesktop ? 'md' : 'sm'}
             radius="sm"
             variant="light"
             color="secondary"
-            isDisabled={prevButtonProps.disabled}
-            aria-label={prevButtonProps['aria-label']}
-            onClick={onNavigateBack}
             className={clsx(
               'h-auto dark:text-secondary-600',
               isMobile && 'w-6 min-w-fit p-0'
@@ -172,25 +177,26 @@ const MonthCalendarHeader = ({
           </Button>
           {!isMobile && !isOnCurrentMonth && (
             <Button
+              as={Link}
               size={isDesktop ? 'md' : 'sm'}
               radius="sm"
-              variant="bordered"
+              variant="light"
               color="secondary"
-              onClick={onResetFocusedDate}
               className="h-auto"
+              to={`/calendar/month/${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`}
+              startContent={<ArrowsClockwise size={isDesktop ? 16 : 12} />}
             >
               Today
             </Button>
           )}
           <Button
+            as={Link}
             isIconOnly
             size={isDesktop ? 'md' : 'sm'}
             variant="light"
             color="secondary"
             radius="sm"
-            isDisabled={nextButtonProps.disabled}
-            aria-label={nextButtonProps['aria-label']}
-            onClick={onNavigateForward}
+            to={`/calendar/month/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}/${nextMonth.getDate()}`}
             className={clsx('h-auto', isMobile && 'w-6 min-w-fit p-0')}
             role="navigate-forward"
           >
@@ -240,7 +246,7 @@ const MonthCalendarHeader = ({
                     key={id}
                     src={iconUrl}
                     alt={`${name} icon`}
-                    className={clsx('h-4 w-4', screenSize < 400 && 'h-3 w-3')}
+                    className={clsx('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
                   />
                 );
               });
@@ -294,7 +300,7 @@ const MonthCalendarHeader = ({
               label: '!-translate-y-2',
             }}
             popoverProps={{
-              crossOffset: screenSize < 768 ? -75 : 0,
+              crossOffset: isMobile ? -75 : 0,
             }}
             renderValue={(selectedTraits: SelectedItems<Trait>) => {
               return selectedTraits.map(({ key }) => {

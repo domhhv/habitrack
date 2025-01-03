@@ -14,6 +14,7 @@ export default {
     '@models': '<rootDir>/src/models',
     '@stores': '<rootDir>/src/stores',
     '@tests': '<rootDir>/tests',
+    '@root/tailwind.config': '<rootDir>/tailwind.config.ts',
   },
   transform: {
     '\\.[jt]sx?$': 'babel-jest',

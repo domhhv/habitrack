@@ -1,4 +1,4 @@
-import { useScreenSize } from '@hooks';
+import { useScreenWidth } from '@hooks';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestOccurrence } from '@tests';
 import { getHabitIconUrl } from '@utils';
@@ -7,7 +7,7 @@ import React from 'react';
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
 
 jest.mock('@hooks', () => ({
-  useScreenSize: jest.fn(),
+  useScreenWidth: jest.fn(),
 }));
 
 jest.mock('@stores', () => ({
@@ -15,6 +15,10 @@ jest.mock('@stores', () => ({
   useNotesStore: jest.fn().mockReturnValue({
     notes: [],
   }),
+}));
+
+jest.mock('@hooks', () => ({
+  useScreenWidth: jest.fn().mockReturnValue({ screenWidth: 1000 }),
 }));
 
 describe(OccurrenceChip.name, () => {
@@ -49,7 +53,7 @@ describe(OccurrenceChip.name, () => {
   });
 
   it('should not render delete button on small screens', () => {
-    (useScreenSize as jest.Mock).mockReturnValue(1024);
+    (useScreenWidth as jest.Mock).mockReturnValue({ screenWidth: 1024 });
     const { queryByRole } = render(<OccurrenceChip {...props} />);
     const chipDelete = queryByRole('habit-chip-delete-button');
     expect(chipDelete).toBeNull();

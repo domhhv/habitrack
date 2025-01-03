@@ -159,7 +159,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         ),
       }));
     },
-    onRangeChange: (range: [number, number]) => set({ range }),
+    onRangeChange: (range: [number, number]) => set(() => ({ range })),
     updateOccurrences: (
       allOccurrences: Occurrence[],
       filteredBy: OccurrenceFilters

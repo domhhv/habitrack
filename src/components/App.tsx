@@ -25,8 +25,14 @@ const App = () => {
       <AppHeader />
       <main className="flex h-full flex-1 flex-col items-start bg-background">
         <Routes>
-          <Route path="/calendar/month" element={<MonthCalendar />} />
-          <Route path="/calendar/week" element={<WeekCalendar />} />
+          <Route
+            path="/calendar/month/:year?/:month?/:day?"
+            element={<MonthCalendar />}
+          />
+          <Route
+            path="/calendar/week/:year?/:month?/:day?"
+            element={<WeekCalendar />}
+          />
           <Route path="/habits" element={<HabitsPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/calendar/month" replace />} />

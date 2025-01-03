@@ -1,12 +1,13 @@
-import { getYearWeekNumberFromMonthWeek } from '@helpers';
+import { getMonthIndex, getYearWeekNumberFromMonthWeek } from '@helpers';
 import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
 import { Button } from '@nextui-org/react';
 import { isTruthy } from '@utils';
 import clsx from 'clsx';
+import { addMonths, isSameMonth } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { type CalendarState } from 'react-stately';
 
 import type { CellPosition, CellRangeStatus } from './MonthCalendarCell';
@@ -37,8 +38,7 @@ const MonthCalendarGrid = ({
   const { locale } = useLocale();
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
-  const { month: activeMonth } = state.visibleRange.start;
-  const { pathname } = useLocation();
+  const visibleMonth = new Date(activeYear, getMonthIndex(activeMonthLabel), 1);
 
   const getCellPosition = (
     weekIndex: number,
@@ -85,6 +85,7 @@ const MonthCalendarGrid = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
         >
           {weekIndexes.map((weekIndex) => {
             const { week } = getYearWeekNumberFromMonthWeek(
@@ -106,17 +107,7 @@ const MonthCalendarGrid = ({
                     'absolute -left-[24px] bottom-0 h-[107px] w-[20px] min-w-fit p-0 md:-left-[48px] md:w-[40px]'
                   )}
                   variant="light"
-                  to="/calendar/week"
-                  state={{
-                    prevPathname: pathname,
-                    month: activeMonth,
-                    year: activeYear,
-                    startDate: new Date(
-                      firstDate.year,
-                      firstDate.month - 1,
-                      firstDate.day
-                    ),
-                  }}
+                  to={`/calendar/week/${firstDate.year}/${firstDate.month}/${firstDate.day}`}
                 >
                   {week}
                 </Button>
@@ -136,15 +127,20 @@ const MonthCalendarGrid = ({
 
                       const { month, day, year } = calendarDate;
 
-                      const rangeStatus: CellRangeStatus =
-                        (month < activeMonth ||
-                          (month === 12 && activeMonth === 1)) &&
-                        month !== 1
+                      const date = new Date(year, month - 1, day);
+                      const prevMonth = addMonths(visibleMonth, -1);
+                      const nextMonth = addMonths(visibleMonth, 1);
+
+                      const rangeStatus: CellRangeStatus = isSameMonth(
+                        date,
+                        visibleMonth
+                      )
+                        ? 'in-range'
+                        : isSameMonth(date, prevMonth)
                           ? 'below-range'
-                          : month > activeMonth ||
-                              (month === 1 && activeMonth === 12)
+                          : isSameMonth(date, nextMonth)
                             ? 'above-range'
-                            : 'in-range';
+                            : '';
 
                       const [cellKey] = calendarDate.toString().split('T');
 
@@ -153,15 +149,15 @@ const MonthCalendarGrid = ({
                       return (
                         <MonthCalendarCell
                           key={cellKey}
-                          dateNumber={day}
-                          monthNumber={month}
-                          fullYear={year}
-                          onAddOccurrence={onAddOccurrence}
-                          onAddNote={onAddNote}
+                          state={state}
+                          visibleMonth={visibleMonth}
+                          date={calendarDate}
+                          onAddOccurrence={() =>
+                            onAddOccurrence(day, month, year)
+                          }
+                          onAddNote={() => onAddNote(day, month, year)}
                           rangeStatus={rangeStatus}
                           position={position}
-                          onNavigateBack={state.focusPreviousPage}
-                          onNavigateForward={state.focusNextPage}
                         />
                       );
                     })}

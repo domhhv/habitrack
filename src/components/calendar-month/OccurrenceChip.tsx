@@ -1,4 +1,4 @@
-import { useScreenSize } from '@hooks';
+import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { Badge, Button, Tooltip } from '@nextui-org/react';
 import { Note, Trash } from '@phosphor-icons/react';
@@ -38,7 +38,7 @@ const OccurrenceChip = ({
   const occurrenceNotes = notes.filter(
     (n) => n.occurrenceId && occurrenceIds.includes(n.occurrenceId)
   );
-  const screenSize = useScreenSize();
+  const { screenWidth } = useScreenWidth();
 
   const chipStyle = {
     borderColor: colorOverride || traitColor,
@@ -97,7 +97,7 @@ const OccurrenceChip = ({
         style={chipStyle}
         className={clsx(
           'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 dark:bg-slate-800 md:mb-1 md:mr-1',
-          screenSize < 400 && 'p-1'
+          screenWidth < 400 && 'p-1'
         )}
         role="habit-chip"
         onClick={(e) => {
@@ -111,7 +111,7 @@ const OccurrenceChip = ({
         <img
           src={iconUrl}
           alt={`${habitName} icon`}
-          className={clsx('h-4 w-4', screenSize < 400 && 'h-3 w-3')}
+          className={clsx('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
         />
       </div>
     </Tooltip>
