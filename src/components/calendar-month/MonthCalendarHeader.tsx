@@ -3,6 +3,7 @@ import { useScreenWidth } from '@hooks';
 import type { Habit, Trait } from '@models';
 import type { SelectedItems } from '@nextui-org/react';
 import {
+  Tooltip,
   ListboxItem,
   Select,
   SelectItem,
@@ -242,12 +243,16 @@ const MonthCalendarHeader = ({
                 const iconUrl = getHabitIconUrl(iconPath);
 
                 return (
-                  <img
-                    key={id}
-                    src={iconUrl}
-                    alt={`${name} icon`}
-                    className={clsx('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
-                  />
+                  <Tooltip key={id} content={name}>
+                    <img
+                      src={iconUrl}
+                      alt={`${name} icon`}
+                      className={clsx(
+                        'h-4 w-4',
+                        screenWidth < 400 && 'h-3 w-3'
+                      )}
+                    />
+                  </Tooltip>
                 );
               });
             }}
