@@ -168,10 +168,7 @@ const MonthCalendarHeader = ({
             radius="sm"
             variant="light"
             color="secondary"
-            className={clsx(
-              'h-auto dark:text-secondary-600',
-              isMobile && 'w-6 min-w-fit p-0'
-            )}
+            className={clsx('h-auto', isMobile && 'w-6 min-w-fit p-0')}
             role="navigate-back"
           >
             <ArrowFatLeft size={isDesktop ? 20 : 16} />

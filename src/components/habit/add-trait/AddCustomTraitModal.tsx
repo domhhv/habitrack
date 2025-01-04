@@ -71,21 +71,21 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             You can define a custom trait for your habits (e g. Moderately Bad)
           </p>
           <Input
-            variant="bordered"
+            variant="faded"
             value={label}
             onChange={handleLabelChange}
             isDisabled={addingTrait}
             label="Trait Label"
           />
           <Input
-            variant="bordered"
+            variant="faded"
             value={slug}
             onChange={handleSlugChange}
             isDisabled={addingTrait}
             label="Trait Slug"
           />
           <Textarea
-            variant="bordered"
+            variant="faded"
             value={description}
             onChange={handleDescriptionChange}
             isDisabled={addingTrait}
@@ -95,7 +95,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             <HexColorPicker color={color} onChange={handleTraitColorChange} />
             <div className="flex w-1/2 flex-col gap-2">
               <Input
-                variant="bordered"
+                variant="faded"
                 value={color.slice(1)}
                 onChange={(event) => handleTraitColorChange(event.target.value)}
                 startContent="#"
@@ -103,11 +103,13 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
               <p className="text-sm">
                 This is how habits of this trait will appear on your calendar
               </p>
-              <OccurrenceChip
-                occurrences={[makeTestOccurrence()]}
-                onDelete={() => null}
-                colorOverride={color}
-              />
+              <div className="flex">
+                <OccurrenceChip
+                  interactable={false}
+                  occurrences={[makeTestOccurrence()]}
+                  colorOverride={color}
+                />
+              </div>
             </div>
           </div>
         </ModalBody>

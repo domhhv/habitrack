@@ -28,9 +28,7 @@ const ThemeToggle = () => {
       {Object.values(ThemeMode).map((mode) => {
         const isSelected = themeMode === mode;
         const iconClassName = clsx(isSelected && 'text-white');
-        const buttonClassName = clsx(
-          isSelected && 'bg-secondary-500 dark:bg-secondary-600'
-        );
+        const buttonClassName = clsx(isSelected && 'bg-secondary-500');
 
         const Icon = modesToIcons[mode];
 

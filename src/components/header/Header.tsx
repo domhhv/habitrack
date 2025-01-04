@@ -3,7 +3,6 @@ import { useScreenWidth, useFetchOnAuth } from '@hooks';
 import { Button, Tooltip, Spinner } from '@nextui-org/react';
 import { GithubLogo } from '@phosphor-icons/react';
 import { useSessionContext } from '@supabase/auth-helpers-react';
-import clsx from 'clsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -28,11 +27,10 @@ const Header = () => {
           </div>
         </div>
       )}
-      <header className="border-b border-b-slate-300 bg-background brightness-[95%] dark:border-b-slate-800 dark:brightness-[90%]">
+      <header className="border-b border-b-slate-300 bg-background-100 dark:border-b-slate-800 dark:dark:bg-background-900">
         <div className="mx-auto flex w-full items-center justify-between gap-2 px-8 py-2 lg:gap-4 lg:px-16 lg:py-4">
           <div className="flex items-center gap-2">
             <Button
-              variant="flat"
               color="primary"
               as={Link}
               to="/calendar/month"
@@ -43,14 +41,9 @@ const Header = () => {
             </Button>
             <Button
               color="secondary"
-              variant="flat"
               as={Link}
               to="/habits"
               size={isDesktop ? 'md' : 'sm'}
-              className={clsx(
-                'dark:text-secondary-800',
-                screenWidth < 339 && 'min-w-fit px-2'
-              )}
             >
               Habits
             </Button>

@@ -43,17 +43,17 @@ const Alert = ({
   const alertClassName = clsx(
     'flex items-center gap-2 rounded-md border px-4 py-2',
     color === 'default' &&
-      'border-neutral-300 bg-slate-50 text-slate-700 dark:border-neutral-700 dark:bg-slate-900 dark:text-slate-100',
+      'border-default-300 bg-default-50 text-default-700 dark:border-default-700 dark:bg-default-900 dark:text-default-100',
     color === 'primary' &&
-      'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-900 dark:text-blue-200',
+      'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900 dark:text-primary-200',
     color === 'secondary' &&
-      'border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-700 dark:bg-purple-900 dark:text-purple-200',
+      'border-secondary-200 bg-secondary-100 text-secondary-700 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-200',
     color === 'success' &&
-      'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900 dark:text-green-200',
+      'border-success-500 bg-success-300 text-success-800 dark:border-success-800 dark:bg-success-900 dark:text-success-200',
     color === 'warning' &&
-      'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-950 dark:text-orange-200',
+      'border-warning-600 bg-warning-400 text-warning-800 dark:border-warning-900 dark:bg-warning-800 dark:text-warning-200',
     color === 'danger' &&
-      'border-red-200 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-900 dark:text-red-200'
+      'border-danger-200 bg-danger-50 text-danger-700 dark:border-danger-700 dark:bg-danger-900 dark:text-danger-200'
   );
 
   const Icon = ICONS_BY_COLOR[color];

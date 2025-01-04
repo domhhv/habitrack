@@ -121,7 +121,7 @@ const AddHabitDialogButton = () => {
               ))}
             </Select>
             <Button
-              variant="bordered"
+              variant="ghost"
               size="sm"
               color="secondary"
               startContent={<Plus />}
@@ -132,7 +132,6 @@ const AddHabitDialogButton = () => {
             <Button
               fullWidth
               as="label"
-              variant="flat"
               size="sm"
               color="secondary"
               startContent={<CloudArrowUp />}
