@@ -10,6 +10,7 @@ import {
   endOfWeek,
   getISOWeekYear,
   getWeek,
+  startOfToday,
 } from 'date-fns';
 import { motion } from 'framer-motion';
 import React from 'react';
@@ -20,19 +21,30 @@ import OccurrenceChip from '../calendar-month/OccurrenceChip';
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const WeekCalendar = () => {
-  const { year, month, day } = useParams();
-  const { occurrences } = useOccurrencesStore();
+  const params = useParams();
+  const { occurrences, onRangeChange } = useOccurrencesStore();
   const [startOfTheWeek, setStartOfTheWeek] = React.useState(new Date());
 
   React.useEffect(() => {
-    if (!year || !month || !day) {
-      return;
-    }
+    const currentWeek = startOfWeek(startOfToday());
+
+    const {
+      year = currentWeek.getFullYear(),
+      month = currentWeek.getMonth() + 1,
+      day = currentWeek.getDate(),
+    } = params;
 
     const date = new Date(Number(year), Number(month) - 1, Number(day));
 
-    setStartOfTheWeek(startOfWeek(startOfDay(date)));
-  }, [year, month, day]);
+    const startDate = startOfWeek(startOfDay(date));
+
+    setStartOfTheWeek(startDate);
+
+    const rangeStart = startOfWeek(startDate);
+    const rangeEnd = endOfWeek(startDate);
+
+    onRangeChange([+rangeStart, +rangeEnd]);
+  }, [params, onRangeChange]);
 
   const days = eachDayOfInterval<Date>({
     start: startOfTheWeek,

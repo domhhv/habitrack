@@ -4,7 +4,13 @@ import { useDisclosure } from '@nextui-org/react';
 import { useOccurrencesStore } from '@stores';
 import { capitalizeFirstLetter } from '@utils';
 import clsx from 'clsx';
-import { endOfMonth, endOfWeek, startOfMonth, startOfWeek } from 'date-fns';
+import {
+  endOfMonth,
+  endOfWeek,
+  startOfMonth,
+  startOfWeek,
+  startOfToday,
+} from 'date-fns';
 import React from 'react';
 import { useCalendar, useLocale } from 'react-aria';
 import { useParams } from 'react-router-dom';
@@ -49,13 +55,15 @@ const MonthCalendar = () => {
   const params = useParams();
 
   React.useEffect(() => {
-    const { year, month, day } = params;
+    const currentMonth = startOfMonth(startOfToday());
 
-    if (!year || !month || !day) {
-      return;
-    }
+    const {
+      year = currentMonth.getFullYear(),
+      month = currentMonth.getMonth() + 1,
+      day = currentMonth.getDate(),
+    } = params;
 
-    const focusedDate = new Date(Number(year), Number(month) - 1, 1);
+    const focusedDate = new Date(Number(year), Number(month) - 1, Number(day));
 
     const rangeStart = startOfWeek(startOfMonth(focusedDate));
     const rangeEnd = endOfWeek(endOfMonth(focusedDate));
