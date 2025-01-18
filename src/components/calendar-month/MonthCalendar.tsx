@@ -92,8 +92,8 @@ const MonthCalendar = () => {
 
   const handleOccurrenceModalClose = () => {
     window.setTimeout(() => {
-      closeOccurrenceDialog();
       setActiveDate(null);
+      closeOccurrenceDialog();
     }, 0);
   };
 
@@ -102,14 +102,14 @@ const MonthCalendar = () => {
     monthIndex: number,
     fullYear: number
   ) => {
-    openOccurrenceDialog();
     setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
+    openOccurrenceDialog();
   };
 
   const handleNoteModalClose = () => {
     window.setTimeout(() => {
-      closeNoteDialog();
       setActiveDate(null);
+      closeNoteDialog();
     }, 0);
   };
 

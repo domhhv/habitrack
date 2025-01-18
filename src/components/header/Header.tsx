@@ -16,7 +16,7 @@ const Header = () => {
   return (
     <>
       {session.isLoading && (
-        <div className="absolute bottom-0 left-0 right-0 top-0 z-50 flex h-full flex-1 items-center justify-center bg-slate-50 opacity-90 dark:bg-slate-950">
+        <div className="absolute bottom-0 left-0 right-0 top-0 z-50 flex h-full flex-1 items-center justify-center bg-background-100 opacity-90 dark:bg-background-800">
           <div className="flex -translate-y-[73px] items-center justify-center">
             <Spinner
               color="primary"

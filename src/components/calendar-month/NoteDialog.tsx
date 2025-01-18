@@ -42,10 +42,10 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
   });
 
   React.useEffect(() => {
-    if (existingNote) {
+    if (existingNote?.content && !content) {
       setContent(existingNote.content);
     }
-  }, [existingNote]);
+  }, [existingNote, content]);
 
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
