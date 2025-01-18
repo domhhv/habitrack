@@ -48,7 +48,7 @@ const useAccountPage = () => {
 
   React.useEffect(() => {
     setForbidden(!loading && !user);
-  }, [user, loading, fillInputs]);
+  }, [user, loading]);
 
   const updateAccount = async () => {
     try {

@@ -36,6 +36,7 @@ export const listOccurrences = async (
   const { error, data } = await supabaseClient
     .from('occurrences')
     .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
+    .order('timestamp')
     .gt('timestamp', range[0])
     .lt('timestamp', range[1]);
 

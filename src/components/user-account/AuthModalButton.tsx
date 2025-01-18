@@ -116,22 +116,21 @@ const AuthModalButton = () => {
       {user?.id ? (
         <ButtonGroup size={screenWidth > 1024 ? 'md' : 'sm'}>
           <Button
+            color="secondary"
             isIconOnly={screenWidth < 1024}
             as={Link}
             to="/account"
             data-testid="auth-button"
-            variant="flat"
             startContent={<UserIcon data-testid="user-icon" weight="bold" />}
           >
             {screenWidth > 1024 && 'Account'}
           </Button>
           <Tooltip content="Log out">
             <Button
+              color="secondary"
               onPress={signOut}
               isIconOnly
-              color="secondary"
-              variant="flat"
-              className="border-l dark:border-secondary-400 dark:text-secondary-800"
+              className="border-l border-background-100 dark:border-background-900"
               startContent={
                 <SignOutIcon data-testid="sign-out-icon" weight="bold" />
               }
