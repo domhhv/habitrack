@@ -28,7 +28,13 @@ import HabitLastEntryCell from './HabitLastEntryCell';
 import HabitLongestStreakCell from './HabitLongestStreakCell';
 import HabitsTotalEntriesCell from './HabitsTotalEntriesCell';
 
-const habitColumns = [
+type Column = {
+  key: string;
+  label: string;
+  align?: 'start' | 'center' | 'end';
+};
+
+const habitColumns: Column[] = [
   {
     key: 'icon',
     label: 'Icon',
@@ -56,10 +62,12 @@ const habitColumns = [
   {
     key: 'total-entries',
     label: 'Total entries',
+    align: 'center',
   },
   {
     key: 'actions',
     label: 'Actions',
+    align: 'end',
   },
 ];
 
@@ -101,7 +109,7 @@ const HabitsPage = () => {
 
   return (
     <>
-      <h1 className="mx-auto my-4 text-3xl font-bold text-gray-800 dark:text-gray-300">
+      <h1 className="mx-auto mb-4 mt-8 text-3xl font-bold text-gray-800 dark:text-gray-300">
         Your habits
       </h1>
       <Table
@@ -116,7 +124,9 @@ const HabitsPage = () => {
       >
         <TableHeader columns={habitColumns}>
           {(column) => (
-            <TableColumn key={column.key}>{column.label}</TableColumn>
+            <TableColumn key={column.key} align={column.align || 'start'}>
+              {column.label}
+            </TableColumn>
           )}
         </TableHeader>
         <TableBody emptyContent="No habits yet">
@@ -145,11 +155,11 @@ const HabitsPage = () => {
               <TableCell>
                 <HabitLongestStreakCell id={habit.id} />
               </TableCell>
-              <TableCell>
+              <TableCell align="center">
                 <HabitsTotalEntriesCell id={habit.id} />
               </TableCell>
               <TableCell>
-                <div className="flex gap-2">
+                <div className="flex justify-end gap-2">
                   <Tooltip content="Edit habit">
                     <Button
                       isIconOnly

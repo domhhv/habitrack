@@ -1,5 +1,5 @@
 import { cacheOccurrences, occurrencesCache, supabaseClient } from '@helpers';
-import type { Occurrence, OccurrencesInsert } from '@models';
+import type { Occurrence, OccurrencesInsert, Streak } from '@models';
 import {
   transformClientEntity,
   transformServerEntities,
@@ -89,22 +89,18 @@ export const getLatestHabitOccurrenceTimestamp = async (habitId: number) => {
   return timestamp;
 };
 
-export const getLongestHabitStreak = async (habitId: number) => {
+export const getLongestHabitStreak = async (
+  habitId: number
+): Promise<Streak> => {
   const { error, data } = await supabaseClient.rpc('get_longest_streak', {
-    habit_identifier: habitId,
+    p_habit_id: habitId,
   });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  if (!data?.length) {
-    return null;
-  }
-
-  const [{ streak_length: streakLength }] = data;
-
-  return streakLength;
+  return transformServerEntity(data);
 };
 
 export const getHabitTotalEntries = async (habitId: number) => {
