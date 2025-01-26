@@ -1,6 +1,12 @@
+import { Tooltip } from '@nextui-org/react';
 import { getLatestHabitOccurrenceTimestamp } from '@services';
 import { capitalizeFirstLetter } from '@utils';
-import { formatDistanceStrict, formatRelative, isThisWeek } from 'date-fns';
+import {
+  format,
+  formatDistanceStrict,
+  formatRelative,
+  isThisWeek,
+} from 'date-fns';
 import { enGB } from 'date-fns/locale';
 import React from 'react';
 
@@ -39,11 +45,18 @@ const HabitLastEntryCell = ({ id }: { id: number }) => {
   };
 
   return latestOccurrenceTimestamp ? (
-    <p>
-      {capitalizeFirstLetter(formatRelativeDate(latestOccurrenceTimestamp))}
-    </p>
+    <Tooltip
+      content={format(new Date(latestOccurrenceTimestamp), 'MMMM do, y')}
+      color="primary"
+      showArrow
+      offset={12}
+    >
+      <span>
+        {capitalizeFirstLetter(formatRelativeDate(latestOccurrenceTimestamp))}
+      </span>
+    </Tooltip>
   ) : (
-    <p className="text-gray-400">None</p>
+    <span className="text-gray-400">None</span>
   );
 };
 

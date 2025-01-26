@@ -913,21 +913,20 @@ export type Database = {
     Functions: {
       get_longest_streak: {
         Args: {
-          habit_identifier: number
+          p_habit_id: number
         }
-        Returns: {
-          habit_id: number
-          streak_start: string
-          streak_end: string
-          streak_length: number
-        }[]
+        Returns: Database["public"]["CompositeTypes"]["streak_info"]
       }
     }
     Enums: {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      streak_info: {
+        streak_length: number | null
+        streak_start: number | null
+        streak_end: number | null
+      }
     }
   }
   storage: {

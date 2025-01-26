@@ -1,21 +1,41 @@
+import type { Streak } from '@models';
+import { Tooltip } from '@nextui-org/react';
 import { getLongestHabitStreak } from '@services';
 import React from 'react';
 
+const options: Intl.DateTimeFormatOptions = {
+  weekday: 'short',
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+};
+
+const dateTimeFormat = new Intl.DateTimeFormat('en', options);
+
 const HabitLongestStreakCell = ({ id }: { id: number }) => {
-  const [longestStreakLength, setLongestStreakLength] = React.useState<
-    number | null
-  >(null);
+  const [longestStreak, setLongestStreak] = React.useState<Streak>({
+    streakLength: null,
+    streakStart: null,
+    streakEnd: null,
+  });
 
   React.useEffect(() => {
-    getLongestHabitStreak(id).then((streakLength) => {
-      setLongestStreakLength(streakLength);
+    getLongestHabitStreak(id).then((longestStreak) => {
+      setLongestStreak(longestStreak);
     });
   }, [id]);
 
-  return longestStreakLength ? (
-    <p>{longestStreakLength} days</p>
+  const range = dateTimeFormat.formatRange(
+    new Date(longestStreak.streakStart || 0),
+    new Date(longestStreak.streakEnd || 0)
+  );
+
+  return longestStreak.streakLength ? (
+    <Tooltip content={range} color="primary" showArrow offset={12}>
+      <span>{longestStreak.streakLength} days</span>
+    </Tooltip>
   ) : (
-    <p className="text-gray-400">None</p>
+    <span className="text-gray-400">None</span>
   );
 };
 

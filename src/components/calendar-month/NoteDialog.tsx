@@ -45,6 +45,10 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
     if (existingNote?.content && !content) {
       setContent(existingNote.content);
     }
+
+    return () => {
+      setContent('');
+    };
   }, [existingNote, content]);
 
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
