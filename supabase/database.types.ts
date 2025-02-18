@@ -924,8 +924,8 @@ export type Database = {
     CompositeTypes: {
       streak_info: {
         streak_length: number | null
-        streak_start: number | null
-        streak_end: number | null
+        streak_start: string | null
+        streak_end: string | null
       }
     }
   }

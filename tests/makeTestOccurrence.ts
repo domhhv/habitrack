@@ -20,6 +20,7 @@ const makeTestOccurrence = () => {
           color: '#000000',
         },
       },
+      notes: [],
       ...override,
     };
   };

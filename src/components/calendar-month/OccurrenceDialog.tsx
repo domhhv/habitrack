@@ -18,25 +18,32 @@ import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
-import { format } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 import React, { type MouseEventHandler } from 'react';
 import { Link } from 'react-router-dom';
+import type { RequireAtLeastOne } from 'type-fest';
 
-type AddOccurrenceDialogProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  date: Date | null;
-};
+type OccurrenceDialogProps = RequireAtLeastOne<
+  {
+    isOpen: boolean;
+    onClose: () => void;
+    date: Date | null;
+    occurrenceId: number | null;
+  },
+  'date' | 'occurrenceId'
+>;
 
 const OccurrenceDialog = ({
   isOpen,
   onClose,
   date,
-}: AddOccurrenceDialogProps) => {
+  occurrenceId,
+}: OccurrenceDialogProps) => {
   const user = useUser();
   const { habits } = useHabitsStore();
   const { addNote, addingNote } = useNotesStore();
-  const { addOccurrence, addingOccurrence } = useOccurrencesStore();
+  const { occurrences, addOccurrence, addingOccurrence } =
+    useOccurrencesStore();
   const [note, setNote] = React.useState('');
   const [selectedHabitId, setSelectedHabitId] = React.useState<
     Selection & { currentKey?: string }
@@ -50,19 +57,41 @@ const OccurrenceDialog = ({
   const hasHabits = habits.length > 0;
 
   React.useEffect(() => {
-    if (!date) {
+    if (!date && !occurrenceId) {
       setTime(parseAbsoluteToLocal(new Date().toISOString()));
       return;
     }
 
-    const occurrenceDateTime = new Date();
+    if (occurrenceId) {
+      const occurrence = occurrences.find((o) => o.id === occurrenceId);
 
-    occurrenceDateTime.setFullYear(date.getFullYear());
-    occurrenceDateTime.setMonth(date.getMonth());
-    occurrenceDateTime.setDate(date.getDate());
+      if (!occurrence) {
+        return;
+      }
 
-    setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
-  }, [date]);
+      setSelectedHabitId(new Set([occurrence.habitId.toString()]));
+      setNote(occurrence.notes[0]?.content || '');
+      setTime(
+        parseAbsoluteToLocal(new Date(occurrence.timestamp).toISOString())
+      );
+
+      return;
+    }
+
+    if (date) {
+      const occurrenceDateTime = new Date();
+
+      occurrenceDateTime.setFullYear(date.getFullYear());
+      occurrenceDateTime.setMonth(date.getMonth());
+      occurrenceDateTime.setDate(date.getDate());
+
+      setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
+    }
+  }, [date, occurrenceId, occurrences]);
+
+  if (!isOpen) {
+    return null;
+  }
 
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
@@ -103,6 +132,22 @@ const OccurrenceDialog = ({
     onClose();
   };
 
+  const formatDate = () => {
+    const dateToFormat =
+      date ||
+      new Date(occurrences.find((o) => o.id === occurrenceId)?.timestamp || '');
+
+    if (isToday(dateToFormat)) {
+      return 'today';
+    }
+
+    if (isYesterday(dateToFormat)) {
+      return 'yesterday';
+    }
+
+    return format(dateToFormat || '', 'iii, LLL d, y');
+  };
+
   return (
     <Modal
       role="add-occurrence-modal"
@@ -110,11 +155,11 @@ const OccurrenceDialog = ({
       onClose={handleClose}
       isDismissable={false}
       placement="center"
-      onClick={(e) => e.stopPropagation()}
+      // onClick={(e) => e.stopPropagation()}
     >
       <ModalContent>
         <ModalHeader>
-          {date && `Add habit entry for ${format(date || '', 'iii, LLL d, y')}`}
+          {occurrenceId ? 'Edit' : 'Add'} habit entry for {formatDate()}
         </ModalHeader>
         <ModalBody>
           <Select

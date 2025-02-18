@@ -14,7 +14,9 @@ export const createOccurrence = async (
   const { error, data } = await supabaseClient
     .from('occurrences')
     .insert(serverBody)
-    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
+    .select(
+      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(content)'
+    )
     .single();
 
   if (error) {
@@ -35,7 +37,9 @@ export const listOccurrences = async (
 
   const { error, data } = await supabaseClient
     .from('occurrences')
-    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
+    .select(
+      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(content)'
+    )
     .order('timestamp')
     .gt('timestamp', range[0])
     .lt('timestamp', range[1]);

@@ -1,4 +1,5 @@
 import type { CalendarDay } from '@helpers';
+import type { Note } from '@root/src/models/note.model';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 import type {
@@ -22,6 +23,8 @@ type HabitWithTrait = OccurrenceHabit & {
 
 export type Occurrence = BaseOccurrence & {
   habit: HabitWithTrait | null;
+} & {
+  notes: Pick<Note, 'content'>[];
 };
 
 export type OccurrencesDateMap = Record<CalendarDay, Occurrence[]>;
