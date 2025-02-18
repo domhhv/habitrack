@@ -1,13 +1,22 @@
-import { type CamelCasedPropertiesDeep } from 'type-fest';
+import type { RequireAtLeastOne, CamelCasedPropertiesDeep } from 'type-fest';
 
-import {
-  type Tables,
-  type TablesInsert,
-  type TablesUpdate,
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
 } from '../../supabase/database.types';
 
-export type Note = CamelCasedPropertiesDeep<Tables<'notes'>>;
+type NoteCheck<T extends Partial<Tables<'notes'>>> = RequireAtLeastOne<
+  T,
+  'day' | 'occurrence_id'
+>;
 
-export type NotesInsert = CamelCasedPropertiesDeep<TablesInsert<'notes'>>;
+export type Note = CamelCasedPropertiesDeep<NoteCheck<Tables<'notes'>>>;
 
-export type NotesUpdate = CamelCasedPropertiesDeep<TablesUpdate<'notes'>>;
+export type NotesInsert = CamelCasedPropertiesDeep<
+  NoteCheck<TablesInsert<'notes'>>
+>;
+
+export type NotesUpdate = CamelCasedPropertiesDeep<
+  NoteCheck<TablesUpdate<'notes'>>
+>;

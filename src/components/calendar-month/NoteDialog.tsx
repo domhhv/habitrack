@@ -15,10 +15,10 @@ import React, { type MouseEventHandler } from 'react';
 type NoteDialogProps = {
   open: boolean;
   onClose: () => void;
-  date: Date | null;
+  day: string | null;
 };
 
-const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
+const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
   const user = useUser();
   const [content, setContent] = React.useState('');
   const {
@@ -32,14 +32,7 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
     deletingNote,
   } = useNotesStore();
 
-  const existingNote = notes.find((note) => {
-    if (!date) {
-      return;
-    }
-
-    const [day] = date.toISOString().split('T');
-    return note.day === day;
-  });
+  const existingNote = notes.find((note) => note.day === day);
 
   React.useEffect(() => {
     if (existingNote?.content && !content) {
@@ -50,11 +43,9 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
-    if (!user || !date || fetchingNotes) {
+    if (!user || !day || fetchingNotes) {
       return null;
     }
-
-    const [day] = new Date(date).toISOString().split('T');
 
     if (!existingNote) {
       await addNote({
@@ -65,6 +56,7 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
     } else {
       await updateNote(existingNote.id, {
         content,
+        day,
       });
     }
 
@@ -90,7 +82,7 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
     <Modal isOpen={open} onClose={handleClose}>
       <ModalContent>
         <ModalHeader>
-          {date && `Add a note about ${format(date || '', 'iii, LLL d, y')}`}
+          {day && `Add a note about ${format(day || '', 'iii, LLL d, y')}`}
         </ModalHeader>
         <ModalBody>
           <Textarea
