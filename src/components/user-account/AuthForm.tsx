@@ -1,6 +1,6 @@
 import { PasswordInput, type AuthMode } from '@components';
-import { Input, Button } from '@heroui/react';
 import { useTextField } from '@hooks';
+import { Input, Button } from '@nextui-org/react';
 import clsx from 'clsx';
 import React from 'react';
 

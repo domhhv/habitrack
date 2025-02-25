@@ -1,3 +1,4 @@
+import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import {
   Button,
   Modal,
@@ -11,19 +12,14 @@ import {
   SelectItem,
   SelectSection,
   TimeInput,
-} from '@heroui/react';
-import type { TimeInputValue, ButtonProps } from '@heroui/react';
-import {
-  parseAbsoluteToLocal,
-  ZonedDateTime,
-  Time,
-} from '@internationalized/date';
+} from '@nextui-org/react';
+import type { TimeInputValue } from '@nextui-org/react';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
 import { format, isToday, isYesterday } from 'date-fns';
-import React, { type ChangeEventHandler } from 'react';
+import React, { type MouseEventHandler, type ChangeEventHandler } from 'react';
 import { Link } from 'react-router-dom';
 import type { RequireAtLeastOne } from 'type-fest';
 
@@ -71,8 +67,6 @@ const OccurrenceDialog = ({
 
   React.useEffect(() => {
     if (!date && !occurrenceId) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       setTime(parseAbsoluteToLocal(new Date().toISOString()));
       return;
     }
@@ -87,8 +81,6 @@ const OccurrenceDialog = ({
       setSelectedHabitId(occurrence.habitId.toString());
       setNote(occurrence.notes[0]?.content || '');
       setTime(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         parseAbsoluteToLocal(new Date(occurrence.timestamp).toISOString())
       );
 
@@ -102,8 +94,6 @@ const OccurrenceDialog = ({
       occurrenceDateTime.setMonth(date.getMonth());
       occurrenceDateTime.setDate(date.getDate());
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
     }
   }, [date, occurrenceId, occurrences]);
@@ -149,7 +139,9 @@ const OccurrenceDialog = ({
     return null;
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
+    event.preventDefault();
+
     if (
       !user ||
       !(date || occurrenceToUpdate) ||
@@ -243,19 +235,14 @@ const OccurrenceDialog = ({
     return format(dateToFormat || '', 'iii, LLL d, y');
   };
 
-  const submitButtonSharedProps: ButtonProps = {
-    color: 'primary',
-    isLoading:
-      addingOccurrence || addingNote || updatingOccurrence || updatingNote,
-    isDisabled: isSubmitButtonDisabled,
-  };
-
   return (
     <Modal
       role="add-occurrence-modal"
       isOpen={isOpen}
       onClose={handleClose}
+      isDismissable={false}
       placement="center"
+      // onClick={(e) => e.stopPropagation()}
     >
       <ModalContent>
         <ModalHeader>
@@ -314,22 +301,33 @@ const OccurrenceDialog = ({
               value={time}
               onChange={setTime}
               variant="faded"
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              maxValue={new Time()}
+              maxValue={parseAbsoluteToLocal(new Date().toISOString())}
             />
           </div>
         </ModalBody>
         <ModalFooter>
-          {hasHabits ? (
-            <Button {...submitButtonSharedProps} onPress={handleSubmit}>
-              {occurrenceToUpdate ? 'Update' : 'Add'}
-            </Button>
-          ) : (
-            <Button as={Link} to="/habits" {...submitButtonSharedProps}>
-              Go to Habits
-            </Button>
-          )}
+          <Button
+            as={hasHabits ? Button : Link}
+            type="submit"
+            color="primary"
+            isLoading={
+              addingOccurrence ||
+              addingNote ||
+              updatingOccurrence ||
+              updatingNote
+            }
+            onClick={hasHabits ? handleSubmit : undefined}
+            isDisabled={isSubmitButtonDisabled}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            to={hasHabits ? undefined : '/habits'}
+          >
+            {hasHabits
+              ? occurrenceToUpdate
+                ? 'Update'
+                : 'Add'
+              : 'Go to Habits'}
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

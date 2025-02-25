@@ -1,4 +1,5 @@
 import { OccurrenceChip } from '@components';
+import { useTextField } from '@hooks';
 import {
   Button,
   Input,
@@ -8,8 +9,7 @@ import {
   ModalFooter,
   ModalHeader,
   Textarea,
-} from '@heroui/react';
-import { useTextField } from '@hooks';
+} from '@nextui-org/react';
 import { useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { makeTestOccurrence } from '@tests';

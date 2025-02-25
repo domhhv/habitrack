@@ -1,5 +1,5 @@
 import { Alert } from '@components';
-import { Button } from '@heroui/react';
+import { Button } from '@nextui-org/react';
 import { useSnackbarsStore } from '@stores';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';

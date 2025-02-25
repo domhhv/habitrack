@@ -1,5 +1,5 @@
-import { Chip } from '@heroui/react';
 import type { Trait } from '@models';
+import { Chip } from '@nextui-org/react';
 import React from 'react';
 
 type TraitChipProps = {

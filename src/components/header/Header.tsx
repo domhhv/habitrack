@@ -1,6 +1,6 @@
 import { AuthModalButton } from '@components';
-import { Button, Tooltip, Spinner } from '@heroui/react';
 import { useScreenWidth, useFetchOnAuth } from '@hooks';
+import { Button, Tooltip, Spinner } from '@nextui-org/react';
 import { GithubLogo } from '@phosphor-icons/react';
 import { useSessionContext } from '@supabase/auth-helpers-react';
 import React from 'react';

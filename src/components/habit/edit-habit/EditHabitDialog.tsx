@@ -1,3 +1,5 @@
+import { useTextField } from '@hooks';
+import type { Habit } from '@models';
 import {
   Button,
   Input,
@@ -10,9 +12,7 @@ import {
   SelectItem,
   Textarea,
   useDisclosure,
-} from '@heroui/react';
-import { useTextField } from '@hooks';
-import type { Habit } from '@models';
+} from '@nextui-org/react';
 import { useHabitsStore, useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { toEventLike } from '@utils';
@@ -79,6 +79,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
       onClose={handleClose}
       role="edit-habit-modal"
       data-visible={isOpen.toString()}
+      isDismissable={!user?.id}
     >
       <ModalContent>
         <ModalHeader>Edit habit</ModalHeader>

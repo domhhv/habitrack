@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@internationalized/date": "^3.5.5",
-    "@heroui/react": "2.7.2",
+    "@nextui-org/react": "^2.4.8",
     "@phosphor-icons/react": "^2.1.7",
     "@supabase/auth-helpers-react": "^0.4.2",
     "@supabase/supabase-js": "^2.39.5",

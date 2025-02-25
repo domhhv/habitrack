@@ -4,7 +4,7 @@ import {
   ModalHeader,
   Modal,
   ModalContent,
-} from '@heroui/react';
+} from '@nextui-org/react';
 import React from 'react';
 
 type ConfirmDialogProps = {

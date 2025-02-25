@@ -1,4 +1,4 @@
-import { Button, Input } from '@heroui/react';
+import { Button, Input } from '@nextui-org/react';
 import { Eye, EyeSlash } from '@phosphor-icons/react';
 import React, { type ChangeEventHandler } from 'react';
 

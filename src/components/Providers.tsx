@@ -1,5 +1,5 @@
 import { supabaseClient } from '@helpers';
-import { HeroUIProvider } from '@heroui/react';
+import { NextUIProvider } from '@nextui-org/react';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import React, { type ReactNode } from 'react';
 import { I18nProvider } from 'react-aria';
@@ -14,7 +14,7 @@ const LowerProviders = React.memo(function WrappedProvider({
 }: ProviderProps) {
   const navigate = useNavigate();
 
-  return <HeroUIProvider navigate={navigate}>{children}</HeroUIProvider>;
+  return <NextUIProvider navigate={navigate}>{children}</NextUIProvider>;
 });
 
 const PotentialSupabaseProvider = React.memo(function WrappedProvider({

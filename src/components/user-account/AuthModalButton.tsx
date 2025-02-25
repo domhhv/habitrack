@@ -1,3 +1,4 @@
+import { useScreenWidth } from '@hooks';
 import {
   Button,
   ButtonGroup,
@@ -10,8 +11,7 @@ import {
   useDisclosure,
   VisuallyHidden,
   Tooltip,
-} from '@heroui/react';
-import { useScreenWidth } from '@hooks';
+} from '@nextui-org/react';
 import {
   SignOut as SignOutIcon,
   User as UserIcon,

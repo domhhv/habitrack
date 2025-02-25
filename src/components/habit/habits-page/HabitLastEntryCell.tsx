@@ -1,4 +1,4 @@
-import { Tooltip } from '@heroui/react';
+import { Tooltip } from '@nextui-org/react';
 import { getLatestHabitOccurrenceTimestamp } from '@services';
 import { capitalizeFirstLetter } from '@utils';
 import {
