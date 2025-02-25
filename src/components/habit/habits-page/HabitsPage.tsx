@@ -166,7 +166,7 @@ const HabitsPage = () => {
                       size="sm"
                       variant="bordered"
                       color="secondary"
-                      onClick={() => handleEditStart(habit)}
+                      onPress={() => handleEditStart(habit)}
                       role="edit-habit-button"
                       data-testid={`edit-habit-id-${habit.id}-button`}
                     >
@@ -179,7 +179,7 @@ const HabitsPage = () => {
                       size="sm"
                       color="danger"
                       variant="bordered"
-                      onClick={() => handleRemovalConfirmOpen(habit)}
+                      onPress={() => handleRemovalConfirmOpen(habit)}
                       isDisabled={!user?.id}
                       role="delete-habit-button"
                       data-testid={`delete-habit-id-${habit.id}-button`}

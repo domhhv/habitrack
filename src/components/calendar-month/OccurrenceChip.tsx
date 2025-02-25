@@ -70,7 +70,7 @@ const OccurrenceChip = ({
                   variant="light"
                   size="sm"
                   color="secondary"
-                  onClick={() => onEdit?.(t.occurrenceId)}
+                  onPress={() => onEdit?.(t.occurrenceId)}
                   className="h-6 w-6 min-w-0 rounded-lg"
                 >
                   <PencilSimple
@@ -83,7 +83,7 @@ const OccurrenceChip = ({
                   isIconOnly
                   variant="light"
                   color="danger"
-                  onClick={() => onDelete?.(t.occurrenceId)}
+                  onPress={() => onDelete?.(t.occurrenceId)}
                   role="habit-chip-delete-button"
                   className="h-6 w-6 min-w-0 rounded-lg"
                 >

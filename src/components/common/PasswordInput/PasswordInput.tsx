@@ -36,7 +36,7 @@ const PasswordInput = ({
         onReset ? (
           <Button
             className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
-            onClick={onReset}
+            onPress={onReset}
             disableAnimation
           >
             Forgot password?

@@ -71,7 +71,7 @@ const AuthForm = ({
             mode === 'reset-password' && (
               <Button
                 className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
-                onClick={goBackToLogin}
+                onPress={goBackToLogin}
                 disableAnimation
               >
                 Back to login
@@ -102,7 +102,7 @@ const AuthForm = ({
         )}
       </div>
       <div className="mt-4 flex justify-end gap-2">
-        <Button onClick={handleCancel} isDisabled={disabled} variant="flat">
+        <Button onPress={handleCancel} isDisabled={disabled} variant="flat">
           Cancel
         </Button>
         <Button

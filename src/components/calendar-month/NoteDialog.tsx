@@ -10,7 +10,7 @@ import {
 import { useNotesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
-import React, { type MouseEventHandler } from 'react';
+import React from 'react';
 
 type NoteDialogProps = {
   open: boolean;
@@ -46,9 +46,7 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
     }
   }, [open]);
 
-  const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
-    event.preventDefault();
-
+  const handleSubmit = async () => {
     if (!user || !day || fetchingNotes) {
       return null;
     }
@@ -103,7 +101,7 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
           {!!existingNote && (
             <Button
               color="danger"
-              onClick={handleDelete}
+              onPress={handleDelete}
               isLoading={deletingNote}
             >
               Delete
@@ -113,7 +111,7 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
             type="submit"
             color="primary"
             isLoading={addingNote || updatingNote}
-            onClick={handleSubmit}
+            onPress={handleSubmit}
             isDisabled={!content || fetchingNotes}
           >
             {existingNote ? 'Save' : 'Add'}

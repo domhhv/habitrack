@@ -119,7 +119,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             color="primary"
             type="submit"
             isDisabled={addingTrait || !user?.id}
-            onClick={handleAdd}
+            onPress={handleAdd}
           >
             Add Trait
           </Button>

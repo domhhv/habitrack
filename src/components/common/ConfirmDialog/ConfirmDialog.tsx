@@ -34,7 +34,7 @@ const ConfirmDialog = ({
             <Button
               color="secondary"
               variant="ghost"
-              onClick={onCancel}
+              onPress={onCancel}
               isDisabled={loading}
               role="confirm-dialog-cancel"
             >
@@ -42,7 +42,7 @@ const ConfirmDialog = ({
             </Button>
             <Button
               color="danger"
-              onClick={onConfirm}
+              onPress={onConfirm}
               isLoading={loading}
               role="confirm-dialog-confirm"
             >

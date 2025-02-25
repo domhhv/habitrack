@@ -65,7 +65,7 @@ const AddHabitDialogButton = () => {
         color="primary"
         variant="solid"
         startContent={<Plus weight="bold" />}
-        onClick={handleDialogOpen}
+        onPress={handleDialogOpen}
         isDisabled={fetchingHabits}
         data-testid="add-habit-button"
         className="w-full lg:w-auto"
@@ -105,8 +105,7 @@ const AddHabitDialogButton = () => {
               {traits.map((trait) => (
                 <SelectItem
                   key={trait.id.toString()}
-                  onClick={(e) => {
-                    e.preventDefault();
+                  onPress={() => {
                     setTraitId(trait.id.toString());
                   }}
                   textValue={trait.name}
@@ -120,7 +119,7 @@ const AddHabitDialogButton = () => {
               size="sm"
               color="secondary"
               startContent={<Plus />}
-              onClick={() => setAddTraitModalOpen(true)}
+              onPress={() => setAddTraitModalOpen(true)}
             >
               Or add a custom trait
             </Button>
@@ -143,7 +142,7 @@ const AddHabitDialogButton = () => {
               isLoading={addingHabit}
               type="submit"
               color="primary"
-              onClick={handleAdd}
+              onPress={handleAdd}
             >
               Submit
             </Button>
