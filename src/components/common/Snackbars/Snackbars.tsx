@@ -21,7 +21,7 @@ const Snackbars = () => {
           const dismissAction = dismissible && (
             <Button
               key={`${id}-dismiss`}
-              onClick={() => hideSnackbar(id)}
+              onPress={() => hideSnackbar(id)}
               size="sm"
               color={color}
               variant="flat"

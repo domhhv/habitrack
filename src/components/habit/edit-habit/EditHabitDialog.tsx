@@ -109,7 +109,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             {traits.map((trait) => (
               <SelectItem
                 key={trait.id.toString()}
-                onClick={() => {
+                onPress={() => {
                   setTraitId(trait.id.toString());
                 }}
                 textValue={trait.name}
@@ -126,7 +126,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             color="primary"
             isLoading={isUpdating}
             role="submit-edited-habit-button"
-            onClick={handleSubmit}
+            onPress={handleSubmit}
             isDisabled={!user?.id}
           >
             Done

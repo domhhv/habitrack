@@ -87,7 +87,7 @@ const MonthCalendarCell = ({
                   className="h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6"
                   variant="light"
                   radius="sm"
-                  onClick={onAddOccurrence}
+                  onPress={onAddOccurrence}
                   color="secondary"
                   isDisabled={fetchingOccurrences || !user}
                   tabIndex={0}
@@ -106,7 +106,7 @@ const MonthCalendarCell = ({
                   )}
                   variant="light"
                   radius="sm"
-                  onClick={onDayNoteClick}
+                  onPress={onDayNoteClick}
                   color={hasNote ? 'primary' : 'secondary'}
                   isDisabled={fetchingNotes || !user}
                   tabIndex={0}
