@@ -1,5 +1,5 @@
+import { ButtonGroup, Button } from '@heroui/react';
 import { ThemeMode, useScreenWidth, useThemeMode } from '@hooks';
-import { ButtonGroup, Button } from '@nextui-org/react';
 import {
   SunDim as SunIcon,
   Desktop as DesktopIcon,

@@ -1,7 +1,5 @@
 import { TraitChip } from '@components';
-import { useScreenWidth } from '@hooks';
-import type { Habit, Trait } from '@models';
-import type { SelectedItems } from '@nextui-org/react';
+import type { SelectedItems } from '@heroui/react';
 import {
   Tooltip,
   ListboxItem,
@@ -9,7 +7,9 @@ import {
   SelectItem,
   Button,
   SelectSection,
-} from '@nextui-org/react';
+} from '@heroui/react';
+import { useScreenWidth } from '@hooks';
+import type { Habit, Trait } from '@models';
 import {
   ArrowFatLeft,
   ArrowFatRight,

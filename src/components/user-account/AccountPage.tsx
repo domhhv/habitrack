@@ -1,6 +1,6 @@
 import { Alert, PasswordInput } from '@components';
+import { Button, Input, Spinner } from '@heroui/react';
 import { useDocumentTitle } from '@hooks';
-import { Button, Input, Spinner } from '@nextui-org/react';
 import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
 

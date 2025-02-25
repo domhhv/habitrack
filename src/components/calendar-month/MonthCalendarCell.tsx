@@ -1,7 +1,7 @@
 import { isCalendarDay } from '@helpers';
+import { Button, Tooltip } from '@heroui/react';
 import { useScreenWidth } from '@hooks';
 import type { CalendarDate } from '@internationalized/date';
-import { Button, Tooltip } from '@nextui-org/react';
 import {
   CalendarBlank,
   CalendarPlus,

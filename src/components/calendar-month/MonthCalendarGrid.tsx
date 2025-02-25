@@ -1,6 +1,6 @@
 import { getMonthIndex, getYearWeekNumberFromMonthWeek } from '@helpers';
+import { Button } from '@heroui/react';
 import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
-import { Button } from '@nextui-org/react';
 import { isTruthy } from '@utils';
 import clsx from 'clsx';
 import { addMonths, isSameMonth } from 'date-fns';

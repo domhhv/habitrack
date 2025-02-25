@@ -6,7 +6,7 @@ import {
   ModalFooter,
   ModalHeader,
   Textarea,
-} from '@nextui-org/react';
+} from '@heroui/react';
 import { useNotesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';

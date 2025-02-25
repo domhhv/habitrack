@@ -9,7 +9,7 @@
 &nbsp;
 <a href="https://tailwindcss.com/" title="TailwindCSS"><img src="https://i.ibb.co/mR0BWJx/Tailwind-CSS.png" alt="Tailwind" width="32" height="32" /></a>
 &nbsp;
-<a href="https://nextui.org" title="NextUI"><img src="https://i.ibb.co/xYjF5K6/nextui.png" alt="NextUI" width="32" height="32"></a>
+<a href="https://www.heroui.com/" title="HeroUI"><img src="https://i.ibb.co/xYjF5K6/nextui.png" alt="HeroUI" width="32" height="32"></a>
 &nbsp;
 <a href="https://supabase.com/" title="Supabase"><img src="https://i.ibb.co/WnJ9m8k/supabase-logo-icon.png" alt="Supabase" width="32" height="32"></a>
 &nbsp;
@@ -27,7 +27,7 @@ This app showcases the use of the following tools and technologies:
 - React with TypeScript, bundled with [Vite](https://vite.dev/)
 - [Zustand](https://zustand.docs.pmnd.rs/) for global state management
 - [Tailwind CSS](https://tailwindcss.com) for styling
-- [NextUI](https://nextui.org) for the UI components
+- [HeroUI](https://www.heroui.com/) for the UI components
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [Supabase](https://supabase.io) for Authentication, Database and Storage
 - [Jest](https://jestjs.io) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit-testing
