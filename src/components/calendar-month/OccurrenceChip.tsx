@@ -30,10 +30,12 @@ const OccurrenceChip = ({
   const { name: habitName, iconPath, trait } = habit || {};
   const { color: traitColor } = trait || {};
   const iconUrl = getHabitIconUrl(iconPath);
-  const occurrenceTimes = occurrences.map((o) => ({
-    occurrenceId: o.id,
-    time: format(new Date(o.timestamp), 'p'),
-  }));
+  const occurrenceTimes = occurrences
+    .map((o) => ({
+      occurrenceId: o.id,
+      time: format(new Date(o.timestamp), 'p'),
+    }))
+    .sort((a, b) => a.time.localeCompare(b.time));
   const occurrenceNotes = notes.filter(
     (n) => n.occurrenceId && occurrenceIds.includes(n.occurrenceId)
   );

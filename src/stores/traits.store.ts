@@ -29,7 +29,15 @@ const useTraitsStore = create<TraitsState>((set) => ({
     try {
       set({ fetchingTraits: true });
       const traits = await listTraits();
-      set({ traits });
+      const sortedUserTraits = traits
+        .filter((trait) => !!trait.userId)
+        .sort((a, b) => {
+          return a.name.localeCompare(b.name);
+        });
+      const allSortedTraits = traits
+        .filter((trait) => !trait.userId)
+        .concat(sortedUserTraits);
+      set({ traits: allSortedTraits });
     } catch (error) {
       console.error(error);
       showSnackbar(

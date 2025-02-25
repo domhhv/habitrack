@@ -20,6 +20,20 @@ export const cacheOccurrence = (
   }
 };
 
+export const updateOccurrenceInCache = (
+  range: [number, number],
+  occurrence: Occurrence
+) => {
+  const cachedOccurrences = occurrencesCache.get(range.toString());
+
+  if (cachedOccurrences) {
+    occurrencesCache.set(
+      range.toString(),
+      cachedOccurrences.map((o) => (o.id === occurrence.id ? occurrence : o))
+    );
+  }
+};
+
 export const uncacheOccurrence = (
   range: [number, number],
   occurrenceId: number

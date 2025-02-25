@@ -25,7 +25,8 @@ export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
 export const listHabits = async () => {
   const { error, data } = await supabaseClient
     .from('habits')
-    .select('*, trait:traits(id, name, color)');
+    .select('*, trait:traits(id, name, color)')
+    .order('id');
 
   if (error) {
     throw new Error(error.message);
