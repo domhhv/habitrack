@@ -43,12 +43,12 @@ export default defineConfig(({ mode }) => {
               return 'supabase';
             }
 
-            if (id.includes('framer-motion')) {
-              return 'framer-motion';
+            if (id.includes('heroui')) {
+              return 'heroui';
             }
 
-            if (id.includes('nextui')) {
-              return 'nextui';
+            if (id.includes('framer-motion')) {
+              return 'framer-motion';
             }
 
             if (id.includes('node_modules')) {

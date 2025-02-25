@@ -57,14 +57,14 @@
     ]
   },
   "dependencies": {
-    "@internationalized/date": "^3.5.5",
     "@heroui/react": "2.7.2",
+    "@internationalized/date": "^3.5.5",
     "@phosphor-icons/react": "^2.1.7",
     "@supabase/auth-helpers-react": "^0.4.2",
     "@supabase/supabase-js": "^2.39.5",
     "clsx": "^2.1.1",
     "date-fns": "^3.0.6",
-    "framer-motion": "^11.3.31",
+    "framer-motion": "^12.4.7",
     "react": "^18.2.0",
     "react-aria": "^3.34.3",
     "react-colorful": "^5.6.1",
