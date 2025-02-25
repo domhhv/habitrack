@@ -32,7 +32,7 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
     deletingNote,
   } = useNotesStore();
 
-  const existingNote = notes.find((note) => note.day === day);
+  const existingNote = day ? notes.find((note) => note.day === day) : null;
 
   React.useEffect(() => {
     if (existingNote?.content && !content) {

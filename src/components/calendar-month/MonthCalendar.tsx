@@ -51,8 +51,9 @@ const MonthCalendar = () => {
     onOpen: openOccurrenceDialog,
     onClose: closeOccurrenceDialog,
   } = useDisclosure();
-  const [occurrenceDate, setOccurrenceDate] = React.useState<Date | null>(null);
-  const [noteDay, setNoteDay] = React.useState<string | null>(null);
+  const [occurrenceToAddDate, setOccurrenceToAddDate] =
+    React.useState<Date | null>(null);
+  const [noteToAddDay, setNoteToAddDay] = React.useState<string | null>(null);
   const [occurrenceIdToEdit, setOccurrenceIdToEdit] = React.useState<
     number | null
   >(null);
@@ -96,7 +97,7 @@ const MonthCalendar = () => {
 
   const handleOccurrenceModalClose = () => {
     window.setTimeout(() => {
-      setOccurrenceDate(null);
+      setOccurrenceToAddDate(null);
       setOccurrenceIdToEdit(null);
       closeOccurrenceDialog();
     }, 0);
@@ -107,7 +108,7 @@ const MonthCalendar = () => {
     monthIndex: number,
     fullYear: number
   ) => {
-    setOccurrenceDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
+    setOccurrenceToAddDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
     openOccurrenceDialog();
   };
 
@@ -118,7 +119,7 @@ const MonthCalendar = () => {
 
   const handleNoteModalClose = () => {
     window.setTimeout(() => {
-      setOccurrenceDate(null);
+      setOccurrenceToAddDate(null);
       closeNoteDialog();
     }, 0);
   };
@@ -129,7 +130,8 @@ const MonthCalendar = () => {
     fullYear: number
   ) => {
     const month = monthIndex < 10 ? `0${monthIndex}` : monthIndex;
-    setNoteDay(`${fullYear}-${month}-${dayOfMonth}`);
+    const day = dayOfMonth < 10 ? `0${dayOfMonth}` : dayOfMonth;
+    setNoteToAddDay(`${fullYear}-${month}-${day}`);
     openNoteDialog();
   };
 
@@ -158,14 +160,14 @@ const MonthCalendar = () => {
       <OccurrenceDialog
         isOpen={isOccurrenceDialogOpen}
         onClose={handleOccurrenceModalClose}
-        date={occurrenceDate}
+        date={occurrenceToAddDate}
         occurrenceId={occurrenceIdToEdit}
       />
 
       <NoteDialog
         open={isNoteDialogOpen}
         onClose={handleNoteModalClose}
-        day={noteDay}
+        day={noteToAddDay}
       />
     </>
   );
