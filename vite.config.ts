@@ -51,6 +51,14 @@ export default defineConfig(({ mode }) => {
               return 'framer-motion';
             }
 
+            if (id.includes('@react-aria')) {
+              return 'react-aria';
+            }
+
+            if (id.includes('@react-stately')) {
+              return 'react-stately';
+            }
+
             if (id.includes('node_modules')) {
               return 'vendor';
             }
