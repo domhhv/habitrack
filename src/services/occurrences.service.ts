@@ -1,5 +1,10 @@
 import { cacheOccurrences, occurrencesCache, supabaseClient } from '@helpers';
-import type { Occurrence, OccurrencesInsert, Streak } from '@models';
+import type {
+  Occurrence,
+  OccurrencesInsert,
+  OccurrencesUpdate,
+  Streak,
+} from '@models';
 import {
   transformClientEntity,
   transformServerEntities,
@@ -14,7 +19,9 @@ export const createOccurrence = async (
   const { error, data } = await supabaseClient
     .from('occurrences')
     .insert(serverBody)
-    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
+    .select(
+      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(id, content)'
+    )
     .single();
 
   if (error) {
@@ -35,7 +42,9 @@ export const listOccurrences = async (
 
   const { error, data } = await supabaseClient
     .from('occurrences')
-    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
+    .select(
+      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(id, content)'
+    )
     .order('timestamp')
     .gt('timestamp', range[0])
     .lt('timestamp', range[1]);
@@ -51,6 +60,31 @@ export const listOccurrences = async (
   }
 
   return result;
+};
+
+export const patchOccurrence = async (
+  id: number,
+  body: OccurrencesUpdate
+): Promise<Occurrence> => {
+  const serverUpdates = transformClientEntity({
+    ...body,
+    updatedAt: new Date().toISOString(),
+  });
+
+  const { error, data } = await supabaseClient
+    .from('occurrences')
+    .update(serverUpdates)
+    .eq('id', id)
+    .select(
+      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(id, content)'
+    )
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformServerEntity(data);
 };
 
 export const destroyOccurrence = async (id: number) => {

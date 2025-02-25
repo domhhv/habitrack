@@ -21,6 +21,7 @@ type CalendarGridProps = {
     monthIndex: number,
     fullYear: number
   ) => void;
+  onEditOccurrence: (occurrenceId: number) => void;
   activeMonthLabel: string;
   activeYear: number;
 };
@@ -31,6 +32,7 @@ const MonthCalendarGrid = ({
   state,
   onAddNote,
   onAddOccurrence,
+  onEditOccurrence,
   activeMonthLabel,
   activeYear,
 }: CalendarGridProps) => {
@@ -149,15 +151,14 @@ const MonthCalendarGrid = ({
                       return (
                         <MonthCalendarCell
                           key={cellKey}
-                          state={state}
-                          visibleMonth={visibleMonth}
                           date={calendarDate}
                           onAddOccurrence={() =>
                             onAddOccurrence(day, month, year)
                           }
-                          onAddNote={() => onAddNote(day, month, year)}
+                          onDayNoteClick={() => onAddNote(day, month, year)}
                           rangeStatus={rangeStatus}
                           position={position}
+                          onEditOccurrence={onEditOccurrence}
                         />
                       );
                     })}

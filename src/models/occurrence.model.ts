@@ -1,10 +1,12 @@
 import type { CalendarDay } from '@helpers';
+import type { Note } from '@root/src/models/note.model';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 import type {
   TablesInsert,
   Tables,
   CompositeTypes,
+  TablesUpdate,
 } from '../../supabase/database.types';
 
 import { type Habit } from './habit.model';
@@ -22,10 +24,15 @@ type HabitWithTrait = OccurrenceHabit & {
 
 export type Occurrence = BaseOccurrence & {
   habit: HabitWithTrait | null;
+} & {
+  notes: Pick<Note, 'id' | 'content'>[];
 };
 
 export type OccurrencesDateMap = Record<CalendarDay, Occurrence[]>;
 
 export type OccurrencesInsert = CamelCasedPropertiesDeep<
   TablesInsert<'occurrences'>
+>;
+export type OccurrencesUpdate = CamelCasedPropertiesDeep<
+  TablesUpdate<'occurrences'>
 >;

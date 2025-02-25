@@ -5,18 +5,15 @@ import { Button, Tooltip } from '@nextui-org/react';
 import {
   CalendarBlank,
   CalendarPlus,
+  Note,
   NoteBlank,
-  NotePencil,
 } from '@phosphor-icons/react';
 import { useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import clsx from 'clsx';
-import { format, isToday, isFuture, startOfMonth, addMonths } from 'date-fns';
+import { format, isToday } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
-// import { useCalendarCell } from 'react-aria';
-import { useNavigate } from 'react-router-dom';
-import type { CalendarState } from 'react-stately';
 
 import OccurrenceChip from './OccurrenceChip';
 
@@ -30,132 +27,40 @@ export type CellPosition =
 export type CellRangeStatus = 'below-range' | 'in-range' | 'above-range' | '';
 
 type CalendarCellProps = {
-  state: CalendarState;
   date: CalendarDate;
-  visibleMonth: Date;
-  onAddNote: () => void;
+  onDayNoteClick: () => void;
   onAddOccurrence: () => void;
+  onEditOccurrence: (occurrenceId: number) => void;
   rangeStatus: CellRangeStatus;
   position: CellPosition;
 };
 
 const MonthCalendarCell = ({
-  // state,
   date,
-  visibleMonth,
-  onAddNote,
+  onDayNoteClick,
   onAddOccurrence,
+  onEditOccurrence,
   rangeStatus,
   position,
 }: CalendarCellProps) => {
-  const cellRef = React.useRef<HTMLDivElement>(null);
-  // const cellProps = useCalendarCell({ date }, state, cellRef);
-  const user = useUser();
   const { removeOccurrence, fetchingOccurrences, occurrencesByDate } =
     useOccurrencesStore();
   const { notes, fetchingNotes } = useNotesStore();
+  const user = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
   const cellDate = new Date(date.year, date.month - 1, date.day);
   const isTodayCell = isToday(cellDate);
-  const isFutureCell = isFuture(cellDate);
   const formattedDay = format(cellDate, 'yyyy-MM-dd');
-  const navigate = useNavigate();
+  const hasNote = notes.some((note) => note.day === formattedDay);
 
   const occurrences = isCalendarDay(formattedDay)
     ? occurrencesByDate[formattedDay] || []
     : [];
-  const hasNote = notes.some((note) => note.day === formattedDay);
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => o.habitId);
 
-  const handleAddNoteClick = React.useCallback(() => {
-    if (fetchingOccurrences || !user) {
-      return null;
-    }
-
-    return onAddNote();
-  }, [fetchingOccurrences, user, onAddNote]);
-
-  const handleAddOccurrenceClick = React.useCallback(
-    (e?: React.MouseEvent, forceOpenDialog = false) => {
-      if (fetchingOccurrences || !user) {
-        return null;
-      }
-
-      if (!isTodayCell) {
-        if (rangeStatus === 'below-range') {
-          const prevMonth = startOfMonth(addMonths(visibleMonth, -1));
-
-          return navigate(
-            `/calendar/month/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}/1`
-          );
-        }
-
-        if (rangeStatus === 'above-range') {
-          const nextMonth = startOfMonth(addMonths(visibleMonth, 1));
-
-          return navigate(
-            `/calendar/month/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}/1`
-          );
-        }
-      }
-
-      if (!isFutureCell || forceOpenDialog) {
-        return onAddOccurrence();
-      }
-    },
-    [
-      fetchingOccurrences,
-      onAddOccurrence,
-      rangeStatus,
-      user,
-      isTodayCell,
-      isFutureCell,
-      visibleMonth,
-      navigate,
-    ]
-  );
-
-  React.useEffect(() => {
-    const cell = cellRef.current;
-
-    if (!cell) {
-      return;
-    }
-
-    const enterHandler = (event: KeyboardEvent) => {
-      if (event.key === 'Enter') {
-        handleAddOccurrenceClick(undefined, true);
-      }
-    };
-
-    cell.addEventListener('keydown', enterHandler);
-
-    return () => {
-      cell.removeEventListener('keydown', enterHandler);
-    };
-  }, [cellRef, handleAddOccurrenceClick]);
-
-  const handleOccurrenceDelete = async (
-    occurrenceId: number,
-    clickEvent: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    clickEvent.stopPropagation();
-    void removeOccurrence(occurrenceId);
-  };
-
-  const renderToday = () => {
-    if (!isTodayCell) {
-      return null;
-    }
-
-    return <CalendarBlank size={20} weight="fill" />;
-  };
-
   const cellRootClassName = clsx(
-    'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-36',
-    rangeStatus === 'below-range' && 'cursor-w-resize',
-    rangeStatus === 'above-range' && 'cursor-e-resize',
+    'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 focus:border-neutral-100 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-36',
     position === 'top-left' && 'rounded-tl-md',
     position === 'top-right' && 'rounded-tr-md',
     position === 'bottom-left' && 'rounded-bl-md',
@@ -171,47 +76,43 @@ const MonthCalendarCell = ({
   );
 
   return (
-    <div
-      // {...cellProps}
-      className={cellRootClassName}
-      ref={cellRef}
-      tabIndex={0}
-      onClick={(e) => handleAddOccurrenceClick(e)}
-    >
+    <div className={cellRootClassName}>
       <div className={cellHeaderClassName}>
         <p className="font-bold">{date.day}</p>
         <div className="flex items-center justify-between gap-2">
-          {rangeStatus === 'in-range' && !isMobile && (
+          {!isMobile && (
             <div className="flex items-center gap-1">
-              {!isFutureCell && (
-                <Tooltip content="Log habit" closeDelay={0}>
-                  <Button
-                    className="h-5 min-w-fit px-2 opacity-100 transition-opacity group-hover/cell:opacity-100 md:opacity-0 lg:h-6 lg:px-4"
-                    radius="sm"
-                    onClick={(e) => handleAddOccurrenceClick(e, true)}
-                    color="secondary"
-                    isDisabled={fetchingOccurrences || !user}
-                  >
-                    <CalendarPlus weight="bold" size={isDesktop ? 18 : 14} />
-                  </Button>
-                </Tooltip>
-              )}
+              <Tooltip content="Log habit" closeDelay={0}>
+                <Button
+                  className="h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6"
+                  variant="light"
+                  radius="sm"
+                  onClick={onAddOccurrence}
+                  color="secondary"
+                  isDisabled={fetchingOccurrences || !user}
+                  tabIndex={0}
+                >
+                  <CalendarPlus weight="bold" size={isDesktop ? 18 : 14} />
+                </Button>
+              </Tooltip>
               <Tooltip
                 content={hasNote ? 'Edit note' : 'Add note'}
                 closeDelay={0}
               >
                 <Button
                   className={clsx(
-                    'h-5 min-w-fit px-2 opacity-0 transition-opacity group-hover/cell:opacity-100 lg:h-6 lg:px-4',
+                    'h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6',
                     hasNote && 'opacity-100'
                   )}
+                  variant="light"
                   radius="sm"
-                  onClick={handleAddNoteClick}
-                  color={hasNote ? 'success' : 'secondary'}
+                  onClick={onDayNoteClick}
+                  color={hasNote ? 'primary' : 'secondary'}
                   isDisabled={fetchingNotes || !user}
+                  tabIndex={0}
                 >
                   {hasNote ? (
-                    <NotePencil weight="bold" size={isDesktop ? 18 : 14} />
+                    <Note weight="bold" size={isDesktop ? 18 : 14} />
                   ) : (
                     <NoteBlank weight="bold" size={isDesktop ? 18 : 14} />
                   )}
@@ -219,7 +120,7 @@ const MonthCalendarCell = ({
               </Tooltip>
             </div>
           )}
-          {renderToday()}
+          {isTodayCell && <CalendarBlank size={20} weight="fill" />}
         </div>
       </div>
       <div className="flex flex-wrap justify-center gap-1 overflow-x-auto overflow-y-visible px-0 py-0.5 pb-2 md:justify-start md:px-2">
@@ -240,7 +141,8 @@ const MonthCalendarCell = ({
                 >
                   <OccurrenceChip
                     occurrences={habitOccurrences}
-                    onDelete={handleOccurrenceDelete}
+                    onDelete={removeOccurrence}
+                    onEdit={onEditOccurrence}
                   />
                 </motion.div>
               );

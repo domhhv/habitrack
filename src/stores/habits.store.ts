@@ -105,7 +105,12 @@ const useHabitsStore = create<HabitsState>((set) => {
       set({ habitIdBeingUpdated: id });
 
       try {
-        const iconPath = await uploadHabitIcon(userId, icon);
+        let iconPath = habit.iconPath;
+
+        if (icon) {
+          iconPath = await uploadHabitIcon(userId, icon);
+        }
+
         const updatedHabit = await patchHabit(id, { ...habit, iconPath });
         set((state) => ({
           habits: state.habits.map((h) => (h.id === id ? updatedHabit : h)),

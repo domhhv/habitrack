@@ -13,74 +13,184 @@ import {
   SelectSection,
   TimeInput,
 } from '@nextui-org/react';
-import type { TimeInputValue, Selection } from '@nextui-org/react';
+import type { TimeInputValue } from '@nextui-org/react';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
-import { format } from 'date-fns';
-import React, { type MouseEventHandler } from 'react';
+import { format, isToday, isYesterday } from 'date-fns';
+import React, { type MouseEventHandler, type ChangeEventHandler } from 'react';
 import { Link } from 'react-router-dom';
+import type { RequireAtLeastOne } from 'type-fest';
 
-type AddOccurrenceDialogProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  date: Date | null;
-};
+type OccurrenceDialogProps = RequireAtLeastOne<
+  {
+    isOpen: boolean;
+    onClose: () => void;
+    date: Date | null;
+    occurrenceId: number | null;
+  },
+  'date' | 'occurrenceId'
+>;
 
 const OccurrenceDialog = ({
   isOpen,
   onClose,
   date,
-}: AddOccurrenceDialogProps) => {
+  occurrenceId,
+}: OccurrenceDialogProps) => {
   const user = useUser();
   const { habits } = useHabitsStore();
-  const { addNote, addingNote } = useNotesStore();
-  const { addOccurrence, addingOccurrence } = useOccurrencesStore();
+  const { addNote, addingNote, updateNote, updatingNote } = useNotesStore();
+  const {
+    occurrences,
+    addOccurrence,
+    addingOccurrence,
+    updateOccurrence,
+    updatingOccurrence,
+  } = useOccurrencesStore();
   const [note, setNote] = React.useState('');
-  const [selectedHabitId, setSelectedHabitId] = React.useState<
-    Selection & { currentKey?: string }
-  >(new Set<number>([]));
+  const [selectedHabitId, setSelectedHabitId] = React.useState('');
   const [time, setTime] = React.useState<TimeInputValue | null>(null);
+  const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
+    React.useState(false);
 
   const habitsByTraitName = React.useMemo(() => {
     return Object.groupBy(habits, (habit) => habit.trait?.name || 'Unknown');
   }, [habits]);
 
+  const occurrenceToUpdate = React.useMemo(() => {
+    return occurrences.find((o) => o.id === occurrenceId);
+  }, [occurrenceId, occurrences]);
+
   const hasHabits = habits.length > 0;
 
   React.useEffect(() => {
-    if (!date) {
+    if (!date && !occurrenceId) {
       setTime(parseAbsoluteToLocal(new Date().toISOString()));
       return;
     }
 
-    const occurrenceDateTime = new Date();
+    if (occurrenceId) {
+      const occurrence = occurrences.find((o) => o.id === occurrenceId);
 
-    occurrenceDateTime.setFullYear(date.getFullYear());
-    occurrenceDateTime.setMonth(date.getMonth());
-    occurrenceDateTime.setDate(date.getDate());
+      if (!occurrence) {
+        return;
+      }
 
-    setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
-  }, [date]);
+      setSelectedHabitId(occurrence.habitId.toString());
+      setNote(occurrence.notes[0]?.content || '');
+      setTime(
+        parseAbsoluteToLocal(new Date(occurrence.timestamp).toISOString())
+      );
+
+      return;
+    }
+
+    if (date) {
+      const occurrenceDateTime = new Date();
+
+      occurrenceDateTime.setFullYear(date.getFullYear());
+      occurrenceDateTime.setMonth(date.getMonth());
+      occurrenceDateTime.setDate(date.getDate());
+
+      setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
+    }
+  }, [date, occurrenceId, occurrences]);
+
+  React.useEffect(() => {
+    if (date) {
+      setIsSubmitButtonDisabled(
+        !selectedHabitId || Number.isNaN(+selectedHabitId)
+      );
+
+      return;
+    }
+
+    if (occurrenceToUpdate) {
+      const hasTimeChanged =
+        time instanceof ZonedDateTime &&
+        +time.toDate() !== +new Date(occurrenceToUpdate.timestamp);
+      const hasNoteChanged =
+        note !== (occurrenceToUpdate.notes[0]?.content || '');
+      const hasHabitChanged =
+        selectedHabitId !== occurrenceToUpdate.habitId.toString();
+
+      const hasOccurrenceChanged =
+        hasNoteChanged || hasHabitChanged || hasTimeChanged;
+
+      const isOccurrenceUpdating = updatingOccurrence || updatingNote;
+
+      setIsSubmitButtonDisabled(isOccurrenceUpdating || !hasOccurrenceChanged);
+
+      return;
+    }
+  }, [
+    date,
+    occurrenceToUpdate,
+    note,
+    selectedHabitId,
+    time,
+    updatingOccurrence,
+    updatingNote,
+  ]);
+
+  if (!isOpen) {
+    return null;
+  }
 
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
-    if (!user || !date || !hasHabits || !selectedHabitId.currentKey) {
+    if (
+      !user ||
+      !(date || occurrenceToUpdate) ||
+      !hasHabits ||
+      !selectedHabitId ||
+      Number.isNaN(+selectedHabitId)
+    ) {
       return null;
     }
 
-    const occurrenceDateTime = new Date(date);
+    const occurrenceDateTime = date
+      ? new Date(date)
+      : time instanceof ZonedDateTime
+        ? time.toDate()
+        : new Date();
 
     if (time instanceof ZonedDateTime) {
       occurrenceDateTime.setHours(time.hour);
       occurrenceDateTime.setMinutes(time.minute);
     }
 
+    if (occurrenceId && occurrenceToUpdate) {
+      await updateOccurrence(occurrenceToUpdate.id, {
+        timestamp: +occurrenceDateTime,
+        habitId: +selectedHabitId,
+        userId: user?.id as string,
+      });
+
+      if (note) {
+        const existingNote = occurrenceToUpdate.notes[0];
+
+        if (existingNote) {
+          await updateNote(existingNote.id, { content: note, occurrenceId });
+        } else {
+          await addNote({
+            content: note,
+            occurrenceId,
+            userId: user.id,
+          });
+        }
+      }
+
+      handleClose();
+      return;
+    }
+
     const newOccurrence = await addOccurrence({
       timestamp: +occurrenceDateTime,
-      habitId: +selectedHabitId.currentKey,
+      habitId: +selectedHabitId,
       userId: user?.id as string,
     });
 
@@ -97,10 +207,32 @@ const OccurrenceDialog = ({
 
   const handleClose = () => {
     setTimeout(() => {
-      setSelectedHabitId(new Set([]));
+      setSelectedHabitId('');
       setNote('');
     });
     onClose();
+  };
+
+  const handleHabitSelectionChange: ChangeEventHandler<HTMLSelectElement> = (
+    e
+  ) => {
+    setSelectedHabitId(e.target.value);
+  };
+
+  const formatDate = () => {
+    const dateToFormat =
+      date ||
+      new Date(occurrences.find((o) => o.id === occurrenceId)?.timestamp || '');
+
+    if (isToday(dateToFormat)) {
+      return 'today';
+    }
+
+    if (isYesterday(dateToFormat)) {
+      return 'yesterday';
+    }
+
+    return format(dateToFormat || '', 'iii, LLL d, y');
   };
 
   return (
@@ -110,18 +242,18 @@ const OccurrenceDialog = ({
       onClose={handleClose}
       isDismissable={false}
       placement="center"
-      onClick={(e) => e.stopPropagation()}
+      // onClick={(e) => e.stopPropagation()}
     >
       <ModalContent>
         <ModalHeader>
-          {date && `Add habit entry for ${format(date || '', 'iii, LLL d, y')}`}
+          {occurrenceId ? 'Edit' : 'Add'} habit entry for {formatDate()}
         </ModalHeader>
         <ModalBody>
           <Select
             disableSelectorIconRotation
             variant="faded"
             selectedKeys={selectedHabitId}
-            onSelectionChange={setSelectedHabitId}
+            onChange={handleHabitSelectionChange}
             label={
               hasHabits
                 ? 'Habits'
@@ -178,14 +310,23 @@ const OccurrenceDialog = ({
             as={hasHabits ? Button : Link}
             type="submit"
             color="primary"
-            isLoading={addingOccurrence || addingNote}
+            isLoading={
+              addingOccurrence ||
+              addingNote ||
+              updatingOccurrence ||
+              updatingNote
+            }
             onClick={hasHabits ? handleSubmit : undefined}
-            isDisabled={hasHabits && !selectedHabitId.currentKey}
+            isDisabled={isSubmitButtonDisabled}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             to={hasHabits ? undefined : '/habits'}
           >
-            {hasHabits ? 'Add' : 'Go to Habits'}
+            {hasHabits
+              ? occurrenceToUpdate
+                ? 'Update'
+                : 'Add'
+              : 'Go to Habits'}
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -1,13 +1,20 @@
-import { cacheOccurrence, occurrencesCache, uncacheOccurrence } from '@helpers';
+import {
+  cacheOccurrence,
+  occurrencesCache,
+  uncacheOccurrence,
+  updateOccurrenceInCache,
+} from '@helpers';
 import type {
   Occurrence,
   OccurrencesDateMap,
   OccurrencesInsert,
+  OccurrencesUpdate,
 } from '@models';
 import {
   createOccurrence,
   destroyOccurrence,
   listOccurrences,
+  patchOccurrence,
 } from '@services';
 import { useHabitsStore, useSnackbarsStore, useTraitsStore } from '@stores';
 import { getErrorMessage } from '@utils';
@@ -34,12 +41,14 @@ type OccurrencesState = {
   removeOccurrence: (id: number) => Promise<void>;
   removeOccurrencesByHabitId: (habitId: number) => void;
   onRangeChange: (range: [number, number]) => void;
-  updateOccurrences: (
+  updateOccurrencesState: (
     allOccurrences: Occurrence[],
     filteredBy: OccurrenceFilters
   ) => void;
   updateOccurrencesMap: (occurrences: Occurrence[]) => void;
   updateFilteredBy: (options: OccurrenceFilters) => void;
+  updateOccurrence: (id: number, body: OccurrencesUpdate) => Promise<void>;
+  updatingOccurrence: boolean;
 };
 
 const useOccurrencesStore = create<OccurrencesState>((set, get) => {
@@ -49,6 +58,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
 
   return {
     addingOccurrence: false,
+    updatingOccurrence: false,
     fetchingOccurrences: true,
     allOccurrences: [],
     occurrences: [],
@@ -116,6 +126,41 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         set({ addingOccurrence: false });
       }
     },
+    updateOccurrence: async (id: number, body: OccurrencesUpdate) => {
+      try {
+        const { range } = get();
+
+        set({ updatingOccurrence: true });
+
+        const updatedOccurrence = await patchOccurrence(id, body);
+
+        set((state) => ({
+          allOccurrences: state.allOccurrences.map((occurrence) =>
+            occurrence.id === id ? updatedOccurrence : occurrence
+          ),
+        }));
+
+        updateOccurrenceInCache(range, updatedOccurrence);
+
+        showSnackbar('Your habit entry has been updated!', {
+          color: 'success',
+          dismissible: true,
+        });
+      } catch (error) {
+        console.error(error);
+
+        showSnackbar(
+          'Something went wrong while updating your habit entry. Please try again.',
+          {
+            description: `Error details: ${getErrorMessage(error)}`,
+            color: 'danger',
+            dismissible: true,
+          }
+        );
+      } finally {
+        set({ updatingOccurrence: false });
+      }
+    },
     removeOccurrence: async (id: number) => {
       const { range } = get();
       try {
@@ -160,7 +205,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
       }));
     },
     onRangeChange: (range: [number, number]) => set(() => ({ range })),
-    updateOccurrences: (
+    updateOccurrencesState: (
       allOccurrences: Occurrence[],
       filteredBy: OccurrenceFilters
     ) => {
@@ -211,7 +256,7 @@ useOccurrencesStore.subscribe((state, prevState) => {
     prevState.allOccurrences !== state.allOccurrences ||
     prevState.filteredBy !== state.filteredBy
   ) {
-    state.updateOccurrences(state.allOccurrences, state.filteredBy);
+    state.updateOccurrencesState(state.allOccurrences, state.filteredBy);
   }
 
   if (prevState.range !== state.range) {

@@ -51,7 +51,12 @@ const MonthCalendar = () => {
     onOpen: openOccurrenceDialog,
     onClose: closeOccurrenceDialog,
   } = useDisclosure();
-  const [activeDate, setActiveDate] = React.useState<Date | null>(null);
+  const [occurrenceToAddDate, setOccurrenceToAddDate] =
+    React.useState<Date | null>(null);
+  const [noteToAddDay, setNoteToAddDay] = React.useState<string | null>(null);
+  const [occurrenceIdToEdit, setOccurrenceIdToEdit] = React.useState<
+    number | null
+  >(null);
   const params = useParams();
 
   React.useEffect(() => {
@@ -92,34 +97,42 @@ const MonthCalendar = () => {
 
   const handleOccurrenceModalClose = () => {
     window.setTimeout(() => {
-      setActiveDate(null);
+      setOccurrenceToAddDate(null);
+      setOccurrenceIdToEdit(null);
       closeOccurrenceDialog();
     }, 0);
   };
 
-  const handleOccurrenceModalOpen = (
+  const handleOccurrenceModalAdd = (
     dateNumber: number,
     monthIndex: number,
     fullYear: number
   ) => {
-    setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
+    setOccurrenceToAddDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
+    openOccurrenceDialog();
+  };
+
+  const handleOccurrenceModalEdit = (occurrenceId: number) => {
+    setOccurrenceIdToEdit(occurrenceId);
     openOccurrenceDialog();
   };
 
   const handleNoteModalClose = () => {
     window.setTimeout(() => {
-      setActiveDate(null);
+      setOccurrenceToAddDate(null);
       closeNoteDialog();
     }, 0);
   };
 
   const handleNoteModalOpen = (
-    dateNumber: number,
+    dayOfMonth: number,
     monthIndex: number,
     fullYear: number
   ) => {
+    const month = monthIndex < 10 ? `0${monthIndex}` : monthIndex;
+    const day = dayOfMonth < 10 ? `0${dayOfMonth}` : dayOfMonth;
+    setNoteToAddDay(`${fullYear}-${month}-${day}`);
     openNoteDialog();
-    setActiveDate(new Date(fullYear, monthIndex - 1, dateNumber, 12));
   };
 
   const calendarContainerClassName = clsx(
@@ -138,21 +151,23 @@ const MonthCalendar = () => {
           activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
           activeYear={Number(activeYear)}
           state={calendarState}
-          onAddOccurrence={handleOccurrenceModalOpen}
+          onAddOccurrence={handleOccurrenceModalAdd}
           onAddNote={handleNoteModalOpen}
+          onEditOccurrence={handleOccurrenceModalEdit}
         />
       </div>
 
       <OccurrenceDialog
         isOpen={isOccurrenceDialogOpen}
         onClose={handleOccurrenceModalClose}
-        date={activeDate}
+        date={occurrenceToAddDate}
+        occurrenceId={occurrenceIdToEdit}
       />
 
       <NoteDialog
         open={isNoteDialogOpen}
         onClose={handleNoteModalClose}
-        date={activeDate}
+        day={noteToAddDay}
       />
     </>
   );
