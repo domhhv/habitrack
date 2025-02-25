@@ -1,6 +1,6 @@
+import { useDisclosure } from '@heroui/react';
 import { useDocumentTitle } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
-import { useDisclosure } from '@nextui-org/react';
 import { useOccurrencesStore } from '@stores';
 import { capitalizeFirstLetter } from '@utils';
 import clsx from 'clsx';

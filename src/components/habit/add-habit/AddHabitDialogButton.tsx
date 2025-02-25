@@ -1,5 +1,4 @@
 import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
-import { useTextField, useFileField } from '@hooks';
 import {
   Button,
   Input,
@@ -11,7 +10,8 @@ import {
   Select,
   SelectItem,
   Textarea,
-} from '@nextui-org/react';
+} from '@heroui/react';
+import { useTextField, useFileField } from '@hooks';
 import { CloudArrowUp, Plus } from '@phosphor-icons/react';
 import { useHabitsStore, useTraitsStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -76,12 +76,7 @@ const AddHabitDialogButton = () => {
         open={addTraitModalOpen}
         onClose={() => setAddTraitModalOpen(false)}
       />
-      <Modal
-        isOpen={open}
-        role="add-habit-dialog"
-        onClose={handleDialogClose}
-        isDismissable={false}
-      >
+      <Modal isOpen={open} role="add-habit-dialog" onClose={handleDialogClose}>
         <ModalContent>
           <ModalHeader>Add New Habit</ModalHeader>
           <ModalBody>

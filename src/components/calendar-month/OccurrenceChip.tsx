@@ -1,6 +1,6 @@
+import { Badge, Button, Tooltip } from '@heroui/react';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
-import { Badge, Button, Tooltip } from '@nextui-org/react';
 import { Note, PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useNotesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
@@ -110,7 +110,7 @@ const OccurrenceChip = ({
         content: 'px-2 py-1.5',
       }}
       delay={0}
-      closeDelay={0}
+      closeDelay={100}
     >
       <div
         style={chipStyle}

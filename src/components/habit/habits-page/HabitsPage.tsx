@@ -4,8 +4,6 @@ import {
   EditHabitDialog,
   TraitChip,
 } from '@components';
-import { useDocumentTitle, useScreenWidth } from '@hooks';
-import { type Habit } from '@models';
 import {
   Button,
   Table,
@@ -15,7 +13,9 @@ import {
   TableHeader,
   TableRow,
   Tooltip,
-} from '@nextui-org/react';
+} from '@heroui/react';
+import { useDocumentTitle, useScreenWidth } from '@hooks';
+import { type Habit } from '@models';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';

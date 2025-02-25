@@ -1,5 +1,5 @@
+import { Tooltip } from '@heroui/react';
 import type { Streak } from '@models';
-import { Tooltip } from '@nextui-org/react';
 import { getLongestHabitStreak } from '@services';
 import React from 'react';
 
