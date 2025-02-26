@@ -1,10 +1,9 @@
 import { useUser } from '@hooks';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 
 import AccountPage from './AccountPage';
-import { useAccountPage } from './use-account-page';
 
 jest.mock('./use-account-page');
 jest.mock('@hooks', () => ({
@@ -20,15 +19,6 @@ jest.mock('./use-auth-search-params', () => ({
 
 describe(AccountPage.name, () => {
   it('should show loader', () => {
-    (useAccountPage as jest.Mock).mockReturnValue({
-      loading: true,
-      forbidden: false,
-      email: '',
-      handleEmailChange: jest.fn(),
-      name: '',
-      handleNameChange: jest.fn(),
-      updateAccount: jest.fn(),
-    });
     const { getByTestId } = render(
       <BrowserRouter>
         <AccountPage />
@@ -39,15 +29,6 @@ describe(AccountPage.name, () => {
   });
 
   it('should ask user to log in', () => {
-    (useAccountPage as jest.Mock).mockReturnValue({
-      loading: false,
-      forbidden: true,
-      email: '',
-      handleEmailChange: jest.fn(),
-      name: '',
-      handleNameChange: jest.fn(),
-      updateAccount: jest.fn(),
-    });
     (useUser as jest.Mock).mockReturnValue({ id: null });
     const { getByTestId } = render(
       <BrowserRouter>
@@ -60,15 +41,6 @@ describe(AccountPage.name, () => {
   });
 
   it.skip('should use account data', () => {
-    (useAccountPage as jest.Mock).mockReturnValue({
-      loading: false,
-      forbidden: false,
-      email: 'example@mail.com',
-      handleEmailChange: jest.fn(),
-      name: 'Test name',
-      handleNameChange: jest.fn(),
-      updateAccount: jest.fn(),
-    });
     const { getByTestId } = render(
       <BrowserRouter>
         <AccountPage />
@@ -87,15 +59,6 @@ describe(AccountPage.name, () => {
 
   it.skip('should call updateAccount', async () => {
     const updateAccount = jest.fn();
-    (useAccountPage as jest.Mock).mockReturnValue({
-      loading: false,
-      forbidden: false,
-      email: '',
-      handleEmailChange: jest.fn(),
-      name: '',
-      handleNameChange: jest.fn(),
-      updateAccount,
-    });
     const { getByTestId } = render(
       <BrowserRouter>
         <AccountPage />

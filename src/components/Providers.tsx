@@ -1,7 +1,7 @@
 import { HeroUIProvider as OriginalHeroUIProvider } from '@heroui/react';
 import React, { type ReactNode } from 'react';
 import { I18nProvider } from 'react-aria';
-import { BrowserRouter, useNavigate } from 'react-router-dom';
+import { BrowserRouter, useNavigate } from 'react-router';
 
 type ProviderProps = {
   children: ReactNode;

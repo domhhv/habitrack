@@ -1,6 +1,6 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 
 import AuthModalButton from './AuthModalButton';
 
@@ -8,8 +8,8 @@ jest.mock('@hooks', () => ({
   useUser: jest.fn().mockReturnValue({ id: null }),
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+jest.mock('react-router', () => ({
+  ...jest.requireActual('react-router'),
   __esModule: true,
   useNavigate: () => jest.fn(),
   BrowserRouter: ({ children }: { children: React.ReactNode }) => (

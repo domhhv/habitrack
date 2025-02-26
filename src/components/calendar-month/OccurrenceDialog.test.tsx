@@ -4,7 +4,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import { format } from 'date-fns';
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 
 import OccurrenceDialog from './OccurrenceDialog';
 

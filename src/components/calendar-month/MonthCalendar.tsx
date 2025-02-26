@@ -12,7 +12,7 @@ import {
 } from 'date-fns';
 import React from 'react';
 import { useCalendar, useLocale } from 'react-aria';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 import { useShallow } from 'zustand/react/shallow';
 

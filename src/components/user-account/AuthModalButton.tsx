@@ -20,7 +20,7 @@ import { sendPasswordResetEmail, signIn, signOut, signUp } from '@services';
 import { useSnackbarsStore } from '@stores';
 import { getErrorMessage } from '@utils';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 import AuthForm from './AuthForm';
 

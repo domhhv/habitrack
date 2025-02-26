@@ -1,10 +1,12 @@
 import { Alert, PasswordInput } from '@components';
 import { Button, Input, Spinner } from '@heroui/react';
-import { useDocumentTitle } from '@hooks';
+import { useDocumentTitle, useTextField, useUser } from '@hooks';
+import { updateUser } from '@services';
+import { useSnackbarsStore } from '@stores';
+import { getErrorMessage, toEventLike } from '@utils';
 import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-import { useAccountPage } from './use-account-page';
 import { useAuthSearchParams } from './use-auth-search-params';
 
 const AccountPage = () => {
@@ -12,23 +14,49 @@ const AccountPage = () => {
 
   useDocumentTitle('My Account | Habitrack');
 
-  const {
-    user,
-    loading,
-    forbidden,
-    email,
-    handleEmailChange,
-    password,
-    handlePasswordChange,
-    name,
-    handleNameChange,
-    updateAccount,
-  } = useAccountPage();
+  const { isLoading: isLoadingUser, user } = useUser();
+  const { showSnackbar } = useSnackbarsStore();
+  const [isUpdating, setIsUpdating] = React.useState(false);
+  const [email, handleEmailChange] = useTextField();
+  const [password, handlePasswordChange] = useTextField();
+  const [name, handleNameChange] = useTextField();
+
+  React.useEffect(() => {
+    handleEmailChange(toEventLike(user?.email));
+    handleNameChange(toEventLike(user?.userMetadata.name || ''));
+  }, [user, handleEmailChange, handleNameChange]);
+
+  const updateAccount = async () => {
+    try {
+      setIsUpdating(true);
+
+      await updateUser(email, password, name);
+
+      showSnackbar('Account updated!', {
+        color: 'success',
+        dismissible: true,
+        dismissText: 'Done',
+      });
+    } catch (error) {
+      showSnackbar(
+        'Something went wrong while updating your account. Please try again.',
+        {
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+          dismissible: true,
+        }
+      );
+
+      console.error(error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const containerClassName =
     'w-full mt-8 flex flex-col items-center justify-center';
 
-  if (!user && loading) {
+  if (!user && isLoadingUser) {
     return (
       <div
         className={twMerge(containerClassName, 'pt-16')}
@@ -39,7 +67,7 @@ const AccountPage = () => {
     );
   }
 
-  if (forbidden || (!user && !forbidden)) {
+  if (!user && !isLoadingUser) {
     return (
       <div
         className={twMerge(containerClassName, 'items-start pt-16')}
@@ -85,7 +113,7 @@ const AccountPage = () => {
                 value={password}
                 onChange={handlePasswordChange}
                 label="Set new password"
-                isDisabled={loading}
+                isDisabled={isUpdating}
                 testId="password-input"
               />
             </div>
@@ -94,7 +122,7 @@ const AccountPage = () => {
                 variant="bordered"
                 value={name}
                 onChange={handleNameChange}
-                isDisabled={loading}
+                isDisabled={isUpdating}
                 label="Name"
                 data-testid="name-input"
               />
@@ -103,7 +131,7 @@ const AccountPage = () => {
               <Button
                 fullWidth
                 type="submit"
-                isLoading={loading}
+                isLoading={isUpdating}
                 color="primary"
                 isDisabled={isSubmitDisabled}
               >
