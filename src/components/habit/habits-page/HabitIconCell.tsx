@@ -1,8 +1,8 @@
 import { VisuallyHiddenInput } from '@components';
 import { Button, Tooltip } from '@heroui/react';
+import { useUser } from '@hooks';
 import { type Habit } from '@models';
 import { useHabitsStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
@@ -12,7 +12,7 @@ type HabitIconCellProps = {
 
 const HabitIconCell = ({ habit }: HabitIconCellProps) => {
   const { updateHabit } = useHabitsStore();
-  const user = useUser();
+  const { user } = useUser();
   const iconUrl = getHabitIconUrl(habit.iconPath);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async ({

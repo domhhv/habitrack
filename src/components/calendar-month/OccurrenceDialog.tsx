@@ -13,10 +13,10 @@ import {
   TimeInput,
 } from '@heroui/react';
 import type { TimeInputValue, ButtonProps } from '@heroui/react';
+import { useUser } from '@hooks';
 import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
 import { format, isFuture, isToday, isYesterday } from 'date-fns';
 import React, { type ChangeEventHandler } from 'react';
@@ -39,7 +39,7 @@ const OccurrenceDialog = ({
   date,
   occurrenceId,
 }: OccurrenceDialogProps) => {
-  const user = useUser();
+  const { user } = useUser();
   const { habits } = useHabitsStore();
   const { addNote, addingNote, updateNote, updatingNote } = useNotesStore();
   const {
@@ -137,8 +137,23 @@ const OccurrenceDialog = ({
   ]);
 
   React.useEffect(() => {
+    if (!time) {
+      return;
+    }
+
     if (date) {
-      setIsDateTimeInFuture(isFuture(date));
+      setIsDateTimeInFuture(
+        isFuture(
+          new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate(),
+            time.hour,
+            time.minute
+          )
+        )
+      );
+
       return;
     }
 

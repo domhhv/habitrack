@@ -1,13 +1,28 @@
+import { type Database } from '@db-types';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@supabase/supabase-js';
 
-import { type Database } from '../../supabase/database.types';
+class SupabaseClientSingleton {
+  private static instance: SupabaseClient<Database> | null = null;
+  private client: SupabaseClient<Database>;
 
-const createSupabaseClient = () => {
-  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-    return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+  private constructor() {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      throw new Error('Supabase URL and ANON KEY must be provided');
+    }
+
+    this.client = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 
-  return {} as ReturnType<typeof createClient>;
-};
+  public static getInstance(): SupabaseClient<Database> {
+    if (!this.instance) {
+      this.instance = new SupabaseClientSingleton().client;
+    }
 
-export const supabaseClient = createSupabaseClient();
+    return this.instance;
+  }
+}
+
+const supabaseClient = SupabaseClientSingleton.getInstance();
+
+export default supabaseClient;

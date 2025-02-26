@@ -15,6 +15,9 @@ jest.mock('@hooks', () => ({
     .fn()
     .mockReturnValue(['', jest.fn(), jest.fn(), jest.fn()]),
   useFileField: jest.fn().mockReturnValue([null, jest.fn(), jest.fn()]),
+  useUser: jest
+    .fn()
+    .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
 }));
 
 jest.mock('@stores', () => ({
@@ -23,12 +26,6 @@ jest.mock('@stores', () => ({
     habitIdBeingUpdated: null,
   }),
   useTraitsStore: jest.fn().mockReturnValue({ traits: [] }),
-}));
-
-jest.mock('@supabase/auth-helpers-react', () => ({
-  useUser: jest
-    .fn()
-    .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
 }));
 
 describe(EditHabitDialog.name, () => {

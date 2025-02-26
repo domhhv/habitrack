@@ -1,10 +1,5 @@
+import type { Tables, TablesInsert, TablesUpdate } from '@db-types';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
-
-import type {
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-} from '../../supabase/database.types';
 
 import { type Trait } from './trait.model';
 
