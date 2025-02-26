@@ -6,7 +6,7 @@ import { addMonths, isSameMonth } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { type CalendarState } from 'react-stately';
 
 import type { CellPosition, CellRangeStatus } from './MonthCalendarCell';

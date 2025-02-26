@@ -14,7 +14,7 @@ import {
 } from 'date-fns';
 import { motion } from 'framer-motion';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 import OccurrenceChip from '../calendar-month/OccurrenceChip';
 

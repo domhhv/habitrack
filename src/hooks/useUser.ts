@@ -1,32 +1,68 @@
 import { supabaseClient } from '@helpers';
-import type { User, UserResponse } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
+import { transformServerEntity } from '@utils';
 import React from 'react';
+import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 const useUser = () => {
-  const [loading, setLoading] = React.useState(true);
-  const [user, setUser] = React.useState<null | User>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<null | Error>(null);
+  const [user, setUser] = React.useState<null | CamelCasedPropertiesDeep<User>>(
+    null
+  );
 
   React.useEffect(() => {
-    supabaseClient.auth
-      .getUser()
-      .then((userResponse: UserResponse) => {
-        if (userResponse.error) {
-          throw new Error(userResponse.error.message);
+    let mounted = true;
+
+    async function getSession() {
+      const {
+        data: { session },
+        error,
+      } = await supabaseClient.auth.getSession();
+
+      if (mounted) {
+        if (error) {
+          setError(error);
+          setIsLoading(false);
+          return;
         }
 
-        setUser(user);
-      })
-      .catch((e) => {
-        if (e.message !== 'Auth session missing!') {
-          console.error('Error fetching user:', e);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  });
+        setUser(session?.user ? transformServerEntity(session.user) : null);
+        setIsLoading(false);
+      }
+    }
 
-  return { loading, user };
+    void getSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (
+        session &&
+        (event === 'SIGNED_IN' ||
+          event === 'TOKEN_REFRESHED' ||
+          event === 'USER_UPDATED')
+      ) {
+        setUser(transformServerEntity(session.user));
+      }
+
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  return { isLoading, error, user };
 };
 
 export default useUser;

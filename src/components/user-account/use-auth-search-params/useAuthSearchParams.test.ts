@@ -1,6 +1,6 @@
 import { useSnackbarsStore } from '@stores';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 
 import useAuthSearchParams from './useAuthSearchParams';
 
@@ -8,8 +8,8 @@ jest.mock('@stores', () => ({
   useSnackbarsStore: jest.fn(),
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+jest.mock('react-router', () => ({
+  ...jest.requireActual('react-router'),
   useSearchParams: jest.fn(),
 }));
 

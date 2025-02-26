@@ -24,8 +24,9 @@ Habitrack is a simple and intuitive web app designed for logging habits and visu
 
 This app showcases the use of the following tools and technologies:
 
-- React with TypeScript, bundled with [Vite](https://vite.dev/)
-- [Zustand](https://zustand.docs.pmnd.rs/) for global state management
+- React 19 with TypeScript, bundled with [Vite](https://vite.dev/)
+- [React Router](https://reactrouter.com) v7 for routing
+- [Zustand](https://zustand.docs.pmnd.rs/) v5 for global state management
 - [Tailwind CSS](https://tailwindcss.com) v3 for styling (HeroUI doesn't support v4 [yet](https://github.com/heroui-inc/heroui/issues/4644))
 - [HeroUI](https://www.heroui.com/) for the UI components
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view

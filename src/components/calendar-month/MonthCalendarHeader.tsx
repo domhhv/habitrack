@@ -20,7 +20,7 @@ import { useTraitsStore, useHabitsStore, useOccurrencesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router';
 
 export type MonthCalendarHeaderProps = {
   activeMonthLabel: string;

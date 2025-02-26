@@ -20,7 +20,7 @@ import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import { format, isFuture, isToday, isYesterday } from 'date-fns';
 import React, { type ChangeEventHandler } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
 
 type OccurrenceDialogProps = RequireAtLeastOne<

@@ -9,7 +9,7 @@ import {
 import { setDefaultOptions } from 'date-fns';
 import { enGB } from 'date-fns/locale';
 import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router';
 
 import Providers from './Providers';
 
