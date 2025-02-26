@@ -1,7 +1,6 @@
 import { PasswordInput, type AuthMode } from '@components';
-import { Input, Button } from '@heroui/react';
+import { Input, Button, cn } from '@heroui/react';
 import { useTextField } from '@hooks';
-import clsx from 'clsx';
 import React from 'react';
 
 type AuthFormProps = {
@@ -43,7 +42,7 @@ const AuthForm = ({
     onCancel();
   };
 
-  const formClassName = clsx(mode === 'reset-password' && 'py-3');
+  const formClassName = cn(mode === 'reset-password' && 'py-3');
 
   return (
     <form

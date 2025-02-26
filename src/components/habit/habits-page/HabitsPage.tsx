@@ -6,6 +6,7 @@ import {
 } from '@components';
 import {
   Button,
+  cn,
   Table,
   TableBody,
   TableCell,
@@ -19,7 +20,6 @@ import { type Habit } from '@models';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
-import clsx from 'clsx';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -116,7 +116,7 @@ const HabitsPage = () => {
         shadow="none"
         isHeaderSticky
         classNames={{
-          base: clsx(
+          base: cn(
             'overflow-scroll px-8 py-2 lg:px-16 lg:py-4 [&>div]:bg-white [&>div]:dark:bg-background-800',
             isMobile ? 'max-h-[400px]' : 'max-h-[600px]'
           ),

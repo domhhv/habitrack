@@ -1,10 +1,9 @@
-import { Badge, Button, Tooltip } from '@heroui/react';
+import { Badge, Button, cn, Tooltip } from '@heroui/react';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { Note, PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useNotesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
-import clsx from 'clsx';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -114,7 +113,7 @@ const OccurrenceChip = ({
     >
       <div
         style={chipStyle}
-        className={clsx(
+        className={cn(
           'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 dark:bg-slate-800 md:mb-1 md:mr-1',
           screenWidth < 400 && 'p-1'
         )}
@@ -123,7 +122,7 @@ const OccurrenceChip = ({
         <img
           src={iconUrl}
           alt={`${habitName} icon`}
-          className={clsx('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
+          className={cn('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
         />
       </div>
     </Tooltip>

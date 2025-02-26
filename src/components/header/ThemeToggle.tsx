@@ -1,13 +1,11 @@
-import { ButtonGroup, Button } from '@heroui/react';
+import { ButtonGroup, Button, cn } from '@heroui/react';
 import { ThemeMode, useScreenWidth, useThemeMode } from '@hooks';
 import {
   SunDim as SunIcon,
   Desktop as DesktopIcon,
   Moon as MoonIcon,
 } from '@phosphor-icons/react';
-import clsx from 'clsx';
 import React from 'react';
-import { twMerge } from 'tailwind-merge';
 
 const modesToIcons = {
   [ThemeMode.LIGHT]: SunIcon,
@@ -27,8 +25,8 @@ const ThemeToggle = () => {
     <ButtonGroup>
       {Object.values(ThemeMode).map((mode) => {
         const isSelected = themeMode === mode;
-        const iconClassName = clsx(isSelected && 'text-white');
-        const buttonClassName = clsx(isSelected && 'bg-secondary-500');
+        const iconClassName = cn(isSelected && 'text-white');
+        const buttonClassName = cn(isSelected && 'bg-secondary-500');
 
         const Icon = modesToIcons[mode];
 
@@ -43,7 +41,7 @@ const ThemeToggle = () => {
             size={screenWidth > 1024 ? 'md' : 'sm'}
           >
             <Icon
-              className={twMerge('dark:text-neutral-200', iconClassName)}
+              className={cn('dark:text-neutral-200', iconClassName)}
               weight={isSelected ? 'bold' : 'regular'}
               size={16}
             />
