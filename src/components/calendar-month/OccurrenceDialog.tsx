@@ -13,16 +13,12 @@ import {
   TimeInput,
 } from '@heroui/react';
 import type { TimeInputValue, ButtonProps } from '@heroui/react';
-import {
-  parseAbsoluteToLocal,
-  ZonedDateTime,
-  Time,
-} from '@internationalized/date';
+import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
-import { format, isToday, isYesterday } from 'date-fns';
+import { format, isFuture, isToday, isYesterday } from 'date-fns';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router-dom';
 import type { RequireAtLeastOne } from 'type-fest';
@@ -56,6 +52,7 @@ const OccurrenceDialog = ({
   const [note, setNote] = React.useState('');
   const [selectedHabitId, setSelectedHabitId] = React.useState('');
   const [time, setTime] = React.useState<TimeInputValue | null>(null);
+  const [isDateTimeInFuture, setIsDateTimeInFuture] = React.useState(false);
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
     React.useState(false);
 
@@ -144,6 +141,29 @@ const OccurrenceDialog = ({
     updatingOccurrence,
     updatingNote,
   ]);
+
+  React.useEffect(() => {
+    if (date) {
+      setIsDateTimeInFuture(isFuture(date));
+      return;
+    }
+
+    if (occurrenceToUpdate) {
+      const occurrenceToUpdateDate = new Date(occurrenceToUpdate.timestamp);
+
+      setIsDateTimeInFuture(
+        isFuture(
+          new Date(
+            occurrenceToUpdateDate.getFullYear(),
+            occurrenceToUpdateDate.getMonth(),
+            occurrenceToUpdateDate.getDate(),
+            time?.hour || 0,
+            time?.minute || 0
+          )
+        )
+      );
+    }
+  }, [date, occurrenceToUpdate, time]);
 
   if (!isOpen) {
     return null;
@@ -265,7 +285,7 @@ const OccurrenceDialog = ({
           <Select
             disableSelectorIconRotation
             variant="faded"
-            selectedKeys={selectedHabitId}
+            selectedKeys={[selectedHabitId]}
             onChange={handleHabitSelectionChange}
             label={
               hasHabits
@@ -311,12 +331,13 @@ const OccurrenceDialog = ({
           <div className="flex w-full flex-col gap-y-2">
             <TimeInput
               label="Time"
+              variant="faded"
               value={time}
               onChange={setTime}
-              variant="faded"
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              maxValue={new Time()}
+              description={
+                isDateTimeInFuture &&
+                'You are logging a habit for the future. Are you a time traveler?'
+              }
             />
           </div>
         </ModalBody>
