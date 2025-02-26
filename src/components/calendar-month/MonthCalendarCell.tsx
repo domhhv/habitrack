@@ -1,6 +1,6 @@
 import { isCalendarDay } from '@helpers';
 import { Button, cn, Tooltip } from '@heroui/react';
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useUser } from '@hooks';
 import type { CalendarDate } from '@internationalized/date';
 import {
   CalendarBlank,
@@ -9,7 +9,6 @@ import {
   NoteBlank,
 } from '@phosphor-icons/react';
 import { useNotesStore, useOccurrencesStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { format, isToday } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
@@ -45,7 +44,7 @@ const MonthCalendarCell = ({
   const { removeOccurrence, fetchingOccurrences, occurrencesByDate } =
     useOccurrencesStore();
   const { notes, fetchingNotes } = useNotesStore();
-  const user = useUser();
+  const { user } = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
   const cellDate = new Date(date.year, date.month - 1, date.day);
   const isTodayCell = isToday(cellDate);

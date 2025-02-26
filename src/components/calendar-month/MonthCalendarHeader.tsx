@@ -9,7 +9,7 @@ import {
   SelectSection,
   cn,
 } from '@heroui/react';
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useUser } from '@hooks';
 import type { Habit, Trait } from '@models';
 import {
   ArrowFatLeft,
@@ -17,7 +17,6 @@ import {
   ArrowsClockwise,
 } from '@phosphor-icons/react';
 import { useTraitsStore, useHabitsStore, useOccurrencesStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
 import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
@@ -52,7 +51,7 @@ const MonthCalendarHeader = ({
   const { habits } = useHabitsStore();
   const { traits } = useTraitsStore();
   const { filteredBy, filterBy } = useOccurrencesStore();
-  const user = useUser();
+  const { user } = useUser();
   const { screenWidth, isDesktop, isMobile } = useScreenWidth();
   const isOnCurrentMonth =
     activeMonthLabel === MONTHS[new Date().getMonth()] &&

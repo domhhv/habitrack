@@ -11,14 +11,13 @@ import {
   VisuallyHidden,
   Tooltip,
 } from '@heroui/react';
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useUser } from '@hooks';
 import {
   SignOut as SignOutIcon,
   User as UserIcon,
 } from '@phosphor-icons/react';
 import { sendPasswordResetEmail, signIn, signOut, signUp } from '@services';
 import { useSnackbarsStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { getErrorMessage } from '@utils';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -28,7 +27,7 @@ import AuthForm from './AuthForm';
 export type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
-  const user = useUser();
+  const { user } = useUser();
   const { screenWidth } = useScreenWidth();
   const { showSnackbar } = useSnackbarsStore();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();

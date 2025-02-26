@@ -1,8 +1,7 @@
 import { AuthModalButton } from '@components';
 import { Button, Tooltip, Spinner } from '@heroui/react';
-import { useScreenWidth, useFetchOnAuth } from '@hooks';
+import { useScreenWidth, useFetchOnAuth, useUser } from '@hooks';
 import { GithubLogo } from '@phosphor-icons/react';
-import { useSessionContext } from '@supabase/auth-helpers-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -11,11 +10,11 @@ import ThemeToggle from './ThemeToggle';
 const Header = () => {
   useFetchOnAuth();
   const { screenWidth, isMobile, isDesktop } = useScreenWidth();
-  const session = useSessionContext();
+  const { loading } = useUser();
 
   return (
     <>
-      {session.isLoading && (
+      {loading && (
         <div className="absolute bottom-0 left-0 right-0 top-0 z-50 flex h-full flex-1 items-center justify-center bg-background-100 opacity-90 dark:bg-background-800">
           <div className="flex -translate-y-[73px] items-center justify-center">
             <Spinner

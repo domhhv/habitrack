@@ -1,4 +1,4 @@
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { supabaseClient } from '@helpers';
 import React from 'react';
 
 type Args = {
@@ -7,14 +7,12 @@ type Args = {
 };
 
 const useDataFetch = ({ clear, load }: Args) => {
-  const supabase = useSupabaseClient();
-
   React.useEffect(() => {
-    if (!supabase.auth) {
+    if (!supabaseClient.auth) {
       return;
     }
 
-    const { data } = supabase.auth.onAuthStateChange((event) => {
+    const { data } = supabaseClient.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         clear();
       }
@@ -27,7 +25,7 @@ const useDataFetch = ({ clear, load }: Args) => {
     return () => {
       data.subscription.unsubscribe();
     };
-  }, [supabase, clear, load]);
+  }, [clear, load]);
 };
 
 export default useDataFetch;

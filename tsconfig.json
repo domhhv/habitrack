@@ -27,6 +27,7 @@
       "@models": ["models"],
       "@stores": ["stores"],
       "@tests": ["../tests"],
+      "@db-types": ["../supabase/database.types"],
       "@root/*": ["../*"]
     }
   },

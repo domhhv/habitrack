@@ -15,11 +15,10 @@ import {
   TableRow,
   Tooltip,
 } from '@heroui/react';
-import { useDocumentTitle, useScreenWidth } from '@hooks';
+import { useDocumentTitle, useScreenWidth, useUser } from '@hooks';
 import { type Habit } from '@models';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useHabitsStore, useOccurrencesStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -72,7 +71,7 @@ const habitColumns: Column[] = [
 ];
 
 const HabitsPage = () => {
-  const user = useUser();
+  const { user } = useUser();
   const { habits, removeHabit, habitIdBeingDeleted } = useHabitsStore();
   const { removeOccurrencesByHabitId } = useOccurrencesStore();
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);

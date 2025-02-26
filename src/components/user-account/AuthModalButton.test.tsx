@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import AuthModalButton from './AuthModalButton';
 
-jest.mock('@supabase/auth-helpers-react', () => ({
+jest.mock('@hooks', () => ({
   useUser: jest.fn().mockReturnValue({ id: null }),
 }));
 

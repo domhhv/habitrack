@@ -9,9 +9,8 @@ import {
   ModalHeader,
   Textarea,
 } from '@heroui/react';
-import { useTextField } from '@hooks';
+import { useTextField, useUser } from '@hooks';
 import { useTraitsStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { makeTestOccurrence } from '@tests';
 import { toEventLike } from '@utils';
 import React from 'react';
@@ -29,7 +28,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
     useTextField();
   const [color, setTraitColor] = React.useState('#94a3b8');
   const { addingTrait, addTrait } = useTraitsStore();
-  const user = useUser();
+  const { user } = useUser();
 
   React.useEffect(() => {
     handleSlugChange(toEventLike(label.toLowerCase().replace(/\s/g, '-')));

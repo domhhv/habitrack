@@ -1,5 +1,5 @@
+import { useUser } from '@hooks';
 import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import { format } from 'date-fns';
@@ -14,7 +14,7 @@ jest.mock('@stores', () => ({
   useNotesStore: jest.fn(),
 }));
 
-jest.mock('@supabase/auth-helpers-react', () => ({
+jest.mock('@hooks', () => ({
   useUser: jest.fn(),
 }));
 

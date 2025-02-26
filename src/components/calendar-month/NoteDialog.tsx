@@ -7,8 +7,8 @@ import {
   ModalHeader,
   Textarea,
 } from '@heroui/react';
+import { useUser } from '@hooks';
 import { useNotesStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -19,7 +19,7 @@ type NoteDialogProps = {
 };
 
 const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
-  const user = useUser();
+  const { user } = useUser();
   const [content, setContent] = React.useState('');
   const {
     addingNote,

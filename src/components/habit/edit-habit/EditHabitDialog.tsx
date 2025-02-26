@@ -11,10 +11,9 @@ import {
   Textarea,
   useDisclosure,
 } from '@heroui/react';
-import { useTextField } from '@hooks';
+import { useTextField, useUser } from '@hooks';
 import type { Habit } from '@models';
 import { useHabitsStore, useTraitsStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { toEventLike } from '@utils';
 import React from 'react';
 
@@ -30,7 +29,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   const [traitId, setTraitId] = React.useState('');
   const { updateHabit, habitIdBeingUpdated } = useHabitsStore();
   const { traits } = useTraitsStore();
-  const user = useUser();
+  const { user } = useUser();
 
   React.useEffect(() => {
     if (habit) {

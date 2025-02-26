@@ -1,6 +1,6 @@
+import { useUser } from '@hooks';
 import { StorageBuckets, uploadFile } from '@services';
 import { useSnackbarsStore, useHabitsStore } from '@stores';
-import { useUser } from '@supabase/auth-helpers-react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -19,9 +19,8 @@ jest.mock('@services', () => ({
   uploadFile: jest.fn(),
 }));
 
-jest.mock('@supabase/auth-helpers-react', () => ({
+jest.mock('@hooks', () => ({
   useUser: jest.fn(),
-  useSession: jest.fn(),
 }));
 
 describe(AddHabitDialogButton.name, () => {

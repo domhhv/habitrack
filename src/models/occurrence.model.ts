@@ -1,13 +1,12 @@
-import type { CalendarDay } from '@helpers';
-import type { Note } from '@root/src/models/note.model';
-import type { CamelCasedPropertiesDeep } from 'type-fest';
-
 import type {
   TablesInsert,
   Tables,
   CompositeTypes,
   TablesUpdate,
-} from '../../supabase/database.types';
+} from '@db-types';
+import type { CalendarDay } from '@helpers';
+import type { Note } from '@root/src/models/note.model';
+import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 import { type Habit } from './habit.model';
 import { type Trait } from './trait.model';

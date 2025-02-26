@@ -26,12 +26,12 @@ This app showcases the use of the following tools and technologies:
 
 - React with TypeScript, bundled with [Vite](https://vite.dev/)
 - [Zustand](https://zustand.docs.pmnd.rs/) for global state management
-- [Tailwind CSS](https://tailwindcss.com) for styling
+- [Tailwind CSS](https://tailwindcss.com) v3 for styling (HeroUI doesn't support v4 [yet](https://github.com/heroui-inc/heroui/issues/4644))
 - [HeroUI](https://www.heroui.com/) for the UI components
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [Supabase](https://supabase.io) for Authentication, Database and Storage
-- [Jest](https://jestjs.io) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit-testing
-- ESLint, Prettier, and Husky for linting and formatting
+- [Jest](https://jestjs.io) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit-testing (inactive, to be replaced with [Vitest](https://vitest.dev/))
+- Custom ESLint v8 config (to be migrated to v9 soon), Prettier, and Husky for linting and formatting
 - Docker for running a local Supabase instance
 - GitHub Actions for CI/CD and Vercel for deployment
 
@@ -47,7 +47,7 @@ This app showcases the use of the following tools and technologies:
 ## Roadmap
 
 - [x] **Dark Mode**: Switch between light and dark themes.
-- [ ] **Weekly View**: View your habits on a weekly calendar.
+- [ ] **Weekly View (in progress)**: View your habits on a weekly calendar.
 - [ ] **Daily View**: Dive into your habits on a daily calendar.
 - [ ] **Export**: Export your habits and entries.
 - [ ] **Environments**: Associate habits with environments where they occur.
@@ -56,6 +56,11 @@ This app showcases the use of the following tools and technologies:
 - [ ] **Statistics**: Track your progress with insightful statistics.
 - [ ] **Notifications**: Get reminders to log your habits.
 - [ ] **Local Storage**: Save your habits and entries locally.
+
+### Tech Debt
+
+- [ ] **Migrate to ESLint v9**: Update the ESLint v9 and use flat config.
+- [ ] **Migrate to Vitest**: Replace Jest with Vitest.
 
 ## Local development
 
@@ -66,7 +71,7 @@ This app showcases the use of the following tools and technologies:
 - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (latest Classic Stable release or higher)
 - [Docker](https://docs.docker.com/get-started/get-docker/) (optional, for running a local Supabase instance)
 
-### Installation
+### Initial Setup
 
 Follow these steps to get the project up and running on your local machine.
 
@@ -96,11 +101,9 @@ Follow these steps to get the project up and running on your local machine.
 
    This command starts the development server and opens the app in your default browser.
 
-#### Database setup (optional)
+### Local Database Setup
 
 The project uses Supabase for database operations.
-
-Habitrack UI is **still runnable** without a local Supabase instance, but you won't be able to sign in/up or retain your habits and entries.
 
 The Supabase project configuration, seeds and migrations live under the `supabase` directory.
 
@@ -159,7 +162,7 @@ To set up a local Supabase instance, run the following commands (Docker required
     yarn db:restart
    ```
 
-##### Migrations
+### Database Migrations
 
 There are a few ways to create and run migrations in the project.
 
@@ -195,7 +198,11 @@ Once the migration ends up in the `main` branch, it will be automatically applie
 
 ### Testing
 
-The project uses [Jest](https://jestjs.io/) for unit testing. To run the tests, use the following command:
+The project uses [Jest](https://jestjs.io/) as the test runner and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit testing of React components.
+
+At the moment, tests are failing and not up-to-date. They will be replaced with [Vitest](https://vitest.dev/) soon.
+
+To run the tests, use the following command:
 
 ```bash
 yarn test
