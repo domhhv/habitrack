@@ -34,7 +34,7 @@ const WeekCalendar = () => {
       day = currentWeek.getDate(),
     } = params;
 
-    const date = new Date(Number(year), Number(month) - 1, Number(day));
+    const date = new Date(Number(year), Number(month) - 1, Number(day) + 1);
 
     const startDate = startOfWeek(startOfDay(date));
 
@@ -46,7 +46,7 @@ const WeekCalendar = () => {
     onRangeChange([+rangeStart, +rangeEnd]);
   }, [params, onRangeChange]);
 
-  const days = eachDayOfInterval<Date>({
+  const days = eachDayOfInterval({
     start: startOfTheWeek,
     end: addDays(startOfTheWeek, 6),
   });
@@ -108,7 +108,7 @@ const WeekCalendar = () => {
                 </h6>
               </div>
               <div className="flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600">
-                {eachMinuteOfInterval<Date>(
+                {eachMinuteOfInterval(
                   {
                     start: startOfDay(day),
                     end: endOfDay(day),
