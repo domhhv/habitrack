@@ -68,8 +68,6 @@ const OccurrenceDialog = ({
 
   React.useEffect(() => {
     if (!date && !occurrenceId) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       setTime(parseAbsoluteToLocal(new Date().toISOString()));
       return;
     }
@@ -84,8 +82,6 @@ const OccurrenceDialog = ({
       setSelectedHabitId(occurrence.habitId.toString());
       setNote(occurrence.notes[0]?.content || '');
       setTime(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         parseAbsoluteToLocal(new Date(occurrence.timestamp).toISOString())
       );
 
@@ -99,8 +95,6 @@ const OccurrenceDialog = ({
       occurrenceDateTime.setMonth(date.getMonth());
       occurrenceDateTime.setDate(date.getDate());
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
     }
   }, [date, occurrenceId, occurrences]);

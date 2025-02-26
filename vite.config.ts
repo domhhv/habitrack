@@ -59,10 +59,6 @@ export default defineConfig(({ mode }) => {
               return 'react-stately';
             }
 
-            if (id.includes('react-dom')) {
-              return 'react-dom';
-            }
-
             if (id.includes('node_modules')) {
               return 'vendor';
             }
