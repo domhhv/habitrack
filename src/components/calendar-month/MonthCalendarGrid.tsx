@@ -1,8 +1,7 @@
 import { getMonthIndex, getYearWeekNumberFromMonthWeek } from '@helpers';
-import { Button } from '@heroui/react';
+import { Button, cn } from '@heroui/react';
 import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
 import { isTruthy } from '@utils';
-import clsx from 'clsx';
 import { addMonths, isSameMonth } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
@@ -105,7 +104,7 @@ const MonthCalendarGrid = ({
               >
                 <Button
                   as={Link}
-                  className={clsx(
+                  className={cn(
                     'absolute -left-[24px] bottom-0 h-[107px] w-[20px] min-w-fit p-0 md:-left-[48px] md:w-[40px]'
                   )}
                   variant="light"
@@ -114,7 +113,7 @@ const MonthCalendarGrid = ({
                   {week}
                 </Button>
                 <div
-                  className={clsx(
+                  className={cn(
                     'flex h-[110px] w-full basis-full justify-between border-l-2 border-r-2 border-neutral-500 last-of-type:border-b-2 group-first-of-type:border-t-2 dark:border-neutral-400 lg:h-auto',
                     weekIndex === 0 && 'rounded-t-lg',
                     weekIndex === weeksInMonthCount - 1 && 'rounded-b-lg'

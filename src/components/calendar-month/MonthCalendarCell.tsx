@@ -1,5 +1,5 @@
 import { isCalendarDay } from '@helpers';
-import { Button, Tooltip } from '@heroui/react';
+import { Button, cn, Tooltip } from '@heroui/react';
 import { useScreenWidth } from '@hooks';
 import type { CalendarDate } from '@internationalized/date';
 import {
@@ -10,7 +10,6 @@ import {
 } from '@phosphor-icons/react';
 import { useNotesStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
-import clsx from 'clsx';
 import { format, isToday } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
@@ -59,7 +58,7 @@ const MonthCalendarCell = ({
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => o.habitId);
 
-  const cellRootClassName = clsx(
+  const cellRootClassName = cn(
     'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 focus:border-neutral-100 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-36',
     position === 'top-left' && 'rounded-tl-md',
     position === 'top-right' && 'rounded-tr-md',
@@ -69,7 +68,7 @@ const MonthCalendarCell = ({
       'bg-background-100 hover:bg-background-300 dark:bg-background-700 dark:hover:bg-background-700'
   );
 
-  const cellHeaderClassName = clsx(
+  const cellHeaderClassName = cn(
     'flex w-full items-center justify-between border-b-1 border-neutral-500 px-1.5 py-1.5 text-sm dark:border-neutral-400 md:text-base',
     rangeStatus !== 'in-range' && 'text-neutral-400 dark:text-neutral-600',
     isTodayCell ? 'w-full self-auto md:self-start' : 'w-full'
@@ -100,7 +99,7 @@ const MonthCalendarCell = ({
                 closeDelay={0}
               >
                 <Button
-                  className={clsx(
+                  className={cn(
                     'h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6',
                     hasNote && 'opacity-100'
                   )}

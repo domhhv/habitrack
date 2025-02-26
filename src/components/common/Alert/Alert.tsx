@@ -1,4 +1,4 @@
-import { type ButtonProps } from '@heroui/react';
+import { type ButtonProps, cn } from '@heroui/react';
 import {
   BellRinging,
   CheckCircle,
@@ -8,7 +8,6 @@ import {
   Warning,
   WarningCircle,
 } from '@phosphor-icons/react';
-import clsx from 'clsx';
 import React, { type ReactNode } from 'react';
 import { type SetRequired, type ValueOf } from 'type-fest';
 
@@ -40,7 +39,7 @@ const Alert = ({
   color = 'default',
   testId = 'alert',
 }: AlertProps) => {
-  const alertClassName = clsx(
+  const alertClassName = cn(
     'flex items-center gap-2 rounded-md border px-4 py-2',
     color === 'default' &&
       'border-default-300 bg-default-50 text-default-700 dark:border-default-700 dark:bg-default-900 dark:text-default-100',

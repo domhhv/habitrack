@@ -7,6 +7,7 @@ import {
   SelectItem,
   Button,
   SelectSection,
+  cn,
 } from '@heroui/react';
 import { useScreenWidth } from '@hooks';
 import type { Habit, Trait } from '@models';
@@ -18,7 +19,6 @@ import {
 import { useTraitsStore, useHabitsStore, useOccurrencesStore } from '@stores';
 import { useUser } from '@supabase/auth-helpers-react';
 import { getHabitIconUrl } from '@utils';
-import clsx from 'clsx';
 import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -168,7 +168,7 @@ const MonthCalendarHeader = ({
             radius="sm"
             variant="light"
             color="secondary"
-            className={clsx('h-auto', isMobile && 'w-6 min-w-fit p-0')}
+            className={cn('h-auto', isMobile && 'w-6 min-w-fit p-0')}
             role="navigate-back"
           >
             <ArrowFatLeft size={isDesktop ? 20 : 16} />
@@ -195,7 +195,7 @@ const MonthCalendarHeader = ({
             color="secondary"
             radius="sm"
             to={`/calendar/month/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}/${nextMonth.getDate()}`}
-            className={clsx('h-auto', isMobile && 'w-6 min-w-fit p-0')}
+            className={cn('h-auto', isMobile && 'w-6 min-w-fit p-0')}
             role="navigate-forward"
           >
             <ArrowFatRight size={isDesktop ? 20 : 16} />
@@ -217,12 +217,12 @@ const MonthCalendarHeader = ({
             classNames={{
               popoverContent: isMobile ? 'w-[150px]' : 'w-[250px]',
               selectorIcon: isMobile && 'hidden',
-              innerWrapper: clsx(
+              innerWrapper: cn(
                 'w-full overflow-x-scroll !pt-6 md:w-48',
                 isMobile && '!pt-0'
               ),
               value: 'text-tiny md:text-base !overflow-visible flex gap-2 w-48',
-              trigger: clsx(!isMobile && 'h-18 pt-0'),
+              trigger: cn(!isMobile && 'h-18 pt-0'),
               label: '!-translate-y-2',
             }}
             popoverProps={{
@@ -244,10 +244,7 @@ const MonthCalendarHeader = ({
                     <img
                       src={iconUrl}
                       alt={`${name} icon`}
-                      className={clsx(
-                        'h-4 w-4',
-                        screenWidth < 400 && 'h-3 w-3'
-                      )}
+                      className={cn('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
                     />
                   </Tooltip>
                 );
@@ -293,12 +290,12 @@ const MonthCalendarHeader = ({
             classNames={{
               popoverContent: isMobile ? 'w-[150px]' : 'w-[250px]',
               selectorIcon: isMobile && 'hidden',
-              innerWrapper: clsx(
+              innerWrapper: cn(
                 'w-full overflow-x-scroll !pt-6 md:w-48',
                 isMobile && '!pt-0'
               ),
               value: 'text-tiny md:text-base !overflow-visible flex gap-2 w-48',
-              trigger: clsx(!isMobile && 'h-18 pt-0'),
+              trigger: cn(!isMobile && 'h-18 pt-0'),
               label: '!-translate-y-2',
             }}
             popoverProps={{

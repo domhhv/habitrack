@@ -1,9 +1,8 @@
-import { useDisclosure } from '@heroui/react';
+import { cn, useDisclosure } from '@heroui/react';
 import { useDocumentTitle } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
 import { useOccurrencesStore } from '@stores';
 import { capitalizeFirstLetter } from '@utils';
-import clsx from 'clsx';
 import {
   endOfMonth,
   endOfWeek,
@@ -135,7 +134,7 @@ const MonthCalendar = () => {
     openNoteDialog();
   };
 
-  const calendarContainerClassName = clsx(
+  const calendarContainerClassName = cn(
     'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 lg:gap-4 lg:px-16 lg:py-4',
     isOccurrenceDialogOpen && 'pointer-events-none'
   );
