@@ -1981,7 +1981,7 @@
     "@heroui/react-rsc-utils" "2.1.5"
     "@heroui/shared-utils" "2.1.6"
 
-"@heroui/react@2.7.2":
+"@heroui/react@^2.7.2":
   version "2.7.2"
   resolved "https://registry.yarnpkg.com/@heroui/react/-/react-2.7.2.tgz#bd558638ee88c77c4efd84216aa4c85563cd3fa3"
   integrity sha512-scxeKoqeGvbkD64wTj1x3rjiULdklL6El9lyevLkb/G52Yj49zFsIPP8aN8/0oKmaf7XVQ9Z8poFoDQJl/slbQ==
