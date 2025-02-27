@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { resolve } from 'path';
 
 import react from '@vitejs/plugin-react';
@@ -21,6 +22,13 @@ export default defineConfig(({ mode }) => {
     define: {
       SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
       SUPABASE_ANON_KEY: JSON.stringify(env.SUPABASE_ANON_KEY),
+    },
+    test: {
+      environment: 'jsdom',
+      setupFiles: './tests/setup.ts',
+      coverage: {
+        reportsDirectory: './tests/coverage',
+      },
     },
     resolve: {
       alias: {

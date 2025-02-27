@@ -5,25 +5,31 @@ import { makeTestHabit } from '@tests';
 import { format } from 'date-fns';
 import React from 'react';
 import { BrowserRouter } from 'react-router';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import OccurrenceDialog from './OccurrenceDialog';
 
-jest.mock('@stores', () => ({
-  useHabitsStore: jest.fn(),
-  useOccurrencesStore: jest.fn(),
-  useNotesStore: jest.fn(),
+vi.mock('@stores', () => ({
+  useHabitsStore: vi.fn(),
+  useOccurrencesStore: vi.fn().mockReturnValue({
+    occurrences: [],
+  }),
+  useNotesStore: vi.fn(),
 }));
 
-jest.mock('@hooks', () => ({
-  useUser: jest.fn(),
+vi.mock('@hooks', () => ({
+  useUser: vi.fn(),
 }));
 
-jest.mock('date-fns', () => ({
-  format: jest.fn(),
+vi.mock('date-fns', () => ({
+  isYesterday: vi.fn(),
+  isToday: vi.fn(),
+  isFuture: vi.fn(),
+  format: vi.fn(),
 }));
 
 describe(OccurrenceDialog.name, () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
   const date = new Date(2021, 1, 1, 12);
 
   const props = {
@@ -33,19 +39,24 @@ describe(OccurrenceDialog.name, () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
-    (useNotesStore as unknown as jest.Mock).mockReturnValue({
-      addNote: jest.fn(),
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      habits: [],
+    });
+    (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      addNote: vi.fn(),
       addingNote: false,
     });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
-      addOccurrence: jest.fn(),
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
+    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
+    (
+      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      occurrences: [],
+      addOccurrence: vi.fn(),
       addingOccurrence: false,
     });
     const { getByText } = render(
@@ -57,15 +68,20 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('if no habits are available, should show a message', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({ habits: [] });
-    (useNotesStore as unknown as jest.Mock).mockReturnValue({
-      addNote: jest.fn(),
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      habits: [],
+    });
+    (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      addNote: vi.fn(),
       addingNote: false,
     });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
-      addOccurrence: jest.fn(),
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
+    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
+    (
+      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      occurrences: [],
+      addOccurrence: vi.fn(),
       addingOccurrence: false,
     });
     const { getAllByText } = render(
@@ -79,17 +95,21 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('should render habit options', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       habits: [makeTestHabit()],
     });
-    (useNotesStore as unknown as jest.Mock).mockReturnValue({
-      addNote: jest.fn(),
+    (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      occurrences: [],
+      addNote: vi.fn(),
       addingNote: false,
     });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
-      addOccurrence: jest.fn(),
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
+    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
+    (
+      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      occurrences: [],
+      addOccurrence: vi.fn(),
       addingOccurrence: false,
     });
     const { getByText } = render(<OccurrenceDialog {...props} />);
@@ -97,13 +117,16 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it.skip('should select habit', async () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       habits: [makeTestHabit({ id: 42 })],
     });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
-      addOccurrence: jest.fn(),
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
+    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
+    (
+      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      occurrences: [],
+      addOccurrence: vi.fn(),
       addingOccurrence: false,
     });
     const { container, getAllByText, getByTestId } = render(
@@ -118,17 +141,20 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('on close, should call onClose', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       habits: [makeTestHabit()],
     });
-    (useNotesStore as unknown as jest.Mock).mockReturnValue({
-      addNote: jest.fn(),
+    (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      addNote: vi.fn(),
       addingNote: false,
     });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
-      addOccurrence: jest.fn(),
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
+    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
+    (
+      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      occurrences: [],
+      addOccurrence: vi.fn(),
       addingOccurrence: false,
     });
     const { getByRole } = render(<OccurrenceDialog {...props} />);
@@ -137,13 +163,16 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it.skip('on close, should unselect habit', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       habits: [makeTestHabit()],
     });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue('2021-01-01');
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
-      addOccurrence: jest.fn(),
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
+    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
+    (
+      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      occurrences: [],
+      addOccurrence: vi.fn(),
       addingOccurrence: false,
     });
     const { getByRole, getByText } = render(<OccurrenceDialog {...props} />);
@@ -159,13 +188,18 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it.skip('on submit, should call addOccurrence with proper arguments', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       habits: [makeTestHabit()],
     });
-    (useUser as jest.Mock).mockReturnValue({ id: '1' });
-    (format as jest.Mock).mockReturnValue(date.toISOString().split('T')[0]);
-    const mockAddOccurrence = jest.fn();
-    (useOccurrencesStore as unknown as jest.Mock).mockReturnValue({
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
+    (format as ReturnType<typeof vi.fn>).mockReturnValue(
+      date.toISOString().split('T')[0]
+    );
+    const mockAddOccurrence = vi.fn();
+    (
+      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      occurrences: [],
       addOccurrence: mockAddOccurrence,
       addingOccurrence: false,
     });

@@ -74,7 +74,7 @@ const MonthCalendarCell = ({
   );
 
   return (
-    <div className={cellRootClassName}>
+    <div className={cellRootClassName} onClick={onAddOccurrence}>
       <div className={cellHeaderClassName}>
         <p className="font-bold">{date.day}</p>
         <div className="flex items-center justify-between gap-2">

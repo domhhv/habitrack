@@ -7,6 +7,12 @@ class SupabaseClientSingleton {
   private client: SupabaseClient<Database>;
 
   private constructor() {
+    if (process.env.NODE_ENV === 'test') {
+      this.client = {} as SupabaseClient<Database>;
+
+      return;
+    }
+
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       throw new Error('Supabase URL and ANON KEY must be provided');
     }

@@ -4,69 +4,76 @@ import { act, render } from '@testing-library/react';
 import React from 'react';
 import { useCalendar } from 'react-aria';
 import { useCalendarState } from 'react-stately';
+import { describe, it, expect, vi } from 'vitest';
 
 import App from './App';
 
-jest.mock('react-aria', () => ({
-  useLocale: jest.fn(),
-  useCalendar: jest.fn(),
+vi.mock('react-aria', () => ({
+  useLocale: vi.fn(),
+  useCalendar: vi.fn(),
 }));
 
-jest.mock('react-stately', () => ({
-  useCalendarState: jest.fn(),
+vi.mock('react-stately', () => ({
+  useCalendarState: vi.fn(),
 }));
 
-jest.mock('@internationalized/date', () => ({
-  getWeeksInMonth: jest.fn(),
+vi.mock('@internationalized/date', () => ({
+  getWeeksInMonth: vi.fn(),
 }));
 
-jest.mock('@utils', () => ({
-  generateCalendarRange: jest.fn(),
+vi.mock('@utils', () => ({
+  generateCalendarRange: vi.fn(),
 }));
 
-jest.mock('@components', () => ({
-  Calendar: jest.fn(),
-  HabitsPage: jest.fn(),
-  AppHeader: jest.fn(),
-  AccountPage: jest.fn(),
-  Snackbars: jest.fn(),
+vi.mock('@components', () => ({
+  Calendar: vi.fn(),
+  HabitsPage: vi.fn(),
+  AppHeader: vi.fn(),
+  AccountPage: vi.fn(),
+  Snackbars: vi.fn(),
 }));
 
-jest.mock('react-aria', () => ({
-  useLocale: jest.fn().mockImplementation(() => ({
+vi.mock('@hooks', () => ({
+  useUser: vi
+    .fn()
+    .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
+}));
+
+vi.mock('react-aria', () => ({
+  useLocale: vi.fn().mockImplementation(() => ({
     locale: 'en-GB',
   })),
-  I18nProvider: jest.fn().mockImplementation(({ children }) => children),
+  I18nProvider: vi.fn().mockImplementation(({ children }) => children),
 }));
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation((query) => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(), // Deprecated
-    removeListener: jest.fn(), // Deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
   })),
 });
 
 describe(App.name, () => {
   it.skip('should call generateCalendarRange', () => {
-    (useCalendarState as jest.Mock).mockReturnValue({
+    (useCalendarState as ReturnType<typeof vi.fn>).mockReturnValue({
       visibleRange: {
         start: new Date('2022-01-01'),
         end: new Date('2022-01-31'),
       },
-      getDatesInWeek: jest.fn().mockReturnValue([]),
+      getDatesInWeek: vi.fn().mockReturnValue([]),
     });
-    (getWeeksInMonth as jest.Mock).mockReturnValue(5);
-    (useCalendar as jest.Mock).mockReturnValue({
+    (getWeeksInMonth as ReturnType<typeof vi.fn>).mockReturnValue(5);
+    (useCalendar as ReturnType<typeof vi.fn>).mockReturnValue({
       title: '',
     });
-    (generateCalendarRange as jest.Mock).mockReturnValue([]);
+    (generateCalendarRange as ReturnType<typeof vi.fn>).mockReturnValue([]);
 
     act(() => render(<App />));
 

@@ -23,11 +23,11 @@ const Providers = React.memo(function WrappedProviders({
   children,
 }: ProviderProps) {
   return (
-    <BrowserRouter>
-      <I18nProvider locale="en-GB">
+    <I18nProvider locale="en-GB">
+      <BrowserRouter>
         <HeroUIProvider>{children}</HeroUIProvider>
-      </I18nProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </I18nProvider>
   );
 });
 

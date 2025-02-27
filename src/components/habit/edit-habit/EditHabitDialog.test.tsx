@@ -2,39 +2,38 @@ import { useHabitsStore, useTraitsStore } from '@stores';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestTrait } from '@tests';
 import React from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import EditHabitDialog, { type EditHabitDialogProps } from './EditHabitDialog';
 
-jest.mock('@hooks', () => ({
+vi.mock('@hooks', () => ({
   ThemeMode: {
     LIGHT: 'light',
     DARK: 'dark',
     SYSTEM: 'system',
   },
-  useTextField: jest
-    .fn()
-    .mockReturnValue(['', jest.fn(), jest.fn(), jest.fn()]),
-  useFileField: jest.fn().mockReturnValue([null, jest.fn(), jest.fn()]),
-  useUser: jest
+  useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn(), vi.fn()]),
+  useFileField: vi.fn().mockReturnValue([null, vi.fn(), vi.fn()]),
+  useUser: vi
     .fn()
     .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
 }));
 
-jest.mock('@stores', () => ({
-  useHabitsStore: jest.fn().mockReturnValue({
-    updateHabit: jest.fn(),
+vi.mock('@stores', () => ({
+  useHabitsStore: vi.fn().mockReturnValue({
+    updateHabit: vi.fn(),
     habitIdBeingUpdated: null,
   }),
-  useTraitsStore: jest.fn().mockReturnValue({ traits: [] }),
+  useTraitsStore: vi.fn().mockReturnValue({ traits: [] }),
 }));
 
 describe(EditHabitDialog.name, () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const props: EditHabitDialogProps = {
-    onClose: jest.fn(),
+    onClose: vi.fn(),
     habit: {
       id: 7,
       createdAt: '2024-02-21T17:30:08.886124+00:00',
@@ -69,7 +68,7 @@ describe(EditHabitDialog.name, () => {
   });
 
   it('should call onClose when closed', async () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const { getByLabelText } = render(
       <EditHabitDialog {...props} onClose={onClose} />
     );
@@ -79,11 +78,11 @@ describe(EditHabitDialog.name, () => {
   });
 
   it.skip('should call updateHabit when submitted', async () => {
-    const mockUpdateHabit = jest.fn();
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+    const mockUpdateHabit = vi.fn();
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       updateHabit: mockUpdateHabit,
     });
-    (useTraitsStore as unknown as jest.Mock).mockReturnValue({
+    (useTraitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       traits: [makeTestTrait()],
     });
     const { getByRole, getByLabelText } = render(

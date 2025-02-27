@@ -1,30 +1,27 @@
 import { useSnackbarsStore } from '@stores';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useSearchParams } from 'react-router';
+import { describe, it, expect, vi } from 'vitest';
 
 import useAuthSearchParams from './useAuthSearchParams';
 
-jest.mock('@stores', () => ({
-  useSnackbarsStore: jest.fn(),
+vi.mock('@stores', () => ({
+  useSnackbarsStore: vi.fn(),
 }));
 
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useSearchParams: jest.fn(),
+vi.mock('react-router', () => ({
+  useSearchParams: vi.fn(),
 }));
 
-jest.mock('@utils', () => ({
-  transformServerEntities: jest.fn(),
+vi.mock('@utils', () => ({
+  transformServerEntities: vi.fn(),
 }));
 
 describe(useAuthSearchParams.name, () => {
   it.skip('should call showSnackbar if email is confirmed', async () => {
     const searchParams = new URLSearchParams();
     searchParams.append('emailConfirmed', 'true');
-    // (useSnackbarsStore as jest.Mock).mockReturnValue({
-    //   showSnackbar: jest.fn(),
-    // });
-    (useSearchParams as jest.Mock).mockReturnValue(location);
+    (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue(location);
     renderHook(() => useAuthSearchParams());
     await waitFor(() =>
       expect(useSnackbarsStore().showSnackbar).toHaveBeenCalled()
@@ -34,10 +31,7 @@ describe(useAuthSearchParams.name, () => {
   it.skip('should call showSnackbar if password was reset', async () => {
     const searchParams = new URLSearchParams();
     searchParams.append('passwordReset', 'true');
-    // (useSnackbarsStore as jest.Mock).mockReturnValue({
-    //   showSnackbar: jest.fn(),
-    // });
-    (useSearchParams as jest.Mock).mockReturnValue(location);
+    (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue(location);
     renderHook(() => useAuthSearchParams());
     await waitFor(() =>
       expect(useSnackbarsStore().showSnackbar).toHaveBeenCalled()
@@ -46,10 +40,9 @@ describe(useAuthSearchParams.name, () => {
 
   it.skip('should not call showSnackbar if email is not confirmed', async () => {
     const emptySearchParams = new URLSearchParams();
-    // (useSnackbarsStore as jest.Mock).mockReturnValue({
-    //   showSnackbar: jest.fn(),
-    // });
-    (useSearchParams as jest.Mock).mockReturnValue(emptySearchParams);
+    (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue(
+      emptySearchParams
+    );
     renderHook(() => useAuthSearchParams());
     await waitFor(() =>
       expect(useSnackbarsStore().showSnackbar).not.toHaveBeenCalled()
