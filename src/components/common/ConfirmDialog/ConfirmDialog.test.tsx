@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
+import { describe, it, expect, vi } from 'vitest';
 
 import ConfirmDialog from './ConfirmDialog';
 
@@ -7,8 +8,8 @@ describe(ConfirmDialog.name, () => {
   const props = {
     open: true,
     heading: 'Heading',
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
+    onCancel: vi.fn(),
+    onConfirm: vi.fn(),
     loading: false,
   };
 

@@ -11,7 +11,7 @@ import {
   startOfToday,
 } from 'date-fns';
 import React from 'react';
-import { useCalendar, useLocale } from 'react-aria';
+import { useCalendar } from 'react-aria';
 import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 import { useShallow } from 'zustand/react/shallow';
@@ -34,9 +34,8 @@ const MonthCalendar = () => {
   const onRangeChange = useOccurrencesStore(
     useShallow((state) => state.onRangeChange)
   );
-  const { locale } = useLocale();
   const calendarState = useCalendarState({
-    locale,
+    locale: 'en-GB',
     createCalendar,
   });
   const { calendarProps, title } = useCalendar({}, calendarState);

@@ -14,7 +14,7 @@ const useUser = () => {
   React.useEffect(() => {
     let mounted = true;
 
-    async function getSession() {
+    const getSession = async () => {
       const {
         data: { session },
         error,
@@ -30,7 +30,7 @@ const useUser = () => {
         setUser(session?.user ? transformServerEntity(session.user) : null);
         setIsLoading(false);
       }
-    }
+    };
 
     void getSession();
 

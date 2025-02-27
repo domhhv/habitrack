@@ -100,6 +100,10 @@ const OccurrenceDialog = ({
   }, [date, occurrenceId, occurrences]);
 
   React.useEffect(() => {
+    if (!habits.length) {
+      return;
+    }
+
     if (date) {
       setIsSubmitButtonDisabled(
         !selectedHabitId || Number.isNaN(+selectedHabitId)
@@ -134,6 +138,7 @@ const OccurrenceDialog = ({
     time,
     updatingOccurrence,
     updatingNote,
+    habits.length,
   ]);
 
   React.useEffect(() => {

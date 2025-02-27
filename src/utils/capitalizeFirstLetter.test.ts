@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest';
+
 import { capitalizeFirstLetter } from './capitalizeFirstLetter';
 
 describe(capitalizeFirstLetter.name, () => {

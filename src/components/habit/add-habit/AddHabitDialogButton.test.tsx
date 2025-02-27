@@ -3,33 +3,39 @@ import { StorageBuckets, uploadFile } from '@services';
 import { useSnackbarsStore, useHabitsStore } from '@stores';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { describe, it, expect, vi } from 'vitest';
 
 import AddHabitDialogButton from './AddHabitDialogButton';
 
-jest.mock('@stores', () => ({
-  useSnackbarsStore: jest.fn(),
-  useHabitsStore: jest.fn(),
-  useTraitsStore: jest.fn(),
+vi.mock('@stores', () => ({
+  useSnackbarsStore: vi.fn(),
+  useHabitsStore: vi.fn(),
+  useTraitsStore: vi.fn(),
 }));
 
-jest.mock('@services', () => ({
+vi.mock('@services', () => ({
   StorageBuckets: {
     HABIT_ICONS: 'habit-icons',
   },
-  uploadFile: jest.fn(),
+  uploadFile: vi.fn(),
 }));
 
-jest.mock('@hooks', () => ({
-  useUser: jest.fn(),
+vi.mock('@hooks', () => ({
+  ThemeMode: {
+    LIGHT: 'light',
+    DARK: 'dark',
+    SYSTEM: 'system',
+  },
+  useUser: vi.fn(),
 }));
 
 describe(AddHabitDialogButton.name, () => {
   it.skip('should handle data enter and dialog close', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
-      updateHabit: jest.fn(),
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      updateHabit: vi.fn(),
       fetchingHabits: false,
     });
-    (useUser as jest.Mock).mockReturnValue({
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({
       id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
     });
 
@@ -70,11 +76,11 @@ describe(AddHabitDialogButton.name, () => {
   });
 
   it.skip('should not set habit icon if empty file uploaded', () => {
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
-      updateHabit: jest.fn(),
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      updateHabit: vi.fn(),
       fetchingHabits: false,
     });
-    (useUser as jest.Mock).mockReturnValue({
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({
       id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
     });
 
@@ -89,11 +95,11 @@ describe(AddHabitDialogButton.name, () => {
   });
 
   it.skip('should call addHabit on form submit', () => {
-    const mockAddHabit = jest.fn().mockReturnValue(Promise.resolve({ id: 1 }));
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+    const mockAddHabit = vi.fn().mockReturnValue(Promise.resolve({ id: 1 }));
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addHabit: mockAddHabit,
     });
-    (useUser as jest.Mock).mockReturnValue({
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({
       id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
     });
 
@@ -110,22 +116,20 @@ describe(AddHabitDialogButton.name, () => {
   });
 
   it.skip('if habit icon uploaded, should call uploadFile and updateHabit', async () => {
-    const mockAddHabit = jest
-      .fn()
-      .mockReturnValue(Promise.resolve({ id: 1234 }));
-    const mockUpdateHabit = jest.fn().mockReturnValue(Promise.resolve({}));
-    const mockShowSnackbar = jest.fn();
-    (uploadFile as jest.Mock).mockReturnValue(
+    const mockAddHabit = vi.fn().mockReturnValue(Promise.resolve({ id: 1234 }));
+    const mockUpdateHabit = vi.fn().mockReturnValue(Promise.resolve({}));
+    const mockShowSnackbar = vi.fn();
+    (uploadFile as ReturnType<typeof vi.fn>).mockReturnValue(
       Promise.resolve({ data: { path: 'icon-path' } })
     );
-    (useHabitsStore as unknown as jest.Mock).mockReturnValue({
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addHabit: mockAddHabit,
       updateHabit: mockUpdateHabit,
     });
-    (useUser as jest.Mock).mockReturnValue({
+    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({
       id: 'uuid-42',
     });
-    (useSnackbarsStore as unknown as jest.Mock).mockReturnValue({
+    (useSnackbarsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       showSnackbar: mockShowSnackbar,
     });
 

@@ -1,17 +1,20 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router';
+import { describe, it, expect, vi } from 'vitest';
 
 import AuthModalButton from './AuthModalButton';
 
-jest.mock('@hooks', () => ({
-  useUser: jest.fn().mockReturnValue({ id: null }),
+vi.mock('@hooks', () => ({
+  useUser: vi.fn().mockReturnValue({ id: null }),
+  ThemeMode: {
+    LIGHT: 'light',
+    DARK: 'dark',
+    SYSTEM: 'system',
+  },
 }));
 
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  __esModule: true,
-  useNavigate: () => jest.fn(),
+vi.mock('react-router', () => ({
   BrowserRouter: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),
@@ -29,9 +32,6 @@ describe(AuthModalButton.name, () => {
   });
 
   it.skip('should navigate to /account if user is logged in', async () => {
-    // (useUserAccount as jest.Mock).mockReturnValue({
-    //   supabaseUser: { id: '123' },
-    // });
     const { getByTestId, queryByText } = render(
       <BrowserRouter>
         <AuthModalButton />
@@ -46,9 +46,6 @@ describe(AuthModalButton.name, () => {
   });
 
   it.skip('should switch to register mode', () => {
-    // (useUserAccount as jest.Mock).mockReturnValue({
-    //   supabaseUser: { id: null },
-    // });
     const { getByTestId, getByText } = render(<AuthModalButton />);
     const button = getByTestId('auth-button');
     act(() => {
@@ -78,42 +75,7 @@ describe(AuthModalButton.name, () => {
     });
   });
 
-  it.skip('should call login on submit', async () => {
-    // (useUserAccount as jest.Mock).mockReturnValue({
-    //   supabaseUser: { id: null },
-    //   login: jest.fn(),
-    // });
-    const { getByTestId } = render(<AuthModalButton />);
-    const button = getByTestId('auth-button');
-    fireEvent.click(button);
-    const submit = getByTestId('submit-button');
-    fireEvent.click(submit);
-    // await waitFor(() => {
-    //   expect(useUserAccount().login).toHaveBeenCalled();
-    // });
-  });
-
-  it.skip('should call register on submit', async () => {
-    // (useUserAccount as jest.Mock).mockReturnValue({
-    //   supabaseUser: { id: null },
-    //   register: jest.fn(),
-    // });
-    const { getByTestId, getByText } = render(<AuthModalButton />);
-    const authButton = getByTestId('auth-button');
-    fireEvent.click(authButton);
-    const registerTab = getByText('Register');
-    fireEvent.click(registerTab);
-    const submitRegisterButton = getByTestId('submit-button');
-    fireEvent.click(submitRegisterButton);
-    // await waitFor(() => {
-    //   expect(useUserAccount().register).toHaveBeenCalled();
-    // });
-  });
-
   it.skip('should display start decorators and logout button if user is logged in', () => {
-    // (useUserAccount as jest.Mock).mockReturnValue({
-    //   supabaseUser: { id: '123' },
-    // });
     const { getByTestId, queryByTestId } = render(<AuthModalButton />);
     const userIcon = getByTestId('user-icon');
     const signOutIcon = queryByTestId('sign-out-icon');
@@ -122,11 +84,7 @@ describe(AuthModalButton.name, () => {
   });
 
   it.skip('should call logout on logout button click if user is logged in', () => {
-    const mockLogOut = jest.fn();
-    // (useUserAccount as jest.Mock).mockReturnValue({
-    //   supabaseUser: { id: '123' },
-    //   logout: mockLogOut,
-    // });
+    const mockLogOut = vi.fn();
     const { getByTestId } = render(
       <BrowserRouter>
         <AuthModalButton />

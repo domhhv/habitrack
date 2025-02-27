@@ -2,45 +2,47 @@ import { useHabitsStore } from '@stores';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import React from 'react';
+import { describe, it, expect, vi } from 'vitest';
 
 import HabitsPage from './HabitsPage';
 
-jest.mock('@services', () => ({
+vi.mock('@services', () => ({
   StorageBuckets: {
     HABIT_ICONS: 'habit-icons',
   },
-  listHabits: jest.fn().mockReturnValue(() => []),
-  getLatestHabitOccurrenceTimestamp: jest.fn().mockResolvedValue(0),
-  getLongestHabitStreak: jest.fn().mockResolvedValue(0),
-  getHabitTotalEntries: jest.fn().mockResolvedValue(0),
+  listHabits: vi.fn().mockReturnValue(() => []),
+  getLatestHabitOccurrenceTimestamp: vi.fn().mockResolvedValue(0),
+  getLongestHabitStreak: vi.fn().mockResolvedValue(0),
+  getHabitTotalEntries: vi.fn().mockResolvedValue(0),
 }));
 
-jest.mock('@stores', () => ({
-  useHabitsStore: jest.fn(),
-  useTraitsStore: jest.fn().mockReturnValue({
+vi.mock('@stores', () => ({
+  useHabitsStore: vi.fn(),
+  useTraitsStore: vi.fn().mockReturnValue({
     traits: [],
   }),
-  useOccurrencesStore: jest.fn().mockReturnValue({
-    removeOccurrencesByHabitId: jest.fn(),
+  useOccurrencesStore: vi.fn().mockReturnValue({
+    removeOccurrencesByHabitId: vi.fn(),
   }),
-  useNotesStore: jest.fn().mockReturnValue({
+  useNotesStore: vi.fn().mockReturnValue({
     addingNote: false,
-    addNote: jest.fn(),
+    addNote: vi.fn(),
   }),
 }));
 
-jest.mock('@hooks', () => ({
+vi.mock('@hooks', () => ({
   ThemeMode: {
     LIGHT: 'light',
     DARK: 'dark',
     SYSTEM: 'system',
   },
-  useDocumentTitle: jest.fn(),
-  useTextField: jest
+  useUser: vi
     .fn()
-    .mockReturnValue(['', jest.fn(), jest.fn(), jest.fn()]),
-  useFileField: jest.fn().mockReturnValue([null, jest.fn(), jest.fn()]),
-  useScreenWidth: jest.fn().mockReturnValue({
+    .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
+  useDocumentTitle: vi.fn(),
+  useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn(), vi.fn()]),
+  useFileField: vi.fn().mockReturnValue([null, vi.fn(), vi.fn()]),
+  useScreenWidth: vi.fn().mockReturnValue({
     screenWidth: 1400,
     isMobile: false,
     isDesktop: true,
@@ -49,18 +51,20 @@ jest.mock('@hooks', () => ({
 
 describe(HabitsPage.name, () => {
   it('should display habits', async () => {
-    (useHabitsStore as unknown as jest.Mock).mockImplementation(() => ({
-      habits: [
-        makeTestHabit({
-          name: 'Habit name #1',
-          description: 'Habit description #1',
-        }),
-        makeTestHabit({
-          name: 'Habit name #2',
-          description: 'Habit description #2',
-        }),
-      ],
-    }));
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => ({
+        habits: [
+          makeTestHabit({
+            name: 'Habit name #1',
+            description: 'Habit description #1',
+          }),
+          makeTestHabit({
+            name: 'Habit name #2',
+            description: 'Habit description #2',
+          }),
+        ],
+      })
+    );
     const { getByText } = render(<HabitsPage />);
     await waitFor(() => {
       expect(getByText('Your habits'));
@@ -72,19 +76,21 @@ describe(HabitsPage.name, () => {
   });
 
   it('should open edit dialog on edit icon button click', async () => {
-    (useHabitsStore as unknown as jest.Mock).mockImplementation(() => ({
-      habits: [
-        makeTestHabit({
-          id: 42,
-          name: 'Habit name #1',
-          description: 'Habit description #1',
-        }),
-        makeTestHabit({
-          name: 'Habit name #2',
-          description: 'Habit description #2',
-        }),
-      ],
-    }));
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => ({
+        habits: [
+          makeTestHabit({
+            id: 42,
+            name: 'Habit name #1',
+            description: 'Habit description #1',
+          }),
+          makeTestHabit({
+            name: 'Habit name #2',
+            description: 'Habit description #2',
+          }),
+        ],
+      })
+    );
     const { queryByRole, getByRole, getByTestId } = render(<HabitsPage />);
     expect(queryByRole('submit-edited-habit-button')).toBeNull();
     fireEvent.click(getByTestId('edit-habit-id-42-button'));
@@ -99,20 +105,22 @@ describe(HabitsPage.name, () => {
   });
 
   it.skip('should remove habit on confirm', async () => {
-    const mockRemoveHabit = jest.fn();
-    (useHabitsStore as unknown as jest.Mock).mockImplementation(() => ({
-      habits: [
-        makeTestHabit({
-          name: 'Habit name #1',
-          description: 'Habit description #1',
-        }),
-        makeTestHabit({
-          name: 'Habit name #2',
-          description: 'Habit description #2',
-        }),
-      ],
-      removeHabit: mockRemoveHabit,
-    }));
+    const mockRemoveHabit = vi.fn();
+    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => ({
+        habits: [
+          makeTestHabit({
+            name: 'Habit name #1',
+            description: 'Habit description #1',
+          }),
+          makeTestHabit({
+            name: 'Habit name #2',
+            description: 'Habit description #2',
+          }),
+        ],
+        removeHabit: mockRemoveHabit,
+      })
+    );
     const { queryByRole, getByRole, getByTestId } = render(<HabitsPage />);
     expect(queryByRole('dialog')).toBeNull();
     fireEvent.click(getByTestId('delete-habit-id-2-button'));

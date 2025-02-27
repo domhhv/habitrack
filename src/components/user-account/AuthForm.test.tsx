@@ -1,12 +1,13 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { describe, it, expect, vi } from 'vitest';
 
 import AuthForm from './AuthForm';
 
 describe(AuthForm.name, () => {
   it('should call onSubmit with email and password', async () => {
-    const onSubmit = jest.fn();
-    const onCancel = jest.fn();
+    const onSubmit = vi.fn();
+    const onCancel = vi.fn();
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByLabelText, getByTestId } = render(
@@ -37,8 +38,8 @@ describe(AuthForm.name, () => {
   });
 
   it('should call onCancel when cancel button is clicked', async () => {
-    const onSubmit = jest.fn();
-    const onCancel = jest.fn();
+    const onSubmit = vi.fn();
+    const onCancel = vi.fn();
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByText } = render(
@@ -65,7 +66,7 @@ describe(AuthForm.name, () => {
   });
 
   it.skip('should show snackbar with error message when error is thrown', async () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByTestId } = render(
@@ -97,7 +98,7 @@ describe(AuthForm.name, () => {
   });
 
   it.skip('should show snackbar with default error message when error is thrown', async () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     const disabled = false;
     const submitButtonLabel = 'Submit';
     const { getByTestId } = render(

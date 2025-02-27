@@ -60,8 +60,8 @@ This app showcases the use of the following tools and technologies:
 
 ### Tech Debt
 
+- [x] **Migrate to Vitest**: Replace Jest with Vitest.
 - [ ] **Migrate to ESLint v9**: Update the ESLint v9 and use flat config.
-- [ ] **Migrate to Vitest**: Replace Jest with Vitest.
 
 ## Local development
 
@@ -199,9 +199,9 @@ Once the migration ends up in the `main` branch, it will be automatically applie
 
 ### Testing
 
-The project uses [Jest](https://jestjs.io/) as the test runner and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit testing of React components.
+The project uses [Vitest](https://vitest.dev/) as the test runner and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit testing of React components.
 
-At the moment, tests are failing and not up-to-date. They will be replaced with [Vitest](https://vitest.dev/) soon.
+At the moment, tests are incomplete and disabled in CI.
 
 To run the tests, use the following command:
 
@@ -214,7 +214,7 @@ Other test related commands include:
 ```bash
 yarn test:coverage # Run all tests and generate coverage report
 yarn test:watch # Run all tests in watch mode
-yarn test:clear-cache # Clear Jest cache
+yarn test:no-cache # Run all tests without cache
 ```
 
 ### Linting

@@ -1,3 +1,4 @@
 dist/
 supabase/
-/vercel.json
+tests/coverage/
+vercel.json
