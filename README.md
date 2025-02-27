@@ -13,7 +13,7 @@
 &nbsp;
 <a href="https://supabase.com/" title="Supabase"><img src="https://i.ibb.co/WnJ9m8k/supabase-logo-icon.png" alt="Supabase" width="32" height="32"></a>
 &nbsp;
-<a href="https://jestjs.io/" title="Jest"><img src="https://i.ibb.co/M50R4zP/Jest.png" alt="Jest" width="32" height="32"></a>
+<a href="https://vitest.dev/" title="Vitest"><img src="https://i.ibb.co/99zTCxvx/vitest.png" alt="Vitest" width="32" height="32"></a>
 &nbsp;
 <a href="https://testing-library.com/" title="React Testing Library"><img src="https://i.ibb.co/YLnX0VY/octopus-64x64.png" alt="React Testing Library" width="32" height="32"></a>
 </div>

@@ -7,8 +7,6 @@ class SupabaseClientSingleton {
   private client: SupabaseClient<Database>;
 
   private constructor() {
-    // console.log('process.env.NODE_ENV', process.env.NODE_ENV);
-
     if (process.env.NODE_ENV === 'test') {
       this.client = {} as SupabaseClient<Database>;
 
