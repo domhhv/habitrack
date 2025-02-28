@@ -4,7 +4,6 @@ import type {
   CompositeTypes,
   TablesUpdate,
 } from '@db-types';
-import type { CalendarDay } from '@helpers';
 import type { Note } from '@root/src/models/note.model';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
@@ -27,7 +26,7 @@ export type Occurrence = BaseOccurrence & {
   notes: Pick<Note, 'id' | 'content'>[];
 };
 
-export type OccurrencesDateMap = Record<CalendarDay, Occurrence[]>;
+export type OccurrencesDateMap = Record<string, Occurrence[]>;
 
 export type OccurrencesInsert = CamelCasedPropertiesDeep<
   TablesInsert<'occurrences'>

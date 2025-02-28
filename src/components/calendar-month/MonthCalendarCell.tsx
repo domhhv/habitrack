@@ -1,4 +1,3 @@
-import { isCalendarDay } from '@helpers';
 import { Button, cn, Tooltip } from '@heroui/react';
 import { useScreenWidth, useUser } from '@hooks';
 import type { CalendarDate } from '@internationalized/date';
@@ -51,9 +50,7 @@ const MonthCalendarCell = ({
   const formattedDay = format(cellDate, 'yyyy-MM-dd');
   const hasNote = notes.some((note) => note.day === formattedDay);
 
-  const occurrences = isCalendarDay(formattedDay)
-    ? occurrencesByDate[formattedDay] || []
-    : [];
+  const occurrences = occurrencesByDate[formattedDay] || [];
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => o.habitId);
 
