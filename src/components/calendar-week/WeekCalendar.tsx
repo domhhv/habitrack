@@ -1,3 +1,4 @@
+import { OccurrenceChip } from '@components';
 import { useOccurrencesStore } from '@stores';
 import {
   addDays,
@@ -15,8 +16,6 @@ import {
 import { motion } from 'framer-motion';
 import React from 'react';
 import { useParams } from 'react-router';
-
-import OccurrenceChip from '../calendar-month/OccurrenceChip';
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
