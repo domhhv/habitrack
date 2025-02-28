@@ -1,11 +1,9 @@
 import { supabaseClient } from '@helpers';
-import { useSnackbarsStore } from '@stores';
+import { addToast } from '@heroui/react';
 import React from 'react';
 import { useSearchParams, useLocation } from 'react-router';
 
 const useAuthSearchParams = () => {
-  const { showSnackbar } = useSnackbarsStore();
-
   const [searchParams, setSearchParams] = useSearchParams();
   const { hash } = useLocation();
 
@@ -20,10 +18,9 @@ const useAuthSearchParams = () => {
           refresh_token: refreshToken,
         })
         .then(() => {
-          showSnackbar(`Email confirmed! You're now logged in 🎉`, {
+          addToast({
+            title: `Email confirmed! You're now logged in 🎉`,
             color: 'success',
-            dismissible: true,
-            dismissText: 'Done',
           });
         });
     }
@@ -35,17 +32,16 @@ const useAuthSearchParams = () => {
           refresh_token: refreshToken,
         })
         .then(() => {
-          showSnackbar(`You're now logged in to Habitrack`, {
+          addToast({
+            title: `You're now logged in to Habitrack`,
             description: 'You can update your password on this page',
             color: 'success',
-            dismissible: true,
-            dismissText: 'Dismiss',
           });
         });
     }
 
     setSearchParams({});
-  }, [showSnackbar, searchParams, setSearchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchParams, setSearchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 };
 
 export default useAuthSearchParams;

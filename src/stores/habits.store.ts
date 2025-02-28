@@ -1,3 +1,4 @@
+import { addToast } from '@heroui/react';
 import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
 import {
   createHabit,
@@ -11,7 +12,7 @@ import {
 import { getErrorMessage } from '@utils';
 import { create } from 'zustand';
 
-import { useSnackbarsStore, useOccurrencesStore } from './index';
+import { useOccurrencesStore } from './index';
 
 type HabitsState = {
   habits: Habit[];
@@ -32,8 +33,6 @@ type HabitsState = {
 };
 
 const useHabitsStore = create<HabitsState>((set) => {
-  const { showSnackbar } = useSnackbarsStore.getState();
-
   return {
     habits: [],
     addingHabit: false,
@@ -54,14 +53,12 @@ const useHabitsStore = create<HabitsState>((set) => {
       } catch (error) {
         console.error(error);
 
-        showSnackbar(
-          'Something went wrong while fetching your habits. Please try reloading the page.',
-          {
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-            dismissible: true,
-          }
-        );
+        addToast({
+          title:
+            'Something went wrong while fetching your habits. Please try reloading the page.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
       } finally {
         set({ fetchingHabits: false });
       }
@@ -75,22 +72,19 @@ const useHabitsStore = create<HabitsState>((set) => {
         const newHabit = await createHabit({ ...habit, iconPath });
         set((state) => ({ habits: [...state.habits, newHabit] }));
 
-        showSnackbar('Your habit has been added!', {
+        addToast({
+          title: 'Your habit has been added!',
           color: 'success',
-          dismissible: true,
-          dismissText: 'Done',
         });
       } catch (error) {
         console.error(error);
 
-        showSnackbar(
-          'Something went wrong while adding your habit. Please try again.',
-          {
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-            dismissible: true,
-          }
-        );
+        addToast({
+          title:
+            'Something went wrong while adding your habit. Please try again.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
       } finally {
         set({ addingHabit: false });
       }
@@ -115,21 +109,20 @@ const useHabitsStore = create<HabitsState>((set) => {
         set((state) => ({
           habits: state.habits.map((h) => (h.id === id ? updatedHabit : h)),
         }));
-        showSnackbar('Your habit has been updated!', {
+
+        addToast({
+          title: 'Your habit has been updated!',
           color: 'success',
-          dismissible: true,
         });
       } catch (error) {
         console.error(error);
 
-        showSnackbar(
-          'Something went wrong while updating your habit. Please try again.',
-          {
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-            dismissible: true,
-          }
-        );
+        addToast({
+          title:
+            'Something went wrong while updating your habit. Please try again.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
       } finally {
         set({ habitIdBeingUpdated: null });
       }
@@ -138,7 +131,8 @@ const useHabitsStore = create<HabitsState>((set) => {
     removeHabit: async ({ id, iconPath }: Habit) => {
       set({ habitIdBeingDeleted: id });
 
-      const { removeOccurrencesByHabitId } = useOccurrencesStore.getState();
+      const { removeOccurrencesByHabitIdFromState } =
+        useOccurrencesStore.getState();
 
       try {
         await destroyHabit(id);
@@ -151,22 +145,21 @@ const useHabitsStore = create<HabitsState>((set) => {
           habits: state.habits.filter((habit) => habit.id !== id),
         }));
 
-        removeOccurrencesByHabitId(id);
+        removeOccurrencesByHabitIdFromState(id);
 
-        showSnackbar('Your habit has been deleted.', {
-          dismissible: true,
+        addToast({
+          title: 'Your habit has been deleted.',
+          color: 'success',
         });
       } catch (error) {
         console.error(error);
 
-        showSnackbar(
-          'Something went wrong while deleting your habit. Please try again.',
-          {
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-            dismissible: true,
-          }
-        );
+        addToast({
+          title:
+            'Something went wrong while deleting your habit. Please try again.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
       } finally {
         set({ habitIdBeingDeleted: null });
       }

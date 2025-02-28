@@ -4,6 +4,7 @@ import {
   uncacheOccurrence,
   updateOccurrenceInCache,
 } from '@helpers';
+import { addToast } from '@heroui/react';
 import type {
   Occurrence,
   OccurrencesDateMap,
@@ -16,7 +17,7 @@ import {
   listOccurrences,
   patchOccurrence,
 } from '@services';
-import { useHabitsStore, useSnackbarsStore, useTraitsStore } from '@stores';
+import { useHabitsStore, useTraitsStore } from '@stores';
 import { getErrorMessage } from '@utils';
 import { format } from 'date-fns';
 import { create } from 'zustand';
@@ -39,7 +40,7 @@ type OccurrencesState = {
   filterBy: (options: OccurrenceFilters) => void;
   addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
   removeOccurrence: (id: number) => Promise<void>;
-  removeOccurrencesByHabitId: (habitId: number) => void;
+  removeOccurrencesByHabitIdFromState: (habitId: number) => void;
   onRangeChange: (range: [number, number]) => void;
   updateOccurrencesState: (
     allOccurrences: Occurrence[],
@@ -52,7 +53,6 @@ type OccurrencesState = {
 };
 
 const useOccurrencesStore = create<OccurrencesState>((set, get) => {
-  const { showSnackbar } = useSnackbarsStore.getState();
   const { habits } = useHabitsStore.getState();
   const { traits } = useTraitsStore.getState();
 
@@ -78,14 +78,12 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         }
       } catch (error) {
         console.error(error);
-        showSnackbar(
-          'Something went wrong while fetching your habit entries. Please try reloading the page.',
-          {
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-            dismissible: true,
-          }
-        );
+        addToast({
+          title:
+            'Something went wrong while fetching your habit entries. Please try reloading the page.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
       } finally {
         set({ fetchingOccurrences: false });
       }
@@ -105,22 +103,19 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         set((state) => ({
           allOccurrences: [...state.allOccurrences, nextOccurrence],
         }));
-        showSnackbar('Habit entry added to the calendar', {
+        addToast({
+          title: 'Your habit entry has been added to the calendar!',
           color: 'success',
-          dismissible: true,
-          dismissText: 'Done',
         });
         return nextOccurrence;
       } catch (error) {
-        showSnackbar(
-          'Something went wrong while adding your habit entry. Please try again.',
-          {
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-            dismissible: true,
-          }
-        );
         console.error(error);
+        addToast({
+          title:
+            'Something went wrong while adding your habit entry. Please try again.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
         return Promise.resolve({} as Occurrence);
       } finally {
         set({ addingOccurrence: false });
@@ -142,21 +137,18 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
 
         updateOccurrenceInCache(range, updatedOccurrence);
 
-        showSnackbar('Your habit entry has been updated!', {
+        addToast({
+          title: 'Your habit entry has been updated!',
           color: 'success',
-          dismissible: true,
         });
       } catch (error) {
         console.error(error);
-
-        showSnackbar(
-          'Something went wrong while updating your habit entry. Please try again.',
-          {
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-            dismissible: true,
-          }
-        );
+        addToast({
+          title:
+            'Something went wrong while updating your habit entry. Please try again.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
       } finally {
         set({ updatingOccurrence: false });
       }
@@ -171,22 +163,21 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
           ),
         }));
         uncacheOccurrence(range, id);
-        showSnackbar('Your habit entry has been deleted from the calendar.', {
-          dismissible: true,
+        addToast({
+          title: 'Your habit entry has been deleted from the calendar.',
+          color: 'success',
         });
       } catch (error) {
-        showSnackbar(
-          'Something went wrong while deleting your habit entry. Please try again.',
-          {
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-            dismissible: true,
-          }
-        );
         console.error(error);
+        addToast({
+          title:
+            'Something went wrong while deleting your habit entry. Please try again.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
       }
     },
-    removeOccurrencesByHabitId: (habitId: number) => {
+    removeOccurrencesByHabitIdFromState: (habitId: number) => {
       const { range } = get();
 
       set((state) => ({

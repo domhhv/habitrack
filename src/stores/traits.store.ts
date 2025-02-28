@@ -1,6 +1,7 @@
+import { addToast } from '@heroui/react';
 import type { Trait, TraitsInsert } from '@models';
 import { listTraits, createTrait } from '@services';
-import { useOccurrencesStore, useSnackbarsStore } from '@stores';
+import { useOccurrencesStore } from '@stores';
 import { makeTestTrait } from '@tests';
 import { getErrorMessage } from '@utils';
 import { create } from 'zustand';
@@ -18,8 +19,6 @@ const testTraits = [
   makeTestTrait({ name: 'Test Good Trait', color: '#2AF004' }),
   makeTestTrait({ name: 'Test Bad Trait', color: '#F6F6F6' }),
 ];
-
-const { showSnackbar } = useSnackbarsStore.getState();
 
 const useTraitsStore = create<TraitsState>((set) => ({
   traits: testTraits,
@@ -40,14 +39,12 @@ const useTraitsStore = create<TraitsState>((set) => ({
       set({ traits: allSortedTraits });
     } catch (error) {
       console.error(error);
-      showSnackbar(
-        'Something went wrong while fetching your traits. Please try reloading the page.',
-        {
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-          dismissible: true,
-        }
-      );
+      addToast({
+        title:
+          'Something went wrong while fetching your traits. Please try reloading the page.',
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
     } finally {
       set({ fetchingTraits: false });
     }
@@ -57,17 +54,17 @@ const useTraitsStore = create<TraitsState>((set) => ({
       set({ addingTrait: true });
       const newTrait = await createTrait(trait);
       set((state) => ({ traits: [...state.traits, newTrait] }));
-      showSnackbar('Trait added successfully', {
+      addToast({
+        title: 'Your habit trait has been added!',
         color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
       });
     } catch (error) {
       console.error(error);
-      showSnackbar('Something went wrong while adding your trait', {
+      addToast({
+        title:
+          'Something went wrong while adding your habit trait. Please try again.',
         description: `Error details: ${getErrorMessage(error)}`,
         color: 'danger',
-        dismissible: true,
       });
     } finally {
       set({ addingTrait: false });

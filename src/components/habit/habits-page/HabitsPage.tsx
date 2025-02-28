@@ -73,7 +73,7 @@ const habitColumns: Column[] = [
 const HabitsPage = () => {
   const { user } = useUser();
   const { habits, removeHabit, habitIdBeingDeleted } = useHabitsStore();
-  const { removeOccurrencesByHabitId } = useOccurrencesStore();
+  const { removeOccurrencesByHabitIdFromState } = useOccurrencesStore();
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
   const { isMobile } = useScreenWidth();
@@ -94,7 +94,7 @@ const HabitsPage = () => {
     }
 
     await removeHabit(habitToRemove);
-    removeOccurrencesByHabitId(habitToRemove.id);
+    removeOccurrencesByHabitIdFromState(habitToRemove.id);
     setHabitToRemove(null);
   };
 

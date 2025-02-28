@@ -1,6 +1,6 @@
 import { useUser } from '@hooks';
 import { StorageBuckets, uploadFile } from '@services';
-import { useSnackbarsStore, useHabitsStore } from '@stores';
+import { useHabitsStore } from '@stores';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
@@ -118,7 +118,6 @@ describe(AddHabitDialogButton.name, () => {
   it.skip('if habit icon uploaded, should call uploadFile and updateHabit', async () => {
     const mockAddHabit = vi.fn().mockReturnValue(Promise.resolve({ id: 1234 }));
     const mockUpdateHabit = vi.fn().mockReturnValue(Promise.resolve({}));
-    const mockShowSnackbar = vi.fn();
     (uploadFile as ReturnType<typeof vi.fn>).mockReturnValue(
       Promise.resolve({ data: { path: 'icon-path' } })
     );
@@ -128,9 +127,6 @@ describe(AddHabitDialogButton.name, () => {
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({
       id: 'uuid-42',
-    });
-    (useSnackbarsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      showSnackbar: mockShowSnackbar,
     });
 
     const { getByRole, getByTestId, getByLabelText } = render(

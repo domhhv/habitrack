@@ -3,7 +3,6 @@ import {
   MonthCalendar,
   AccountPage,
   HabitsPage,
-  Snackbars,
   WeekCalendar,
 } from '@components';
 import { setDefaultOptions } from 'date-fns';
@@ -38,7 +37,6 @@ const App = () => {
           <Route path="*" element={<Navigate to="/calendar/month" replace />} />
         </Routes>
       </main>
-      <Snackbars />
     </Providers>
   );
 };

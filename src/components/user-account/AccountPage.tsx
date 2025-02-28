@@ -1,8 +1,7 @@
 import { Alert, PasswordInput } from '@components';
-import { Button, Input, Spinner } from '@heroui/react';
+import { addToast, Button, Input, Spinner } from '@heroui/react';
 import { useDocumentTitle, useTextField, useUser } from '@hooks';
 import { updateUser } from '@services';
-import { useSnackbarsStore } from '@stores';
 import { getErrorMessage, toEventLike } from '@utils';
 import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -15,7 +14,6 @@ const AccountPage = () => {
   useDocumentTitle('My Account | Habitrack');
 
   const { isLoading: isLoadingUser, user } = useUser();
-  const { showSnackbar } = useSnackbarsStore();
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [email, handleEmailChange] = useTextField();
   const [password, handlePasswordChange] = useTextField();
@@ -32,20 +30,17 @@ const AccountPage = () => {
 
       await updateUser(email, password, name);
 
-      showSnackbar('Account updated!', {
+      addToast({
+        title: 'Account updated!',
         color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
       });
     } catch (error) {
-      showSnackbar(
-        'Something went wrong while updating your account. Please try again.',
-        {
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-          dismissible: true,
-        }
-      );
+      addToast({
+        title:
+          'Something went wrong while updating your account. Please try again.',
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
 
       console.error(error);
     } finally {
