@@ -1,4 +1,7 @@
-import { HeroUIProvider as OriginalHeroUIProvider } from '@heroui/react';
+import {
+  HeroUIProvider as OriginalHeroUIProvider,
+  ToastProvider,
+} from '@heroui/react';
 import React, { type ReactNode } from 'react';
 import { I18nProvider } from 'react-aria';
 import { BrowserRouter, useNavigate } from 'react-router';
@@ -25,7 +28,16 @@ const Providers = React.memo(function WrappedProviders({
   return (
     <I18nProvider locale="en-GB">
       <BrowserRouter>
-        <HeroUIProvider>{children}</HeroUIProvider>
+        <HeroUIProvider>
+          <ToastProvider
+            toastProps={{
+              variant: 'solid',
+              hideIcon: true,
+            }}
+            placement="bottom-center"
+          />
+          {children}
+        </HeroUIProvider>
       </BrowserRouter>
     </I18nProvider>
   );

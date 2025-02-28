@@ -10,6 +10,7 @@ import {
   useDisclosure,
   VisuallyHidden,
   Tooltip,
+  addToast,
 } from '@heroui/react';
 import { useScreenWidth, useUser } from '@hooks';
 import {
@@ -17,7 +18,6 @@ import {
   User as UserIcon,
 } from '@phosphor-icons/react';
 import { sendPasswordResetEmail, signIn, signOut, signUp } from '@services';
-import { useSnackbarsStore } from '@stores';
 import { getErrorMessage } from '@utils';
 import React from 'react';
 import { Link } from 'react-router';
@@ -29,7 +29,6 @@ export type AuthMode = 'login' | 'register' | 'reset-password';
 const AuthModalButton = () => {
   const { user } = useUser();
   const { screenWidth } = useScreenWidth();
-  const { showSnackbar } = useSnackbarsStore();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
@@ -70,6 +69,14 @@ const AuthModalButton = () => {
     'reset-password': 'Password reset email sent!',
   };
 
+  const errorMessages: Record<AuthMode, string> = {
+    login: 'Something went wrong while logging in. Please try again.',
+    register:
+      'Something went wrong while creating your account. Please try again.',
+    'reset-password':
+      'Something went wrong while sending the reset password email. Please try again.',
+  };
+
   const handleSubmit = async (
     email: string,
     password: string,
@@ -84,16 +91,15 @@ const AuthModalButton = () => {
 
       handleClose();
 
-      showSnackbar(successfulMessages[mode], {
+      addToast({
+        title: successfulMessages[mode],
         color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
       });
     } catch (error) {
-      showSnackbar('Something went wrong. Please try again.', {
+      addToast({
+        title: errorMessages[mode],
         description: `Error details: ${getErrorMessage(error)}`,
         color: 'danger',
-        dismissible: true,
       });
     } finally {
       setAuthenticating(false);

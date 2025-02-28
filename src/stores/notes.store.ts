@@ -1,14 +1,8 @@
+import { addToast } from '@heroui/react';
 import type { Note, NotesInsert, NotesUpdate } from '@models';
-import { useSnackbarsStore } from '@stores';
+import { createNote, destroyNote, listNotes, updateNote } from '@services';
 import { getErrorMessage } from '@utils';
 import { create } from 'zustand';
-
-import {
-  createNote,
-  destroyNote,
-  listNotes,
-  updateNote,
-} from '../services/notes.service';
 
 type NotesState = {
   notes: Note[];
@@ -23,8 +17,6 @@ type NotesState = {
   clearNotes: () => void;
 };
 
-const { showSnackbar } = useSnackbarsStore.getState();
-
 const useNotesStore = create<NotesState>((set) => ({
   notes: [],
   fetchingNotes: true,
@@ -38,10 +30,11 @@ const useNotesStore = create<NotesState>((set) => ({
       set({ notes });
     } catch (error) {
       console.error(error);
-      showSnackbar('Something went wrong while fetching your notes.', {
+      addToast({
+        title:
+          'Something went wrong while fetching your notes. Please try reloading the page.',
         description: `Error details: ${getErrorMessage(error)}`,
         color: 'danger',
-        dismissible: true,
       });
     } finally {
       set({ fetchingNotes: false });
@@ -52,17 +45,16 @@ const useNotesStore = create<NotesState>((set) => ({
       set({ addingNote: true });
       const newNote = await createNote(note);
       set((state) => ({ notes: [...state.notes, newNote] }));
-      showSnackbar('Note added successfully', {
+      addToast({
+        title: 'Note added successfully',
         color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
       });
     } catch (error) {
       console.error(error);
-      showSnackbar('Something went wrong while adding your trait', {
+      addToast({
+        title: 'Something went wrong while adding your note',
         description: `Error details: ${getErrorMessage(error)}`,
         color: 'danger',
-        dismissible: true,
       });
     } finally {
       set({ addingNote: false });
@@ -77,17 +69,16 @@ const useNotesStore = create<NotesState>((set) => ({
           n.id === updatedNote.id ? updatedNote : n
         ),
       }));
-      showSnackbar('Note updated successfully', {
+      addToast({
+        title: 'Note updated successfully',
         color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
       });
     } catch (error) {
       console.error(error);
-      showSnackbar('Something went wrong while updating your note', {
+      addToast({
+        title: 'Something went wrong while updating your note',
         description: `Error details: ${getErrorMessage(error)}`,
         color: 'danger',
-        dismissible: true,
       });
     } finally {
       set({ updatingNote: false });
@@ -100,17 +91,16 @@ const useNotesStore = create<NotesState>((set) => ({
       set((state) => ({
         notes: state.notes.filter((note) => note.id !== id),
       }));
-      showSnackbar('Note deleted successfully', {
+      addToast({
+        title: 'Note deleted successfully',
         color: 'success',
-        dismissible: true,
-        dismissText: 'Done',
       });
     } catch (error) {
       console.error(error);
-      showSnackbar('Something went wrong while deleting your note', {
+      addToast({
+        title: 'Something went wrong while deleted your note',
         description: `Error details: ${getErrorMessage(error)}`,
         color: 'danger',
-        dismissible: true,
       });
     } finally {
       set({ deletingNote: false });
