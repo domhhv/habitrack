@@ -1,5 +1,5 @@
-import { Alert, PasswordInput } from '@components';
-import { addToast, Button, Input, Spinner } from '@heroui/react';
+import { PasswordInput } from '@components';
+import { addToast, Alert, Button, Input, Spinner } from '@heroui/react';
 import { useDocumentTitle, useTextField, useUser } from '@hooks';
 import { updateUser } from '@services';
 import { getErrorMessage, toEventLike } from '@utils';
@@ -68,7 +68,11 @@ const AccountPage = () => {
         className={twMerge(containerClassName, 'items-start pt-16')}
         data-testid="account-page"
       >
-        <Alert message="Please log in to your account first" color="danger" />
+        <Alert
+          title="Please log in to your account first"
+          color="danger"
+          className="mx-auto w-96"
+        />
       </div>
     );
   }
