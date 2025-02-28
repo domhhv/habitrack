@@ -1,3 +1,4 @@
+import { OccurrenceChip } from '@components';
 import { Button, cn, Tooltip } from '@heroui/react';
 import { useScreenWidth, useUser } from '@hooks';
 import type { CalendarDate } from '@internationalized/date';
@@ -11,8 +12,6 @@ import { useNotesStore, useOccurrencesStore } from '@stores';
 import { format, isToday } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
-
-import OccurrenceChip from './OccurrenceChip';
 
 export type CellPosition =
   | 'top-left'

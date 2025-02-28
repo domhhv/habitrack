@@ -1,3 +1,4 @@
+import { OccurrenceDialog, NoteDialog } from '@components';
 import { cn, useDisclosure } from '@heroui/react';
 import { useDocumentTitle } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
@@ -18,8 +19,6 @@ import { useShallow } from 'zustand/react/shallow';
 
 import MonthCalendarGrid from './MonthCalendarGrid';
 import MonthCalendarHeader from './MonthCalendarHeader';
-import NoteDialog from './NoteDialog';
-import OccurrenceDialog from './OccurrenceDialog';
 
 const createCalendar = (identifier: string) => {
   switch (identifier) {
