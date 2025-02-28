@@ -68,7 +68,7 @@ This app showcases the use of the following tools and technologies:
 ### Prerequisites
 
 - [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en/) (LTS)
+- [Node.js v18](https://nodejs.org/en/) (LTS Hydrogen)
 - [Yarn v4](https://yarnpkg.com/) (Berry)
 - [Docker](https://docs.docker.com/get-started/get-docker/)
 
