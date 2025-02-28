@@ -24,3 +24,6 @@ supabase/.temp/
 .DS_Store
 yarn-debug.log*
 yarn-error.log*
+
+# Yarn 4
+.yarn/install-state.gz

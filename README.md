@@ -24,15 +24,15 @@ Habitrack is a simple and intuitive web app designed for logging habits and visu
 
 This app showcases the use of the following tools and technologies:
 
-- React 19 with TypeScript, bundled with [Vite](https://vite.dev/)
+- React 19 with TypeScript, bundled with [Vite 6](https://vite.dev/)
 - [React Router](https://reactrouter.com) v7 for routing
 - [Zustand](https://zustand.docs.pmnd.rs/) v5 for global state management
 - [Tailwind CSS](https://tailwindcss.com) v3 for styling (HeroUI doesn't support v4 [yet](https://github.com/heroui-inc/heroui/issues/4644))
 - [HeroUI](https://www.heroui.com/) for the UI components
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [Supabase](https://supabase.io) for Authentication, Database and Storage
-- [Jest](https://jestjs.io) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit-testing (inactive, to be replaced with [Vitest](https://vitest.dev/))
-- Custom ESLint v8 config (to be migrated to v9 soon), Prettier, and Husky for linting and formatting
+- [Vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit-testing
+- ESLint, Prettier, and Husky for linting and formatting
 - Docker for running a local Supabase instance
 - GitHub Actions for CI/CD and Vercel for deployment
 
@@ -61,7 +61,7 @@ This app showcases the use of the following tools and technologies:
 ### Tech Debt
 
 - [x] **Migrate to Vitest**: Replace Jest with Vitest.
-- [ ] **Migrate to ESLint v9**: Update the ESLint v9 and use flat config.
+- [x] **Migrate to ESLint v9**: Update to ESLint v9 and use flat config.
 
 ## Local development
 
@@ -69,8 +69,8 @@ This app showcases the use of the following tools and technologies:
 
 - [Git](https://git-scm.com/)
 - [Node.js](https://nodejs.org/en/) (LTS)
-- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (latest Classic Stable release or higher)
-- [Docker](https://docs.docker.com/get-started/get-docker/) (optional, for running a local Supabase instance)
+- [Yarn v4](https://yarnpkg.com/) (Berry)
+- [Docker](https://docs.docker.com/get-started/get-docker/)
 
 ### Initial Setup
 
@@ -219,7 +219,7 @@ yarn test:no-cache # Run all tests without cache
 
 ### Linting
 
-The project uses [ESLint](https://eslint.org/) for linting. To run ESLint, use the following command:
+The project uses [ESLint](https://eslint.org/) v9 with a custom flat config for linting. To run ESLint, use the following command:
 
 ```bash
 yarn eslint:check # Check for linting errors
@@ -232,7 +232,7 @@ The project uses [Prettier](https://prettier.io/) for formatting. To run Prettie
 
 ```bash
 yarn prettier:check # Check for formatting errors
-yarn prettier:fix # Fix formatting errors
+yarn prettier:write # Fix formatting errors
 ```
 
 ### Building
