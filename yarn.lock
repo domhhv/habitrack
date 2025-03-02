@@ -4289,12 +4289,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.11.9":
-  version: 18.19.76
-  resolution: "@types/node@npm:18.19.76"
+"@types/node@npm:^18.19.78":
+  version: 18.19.78
+  resolution: "@types/node@npm:18.19.78"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10c0/211250b264ca3967d4cce41921b8a4cd704d920152f723f95c18dc7b70771c43472c69a6adc1be1a8364007cfa6ae17408424b3b0bc1d55b5f29bab4a6741336
+  checksum: 10c0/d7d06ed52afec05705f5a05528d1885065de75de52785288005dff48b502d526f4f49f0aede421308a309cc0abddf516a871452a45a7267c991687143abdb422
   languageName: node
   linkType: hard
 
@@ -5840,12 +5840,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-hooks@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "eslint-plugin-react-hooks@npm:5.1.0"
+"eslint-plugin-react-hooks@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "eslint-plugin-react-hooks@npm:5.2.0"
   peerDependencies:
     eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
-  checksum: 10c0/37ef76e1d916d46ab8e93a596078efcf2162e2c653614437e0c54e31d02a5dadabec22802fab717effe257aeb4bdc20c2a710666a89ab1cf07e01e614dde75d8
+  checksum: 10c0/1c8d50fa5984c6dea32470651807d2922cc3934cf3425e78f84a24c2dfd972e7f019bee84aefb27e0cf2c13fea0ac1d4473267727408feeb1c56333ca1489385
   languageName: node
   linkType: hard
 
@@ -6414,7 +6414,7 @@ __metadata:
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.2.0"
-    "@types/node": "npm:^18.11.9"
+    "@types/node": "npm:^18.19.78"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@typescript-eslint/eslint-plugin": "npm:^8.25.0"
@@ -6428,7 +6428,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-react: "npm:^7.37.4"
-    eslint-plugin-react-hooks: "npm:^5.1.0"
+    eslint-plugin-react-hooks: "npm:^5.2.0"
     eslint-plugin-unused-imports: "npm:^4.1.4"
     framer-motion: "npm:^12.4.7"
     globals: "npm:^16.0.0"
@@ -6444,7 +6444,7 @@ __metadata:
     react-router: "npm:^7.2.0"
     react-stately: "npm:^3.35.0"
     rollup-plugin-visualizer: "npm:^5.14.0"
-    supabase: "npm:^2.15.8"
+    supabase: "npm:^2.15.14"
     tailwindcss: "npm:^3.4.17"
     type-fest: "npm:^4.35.0"
     typescript: "npm:^5.7.3"
@@ -8953,9 +8953,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"supabase@npm:^2.15.8":
-  version: 2.15.13
-  resolution: "supabase@npm:2.15.13"
+"supabase@npm:^2.15.14":
+  version: 2.15.14
+  resolution: "supabase@npm:2.15.14"
   dependencies:
     bin-links: "npm:^5.0.0"
     https-proxy-agent: "npm:^7.0.2"
@@ -8963,7 +8963,7 @@ __metadata:
     tar: "npm:7.4.3"
   bin:
     supabase: bin/supabase
-  checksum: 10c0/f353ad520eee3bedbeb718f93aa5c7415ba986ab0e9b6dae46c70b6d3ab3457b7d9148fad0339c867d7a6ab031d94402180931c0421263e97814f3dda9e545ed
+  checksum: 10c0/f1aa154fe04c902a833453eb4277104daebc4750a4d566f9d4fd7355f075f4d5a921ea96e712531d189e6eb58354db1d5bf5649fc58b0ed53fa683d2d763e6f3
   languageName: node
   linkType: hard
 
