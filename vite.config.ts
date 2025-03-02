@@ -60,6 +60,10 @@ export default defineConfig(({ mode }) => {
               return 'framer-motion';
             }
 
+            if (id.includes('date-fns')) {
+              return 'date-fns';
+            }
+
             if (id.includes('@react-aria')) {
               return 'react-aria';
             }
