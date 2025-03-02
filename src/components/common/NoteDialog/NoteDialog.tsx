@@ -51,6 +51,8 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
       return null;
     }
 
+    handleClose();
+
     if (!existingNote) {
       await addNote({
         userId: user.id,
@@ -63,8 +65,6 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
         day,
       });
     }
-
-    handleClose();
   };
 
   const handleDelete = async () => {

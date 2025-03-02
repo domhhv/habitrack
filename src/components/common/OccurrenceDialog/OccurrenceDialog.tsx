@@ -179,10 +179,6 @@ const OccurrenceDialog = ({
     }
   }, [date, occurrenceToUpdate, time]);
 
-  if (!isOpen) {
-    return null;
-  }
-
   const handleSubmit = async () => {
     if (
       !user ||
@@ -262,6 +258,10 @@ const OccurrenceDialog = ({
   };
 
   const formatDate = () => {
+    if (!date && !occurrenceId) {
+      return 'today';
+    }
+
     const dateToFormat =
       date ||
       new Date(occurrences.find((o) => o.id === occurrenceId)?.timestamp || '');
