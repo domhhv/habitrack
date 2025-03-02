@@ -1,5 +1,6 @@
 import { getYearWeekNumberFromMonthWeek } from '@helpers';
 import { Button, cn, Tooltip } from '@heroui/react';
+import { useScreenWidth } from '@hooks';
 import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
 import { isTruthy, getMonthIndex } from '@utils';
 import { addMonths, isSameMonth } from 'date-fns';
@@ -14,7 +15,6 @@ import MonthCalendarCell from './MonthCalendarCell';
 
 type CalendarGridProps = {
   state: CalendarState;
-  onAddNote: (dateNumber: number, monthIndex: number, fullYear: number) => void;
   onAddOccurrence: (
     dateNumber: number,
     monthIndex: number,
@@ -29,7 +29,6 @@ const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const MonthCalendarGrid = ({
   state,
-  onAddNote,
   onAddOccurrence,
   onEditOccurrence,
   activeMonthLabel,
@@ -37,6 +36,7 @@ const MonthCalendarGrid = ({
 }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
   const { locale } = useLocale();
+  const { isMobile } = useScreenWidth();
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const visibleMonth = new Date(activeYear, getMonthIndex(activeMonthLabel), 1);
@@ -106,10 +106,11 @@ const MonthCalendarGrid = ({
                   <Button
                     as={Link}
                     className={cn(
-                      'absolute -left-6 top-0 h-[32px] w-5 min-w-fit p-0 md:-left-12 md:h-[37px] md:w-10',
+                      'absolute -left-7 top-0 h-[32px] w-6 min-w-fit p-0 md:-left-12 md:h-[37px] md:w-10',
                       weekIndex === 0 && 'top-0.5'
                     )}
                     variant="ghost"
+                    radius={isMobile ? 'sm' : 'md'}
                     to={`/calendar/week/${firstDate.year}/${firstDate.month}/${firstDate.day}`}
                   >
                     {week}
@@ -157,7 +158,6 @@ const MonthCalendarGrid = ({
                           onAddOccurrence={() =>
                             onAddOccurrence(day, month, year)
                           }
-                          onDayNoteClick={() => onAddNote(day, month, year)}
                           rangeStatus={rangeStatus}
                           position={position}
                           onEditOccurrence={onEditOccurrence}

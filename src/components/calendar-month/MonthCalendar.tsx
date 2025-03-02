@@ -1,5 +1,5 @@
-import { OccurrenceDialog, NoteDialog } from '@components';
-import { cn, useDisclosure } from '@heroui/react';
+import { OccurrenceDialog } from '@components';
+import { useDisclosure } from '@heroui/react';
 import { useDocumentTitle } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
 import { useOccurrencesStore } from '@stores';
@@ -39,18 +39,12 @@ const MonthCalendar = () => {
   });
   const { calendarProps, title } = useCalendar({}, calendarState);
   const {
-    isOpen: isNoteDialogOpen,
-    onOpen: openNoteDialog,
-    onClose: closeNoteDialog,
-  } = useDisclosure();
-  const {
     isOpen: isOccurrenceDialogOpen,
     onOpen: openOccurrenceDialog,
     onClose: closeOccurrenceDialog,
   } = useDisclosure();
   const [occurrenceToAddDate, setOccurrenceToAddDate] =
     React.useState<Date | null>(null);
-  const [noteToAddDay, setNoteToAddDay] = React.useState<string | null>(null);
   const [occurrenceIdToEdit, setOccurrenceIdToEdit] = React.useState<
     number | null
   >(null);
@@ -93,11 +87,9 @@ const MonthCalendar = () => {
   );
 
   const handleOccurrenceModalClose = () => {
-    window.setTimeout(() => {
-      setOccurrenceToAddDate(null);
-      setOccurrenceIdToEdit(null);
-      closeOccurrenceDialog();
-    }, 0);
+    setOccurrenceToAddDate(null);
+    setOccurrenceIdToEdit(null);
+    closeOccurrenceDialog();
   };
 
   const handleOccurrenceModalAdd = (
@@ -114,32 +106,12 @@ const MonthCalendar = () => {
     openOccurrenceDialog();
   };
 
-  const handleNoteModalClose = () => {
-    window.setTimeout(() => {
-      setOccurrenceToAddDate(null);
-      closeNoteDialog();
-    }, 0);
-  };
-
-  const handleNoteModalOpen = (
-    dayOfMonth: number,
-    monthIndex: number,
-    fullYear: number
-  ) => {
-    const month = monthIndex < 10 ? `0${monthIndex}` : monthIndex;
-    const day = dayOfMonth < 10 ? `0${dayOfMonth}` : dayOfMonth;
-    setNoteToAddDay(`${fullYear}-${month}-${day}`);
-    openNoteDialog();
-  };
-
-  const calendarContainerClassName = cn(
-    'flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 lg:gap-4 lg:px-16 lg:py-4',
-    isOccurrenceDialogOpen && 'pointer-events-none'
-  );
-
   return (
     <>
-      <div {...calendarProps} className={calendarContainerClassName}>
+      <div
+        {...calendarProps}
+        className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 lg:gap-4 lg:px-16 lg:py-4"
+      >
         <MonthCalendarHeader
           activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
           activeYear={activeYear}
@@ -149,7 +121,6 @@ const MonthCalendar = () => {
           activeYear={Number(activeYear)}
           state={calendarState}
           onAddOccurrence={handleOccurrenceModalAdd}
-          onAddNote={handleNoteModalOpen}
           onEditOccurrence={handleOccurrenceModalEdit}
         />
       </div>
@@ -159,12 +130,6 @@ const MonthCalendar = () => {
         onClose={handleOccurrenceModalClose}
         date={occurrenceToAddDate}
         occurrenceId={occurrenceIdToEdit}
-      />
-
-      <NoteDialog
-        open={isNoteDialogOpen}
-        onClose={handleNoteModalClose}
-        day={noteToAddDay}
       />
     </>
   );
