@@ -5,6 +5,7 @@ import {
   HabitsPage,
   WeekCalendar,
 } from '@components';
+import { Analytics } from '@vercel/analytics/react';
 import { setDefaultOptions } from 'date-fns';
 import { enGB } from 'date-fns/locale';
 import React from 'react';
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/calendar/month" replace />} />
         </Routes>
       </main>
+      <Analytics />
     </Providers>
   );
 };
