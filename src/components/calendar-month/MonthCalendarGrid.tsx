@@ -1,5 +1,5 @@
 import { getYearWeekNumberFromMonthWeek } from '@helpers';
-import { Button, cn } from '@heroui/react';
+import { Button, cn, Tooltip } from '@heroui/react';
 import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
 import { isTruthy, getMonthIndex } from '@utils';
 import { addMonths, isSameMonth } from 'date-fns';
@@ -102,16 +102,19 @@ const MonthCalendarGrid = ({
                 key={weekIndex}
                 className="group relative flex items-end gap-1 md:gap-2"
               >
-                <Button
-                  as={Link}
-                  className={cn(
-                    'absolute -left-[24px] bottom-0 h-[107px] w-[20px] min-w-fit p-0 md:-left-[48px] md:w-[40px]'
-                  )}
-                  variant="light"
-                  to={`/calendar/week/${firstDate.year}/${firstDate.month}/${firstDate.day}`}
-                >
-                  {week}
-                </Button>
+                <Tooltip content="Go to this week">
+                  <Button
+                    as={Link}
+                    className={cn(
+                      'absolute -left-6 top-0 h-[32px] w-5 min-w-fit p-0 md:-left-12 md:h-[37px] md:w-10',
+                      weekIndex === 0 && 'top-0.5'
+                    )}
+                    variant="ghost"
+                    to={`/calendar/week/${firstDate.year}/${firstDate.month}/${firstDate.day}`}
+                  >
+                    {week}
+                  </Button>
+                </Tooltip>
                 <div
                   className={cn(
                     'flex h-[110px] w-full basis-full justify-between border-l-2 border-r-2 border-neutral-500 last-of-type:border-b-2 group-first-of-type:border-t-2 dark:border-neutral-400 lg:h-auto',

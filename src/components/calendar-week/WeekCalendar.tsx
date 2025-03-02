@@ -1,4 +1,5 @@
 import { OccurrenceChip } from '@components';
+import { cn } from '@heroui/react';
 import { useOccurrencesStore } from '@stores';
 import {
   addDays,
@@ -12,6 +13,7 @@ import {
   getISOWeekYear,
   getWeek,
   startOfToday,
+  isToday,
 } from 'date-fns';
 import { motion } from 'framer-motion';
 import React from 'react';
@@ -98,13 +100,15 @@ const WeekCalendar = () => {
 
           return (
             <div key={dayIndex} className="group flex flex-1 flex-col gap-4">
-              <div className="space-y-2 text-center">
-                <h3 className="text-stone-600 dark:text-stone-300">
-                  {weekDayName}
-                </h3>
-                <h6 className="text-stone-600 dark:text-stone-300">
-                  {day.getDate()}
-                </h6>
+              <div
+                className={cn(
+                  'space-y-2 text-center text-stone-600 dark:text-stone-300',
+                  isToday(day) &&
+                    'font-bold text-primary-600 dark:text-primary-400'
+                )}
+              >
+                <h3>{weekDayName}</h3>
+                <h6>{day.getDate()}</h6>
               </div>
               <div className="flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600">
                 {eachMinuteOfInterval(
