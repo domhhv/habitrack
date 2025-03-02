@@ -23,7 +23,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['**/dist/', 'tests/coverage', '.yarn/releases/yarn-4.6.0.cjs'],
+    ignores: ['**/dist/', 'tests/coverage', '.yarn/releases/yarn-4.7.0.cjs'],
   },
   ...fixupConfigRules(
     compat.extends(
