@@ -1,7 +1,7 @@
 import { type Occurrence } from '@models';
 
 const makeTestOccurrence = () => {
-  let id = 1;
+  let id = 999;
 
   return (override: Partial<Occurrence> = {}): Occurrence => {
     return {

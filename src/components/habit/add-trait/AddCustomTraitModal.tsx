@@ -104,7 +104,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
               </p>
               <div className="flex">
                 <OccurrenceChip
-                  interactable={false}
+                  isInteractable={false}
                   occurrences={[makeTestOccurrence()]}
                   colorOverride={color}
                 />
