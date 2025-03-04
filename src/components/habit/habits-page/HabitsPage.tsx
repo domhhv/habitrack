@@ -15,7 +15,7 @@ import {
   TableRow,
   Tooltip,
 } from '@heroui/react';
-import { useDocumentTitle, useScreenWidth, useUser } from '@hooks';
+import { useScreenWidth, useUser } from '@hooks';
 import { type Habit } from '@models';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useHabitsStore, useOccurrencesStore } from '@stores';
@@ -78,8 +78,6 @@ const HabitsPage = () => {
   const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
   const { isMobile } = useScreenWidth();
 
-  useDocumentTitle('My Habits | Habitrack');
-
   const handleRemovalConfirmOpen = (habit: Habit) => {
     setHabitToRemove(habit);
   };
@@ -108,6 +106,7 @@ const HabitsPage = () => {
 
   return (
     <>
+      <title>My Habits | Habitrack</title>
       <h1 className="mx-auto mb-4 mt-8 text-3xl font-bold text-gray-800 dark:text-gray-300">
         Your habits
       </h1>

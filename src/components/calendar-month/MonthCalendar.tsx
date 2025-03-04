@@ -1,4 +1,3 @@
-import { useDocumentTitle } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
 import { useOccurrencesStore } from '@stores';
 import { capitalizeFirstLetter } from '@utils';
@@ -71,15 +70,14 @@ const MonthCalendar = () => {
 
   const [activeMonthLabel, activeYear] = title.split(' ');
 
-  useDocumentTitle(
-    `${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`
-  );
-
   return (
     <div
       {...calendarProps}
       className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 lg:gap-4 lg:px-16 lg:py-4"
     >
+      <title>
+        {`${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`}
+      </title>
       <MonthCalendarHeader
         activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
         activeYear={activeYear}

@@ -1,6 +1,6 @@
 import { PasswordInput } from '@components';
 import { addToast, Alert, Button, Input, Spinner } from '@heroui/react';
-import { useDocumentTitle, useTextField, useUser } from '@hooks';
+import { useTextField, useUser } from '@hooks';
 import { updateUser } from '@services';
 import { getErrorMessage, toEventLike } from '@utils';
 import React, { type FormEventHandler } from 'react';
@@ -10,8 +10,6 @@ import { useAuthSearchParams } from './use-auth-search-params';
 
 const AccountPage = () => {
   useAuthSearchParams();
-
-  useDocumentTitle('My Account | Habitrack');
 
   const { isLoading: isLoadingUser, user } = useUser();
   const [isUpdating, setIsUpdating] = React.useState(false);
@@ -23,6 +21,8 @@ const AccountPage = () => {
     handleEmailChange(toEventLike(user?.email));
     handleNameChange(toEventLike(user?.userMetadata.name || ''));
   }, [user, handleEmailChange, handleNameChange]);
+
+  const title = <title>My Account | Habitrack</title>;
 
   const updateAccount = async () => {
     try {
@@ -57,6 +57,7 @@ const AccountPage = () => {
         className={twMerge(containerClassName, 'pt-16')}
         data-testid="account-page"
       >
+        {title}
         <Spinner data-testid="loader" aria-label="Loading..." />
       </div>
     );
@@ -68,6 +69,7 @@ const AccountPage = () => {
         className={twMerge(containerClassName, 'items-start pt-16')}
         data-testid="account-page"
       >
+        {title}
         <Alert
           title="Please log in to your account first"
           color="danger"
@@ -87,6 +89,7 @@ const AccountPage = () => {
 
   return (
     <div className="flex h-lvh w-full flex-col items-start self-start px-8 py-2 lg:px-16 lg:py-4">
+      {title}
       <div className={containerClassName} data-testid="account-page">
         <h1 className="text-xl font-semibold">Your Account Info</h1>
         <form
