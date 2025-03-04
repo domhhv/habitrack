@@ -1,5 +1,4 @@
 DROP FUNCTION IF EXISTS get_longest_streak(integer);
-DROP TYPE IF EXISTS streak_info;
 
 CREATE TYPE streak_info AS (
     streak_length integer,
