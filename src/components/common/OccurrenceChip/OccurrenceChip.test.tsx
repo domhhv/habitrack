@@ -23,10 +23,8 @@ vi.mock('@hooks', () => ({
 }));
 
 describe(OccurrenceChip.name, () => {
-  const mockOnDelete = vi.fn();
   const props: OccurrenceChipProps = {
     occurrences: [makeTestOccurrence()],
-    onDelete: mockOnDelete,
   };
 
   it('should render img with habit icon', async () => {
@@ -50,7 +48,6 @@ describe(OccurrenceChip.name, () => {
       expect(deleteButton).toBeDefined();
     });
     deleteButton.click();
-    expect(mockOnDelete).toHaveBeenCalledWith(1, expect.anything());
   });
 
   it('should not render delete button on small screens', () => {

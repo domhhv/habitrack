@@ -1,7 +1,6 @@
-import { NoteDialog, OccurrenceChip } from '@components';
+import { NoteDialog, OccurrenceChip, OccurrenceDialog } from '@components';
 import { Button, cn, Tooltip, useDisclosure } from '@heroui/react';
 import { useScreenWidth, useUser } from '@hooks';
-import type { CalendarDate } from '@internationalized/date';
 import {
   CalendarBlank,
   CalendarPlus,
@@ -23,35 +22,33 @@ export type CellPosition =
 export type CellRangeStatus = 'below-range' | 'in-range' | 'above-range' | '';
 
 type CalendarCellProps = {
-  date: CalendarDate;
-  onAddOccurrence: () => void;
-  onEditOccurrence: (occurrenceId: number) => void;
+  date: Date;
   rangeStatus: CellRangeStatus;
   position: CellPosition;
 };
 
 const MonthCalendarCell = ({
   date,
-  onAddOccurrence,
-  onEditOccurrence,
   rangeStatus,
   position,
 }: CalendarCellProps) => {
-  const { removeOccurrence, fetchingOccurrences, occurrencesByDate } =
-    useOccurrencesStore();
+  const { fetchingOccurrences, occurrencesByDate } = useOccurrencesStore();
   const { notes, fetchingNotes } = useNotesStore();
   const { user } = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
-  const cellDate = new Date(date.year, date.month - 1, date.day);
-  const isTodayCell = isToday(cellDate);
-  const formattedDay = format(cellDate, 'yyyy-MM-dd');
+  const isTodayCell = isToday(date);
+  const formattedDay = format(date, 'yyyy-MM-dd');
   const hasNote = notes.some((note) => note.day === formattedDay);
   const {
     isOpen: isNoteDialogOpen,
     onOpen: openNoteDialog,
     onClose: closeNoteDialog,
   } = useDisclosure();
-  const [noteToAddDay, setNoteToAddDay] = React.useState<string | null>(null);
+  const {
+    isOpen: isOccurrenceDialogOpen,
+    onOpen: openOccurrenceDialog,
+    onClose: closeOccurrenceDialog,
+  } = useDisclosure();
 
   const groupedOccurrences = Object.groupBy(
     occurrencesByDate[formattedDay] || [],
@@ -74,32 +71,26 @@ const MonthCalendarCell = ({
     isTodayCell ? 'w-full self-auto md:self-start' : 'w-full'
   );
 
-  const handleNoteModalOpen = () => {
-    const month = date.month < 10 ? `0${date.month}` : date.month;
-    const day = date.day < 10 ? `0${date.day}` : date.day;
-    setNoteToAddDay(`${date.year}-${month}-${day}`);
-    openNoteDialog();
-  };
-
-  const handleNoteModalClose = () => {
-    closeNoteDialog();
-    setNoteToAddDay(null);
-  };
-
   return (
     <>
       <NoteDialog
         open={isNoteDialogOpen}
-        onClose={handleNoteModalClose}
-        day={noteToAddDay}
+        onClose={closeNoteDialog}
+        date={date}
       />
 
-      <div
-        className={cellRootClassName}
-        onClick={isMobile ? onAddOccurrence : undefined}
-      >
-        <div className={cellHeaderClassName}>
-          <p className="font-bold">{date.day}</p>
+      <OccurrenceDialog
+        isOpen={isOccurrenceDialogOpen}
+        onClose={closeOccurrenceDialog}
+        newOccurrenceDate={date}
+      />
+
+      <div className={cellRootClassName}>
+        <div
+          className={cellHeaderClassName}
+          onClick={isMobile ? openOccurrenceDialog : undefined}
+        >
+          <p className="font-bold">{date.getDate()}</p>
           <div className="flex items-center justify-between gap-2">
             {!isMobile && (
               <div className="flex items-center gap-1">
@@ -108,7 +99,7 @@ const MonthCalendarCell = ({
                     className="h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6"
                     variant="light"
                     radius="sm"
-                    onPress={onAddOccurrence}
+                    onPress={openOccurrenceDialog}
                     color="secondary"
                     isDisabled={fetchingOccurrences || !user}
                     tabIndex={0}
@@ -127,7 +118,7 @@ const MonthCalendarCell = ({
                     )}
                     variant="light"
                     radius="sm"
-                    onPress={handleNoteModalOpen}
+                    onPress={openNoteDialog}
                     color={hasNote ? 'primary' : 'secondary'}
                     isDisabled={fetchingNotes || !user}
                     tabIndex={0}
@@ -160,11 +151,7 @@ const MonthCalendarCell = ({
                     exit={{ scale: 0 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <OccurrenceChip
-                      occurrences={habitOccurrences}
-                      onDelete={removeOccurrence}
-                      onEdit={onEditOccurrence}
-                    />
+                    <OccurrenceChip occurrences={habitOccurrences} />
                   </motion.div>
                 );
               }

@@ -15,12 +15,6 @@ import MonthCalendarCell from './MonthCalendarCell';
 
 type CalendarGridProps = {
   state: CalendarState;
-  onAddOccurrence: (
-    dateNumber: number,
-    monthIndex: number,
-    fullYear: number
-  ) => void;
-  onEditOccurrence: (occurrenceId: number) => void;
   activeMonthLabel: string;
   activeYear: number;
 };
@@ -29,14 +23,12 @@ const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const MonthCalendarGrid = ({
   state,
-  onAddOccurrence,
-  onEditOccurrence,
   activeMonthLabel,
   activeYear,
 }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
-  const { locale } = useLocale();
   const { isMobile } = useScreenWidth();
+  const { locale } = useLocale();
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const visibleMonth = new Date(activeYear, getMonthIndex(activeMonthLabel), 1);
@@ -154,13 +146,9 @@ const MonthCalendarGrid = ({
                       return (
                         <MonthCalendarCell
                           key={cellKey}
-                          date={calendarDate}
-                          onAddOccurrence={() =>
-                            onAddOccurrence(day, month, year)
-                          }
+                          date={date}
                           rangeStatus={rangeStatus}
                           position={position}
-                          onEditOccurrence={onEditOccurrence}
                         />
                       );
                     })}

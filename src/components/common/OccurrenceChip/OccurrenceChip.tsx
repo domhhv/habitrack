@@ -1,3 +1,4 @@
+import { OccurrenceDialog } from '@components';
 import {
   Badge,
   Button,
@@ -13,6 +14,7 @@ import {
 import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { Note, PencilSimple, TrashSimple } from '@phosphor-icons/react';
+import { useOccurrencesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
@@ -20,16 +22,12 @@ import React from 'react';
 export type OccurrenceChipProps = {
   isInteractable?: boolean;
   occurrences: Occurrence[];
-  onDelete?: (occurrenceId: number) => void;
-  onEdit?: (occurrenceId: number) => void;
   colorOverride?: string;
 };
 
 const OccurrenceChip = ({
   isInteractable = true,
   occurrences,
-  onDelete,
-  onEdit,
   colorOverride,
 }: OccurrenceChipProps) => {
   const {
@@ -38,12 +36,31 @@ const OccurrenceChip = ({
     onClose: closeDrawer,
     onOpenChange: onDrawerOpenChange,
   } = useDisclosure();
+  const {
+    isOpen: isOccurrenceDialogOpen,
+    onOpen: openOccurrenceDialog,
+    onClose: closeOccurrenceDialog,
+  } = useDisclosure();
+  const [occurrenceIdToEdit, setOccurrenceIdToEdit] = React.useState<
+    number | null
+  >(null);
   const [occurrence] = occurrences;
   const { habit } = occurrence;
   const { name: habitName, iconPath, trait } = habit || {};
   const { color: traitColor } = trait || {};
   const iconUrl = getHabitIconUrl(iconPath);
   const { screenWidth } = useScreenWidth();
+  const { removeOccurrence } = useOccurrencesStore();
+
+  const handleOccurrenceModalClose = () => {
+    setOccurrenceIdToEdit(null);
+    closeOccurrenceDialog();
+  };
+
+  const handleOccurrenceModalOpen = (occurrenceId: number) => {
+    setOccurrenceIdToEdit(occurrenceId);
+    openOccurrenceDialog();
+  };
 
   let chip = (
     <Tooltip
@@ -62,7 +79,7 @@ const OccurrenceChip = ({
         className={cn(
           'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 dark:bg-slate-800 md:mb-1 md:mr-1',
           screenWidth < 400 && 'p-1',
-          isDrawerOpen && 'z-[51]'
+          isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]'
         )}
       >
         <img
@@ -82,7 +99,7 @@ const OccurrenceChip = ({
         variant="solid"
         placement="bottom-right"
         color="primary"
-        className={cn(isDrawerOpen && 'z-[51]')}
+        className={cn(isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]')}
       >
         {chip}
       </Badge>
@@ -97,7 +114,7 @@ const OccurrenceChip = ({
         placement="top-right"
         className={cn(
           'right-1 top-1 border-none bg-transparent',
-          isDrawerOpen && 'z-[51]'
+          isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]'
         )}
       >
         {chip}
@@ -108,6 +125,12 @@ const OccurrenceChip = ({
   return (
     <>
       {chip}
+
+      <OccurrenceDialog
+        isOpen={isOccurrenceDialogOpen}
+        existingOccurrenceId={occurrenceIdToEdit}
+        onClose={handleOccurrenceModalClose}
+      />
 
       <Drawer
         placement="bottom"
@@ -144,7 +167,7 @@ const OccurrenceChip = ({
                             variant="light"
                             size="sm"
                             color="secondary"
-                            onPress={() => onEdit?.(o.id)}
+                            onPress={() => handleOccurrenceModalOpen(o.id)}
                             className="h-6 w-6 min-w-0 rounded-lg"
                           >
                             <PencilSimple
@@ -157,7 +180,7 @@ const OccurrenceChip = ({
                             isIconOnly
                             variant="light"
                             color="danger"
-                            onPress={() => onDelete?.(o.id)}
+                            onPress={() => removeOccurrence(o.id)}
                             role="habit-chip-delete-button"
                             className="h-6 w-6 min-w-0 rounded-lg"
                           >
