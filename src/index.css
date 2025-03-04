@@ -19,3 +19,7 @@ button,
   flex-direction: column;
   justify-content: flex-start;
 }
+
+div[data-placement='top-center'] {
+  z-index: 51;
+}

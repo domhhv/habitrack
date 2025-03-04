@@ -15,10 +15,10 @@ import React from 'react';
 type NoteDialogProps = {
   open: boolean;
   onClose: () => void;
-  day: string | null;
+  date: Date;
 };
 
-const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
+const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
   const { user } = useUser();
   const [content, setContent] = React.useState('');
   const {
@@ -32,13 +32,20 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
     deletingNote,
   } = useNotesStore();
 
-  const existingNote = day ? notes.find((note) => note.day === day) : null;
+  const month =
+    date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth();
+  const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+  const sqlDate = `${date.getFullYear()}-${month}-${day}`;
+
+  const existingNote = React.useMemo(() => {
+    return date ? notes.find((note) => note.day === sqlDate) : null;
+  }, [notes, sqlDate, date]);
 
   React.useEffect(() => {
-    if (existingNote?.content && !content) {
+    if (existingNote?.content) {
       setContent(existingNote.content);
     }
-  }, [existingNote, content]);
+  }, [existingNote]);
 
   React.useEffect(() => {
     if (!open) {
@@ -47,23 +54,25 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
   }, [open]);
 
   const handleSubmit = async () => {
-    if (!user || !day || fetchingNotes) {
+    if (!user || !date || fetchingNotes) {
       return null;
     }
 
     handleClose();
 
-    if (!existingNote) {
-      await addNote({
-        userId: user.id,
-        day,
-        content,
-      });
-    } else {
-      await updateNote(existingNote.id, {
-        content,
-        day,
-      });
+    if (content) {
+      if (!existingNote) {
+        await addNote({
+          userId: user.id,
+          day: sqlDate,
+          content,
+        });
+      } else if (existingNote.content !== content) {
+        await updateNote(existingNote.id, {
+          content,
+          day: sqlDate,
+        });
+      }
     }
   };
 
@@ -86,7 +95,7 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
     <Modal isOpen={open} onClose={handleClose}>
       <ModalContent>
         <ModalHeader>
-          {day && `Add a note about ${format(day || '', 'iii, LLL d, y')}`}
+          {date && `Add a note about ${format(date || '', 'iii, LLL d, y')}`}
         </ModalHeader>
         <ModalBody>
           <Textarea

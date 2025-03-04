@@ -30,12 +30,12 @@ vi.mock('date-fns', () => ({
 
 describe(OccurrenceDialog.name, () => {
   const mockOnClose = vi.fn();
-  const date = new Date(2021, 1, 1, 12);
+  const newOccurrenceDate = new Date(2021, 1, 1, 12);
 
   const props = {
     isOpen: true,
     onClose: mockOnClose,
-    date,
+    newOccurrenceDate,
   };
 
   beforeEach(() => {
@@ -193,7 +193,7 @@ describe(OccurrenceDialog.name, () => {
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue(
-      date.toISOString().split('T')[0]
+      newOccurrenceDate.toISOString().split('T')[0]
     );
     const mockAddOccurrence = vi.fn();
     (
@@ -212,7 +212,7 @@ describe(OccurrenceDialog.name, () => {
     fireEvent.click(getByText('Submit'));
     expect(mockAddOccurrence).toHaveBeenCalledWith({
       day: '2021-02-01',
-      timestamp: +date,
+      timestamp: +newOccurrenceDate,
       habitId: 1,
       userId: '1',
       time: null,

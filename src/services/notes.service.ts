@@ -45,14 +45,13 @@ export const updateNote = async (
     .from('notes')
     .update(serverNote)
     .eq('id', id)
-    .select()
-    .single();
+    .select();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return transformServerEntity(data[0]);
 };
 
 export const destroyNote = async (id: number) => {
