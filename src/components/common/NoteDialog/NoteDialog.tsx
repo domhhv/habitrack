@@ -99,6 +99,7 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
         </ModalHeader>
         <ModalBody>
           <Textarea
+            onKeyDown={() => null}
             onValueChange={setContent}
             value={content}
             placeholder="Note"
