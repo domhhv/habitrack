@@ -342,6 +342,7 @@ const OccurrenceDialog = ({
             ))}
           </Select>
           <Textarea
+            onKeyDown={() => null}
             onValueChange={setNote}
             value={note}
             placeholder="Note"
