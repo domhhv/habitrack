@@ -1,4 +1,4 @@
-drop policy "Enable insert for users based on user_id" on "public"."notes";
+drop policy if exists "Enable insert for users based on user_id" on "public"."notes";
 
 drop policy "Enable delete for users based on user_id" on "public"."notes";
 
