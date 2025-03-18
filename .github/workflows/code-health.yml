@@ -10,7 +10,7 @@ env:
 
 jobs:
   setup:
-    name: Setup
+    name: Set up Node.js and Dependencies Cache
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,9 +39,9 @@ jobs:
         check:
           - name: Typecheck
             command: typecheck
-          - name: Lint
+          - name: ESLint
             command: eslint:check
-          - name: Formatting
+          - name: Prettier
             command: prettier:check
       fail-fast: false
     name: ${{ matrix.check.name }}
