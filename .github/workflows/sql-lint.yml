@@ -7,7 +7,7 @@ on:
 
 jobs:
   lint:
-    name: SQL Lint
+    name: Lint Supabase migrations
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
