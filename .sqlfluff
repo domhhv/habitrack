@@ -1,0 +1,5 @@
+[sqlfluff]
+dialect = postgres
+
+[sqlfluff:rules:references.quoting]
+prefer_quoted_identifiers = True
