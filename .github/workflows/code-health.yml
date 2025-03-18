@@ -39,9 +39,9 @@ jobs:
         check:
           - name: Typecheck
             command: typecheck
-          - name: Lint
+          - name: ESLint
             command: eslint:check
-          - name: Formatting
+          - name: Prettier
             command: prettier:check
       fail-fast: false
     name: ${{ matrix.check.name }}
