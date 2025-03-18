@@ -21,4 +21,4 @@ jobs:
         run: pip install sqlfluff
 
       - name: Run SQL Lint
-        run: sqlfluff lint 'supabase/migrations/*.sql'
+        run: sqlfluff lint 'supabase/migrations'
