@@ -35,6 +35,8 @@
     "eslint:fix": "eslint --fix .",
     "prettier:check": "prettier --check .",
     "prettier:write": "prettier --write .",
+    "lint:sql": "docker run --rm -v $(pwd):/sql sqlfluff/sqlfluff lint 'supabase/migrations'",
+    "fix:sql": "docker run --rm -v $(pwd):/sql sqlfluff/sqlfluff fix 'supabase/migrations'",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "yarn test --coverage",
