@@ -35,8 +35,8 @@
     "eslint:fix": "eslint --fix .",
     "prettier:check": "prettier --check .",
     "prettier:write": "prettier --write .",
-    "lint:sql": "docker run --rm -v $(pwd):/sql sqlfluff/sqlfluff lint 'supabase/migrations'",
-    "fix:sql": "docker run --rm -v $(pwd):/sql sqlfluff/sqlfluff fix 'supabase/migrations'",
+    "lint:sql": "docker run --rm -v $(pwd):/sql sqlfluff/sqlfluff lint",
+    "fix:sql": "docker run --rm -v $(pwd):/sql sqlfluff/sqlfluff fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "yarn test --coverage",
@@ -50,13 +50,6 @@
     "db:migration:up": "supabase migration up",
     "db:migration:new": "supabase migration new",
     "db:gen-types": "supabase gen types --lang=typescript --schema public --schema auth --schema storage --local > supabase/database.types.ts"
-  },
-  "lint-staged": {
-    "**/*.{ts,tsx}": [
-      "typecheck",
-      "eslint",
-      "prettier --check"
-    ]
   },
   "dependencies": {
     "@heroui/react": "^2.7.5",
@@ -100,6 +93,7 @@
     "globals": "^16.0.0",
     "husky": "^9.1.7",
     "jsdom": "^26.0.0",
+    "lint-staged": "^15.5.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
