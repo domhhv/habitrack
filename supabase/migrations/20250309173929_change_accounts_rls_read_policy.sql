@@ -1,8 +1,8 @@
 ALTER POLICY "Enable read access for all users"
 ON "public"."accounts"
-TO authenticated
+TO "authenticated"
 USING (
-  (SELECT auth.uid()) = id
+    (SELECT "auth"."uid"()) = "id"
 );
 ALTER POLICY "Enable read access for all users"
 ON "public"."accounts"

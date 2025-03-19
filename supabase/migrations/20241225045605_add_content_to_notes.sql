@@ -1,1 +1,1 @@
-ALTER TABLE notes ADD COLUMN content text;
+ALTER TABLE "notes" ADD COLUMN "content" TEXT;
