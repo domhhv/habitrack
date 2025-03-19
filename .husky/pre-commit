@@ -1,7 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-yarn typecheck
-yarn eslint:check
-yarn prettier:check
-
+npx lint-staged

@@ -52,10 +52,11 @@
     "db:gen-types": "supabase gen types --lang=typescript --schema public --schema auth --schema storage --local > supabase/database.types.ts"
   },
   "lint-staged": {
-    "**/*.{ts,tsx}": [
-      "typecheck",
+    "**/*.{md,js,ts,tsx,sql}": [
+      "tsc --noEmit",
       "eslint",
-      "prettier --check"
+      "prettier --check",
+      "docker run --rm -v $(pwd):/sql sqlfluff/sqlfluff lint 'supabase/migrations'"
     ]
   },
   "dependencies": {
