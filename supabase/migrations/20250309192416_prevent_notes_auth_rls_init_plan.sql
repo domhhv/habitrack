@@ -17,7 +17,7 @@ CREATE POLICY "Enable read access for users based on user_id"
 ON "public"."notes"
 AS PERMISSIVE
 FOR SELECT
-TO public
+TO "public"
 USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 CREATE POLICY "Enable update for users based on user_id"
