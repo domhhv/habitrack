@@ -1,32 +1,27 @@
-drop policy "Enable delete for users based on user_id" on "public"."occurrences";
+DROP POLICY "Enable delete for users based on user_id" ON "public"."occurrences";
 
-drop policy "Enable read access for users based on user_id" on "public"."occurrences";
+DROP POLICY "Enable read access for users based on user_id" ON "public"."occurrences";
 
-drop policy "Enable update for users based on user_id" on "public"."occurrences";
+DROP POLICY "Enable update for users based on user_id" ON "public"."occurrences";
 
-create policy "Enable delete for users based on user_id"
-on "public"."occurrences"
-as permissive
-for delete
-to public
-using ((( SELECT auth.uid() AS uid) = user_id));
+CREATE POLICY "Enable delete for users based on user_id"
+ON "public"."occurrences"
+AS PERMISSIVE
+FOR DELETE
+TO "public"
+USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
+CREATE POLICY "Enable read access for users based on user_id"
+ON "public"."occurrences"
+AS PERMISSIVE
+FOR SELECT
+TO "public"
+USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
-create policy "Enable read access for users based on user_id"
-on "public"."occurrences"
-as permissive
-for select
-to public
-using ((( SELECT auth.uid() AS uid) = user_id));
-
-
-create policy "Enable update for users based on user_id"
-on "public"."occurrences"
-as permissive
-for update
-to public
-using ((( SELECT auth.uid() AS uid) = user_id))
-with check ((( SELECT auth.uid() AS uid) = user_id));
-
-
-
+CREATE POLICY "Enable update for users based on user_id"
+ON "public"."occurrences"
+AS PERMISSIVE
+FOR UPDATE
+TO "public"
+USING (((SELECT "auth"."uid"() AS "uid") = "user_id"))
+WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
