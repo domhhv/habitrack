@@ -11,4 +11,4 @@ export * from './common';
 
 export * from './habit';
 
-export * from './user-account';
+export * from './account';
