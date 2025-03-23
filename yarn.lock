@@ -6727,7 +6727,7 @@ __metadata:
     react-router: "npm:^7.3.0"
     react-stately: "npm:^3.36.0"
     rollup-plugin-visualizer: "npm:^5.14.0"
-    supabase: "npm:^2.19.2"
+    supabase: "npm:^2.19.7"
     tailwindcss: "npm:^3.4.17"
     type-fest: "npm:^4.37.0"
     typescript: "npm:^5.8.2"
@@ -9443,9 +9443,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"supabase@npm:^2.19.2":
-  version: 2.19.2
-  resolution: "supabase@npm:2.19.2"
+"supabase@npm:^2.19.7":
+  version: 2.20.3
+  resolution: "supabase@npm:2.20.3"
   dependencies:
     bin-links: "npm:^5.0.0"
     https-proxy-agent: "npm:^7.0.2"
@@ -9453,7 +9453,7 @@ __metadata:
     tar: "npm:7.4.3"
   bin:
     supabase: bin/supabase
-  checksum: 10c0/517c0f590b42509e8b4a386e630f2ad2c61e458e5acd5bff7e8dce68d6fad7564286ffef673d0d8cd1443ec1a8e95a321bf78d775fbfc3e71e508cbc6734f1af
+  checksum: 10c0/a87d244c2c5e7aa24f5392acb995de2165091f7504b25b2d1da730e7e5d0a1aa24e400cbda0dc03f8cba712bfb12e8f058425b3630f6ca2afa16943edd7edb1e
   languageName: node
   linkType: hard
 
