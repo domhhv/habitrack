@@ -12,7 +12,7 @@ DECLARE
     "result" "streak_info";
 BEGIN
     WITH "daily_occurrences" AS (
-        SELECT DISTINCT DATE(TO_TIMESTAMP("timestamp" / "1000")) AS "occurrence_date"
+        SELECT DISTINCT DATE(TO_TIMESTAMP("timestamp" / '1000')) AS "occurrence_date"
         FROM "occurrences"
         WHERE "habit_id" = "p_habit_id"
         ORDER BY "occurrence_date"
