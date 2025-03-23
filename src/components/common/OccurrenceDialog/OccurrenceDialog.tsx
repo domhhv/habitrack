@@ -67,8 +67,11 @@ const OccurrenceDialog = ({
   const hasHabits = habits.length > 0;
 
   React.useEffect(() => {
+    if (time) {
+      return;
+    }
+
     if (!newOccurrenceDate && !existingOccurrenceId) {
-      setTime(parseAbsoluteToLocal(new Date().toISOString()));
       return;
     }
 
@@ -97,7 +100,7 @@ const OccurrenceDialog = ({
 
       setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
     }
-  }, [newOccurrenceDate, existingOccurrenceId, occurrences]);
+  }, [newOccurrenceDate, existingOccurrenceId, occurrences, time]);
 
   React.useEffect(() => {
     if (!habits.length) {
