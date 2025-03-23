@@ -219,11 +219,24 @@ yarn test:no-cache # Run all tests without cache
 
 ### Linting
 
+There are two types of linting in the project: JavaScript/TypeScript linting and SQL linting.
+
+#### JS/TS
+
 The project uses [ESLint](https://eslint.org/) v9 with a custom flat config for linting. To run ESLint, use the following command:
 
 ```bash
 yarn eslint:check # Check for linting errors
 yarn eslint:fix # Fix linting errors
+```
+
+#### SQL
+
+In addition to ESLint, the project uses [SQLFluff](https://docs.sqlfluff.com/en/stable/) for linting SQL queries under `supabase` directory. To run SQLFluff (Docker required), use the following command:
+
+```bash
+yarn lint:sql # Lint SQL queries
+yarn fix:sql # Find fixable linting violations in SQL queries and apply fixes
 ```
 
 ### Formatting
@@ -248,6 +261,30 @@ You can run the production build locally using the following command:
 ```bash
 yarn preview
 ```
+
+## CI/CD
+
+The project uses GitHub Actions for CI/CD.
+
+### Pull Requests
+
+When you open a pull request, the following checks are run:
+
+- **Setup**: Install and cache Yarn dependencies.
+- **Typecheck**: Run TypeScript type checks.
+- **ESLint**: Run ESLint checks for JS/TS lint issues.
+- **SQLFluff**: Run SQLFluff checks for SQL lint issues.
+- **Prettier**: Run Prettier checks for formatting issues.
+- **Deploy preview**: Build and deploy the app to Vercel for preview.
+
+All checks but the last one must pass before merging a pull request.
+
+### Merging to Main
+
+When a pull request is merged to the `main` branch, the following checks are run:
+
+- **Deploy app**: Build and deploy the app to Vercel.
+- **Migrate database**: Apply Supabase migrations to the production database, if any.
 
 ## Contributing
 
