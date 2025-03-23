@@ -20,60 +20,62 @@ const testTraits = [
   makeTestTrait({ name: 'Test Bad Trait', color: '#F6F6F6' }),
 ];
 
-const useTraitsStore = create<TraitsState>((set) => ({
-  traits: testTraits,
-  fetchingTraits: true,
-  addingTrait: false,
-  fetchTraits: async () => {
-    try {
-      set({ fetchingTraits: true });
-      const traits = await listTraits();
-      const sortedUserTraits = traits
-        .filter((trait) => !!trait.userId)
-        .sort((a, b) => {
-          return a.name.localeCompare(b.name);
+const useTraitsStore = create<TraitsState>((set) => {
+  return {
+    traits: testTraits,
+    fetchingTraits: true,
+    addingTrait: false,
+    fetchTraits: async () => {
+      try {
+        set({ fetchingTraits: true });
+        const traits = await listTraits();
+        const sortedUserTraits = traits
+          .filter((trait) => !!trait.userId)
+          .sort((a, b) => {
+            return a.name.localeCompare(b.name);
+          });
+        const allSortedTraits = traits
+          .filter((trait) => !trait.userId)
+          .concat(sortedUserTraits);
+        set({ traits: allSortedTraits });
+      } catch (error) {
+        console.error(error);
+        addToast({
+          title:
+            'Something went wrong while fetching your traits. Please try reloading the page.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
         });
-      const allSortedTraits = traits
-        .filter((trait) => !trait.userId)
-        .concat(sortedUserTraits);
-      set({ traits: allSortedTraits });
-    } catch (error) {
-      console.error(error);
-      addToast({
-        title:
-          'Something went wrong while fetching your traits. Please try reloading the page.',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    } finally {
-      set({ fetchingTraits: false });
-    }
-  },
-  addTrait: async (trait: TraitsInsert) => {
-    try {
-      set({ addingTrait: true });
-      const newTrait = await createTrait(trait);
-      set((state) => ({ traits: [...state.traits, newTrait] }));
-      addToast({
-        title: 'Your habit trait has been added!',
-        color: 'success',
-      });
-    } catch (error) {
-      console.error(error);
-      addToast({
-        title:
-          'Something went wrong while adding your habit trait. Please try again.',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    } finally {
-      set({ addingTrait: false });
-    }
-  },
-  clearTraits: () => {
-    set({ traits: [] });
-  },
-}));
+      } finally {
+        set({ fetchingTraits: false });
+      }
+    },
+    addTrait: async (trait: TraitsInsert) => {
+      try {
+        set({ addingTrait: true });
+        const newTrait = await createTrait(trait);
+        set((state) => ({ traits: [...state.traits, newTrait] }));
+        addToast({
+          title: 'Your habit trait has been added!',
+          color: 'success',
+        });
+      } catch (error) {
+        console.error(error);
+        addToast({
+          title:
+            'Something went wrong while adding your habit trait. Please try again.',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
+      } finally {
+        set({ addingTrait: false });
+      }
+    },
+    clearTraits: () => {
+      set({ traits: [] });
+    },
+  };
+});
 
 useTraitsStore.subscribe((state, prevState) => {
   const { updateFilteredBy } = useOccurrencesStore.getState();

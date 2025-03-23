@@ -6,6 +6,7 @@ import {
 } from '@helpers';
 import { addToast } from '@heroui/react';
 import type {
+  Note,
   Occurrence,
   OccurrencesDateMap,
   OccurrencesInsert,
@@ -50,6 +51,10 @@ type OccurrencesState = {
   updateFilteredBy: (options: OccurrenceFilters) => void;
   updateOccurrence: (id: number, body: OccurrencesUpdate) => Promise<void>;
   updatingOccurrence: boolean;
+  updateOccurrenceNoteInState: (
+    occurrenceId: number,
+    note: Pick<Note, 'id' | 'content'>
+  ) => void;
 };
 
 const useOccurrencesStore = create<OccurrencesState>((set, get) => {
@@ -196,6 +201,40 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
       }));
     },
     onRangeChange: (range: [number, number]) => set(() => ({ range })),
+    updateOccurrenceNoteInState: (
+      occurrenceId: number,
+      note: Pick<Note, 'id' | 'content'>
+    ) => {
+      set((state) => {
+        const occurrence = state.allOccurrences.find(
+          (occurrence) => occurrence.id === occurrenceId
+        );
+
+        if (!occurrence) {
+          return state;
+        }
+
+        const updatedOccurrence = {
+          ...occurrence,
+          notes: [
+            {
+              id: note.id,
+              content: note.content,
+            },
+          ],
+        };
+
+        updateOccurrenceInCache(state.range, updatedOccurrence);
+
+        return {
+          allOccurrences: state.allOccurrences.map((occurrence) =>
+            occurrence.id === updatedOccurrence.id
+              ? updatedOccurrence
+              : occurrence
+          ),
+        };
+      });
+    },
     updateOccurrencesState: (
       allOccurrences: Occurrence[],
       filteredBy: OccurrenceFilters
