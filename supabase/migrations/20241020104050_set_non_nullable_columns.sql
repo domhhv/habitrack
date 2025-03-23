@@ -1,23 +1,23 @@
-alter table "public"."habits" alter column "user_id" set not null;
+ALTER TABLE "public"."habits" ALTER COLUMN "user_id" SET NOT NULL;
 
-alter table "public"."occurrences" alter column "timestamp" set not null;
+ALTER TABLE "public"."occurrences" ALTER COLUMN "timestamp" SET NOT NULL;
 
-alter table "public"."traits" alter column "color" set not null;
+ALTER TABLE "public"."traits" ALTER COLUMN "color" SET NOT NULL;
 
-alter table "public"."accounts" alter column "email" set not null;
+ALTER TABLE "public"."accounts" ALTER COLUMN "email" SET NOT NULL;
 
-CREATE UNIQUE INDEX habits_id_key ON public.habits USING btree (id);
+CREATE UNIQUE INDEX "habits_id_key" ON "public"."habits" USING "btree" ("id");
 
-CREATE UNIQUE INDEX notes_id_key ON public.notes USING btree (id);
+CREATE UNIQUE INDEX "notes_id_key" ON "public"."notes" USING "btree" ("id");
 
-CREATE UNIQUE INDEX occurrences_id_key ON public.occurrences USING btree (id);
+CREATE UNIQUE INDEX "occurrences_id_key" ON "public"."occurrences" USING "btree" ("id");
 
-CREATE UNIQUE INDEX traits_id_key ON public.traits USING btree (id);
+CREATE UNIQUE INDEX "traits_id_key" ON "public"."traits" USING "btree" ("id");
 
-alter table "public"."habits" add constraint "habits_id_key" UNIQUE using index "habits_id_key";
+ALTER TABLE "public"."habits" ADD CONSTRAINT "habits_id_key" UNIQUE USING INDEX "habits_id_key";
 
-alter table "public"."notes" add constraint "notes_id_key" UNIQUE using index "notes_id_key";
+ALTER TABLE "public"."notes" ADD CONSTRAINT "notes_id_key" UNIQUE USING INDEX "notes_id_key";
 
-alter table "public"."occurrences" add constraint "occurrences_id_key" UNIQUE using index "occurrences_id_key";
+ALTER TABLE "public"."occurrences" ADD CONSTRAINT "occurrences_id_key" UNIQUE USING INDEX "occurrences_id_key";
 
-alter table "public"."traits" add constraint "traits_id_key" UNIQUE using index "traits_id_key";
+ALTER TABLE "public"."traits" ADD CONSTRAINT "traits_id_key" UNIQUE USING INDEX "traits_id_key";
