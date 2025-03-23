@@ -8,7 +8,7 @@ RETURNS TABLE (
     "streak_length" INTEGER
 )
 LANGUAGE "plpgsql"
-SET "search_path" TO ""
+SET "search_path" TO ''
 AS $FUNCTION$
 BEGIN
     RETURN QUERY
