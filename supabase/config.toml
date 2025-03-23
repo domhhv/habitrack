@@ -82,11 +82,11 @@ file_size_limit = "50MiB"
 enabled = true
 
 # Uncomment to configure local storage buckets
-# [storage.buckets.images]
-# public = false
-# file_size_limit = "50MiB"
-# allowed_mime_types = ["image/png", "image/jpeg"]
-# objects_path = "./images"
+[storage.buckets.habit_icons]
+public = true
+file_size_limit = "50MiB"
+allowed_mime_types = ["image/png", "image/jpeg"]
+objects_path = "./habit-icons"
 
 [auth]
 enabled = true
