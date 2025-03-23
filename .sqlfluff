@@ -15,4 +15,3 @@ preferred_quoted_literal_style = double_quotes
 
 [sqlfluff:rules:references.special_chars]
 allow_space_in_identifier = True
-ignore_words = ""
