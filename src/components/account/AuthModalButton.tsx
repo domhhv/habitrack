@@ -108,12 +108,16 @@ const AuthModalButton = () => {
 
   const authFormProps = {
     mode,
-    onModeChange: (nextMode: AuthMode) => setMode(nextMode),
+    onModeChange: (nextMode: AuthMode) => {
+      return setMode(nextMode);
+    },
     onSubmit: handleSubmit,
     onCancel: handleClose,
     disabled: authenticating,
     submitButtonLabel: actionLabels[mode],
-    goBackToLogin: () => setMode('login'),
+    goBackToLogin: () => {
+      return setMode('login');
+    },
   };
 
   return (

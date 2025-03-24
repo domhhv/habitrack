@@ -38,7 +38,11 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
   const sqlDate = `${date.getFullYear()}-${month}-${day}`;
 
   const existingNote = React.useMemo(() => {
-    return date ? notes.find((note) => note.day === sqlDate) : null;
+    return date
+      ? notes.find((note) => {
+          return note.day === sqlDate;
+        })
+      : null;
   }, [notes, sqlDate, date]);
 
   React.useEffect(() => {
@@ -87,7 +91,9 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
   };
 
   const handleClose = () => {
-    setTimeout(() => setContent(''));
+    setTimeout(() => {
+      return setContent('');
+    });
     onClose();
   };
 
@@ -99,7 +105,9 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
         </ModalHeader>
         <ModalBody>
           <Textarea
-            onKeyDown={() => null}
+            onKeyDown={() => {
+              return null;
+            }}
             onValueChange={setContent}
             value={content}
             placeholder="Note"

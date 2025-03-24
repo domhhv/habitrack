@@ -106,7 +106,11 @@ const OccurrenceChip = ({
     );
   }
 
-  if (occurrences.some((o) => o.notes[0])) {
+  if (
+    occurrences.some((o) => {
+      return o.notes[0];
+    })
+  ) {
     chip = (
       <Badge
         size="sm"
@@ -144,7 +148,9 @@ const OccurrenceChip = ({
               <span className="font-bold">{habitName}</span>
               <ul className="space-y-2 italic">
                 {occurrences
-                  .toSorted((a, b) => a.timestamp - b.timestamp)
+                  .toSorted((a, b) => {
+                    return a.timestamp - b.timestamp;
+                  })
                   .map((o) => {
                     return (
                       <li
@@ -167,7 +173,9 @@ const OccurrenceChip = ({
                             variant="light"
                             size="sm"
                             color="secondary"
-                            onPress={() => handleOccurrenceModalOpen(o.id)}
+                            onPress={() => {
+                              return handleOccurrenceModalOpen(o.id);
+                            }}
                             className="h-6 w-6 min-w-0 rounded-lg"
                           >
                             <PencilSimple
@@ -180,7 +188,9 @@ const OccurrenceChip = ({
                             isIconOnly
                             variant="light"
                             color="danger"
-                            onPress={() => removeOccurrence(o.id)}
+                            onPress={() => {
+                              return removeOccurrence(o.id);
+                            }}
                             role="habit-chip-delete-button"
                             className="h-6 w-6 min-w-0 rounded-lg"
                           >

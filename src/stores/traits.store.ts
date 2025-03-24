@@ -30,12 +30,16 @@ const useTraitsStore = create<TraitsState>((set) => {
         set({ fetchingTraits: true });
         const traits = await listTraits();
         const sortedUserTraits = traits
-          .filter((trait) => !!trait.userId)
+          .filter((trait) => {
+            return !!trait.userId;
+          })
           .sort((a, b) => {
             return a.name.localeCompare(b.name);
           });
         const allSortedTraits = traits
-          .filter((trait) => !trait.userId)
+          .filter((trait) => {
+            return !trait.userId;
+          })
           .concat(sortedUserTraits);
         set({ traits: allSortedTraits });
       } catch (error) {
@@ -54,7 +58,9 @@ const useTraitsStore = create<TraitsState>((set) => {
       try {
         set({ addingTrait: true });
         const newTrait = await createTrait(trait);
-        set((state) => ({ traits: [...state.traits, newTrait] }));
+        set((state) => {
+          return { traits: [...state.traits, newTrait] };
+        });
         addToast({
           title: 'Your habit trait has been added!',
           color: 'success',
@@ -82,7 +88,11 @@ useTraitsStore.subscribe((state, prevState) => {
 
   if (prevState.traits.length !== state.traits.length) {
     updateFilteredBy({
-      traitIds: new Set(state.traits.map((trait) => trait.id.toString())),
+      traitIds: new Set(
+        state.traits.map((trait) => {
+          return trait.id.toString();
+        })
+      ),
     });
   }
 });

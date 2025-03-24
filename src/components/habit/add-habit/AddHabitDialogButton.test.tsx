@@ -7,27 +7,33 @@ import { describe, it, expect, vi } from 'vitest';
 
 import AddHabitDialogButton from './AddHabitDialogButton';
 
-vi.mock('@stores', () => ({
-  useSnackbarsStore: vi.fn(),
-  useHabitsStore: vi.fn(),
-  useTraitsStore: vi.fn(),
-}));
+vi.mock('@stores', () => {
+  return {
+    useSnackbarsStore: vi.fn(),
+    useHabitsStore: vi.fn(),
+    useTraitsStore: vi.fn(),
+  };
+});
 
-vi.mock('@services', () => ({
-  StorageBuckets: {
-    HABIT_ICONS: 'habit-icons',
-  },
-  uploadFile: vi.fn(),
-}));
+vi.mock('@services', () => {
+  return {
+    StorageBuckets: {
+      HABIT_ICONS: 'habit-icons',
+    },
+    uploadFile: vi.fn(),
+  };
+});
 
-vi.mock('@hooks', () => ({
-  ThemeMode: {
-    LIGHT: 'light',
-    DARK: 'dark',
-    SYSTEM: 'system',
-  },
-  useUser: vi.fn(),
-}));
+vi.mock('@hooks', () => {
+  return {
+    ThemeMode: {
+      LIGHT: 'light',
+      DARK: 'dark',
+      SYSTEM: 'system',
+    },
+    useUser: vi.fn(),
+  };
+});
 
 describe(AddHabitDialogButton.name, () => {
   it.skip('should handle data enter and dialog close', () => {

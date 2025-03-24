@@ -8,6 +8,7 @@ const getFirstMondayOfMonth = (year: number, monthIndex: number): Date => {
   const firstDay = new Date(year, monthIndex, 1);
   const offset = getMondayOffset(firstDay.getDay());
   firstDay.setDate(firstDay.getDate() - offset);
+
   return firstDay;
 };
 
@@ -18,6 +19,7 @@ const getDateForMonthWeek = (
 ): Date => {
   const mondayOfMonth = getFirstMondayOfMonth(year, monthIndex);
   mondayOfMonth.setDate(mondayOfMonth.getDate() + weekIndex * 7);
+
   return mondayOfMonth;
 };
 
@@ -38,6 +40,7 @@ const getISOWeekYearAndNumber = (
   const daysSinceYearStart =
     (utcDate.getTime() - startOfIsoYear.getTime()) / 86400000 + 1;
   const weekNumber = Math.ceil(daysSinceYearStart / 7);
+
   return { year: isoYear, week: weekNumber };
 };
 
@@ -48,6 +51,7 @@ const getYearWeekNumberFromMonthWeek = (
 ): { year: number; week: number } => {
   const monthIndex = getMonthIndex(monthLabel);
   const date = getDateForMonthWeek(year, monthIndex, weekIndex);
+
   return getISOWeekYearAndNumber(date);
 };
 

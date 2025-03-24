@@ -5,33 +5,47 @@ import { describe, it, expect, vi } from 'vitest';
 
 import useAuthSearchParams from './useAuthSearchParams';
 
-vi.mock('@stores', () => ({
-  useSnackbarsStore: vi.fn(),
-}));
+vi.mock('@stores', () => {
+  return {
+    useSnackbarsStore: vi.fn(),
+  };
+});
 
-vi.mock('react-router', () => ({
-  useSearchParams: vi.fn(),
-}));
+vi.mock('react-router', () => {
+  return {
+    useSearchParams: vi.fn(),
+  };
+});
 
-vi.mock('@utils', () => ({
-  transformServerEntities: vi.fn(),
-}));
+vi.mock('@utils', () => {
+  return {
+    transformServerEntities: vi.fn(),
+  };
+});
 
 describe(useAuthSearchParams.name, () => {
   it.skip('should call showSnackbar if email is confirmed', async () => {
     const searchParams = new URLSearchParams();
     searchParams.append('emailConfirmed', 'true');
     (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue(location);
-    renderHook(() => useAuthSearchParams());
-    await waitFor(() => expect(addToast).toHaveBeenCalled());
+    renderHook(() => {
+      return useAuthSearchParams();
+    });
+    await waitFor(() => {
+      return expect(addToast).toHaveBeenCalled();
+    });
   });
 
   it.skip('should call showSnackbar if password was reset', async () => {
     const searchParams = new URLSearchParams();
     searchParams.append('passwordReset', 'true');
     (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue(location);
-    renderHook(() => useAuthSearchParams());
-    await waitFor(() => expect(addToast).toHaveBeenCalled());
+    renderHook(() => {
+      return useAuthSearchParams();
+    });
+    await waitFor(() => {
+      return expect(addToast).toHaveBeenCalled();
+    });
   });
 
   it.skip('should not call showSnackbar if email is not confirmed', async () => {
@@ -39,7 +53,11 @@ describe(useAuthSearchParams.name, () => {
     (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue(
       emptySearchParams
     );
-    renderHook(() => useAuthSearchParams());
-    await waitFor(() => expect(addToast).not.toHaveBeenCalled());
+    renderHook(() => {
+      return useAuthSearchParams();
+    });
+    await waitFor(() => {
+      return expect(addToast).not.toHaveBeenCalled();
+    });
   });
 });

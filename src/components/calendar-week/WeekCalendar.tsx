@@ -60,6 +60,7 @@ const WeekCalendar = () => {
 
     return occurrences.filter((o) => {
       const date = new Date(o.timestamp);
+
       return date >= occurrencesRange[0] && date <= occurrencesRange[1];
     });
   }, [days, occurrences, startOfTheWeek]);
@@ -70,6 +71,7 @@ const WeekCalendar = () => {
 
       const relatedOccurrences = occurrencesInWeek.filter((o) => {
         const date = new Date(o.timestamp);
+
         return (
           date.getDate() === days[dayIndex].getDate() &&
           date.getDay() === day &&
@@ -78,7 +80,9 @@ const WeekCalendar = () => {
       });
 
       return Object.entries(
-        Object.groupBy(relatedOccurrences, (o) => o.habitId)
+        Object.groupBy(relatedOccurrences, (o) => {
+          return o.habitId;
+        })
       );
     },
     [days, occurrencesInWeek]

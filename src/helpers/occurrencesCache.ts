@@ -29,7 +29,9 @@ export const updateOccurrenceInCache = (
   if (cachedOccurrences) {
     occurrencesCache.set(
       range.toString(),
-      cachedOccurrences.map((o) => (o.id === occurrence.id ? occurrence : o))
+      cachedOccurrences.map((o) => {
+        return o.id === occurrence.id ? occurrence : o;
+      })
     );
   }
 };
@@ -43,7 +45,9 @@ export const uncacheOccurrence = (
   if (cachedOccurrences) {
     occurrencesCache.set(
       range.toString(),
-      cachedOccurrences.filter((o) => o.id !== occurrenceId)
+      cachedOccurrences.filter((o) => {
+        return o.id !== occurrenceId;
+      })
     );
   }
 };

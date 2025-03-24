@@ -24,7 +24,9 @@ const PasswordInput = ({
   const [isVisible, setIsVisible] = React.useState(false);
 
   const toggleVisibility = () => {
-    setIsVisible((prev) => !prev);
+    setIsVisible((prev) => {
+      return !prev;
+    });
   };
 
   return (

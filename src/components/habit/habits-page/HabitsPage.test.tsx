@@ -6,64 +6,74 @@ import { describe, it, expect, vi } from 'vitest';
 
 import HabitsPage from './HabitsPage';
 
-vi.mock('@services', () => ({
-  StorageBuckets: {
-    HABIT_ICONS: 'habit-icons',
-  },
-  listHabits: vi.fn().mockReturnValue(() => []),
-  getLatestHabitOccurrenceTimestamp: vi.fn().mockResolvedValue(0),
-  getLongestHabitStreak: vi.fn().mockResolvedValue(0),
-  getHabitTotalEntries: vi.fn().mockResolvedValue(0),
-}));
+vi.mock('@services', () => {
+  return {
+    StorageBuckets: {
+      HABIT_ICONS: 'habit-icons',
+    },
+    listHabits: vi.fn().mockReturnValue(() => {
+      return [];
+    }),
+    getLatestHabitOccurrenceTimestamp: vi.fn().mockResolvedValue(0),
+    getLongestHabitStreak: vi.fn().mockResolvedValue(0),
+    getHabitTotalEntries: vi.fn().mockResolvedValue(0),
+  };
+});
 
-vi.mock('@stores', () => ({
-  useHabitsStore: vi.fn(),
-  useTraitsStore: vi.fn().mockReturnValue({
-    traits: [],
-  }),
-  useOccurrencesStore: vi.fn().mockReturnValue({
-    removeOccurrencesByHabitId: vi.fn(),
-  }),
-  useNotesStore: vi.fn().mockReturnValue({
-    addingNote: false,
-    addNote: vi.fn(),
-  }),
-}));
+vi.mock('@stores', () => {
+  return {
+    useHabitsStore: vi.fn(),
+    useTraitsStore: vi.fn().mockReturnValue({
+      traits: [],
+    }),
+    useOccurrencesStore: vi.fn().mockReturnValue({
+      removeOccurrencesByHabitId: vi.fn(),
+    }),
+    useNotesStore: vi.fn().mockReturnValue({
+      addingNote: false,
+      addNote: vi.fn(),
+    }),
+  };
+});
 
-vi.mock('@hooks', () => ({
-  ThemeMode: {
-    LIGHT: 'light',
-    DARK: 'dark',
-    SYSTEM: 'system',
-  },
-  useUser: vi
-    .fn()
-    .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
-  useDocumentTitle: vi.fn(),
-  useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn(), vi.fn()]),
-  useFileField: vi.fn().mockReturnValue([null, vi.fn(), vi.fn()]),
-  useScreenWidth: vi.fn().mockReturnValue({
-    screenWidth: 1400,
-    isMobile: false,
-    isDesktop: true,
-  }),
-}));
+vi.mock('@hooks', () => {
+  return {
+    ThemeMode: {
+      LIGHT: 'light',
+      DARK: 'dark',
+      SYSTEM: 'system',
+    },
+    useUser: vi
+      .fn()
+      .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
+    useDocumentTitle: vi.fn(),
+    useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn(), vi.fn()]),
+    useFileField: vi.fn().mockReturnValue([null, vi.fn(), vi.fn()]),
+    useScreenWidth: vi.fn().mockReturnValue({
+      screenWidth: 1400,
+      isMobile: false,
+      isDesktop: true,
+    }),
+  };
+});
 
 describe(HabitsPage.name, () => {
   it('should display habits', async () => {
     (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      () => ({
-        habits: [
-          makeTestHabit({
-            name: 'Habit name #1',
-            description: 'Habit description #1',
-          }),
-          makeTestHabit({
-            name: 'Habit name #2',
-            description: 'Habit description #2',
-          }),
-        ],
-      })
+      () => {
+        return {
+          habits: [
+            makeTestHabit({
+              name: 'Habit name #1',
+              description: 'Habit description #1',
+            }),
+            makeTestHabit({
+              name: 'Habit name #2',
+              description: 'Habit description #2',
+            }),
+          ],
+        };
+      }
     );
     const { getByText } = render(<HabitsPage />);
     await waitFor(() => {
@@ -77,19 +87,21 @@ describe(HabitsPage.name, () => {
 
   it('should open edit dialog on edit icon button click', async () => {
     (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      () => ({
-        habits: [
-          makeTestHabit({
-            id: 42,
-            name: 'Habit name #1',
-            description: 'Habit description #1',
-          }),
-          makeTestHabit({
-            name: 'Habit name #2',
-            description: 'Habit description #2',
-          }),
-        ],
-      })
+      () => {
+        return {
+          habits: [
+            makeTestHabit({
+              id: 42,
+              name: 'Habit name #1',
+              description: 'Habit description #1',
+            }),
+            makeTestHabit({
+              name: 'Habit name #2',
+              description: 'Habit description #2',
+            }),
+          ],
+        };
+      }
     );
     const { queryByRole, getByRole, getByTestId } = render(<HabitsPage />);
     expect(queryByRole('submit-edited-habit-button')).toBeNull();
@@ -107,19 +119,21 @@ describe(HabitsPage.name, () => {
   it.skip('should remove habit on confirm', async () => {
     const mockRemoveHabit = vi.fn();
     (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      () => ({
-        habits: [
-          makeTestHabit({
-            name: 'Habit name #1',
-            description: 'Habit description #1',
-          }),
-          makeTestHabit({
-            name: 'Habit name #2',
-            description: 'Habit description #2',
-          }),
-        ],
-        removeHabit: mockRemoveHabit,
-      })
+      () => {
+        return {
+          habits: [
+            makeTestHabit({
+              name: 'Habit name #1',
+              description: 'Habit description #1',
+            }),
+            makeTestHabit({
+              name: 'Habit name #2',
+              description: 'Habit description #2',
+            }),
+          ],
+          removeHabit: mockRemoveHabit,
+        };
+      }
     );
     const { queryByRole, getByRole, getByTestId } = render(<HabitsPage />);
     expect(queryByRole('dialog')).toBeNull();

@@ -121,75 +121,86 @@ const HabitsPage = () => {
         }}
       >
         <TableHeader columns={habitColumns}>
-          {(column) => (
-            <TableColumn key={column.key} align={column.align || 'start'}>
-              {column.label}
-            </TableColumn>
-          )}
+          {(column) => {
+            return (
+              <TableColumn key={column.key} align={column.align || 'start'}>
+                {column.label}
+              </TableColumn>
+            );
+          }}
         </TableHeader>
         <TableBody emptyContent="No habits yet">
-          {habits.map((habit) => (
-            <TableRow key={habit.id}>
-              <TableCell>
-                <HabitIconCell habit={habit} />
-              </TableCell>
-              <TableCell>
-                <h6 className="font-semibold">{habit.name}</h6>
-                {habit.description && (
-                  <p className="text-left text-xs">
-                    <i>{habit.description}</i>
-                  </p>
-                )}
-              </TableCell>
-              <TableCell>
-                <TraitChip trait={habit.trait} />
-              </TableCell>
-              <TableCell>
-                {format(habit.createdAt, isMobile ? 'MMM d, y' : 'LLLL do, y')}
-              </TableCell>
-              <TableCell>
-                <HabitLastEntryCell id={habit.id} />
-              </TableCell>
-              <TableCell>
-                <HabitLongestStreakCell id={habit.id} />
-              </TableCell>
-              <TableCell align="center">
-                <HabitsTotalEntriesCell id={habit.id} />
-              </TableCell>
-              <TableCell>
-                <div className="flex justify-end gap-2">
-                  <Tooltip content="Edit habit">
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="bordered"
-                      color="secondary"
-                      onPress={() => handleEditStart(habit)}
-                      role="edit-habit-button"
-                      data-testid={`edit-habit-id-${habit.id}-button`}
-                    >
-                      <PencilSimple weight="bold" size={16} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content="Delete habit" color="danger">
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      color="danger"
-                      variant="bordered"
-                      onPress={() => handleRemovalConfirmOpen(habit)}
-                      isDisabled={!user?.id}
-                      role="delete-habit-button"
-                      data-testid={`delete-habit-id-${habit.id}-button`}
-                      className="group"
-                    >
-                      <TrashSimple weight="bold" size={16} />
-                    </Button>
-                  </Tooltip>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+          {habits.map((habit) => {
+            return (
+              <TableRow key={habit.id}>
+                <TableCell>
+                  <HabitIconCell habit={habit} />
+                </TableCell>
+                <TableCell>
+                  <h6 className="font-semibold">{habit.name}</h6>
+                  {habit.description && (
+                    <p className="text-left text-xs">
+                      <i>{habit.description}</i>
+                    </p>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <TraitChip trait={habit.trait} />
+                </TableCell>
+                <TableCell>
+                  {format(
+                    habit.createdAt,
+                    isMobile ? 'MMM d, y' : 'LLLL do, y'
+                  )}
+                </TableCell>
+                <TableCell>
+                  <HabitLastEntryCell id={habit.id} />
+                </TableCell>
+                <TableCell>
+                  <HabitLongestStreakCell id={habit.id} />
+                </TableCell>
+                <TableCell align="center">
+                  <HabitsTotalEntriesCell id={habit.id} />
+                </TableCell>
+                <TableCell>
+                  <div className="flex justify-end gap-2">
+                    <Tooltip content="Edit habit">
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="bordered"
+                        color="secondary"
+                        onPress={() => {
+                          return handleEditStart(habit);
+                        }}
+                        role="edit-habit-button"
+                        data-testid={`edit-habit-id-${habit.id}-button`}
+                      >
+                        <PencilSimple weight="bold" size={16} />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip content="Delete habit" color="danger">
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        color="danger"
+                        variant="bordered"
+                        onPress={() => {
+                          return handleRemovalConfirmOpen(habit);
+                        }}
+                        isDisabled={!user?.id}
+                        role="delete-habit-button"
+                        data-testid={`delete-habit-id-${habit.id}-button`}
+                        className="group"
+                      >
+                        <TrashSimple weight="bold" size={16} />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
       <EditHabitDialog onClose={handleEditEnd} habit={habitToEdit} />

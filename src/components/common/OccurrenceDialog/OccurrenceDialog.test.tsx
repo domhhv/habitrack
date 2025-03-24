@@ -9,24 +9,30 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import OccurrenceDialog from './OccurrenceDialog';
 
-vi.mock('@stores', () => ({
-  useHabitsStore: vi.fn(),
-  useOccurrencesStore: vi.fn().mockReturnValue({
-    occurrences: [],
-  }),
-  useNotesStore: vi.fn(),
-}));
+vi.mock('@stores', () => {
+  return {
+    useHabitsStore: vi.fn(),
+    useOccurrencesStore: vi.fn().mockReturnValue({
+      occurrences: [],
+    }),
+    useNotesStore: vi.fn(),
+  };
+});
 
-vi.mock('@hooks', () => ({
-  useUser: vi.fn(),
-}));
+vi.mock('@hooks', () => {
+  return {
+    useUser: vi.fn(),
+  };
+});
 
-vi.mock('date-fns', () => ({
-  isYesterday: vi.fn(),
-  isToday: vi.fn(),
-  isFuture: vi.fn(),
-  format: vi.fn(),
-}));
+vi.mock('date-fns', () => {
+  return {
+    isYesterday: vi.fn(),
+    isToday: vi.fn(),
+    isFuture: vi.fn(),
+    format: vi.fn(),
+  };
+});
 
 describe(OccurrenceDialog.name, () => {
   const mockOnClose = vi.fn();

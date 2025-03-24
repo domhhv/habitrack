@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { fixupConfigRules, fixupPluginRules } from '@eslint/compat';
 import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
+import stylisticTs from '@stylistic/eslint-plugin-ts';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import _import from 'eslint-plugin-import';
@@ -37,6 +38,7 @@ export default [
   {
     plugins: {
       '@typescript-eslint': fixupPluginRules(typescriptEslint),
+      '@stylistic/ts': stylisticTs,
       react: fixupPluginRules(react),
       'react-hooks': fixupPluginRules(reactHooks),
       'jsx-a11y': jsxA11Y,
@@ -63,6 +65,7 @@ export default [
     rules: {
       'no-undef': 'off',
       'no-useless-rename': 'error',
+      'arrow-body-style': ['error', 'always'],
 
       'no-console': [
         'warn',
@@ -82,6 +85,18 @@ export default [
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
         },
+      ],
+
+      'padding-line-between-statements': [
+        'error',
+        { blankLine: 'always', prev: '*', next: 'return' },
+        { blankLine: 'always', prev: '*', next: 'block-like' },
+        { blankLine: 'always', prev: '*', next: 'block' },
+        { blankLine: 'always', prev: 'block-like', next: '*' },
+        { blankLine: 'always', prev: 'block', next: '*' },
+        { blankLine: 'always', prev: '*', next: 'case' },
+        { blankLine: 'never', prev: 'case', next: 'case' },
+        { blankLine: 'always', prev: '*', next: 'default' },
       ],
 
       'import/order': [

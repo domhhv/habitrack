@@ -57,11 +57,15 @@ const OccurrenceDialog = ({
     React.useState(false);
 
   const habitsByTraitName = React.useMemo(() => {
-    return Object.groupBy(habits, (habit) => habit.trait?.name || 'Unknown');
+    return Object.groupBy(habits, (habit) => {
+      return habit.trait?.name || 'Unknown';
+    });
   }, [habits]);
 
   const occurrenceToUpdate = React.useMemo(() => {
-    return occurrences.find((o) => o.id === existingOccurrenceId);
+    return occurrences.find((o) => {
+      return o.id === existingOccurrenceId;
+    });
   }, [existingOccurrenceId, occurrences]);
 
   const hasHabits = habits.length > 0;
@@ -76,7 +80,9 @@ const OccurrenceDialog = ({
     }
 
     if (existingOccurrenceId) {
-      const occurrence = occurrences.find((o) => o.id === existingOccurrenceId);
+      const occurrence = occurrences.find((o) => {
+        return o.id === existingOccurrenceId;
+      });
 
       if (!occurrence) {
         return;
@@ -229,6 +235,7 @@ const OccurrenceDialog = ({
       }
 
       handleClose();
+
       return;
     }
 
@@ -271,7 +278,9 @@ const OccurrenceDialog = ({
     const dateToFormat =
       newOccurrenceDate ||
       new Date(
-        occurrences.find((o) => o.id === existingOccurrenceId)?.timestamp || ''
+        occurrences.find((o) => {
+          return o.id === existingOccurrenceId;
+        })?.timestamp || ''
       );
 
     if (isToday(dateToFormat)) {
@@ -318,34 +327,38 @@ const OccurrenceDialog = ({
             data-testid="habit-select"
             selectorIcon={<ArrowsClockwise />}
           >
-            {Object.keys(habitsByTraitName).map((traitName) => (
-              <SelectSection key={traitName} title={traitName} showDivider>
-                {habitsByTraitName[traitName] ? (
-                  habitsByTraitName[traitName].map((habit) => {
-                    const iconUrl = getHabitIconUrl(habit.iconPath);
+            {Object.keys(habitsByTraitName).map((traitName) => {
+              return (
+                <SelectSection key={traitName} title={traitName} showDivider>
+                  {habitsByTraitName[traitName] ? (
+                    habitsByTraitName[traitName].map((habit) => {
+                      const iconUrl = getHabitIconUrl(habit.iconPath);
 
-                    return (
-                      <SelectItem key={habit.id} textValue={habit.name}>
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={iconUrl}
-                            alt={habit.name}
-                            role="habit-icon"
-                            className="h-4 w-4"
-                          />
-                          <span>{habit.name}</span>
-                        </div>
-                      </SelectItem>
-                    );
-                  })
-                ) : (
-                  <ListboxItem key="none">No habits</ListboxItem>
-                )}
-              </SelectSection>
-            ))}
+                      return (
+                        <SelectItem key={habit.id} textValue={habit.name}>
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={iconUrl}
+                              alt={habit.name}
+                              role="habit-icon"
+                              className="h-4 w-4"
+                            />
+                            <span>{habit.name}</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })
+                  ) : (
+                    <ListboxItem key="none">No habits</ListboxItem>
+                  )}
+                </SelectSection>
+              );
+            })}
           </Select>
           <Textarea
-            onKeyDown={() => null}
+            onKeyDown={() => {
+              return null;
+            }}
             onValueChange={setNote}
             value={note}
             placeholder="Note"

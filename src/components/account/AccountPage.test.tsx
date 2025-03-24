@@ -8,20 +8,24 @@ import AccountPage from './AccountPage';
 
 vi.mock('@services');
 
-vi.mock('@hooks', () => ({
-  ThemeMode: {
-    LIGHT: 'light',
-    DARK: 'dark',
-    SYSTEM: 'system',
-  },
-  useUser: vi.fn().mockReturnValue({ id: '123' }),
-  useDocumentTitle: vi.fn(),
-  useTextField: vi.fn().mockReturnValue(['', vi.fn()]),
-}));
+vi.mock('@hooks', () => {
+  return {
+    ThemeMode: {
+      LIGHT: 'light',
+      DARK: 'dark',
+      SYSTEM: 'system',
+    },
+    useUser: vi.fn().mockReturnValue({ id: '123' }),
+    useDocumentTitle: vi.fn(),
+    useTextField: vi.fn().mockReturnValue(['', vi.fn()]),
+  };
+});
 
-vi.mock('./use-auth-search-params', () => ({
-  useAuthSearchParams: vi.fn(),
-}));
+vi.mock('./use-auth-search-params', () => {
+  return {
+    useAuthSearchParams: vi.fn(),
+  };
+});
 
 describe(AccountPage.name, () => {
   it.skip('should show loader', () => {
