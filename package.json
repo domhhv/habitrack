@@ -55,6 +55,7 @@
     "@heroui/react": "^2.7.5",
     "@internationalized/date": "^3.7.0",
     "@phosphor-icons/react": "^2.1.7",
+    "@stylistic/eslint-plugin-ts": "^4.2.0",
     "@supabase/supabase-js": "^2.49.1",
     "@vercel/analytics": "^1.5.0",
     "date-fns": "^4.1.0",

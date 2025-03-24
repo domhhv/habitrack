@@ -105,17 +105,19 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             data-testid="habit-select"
             variant="faded"
           >
-            {traits.map((trait) => (
-              <SelectItem
-                key={trait.id.toString()}
-                onPress={() => {
-                  setTraitId(trait.id.toString());
-                }}
-                textValue={trait.name}
-              >
-                {trait.name}
-              </SelectItem>
-            ))}
+            {traits.map((trait) => {
+              return (
+                <SelectItem
+                  key={trait.id.toString()}
+                  onPress={() => {
+                    setTraitId(trait.id.toString());
+                  }}
+                  textValue={trait.name}
+                >
+                  {trait.name}
+                </SelectItem>
+              );
+            })}
           </Select>
         </ModalBody>
         <ModalFooter>

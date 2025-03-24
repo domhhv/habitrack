@@ -7,9 +7,9 @@ export enum ThemeMode {
 }
 
 const useThemeMode = () => {
-  const [themeMode, setThemeMode] = React.useState<ThemeMode>(
-    () => localStorage.theme || 'system'
-  );
+  const [themeMode, setThemeMode] = React.useState<ThemeMode>(() => {
+    return localStorage.theme || 'system';
+  });
 
   const applyTheme = (mode: ThemeMode) => {
     document.documentElement.classList.toggle(

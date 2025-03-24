@@ -38,7 +38,9 @@ const MonthCalendarCell = ({
   const { isDesktop, isMobile } = useScreenWidth();
   const isTodayCell = isToday(date);
   const formattedDay = format(date, 'yyyy-MM-dd');
-  const hasNote = notes.some((note) => note.day === formattedDay);
+  const hasNote = notes.some((note) => {
+    return note.day === formattedDay;
+  });
   const {
     isOpen: isNoteDialogOpen,
     onOpen: openNoteDialog,
@@ -52,7 +54,9 @@ const MonthCalendarCell = ({
 
   const groupedOccurrences = Object.groupBy(
     occurrencesByDate[formattedDay] || [],
-    (o) => o.habitId
+    (o) => {
+      return o.habitId;
+    }
   );
 
   const cellRootClassName = cn(

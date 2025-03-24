@@ -17,8 +17,10 @@ const ThemeToggle = () => {
   const { themeMode, setThemeMode } = useThemeMode();
   const { screenWidth } = useScreenWidth();
 
-  const handleThemeChange = (newThemeMode: ThemeMode) => () => {
-    setThemeMode(newThemeMode);
+  const handleThemeChange = (newThemeMode: ThemeMode) => {
+    return () => {
+      setThemeMode(newThemeMode);
+    };
   };
 
   return (

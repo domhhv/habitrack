@@ -70,7 +70,9 @@ const useHabitsStore = create<HabitsState>((set) => {
       try {
         const iconPath = await uploadHabitIcon(habit.userId, icon);
         const newHabit = await createHabit({ ...habit, iconPath });
-        set((state) => ({ habits: [...state.habits, newHabit] }));
+        set((state) => {
+          return { habits: [...state.habits, newHabit] };
+        });
 
         addToast({
           title: 'Your habit has been added!',
@@ -106,9 +108,13 @@ const useHabitsStore = create<HabitsState>((set) => {
         }
 
         const updatedHabit = await patchHabit(id, { ...habit, iconPath });
-        set((state) => ({
-          habits: state.habits.map((h) => (h.id === id ? updatedHabit : h)),
-        }));
+        set((state) => {
+          return {
+            habits: state.habits.map((h) => {
+              return h.id === id ? updatedHabit : h;
+            }),
+          };
+        });
 
         addToast({
           title: 'Your habit has been updated!',
@@ -141,9 +147,13 @@ const useHabitsStore = create<HabitsState>((set) => {
           await deleteFile(StorageBuckets.HABIT_ICONS, iconPath);
         }
 
-        set((state) => ({
-          habits: state.habits.filter((habit) => habit.id !== id),
-        }));
+        set((state) => {
+          return {
+            habits: state.habits.filter((habit) => {
+              return habit.id !== id;
+            }),
+          };
+        });
 
         removeOccurrencesByHabitIdFromState(id);
 
@@ -172,17 +182,23 @@ useHabitsStore.subscribe((state, prevState) => {
 
   if (prevState.habits.length !== state.habits.length) {
     updateFilteredBy({
-      habitIds: new Set(state.habits.map((habit) => habit.id.toString())),
+      habitIds: new Set(
+        state.habits.map((habit) => {
+          return habit.id.toString();
+        })
+      ),
     });
   }
 });
 
 const uploadHabitIcon = async (userId: string, icon?: File | null) => {
   let iconPath = '';
+
   if (icon) {
     iconPath = `${userId}/${Date.now()}-${icon.name}`;
     await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, icon);
   }
+
   return iconPath;
 };
 

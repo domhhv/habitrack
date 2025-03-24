@@ -42,7 +42,9 @@ const MONTHS = [
   'December',
 ];
 
-const YEARS = Array.from({ length: 31 }, (_, i) => 2000 + i);
+const YEARS = Array.from({ length: 31 }, (_, i) => {
+  return 2000 + i;
+});
 
 const MonthCalendarHeader = ({
   activeMonthLabel,
@@ -74,7 +76,9 @@ const MonthCalendarHeader = ({
   const shouldRenderFilters = !!user && habits.length > 0 && traits.length > 0;
 
   const habitsByTraitName = React.useMemo(() => {
-    return Object.groupBy(habits, (habit) => habit.trait?.name || 'Unknown');
+    return Object.groupBy(habits, (habit) => {
+      return habit.trait?.name || 'Unknown';
+    });
   }, [habits]);
 
   const handleMonthChange: React.ChangeEventHandler<HTMLSelectElement> = (
@@ -131,9 +135,9 @@ const MonthCalendarHeader = ({
               value: isMobile && 'text-tiny',
             }}
           >
-            {MONTHS.map((month) => (
-              <SelectItem key={month}>{month}</SelectItem>
-            ))}
+            {MONTHS.map((month) => {
+              return <SelectItem key={month}>{month}</SelectItem>;
+            })}
           </Select>
           <Select
             variant="bordered"
@@ -151,11 +155,13 @@ const MonthCalendarHeader = ({
               value: isMobile && 'text-tiny',
             }}
           >
-            {YEARS.map((year) => (
-              <SelectItem as={Link} key={year.toString()}>
-                {year.toString()}
-              </SelectItem>
-            ))}
+            {YEARS.map((year) => {
+              return (
+                <SelectItem as={Link} key={year.toString()}>
+                  {year.toString()}
+                </SelectItem>
+              );
+            })}
           </Select>
         </div>
         <div className="flex items-stretch gap-0 lg:gap-2">
@@ -229,7 +235,9 @@ const MonthCalendarHeader = ({
             }}
             renderValue={(selectedHabits: SelectedItems<Habit>) => {
               return selectedHabits.map(({ key }) => {
-                const habit = habits.find((h) => h.id === Number(key));
+                const habit = habits.find((h) => {
+                  return h.id === Number(key);
+                });
 
                 if (!habit) {
                   return null;
@@ -250,31 +258,33 @@ const MonthCalendarHeader = ({
               });
             }}
           >
-            {Object.keys(habitsByTraitName).map((traitName) => (
-              <SelectSection key={traitName} title={traitName} showDivider>
-                {habitsByTraitName[traitName] ? (
-                  habitsByTraitName[traitName].map((habit) => {
-                    const iconUrl = getHabitIconUrl(habit.iconPath);
+            {Object.keys(habitsByTraitName).map((traitName) => {
+              return (
+                <SelectSection key={traitName} title={traitName} showDivider>
+                  {habitsByTraitName[traitName] ? (
+                    habitsByTraitName[traitName].map((habit) => {
+                      const iconUrl = getHabitIconUrl(habit.iconPath);
 
-                    return (
-                      <SelectItem key={habit.id} textValue={habit.name}>
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={iconUrl}
-                            alt={habit.name}
-                            role="habit-icon"
-                            className="h-4 w-4"
-                          />
-                          <span>{habit.name}</span>
-                        </div>
-                      </SelectItem>
-                    );
-                  })
-                ) : (
-                  <ListboxItem key="none">No habits</ListboxItem>
-                )}
-              </SelectSection>
-            ))}
+                      return (
+                        <SelectItem key={habit.id} textValue={habit.name}>
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={iconUrl}
+                              alt={habit.name}
+                              role="habit-icon"
+                              className="h-4 w-4"
+                            />
+                            <span>{habit.name}</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })
+                  ) : (
+                    <ListboxItem key="none">No habits</ListboxItem>
+                  )}
+                </SelectSection>
+              );
+            })}
           </Select>
           <Select
             variant="bordered"
@@ -302,7 +312,9 @@ const MonthCalendarHeader = ({
             }}
             renderValue={(selectedTraits: SelectedItems<Trait>) => {
               return selectedTraits.map(({ key }) => {
-                const trait = traits.find((t) => t.id === Number(key));
+                const trait = traits.find((t) => {
+                  return t.id === Number(key);
+                });
 
                 if (!trait) {
                   return null;
@@ -315,9 +327,9 @@ const MonthCalendarHeader = ({
             }}
           >
             <SelectSection title="Filter by traits">
-              {traits.map((trait) => (
-                <SelectItem key={trait.id}>{trait.name}</SelectItem>
-              ))}
+              {traits.map((trait) => {
+                return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
+              })}
             </SelectSection>
           </Select>
         </div>

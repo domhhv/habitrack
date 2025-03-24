@@ -49,7 +49,9 @@ const useNotesStore = create<NotesState>((set) => {
       try {
         set({ addingNote: true });
         const newNote = await createNote(note);
-        set((state) => ({ notes: [...state.notes, newNote] }));
+        set((state) => {
+          return { notes: [...state.notes, newNote] };
+        });
 
         if (note.occurrenceId) {
           updateOccurrenceNoteInState(note.occurrenceId, {
@@ -77,11 +79,13 @@ const useNotesStore = create<NotesState>((set) => {
       try {
         set({ updatingNote: true });
         const updatedNote = await updateNote(id, note);
-        set((state) => ({
-          notes: state.notes.map((n) =>
-            n.id === updatedNote.id ? updatedNote : n
-          ),
-        }));
+        set((state) => {
+          return {
+            notes: state.notes.map((n) => {
+              return n.id === updatedNote.id ? updatedNote : n;
+            }),
+          };
+        });
 
         if (note.occurrenceId) {
           updateOccurrenceNoteInState(note.occurrenceId, {
@@ -109,9 +113,13 @@ const useNotesStore = create<NotesState>((set) => {
       try {
         set({ deletingNote: true });
         await destroyNote(id);
-        set((state) => ({
-          notes: state.notes.filter((note) => note.id !== id),
-        }));
+        set((state) => {
+          return {
+            notes: state.notes.filter((note) => {
+              return note.id !== id;
+            }),
+          };
+        });
         addToast({
           title: 'Note deleted successfully',
           color: 'success',

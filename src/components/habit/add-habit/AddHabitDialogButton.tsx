@@ -73,7 +73,9 @@ const AddHabitDialogButton = () => {
       </Button>
       <AddCustomTraitModal
         open={addTraitModalOpen}
-        onClose={() => setAddTraitModalOpen(false)}
+        onClose={() => {
+          return setAddTraitModalOpen(false);
+        }}
       />
       <Modal isOpen={open} role="add-habit-dialog" onClose={handleDialogClose}>
         <ModalContent>
@@ -101,24 +103,28 @@ const AddHabitDialogButton = () => {
               data-testid="habit-select"
               variant="faded"
             >
-              {traits.map((trait) => (
-                <SelectItem
-                  key={trait.id.toString()}
-                  onPress={() => {
-                    setTraitId(trait.id.toString());
-                  }}
-                  textValue={trait.name}
-                >
-                  {trait.name}
-                </SelectItem>
-              ))}
+              {traits.map((trait) => {
+                return (
+                  <SelectItem
+                    key={trait.id.toString()}
+                    onPress={() => {
+                      setTraitId(trait.id.toString());
+                    }}
+                    textValue={trait.name}
+                  >
+                    {trait.name}
+                  </SelectItem>
+                );
+              })}
             </Select>
             <Button
               variant="ghost"
               size="sm"
               color="secondary"
               startContent={<Plus />}
-              onPress={() => setAddTraitModalOpen(true)}
+              onPress={() => {
+                return setAddTraitModalOpen(true);
+              }}
             >
               Or add a custom trait
             </Button>

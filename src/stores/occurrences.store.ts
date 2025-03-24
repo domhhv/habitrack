@@ -69,12 +69,21 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
     occurrences: [],
     occurrencesByDate: {},
     filteredBy: {
-      habitIds: new Set(habits.map((habit) => habit.id.toString())),
-      traitIds: new Set(traits.map((trait) => trait.id.toString())),
+      habitIds: new Set(
+        habits.map((habit) => {
+          return habit.id.toString();
+        })
+      ),
+      traitIds: new Set(
+        traits.map((trait) => {
+          return trait.id.toString();
+        })
+      ),
     },
     range: [0, 0],
     fetchOccurrences: async () => {
       const { range } = get();
+
       try {
         if (range.every(Boolean)) {
           set({ fetchingOccurrences: true });
@@ -97,7 +106,9 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
       set({ allOccurrences: [] });
       occurrencesCache.clear();
     },
-    filterBy: (options: OccurrenceFilters) => set({ filteredBy: options }),
+    filterBy: (options: OccurrenceFilters) => {
+      return set({ filteredBy: options });
+    },
     addOccurrence: async (occurrence: OccurrencesInsert) => {
       set({ addingOccurrence: true });
       const { range } = get();
@@ -105,13 +116,16 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
       try {
         const nextOccurrence = await createOccurrence(occurrence);
         cacheOccurrence(range, nextOccurrence);
-        set((state) => ({
-          allOccurrences: [...state.allOccurrences, nextOccurrence],
-        }));
+        set((state) => {
+          return {
+            allOccurrences: [...state.allOccurrences, nextOccurrence],
+          };
+        });
         addToast({
           title: 'Your habit entry has been added to the calendar!',
           color: 'success',
         });
+
         return nextOccurrence;
       } catch (error) {
         console.error(error);
@@ -121,6 +135,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
           description: `Error details: ${getErrorMessage(error)}`,
           color: 'danger',
         });
+
         return Promise.resolve({} as Occurrence);
       } finally {
         set({ addingOccurrence: false });
@@ -134,11 +149,13 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
 
         const updatedOccurrence = await patchOccurrence(id, body);
 
-        set((state) => ({
-          allOccurrences: state.allOccurrences.map((occurrence) =>
-            occurrence.id === id ? updatedOccurrence : occurrence
-          ),
-        }));
+        set((state) => {
+          return {
+            allOccurrences: state.allOccurrences.map((occurrence) => {
+              return occurrence.id === id ? updatedOccurrence : occurrence;
+            }),
+          };
+        });
 
         updateOccurrenceInCache(range, updatedOccurrence);
 
@@ -160,13 +177,16 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
     },
     removeOccurrence: async (id: number) => {
       const { range } = get();
+
       try {
         await destroyOccurrence(id);
-        set((state) => ({
-          allOccurrences: state.allOccurrences.filter(
-            (occurrence) => occurrence.id !== id
-          ),
-        }));
+        set((state) => {
+          return {
+            allOccurrences: state.allOccurrences.filter((occurrence) => {
+              return occurrence.id !== id;
+            }),
+          };
+        });
         uncacheOccurrence(range, id);
         addToast({
           title: 'Your habit entry has been deleted from the calendar.',
@@ -185,30 +205,36 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
     removeOccurrencesByHabitIdFromState: (habitId: number) => {
       const { range } = get();
 
-      set((state) => ({
-        allOccurrences: state.allOccurrences.reduce(
-          (acc: Occurrence[], occurrence) => {
-            if (occurrence.habitId !== habitId) {
-              return [...acc, occurrence];
-            }
+      set((state) => {
+        return {
+          allOccurrences: state.allOccurrences.reduce(
+            (acc: Occurrence[], occurrence) => {
+              if (occurrence.habitId !== habitId) {
+                return [...acc, occurrence];
+              }
 
-            uncacheOccurrence(range, occurrence.id);
+              uncacheOccurrence(range, occurrence.id);
 
-            return acc;
-          },
-          []
-        ),
-      }));
+              return acc;
+            },
+            []
+          ),
+        };
+      });
     },
-    onRangeChange: (range: [number, number]) => set(() => ({ range })),
+    onRangeChange: (range: [number, number]) => {
+      return set(() => {
+        return { range };
+      });
+    },
     updateOccurrenceNoteInState: (
       occurrenceId: number,
       note: Pick<Note, 'id' | 'content'>
     ) => {
       set((state) => {
-        const occurrence = state.allOccurrences.find(
-          (occurrence) => occurrence.id === occurrenceId
-        );
+        const occurrence = state.allOccurrences.find((occurrence) => {
+          return occurrence.id === occurrenceId;
+        });
 
         if (!occurrence) {
           return state;
@@ -227,11 +253,11 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         updateOccurrenceInCache(state.range, updatedOccurrence);
 
         return {
-          allOccurrences: state.allOccurrences.map((occurrence) =>
-            occurrence.id === updatedOccurrence.id
+          allOccurrences: state.allOccurrences.map((occurrence) => {
+            return occurrence.id === updatedOccurrence.id
               ? updatedOccurrence
-              : occurrence
-          ),
+              : occurrence;
+          }),
         };
       });
     },
@@ -259,6 +285,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
           } else {
             acc[day].push(occurrence);
           }
+
           return acc;
         },
         {} as Record<string, Occurrence[]>
@@ -267,12 +294,14 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
       set({ occurrencesByDate: nextOccurrencesByDate });
     },
     updateFilteredBy: (options: OccurrenceFilters) => {
-      set((prevState) => ({
-        filteredBy: {
-          ...prevState.filteredBy,
-          ...options,
-        },
-      }));
+      set((prevState) => {
+        return {
+          filteredBy: {
+            ...prevState.filteredBy,
+            ...options,
+          },
+        };
+      });
     },
   };
 });

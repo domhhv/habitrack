@@ -32,7 +32,9 @@ const HabitLastEntryCell = ({ id }: { id: number }) => {
       return formatRelative(timestamp, new Date(), {
         locale: {
           ...enGB,
-          formatRelative: (token: string) => formatRelativeLocale[token],
+          formatRelative: (token: string) => {
+            return formatRelativeLocale[token];
+          },
         },
       });
     }

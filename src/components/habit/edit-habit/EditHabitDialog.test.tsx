@@ -6,26 +6,30 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import EditHabitDialog, { type EditHabitDialogProps } from './EditHabitDialog';
 
-vi.mock('@hooks', () => ({
-  ThemeMode: {
-    LIGHT: 'light',
-    DARK: 'dark',
-    SYSTEM: 'system',
-  },
-  useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn(), vi.fn()]),
-  useFileField: vi.fn().mockReturnValue([null, vi.fn(), vi.fn()]),
-  useUser: vi
-    .fn()
-    .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
-}));
+vi.mock('@hooks', () => {
+  return {
+    ThemeMode: {
+      LIGHT: 'light',
+      DARK: 'dark',
+      SYSTEM: 'system',
+    },
+    useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn(), vi.fn()]),
+    useFileField: vi.fn().mockReturnValue([null, vi.fn(), vi.fn()]),
+    useUser: vi
+      .fn()
+      .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
+  };
+});
 
-vi.mock('@stores', () => ({
-  useHabitsStore: vi.fn().mockReturnValue({
-    updateHabit: vi.fn(),
-    habitIdBeingUpdated: null,
-  }),
-  useTraitsStore: vi.fn().mockReturnValue({ traits: [] }),
-}));
+vi.mock('@stores', () => {
+  return {
+    useHabitsStore: vi.fn().mockReturnValue({
+      updateHabit: vi.fn(),
+      habitIdBeingUpdated: null,
+    }),
+    useTraitsStore: vi.fn().mockReturnValue({ traits: [] }),
+  };
+});
 
 describe(EditHabitDialog.name, () => {
   beforeEach(() => {
@@ -101,8 +105,8 @@ describe(EditHabitDialog.name, () => {
       });
       fireEvent.click(submitButton);
     });
-    await waitFor(() =>
-      expect(mockUpdateHabit).toHaveBeenCalledWith(7, {
+    await waitFor(() => {
+      return expect(mockUpdateHabit).toHaveBeenCalledWith(7, {
         createdAt: '2024-02-21T17:30:08.886124+00:00',
         updatedAt: updatedAt.toISOString(),
         userId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
@@ -110,7 +114,7 @@ describe(EditHabitDialog.name, () => {
         description: 'New habit description',
         traitId: null,
         iconPath: '',
-      })
-    );
+      });
+    });
   });
 });

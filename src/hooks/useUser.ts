@@ -24,6 +24,7 @@ const useUser = () => {
         if (error) {
           setError(error);
           setIsLoading(false);
+
           return;
         }
 

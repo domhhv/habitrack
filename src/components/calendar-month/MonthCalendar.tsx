@@ -21,6 +21,7 @@ const createCalendar = (identifier: string) => {
   switch (identifier) {
     case 'gregory':
       return new GregorianCalendar();
+
     default:
       throw new Error(`Unsupported calendar ${identifier}`);
   }
@@ -28,7 +29,9 @@ const createCalendar = (identifier: string) => {
 
 const MonthCalendar = () => {
   const onRangeChange = useOccurrencesStore(
-    useShallow((state) => state.onRangeChange)
+    useShallow((state) => {
+      return state.onRangeChange;
+    })
   );
   const { locale } = useLocale();
   const calendarState = useCalendarState({

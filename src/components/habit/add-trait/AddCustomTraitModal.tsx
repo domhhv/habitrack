@@ -96,7 +96,9 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
               <Input
                 variant="faded"
                 value={color.slice(1)}
-                onChange={(event) => handleTraitColorChange(event.target.value)}
+                onChange={(event) => {
+                  return handleTraitColorChange(event.target.value);
+                }}
                 startContent="#"
               />
               <p className="text-sm">

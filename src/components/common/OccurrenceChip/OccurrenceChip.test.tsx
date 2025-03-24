@@ -7,20 +7,26 @@ import { describe, it, expect, vi } from 'vitest';
 
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
 
-vi.mock('@hooks', () => ({
-  useScreenWidth: vi.fn(),
-}));
+vi.mock('@hooks', () => {
+  return {
+    useScreenWidth: vi.fn(),
+  };
+});
 
-vi.mock('@stores', () => ({
-  useOccurrencesStore: vi.fn(),
-  useNotesStore: vi.fn().mockReturnValue({
-    notes: [],
-  }),
-}));
+vi.mock('@stores', () => {
+  return {
+    useOccurrencesStore: vi.fn(),
+    useNotesStore: vi.fn().mockReturnValue({
+      notes: [],
+    }),
+  };
+});
 
-vi.mock('@hooks', () => ({
-  useScreenWidth: vi.fn().mockReturnValue({ screenWidth: 1000 }),
-}));
+vi.mock('@hooks', () => {
+  return {
+    useScreenWidth: vi.fn().mockReturnValue({ screenWidth: 1000 }),
+  };
+});
 
 describe(OccurrenceChip.name, () => {
   const props: OccurrenceChipProps = {

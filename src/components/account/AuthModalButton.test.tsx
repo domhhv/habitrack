@@ -5,20 +5,24 @@ import { describe, it, expect, vi } from 'vitest';
 
 import AuthModalButton from './AuthModalButton';
 
-vi.mock('@hooks', () => ({
-  useUser: vi.fn().mockReturnValue({ id: null }),
-  ThemeMode: {
-    LIGHT: 'light',
-    DARK: 'dark',
-    SYSTEM: 'system',
-  },
-}));
+vi.mock('@hooks', () => {
+  return {
+    useUser: vi.fn().mockReturnValue({ id: null }),
+    ThemeMode: {
+      LIGHT: 'light',
+      DARK: 'dark',
+      SYSTEM: 'system',
+    },
+  };
+});
 
-vi.mock('react-router', () => ({
-  BrowserRouter: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-}));
+vi.mock('react-router', () => {
+  return {
+    BrowserRouter: ({ children }: { children: React.ReactNode }) => {
+      return <div>{children}</div>;
+    },
+  };
+});
 
 describe(AuthModalButton.name, () => {
   it.skip('should open modal if user is not logged out', () => {

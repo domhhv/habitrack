@@ -94,7 +94,9 @@ const AuthForm = ({
             isDisabled={disabled}
             onReset={
               mode === 'login'
-                ? () => onModeChange('reset-password')
+                ? () => {
+                    return onModeChange('reset-password');
+                  }
                 : undefined
             }
           />
