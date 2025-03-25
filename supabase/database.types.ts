@@ -713,30 +713,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      accounts: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          name: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id: string
-          name?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       habits: {
         Row: {
           created_at: string
@@ -769,13 +745,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "habits_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "public_habits_trait_id_fkey"
             columns: ["trait_id"]
@@ -819,13 +788,6 @@ export type Database = {
             columns: ["occurrence_id"]
             isOneToOne: false
             referencedRelation: "occurrences"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -896,15 +858,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "public_traits_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
