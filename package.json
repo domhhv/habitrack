@@ -47,6 +47,7 @@
     "db:status": "supabase status",
     "db:restart": "yarn db:stop && yarn db:start",
     "db:diff": "supabase db diff",
+    "db:diff:storage": "supabase db diff --schema storage",
     "db:migration:up": "supabase migration up",
     "db:migration:new": "supabase migration new",
     "db:gen-types": "supabase gen types --lang=typescript --schema public --schema auth --schema storage --local > supabase/database.types.ts"
@@ -58,6 +59,7 @@
     "@stylistic/eslint-plugin-ts": "^4.2.0",
     "@supabase/supabase-js": "^2.49.3",
     "@vercel/analytics": "^1.5.0",
+    "browser-image-compression": "^2.0.2",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.5.0",
     "react": "^19.0.0",

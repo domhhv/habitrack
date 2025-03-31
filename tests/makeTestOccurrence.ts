@@ -21,6 +21,7 @@ const makeTestOccurrence = () => {
         },
       },
       notes: [],
+      photoPaths: [],
       ...override,
     };
   };

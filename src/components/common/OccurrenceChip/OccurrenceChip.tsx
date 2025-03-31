@@ -13,7 +13,7 @@ import {
 } from '@heroui/react';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
-import { Note, PencilSimple, TrashSimple } from '@phosphor-icons/react';
+import { Camera, Note, PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useOccurrencesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import { format } from 'date-fns';
@@ -116,6 +116,26 @@ const OccurrenceChip = ({
         size="sm"
         content={<Note weight="fill" size={14} />}
         placement="top-right"
+        className={cn(
+          'right-1 top-1 border-none bg-transparent',
+          isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]'
+        )}
+      >
+        {chip}
+      </Badge>
+    );
+  }
+
+  if (
+    occurrences.some((o) => {
+      return o.photoPaths;
+    })
+  ) {
+    chip = (
+      <Badge
+        size="sm"
+        content={<Camera weight="fill" size={14} />}
+        placement="top-left"
         className={cn(
           'right-1 top-1 border-none bg-transparent',
           isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]'

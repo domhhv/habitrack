@@ -84,9 +84,14 @@ enabled = true
 # Uncomment to configure local storage buckets
 [storage.buckets.habit_icons]
 public = true
-file_size_limit = "50MiB"
-allowed_mime_types = ["image/png", "image/jpeg"]
+file_size_limit = "100KB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/svg"]
 objects_path = "./habit-icons"
+
+[storage.buckets.occurrence_photos]
+public = false
+file_size_limit = "5MB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/webp", "image/heic"]
 
 [auth]
 enabled = true

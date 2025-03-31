@@ -33,7 +33,7 @@ export const transformServerEntity = <T extends object>(
   entity: T
 ): CamelCasedPropertiesDeep<T> => {
   const serverEntries = Object.entries(entity || {}).map(([key, value]) => {
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       return {
         [transformServerKey(key)]: transformServerEntity(value),
       };
@@ -51,7 +51,7 @@ export const transformClientEntity = <T extends object>(
   entity: T
 ): SnakeCasedPropertiesDeep<T> => {
   const clientEntries = Object.entries(entity || {}).map(([key, value]) => {
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       return {
         [transformClientKey(key)]: transformClientEntity(value),
       };
