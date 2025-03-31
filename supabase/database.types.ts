@@ -797,6 +797,7 @@ export type Database = {
           created_at: string
           habit_id: number
           id: number
+          photo_paths: string[] | null
           timestamp: number
           updated_at: string | null
           user_id: string
@@ -805,6 +806,7 @@ export type Database = {
           created_at?: string
           habit_id: number
           id?: number
+          photo_paths?: string[] | null
           timestamp: number
           updated_at?: string | null
           user_id: string
@@ -813,6 +815,7 @@ export type Database = {
           created_at?: string
           habit_id?: number
           id?: number
+          photo_paths?: string[] | null
           timestamp?: number
           updated_at?: string | null
           user_id?: string

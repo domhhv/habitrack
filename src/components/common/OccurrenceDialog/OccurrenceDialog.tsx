@@ -1,18 +1,18 @@
+import type { ButtonProps, TimeInputValue } from '@heroui/react';
 import {
   Button,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   ListboxItem,
-  Textarea,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Select,
   SelectItem,
   SelectSection,
+  Textarea,
   TimeInput,
 } from '@heroui/react';
-import type { TimeInputValue, ButtonProps } from '@heroui/react';
 import { useUser } from '@hooks';
 import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import { ArrowsClockwise } from '@phosphor-icons/react';
@@ -22,6 +22,8 @@ import { format, isFuture, isToday, isYesterday } from 'date-fns';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
+
+import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 
 type OccurrenceDialogProps = RequireAtLeastOne<
   {
@@ -55,6 +57,7 @@ const OccurrenceDialog = ({
   const [isDateTimeInFuture, setIsDateTimeInFuture] = React.useState(false);
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
     React.useState(false);
+  const [photoPaths, setPhotoPaths] = React.useState<string[] | null>(null);
 
   const habitsByTraitName = React.useMemo(() => {
     return Object.groupBy(habits, (habit) => {
@@ -93,6 +96,7 @@ const OccurrenceDialog = ({
       setTime(
         parseAbsoluteToLocal(new Date(occurrence.timestamp).toISOString())
       );
+      setPhotoPaths(occurrence.photoPaths);
 
       return;
     }
@@ -243,6 +247,7 @@ const OccurrenceDialog = ({
       timestamp: +occurrenceDateTime,
       habitId: +selectedHabitId,
       userId: user?.id as string,
+      photoPaths,
     });
 
     if (note) {
@@ -376,6 +381,10 @@ const OccurrenceDialog = ({
               }
             />
           </div>
+          <OccurrencePhotosUploader
+            photoPaths={photoPaths}
+            onPhotoPathsChange={setPhotoPaths}
+          />
         </ModalBody>
         <ModalFooter>
           {hasHabits ? (
@@ -393,4 +402,4 @@ const OccurrenceDialog = ({
   );
 };
 
-export default OccurrenceDialog;
+export default React.memo(OccurrenceDialog);

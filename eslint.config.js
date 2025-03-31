@@ -66,6 +66,7 @@ export default [
       'no-undef': 'off',
       'no-useless-rename': 'error',
       'arrow-body-style': ['error', 'always'],
+      curly: 'error',
 
       'no-console': [
         'warn',

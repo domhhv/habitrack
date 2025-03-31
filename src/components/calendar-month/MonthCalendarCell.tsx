@@ -50,7 +50,9 @@ const MonthCalendarCell = ({
     isOpen: isOccurrenceDialogOpen,
     onOpen: openOccurrenceDialog,
     onClose: closeOccurrenceDialog,
-  } = useDisclosure();
+  } = useDisclosure({
+    id: date.toISOString(),
+  });
 
   const groupedOccurrences = Object.groupBy(
     occurrencesByDate[formattedDay] || [],
