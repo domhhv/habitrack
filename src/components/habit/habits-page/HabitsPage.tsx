@@ -168,7 +168,7 @@ const HabitsPage = () => {
                       <Button
                         isIconOnly
                         size="sm"
-                        variant="bordered"
+                        variant="ghost"
                         color="secondary"
                         onPress={() => {
                           return handleEditStart(habit);
@@ -184,7 +184,7 @@ const HabitsPage = () => {
                         isIconOnly
                         size="sm"
                         color="danger"
-                        variant="bordered"
+                        variant="ghost"
                         onPress={() => {
                           return handleRemovalConfirmOpen(habit);
                         }}
