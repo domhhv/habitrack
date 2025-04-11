@@ -11,6 +11,7 @@ import _import from 'eslint-plugin-import';
 import jsxA11Y from 'eslint-plugin-jsx-a11y';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
+import switchCase from 'eslint-plugin-switch-case';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 
@@ -32,6 +33,7 @@ export default [
       'plugin:@typescript-eslint/recommended',
       'plugin:react/recommended',
       'plugin:react-hooks/recommended',
+      'plugin:switch-case/recommended',
       'prettier'
     )
   ),
@@ -40,6 +42,7 @@ export default [
       '@typescript-eslint': fixupPluginRules(typescriptEslint),
       '@stylistic/ts': stylisticTs,
       react: fixupPluginRules(react),
+      'switch-case': switchCase,
       'react-hooks': fixupPluginRules(reactHooks),
       'jsx-a11y': jsxA11Y,
       import: fixupPluginRules(_import),
@@ -63,10 +66,15 @@ export default [
     },
 
     rules: {
-      'no-undef': 'off',
-      'no-useless-rename': 'error',
-      'arrow-body-style': ['error', 'always'],
       curly: 'error',
+      'no-undef': 'off',
+      'object-shorthand': 'error',
+      'no-useless-rename': 'error',
+      'import/no-duplicates': 'error',
+      'react/react-in-jsx-scope': 'off',
+      'switch-case/no-case-curly': 'off',
+      'arrow-body-style': ['error', 'always'],
+      '@typescript-eslint/consistent-type-imports': 'error',
 
       'no-console': [
         'warn',
@@ -74,11 +82,6 @@ export default [
           allow: ['warn', 'error'],
         },
       ],
-
-      'object-shorthand': 'error',
-      'import/no-duplicates': 'error',
-      'react/react-in-jsx-scope': 'off',
-      '@typescript-eslint/consistent-type-imports': 'error',
 
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -95,9 +98,12 @@ export default [
         { blankLine: 'always', prev: '*', next: 'block' },
         { blankLine: 'always', prev: 'block-like', next: '*' },
         { blankLine: 'always', prev: 'block', next: '*' },
-        { blankLine: 'always', prev: '*', next: 'case' },
-        { blankLine: 'never', prev: 'case', next: 'case' },
-        { blankLine: 'always', prev: '*', next: 'default' },
+      ],
+
+      'switch-case/newline-between-switch-case': [
+        'error',
+        'always',
+        { fallthrough: 'never' },
       ],
 
       'import/order': [

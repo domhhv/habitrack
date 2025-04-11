@@ -5076,6 +5076,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/pluralize@npm:^0.0.33":
+  version: 0.0.33
+  resolution: "@types/pluralize@npm:0.0.33"
+  checksum: 10c0/24899caf85b79dd291a6b6e9b9f3b67b452b18d578d0ac0d531a705bf5ee0361d9386ea1f8532c64de9e22c6e9606c5497787bb5e31bd299c487980436c59785
+  languageName: node
+  linkType: hard
+
 "@types/react-dom@npm:^19.0.4":
   version: 19.0.4
   resolution: "@types/react-dom@npm:19.0.4"
@@ -6757,6 +6764,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-switch-case@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "eslint-plugin-switch-case@npm:3.0.1"
+  peerDependencies:
+    eslint: ^9.8.0
+  checksum: 10c0/abb38c6ff2687363a7571c068c2993c15b7ff98d77378b0b217865df3601021724802266c687c0584ab6b457dfb5bccf37dec627bac95c2609949487511a6a41
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-unused-imports@npm:^4.1.4":
   version: 4.1.4
   resolution: "eslint-plugin-unused-imports@npm:4.1.4"
@@ -7335,6 +7351,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.2.0"
     "@types/node": "npm:^18.19.83"
+    "@types/pluralize": "npm:^0.0.33"
     "@types/react": "npm:^19.0.12"
     "@types/react-dom": "npm:^19.0.4"
     "@typescript-eslint/eslint-plugin": "npm:^8.28.0"
@@ -7351,12 +7368,14 @@ __metadata:
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-react: "npm:^7.37.4"
     eslint-plugin-react-hooks: "npm:^5.2.0"
+    eslint-plugin-switch-case: "npm:^3.0.1"
     eslint-plugin-unused-imports: "npm:^4.1.4"
     framer-motion: "npm:^12.5.0"
     globals: "npm:^16.0.0"
     husky: "npm:^9.1.7"
     jsdom: "npm:^26.0.0"
     lint-staged: "npm:^15.5.0"
+    pluralize: "npm:^8.0.0"
     postcss: "npm:^8.5.3"
     prettier: "npm:^3.5.3"
     prettier-plugin-tailwindcss: "npm:^0.6.11"
@@ -8913,6 +8932,13 @@ __metadata:
   version: 4.0.6
   resolution: "pirates@npm:4.0.6"
   checksum: 10c0/00d5fa51f8dded94d7429700fb91a0c1ead00ae2c7fd27089f0c5b63e6eca36197fe46384631872690a66f390c5e27198e99006ab77ae472692ab9c2ca903f36
+  languageName: node
+  linkType: hard
+
+"pluralize@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "pluralize@npm:8.0.0"
+  checksum: 10c0/2044cfc34b2e8c88b73379ea4a36fc577db04f651c2909041b054c981cd863dd5373ebd030123ab058d194ae615d3a97cfdac653991e499d10caf592e8b3dc33
   languageName: node
   linkType: hard
 
