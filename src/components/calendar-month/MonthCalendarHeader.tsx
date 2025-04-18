@@ -41,7 +41,7 @@ const MonthCalendarHeader = ({
   const { traits } = useTraitsStore();
   const { filteredBy, filterBy } = useOccurrencesStore();
   const { user } = useUser();
-  const { screenWidth, isDesktop, isMobile } = useScreenWidth();
+  const { screenWidth, isDesktop, isMobile, isTablet } = useScreenWidth();
   const isOnCurrentMonth =
     activeMonthLabel === MONTHS[new Date().getMonth()] &&
     activeYear === new Date().getFullYear().toString();
@@ -295,7 +295,7 @@ const MonthCalendarHeader = ({
                 'w-full !pt-6 md:w-48',
                 isMobile && '!pt-0'
               ),
-              value: 'text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none h-5 items-start',
+              value: cn('text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none h-5 items-start', !isDesktop && 'w-full'),
               trigger: cn(!isMobile && 'h-18 pt-0'),
               label: '!-translate-y-2',
             }}

@@ -22,8 +22,9 @@ const useScreenWidth = () => {
 
   const isMobile = screenWidth < Number(md.slice(0, -2));
   const isDesktop = screenWidth >= Number(lg.slice(0, -2));
+  const isTablet = !isMobile && !isDesktop;
 
-  return { screenWidth, isMobile, isDesktop };
+  return { screenWidth, isMobile, isDesktop, isTablet };
 };
 
 export default useScreenWidth;
