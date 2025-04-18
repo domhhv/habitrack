@@ -112,7 +112,7 @@
     "vitest": "^3.0.9"
   },
   "engines": {
-    "node": "^18.20.7",
+    "node": "^22.14.0",
     "yarn": "^4.6.0"
   },
   "packageManager": "yarn@4.7.0"
