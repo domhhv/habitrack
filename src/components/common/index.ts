@@ -5,3 +5,4 @@ export * from './TraitChip';
 export * from './OccurrenceDialog';
 export * from './OccurrenceChip';
 export * from './NoteDialog';
+export { default as CrossPlatformHorizontalScroll } from './CrossPlatformHorizontalScroll';

@@ -115,7 +115,7 @@ const HabitsPage = () => {
         isHeaderSticky
         classNames={{
           base: cn(
-            'overflow-scroll px-8 py-2 lg:px-16 lg:py-4 [&>div]:bg-white [&>div]:dark:bg-background-800',
+            'overflow-scroll scrollbar-hide px-8 py-2 lg:px-16 lg:py-4 [&>div]:bg-white [&>div]:dark:bg-background-800',
             isMobile ? 'max-h-[400px]' : 'max-h-[600px]'
           ),
         }}

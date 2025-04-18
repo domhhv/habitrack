@@ -1,4 +1,4 @@
-import { TraitChip } from '@components';
+import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
 import type { SelectedItems } from '@heroui/react';
 import {
   Tooltip,
@@ -22,25 +22,12 @@ import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
+import { MONTHS } from './MonthCalendar';
+
 export type MonthCalendarHeaderProps = {
   activeMonthLabel: string;
   activeYear: string;
 };
-
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
 
 const YEARS = Array.from({ length: 31 }, (_, i) => {
   return 2000 + i;
@@ -223,10 +210,11 @@ const MonthCalendarHeader = ({
               popoverContent: isMobile ? 'w-[150px]' : 'w-[250px]',
               selectorIcon: isMobile && 'hidden',
               innerWrapper: cn(
-                'w-full overflow-x-scroll !pt-6 md:w-48',
+                'w-full overflow-x-scroll !pt-6 md:w-48 scrollbar-hide',
                 isMobile && '!pt-0'
               ),
-              value: 'text-tiny md:text-base !overflow-visible flex gap-2 w-48',
+              value:
+                'text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none',
               trigger: cn(!isMobile && 'h-18 pt-0'),
               label: '!-translate-y-2',
             }}
@@ -234,28 +222,35 @@ const MonthCalendarHeader = ({
               crossOffset: isMobile ? -75 : 0,
             }}
             renderValue={(selectedHabits: SelectedItems<Habit>) => {
-              return selectedHabits.map(({ key }) => {
-                const habit = habits.find((h) => {
-                  return h.id === Number(key);
-                });
+              return (
+                <CrossPlatformHorizontalScroll className="space-x-2">
+                  {selectedHabits.map(({ key }) => {
+                    const habit = habits.find((h) => {
+                      return h.id === Number(key);
+                    });
 
-                if (!habit) {
-                  return null;
-                }
+                    if (!habit) {
+                      return null;
+                    }
 
-                const { id, name, iconPath } = habit;
-                const iconUrl = getHabitIconUrl(iconPath);
+                    const { id, name, iconPath } = habit;
+                    const iconUrl = getHabitIconUrl(iconPath);
 
-                return (
-                  <Tooltip key={id} content={name}>
-                    <img
-                      src={iconUrl}
-                      alt={`${name} icon`}
-                      className={cn('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
-                    />
-                  </Tooltip>
-                );
-              });
+                    return (
+                      <Tooltip key={id} content={name}>
+                        <img
+                          src={iconUrl}
+                          alt={`${name} icon`}
+                          className={cn(
+                            'h-5 w-5',
+                            screenWidth < 400 && 'h-3 w-3'
+                          )}
+                        />
+                      </Tooltip>
+                    );
+                  })}
+                </CrossPlatformHorizontalScroll>
+              );
             }}
           >
             {Object.keys(habitsByTraitName).map((traitName) => {
@@ -299,11 +294,11 @@ const MonthCalendarHeader = ({
             classNames={{
               popoverContent: isMobile ? 'w-[150px]' : 'w-[250px]',
               selectorIcon: isMobile && 'hidden',
-              innerWrapper: cn(
-                'w-full overflow-x-scroll !pt-6 md:w-48',
-                isMobile && '!pt-0'
+              innerWrapper: cn('w-full !pt-6 md:w-48', isMobile && '!pt-0'),
+              value: cn(
+                'text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none h-5 items-start',
+                !isDesktop && 'w-full'
               ),
-              value: 'text-tiny md:text-base !overflow-visible flex gap-2 w-48',
               trigger: cn(!isMobile && 'h-18 pt-0'),
               label: '!-translate-y-2',
             }}
@@ -311,19 +306,23 @@ const MonthCalendarHeader = ({
               crossOffset: isMobile ? -75 : 0,
             }}
             renderValue={(selectedTraits: SelectedItems<Trait>) => {
-              return selectedTraits.map(({ key }) => {
-                const trait = traits.find((t) => {
-                  return t.id === Number(key);
-                });
+              return (
+                <CrossPlatformHorizontalScroll className="space-x-2">
+                  {selectedTraits.map(({ key }) => {
+                    const trait = traits.find((t) => {
+                      return t.id === Number(key);
+                    });
 
-                if (!trait) {
-                  return null;
-                }
+                    if (!trait) {
+                      return null;
+                    }
 
-                const { id, name, color } = trait;
+                    const { id, name, color } = trait;
 
-                return <TraitChip key={id} trait={{ name, color }} />;
-              });
+                    return <TraitChip key={id} trait={{ name, color }} />;
+                  })}
+                </CrossPlatformHorizontalScroll>
+              );
             }}
           >
             <SelectSection title="Filter by traits">
