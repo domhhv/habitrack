@@ -41,7 +41,7 @@ const MonthCalendarHeader = ({
   const { traits } = useTraitsStore();
   const { filteredBy, filterBy } = useOccurrencesStore();
   const { user } = useUser();
-  const { screenWidth, isDesktop, isMobile, isTablet } = useScreenWidth();
+  const { screenWidth, isDesktop, isMobile } = useScreenWidth();
   const isOnCurrentMonth =
     activeMonthLabel === MONTHS[new Date().getMonth()] &&
     activeYear === new Date().getFullYear().toString();
@@ -213,7 +213,8 @@ const MonthCalendarHeader = ({
                 'w-full overflow-x-scroll !pt-6 md:w-48 scrollbar-hide',
                 isMobile && '!pt-0'
               ),
-              value: 'text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none',
+              value:
+                'text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none',
               trigger: cn(!isMobile && 'h-18 pt-0'),
               label: '!-translate-y-2',
             }}
@@ -222,7 +223,7 @@ const MonthCalendarHeader = ({
             }}
             renderValue={(selectedHabits: SelectedItems<Habit>) => {
               return (
-                <CrossPlatformHorizontalScroll className='space-x-2'>
+                <CrossPlatformHorizontalScroll className="space-x-2">
                   {selectedHabits.map(({ key }) => {
                     const habit = habits.find((h) => {
                       return h.id === Number(key);
@@ -240,13 +241,16 @@ const MonthCalendarHeader = ({
                         <img
                           src={iconUrl}
                           alt={`${name} icon`}
-                          className={cn('h-5 w-5', screenWidth < 400 && 'h-3 w-3')}
+                          className={cn(
+                            'h-5 w-5',
+                            screenWidth < 400 && 'h-3 w-3'
+                          )}
                         />
                       </Tooltip>
                     );
                   })}
                 </CrossPlatformHorizontalScroll>
-              )
+              );
             }}
           >
             {Object.keys(habitsByTraitName).map((traitName) => {
@@ -287,15 +291,14 @@ const MonthCalendarHeader = ({
             onChange={handleTraitsFilterChange}
             className="w-[75px] md:w-[250px]"
             selectionMode="multiple"
-
             classNames={{
               popoverContent: isMobile ? 'w-[150px]' : 'w-[250px]',
               selectorIcon: isMobile && 'hidden',
-              innerWrapper: cn(
-                'w-full !pt-6 md:w-48',
-                isMobile && '!pt-0'
+              innerWrapper: cn('w-full !pt-6 md:w-48', isMobile && '!pt-0'),
+              value: cn(
+                'text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none h-5 items-start',
+                !isDesktop && 'w-full'
               ),
-              value: cn('text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none h-5 items-start', !isDesktop && 'w-full'),
               trigger: cn(!isMobile && 'h-18 pt-0'),
               label: '!-translate-y-2',
             }}
@@ -304,7 +307,7 @@ const MonthCalendarHeader = ({
             }}
             renderValue={(selectedTraits: SelectedItems<Trait>) => {
               return (
-                <CrossPlatformHorizontalScroll className='space-x-2'>
+                <CrossPlatformHorizontalScroll className="space-x-2">
                   {selectedTraits.map(({ key }) => {
                     const trait = traits.find((t) => {
                       return t.id === Number(key);
@@ -319,7 +322,7 @@ const MonthCalendarHeader = ({
                     return <TraitChip key={id} trait={{ name, color }} />;
                   })}
                 </CrossPlatformHorizontalScroll>
-              )
+              );
             }}
           >
             <SelectSection title="Filter by traits">

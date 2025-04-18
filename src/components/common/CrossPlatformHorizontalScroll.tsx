@@ -4,9 +4,12 @@ import React from 'react';
 type HorizontalScrollProps = {
   children: React.ReactNode;
   className?: string;
-}
+};
 
-const CrossPlatformHorizontalScroll = ({ children, className }: HorizontalScrollProps) => {
+const CrossPlatformHorizontalScroll = ({
+  children,
+  className,
+}: HorizontalScrollProps) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -34,11 +37,14 @@ const CrossPlatformHorizontalScroll = ({ children, className }: HorizontalScroll
   return (
     <div
       ref={scrollRef}
-      className={cn('overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-hide', className)}
+      className={cn(
+        'overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-hide',
+        className
+      )}
     >
       {children}
     </div>
   );
-}
+};
 
 export default CrossPlatformHorizontalScroll;

@@ -15,10 +15,10 @@ export default {
           '-ms-overflow-style': 'none',
           'scrollbar-width': 'none',
           '&::-webkit-scrollbar': {
-            display: 'none'
-          }
-        }
-      }
+            display: 'none',
+          },
+        },
+      },
     },
   },
   plugins: [
