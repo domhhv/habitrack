@@ -17,6 +17,21 @@ import { useShallow } from 'zustand/react/shallow';
 import MonthCalendarGrid from './MonthCalendarGrid';
 import MonthCalendarHeader from './MonthCalendarHeader';
 
+export const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
 const createCalendar = (identifier: string) => {
   switch (identifier) {
     case 'gregory':
@@ -71,7 +86,9 @@ const MonthCalendar = () => {
     }
   }, [params, calendarState, onRangeChange]);
 
-  const [activeMonthLabel, activeYear] = title.split(' ');
+  const [, activeYear] = title.split(' ');
+
+  const activeMonthLabel = MONTHS[calendarState.focusedDate.month - 1];
 
   return (
     <div
