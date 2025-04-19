@@ -93,7 +93,7 @@ const MonthCalendar = () => {
   return (
     <div
       {...calendarProps}
-      className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 lg:gap-4 lg:px-16 lg:py-4"
+      className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 md:gap-4 md:py-4 lg:px-16"
     >
       <title>
         {`${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`}
