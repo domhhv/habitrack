@@ -223,7 +223,7 @@ const MonthCalendarHeader = ({
             }}
             renderValue={(selectedHabits: SelectedItems<Habit>) => {
               return (
-                <CrossPlatformHorizontalScroll className="space-x-2">
+                <CrossPlatformHorizontalScroll className="flex space-x-2">
                   {selectedHabits.map(({ key }) => {
                     const habit = habits.find((h) => {
                       return h.id === Number(key);
