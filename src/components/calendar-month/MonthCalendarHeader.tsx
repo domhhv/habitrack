@@ -41,7 +41,7 @@ const MonthCalendarHeader = ({
   const { traits } = useTraitsStore();
   const { filteredBy, filterBy } = useOccurrencesStore();
   const { user } = useUser();
-  const { screenWidth, isDesktop, isMobile } = useScreenWidth();
+  const { screenWidth, isMobile } = useScreenWidth();
   const isOnCurrentMonth =
     activeMonthLabel === MONTHS[new Date().getMonth()] &&
     activeYear === new Date().getFullYear().toString();
@@ -103,43 +103,38 @@ const MonthCalendarHeader = ({
   };
 
   return (
-    <div className="flex items-stretch justify-between px-0 pt-2 lg:px-0 lg:pt-0">
-      <div className="flex items-stretch justify-between gap-0 lg:gap-2">
+    <div className="flex flex-col items-stretch justify-between gap-4 px-0 pt-2 md:pt-0 lg:flex-row lg:gap-0 lg:px-0">
+      <div className="flex flex-col items-stretch justify-end gap-0 max-[372px]:gap-4 min-[373px]:flex-row lg:justify-between lg:gap-2">
         <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
           <Select
             variant="bordered"
             color="secondary"
             radius="sm"
-            label={isMobile ? null : 'Month'}
-            size={isDesktop ? 'md' : 'sm'}
+            label="Month"
             selectedKeys={new Set([activeMonthLabel])}
             onChange={handleMonthChange}
             classNames={{
-              base: 'w-[75px] md:w-[125px]',
+              base: 'w-[100px]',
               popoverContent: 'w-[125px]',
-              selectorIcon: isMobile && 'hidden',
-              innerWrapper: isMobile && 'w-full',
-              value: isMobile && 'text-tiny',
             }}
           >
             {MONTHS.map((month) => {
-              return <SelectItem key={month}>{month}</SelectItem>;
+              return (
+                <SelectItem key={month}>
+                  {isMobile ? month.substring(0, 3) : month}
+                </SelectItem>
+              );
             })}
           </Select>
           <Select
             variant="bordered"
             color="secondary"
             radius="sm"
-            label={isMobile ? null : 'Year'}
-            size={isDesktop ? 'md' : 'sm'}
+            label="Year"
             selectedKeys={new Set([activeYear])}
             onChange={handleYearChange}
             classNames={{
-              base: 'w-[50px] md:w-[100px]',
-              popoverContent: isMobile ? 'w-[75px]' : 'w-[100px]',
-              selectorIcon: isMobile && 'hidden',
-              innerWrapper: isMobile && 'w-full',
-              value: isMobile && 'text-tiny',
+              base: 'w-[100px]',
             }}
           >
             {YEARS.map((year) => {
@@ -156,68 +151,55 @@ const MonthCalendarHeader = ({
             isIconOnly
             as={Link}
             to={`/calendar/month/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}/${prevMonth.getDate()}`}
-            size={isDesktop ? 'md' : 'sm'}
+            size="md"
             radius="sm"
             variant="light"
             color="secondary"
-            className={cn('h-auto', isMobile && 'w-6 min-w-fit p-0')}
+            className="h-auto"
             role="navigate-back"
           >
-            <ArrowFatLeft size={isDesktop ? 20 : 16} />
+            <ArrowFatLeft size={20} />
           </Button>
-          {!isMobile && !isOnCurrentMonth && (
+          {!isOnCurrentMonth && (
             <Button
               as={Link}
-              size={isDesktop ? 'md' : 'sm'}
+              size="md"
               radius="sm"
               variant="light"
               color="secondary"
-              className="h-auto"
+              className={cn('h-auto', isMobile && 'min-w-fit p-0')}
               to={`/calendar/month/${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`}
-              startContent={<ArrowsClockwise size={isDesktop ? 16 : 12} />}
+              startContent={<ArrowsClockwise size={20} />}
             >
-              Today
+              {(!isMobile || screenWidth < 373) && 'Today'}
             </Button>
           )}
           <Button
             as={Link}
             isIconOnly
-            size={isDesktop ? 'md' : 'sm'}
+            size="md"
             variant="light"
             color="secondary"
             radius="sm"
             to={`/calendar/month/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}/${nextMonth.getDate()}`}
-            className={cn('h-auto', isMobile && 'w-6 min-w-fit p-0')}
+            className="h-auto"
             role="navigate-forward"
           >
-            <ArrowFatRight size={isDesktop ? 20 : 16} />
+            <ArrowFatRight size={20} />
           </Button>
         </div>
       </div>
       {shouldRenderFilters && (
-        <div className="flex items-stretch justify-between gap-2">
+        <div className="flex flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between">
           <Select
             variant="bordered"
             color="secondary"
             radius="sm"
-            label={isMobile ? null : 'Filter by habits'}
-            size={isDesktop ? 'md' : 'sm'}
+            label="Filter by habits"
             selectedKeys={filteredBy.habitIds}
             onChange={handleHabitsFilterChange}
-            className="w-[75px] md:w-[250px]"
+            className="w-full md:w-[200px]"
             selectionMode="multiple"
-            classNames={{
-              popoverContent: isMobile ? 'w-[150px]' : 'w-[250px]',
-              selectorIcon: isMobile && 'hidden',
-              innerWrapper: cn(
-                'w-full overflow-x-scroll !pt-6 md:w-48 scrollbar-hide',
-                isMobile && '!pt-0'
-              ),
-              value:
-                'text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none',
-              trigger: cn(!isMobile && 'h-18 pt-0'),
-              label: '!-translate-y-2',
-            }}
             popoverProps={{
               crossOffset: isMobile ? -75 : 0,
             }}
@@ -241,10 +223,7 @@ const MonthCalendarHeader = ({
                         <img
                           src={iconUrl}
                           alt={`${name} icon`}
-                          className={cn(
-                            'h-5 w-5',
-                            screenWidth < 400 && 'h-3 w-3'
-                          )}
+                          className="h-4 w-4"
                         />
                       </Tooltip>
                     );
@@ -285,26 +264,12 @@ const MonthCalendarHeader = ({
             variant="bordered"
             color="secondary"
             radius="sm"
-            size={isDesktop ? 'md' : 'sm'}
+            label="Filter by traits"
+            size="md"
             selectedKeys={filteredBy.traitIds}
-            label={isMobile ? null : 'Filter by traits'}
             onChange={handleTraitsFilterChange}
-            className="w-[75px] md:w-[250px]"
+            className="w-full md:w-[250px]"
             selectionMode="multiple"
-            classNames={{
-              popoverContent: isMobile ? 'w-[150px]' : 'w-[250px]',
-              selectorIcon: isMobile && 'hidden',
-              innerWrapper: cn('w-full !pt-6 md:w-48', isMobile && '!pt-0'),
-              value: cn(
-                'text-tiny md:text-base !overflow-visible flex gap-2 w-48 !leading-none h-5 items-start',
-                !isDesktop && 'w-full'
-              ),
-              trigger: cn(!isMobile && 'h-18 pt-0'),
-              label: '!-translate-y-2',
-            }}
-            popoverProps={{
-              crossOffset: isMobile ? -75 : 0,
-            }}
             renderValue={(selectedTraits: SelectedItems<Trait>) => {
               return (
                 <CrossPlatformHorizontalScroll className="space-x-2">

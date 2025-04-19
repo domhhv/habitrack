@@ -27,7 +27,7 @@ const MonthCalendarGrid = ({
   activeYear,
 }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
-  const { isMobile } = useScreenWidth();
+  const { isDesktop } = useScreenWidth();
   const { locale } = useLocale();
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
@@ -98,11 +98,11 @@ const MonthCalendarGrid = ({
                   <Button
                     as={Link}
                     className={cn(
-                      'absolute -left-7 top-0 h-[32px] w-6 min-w-fit p-0 md:-left-12 md:h-[37px] md:w-10',
+                      'absolute -left-7 top-0 h-[32px] w-6 min-w-fit p-0 lg:-left-12 lg:h-[37px] lg:w-10',
                       weekIndex === 0 && 'top-0.5'
                     )}
                     variant="ghost"
-                    radius={isMobile ? 'sm' : 'md'}
+                    radius={isDesktop ? 'md' : 'sm'}
                     to={`/calendar/week/${firstDate.year}/${firstDate.month}/${firstDate.day}`}
                   >
                     {week}

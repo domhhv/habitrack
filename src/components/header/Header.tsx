@@ -1,7 +1,7 @@
 import { AuthModalButton } from '@components';
 import { Button, Tooltip, Spinner } from '@heroui/react';
 import { useScreenWidth, useFetchOnAuth, useUser } from '@hooks';
-import { GithubLogo } from '@phosphor-icons/react';
+import { CalendarDots, GithubLogo, Repeat } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router';
 
@@ -30,21 +30,31 @@ const Header = () => {
         <div className="mx-auto flex w-full items-center justify-between gap-2 px-8 py-2 lg:gap-4 lg:px-16 lg:py-4">
           <div className="flex items-center gap-2">
             <Button
+              isIconOnly={screenWidth < 372}
               color="primary"
               as={Link}
               to="/calendar/month"
               size={isDesktop ? 'md' : 'sm'}
               className={screenWidth < 339 ? 'min-w-fit px-2' : ''}
             >
-              Calendar
+              {screenWidth < 372 ? (
+                <CalendarDots weight="bold" size={16} />
+              ) : (
+                'Calendar'
+              )}
             </Button>
             <Button
+              isIconOnly={screenWidth < 372}
               color="secondary"
               as={Link}
               to="/habits"
               size={isDesktop ? 'md' : 'sm'}
             >
-              Habits
+              {screenWidth < 372 ? (
+                <Repeat size={16} weight="bold" />
+              ) : (
+                'Habits'
+              )}
             </Button>
             <ThemeToggle />
             {!isMobile && (

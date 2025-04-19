@@ -138,7 +138,9 @@ const MonthCalendarCell = ({
                 </Tooltip>
               </div>
             )}
-            {isTodayCell && <CalendarBlank size={20} weight="fill" />}
+            {isTodayCell && (
+              <CalendarBlank size={isMobile ? 18 : 20} weight="fill" />
+            )}
           </div>
         </div>
         <div className="flex flex-wrap justify-center gap-1 overflow-x-auto overflow-y-visible px-0 py-0.5 pb-2 md:justify-start md:px-2">
