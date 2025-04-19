@@ -321,7 +321,7 @@ const OccurrenceDialog = ({
       placement="center"
       size={isMobile ? 'full' : 'md'}
     >
-      <ModalContent>
+      <ModalContent className="overflow-y-auto">
         <ModalHeader>
           {existingOccurrenceId ? 'Edit' : 'Add'} habit entry for {formatDate()}
         </ModalHeader>
