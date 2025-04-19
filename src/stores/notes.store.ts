@@ -28,23 +28,18 @@ const useNotesStore = create<NotesState>((set) => {
     addingNote: false,
     updatingNote: false,
     deletingNote: false,
-    fetchNotes: async () => {
-      try {
-        set({ fetchingNotes: true });
-        const notes = await listNotes();
-        set({ notes });
-      } catch (error) {
-        console.error(error);
-        addToast({
-          title:
-            'Something went wrong while fetching your notes. Please try reloading the page.',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ fetchingNotes: false });
-      }
+
+    clearNotes: () => {
+      set({ notes: [] });
     },
+
+    fetchNotes: async () => {
+      set({ fetchingNotes: true });
+      const notes = await listNotes();
+      set({ notes });
+      set({ fetchingNotes: false });
+    },
+
     addNote: async (note: NotesInsert) => {
       try {
         set({ addingNote: true });
@@ -75,6 +70,7 @@ const useNotesStore = create<NotesState>((set) => {
         set({ addingNote: false });
       }
     },
+
     updateNote: async (id: number, note: NotesUpdate) => {
       try {
         set({ updatingNote: true });
@@ -109,6 +105,7 @@ const useNotesStore = create<NotesState>((set) => {
         set({ updatingNote: false });
       }
     },
+
     deleteNote: async (id: number) => {
       try {
         set({ deletingNote: true });
@@ -134,9 +131,6 @@ const useNotesStore = create<NotesState>((set) => {
       } finally {
         set({ deletingNote: false });
       }
-    },
-    clearNotes: () => {
-      set({ notes: [] });
     },
   };
 });

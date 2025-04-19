@@ -46,22 +46,9 @@ const useHabitsStore = create<HabitsState>((set) => {
 
     fetchHabits: async () => {
       set({ fetchingHabits: true });
-
-      try {
-        const habits = await listHabits();
-        set({ habits });
-      } catch (error) {
-        console.error(error);
-
-        addToast({
-          title:
-            'Something went wrong while fetching your habits. Please try reloading the page.',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ fetchingHabits: false });
-      }
+      const habits = await listHabits();
+      set({ habits });
+      set({ fetchingHabits: false });
     },
 
     addHabit: async (habit: HabitsInsert, icon?: File | null) => {

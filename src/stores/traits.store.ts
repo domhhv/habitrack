@@ -2,7 +2,6 @@ import { addToast } from '@heroui/react';
 import type { Trait, TraitsInsert } from '@models';
 import { listTraits, createTrait } from '@services';
 import { useOccurrencesStore } from '@stores';
-import { makeTestTrait } from '@tests';
 import { getErrorMessage } from '@utils';
 import { create } from 'zustand';
 
@@ -15,45 +14,35 @@ type TraitsState = {
   clearTraits: () => void;
 };
 
-const testTraits = [
-  makeTestTrait({ name: 'Test Good Trait', color: '#2AF004' }),
-  makeTestTrait({ name: 'Test Bad Trait', color: '#F6F6F6' }),
-];
-
 const useTraitsStore = create<TraitsState>((set) => {
   return {
-    traits: testTraits,
+    traits: [],
     fetchingTraits: true,
     addingTrait: false,
-    fetchTraits: async () => {
-      try {
-        set({ fetchingTraits: true });
-        const traits = await listTraits();
-        const sortedUserTraits = traits
-          .filter((trait) => {
-            return !!trait.userId;
-          })
-          .sort((a, b) => {
-            return a.name.localeCompare(b.name);
-          });
-        const allSortedTraits = traits
-          .filter((trait) => {
-            return !trait.userId;
-          })
-          .concat(sortedUserTraits);
-        set({ traits: allSortedTraits });
-      } catch (error) {
-        console.error(error);
-        addToast({
-          title:
-            'Something went wrong while fetching your traits. Please try reloading the page.',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ fetchingTraits: false });
-      }
+
+    clearTraits: () => {
+      set({ traits: [] });
     },
+
+    fetchTraits: async () => {
+      set({ fetchingTraits: true });
+      const traits = await listTraits();
+      const sortedUserTraits = traits
+        .filter((trait) => {
+          return !!trait.userId;
+        })
+        .sort((a, b) => {
+          return a.name.localeCompare(b.name);
+        });
+      const allSortedTraits = traits
+        .filter((trait) => {
+          return !trait.userId;
+        })
+        .concat(sortedUserTraits);
+      set({ traits: allSortedTraits });
+      set({ fetchingTraits: false });
+    },
+
     addTrait: async (trait: TraitsInsert) => {
       try {
         set({ addingTrait: true });
@@ -76,9 +65,6 @@ const useTraitsStore = create<TraitsState>((set) => {
       } finally {
         set({ addingTrait: false });
       }
-    },
-    clearTraits: () => {
-      set({ traits: [] });
     },
   };
 });

@@ -143,7 +143,7 @@ const MonthCalendarCell = ({
             )}
           </div>
         </div>
-        <div className="flex flex-wrap justify-center gap-1 overflow-x-auto overflow-y-visible px-0 py-0.5 pb-2 md:justify-start md:px-2">
+        <div className="flex flex-wrap justify-center gap-2 overflow-x-auto overflow-y-visible px-0 py-0.5 pb-2 md:justify-start md:px-2">
           <AnimatePresence mode="sync">
             {Object.entries(groupedOccurrences).map(
               ([habitId, habitOccurrences]) => {

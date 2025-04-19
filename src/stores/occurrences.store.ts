@@ -81,34 +81,28 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
       ),
     },
     range: [0, 0],
-    fetchOccurrences: async () => {
-      const { range } = get();
 
-      try {
-        if (range.every(Boolean)) {
-          set({ fetchingOccurrences: true });
-          const allOccurrences = await listOccurrences(range);
-          set({ allOccurrences });
-        }
-      } catch (error) {
-        console.error(error);
-        addToast({
-          title:
-            'Something went wrong while fetching your habit entries. Please try reloading the page.',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ fetchingOccurrences: false });
-      }
-    },
     clearOccurrences: () => {
       set({ allOccurrences: [] });
       occurrencesCache.clear();
     },
+
+    fetchOccurrences: async () => {
+      const { range } = get();
+
+      if (range.every(Boolean)) {
+        set({ fetchingOccurrences: true });
+        const allOccurrences = await listOccurrences(range);
+        set({ allOccurrences });
+      }
+
+      set({ fetchingOccurrences: false });
+    },
+
     filterBy: (options: OccurrenceFilters) => {
       return set({ filteredBy: options });
     },
+
     addOccurrence: async (occurrence: OccurrencesInsert) => {
       set({ addingOccurrence: true });
       const { range } = get();
@@ -141,6 +135,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         set({ addingOccurrence: false });
       }
     },
+
     updateOccurrence: async (id: number, body: OccurrencesUpdate) => {
       try {
         const { range } = get();
@@ -175,6 +170,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         set({ updatingOccurrence: false });
       }
     },
+
     removeOccurrence: async (id: number) => {
       const { range } = get();
 
@@ -202,6 +198,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         });
       }
     },
+
     removeOccurrencesByHabitIdFromState: (habitId: number) => {
       const { range } = get();
 
@@ -222,11 +219,13 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         };
       });
     },
+
     onRangeChange: (range: [number, number]) => {
       return set(() => {
         return { range };
       });
     },
+
     updateOccurrenceNoteInState: (
       occurrenceId: number,
       note: Pick<Note, 'id' | 'content'>
@@ -261,6 +260,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
         };
       });
     },
+
     updateOccurrencesState: (
       allOccurrences: Occurrence[],
       filteredBy: OccurrenceFilters
@@ -274,6 +274,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
 
       set({ occurrences: nextOccurrences });
     },
+
     updateOccurrencesMap: (occurrences: Occurrence[]) => {
       const nextOccurrencesByDate = occurrences.reduce(
         (acc, occurrence) => {
@@ -293,6 +294,7 @@ const useOccurrencesStore = create<OccurrencesState>((set, get) => {
 
       set({ occurrencesByDate: nextOccurrencesByDate });
     },
+
     updateFilteredBy: (options: OccurrenceFilters) => {
       set((prevState) => {
         return {
