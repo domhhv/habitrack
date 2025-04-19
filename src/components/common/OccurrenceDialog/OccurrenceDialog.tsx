@@ -1,5 +1,6 @@
 import type { ButtonProps, TimeInputValue } from '@heroui/react';
 import {
+  NumberInput,
   Button,
   ListboxItem,
   Modal,
@@ -13,7 +14,7 @@ import {
   Textarea,
   TimeInput,
 } from '@heroui/react';
-import { useUser } from '@hooks';
+import { useScreenWidth, useUser } from '@hooks';
 import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
@@ -52,12 +53,14 @@ const OccurrenceDialog = ({
     updatingOccurrence,
   } = useOccurrencesStore();
   const [note, setNote] = React.useState('');
+  const [repeat, setRepeat] = React.useState(1);
   const [selectedHabitId, setSelectedHabitId] = React.useState('');
   const [time, setTime] = React.useState<TimeInputValue | null>(null);
   const [isDateTimeInFuture, setIsDateTimeInFuture] = React.useState(false);
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
     React.useState(false);
   const [photoPaths, setPhotoPaths] = React.useState<string[] | null>(null);
+  const { isDesktop, isMobile } = useScreenWidth();
 
   const habitsByTraitName = React.useMemo(() => {
     return Object.groupBy(habits, (habit) => {
@@ -243,20 +246,24 @@ const OccurrenceDialog = ({
       return;
     }
 
-    const newOccurrence = await addOccurrence({
-      timestamp: +occurrenceDateTime,
-      habitId: +selectedHabitId,
-      userId: user?.id as string,
-      photoPaths,
+    const addPromises = Array.from({ length: repeat || 1 }).map(async () => {
+      const newOccurrence = await addOccurrence({
+        timestamp: +occurrenceDateTime,
+        habitId: +selectedHabitId,
+        userId: user?.id as string,
+        photoPaths,
+      });
+
+      if (note) {
+        await addNote({
+          content: note,
+          occurrenceId: newOccurrence.id,
+          userId: user.id,
+        });
+      }
     });
 
-    if (note) {
-      await addNote({
-        content: note,
-        occurrenceId: newOccurrence.id,
-        userId: user.id,
-      });
-    }
+    await Promise.all(addPromises);
 
     handleClose();
   };
@@ -312,6 +319,7 @@ const OccurrenceDialog = ({
       isOpen={isOpen}
       onClose={handleClose}
       placement="center"
+      size={isMobile ? 'full' : 'md'}
     >
       <ModalContent>
         <ModalHeader>
@@ -368,7 +376,32 @@ const OccurrenceDialog = ({
             value={note}
             placeholder="Note"
             variant="faded"
+            classNames={
+              !isDesktop
+                ? {
+                    input: 'text-base',
+                  }
+                : undefined
+            }
           />
+          {!occurrenceToUpdate && (
+            <NumberInput
+              onValueChange={setRepeat}
+              value={repeat}
+              label="Repeat"
+              variant="faded"
+              minValue={0}
+              classNames={
+                !isDesktop
+                  ? {
+                      inputWrapper: 'py-2 px-4 h-16',
+                      label: 'text-small',
+                      input: 'text-base',
+                    }
+                  : undefined
+              }
+            />
+          )}
           <div className="flex w-full flex-col gap-y-2">
             <TimeInput
               label="Time"
@@ -378,6 +411,15 @@ const OccurrenceDialog = ({
               description={
                 isDateTimeInFuture &&
                 'You are logging a habit for the future. Are you a time traveler?'
+              }
+              classNames={
+                !isDesktop
+                  ? {
+                      inputWrapper: 'py-3 px-4 h-16',
+                      label: 'text-small',
+                      input: 'text-base',
+                    }
+                  : undefined
               }
             />
           </div>
