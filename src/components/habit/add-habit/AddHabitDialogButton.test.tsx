@@ -11,7 +11,7 @@ vi.mock('@stores', () => {
   return {
     useSnackbarsStore: vi.fn(),
     useHabitsStore: vi.fn(),
-    useTraitsStore: vi.fn(),
+    useTraits: vi.fn(),
   };
 });
 

@@ -23,9 +23,7 @@ vi.mock('@services', () => {
 vi.mock('@stores', () => {
   return {
     useHabitsStore: vi.fn(),
-    useTraitsStore: vi.fn().mockReturnValue({
-      traits: [],
-    }),
+    useTraits: vi.fn().mockReturnValue([]),
     useOccurrencesStore: vi.fn().mockReturnValue({
       removeOccurrencesByHabitId: vi.fn(),
     }),

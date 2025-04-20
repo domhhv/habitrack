@@ -1,7 +1,7 @@
 import { supabaseClient } from '@helpers';
 import { addToast } from '@heroui/react';
 import {
-  useTraitsStore,
+  useTraitActions,
   useHabitsStore,
   useOccurrencesStore,
   useNotesStore,
@@ -10,7 +10,7 @@ import { getErrorMessage } from '@utils';
 import React from 'react';
 
 const useFetchOnAuth = () => {
-  const { fetchTraits, clearTraits } = useTraitsStore();
+  const { fetchTraits, clearTraits } = useTraitActions();
   const { fetchHabits, clearHabits } = useHabitsStore();
   const { fetchNotes, clearNotes } = useNotesStore();
   const { fetchOccurrences, clearOccurrences } = useOccurrencesStore();
