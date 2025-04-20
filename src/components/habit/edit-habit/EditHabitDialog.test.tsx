@@ -1,4 +1,4 @@
-import { useHabitsStore, useTraits } from '@stores';
+import { useHabitActions, useTraits } from '@stores';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestTrait } from '@tests';
 import React from 'react';
@@ -23,9 +23,8 @@ vi.mock('@hooks', () => {
 
 vi.mock('@stores', () => {
   return {
-    useHabitsStore: vi.fn().mockReturnValue({
+    useHabitActions: vi.fn().mockReturnValue({
       updateHabit: vi.fn(),
-      habitIdBeingUpdated: null,
     }),
     useTraits: vi.fn().mockReturnValue([]),
   };
@@ -83,7 +82,7 @@ describe(EditHabitDialog.name, () => {
 
   it.skip('should call updateHabit when submitted', async () => {
     const mockUpdateHabit = vi.fn();
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useHabitActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       updateHabit: mockUpdateHabit,
     });
     (useTraits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([

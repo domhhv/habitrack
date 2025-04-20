@@ -1,4 +1,4 @@
-import { useHabitsStore } from '@stores';
+import { useHabits, useHabitActions } from '@stores';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import React from 'react';
@@ -22,7 +22,11 @@ vi.mock('@services', () => {
 
 vi.mock('@stores', () => {
   return {
-    useHabitsStore: vi.fn(),
+    useHabits: vi.fn(),
+    useHabitActions: vi.fn().mockReturnValue({
+      updateHabit: vi.fn(),
+      removeHabit: vi.fn(),
+    }),
     useTraits: vi.fn().mockReturnValue([]),
     useOccurrencesStore: vi.fn().mockReturnValue({
       removeOccurrencesByHabitId: vi.fn(),
@@ -57,20 +61,18 @@ vi.mock('@hooks', () => {
 
 describe(HabitsPage.name, () => {
   it('should display habits', async () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
-        return {
-          habits: [
-            makeTestHabit({
-              name: 'Habit name #1',
-              description: 'Habit description #1',
-            }),
-            makeTestHabit({
-              name: 'Habit name #2',
-              description: 'Habit description #2',
-            }),
-          ],
-        };
+        return [
+          makeTestHabit({
+            name: 'Habit name #1',
+            description: 'Habit description #1',
+          }),
+          makeTestHabit({
+            name: 'Habit name #2',
+            description: 'Habit description #2',
+          }),
+        ];
       }
     );
     const { getByText } = render(<HabitsPage />);
@@ -84,21 +86,18 @@ describe(HabitsPage.name, () => {
   });
 
   it('should open edit dialog on edit icon button click', async () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
-        return {
-          habits: [
-            makeTestHabit({
-              id: 42,
-              name: 'Habit name #1',
-              description: 'Habit description #1',
-            }),
-            makeTestHabit({
-              name: 'Habit name #2',
-              description: 'Habit description #2',
-            }),
-          ],
-        };
+        return [
+          makeTestHabit({
+            name: 'Habit name #1',
+            description: 'Habit description #1',
+          }),
+          makeTestHabit({
+            name: 'Habit name #2',
+            description: 'Habit description #2',
+          }),
+        ];
       }
     );
     const { queryByRole, getByRole, getByTestId } = render(<HabitsPage />);
@@ -116,23 +115,27 @@ describe(HabitsPage.name, () => {
 
   it.skip('should remove habit on confirm', async () => {
     const mockRemoveHabit = vi.fn();
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
-        return {
-          habits: [
-            makeTestHabit({
-              name: 'Habit name #1',
-              description: 'Habit description #1',
-            }),
-            makeTestHabit({
-              name: 'Habit name #2',
-              description: 'Habit description #2',
-            }),
-          ],
-          removeHabit: mockRemoveHabit,
-        };
+        return [
+          makeTestHabit({
+            name: 'Habit name #1',
+            description: 'Habit description #1',
+          }),
+          makeTestHabit({
+            name: 'Habit name #2',
+            description: 'Habit description #2',
+          }),
+        ];
       }
     );
+    (
+      useHabitActions() as unknown as ReturnType<typeof vi.fn>
+    ).mockImplementation(() => {
+      return {
+        removeHabit: mockRemoveHabit,
+      };
+    });
     const { queryByRole, getByRole, getByTestId } = render(<HabitsPage />);
     expect(queryByRole('dialog')).toBeNull();
     fireEvent.click(getByTestId('delete-habit-id-2-button'));

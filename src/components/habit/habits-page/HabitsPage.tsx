@@ -5,6 +5,7 @@ import {
   TraitChip,
 } from '@components';
 import {
+  addToast,
   Button,
   cn,
   Table,
@@ -18,7 +19,8 @@ import {
 import { useScreenWidth, useUser } from '@hooks';
 import { type Habit } from '@models';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
-import { useHabitsStore, useOccurrencesStore } from '@stores';
+import { useHabitActions, useHabits, useOccurrencesStore } from '@stores';
+import { getErrorMessage } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -72,10 +74,12 @@ const habitColumns: Column[] = [
 
 const HabitsPage = () => {
   const { user } = useUser();
-  const { habits, removeHabit, habitIdBeingDeleted } = useHabitsStore();
+  const { removeHabit } = useHabitActions();
+  const habits = useHabits();
   const { removeOccurrencesByHabitIdFromState } = useOccurrencesStore();
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
+  const [isRemoving, setIsRemoving] = React.useState<boolean>(false);
   const { isMobile } = useScreenWidth();
 
   const handleRemovalConfirmOpen = (habit: Habit) => {
@@ -91,9 +95,28 @@ const HabitsPage = () => {
       return null;
     }
 
-    await removeHabit(habitToRemove);
-    removeOccurrencesByHabitIdFromState(habitToRemove.id);
-    setHabitToRemove(null);
+    setIsRemoving(true);
+
+    try {
+      await removeHabit(habitToRemove);
+
+      removeOccurrencesByHabitIdFromState(habitToRemove.id);
+
+      addToast({
+        title: 'Your habit has been deleted.',
+        color: 'success',
+      });
+    } catch (error) {
+      console.error(error);
+      addToast({
+        title:
+          'Something went wrong while deleting your habit. Please try again.',
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
+    } finally {
+      setIsRemoving(false);
+    }
   };
 
   const handleEditStart = (habit: Habit) => {
@@ -212,7 +235,7 @@ const HabitsPage = () => {
         heading="Delete habit"
         onConfirm={handleRemovalConfirmed}
         onCancel={handleRemovalCancel}
-        loading={habitIdBeingDeleted === habitToRemove?.id}
+        loading={isRemoving}
       >
         <div>
           Are you sure you want to delete <strong>{habitToRemove?.name}</strong>{' '}

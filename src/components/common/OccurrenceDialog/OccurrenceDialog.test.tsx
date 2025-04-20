@@ -1,5 +1,5 @@
 import { useUser } from '@hooks';
-import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
+import { useHabits, useNotesStore, useOccurrencesStore } from '@stores';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import { format } from 'date-fns';
@@ -11,7 +11,7 @@ import OccurrenceDialog from './OccurrenceDialog';
 
 vi.mock('@stores', () => {
   return {
-    useHabitsStore: vi.fn(),
+    useHabits: vi.fn(),
     useOccurrencesStore: vi.fn().mockReturnValue({
       occurrences: [],
     }),
@@ -49,9 +49,7 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('should render', () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      habits: [],
-    });
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
     (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
       addingNote: false,
@@ -74,9 +72,7 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('if no habits are available, should show a message', () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      habits: [],
-    });
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
     (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
       addingNote: false,
@@ -101,9 +97,9 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('should render habit options', () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      habits: [makeTestHabit()],
-    });
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([
+      makeTestHabit(),
+    ]);
     (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       occurrences: [],
       addNote: vi.fn(),
@@ -123,9 +119,7 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it.skip('should select habit', async () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      habits: [makeTestHabit({ id: 42 })],
-    });
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
     (
@@ -147,9 +141,7 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('on close, should call onClose', () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      habits: [makeTestHabit()],
-    });
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
     (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
       addingNote: false,
@@ -169,9 +161,7 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it.skip('on close, should unselect habit', () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      habits: [makeTestHabit()],
-    });
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
     (
@@ -194,9 +184,7 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it.skip('on submit, should call addOccurrence with proper arguments', () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      habits: [makeTestHabit()],
-    });
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue(
       newOccurrenceDate.toISOString().split('T')[0]

@@ -1,9 +1,9 @@
 import { VisuallyHiddenInput } from '@components';
-import { Button, Tooltip } from '@heroui/react';
+import { addToast, Button, Tooltip } from '@heroui/react';
 import { useUser } from '@hooks';
 import { type Habit } from '@models';
-import { useHabitsStore } from '@stores';
-import { getHabitIconUrl } from '@utils';
+import { useHabitActions } from '@stores';
+import { getErrorMessage, getHabitIconUrl } from '@utils';
 import React from 'react';
 
 type HabitIconCellProps = {
@@ -11,8 +11,9 @@ type HabitIconCellProps = {
 };
 
 const HabitIconCell = ({ habit }: HabitIconCellProps) => {
-  const { updateHabit } = useHabitsStore();
+  const { updateHabit } = useHabitActions();
   const { user } = useUser();
+  const [isUploading, setIsUploading] = React.useState(false);
   const iconUrl = getHabitIconUrl(habit.iconPath);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async ({
@@ -22,15 +23,29 @@ const HabitIconCell = ({ habit }: HabitIconCellProps) => {
       return null;
     }
 
+    setIsUploading(true);
+
     const [iconFile] = files;
 
-    await updateHabit(habit.id, user.id, {}, iconFile);
+    try {
+      await updateHabit(habit.id, user.id, {}, iconFile);
+    } catch (error) {
+      console.error(error);
+      addToast({
+        title: 'Something went wrong while uploading your icon',
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
     <Tooltip content="Upload new icon">
       <Button
         isIconOnly
+        isLoading={isUploading}
         size="lg"
         variant="light"
         as="label"

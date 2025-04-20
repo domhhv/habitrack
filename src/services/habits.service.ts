@@ -1,5 +1,6 @@
 import { supabaseClient } from '@helpers';
 import { type Habit, type HabitsInsert, type HabitsUpdate } from '@models';
+import { StorageBuckets, uploadFile } from '@root/src/services/storage.service';
 import {
   transformClientEntity,
   transformServerEntities,
@@ -71,4 +72,15 @@ export const destroyHabit = async (id: number): Promise<Habit> => {
   }
 
   return transformServerEntity(data);
+};
+
+export const uploadHabitIcon = async (userId: string, icon?: File | null) => {
+  let iconPath = '';
+
+  if (icon) {
+    iconPath = `${userId}/${Date.now()}-${icon.name}`;
+    await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, icon);
+  }
+
+  return iconPath;
 };
