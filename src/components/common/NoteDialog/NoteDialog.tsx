@@ -1,4 +1,5 @@
 import {
+  addToast,
   Button,
   Modal,
   ModalBody,
@@ -8,7 +9,8 @@ import {
   Textarea,
 } from '@heroui/react';
 import { useUser } from '@hooks';
-import { useNotesStore } from '@stores';
+import { useNotes, useNoteActions } from '@stores';
+import { getErrorMessage } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -21,16 +23,10 @@ type NoteDialogProps = {
 const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
   const { user } = useUser();
   const [content, setContent] = React.useState('');
-  const {
-    addingNote,
-    addNote,
-    notes,
-    fetchingNotes,
-    updateNote,
-    updatingNote,
-    deleteNote,
-    deletingNote,
-  } = useNotesStore();
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const notes = useNotes();
+  const { addNote, updateNote, deleteNote } = useNoteActions();
 
   const month =
     date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth();
@@ -46,10 +42,10 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
   }, [notes, sqlDate, date]);
 
   React.useEffect(() => {
-    if (existingNote?.content) {
+    if (open && existingNote?.content) {
       setContent(existingNote.content);
     }
-  }, [existingNote]);
+  }, [existingNote, open]);
 
   React.useEffect(() => {
     if (!open) {
@@ -58,24 +54,56 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
   }, [open]);
 
   const handleSubmit = async () => {
-    if (!user || !date || fetchingNotes) {
+    if (!user || !date) {
       return null;
     }
 
-    handleClose();
+    setIsSaving(true);
 
     if (content) {
       if (!existingNote) {
-        await addNote({
-          userId: user.id,
-          day: sqlDate,
-          content,
-        });
+        try {
+          await addNote({
+            userId: user.id,
+            day: sqlDate,
+            content,
+          });
+
+          addToast({
+            title: 'Note added successfully',
+            color: 'success',
+          });
+
+          handleClose();
+        } catch (error) {
+          console.error(error);
+          addToast({
+            title: 'Something went wrong while adding your note',
+            description: `Error details: ${getErrorMessage(error)}`,
+            color: 'danger',
+          });
+        }
       } else if (existingNote.content !== content) {
-        await updateNote(existingNote.id, {
-          content,
-          day: sqlDate,
-        });
+        try {
+          await updateNote(existingNote.id, {
+            content,
+            day: sqlDate,
+          });
+
+          addToast({
+            title: 'Note updated successfully',
+            color: 'success',
+          });
+
+          handleClose();
+        } catch (error) {
+          console.error(error);
+          addToast({
+            title: 'Something went wrong while updating your note',
+            description: `Error details: ${getErrorMessage(error)}`,
+            color: 'danger',
+          });
+        }
       }
     }
   };
@@ -85,16 +113,35 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
       return;
     }
 
-    await deleteNote(existingNote.id);
+    setIsDeleting(true);
 
-    handleClose();
+    try {
+      await deleteNote(existingNote.id);
+
+      addToast({
+        title: 'Note deleted successfully',
+        color: 'success',
+      });
+
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      addToast({
+        title: 'Something went wrong while deleted your note',
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
+    } finally {
+      setIsDeleting(true);
+    }
   };
 
   const handleClose = () => {
-    setTimeout(() => {
-      return setContent('');
-    });
+    setIsSaving(false);
     onClose();
+    setTimeout(() => {
+      setContent('');
+    });
   };
 
   return (
@@ -112,7 +159,6 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
             value={content}
             placeholder="Note"
             variant="faded"
-            disabled={fetchingNotes}
           />
         </ModalBody>
         <ModalFooter>
@@ -120,7 +166,7 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
             <Button
               color="danger"
               onPress={handleDelete}
-              isLoading={deletingNote}
+              isLoading={isDeleting}
             >
               Delete
             </Button>
@@ -128,9 +174,9 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
           <Button
             type="submit"
             color="primary"
-            isLoading={addingNote || updatingNote}
+            isLoading={isSaving}
             onPress={handleSubmit}
-            isDisabled={!content || fetchingNotes}
+            isDisabled={!content}
           >
             {existingNote ? 'Save' : 'Add'}
           </Button>

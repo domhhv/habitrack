@@ -31,8 +31,7 @@ vi.mock('@stores', () => {
     useOccurrencesStore: vi.fn().mockReturnValue({
       removeOccurrencesByHabitId: vi.fn(),
     }),
-    useNotesStore: vi.fn().mockReturnValue({
-      addingNote: false,
+    useNoteActions: vi.fn().mockReturnValue({
       addNote: vi.fn(),
     }),
   };

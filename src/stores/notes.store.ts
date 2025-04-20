@@ -1,80 +1,45 @@
-import { addToast } from '@heroui/react';
 import type { Note, NotesInsert, NotesUpdate } from '@models';
 import { createNote, destroyNote, listNotes, updateNote } from '@services';
-import { getErrorMessage } from '@utils';
 import { create } from 'zustand';
-
-import useOccurrencesStore from './occurrences.store';
 
 type NotesState = {
   notes: Note[];
-  fetchingNotes: boolean;
-  addingNote: boolean;
-  fetchNotes: () => Promise<void>;
-  addNote: (note: NotesInsert) => Promise<void>;
-  updateNote: (id: number, note: NotesUpdate) => Promise<void>;
-  updatingNote: boolean;
-  deleteNote: (id: number) => Promise<void>;
-  deletingNote: boolean;
-  clearNotes: () => void;
+  actions: {
+    fetchNotes: () => Promise<void>;
+    addNote: (note: NotesInsert) => Promise<Note>;
+    updateNote: (id: number, note: NotesUpdate) => Promise<Note>;
+    deleteNote: (id: number) => Promise<void>;
+    clearNotes: () => void;
+  };
 };
 
 const useNotesStore = create<NotesState>((set) => {
-  const { updateOccurrenceNoteInState } = useOccurrencesStore.getState();
-
   return {
     notes: [],
-    fetchingNotes: true,
-    addingNote: false,
-    updatingNote: false,
-    deletingNote: false,
 
-    clearNotes: () => {
-      set({ notes: [] });
-    },
+    actions: {
+      clearNotes: () => {
+        set({ notes: [] });
+      },
 
-    fetchNotes: async () => {
-      set({ fetchingNotes: true });
-      const notes = await listNotes();
-      set({ notes });
-      set({ fetchingNotes: false });
-    },
+      fetchNotes: async () => {
+        const notes = await listNotes();
+        set({ notes });
+      },
 
-    addNote: async (note: NotesInsert) => {
-      try {
-        set({ addingNote: true });
+      addNote: async (note: NotesInsert) => {
         const newNote = await createNote(note);
+
         set((state) => {
           return { notes: [...state.notes, newNote] };
         });
 
-        if (note.occurrenceId) {
-          updateOccurrenceNoteInState(note.occurrenceId, {
-            id: newNote.id,
-            content: newNote.content,
-          });
-        }
+        return newNote;
+      },
 
-        addToast({
-          title: 'Note added successfully',
-          color: 'success',
-        });
-      } catch (error) {
-        console.error(error);
-        addToast({
-          title: 'Something went wrong while adding your note',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ addingNote: false });
-      }
-    },
-
-    updateNote: async (id: number, note: NotesUpdate) => {
-      try {
-        set({ updatingNote: true });
+      updateNote: async (id: number, note: NotesUpdate) => {
         const updatedNote = await updateNote(id, note);
+
         set((state) => {
           return {
             notes: state.notes.map((n) => {
@@ -83,32 +48,10 @@ const useNotesStore = create<NotesState>((set) => {
           };
         });
 
-        if (note.occurrenceId) {
-          updateOccurrenceNoteInState(note.occurrenceId, {
-            id: updatedNote.id,
-            content: updatedNote.content,
-          });
-        }
+        return updatedNote;
+      },
 
-        addToast({
-          title: 'Note updated successfully',
-          color: 'success',
-        });
-      } catch (error) {
-        console.error(error);
-        addToast({
-          title: 'Something went wrong while updating your note',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ updatingNote: false });
-      }
-    },
-
-    deleteNote: async (id: number) => {
-      try {
-        set({ deletingNote: true });
+      deleteNote: async (id: number) => {
         await destroyNote(id);
         set((state) => {
           return {
@@ -117,22 +60,19 @@ const useNotesStore = create<NotesState>((set) => {
             }),
           };
         });
-        addToast({
-          title: 'Note deleted successfully',
-          color: 'success',
-        });
-      } catch (error) {
-        console.error(error);
-        addToast({
-          title: 'Something went wrong while deleted your note',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ deletingNote: false });
-      }
+      },
     },
   };
 });
 
-export default useNotesStore;
+export const useNotes = () => {
+  return useNotesStore((state) => {
+    return state.notes;
+  });
+};
+
+export const useNoteActions = () => {
+  return useNotesStore((state) => {
+    return state.actions;
+  });
+};
