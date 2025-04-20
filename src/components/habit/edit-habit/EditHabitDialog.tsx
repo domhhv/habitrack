@@ -13,7 +13,7 @@ import {
 } from '@heroui/react';
 import { useTextField, useUser } from '@hooks';
 import type { Habit } from '@models';
-import { useHabitsStore, useTraitsStore } from '@stores';
+import { useHabitsStore, useTraits } from '@stores';
 import { toEventLike } from '@utils';
 import React from 'react';
 
@@ -28,7 +28,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   const [description, handleDescriptionChange] = useTextField();
   const [traitId, setTraitId] = React.useState('');
   const { updateHabit, habitIdBeingUpdated } = useHabitsStore();
-  const { traits } = useTraitsStore();
+  const traits = useTraits();
   const { user } = useUser();
 
   React.useEffect(() => {

@@ -1,4 +1,4 @@
-import { useHabitsStore, useTraitsStore } from '@stores';
+import { useHabitsStore, useTraits } from '@stores';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestTrait } from '@tests';
 import React from 'react';
@@ -27,7 +27,7 @@ vi.mock('@stores', () => {
       updateHabit: vi.fn(),
       habitIdBeingUpdated: null,
     }),
-    useTraitsStore: vi.fn().mockReturnValue({ traits: [] }),
+    useTraits: vi.fn().mockReturnValue([]),
   };
 });
 
@@ -86,9 +86,9 @@ describe(EditHabitDialog.name, () => {
     (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       updateHabit: mockUpdateHabit,
     });
-    (useTraitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      traits: [makeTestTrait()],
-    });
+    (useTraits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([
+      makeTestTrait(),
+    ]);
     const { getByRole, getByLabelText } = render(
       <EditHabitDialog {...props} />
     );

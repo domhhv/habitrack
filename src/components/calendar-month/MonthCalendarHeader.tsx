@@ -16,7 +16,7 @@ import {
   ArrowFatRight,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
-import { useTraitsStore, useHabitsStore, useOccurrencesStore } from '@stores';
+import { useTraits, useHabitsStore, useOccurrencesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
@@ -38,7 +38,7 @@ const MonthCalendarHeader = ({
   activeYear,
 }: MonthCalendarHeaderProps) => {
   const { habits } = useHabitsStore();
-  const { traits } = useTraitsStore();
+  const traits = useTraits();
   const { filteredBy, filterBy } = useOccurrencesStore();
   const { user } = useUser();
   const { screenWidth, isMobile } = useScreenWidth();

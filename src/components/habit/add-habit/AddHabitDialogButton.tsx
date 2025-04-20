@@ -13,12 +13,12 @@ import {
 } from '@heroui/react';
 import { useTextField, useFileField, useUser } from '@hooks';
 import { CloudArrowUp, Plus } from '@phosphor-icons/react';
-import { useHabitsStore, useTraitsStore } from '@stores';
+import { useHabitsStore, useTraits } from '@stores';
 import React from 'react';
 
 const AddHabitDialogButton = () => {
   const { user } = useUser();
-  const { traits } = useTraitsStore();
+  const traits = useTraits();
   const { fetchingHabits, addingHabit, addHabit } = useHabitsStore();
   const [open, setOpen] = React.useState(false);
   const [name, handleNameChange, clearName] = useTextField();

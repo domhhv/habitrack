@@ -1,5 +1,6 @@
 import { OccurrenceChip } from '@components';
 import {
+  addToast,
   Button,
   Input,
   Modal,
@@ -10,9 +11,9 @@ import {
   Textarea,
 } from '@heroui/react';
 import { useTextField, useUser } from '@hooks';
-import { useTraitsStore } from '@stores';
+import { useTraitActions } from '@stores';
 import { makeTestOccurrence } from '@tests';
-import { toEventLike } from '@utils';
+import { getErrorMessage, toEventLike } from '@utils';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
@@ -27,7 +28,8 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   const [description, handleDescriptionChange, clearDescription] =
     useTextField();
   const [color, setTraitColor] = React.useState('#94a3b8');
-  const { addingTrait, addTrait } = useTraitsStore();
+  const [isAdding, setIsAdding] = React.useState(false);
+  const { addTrait } = useTraitActions();
   const { user } = useUser();
 
   React.useEffect(() => {
@@ -46,13 +48,27 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
       return null;
     }
 
-    await addTrait({
-      name: label,
-      description,
-      slug,
-      color,
-      userId: user.id,
-    });
+    setIsAdding(true);
+
+    try {
+      await addTrait({
+        name: label,
+        description,
+        slug,
+        color,
+        userId: user.id,
+      });
+    } catch (error) {
+      console.error(error);
+      addToast({
+        title:
+          'Something went wrong while adding your habit trait. Please try again.',
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
+    } finally {
+      setIsAdding(false);
+    }
 
     handleDialogClose();
   };
@@ -73,21 +89,21 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             variant="faded"
             value={label}
             onChange={handleLabelChange}
-            isDisabled={addingTrait}
+            isDisabled={isAdding}
             label="Trait Label"
           />
           <Input
             variant="faded"
             value={slug}
             onChange={handleSlugChange}
-            isDisabled={addingTrait}
+            isDisabled={isAdding}
             label="Trait Slug"
           />
           <Textarea
             variant="faded"
             value={description}
             onChange={handleDescriptionChange}
-            isDisabled={addingTrait}
+            isDisabled={isAdding}
             label="Trait Description"
           />
           <div className="flex gap-2">
@@ -119,7 +135,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             fullWidth
             color="primary"
             type="submit"
-            isDisabled={addingTrait || !user?.id}
+            isDisabled={isAdding || !user?.id}
             onPress={handleAdd}
           >
             Add Trait
