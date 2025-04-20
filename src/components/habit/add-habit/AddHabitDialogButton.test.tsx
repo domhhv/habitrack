@@ -1,6 +1,6 @@
 import { useUser } from '@hooks';
 import { StorageBuckets, uploadFile } from '@services';
-import { useHabitsStore } from '@stores';
+import { useHabitActions } from '@stores';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
@@ -10,7 +10,7 @@ import AddHabitDialogButton from './AddHabitDialogButton';
 vi.mock('@stores', () => {
   return {
     useSnackbarsStore: vi.fn(),
-    useHabitsStore: vi.fn(),
+    useHabitActions: vi.fn(),
     useTraits: vi.fn(),
   };
 });
@@ -37,9 +37,8 @@ vi.mock('@hooks', () => {
 
 describe(AddHabitDialogButton.name, () => {
   it.skip('should handle data enter and dialog close', () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useHabitActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       updateHabit: vi.fn(),
-      fetchingHabits: false,
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({
       id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
@@ -82,9 +81,8 @@ describe(AddHabitDialogButton.name, () => {
   });
 
   it.skip('should not set habit icon if empty file uploaded', () => {
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useHabitActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       updateHabit: vi.fn(),
-      fetchingHabits: false,
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({
       id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
@@ -102,7 +100,7 @@ describe(AddHabitDialogButton.name, () => {
 
   it.skip('should call addHabit on form submit', () => {
     const mockAddHabit = vi.fn().mockReturnValue(Promise.resolve({ id: 1 }));
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useHabitActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addHabit: mockAddHabit,
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -127,7 +125,7 @@ describe(AddHabitDialogButton.name, () => {
     (uploadFile as ReturnType<typeof vi.fn>).mockReturnValue(
       Promise.resolve({ data: { path: 'icon-path' } })
     );
-    (useHabitsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useHabitActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addHabit: mockAddHabit,
       updateHabit: mockUpdateHabit,
     });

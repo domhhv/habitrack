@@ -1,4 +1,3 @@
-import { addToast } from '@heroui/react';
 import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
 import {
   createHabit,
@@ -7,87 +6,56 @@ import {
   listHabits,
   patchHabit,
   StorageBuckets,
-  uploadFile,
+  uploadHabitIcon,
 } from '@services';
-import { getErrorMessage } from '@utils';
 import { create } from 'zustand';
 
 import { useOccurrencesStore } from './index';
 
 type HabitsState = {
   habits: Habit[];
-  addingHabit: boolean;
-  fetchingHabits: boolean;
-  habitIdBeingUpdated: number | null;
-  habitIdBeingDeleted: number | null;
-  clearHabits: () => void;
-  fetchHabits: () => Promise<void>;
-  addHabit: (habit: HabitsInsert, icon?: File | null) => Promise<void>;
-  updateHabit: (
-    id: number,
-    userId: string,
-    habit: HabitsUpdate,
-    icon?: File | null
-  ) => Promise<void>;
-  removeHabit: (habit: Habit) => Promise<void>;
+  actions: {
+    clearHabits: () => void;
+    fetchHabits: () => Promise<void>;
+    addHabit: (habit: HabitsInsert, icon?: File | null) => Promise<void>;
+    updateHabit: (
+      id: number,
+      userId: string,
+      habit: HabitsUpdate,
+      icon?: File | null
+    ) => Promise<void>;
+    removeHabit: (habit: Habit) => Promise<void>;
+  };
 };
 
-const useHabitsStore = create<HabitsState>((set) => {
+export const useHabitsStore = create<HabitsState>((set) => {
   return {
     habits: [],
-    addingHabit: false,
-    fetchingHabits: true,
-    habitIdBeingUpdated: null,
-    habitIdBeingDeleted: null,
 
-    clearHabits: () => {
-      set({ habits: [] });
-    },
+    actions: {
+      clearHabits: () => {
+        set({ habits: [] });
+      },
 
-    fetchHabits: async () => {
-      set({ fetchingHabits: true });
-      const habits = await listHabits();
-      set({ habits });
-      set({ fetchingHabits: false });
-    },
+      fetchHabits: async () => {
+        const habits = await listHabits();
+        set({ habits });
+      },
 
-    addHabit: async (habit: HabitsInsert, icon?: File | null) => {
-      set({ addingHabit: true });
-
-      try {
+      addHabit: async (habit: HabitsInsert, icon?: File | null) => {
         const iconPath = await uploadHabitIcon(habit.userId, icon);
         const newHabit = await createHabit({ ...habit, iconPath });
         set((state) => {
           return { habits: [...state.habits, newHabit] };
         });
+      },
 
-        addToast({
-          title: 'Your habit has been added!',
-          color: 'success',
-        });
-      } catch (error) {
-        console.error(error);
-
-        addToast({
-          title:
-            'Something went wrong while adding your habit. Please try again.',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ addingHabit: false });
-      }
-    },
-
-    updateHabit: async (
-      id: number,
-      userId: string,
-      habit: HabitsUpdate,
-      icon?: File | null
-    ) => {
-      set({ habitIdBeingUpdated: id });
-
-      try {
+      updateHabit: async (
+        id: number,
+        userId: string,
+        habit: HabitsUpdate,
+        icon?: File | null
+      ) => {
         let iconPath = habit.iconPath;
 
         if (icon) {
@@ -95,6 +63,7 @@ const useHabitsStore = create<HabitsState>((set) => {
         }
 
         const updatedHabit = await patchHabit(id, { ...habit, iconPath });
+
         set((state) => {
           return {
             habits: state.habits.map((h) => {
@@ -102,32 +71,9 @@ const useHabitsStore = create<HabitsState>((set) => {
             }),
           };
         });
+      },
 
-        addToast({
-          title: 'Your habit has been updated!',
-          color: 'success',
-        });
-      } catch (error) {
-        console.error(error);
-
-        addToast({
-          title:
-            'Something went wrong while updating your habit. Please try again.',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ habitIdBeingUpdated: null });
-      }
-    },
-
-    removeHabit: async ({ id, iconPath }: Habit) => {
-      set({ habitIdBeingDeleted: id });
-
-      const { removeOccurrencesByHabitIdFromState } =
-        useOccurrencesStore.getState();
-
-      try {
+      removeHabit: async ({ id, iconPath }: Habit) => {
         await destroyHabit(id);
 
         if (iconPath) {
@@ -141,25 +87,7 @@ const useHabitsStore = create<HabitsState>((set) => {
             }),
           };
         });
-
-        removeOccurrencesByHabitIdFromState(id);
-
-        addToast({
-          title: 'Your habit has been deleted.',
-          color: 'success',
-        });
-      } catch (error) {
-        console.error(error);
-
-        addToast({
-          title:
-            'Something went wrong while deleting your habit. Please try again.',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        set({ habitIdBeingDeleted: null });
-      }
+      },
     },
   };
 });
@@ -178,15 +106,14 @@ useHabitsStore.subscribe((state, prevState) => {
   }
 });
 
-const uploadHabitIcon = async (userId: string, icon?: File | null) => {
-  let iconPath = '';
-
-  if (icon) {
-    iconPath = `${userId}/${Date.now()}-${icon.name}`;
-    await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, icon);
-  }
-
-  return iconPath;
+export const useHabits = () => {
+  return useHabitsStore((state) => {
+    return state.habits;
+  });
 };
 
-export default useHabitsStore;
+export const useHabitActions = () => {
+  return useHabitsStore((state) => {
+    return state.actions;
+  });
+};

@@ -1,5 +1,6 @@
 import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
 import {
+  addToast,
   Button,
   Input,
   Modal,
@@ -13,19 +14,21 @@ import {
 } from '@heroui/react';
 import { useTextField, useFileField, useUser } from '@hooks';
 import { CloudArrowUp, Plus } from '@phosphor-icons/react';
-import { useHabitsStore, useTraits } from '@stores';
+import { useHabitActions, useTraits } from '@stores';
+import { getErrorMessage } from '@utils';
 import React from 'react';
 
 const AddHabitDialogButton = () => {
   const { user } = useUser();
   const traits = useTraits();
-  const { fetchingHabits, addingHabit, addHabit } = useHabitsStore();
+  const { addHabit } = useHabitActions();
   const [open, setOpen] = React.useState(false);
   const [name, handleNameChange, clearName] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
     useTextField();
   const [icon, handleIconChange, clearIcon] = useFileField();
   const [traitId, setTraitId] = React.useState('');
+  const [isAdding, setIsAdding] = React.useState(false);
   const [addTraitModalOpen, setAddTraitModalOpen] = React.useState(false);
 
   const handleDialogOpen = () => {
@@ -45,15 +48,36 @@ const AddHabitDialogButton = () => {
       return null;
     }
 
-    await addHabit(
-      {
-        name,
-        description,
-        userId: user.id,
-        traitId: +traitId,
-      },
-      icon
-    );
+    setIsAdding(true);
+
+    try {
+      await addHabit(
+        {
+          name,
+          description,
+          userId: user.id,
+          traitId: +traitId,
+        },
+        icon
+      );
+
+      addToast({
+        title: 'Habit added successfully',
+        description: 'Your habit has been added successfully.',
+        color: 'success',
+      });
+
+      handleDialogClose();
+    } catch (error) {
+      console.error(error);
+      addToast({
+        title: 'Something went wrong while adding your habit',
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
+    } finally {
+      setIsAdding(false);
+    }
 
     handleDialogClose();
   };
@@ -63,9 +87,9 @@ const AddHabitDialogButton = () => {
       <Button
         color="primary"
         variant="solid"
+        isDisabled={!user}
         startContent={<Plus weight="bold" />}
         onPress={handleDialogOpen}
-        isDisabled={fetchingHabits}
         data-testid="add-habit-button"
         className="w-full lg:w-auto"
       >
@@ -144,7 +168,7 @@ const AddHabitDialogButton = () => {
             <Button
               fullWidth
               isDisabled={!user?.id || !name || !traitId}
-              isLoading={addingHabit}
+              isLoading={isAdding}
               type="submit"
               color="primary"
               onPress={handleAdd}

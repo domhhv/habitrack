@@ -17,7 +17,7 @@ import {
 import { useScreenWidth, useUser } from '@hooks';
 import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import { ArrowsClockwise } from '@phosphor-icons/react';
-import { useHabitsStore, useNotesStore, useOccurrencesStore } from '@stores';
+import { useHabits, useNotesStore, useOccurrencesStore } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import { format, isFuture, isToday, isYesterday } from 'date-fns';
 import React, { type ChangeEventHandler } from 'react';
@@ -43,7 +43,7 @@ const OccurrenceDialog = ({
   existingOccurrenceId,
 }: OccurrenceDialogProps) => {
   const { user } = useUser();
-  const { habits } = useHabitsStore();
+  const habits = useHabits();
   const { addNote, addingNote, updateNote, updatingNote } = useNotesStore();
   const {
     occurrences,

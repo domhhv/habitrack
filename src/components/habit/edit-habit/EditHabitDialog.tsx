@@ -1,4 +1,5 @@
 import {
+  addToast,
   Button,
   Input,
   Modal,
@@ -13,8 +14,8 @@ import {
 } from '@heroui/react';
 import { useTextField, useUser } from '@hooks';
 import type { Habit } from '@models';
-import { useHabitsStore, useTraits } from '@stores';
-import { toEventLike } from '@utils';
+import { useHabitActions, useTraits } from '@stores';
+import { getErrorMessage, toEventLike } from '@utils';
 import React from 'react';
 
 export type EditHabitDialogProps = {
@@ -27,7 +28,8 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   const [name, handleNameChange] = useTextField();
   const [description, handleDescriptionChange] = useTextField();
   const [traitId, setTraitId] = React.useState('');
-  const { updateHabit, habitIdBeingUpdated } = useHabitsStore();
+  const [isUpdating, setIsUpdating] = React.useState(false);
+  const { updateHabit } = useHabitActions();
   const traits = useTraits();
   const { user } = useUser();
 
@@ -61,16 +63,33 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
       return null;
     }
 
-    await updateHabit(habit.id, user.id, {
-      name,
-      description,
-      traitId: +traitId,
-    });
+    setIsUpdating(true);
 
-    handleClose();
+    try {
+      await updateHabit(habit.id, user.id, {
+        name,
+        description,
+        traitId: +traitId,
+      });
+
+      addToast({
+        title: 'Your habit has been updated!',
+        color: 'success',
+      });
+
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      addToast({
+        title:
+          'Something went wrong while updating your habit. Please try again.',
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
-
-  const isUpdating = habitIdBeingUpdated === habit.id;
 
   return (
     <Modal
