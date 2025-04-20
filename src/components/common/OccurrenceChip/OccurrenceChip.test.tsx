@@ -16,9 +16,6 @@ vi.mock('@hooks', () => {
 vi.mock('@stores', () => {
   return {
     useOccurrencesStore: vi.fn(),
-    useNotesStore: vi.fn().mockReturnValue({
-      notes: [],
-    }),
   };
 });
 

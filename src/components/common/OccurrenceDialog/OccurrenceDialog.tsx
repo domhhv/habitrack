@@ -1,5 +1,6 @@
 import type { ButtonProps, TimeInputValue } from '@heroui/react';
 import {
+  addToast,
   NumberInput,
   Button,
   ListboxItem,
@@ -17,9 +18,10 @@ import {
 import { useScreenWidth, useUser } from '@hooks';
 import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import { ArrowsClockwise } from '@phosphor-icons/react';
-import { useHabits, useNotesStore, useOccurrencesStore } from '@stores';
-import { getHabitIconUrl } from '@utils';
+import { useHabits, useNoteActions, useOccurrencesStore } from '@stores';
+import { getErrorMessage, getHabitIconUrl } from '@utils';
 import { format, isFuture, isToday, isYesterday } from 'date-fns';
+import pluralize from 'pluralize';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
@@ -44,13 +46,13 @@ const OccurrenceDialog = ({
 }: OccurrenceDialogProps) => {
   const { user } = useUser();
   const habits = useHabits();
-  const { addNote, addingNote, updateNote, updatingNote } = useNotesStore();
+  const [isSaving, setIsSaving] = React.useState(false);
+  const { addNote, updateNote } = useNoteActions();
   const {
     occurrences,
     addOccurrence,
-    addingOccurrence,
     updateOccurrence,
-    updatingOccurrence,
+    updateOccurrenceNoteInState,
   } = useOccurrencesStore();
   const [note, setNote] = React.useState('');
   const [repeat, setRepeat] = React.useState(1);
@@ -85,7 +87,7 @@ const OccurrenceDialog = ({
       return;
     }
 
-    if (existingOccurrenceId) {
+    if (isOpen && existingOccurrenceId) {
       const occurrence = occurrences.find((o) => {
         return o.id === existingOccurrenceId;
       });
@@ -113,7 +115,7 @@ const OccurrenceDialog = ({
 
       setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
     }
-  }, [newOccurrenceDate, existingOccurrenceId, occurrences, time]);
+  }, [newOccurrenceDate, existingOccurrenceId, occurrences, time, isOpen]);
 
   React.useEffect(() => {
     if (!habits.length) {
@@ -140,9 +142,7 @@ const OccurrenceDialog = ({
       const hasOccurrenceChanged =
         hasNoteChanged || hasHabitChanged || hasTimeChanged;
 
-      const isOccurrenceUpdating = updatingOccurrence || updatingNote;
-
-      setIsSubmitButtonDisabled(isOccurrenceUpdating || !hasOccurrenceChanged);
+      setIsSubmitButtonDisabled(isSaving || !hasOccurrenceChanged);
 
       return;
     }
@@ -152,8 +152,7 @@ const OccurrenceDialog = ({
     note,
     selectedHabitId,
     time,
-    updatingOccurrence,
-    updatingNote,
+    isSaving,
     habits.length,
   ]);
 
@@ -217,31 +216,51 @@ const OccurrenceDialog = ({
       occurrenceDateTime.setMinutes(time.minute);
     }
 
+    setIsSaving(true);
+
     if (existingOccurrenceId && occurrenceToUpdate) {
-      await updateOccurrence(occurrenceToUpdate.id, {
-        timestamp: +occurrenceDateTime,
-        habitId: +selectedHabitId,
-        userId: user?.id as string,
-      });
+      try {
+        await updateOccurrence(occurrenceToUpdate.id, {
+          timestamp: +occurrenceDateTime,
+          habitId: +selectedHabitId,
+          userId: user?.id as string,
+        });
 
-      if (note) {
-        const existingNote = occurrenceToUpdate.notes[0];
+        if (note) {
+          const existingNote = occurrenceToUpdate.notes[0];
 
-        if (existingNote) {
-          await updateNote(existingNote.id, {
-            content: note,
-            occurrenceId: existingOccurrenceId,
-          });
-        } else {
-          await addNote({
-            content: note,
-            occurrenceId: existingOccurrenceId,
-            userId: user.id,
+          let newNote;
+
+          if (existingNote) {
+            newNote = await updateNote(existingNote.id, {
+              content: note,
+              occurrenceId: existingOccurrenceId,
+            });
+          } else {
+            newNote = await addNote({
+              content: note,
+              occurrenceId: existingOccurrenceId,
+              userId: user.id,
+            });
+          }
+
+          updateOccurrenceNoteInState(existingOccurrenceId, {
+            id: newNote.id,
+            content: newNote.content,
           });
         }
-      }
 
-      handleClose();
+        handleClose();
+      } catch (error) {
+        console.error(error);
+        addToast({
+          title: 'Something went wrong while updating your occurrence',
+          description: `Error details: ${getErrorMessage(error)}`,
+          color: 'danger',
+        });
+      } finally {
+        setIsSaving(false);
+      }
 
       return;
     }
@@ -255,17 +274,38 @@ const OccurrenceDialog = ({
       });
 
       if (note) {
-        await addNote({
+        const newNote = await addNote({
           content: note,
           occurrenceId: newOccurrence.id,
           userId: user.id,
         });
+
+        updateOccurrenceNoteInState(newOccurrence.id, {
+          id: newNote.id,
+          content: newNote.content,
+        });
       }
     });
 
-    await Promise.all(addPromises);
+    try {
+      await Promise.all(addPromises);
 
-    handleClose();
+      addToast({
+        title: `Successfully added ${pluralize('occurrence', addPromises.length, true)}`,
+        color: 'success',
+      });
+
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      addToast({
+        title: `Something went wrong while adding your ${pluralize('occurrence', addPromises.length)}`,
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleClose = () => {
@@ -308,8 +348,7 @@ const OccurrenceDialog = ({
 
   const submitButtonSharedProps: ButtonProps = {
     color: 'primary',
-    isLoading:
-      addingOccurrence || addingNote || updatingOccurrence || updatingNote,
+    isLoading: isSaving,
     isDisabled: isSubmitButtonDisabled,
   };
 

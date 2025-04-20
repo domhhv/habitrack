@@ -3,7 +3,7 @@ import { addToast } from '@heroui/react';
 import {
   useTraitActions,
   useOccurrencesStore,
-  useNotesStore,
+  useNoteActions,
   useHabitActions,
 } from '@stores';
 import { getErrorMessage } from '@utils';
@@ -12,7 +12,7 @@ import React from 'react';
 const useFetchOnAuth = () => {
   const { fetchTraits, clearTraits } = useTraitActions();
   const { fetchHabits, clearHabits } = useHabitActions();
-  const { fetchNotes, clearNotes } = useNotesStore();
+  const { fetchNotes, clearNotes } = useNoteActions();
   const { fetchOccurrences, clearOccurrences } = useOccurrencesStore();
 
   const fetchAllData = React.useCallback(async () => {

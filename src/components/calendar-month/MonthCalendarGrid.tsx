@@ -26,6 +26,7 @@ const MonthCalendarGrid = ({
   activeMonthLabel,
   activeYear,
 }: CalendarGridProps) => {
+  console.log('MonthCalendarGrid render');
   const { gridProps } = useCalendarGrid({}, state);
   const { isDesktop } = useScreenWidth();
   const { locale } = useLocale();

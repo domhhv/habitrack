@@ -1,5 +1,5 @@
 import { useUser } from '@hooks';
-import { useHabits, useNotesStore, useOccurrencesStore } from '@stores';
+import { useHabits, useNoteActions, useOccurrencesStore } from '@stores';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import { format } from 'date-fns';
@@ -15,7 +15,7 @@ vi.mock('@stores', () => {
     useOccurrencesStore: vi.fn().mockReturnValue({
       occurrences: [],
     }),
-    useNotesStore: vi.fn(),
+    useNoteActions: vi.fn(),
   };
 });
 
@@ -50,9 +50,8 @@ describe(OccurrenceDialog.name, () => {
 
   it('should render', () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
-    (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useNoteActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
-      addingNote: false,
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
@@ -73,9 +72,8 @@ describe(OccurrenceDialog.name, () => {
 
   it('if no habits are available, should show a message', () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
-    (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useNoteActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
-      addingNote: false,
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
@@ -100,10 +98,8 @@ describe(OccurrenceDialog.name, () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([
       makeTestHabit(),
     ]);
-    (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      occurrences: [],
+    (useNoteActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
-      addingNote: false,
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
@@ -142,9 +138,8 @@ describe(OccurrenceDialog.name, () => {
 
   it('on close, should call onClose', () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
-    (useNotesStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useNoteActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
-      addingNote: false,
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');

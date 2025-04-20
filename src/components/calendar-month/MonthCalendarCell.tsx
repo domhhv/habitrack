@@ -7,7 +7,7 @@ import {
   Note,
   NoteBlank,
 } from '@phosphor-icons/react';
-import { useNotesStore, useOccurrencesStore } from '@stores';
+import { useNotes, useOccurrencesStore } from '@stores';
 import { format, isToday } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
@@ -33,7 +33,7 @@ const MonthCalendarCell = ({
   position,
 }: CalendarCellProps) => {
   const { fetchingOccurrences, occurrencesByDate } = useOccurrencesStore();
-  const { notes, fetchingNotes } = useNotesStore();
+  const notes = useNotes();
   const { user } = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
   const isTodayCell = isToday(date);
@@ -53,6 +53,7 @@ const MonthCalendarCell = ({
   } = useDisclosure({
     id: date.toISOString(),
   });
+  console.log('MonthCalendarCell');
 
   const groupedOccurrences = Object.groupBy(
     occurrencesByDate[formattedDay] || [],
@@ -126,7 +127,7 @@ const MonthCalendarCell = ({
                     radius="sm"
                     onPress={openNoteDialog}
                     color={hasNote ? 'primary' : 'secondary'}
-                    isDisabled={fetchingNotes || !user}
+                    isDisabled={!user}
                     tabIndex={0}
                   >
                     {hasNote ? (
