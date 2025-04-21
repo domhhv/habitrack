@@ -61,6 +61,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "@vercel/analytics": "^1.5.0",
     "browser-image-compression": "^2.0.2",
+    "compromise": "^14.14.4",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.7.4",
     "pluralize": "^8.0.0",

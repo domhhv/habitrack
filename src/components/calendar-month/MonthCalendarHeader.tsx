@@ -16,6 +16,7 @@ import {
   ArrowFatRight,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
+import isTruthy from '@root/src/utils/isTruthy';
 import { useTraits, useHabits } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import { addMonths, startOfToday, startOfMonth } from 'date-fns';
@@ -72,7 +73,7 @@ const MonthCalendarHeader = ({
           return habit.id === Number(habitId);
         });
       })
-      .filter(Boolean) as Habit[];
+      .filter(isTruthy);
 
     return Object.groupBy(filteredHabits, (habit) => {
       return habit.trait?.name || 'Unknown';

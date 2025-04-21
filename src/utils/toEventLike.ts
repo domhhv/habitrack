@@ -1,13 +1,9 @@
-export type ChangeEventLike = {
-  target: {
-    value: string;
-  };
-};
-
-export const toEventLike = (value: string = ''): ChangeEventLike => {
+const toEventLike = (value: string = '') => {
   return {
     target: {
       value,
     },
   };
 };
+
+export default toEventLike;

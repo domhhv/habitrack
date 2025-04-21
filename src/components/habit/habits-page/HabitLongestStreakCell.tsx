@@ -20,9 +20,7 @@ const HabitLongestStreakCell = ({ id }: { id: number }) => {
   });
 
   React.useEffect(() => {
-    getLongestHabitStreak(id).then((longestStreak) => {
-      setLongestStreak(longestStreak);
-    });
+    getLongestHabitStreak(id).then(setLongestStreak);
   }, [id]);
 
   const range = dateTimeFormat.formatRange(

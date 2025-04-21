@@ -1,4 +1,3 @@
-import { isFulfilled, isRejected } from '@helpers';
 import { addToast, Input } from '@heroui/react';
 import { useUser } from '@hooks';
 import type {
@@ -15,7 +14,7 @@ import {
   uploadImage,
   createSignedUrls,
 } from '@services';
-import { getErrorMessage } from '@utils';
+import { getErrorMessage, isFulfilled, isRejected } from '@utils';
 import React from 'react';
 
 import ImageCarousel from './ImageCarousel';
