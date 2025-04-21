@@ -1,3 +1,4 @@
+import { handleAsyncAction } from '@helpers';
 import {
   addToast,
   Button,
@@ -62,27 +63,19 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
 
     if (content) {
       if (!existingNote) {
-        try {
-          await addNote({
-            userId: user.id,
-            day: sqlDate,
-            content,
-          });
-
-          addToast({
-            title: 'Note added successfully',
-            color: 'success',
-          });
-
+        handleAsyncAction(
+          () => {
+            return addNote({
+              userId: user.id,
+              day: sqlDate,
+              content,
+            });
+          },
+          'add_note',
+          setIsSaving
+        ).then(() => {
           handleClose();
-        } catch (error) {
-          console.error(error);
-          addToast({
-            title: 'Something went wrong while adding your note',
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-          });
-        }
+        });
       } else if (existingNote.content !== content) {
         try {
           await updateNote(existingNote.id, {

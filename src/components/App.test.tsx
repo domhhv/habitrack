@@ -1,4 +1,3 @@
-import { generateCalendarRange } from '@helpers';
 import { getWeeksInMonth } from '@internationalized/date';
 import { act, render } from '@testing-library/react';
 import React from 'react';
@@ -24,12 +23,6 @@ vi.mock('react-stately', () => {
 vi.mock('@internationalized/date', () => {
   return {
     getWeeksInMonth: vi.fn(),
-  };
-});
-
-vi.mock('@utils', () => {
-  return {
-    generateCalendarRange: vi.fn(),
   };
 });
 
@@ -93,7 +86,6 @@ describe(App.name, () => {
     (useCalendar as ReturnType<typeof vi.fn>).mockReturnValue({
       title: '',
     });
-    (generateCalendarRange as ReturnType<typeof vi.fn>).mockReturnValue([]);
 
     act(() => {
       return render(<App />);

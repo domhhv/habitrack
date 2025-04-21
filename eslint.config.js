@@ -7,7 +7,7 @@ import js from '@eslint/js';
 import stylisticTs from '@stylistic/eslint-plugin-ts';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
-import _import from 'eslint-plugin-import';
+import importPlugin from 'eslint-plugin-import';
 import jsxA11Y from 'eslint-plugin-jsx-a11y';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -15,12 +15,9 @@ import switchCase from 'eslint-plugin-switch-case';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
-  baseDirectory: __dirname,
+  baseDirectory: path.dirname(fileURLToPath(import.meta.url)),
   recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
 });
 
 export default [
@@ -39,14 +36,14 @@ export default [
   ),
   {
     plugins: {
-      '@typescript-eslint': fixupPluginRules(typescriptEslint),
-      '@stylistic/ts': stylisticTs,
+      import: importPlugin,
       react: fixupPluginRules(react),
-      'switch-case': switchCase,
-      'react-hooks': fixupPluginRules(reactHooks),
       'jsx-a11y': jsxA11Y,
-      import: fixupPluginRules(_import),
+      'switch-case': switchCase,
+      '@stylistic/ts': stylisticTs,
       'unused-imports': unusedImports,
+      'react-hooks': fixupPluginRules(reactHooks),
+      '@typescript-eslint': fixupPluginRules(typescriptEslint),
     },
 
     languageOptions: {

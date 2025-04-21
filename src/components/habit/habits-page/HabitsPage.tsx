@@ -4,8 +4,8 @@ import {
   EditHabitDialog,
   TraitChip,
 } from '@components';
+import { handleAsyncAction } from '@helpers';
 import {
-  addToast,
   Button,
   cn,
   Table,
@@ -20,7 +20,6 @@ import { useScreenWidth, useUser } from '@hooks';
 import { type Habit } from '@models';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useHabitActions, useHabits } from '@stores';
-import { getErrorMessage } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -94,26 +93,13 @@ const HabitsPage = () => {
       return null;
     }
 
-    setIsRemoving(true);
-
-    try {
-      await removeHabit(habitToRemove);
-
-      addToast({
-        title: 'Your habit has been deleted.',
-        color: 'success',
-      });
-    } catch (error) {
-      console.error(error);
-      addToast({
-        title:
-          'Something went wrong while deleting your habit. Please try again.',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    } finally {
-      setIsRemoving(false);
-    }
+    handleAsyncAction(
+      () => {
+        return removeHabit(habitToRemove);
+      },
+      'remove_habit',
+      setIsRemoving
+    );
   };
 
   const handleEditStart = (habit: Habit) => {

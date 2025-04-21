@@ -23,6 +23,8 @@ const toErrorWithMessage = (maybeError: unknown): ErrorWithMessage => {
   }
 };
 
-export const getErrorMessage = (error: unknown) => {
+const getErrorMessage = (error: unknown) => {
   return toErrorWithMessage(error).message;
 };
+
+export default getErrorMessage;

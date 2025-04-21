@@ -1,6 +1,6 @@
 import { StorageBuckets } from '@services';
 
-export const getHabitIconUrl = (habitIconPath?: string | null) => {
+const getHabitIconUrl = (habitIconPath?: string | null) => {
   if (habitIconPath?.startsWith('http')) {
     return habitIconPath;
   }
@@ -9,3 +9,5 @@ export const getHabitIconUrl = (habitIconPath?: string | null) => {
     StorageBuckets.HABIT_ICONS
   }/${habitIconPath || 'default.png'}`;
 };
+
+export default getHabitIconUrl;
