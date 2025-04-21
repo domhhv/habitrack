@@ -1,21 +1,21 @@
 <h1 align="center">Habitrack</h1>
 
 <div align="center">
-<a href="https://react.dev/" title="React"><img src="https://i.ibb.co/DzpWrw3/react.png" alt="React" width="32" height="32" /></a>
+<a href="https://react.dev/" target="_blank" title="React"><img src="https://i.ibb.co/dwS2knBp/atom.png" alt="React" width="32" height="32" /></a>
 &nbsp;
-<a href="https://www.typescriptlang.org/" title="TypeScript"><img src="https://i.ibb.co/Kq8DY4f/typescript.png" alt="TypeScript" width="32" height="32"></a>
+<a href="https://www.typescriptlang.org/" target="_blank" title="TypeScript"><img src="https://i.ibb.co/Kq8DY4f/typescript.png" alt="TypeScript" width="32" height="32"></a>
 &nbsp;
-<a href="https://vite.dev/" title="Vite"><img src="https://i.ibb.co/FWtjy8J/Vite-js.png" alt="Vite" width="32" height="32"></a>
+<a href="https://vite.dev/" target="_blank" title="Vite"><img src="https://i.ibb.co/FWtjy8J/Vite-js.png" alt="Vite" width="32" height="32"></a>
 &nbsp;
-<a href="https://tailwindcss.com/" title="TailwindCSS"><img src="https://i.ibb.co/mR0BWJx/Tailwind-CSS.png" alt="Tailwind" width="32" height="32" /></a>
+<a href="https://tailwindcss.com/" target="_blank" title="TailwindCSS"><img src="https://i.ibb.co/mR0BWJx/Tailwind-CSS.png" alt="Tailwind" width="32" height="32" /></a>
 &nbsp;
-<a href="https://www.heroui.com/" title="HeroUI"><img src="https://i.ibb.co/xYjF5K6/nextui.png" alt="HeroUI" width="32" height="32"></a>
+<a href="https://www.heroui.com/" target="_blank" title="HeroUI"><img src="https://i.ibb.co/xYjF5K6/nextui.png" alt="HeroUI" width="32" height="32"></a>
 &nbsp;
-<a href="https://supabase.com/" title="Supabase"><img src="https://i.ibb.co/WnJ9m8k/supabase-logo-icon.png" alt="Supabase" width="32" height="32"></a>
+<a href="https://supabase.com/" target="_blank" title="Supabase"><img src="https://i.ibb.co/WnJ9m8k/supabase-logo-icon.png" alt="Supabase" width="32" height="32"></a>
 &nbsp;
-<a href="https://vitest.dev/" title="Vitest"><img src="https://i.ibb.co/99zTCxvx/vitest.png" alt="Vitest" width="32" height="32"></a>
+<a href="https://vitest.dev/" target="_blank" title="Vitest"><img src="https://i.ibb.co/99zTCxvx/vitest.png" alt="Vitest" width="32" height="32"></a>
 &nbsp;
-<a href="https://testing-library.com/" title="React Testing Library"><img src="https://i.ibb.co/YLnX0VY/octopus-64x64.png" alt="React Testing Library" width="32" height="32"></a>
+<a href="https://testing-library.com/" target="_blank" title="React Testing Library"><img src="https://i.ibb.co/YLnX0VY/octopus-64x64.png" alt="React Testing Library" width="32" height="32"></a>
 </div>
 
 <br />
@@ -24,15 +24,15 @@ Habitrack is a simple and intuitive web app designed for logging habits and visu
 
 This app showcases the use of the following tools and technologies:
 
-- React 19 with TypeScript, bundled with [Vite 6](https://vite.dev/)
-- [React Router](https://reactrouter.com) v7 for routing
+- React 19 with TypeScript 5.8, bundled with [Vite 6](https://vite.dev/)
+- [React Router](https://reactrouter.com) v7 for routing (library mode)
 - [Zustand](https://zustand.docs.pmnd.rs/) v5 for global state management
 - [Tailwind CSS](https://tailwindcss.com) v3 for styling (HeroUI doesn't support v4 [yet](https://github.com/heroui-inc/heroui/issues/4644))
 - [HeroUI](https://www.heroui.com/) for the UI components
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [Supabase](https://supabase.io) for Authentication, Database and Storage
 - [Vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit-testing
-- ESLint, Prettier, and Husky for linting and formatting
+- ESLint, Prettier, Husky, and SQLFluff for linting and formatting
 - Docker for running a local Supabase instance
 - GitHub Actions for CI/CD and Vercel for deployment
 
@@ -68,8 +68,8 @@ This app showcases the use of the following tools and technologies:
 ### Prerequisites
 
 - [Git](https://git-scm.com/)
-- [Node.js v18](https://nodejs.org/en/) (LTS Hydrogen)
-- [Yarn v4](https://yarnpkg.com/) (Berry)
+- [Node.js](https://nodejs.org/en/) (LTS)
+- [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (v2)
 - [Docker](https://docs.docker.com/get-started/get-docker/)
 
 ### Initial Setup
@@ -93,14 +93,6 @@ Follow these steps to get the project up and running on your local machine.
    ```bash
    yarn install
    ```
-
-4. **Run the application:**
-
-   ```bash
-   yarn dev
-   ```
-
-   This command starts the development server and opens the app in your default browser.
 
 ### Local Database Setup
 
@@ -144,24 +136,15 @@ To set up a local Supabase instance, run the following commands (Docker required
 
    This command resets the local database to a clean state, applies migrations from `supabase/migrations` and seeds the db with essential initial data based on `supabase/seed.sql`.
 
-4. **Check status of the local Supabase instance:**
+### Run the app
 
-   ```bash
-   yarn db:status
-   # the same output as when starting the local Supabase instance
-   ```
+Once the dependencies are installed and the local Supabase instance is running, you can run the app locally:
 
-5. **Stop the local Supabase instance:**
+```bash
+yarn dev
+```
 
-   ```bash
-    yarn db:stop
-   ```
-
-6. **Restart the local Supabase instance:**
-
-   ```bash
-    yarn db:restart
-   ```
+This command starts the development server and opens the app in your default browser.
 
 ### Database Migrations
 
