@@ -19,7 +19,7 @@ import {
 import { useScreenWidth, useUser } from '@hooks';
 import { type Habit } from '@models';
 import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
-import { useHabitActions, useHabits, useOccurrencesStore } from '@stores';
+import { useHabitActions, useHabits } from '@stores';
 import { getErrorMessage } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
@@ -76,7 +76,6 @@ const HabitsPage = () => {
   const { user } = useUser();
   const { removeHabit } = useHabitActions();
   const habits = useHabits();
-  const { removeOccurrencesByHabitIdFromState } = useOccurrencesStore();
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
   const [isRemoving, setIsRemoving] = React.useState<boolean>(false);
@@ -99,8 +98,6 @@ const HabitsPage = () => {
 
     try {
       await removeHabit(habitToRemove);
-
-      removeOccurrencesByHabitIdFromState(habitToRemove.id);
 
       addToast({
         title: 'Your habit has been deleted.',

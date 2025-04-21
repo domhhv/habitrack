@@ -1,13 +1,14 @@
 import { NoteDialog, OccurrenceChip, OccurrenceDialog } from '@components';
 import { Button, cn, Tooltip, useDisclosure } from '@heroui/react';
 import { useScreenWidth, useUser } from '@hooks';
+import type { Occurrence } from '@models';
 import {
   CalendarBlank,
   CalendarPlus,
   Note,
   NoteBlank,
 } from '@phosphor-icons/react';
-import { useNotes, useOccurrencesStore } from '@stores';
+import { useNotes } from '@stores';
 import { format, isToday } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
@@ -25,14 +26,15 @@ type CalendarCellProps = {
   date: Date;
   rangeStatus: CellRangeStatus;
   position: CellPosition;
+  occurrences: Occurrence[];
 };
 
 const MonthCalendarCell = ({
   date,
   rangeStatus,
   position,
+  occurrences,
 }: CalendarCellProps) => {
-  const { fetchingOccurrences, occurrencesByDate } = useOccurrencesStore();
   const notes = useNotes();
   const { user } = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
@@ -50,17 +52,11 @@ const MonthCalendarCell = ({
     isOpen: isOccurrenceDialogOpen,
     onOpen: openOccurrenceDialog,
     onClose: closeOccurrenceDialog,
-  } = useDisclosure({
-    id: date.toISOString(),
-  });
-  console.log('MonthCalendarCell');
+  } = useDisclosure();
 
-  const groupedOccurrences = Object.groupBy(
-    occurrencesByDate[formattedDay] || [],
-    (o) => {
-      return o.habitId;
-    }
-  );
+  const groupedOccurrences = Object.groupBy(occurrences, (o) => {
+    return o.habitId;
+  });
 
   const cellRootClassName = cn(
     'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 focus:border-neutral-100 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-36',
@@ -108,7 +104,7 @@ const MonthCalendarCell = ({
                     radius="sm"
                     onPress={openOccurrenceDialog}
                     color="secondary"
-                    isDisabled={fetchingOccurrences || !user}
+                    isDisabled={!user}
                     tabIndex={0}
                   >
                     <CalendarPlus weight="bold" size={isDesktop ? 18 : 14} />

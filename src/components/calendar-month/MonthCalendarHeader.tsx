@@ -10,13 +10,13 @@ import {
   cn,
 } from '@heroui/react';
 import { useScreenWidth, useUser } from '@hooks';
-import type { Habit, Trait } from '@models';
+import type { Habit, OccurrenceFilters, Trait } from '@models';
 import {
   ArrowFatLeft,
   ArrowFatRight,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
-import { useTraits, useHabits, useOccurrencesStore } from '@stores';
+import { useTraits, useHabits } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
@@ -27,6 +27,8 @@ import { MONTHS } from './MonthCalendar';
 export type MonthCalendarHeaderProps = {
   activeMonthLabel: string;
   activeYear: string;
+  filters: OccurrenceFilters;
+  onFilterChange: (filters: OccurrenceFilters) => void;
 };
 
 const YEARS = Array.from({ length: 31 }, (_, i) => {
@@ -36,10 +38,11 @@ const YEARS = Array.from({ length: 31 }, (_, i) => {
 const MonthCalendarHeader = ({
   activeMonthLabel,
   activeYear,
+  filters,
+  onFilterChange,
 }: MonthCalendarHeaderProps) => {
   const habits = useHabits();
   const traits = useTraits();
-  const { filteredBy, filterBy } = useOccurrencesStore();
   const { user } = useUser();
   const { screenWidth, isMobile } = useScreenWidth();
   const isOnCurrentMonth =
@@ -63,10 +66,18 @@ const MonthCalendarHeader = ({
   const shouldRenderFilters = !!user && habits.length > 0 && traits.length > 0;
 
   const habitsByTraitName = React.useMemo(() => {
-    return Object.groupBy(habits, (habit) => {
+    const filteredHabits = Array.from(filters.habitIds)
+      .map((habitId) => {
+        return habits.find((habit) => {
+          return habit.id === Number(habitId);
+        });
+      })
+      .filter(Boolean) as Habit[];
+
+    return Object.groupBy(filteredHabits, (habit) => {
       return habit.trait?.name || 'Unknown';
     });
-  }, [habits]);
+  }, [habits, filters.habitIds]);
 
   const handleMonthChange: React.ChangeEventHandler<HTMLSelectElement> = (
     event
@@ -87,8 +98,8 @@ const MonthCalendarHeader = ({
   const handleHabitsFilterChange: React.ChangeEventHandler<
     HTMLSelectElement
   > = (event) => {
-    filterBy({
-      ...filteredBy,
+    onFilterChange({
+      ...filters,
       habitIds: new Set(event.target.value.split(',')),
     });
   };
@@ -96,8 +107,8 @@ const MonthCalendarHeader = ({
   const handleTraitsFilterChange: React.ChangeEventHandler<
     HTMLSelectElement
   > = (event) => {
-    filterBy({
-      ...filteredBy,
+    onFilterChange({
+      ...filters,
       traitIds: new Set(event.target.value.split(',')),
     });
   };
@@ -196,7 +207,7 @@ const MonthCalendarHeader = ({
             color="secondary"
             radius="sm"
             label="Filter by habits"
-            selectedKeys={filteredBy.habitIds}
+            selectedKeys={filters.habitIds}
             onChange={handleHabitsFilterChange}
             className="w-full md:w-[200px]"
             selectionMode="multiple"
@@ -266,7 +277,7 @@ const MonthCalendarHeader = ({
             radius="sm"
             label="Filter by traits"
             size="md"
-            selectedKeys={filteredBy.traitIds}
+            selectedKeys={filters.traitIds}
             onChange={handleTraitsFilterChange}
             className="w-full md:w-[250px]"
             selectionMode="multiple"

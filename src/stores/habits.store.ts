@@ -10,8 +10,6 @@ import {
 } from '@services';
 import { create } from 'zustand';
 
-import { useOccurrencesStore } from './index';
-
 type HabitsState = {
   habits: Habit[];
   actions: {
@@ -28,7 +26,7 @@ type HabitsState = {
   };
 };
 
-export const useHabitsStore = create<HabitsState>((set) => {
+const useHabitsStore = create<HabitsState>((set) => {
   return {
     habits: [],
 
@@ -90,20 +88,6 @@ export const useHabitsStore = create<HabitsState>((set) => {
       },
     },
   };
-});
-
-useHabitsStore.subscribe((state, prevState) => {
-  const { updateFilteredBy } = useOccurrencesStore.getState();
-
-  if (prevState.habits.length !== state.habits.length) {
-    updateFilteredBy({
-      habitIds: new Set(
-        state.habits.map((habit) => {
-          return habit.id.toString();
-        })
-      ),
-    });
-  }
 });
 
 export const useHabits = () => {

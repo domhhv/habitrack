@@ -1,6 +1,7 @@
 import { OccurrenceChip } from '@components';
 import { cn } from '@heroui/react';
-import { useOccurrencesStore } from '@stores';
+import { useUser } from '@hooks';
+import { useOccurrenceActions, useOccurrences } from '@stores';
 import {
   addDays,
   eachDayOfInterval,
@@ -23,10 +24,20 @@ const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const WeekCalendar = () => {
   const params = useParams();
-  const { occurrences, onRangeChange } = useOccurrencesStore();
+  const { user } = useUser();
+  const occurrences = useOccurrences();
+  const { fetchOccurrences, clearOccurrences } = useOccurrenceActions();
   const [startOfTheWeek, setStartOfTheWeek] = React.useState(new Date());
 
   React.useEffect(() => {
+    if (!user) {
+      if (occurrences.length) {
+        clearOccurrences();
+      }
+
+      return;
+    }
+
     const currentWeek = startOfWeek(startOfToday());
 
     const {
@@ -44,32 +55,19 @@ const WeekCalendar = () => {
     const rangeStart = startOfWeek(startDate);
     const rangeEnd = endOfWeek(startDate);
 
-    onRangeChange([+rangeStart, +rangeEnd]);
-  }, [params, onRangeChange]);
+    void fetchOccurrences([+rangeStart, +rangeEnd]);
+  }, [params, user, fetchOccurrences, clearOccurrences]);
 
   const days = eachDayOfInterval({
     start: startOfTheWeek,
     end: addDays(startOfTheWeek, 6),
   });
 
-  const occurrencesInWeek = React.useMemo(() => {
-    const occurrencesRange = [
-      startOfTheWeek,
-      endOfWeek(endOfDay(days.at(-1) || new Date())),
-    ];
-
-    return occurrences.filter((o) => {
-      const date = new Date(o.timestamp);
-
-      return date >= occurrencesRange[0] && date <= occurrencesRange[1];
-    });
-  }, [days, occurrences, startOfTheWeek]);
-
   const groupOccurrences = React.useCallback(
     (dayIndex: number, hour: number) => {
       const day = dayIndex === 6 ? 0 : dayIndex + 1;
 
-      const relatedOccurrences = occurrencesInWeek.filter((o) => {
+      const relatedOccurrences = occurrences.filter((o) => {
         const date = new Date(o.timestamp);
 
         return (
@@ -85,7 +83,7 @@ const WeekCalendar = () => {
         })
       );
     },
-    [days, occurrencesInWeek]
+    [days, occurrences]
   );
 
   return (

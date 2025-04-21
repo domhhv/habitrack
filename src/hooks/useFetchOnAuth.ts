@@ -1,11 +1,6 @@
 import { supabaseClient } from '@helpers';
 import { addToast } from '@heroui/react';
-import {
-  useTraitActions,
-  useOccurrencesStore,
-  useNoteActions,
-  useHabitActions,
-} from '@stores';
+import { useTraitActions, useNoteActions, useHabitActions } from '@stores';
 import { getErrorMessage } from '@utils';
 import React from 'react';
 
@@ -13,16 +8,10 @@ const useFetchOnAuth = () => {
   const { fetchTraits, clearTraits } = useTraitActions();
   const { fetchHabits, clearHabits } = useHabitActions();
   const { fetchNotes, clearNotes } = useNoteActions();
-  const { fetchOccurrences, clearOccurrences } = useOccurrencesStore();
 
   const fetchAllData = React.useCallback(async () => {
     try {
-      await Promise.all([
-        fetchTraits(),
-        fetchHabits(),
-        fetchOccurrences(),
-        fetchNotes(),
-      ]);
+      await Promise.all([fetchTraits(), fetchHabits(), fetchNotes()]);
     } catch (error) {
       console.error(error);
       addToast({
@@ -31,14 +20,13 @@ const useFetchOnAuth = () => {
         color: 'danger',
       });
     }
-  }, [fetchTraits, fetchHabits, fetchOccurrences, fetchNotes]);
+  }, [fetchTraits, fetchHabits, fetchNotes]);
 
   React.useEffect(() => {
     const { data } = supabaseClient.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         clearTraits();
         clearHabits();
-        clearOccurrences();
         clearNotes();
       }
 
@@ -50,7 +38,7 @@ const useFetchOnAuth = () => {
     return () => {
       data.subscription.unsubscribe();
     };
-  }, [fetchAllData, clearTraits, clearHabits, clearOccurrences, clearNotes]);
+  }, [fetchAllData, clearTraits, clearHabits, clearNotes]);
 };
 
 export default useFetchOnAuth;

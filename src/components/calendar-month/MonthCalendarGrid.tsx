@@ -2,8 +2,9 @@ import { getYearWeekNumberFromMonthWeek } from '@helpers';
 import { Button, cn, Tooltip } from '@heroui/react';
 import { useScreenWidth } from '@hooks';
 import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
+import type { Occurrence } from '@models';
 import { isTruthy, getMonthIndex } from '@utils';
-import { addMonths, isSameMonth } from 'date-fns';
+import { addMonths, endOfDay, isSameMonth, startOfDay } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { useCalendarGrid, useLocale } from 'react-aria';
@@ -17,6 +18,7 @@ type CalendarGridProps = {
   state: CalendarState;
   activeMonthLabel: string;
   activeYear: number;
+  occurrences: Occurrence[];
 };
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -25,8 +27,8 @@ const MonthCalendarGrid = ({
   state,
   activeMonthLabel,
   activeYear,
+  occurrences,
 }: CalendarGridProps) => {
-  console.log('MonthCalendarGrid render');
   const { gridProps } = useCalendarGrid({}, state);
   const { isDesktop } = useScreenWidth();
   const { locale } = useLocale();
@@ -128,6 +130,8 @@ const MonthCalendarGrid = ({
                       const date = new Date(year, month - 1, day);
                       const prevMonth = addMonths(visibleMonth, -1);
                       const nextMonth = addMonths(visibleMonth, 1);
+                      const dayStart = startOfDay(date);
+                      const dayEnd = endOfDay(date);
 
                       const rangeStatus: CellRangeStatus = isSameMonth(
                         date,
@@ -150,6 +154,12 @@ const MonthCalendarGrid = ({
                           date={date}
                           rangeStatus={rangeStatus}
                           position={position}
+                          occurrences={occurrences.filter((occurrence) => {
+                            return (
+                              occurrence.timestamp >= +dayStart &&
+                              occurrence.timestamp <= +dayEnd
+                            );
+                          })}
                         />
                       );
                     })}

@@ -1,5 +1,12 @@
+import { useUser } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
-import { useOccurrencesStore } from '@stores';
+import type { OccurrenceFilters } from '@models';
+import {
+  useOccurrences,
+  useOccurrenceActions,
+  useHabits,
+  useTraits,
+} from '@stores';
 import { capitalizeFirstLetter } from '@utils';
 import {
   endOfMonth,
@@ -12,7 +19,6 @@ import React from 'react';
 import { useCalendar, useLocale } from 'react-aria';
 import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
-import { useShallow } from 'zustand/react/shallow';
 
 import MonthCalendarGrid from './MonthCalendarGrid';
 import MonthCalendarHeader from './MonthCalendarHeader';
@@ -43,20 +49,48 @@ const createCalendar = (identifier: string) => {
 };
 
 const MonthCalendar = () => {
-  const onRangeChange = useOccurrencesStore(
-    useShallow((state) => {
-      return state.onRangeChange;
-    })
-  );
+  const { user } = useUser();
+  const occurrences = useOccurrences();
+  const habits = useHabits();
+  const traits = useTraits();
+  const { fetchOccurrences, clearOccurrences } = useOccurrenceActions();
+  const [filters, setFilters] = React.useState<OccurrenceFilters>({
+    habitIds: new Set(),
+    traitIds: new Set(),
+  });
   const { locale } = useLocale();
   const calendarState = useCalendarState({
     locale,
     createCalendar,
+    isReadOnly: true,
   });
   const { calendarProps, title } = useCalendar({}, calendarState);
   const params = useParams();
 
   React.useEffect(() => {
+    setFilters({
+      habitIds: new Set(
+        habits.map((habit) => {
+          return habit.id.toString();
+        })
+      ),
+      traitIds: new Set(
+        traits.map((trait) => {
+          return trait.id.toString();
+        })
+      ),
+    });
+  }, [habits, traits]);
+
+  React.useEffect(() => {
+    if (!user) {
+      if (occurrences.length) {
+        clearOccurrences();
+      }
+
+      return;
+    }
+
     const currentMonth = startOfMonth(startOfToday());
 
     const {
@@ -70,7 +104,7 @@ const MonthCalendar = () => {
     const rangeStart = startOfWeek(startOfMonth(focusedDate));
     const rangeEnd = endOfWeek(endOfMonth(focusedDate));
 
-    onRangeChange([+rangeStart, +rangeEnd]);
+    void fetchOccurrences([+rangeStart, +rangeEnd]);
 
     const nextFocusedDate = new CalendarDate(
       focusedDate.getFullYear(),
@@ -84,7 +118,14 @@ const MonthCalendar = () => {
     if (hasFocusedDateChanged) {
       calendarState.setFocusedDate(nextFocusedDate);
     }
-  }, [params, calendarState, onRangeChange]);
+  }, [
+    params,
+    calendarState.focusedDate,
+    user,
+    fetchOccurrences,
+    clearOccurrences,
+    occurrences.length,
+  ]);
 
   const [, activeYear] = title.split(' ');
 
@@ -101,11 +142,19 @@ const MonthCalendar = () => {
       <MonthCalendarHeader
         activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
         activeYear={activeYear}
+        filters={filters}
+        onFilterChange={setFilters}
       />
       <MonthCalendarGrid
         activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
         activeYear={Number(activeYear)}
         state={calendarState}
+        occurrences={occurrences.filter((occurrence) => {
+          return (
+            filters.habitIds.has(occurrence.habitId.toString()) &&
+            filters.traitIds.has(occurrence.habit?.trait?.id.toString() || '')
+          );
+        })}
       />
     </div>
   );

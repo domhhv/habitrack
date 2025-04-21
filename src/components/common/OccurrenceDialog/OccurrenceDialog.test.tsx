@@ -1,5 +1,5 @@
 import { useUser } from '@hooks';
-import { useHabits, useNoteActions, useOccurrencesStore } from '@stores';
+import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import { format } from 'date-fns';
@@ -12,8 +12,9 @@ import OccurrenceDialog from './OccurrenceDialog';
 vi.mock('@stores', () => {
   return {
     useHabits: vi.fn(),
-    useOccurrencesStore: vi.fn().mockReturnValue({
-      occurrences: [],
+    useOccurrences: vi.fn().mockReturnValue([]),
+    useOccurrenceActions: vi.fn().mockReturnValue({
+      addOccurrence: vi.fn(),
     }),
     useNoteActions: vi.fn(),
   };
@@ -55,13 +56,6 @@ describe(OccurrenceDialog.name, () => {
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
-    (
-      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
-    ).mockReturnValue({
-      occurrences: [],
-      addOccurrence: vi.fn(),
-      addingOccurrence: false,
-    });
     const { getByText } = render(
       <BrowserRouter>
         <OccurrenceDialog {...props} />
@@ -77,13 +71,6 @@ describe(OccurrenceDialog.name, () => {
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
-    (
-      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
-    ).mockReturnValue({
-      occurrences: [],
-      addOccurrence: vi.fn(),
-      addingOccurrence: false,
-    });
     const { getAllByText } = render(
       <BrowserRouter>
         <OccurrenceDialog {...props} />
@@ -103,13 +90,6 @@ describe(OccurrenceDialog.name, () => {
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
-    (
-      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
-    ).mockReturnValue({
-      occurrences: [],
-      addOccurrence: vi.fn(),
-      addingOccurrence: false,
-    });
     const { getByText } = render(<OccurrenceDialog {...props} />);
     expect(getByText('Test Habit')).toBeInTheDocument();
   });
@@ -118,13 +98,6 @@ describe(OccurrenceDialog.name, () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
-    (
-      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
-    ).mockReturnValue({
-      occurrences: [],
-      addOccurrence: vi.fn(),
-      addingOccurrence: false,
-    });
     const { container, getAllByText, getByTestId } = render(
       <OccurrenceDialog {...props} />
     );
@@ -143,13 +116,6 @@ describe(OccurrenceDialog.name, () => {
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
-    (
-      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
-    ).mockReturnValue({
-      occurrences: [],
-      addOccurrence: vi.fn(),
-      addingOccurrence: false,
-    });
     const { getByRole } = render(<OccurrenceDialog {...props} />);
     fireEvent.click(getByRole('button', { name: 'Close' }));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -159,13 +125,6 @@ describe(OccurrenceDialog.name, () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
-    (
-      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
-    ).mockReturnValue({
-      occurrences: [],
-      addOccurrence: vi.fn(),
-      addingOccurrence: false,
-    });
     const { getByRole, getByText } = render(<OccurrenceDialog {...props} />);
     fireEvent.click(getByRole('habit-select'));
     fireEvent.click(getByText('Test Habit'));
@@ -186,11 +145,9 @@ describe(OccurrenceDialog.name, () => {
     );
     const mockAddOccurrence = vi.fn();
     (
-      useOccurrencesStore as unknown as ReturnType<typeof vi.fn>
+      useOccurrenceActions as unknown as ReturnType<typeof vi.fn>
     ).mockReturnValue({
-      occurrences: [],
       addOccurrence: mockAddOccurrence,
-      addingOccurrence: false,
     });
     const { getByRole, getByText } = render(<OccurrenceDialog {...props} />);
     fireEvent.click(getByRole('habit-select'));
