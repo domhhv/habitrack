@@ -78,6 +78,8 @@ const OccurrenceDialog = ({
       setSelectedHabitId(existingOccurrence.habitId.toString());
       setNote(existingOccurrence.notes[0]?.content || '');
       setTime(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         parseAbsoluteToLocal(
           new Date(existingOccurrence.timestamp).toISOString()
         )
@@ -94,6 +96,8 @@ const OccurrenceDialog = ({
       occurrenceDateTime.setMonth(newOccurrenceDate.getMonth());
       occurrenceDateTime.setDate(newOccurrenceDate.getDate());
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
     }
   }, [newOccurrenceDate, existingOccurrence, isOpen]);
@@ -405,7 +409,7 @@ const OccurrenceDialog = ({
               value={repeat}
               label="Repeat"
               variant="faded"
-              minValue={0}
+              minValue={1}
               classNames={
                 !isDesktop
                   ? {
