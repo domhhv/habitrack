@@ -120,7 +120,7 @@ const MonthCalendar = () => {
     }
   }, [
     params,
-    calendarState.focusedDate,
+    calendarState,
     user,
     fetchOccurrences,
     clearOccurrences,
