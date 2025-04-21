@@ -1,4 +1,3 @@
-export * from './occurrencesCache';
 export * from './promise';
 export { default as generateCalendarRange } from './generateCalendarRange';
 export { default as supabaseClient } from './supabaseClient';

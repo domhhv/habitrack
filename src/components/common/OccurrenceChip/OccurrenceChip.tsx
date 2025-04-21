@@ -1,5 +1,6 @@
 import { OccurrenceDialog } from '@components';
 import {
+  addToast,
   Badge,
   Button,
   cn,
@@ -14,8 +15,8 @@ import {
 import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { Camera, Note, PencilSimple, TrashSimple } from '@phosphor-icons/react';
-import { useOccurrencesStore } from '@stores';
-import { getHabitIconUrl } from '@utils';
+import { useOccurrenceActions } from '@stores';
+import { getErrorMessage, getHabitIconUrl } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -41,25 +42,42 @@ const OccurrenceChip = ({
     onOpen: openOccurrenceDialog,
     onClose: closeOccurrenceDialog,
   } = useDisclosure();
-  const [occurrenceIdToEdit, setOccurrenceIdToEdit] = React.useState<
-    number | null
-  >(null);
+  const [occurrenceToEdit, setOccurrenceToEdit] =
+    React.useState<Occurrence | null>(null);
   const [occurrence] = occurrences;
   const { habit } = occurrence;
   const { name: habitName, iconPath, trait } = habit || {};
   const { color: traitColor } = trait || {};
   const iconUrl = getHabitIconUrl(iconPath);
   const { screenWidth } = useScreenWidth();
-  const { removeOccurrence } = useOccurrencesStore();
+  const { removeOccurrence } = useOccurrenceActions();
 
   const handleOccurrenceModalClose = () => {
-    setOccurrenceIdToEdit(null);
+    setOccurrenceToEdit(null);
     closeOccurrenceDialog();
   };
 
-  const handleOccurrenceModalOpen = (occurrenceId: number) => {
-    setOccurrenceIdToEdit(occurrenceId);
+  const handleOccurrenceModalOpen = (occurrence: Occurrence) => {
+    setOccurrenceToEdit(occurrence);
     openOccurrenceDialog();
+  };
+
+  const handleRemoveOccurrence = async (id: number) => {
+    try {
+      await removeOccurrence(id);
+      addToast({
+        title: 'Your habit entry has been deleted from the calendar.',
+        color: 'success',
+      });
+    } catch (error) {
+      console.error('Error removing occurrence:', error);
+      addToast({
+        title:
+          'Something went wrong while deleting your habit entry. Please try again.',
+        description: `Error details: ${getErrorMessage(error)}`,
+        color: 'danger',
+      });
+    }
   };
 
   let chip = (
@@ -152,7 +170,7 @@ const OccurrenceChip = ({
 
       <OccurrenceDialog
         isOpen={isOccurrenceDialogOpen}
-        existingOccurrenceId={occurrenceIdToEdit}
+        existingOccurrence={occurrenceToEdit}
         onClose={handleOccurrenceModalClose}
       />
 
@@ -194,7 +212,7 @@ const OccurrenceChip = ({
                             size="sm"
                             color="secondary"
                             onPress={() => {
-                              return handleOccurrenceModalOpen(o.id);
+                              return handleOccurrenceModalOpen(o);
                             }}
                             className="h-6 w-6 min-w-0 rounded-lg"
                           >
@@ -209,7 +227,7 @@ const OccurrenceChip = ({
                             variant="light"
                             color="danger"
                             onPress={() => {
-                              return removeOccurrence(o.id);
+                              return handleRemoveOccurrence(o.id);
                             }}
                             role="habit-chip-delete-button"
                             className="h-6 w-6 min-w-0 rounded-lg"

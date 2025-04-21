@@ -17,8 +17,9 @@ import {
 } from '@heroui/react';
 import { useScreenWidth, useUser } from '@hooks';
 import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
+import type { Occurrence } from '@models';
 import { ArrowsClockwise } from '@phosphor-icons/react';
-import { useHabits, useNoteActions, useOccurrencesStore } from '@stores';
+import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
 import { getErrorMessage, getHabitIconUrl } from '@utils';
 import { format, isFuture, isToday, isYesterday } from 'date-fns';
 import pluralize from 'pluralize';
@@ -33,27 +34,23 @@ type OccurrenceDialogProps = RequireAtLeastOne<
     isOpen: boolean;
     onClose: () => void;
     newOccurrenceDate: Date | null;
-    existingOccurrenceId: number | null;
+    existingOccurrence: Occurrence | null;
   },
-  'newOccurrenceDate' | 'existingOccurrenceId'
+  'newOccurrenceDate' | 'existingOccurrence'
 >;
 
 const OccurrenceDialog = ({
   isOpen,
   onClose,
   newOccurrenceDate,
-  existingOccurrenceId,
+  existingOccurrence,
 }: OccurrenceDialogProps) => {
   const { user } = useUser();
   const habits = useHabits();
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote, updateNote } = useNoteActions();
-  const {
-    occurrences,
-    addOccurrence,
-    updateOccurrence,
-    updateOccurrenceNoteInState,
-  } = useOccurrencesStore();
+  const { addOccurrence, updateOccurrence, updateOccurrenceNoteInState } =
+    useOccurrenceActions();
   const [note, setNote] = React.useState('');
   const [repeat, setRepeat] = React.useState(1);
   const [selectedHabitId, setSelectedHabitId] = React.useState('');
@@ -70,43 +67,27 @@ const OccurrenceDialog = ({
     });
   }, [habits]);
 
-  const occurrenceToUpdate = React.useMemo(() => {
-    return occurrences.find((o) => {
-      return o.id === existingOccurrenceId;
-    });
-  }, [existingOccurrenceId, occurrences]);
-
   const hasHabits = habits.length > 0;
 
   React.useEffect(() => {
-    if (time) {
+    if (!newOccurrenceDate && !existingOccurrence) {
       return;
     }
 
-    if (!newOccurrenceDate && !existingOccurrenceId) {
-      return;
-    }
-
-    if (isOpen && existingOccurrenceId) {
-      const occurrence = occurrences.find((o) => {
-        return o.id === existingOccurrenceId;
-      });
-
-      if (!occurrence) {
-        return;
-      }
-
-      setSelectedHabitId(occurrence.habitId.toString());
-      setNote(occurrence.notes[0]?.content || '');
+    if (isOpen && existingOccurrence) {
+      setSelectedHabitId(existingOccurrence.habitId.toString());
+      setNote(existingOccurrence.notes[0]?.content || '');
       setTime(
-        parseAbsoluteToLocal(new Date(occurrence.timestamp).toISOString())
+        parseAbsoluteToLocal(
+          new Date(existingOccurrence.timestamp).toISOString()
+        )
       );
-      setPhotoPaths(occurrence.photoPaths);
+      setPhotoPaths(existingOccurrence.photoPaths);
 
       return;
     }
 
-    if (newOccurrenceDate) {
+    if (isOpen && newOccurrenceDate) {
       const occurrenceDateTime = new Date();
 
       occurrenceDateTime.setFullYear(newOccurrenceDate.getFullYear());
@@ -115,7 +96,7 @@ const OccurrenceDialog = ({
 
       setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
     }
-  }, [newOccurrenceDate, existingOccurrenceId, occurrences, time, isOpen]);
+  }, [newOccurrenceDate, existingOccurrence, isOpen]);
 
   React.useEffect(() => {
     if (!habits.length) {
@@ -130,14 +111,14 @@ const OccurrenceDialog = ({
       return;
     }
 
-    if (occurrenceToUpdate) {
+    if (existingOccurrence) {
       const hasTimeChanged =
         time instanceof ZonedDateTime &&
-        +time.toDate() !== +new Date(occurrenceToUpdate.timestamp);
+        +time.toDate() !== +new Date(existingOccurrence.timestamp);
       const hasNoteChanged =
-        note !== (occurrenceToUpdate.notes[0]?.content || '');
+        note !== (existingOccurrence.notes[0]?.content || '');
       const hasHabitChanged =
-        selectedHabitId !== occurrenceToUpdate.habitId.toString();
+        selectedHabitId !== existingOccurrence.habitId.toString();
 
       const hasOccurrenceChanged =
         hasNoteChanged || hasHabitChanged || hasTimeChanged;
@@ -148,7 +129,7 @@ const OccurrenceDialog = ({
     }
   }, [
     newOccurrenceDate,
-    occurrenceToUpdate,
+    existingOccurrence,
     note,
     selectedHabitId,
     time,
@@ -177,27 +158,27 @@ const OccurrenceDialog = ({
       return;
     }
 
-    if (occurrenceToUpdate) {
-      const occurrenceToUpdateDate = new Date(occurrenceToUpdate.timestamp);
+    if (existingOccurrence) {
+      const existingOccurrenceDate = new Date(existingOccurrence.timestamp);
 
       setIsDateTimeInFuture(
         isFuture(
           new Date(
-            occurrenceToUpdateDate.getFullYear(),
-            occurrenceToUpdateDate.getMonth(),
-            occurrenceToUpdateDate.getDate(),
+            existingOccurrenceDate.getFullYear(),
+            existingOccurrenceDate.getMonth(),
+            existingOccurrenceDate.getDate(),
             time?.hour || 0,
             time?.minute || 0
           )
         )
       );
     }
-  }, [newOccurrenceDate, occurrenceToUpdate, time]);
+  }, [newOccurrenceDate, existingOccurrence, time]);
 
   const handleSubmit = async () => {
     if (
       !user ||
-      !(newOccurrenceDate || occurrenceToUpdate) ||
+      !(newOccurrenceDate || existingOccurrence) ||
       !hasHabits ||
       !selectedHabitId ||
       Number.isNaN(+selectedHabitId)
@@ -218,33 +199,33 @@ const OccurrenceDialog = ({
 
     setIsSaving(true);
 
-    if (existingOccurrenceId && occurrenceToUpdate) {
+    if (existingOccurrence) {
       try {
-        await updateOccurrence(occurrenceToUpdate.id, {
+        await updateOccurrence(existingOccurrence.id, {
           timestamp: +occurrenceDateTime,
           habitId: +selectedHabitId,
           userId: user?.id as string,
         });
 
         if (note) {
-          const existingNote = occurrenceToUpdate.notes[0];
+          const [existingNote] = existingOccurrence.notes;
 
           let newNote;
 
           if (existingNote) {
             newNote = await updateNote(existingNote.id, {
               content: note,
-              occurrenceId: existingOccurrenceId,
+              occurrenceId: existingOccurrence.id,
             });
           } else {
             newNote = await addNote({
               content: note,
-              occurrenceId: existingOccurrenceId,
+              occurrenceId: existingOccurrence.id,
               userId: user.id,
             });
           }
 
-          updateOccurrenceNoteInState(existingOccurrenceId, {
+          updateOccurrenceNoteInState(existingOccurrence.id, {
             id: newNote.id,
             content: newNote.content,
           });
@@ -323,17 +304,12 @@ const OccurrenceDialog = ({
   };
 
   const formatDate = () => {
-    if (!newOccurrenceDate && !existingOccurrenceId) {
+    if (!newOccurrenceDate && !existingOccurrence) {
       return 'today';
     }
 
     const dateToFormat =
-      newOccurrenceDate ||
-      new Date(
-        occurrences.find((o) => {
-          return o.id === existingOccurrenceId;
-        })?.timestamp || ''
-      );
+      newOccurrenceDate || new Date(existingOccurrence?.timestamp || '');
 
     if (isToday(dateToFormat)) {
       return 'today';
@@ -362,7 +338,7 @@ const OccurrenceDialog = ({
     >
       <ModalContent className="overflow-y-auto">
         <ModalHeader>
-          {existingOccurrenceId ? 'Edit' : 'Add'} habit entry for {formatDate()}
+          {existingOccurrence ? 'Edit' : 'Add'} habit entry for {formatDate()}
         </ModalHeader>
         <ModalBody>
           <Select
@@ -423,7 +399,7 @@ const OccurrenceDialog = ({
                 : undefined
             }
           />
-          {!occurrenceToUpdate && (
+          {!existingOccurrence && (
             <NumberInput
               onValueChange={setRepeat}
               value={repeat}
@@ -470,7 +446,7 @@ const OccurrenceDialog = ({
         <ModalFooter>
           {hasHabits ? (
             <Button {...submitButtonSharedProps} onPress={handleSubmit}>
-              {occurrenceToUpdate ? 'Update' : 'Add'}
+              {existingOccurrence ? 'Update' : 'Add'}
             </Button>
           ) : (
             <Button as={Link} to="/habits" {...submitButtonSharedProps}>
@@ -483,4 +459,4 @@ const OccurrenceDialog = ({
   );
 };
 
-export default React.memo(OccurrenceDialog);
+export default OccurrenceDialog;

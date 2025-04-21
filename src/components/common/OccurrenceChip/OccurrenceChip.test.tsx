@@ -1,5 +1,5 @@
 import { useScreenWidth } from '@hooks';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { makeTestOccurrence } from '@tests';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
@@ -15,7 +15,7 @@ vi.mock('@hooks', () => {
 
 vi.mock('@stores', () => {
   return {
-    useOccurrencesStore: vi.fn(),
+    useOccurrenceActions: vi.fn(),
   };
 });
 
@@ -40,17 +40,6 @@ describe(OccurrenceChip.name, () => {
         getHabitIconUrl('https://i.ibb.co/vvgw7bx/habitrack-logo.png')
       );
     });
-  });
-
-  it.skip('should call onDelete when delete button is clicked', async () => {
-    const { getByRole } = render(<OccurrenceChip {...props} />);
-    const chip = getByRole('habit-chip');
-    fireEvent.mouseOver(chip);
-    const deleteButton = getByRole('habit-chip-delete-button');
-    await waitFor(() => {
-      expect(deleteButton).toBeDefined();
-    });
-    deleteButton.click();
   });
 
   it('should not render delete button on small screens', () => {

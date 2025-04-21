@@ -1,4 +1,4 @@
-import { cacheOccurrences, occurrencesCache, supabaseClient } from '@helpers';
+import { supabaseClient } from '@helpers';
 import type {
   Occurrence,
   OccurrencesInsert,
@@ -34,12 +34,6 @@ export const createOccurrence = async (
 export const listOccurrences = async (
   range: [number, number]
 ): Promise<Occurrence[]> => {
-  const cachedOccurrences = occurrencesCache.get(range.toString());
-
-  if (cachedOccurrences?.length) {
-    return cachedOccurrences;
-  }
-
   const { error, data } = await supabaseClient
     .from('occurrences')
     .select(
@@ -54,10 +48,6 @@ export const listOccurrences = async (
   }
 
   const result = transformServerEntities(data);
-
-  if (result.length) {
-    cacheOccurrences(range, result);
-  }
 
   return result;
 };

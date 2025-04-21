@@ -26,11 +26,15 @@ export type Occurrence = BaseOccurrence & {
   notes: Pick<Note, 'id' | 'content'>[];
 };
 
-export type OccurrencesDateMap = Record<string, Occurrence[]>;
-
 export type OccurrencesInsert = CamelCasedPropertiesDeep<
   TablesInsert<'occurrences'>
 >;
+
 export type OccurrencesUpdate = CamelCasedPropertiesDeep<
   TablesUpdate<'occurrences'>
 >;
+
+export type OccurrenceFilters = {
+  habitIds: Set<string>;
+  traitIds: Set<string>;
+};

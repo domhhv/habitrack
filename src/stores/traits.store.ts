@@ -1,6 +1,5 @@
 import type { Trait, TraitsInsert } from '@models';
 import { listTraits, createTrait } from '@services';
-import { useOccurrencesStore } from '@stores';
 import { create } from 'zustand';
 
 type TraitsState = {
@@ -12,7 +11,7 @@ type TraitsState = {
   };
 };
 
-export const useTraitsStore = create<TraitsState>((set) => {
+const useTraitsStore = create<TraitsState>((set) => {
   return {
     traits: [],
 
@@ -34,20 +33,6 @@ export const useTraitsStore = create<TraitsState>((set) => {
       },
     },
   };
-});
-
-useTraitsStore.subscribe((state, prevState) => {
-  const { updateFilteredBy } = useOccurrencesStore.getState();
-
-  if (prevState.traits.length !== state.traits.length) {
-    updateFilteredBy({
-      traitIds: new Set(
-        state.traits.map((trait) => {
-          return trait.id.toString();
-        })
-      ),
-    });
-  }
 });
 
 export const useTraits = () => {
