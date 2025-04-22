@@ -1,28 +1,27 @@
 import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE_MB } from '@const';
 import { supabaseClient } from '@helpers';
+import type { UploadResult } from '@models';
+import { StorageBuckets } from '@models';
 import imageCompression from 'browser-image-compression';
-import type { AsyncReturnType } from 'type-fest';
-
-export enum StorageBuckets {
-  HABIT_ICONS = 'habit_icons',
-  OCCURRENCE_PHOTOS = 'occurrence_photos',
-}
 
 export const uploadFile = async (
   bucket: StorageBuckets,
   path: string,
-  file: File
+  file: File,
+  cacheControl?: string
 ) => {
-  const { error } = await supabaseClient.storage
+  const { data, error } = await supabaseClient.storage
     .from(bucket)
     .upload(path, file, {
-      cacheControl: '3600',
       upsert: true,
+      cacheControl,
     });
 
   if (error) {
     throw new Error(error.message);
   }
+
+  return data.path;
 };
 
 export const deleteFile = async (bucket: StorageBuckets, path: string) => {
@@ -35,22 +34,11 @@ export const deleteFile = async (bucket: StorageBuckets, path: string) => {
   return true;
 };
 
-export type SuccessfulUpload = {
-  status: 'success';
-  path: string;
-};
-
-export type FailedUpload = {
-  status: 'error';
-  error: string;
-};
-
-export type UploadResult = SuccessfulUpload | FailedUpload;
-
 export async function uploadImage(
   bucket: StorageBuckets,
   file: File,
-  userId: string
+  userId: string,
+  metadata?: object
 ): Promise<UploadResult> {
   if (!ALLOWED_IMAGE_TYPES[bucket].includes(file.type)) {
     return { error: 'Invalid file type', status: 'error' };
@@ -75,6 +63,7 @@ export async function uploadImage(
     .from(bucket)
     .upload(filePath, compressedFile, {
       upsert: false,
+      metadata,
     });
 
   if (uploadError) {
@@ -98,5 +87,3 @@ export const createSignedUrls = async (
 
   return data;
 };
-
-export type SignedUrls = AsyncReturnType<typeof createSignedUrls>;

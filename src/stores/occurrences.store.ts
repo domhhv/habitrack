@@ -4,8 +4,10 @@ import type {
   OccurrencesInsert,
   OccurrencesUpdate,
 } from '@models';
+import { StorageBuckets } from '@models';
 import {
   createOccurrence,
+  deleteFile,
   destroyOccurrence,
   listOccurrences,
   patchOccurrence,
@@ -18,7 +20,7 @@ type OccurrencesState = {
     fetchOccurrences: (range: [number, number]) => Promise<void>;
     clearOccurrences: () => void;
     addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
-    removeOccurrence: (id: number) => Promise<void>;
+    removeOccurrence: (occurrence: Occurrence) => Promise<void>;
     updateOccurrence: (id: number, body: OccurrencesUpdate) => Promise<void>;
     updateOccurrenceNoteInState: (
       occurrenceId: number,
@@ -55,8 +57,17 @@ const useOccurrencesStore = create<OccurrencesState>((set) => {
         return nextOccurrence;
       },
 
-      removeOccurrence: async (id: number) => {
+      removeOccurrence: async ({ id, photoPaths }: Occurrence) => {
         await destroyOccurrence(id);
+
+        if (photoPaths) {
+          await Promise.all(
+            photoPaths.map((photoPath) => {
+              return deleteFile(StorageBuckets.OCCURRENCE_PHOTOS, photoPath);
+            })
+          );
+        }
+
         set((state) => {
           return {
             occurrences: state.occurrences.filter((occurrence) => {

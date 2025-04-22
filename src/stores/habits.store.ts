@@ -1,12 +1,11 @@
 import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
+import { StorageBuckets } from '@models';
 import {
   createHabit,
   deleteFile,
   destroyHabit,
   listHabits,
   patchHabit,
-  StorageBuckets,
-  uploadHabitIcon,
 } from '@services';
 import { create } from 'zustand';
 
@@ -15,13 +14,8 @@ type HabitsState = {
   actions: {
     clearHabits: () => void;
     fetchHabits: () => Promise<void>;
-    addHabit: (habit: HabitsInsert, icon?: File | null) => Promise<void>;
-    updateHabit: (
-      id: number,
-      userId: string,
-      habit: HabitsUpdate,
-      icon?: File | null
-    ) => Promise<void>;
+    addHabit: (habit: HabitsInsert) => Promise<void>;
+    updateHabit: (id: number, habit: HabitsUpdate) => Promise<void>;
     removeHabit: (habit: Habit) => Promise<void>;
   };
 };
@@ -40,27 +34,15 @@ const useHabitsStore = create<HabitsState>((set) => {
         set({ habits });
       },
 
-      addHabit: async (habit: HabitsInsert, icon?: File | null) => {
-        const iconPath = await uploadHabitIcon(habit.userId, icon);
-        const newHabit = await createHabit({ ...habit, iconPath });
+      addHabit: async (habit: HabitsInsert) => {
+        const newHabit = await createHabit(habit);
         set((state) => {
           return { habits: [...state.habits, newHabit] };
         });
       },
 
-      updateHabit: async (
-        id: number,
-        userId: string,
-        habit: HabitsUpdate,
-        icon?: File | null
-      ) => {
-        let iconPath = habit.iconPath;
-
-        if (icon) {
-          iconPath = await uploadHabitIcon(userId, icon);
-        }
-
-        const updatedHabit = await patchHabit(id, { ...habit, iconPath });
+      updateHabit: async (id: number, habit: HabitsUpdate) => {
+        const updatedHabit = await patchHabit(id, habit);
 
         set((state) => {
           return {

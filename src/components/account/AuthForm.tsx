@@ -1,4 +1,4 @@
-import { PasswordInput, type AuthMode } from '@components';
+import { PasswordInput } from '@components';
 import { Input, Button, cn } from '@heroui/react';
 import { useTextField } from '@hooks';
 import React from 'react';
@@ -8,8 +8,8 @@ type AuthFormProps = {
   onCancel: () => void;
   disabled: boolean;
   submitButtonLabel: string;
-  mode: AuthMode;
-  onModeChange: (mode: AuthMode) => void;
+  mode: 'login' | 'register' | 'reset-password';
+  onModeChange: (mode: 'login' | 'register' | 'reset-password') => void;
   goBackToLogin: () => void;
 };
 

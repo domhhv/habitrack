@@ -1,4 +1,4 @@
-import { StorageBuckets } from '@services';
+import { StorageBuckets } from '@models';
 
 const getHabitIconUrl = (habitIconPath?: string | null) => {
   if (habitIconPath?.startsWith('http')) {

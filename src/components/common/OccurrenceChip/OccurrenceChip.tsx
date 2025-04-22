@@ -1,6 +1,6 @@
 import { OccurrenceDialog } from '@components';
+import { handleAsyncAction } from '@helpers';
 import {
-  addToast,
   Badge,
   Button,
   cn,
@@ -16,7 +16,7 @@ import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { Camera, Note, PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useOccurrenceActions } from '@stores';
-import { getErrorMessage, getHabitIconUrl } from '@utils';
+import { getHabitIconUrl } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -62,22 +62,8 @@ const OccurrenceChip = ({
     openOccurrenceDialog();
   };
 
-  const handleRemoveOccurrence = async (id: number) => {
-    try {
-      await removeOccurrence(id);
-      addToast({
-        title: 'Your habit entry has been deleted from the calendar.',
-        color: 'success',
-      });
-    } catch (error) {
-      console.error('Error removing occurrence:', error);
-      addToast({
-        title:
-          'Something went wrong while deleting your habit entry. Please try again.',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    }
+  const handleRemoveOccurrence = async (occurrence: Occurrence) => {
+    handleAsyncAction(removeOccurrence(occurrence), 'remove_occurrence');
   };
 
   let chip = (
@@ -227,7 +213,7 @@ const OccurrenceChip = ({
                             variant="light"
                             color="danger"
                             onPress={() => {
-                              return handleRemoveOccurrence(o.id);
+                              return handleRemoveOccurrence(o);
                             }}
                             role="habit-chip-delete-button"
                             className="h-6 w-6 min-w-0 rounded-lg"

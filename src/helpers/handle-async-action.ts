@@ -38,9 +38,9 @@ const getMessages = (actionType: ActionType) => {
 const handleAsyncAction = <T>(
   action: Promise<T>,
   actionType: ActionType,
-  setState: (isLoading: boolean) => void
+  setState?: (isLoading: boolean) => void
 ): Promise<T> => {
-  setState(true);
+  setState?.(true);
 
   const messages = getMessages(actionType);
 
@@ -65,7 +65,7 @@ const handleAsyncAction = <T>(
       return Promise.reject();
     })
     .finally(() => {
-      setState(false);
+      setState?.(false);
     });
 };
 

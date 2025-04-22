@@ -2,17 +2,13 @@ import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE_MB } from '@const';
 import { addToast, Input } from '@heroui/react';
 import { useUser } from '@hooks';
 import type {
-  SignedUrls,
   FailedUpload,
-  UploadResult,
+  SignedUrls,
   SuccessfulUpload,
-} from '@services';
-import {
-  StorageBuckets,
-  deleteFile,
-  uploadImage,
-  createSignedUrls,
-} from '@services';
+  UploadResult,
+} from '@models';
+import { StorageBuckets } from '@models';
+import { deleteFile, uploadImage, createSignedUrls } from '@services';
 import { getErrorMessage, isFulfilled, isRejected } from '@utils';
 import pluralize from 'pluralize';
 import React from 'react';

@@ -2,12 +2,10 @@ import { supabaseClient } from '@helpers';
 import type { NotesUpdate, Note, NotesInsert } from '@models';
 import { deepSnakify, deepCamelize } from '@utils';
 
-export const createNote = async (body: NotesInsert): Promise<Note> => {
-  const serverBody = deepSnakify(body);
-
+export const createNote = async (note: NotesInsert): Promise<Note> => {
   const { error, data } = await supabaseClient
     .from('notes')
-    .insert(serverBody)
+    .insert(deepSnakify(note))
     .select()
     .single();
 
@@ -32,14 +30,9 @@ export const updateNote = async (
   id: number,
   note: NotesUpdate
 ): Promise<Note> => {
-  const serverNote = deepSnakify({
-    ...note,
-    updatedAt: new Date().toISOString(),
-  });
-
   const { error, data } = await supabaseClient
     .from('notes')
-    .update(serverNote)
+    .update(deepSnakify(note))
     .eq('id', id)
     .select();
 

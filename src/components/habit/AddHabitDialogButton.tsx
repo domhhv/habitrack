@@ -14,6 +14,7 @@ import {
 } from '@heroui/react';
 import { useTextField, useFileField, useUser } from '@hooks';
 import { CloudArrowUp, Plus } from '@phosphor-icons/react';
+import { uploadHabitIcon } from '@services';
 import { useHabitActions, useTraits } from '@stores';
 import React from 'react';
 
@@ -47,19 +48,21 @@ const AddHabitDialogButton = () => {
       return null;
     }
 
-    void handleAsyncAction(
-      addHabit(
-        {
-          name,
-          description,
-          userId: user.id,
-          traitId: +traitId,
-        },
-        icon
-      ),
-      'add_habit',
-      setIsAdding
-    ).then(handleDialogClose);
+    const add = async () => {
+      const iconPath = icon ? await uploadHabitIcon(user.id, icon) : '';
+
+      return addHabit({
+        name,
+        description,
+        userId: user.id,
+        traitId: +traitId,
+        iconPath,
+      });
+    };
+
+    void handleAsyncAction(add(), 'add_habit', setIsAdding).then(
+      handleDialogClose
+    );
   };
 
   return (

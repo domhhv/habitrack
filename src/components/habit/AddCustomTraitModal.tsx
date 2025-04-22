@@ -17,7 +17,7 @@ import { toEventLike } from '@utils';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
-export type AddCustomTraitModalProps = {
+type AddCustomTraitModalProps = {
   open: boolean;
   onClose: () => void;
 };

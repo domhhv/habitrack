@@ -1,4 +1,4 @@
-import { StorageBuckets } from '@services';
+import { StorageBuckets } from '@models';
 
 export const MAX_FILE_SIZE_MB = {
   [StorageBuckets.HABIT_ICONS]: 0.1,

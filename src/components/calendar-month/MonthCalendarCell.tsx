@@ -78,7 +78,7 @@ const MonthCalendarCell = ({
   return (
     <>
       <NoteDialog
-        open={isNoteDialogOpen}
+        isOpen={isNoteDialogOpen}
         onClose={closeNoteDialog}
         day={toSqlDate(date)}
       />

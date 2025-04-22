@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { type ChangeEvent } from 'react';
 
 type VisuallyHiddenInputProps = {
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 const VisuallyHiddenInput = ({ onChange }: VisuallyHiddenInputProps) => {
