@@ -1,13 +1,11 @@
 import { PasswordInput } from '@components';
 import { handleAsyncAction } from '@helpers';
 import { Alert, Button, Input, Spinner } from '@heroui/react';
-import { useTextField, useUser } from '@hooks';
+import { useTextField, useUser, useAuthSearchParams } from '@hooks';
 import { updateUser } from '@services';
 import { toEventLike } from '@utils';
 import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
-
-import { useAuthSearchParams } from './use-auth-search-params';
 
 const AccountPage = () => {
   useAuthSearchParams();

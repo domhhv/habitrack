@@ -5,7 +5,7 @@ const makeTestHabit = () => {
 
   return (override: Partial<Habit> = {}): Habit => {
     return {
-      id: id++,
+      id: override.id || id++,
       name: 'Test Habit',
       traitId: 1,
       description: 'Test Description',

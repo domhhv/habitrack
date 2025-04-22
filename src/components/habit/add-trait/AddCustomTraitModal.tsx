@@ -105,6 +105,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
                 onChange={(event) => {
                   return handleTraitColorChange(event.target.value);
                 }}
+                aria-label='"Trait Color"'
                 startContent="#"
               />
               <p className="text-sm">

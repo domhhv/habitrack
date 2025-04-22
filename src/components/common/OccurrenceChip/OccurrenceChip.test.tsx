@@ -13,14 +13,25 @@ vi.mock('@hooks', () => {
   };
 });
 
-vi.mock('@stores', () => {
+vi.mock('@stores', async (importOriginal) => {
+  const original = (await importOriginal()) as object;
+
   return {
-    useOccurrenceActions: vi.fn(),
+    ...original,
+    useOccurrenceActions: vi.fn().mockReturnValue({
+      removeOccurrence: vi.fn(),
+    }),
   };
 });
 
-vi.mock('@hooks', () => {
+vi.mock('@hooks', async (importOriginal) => {
+  const original = (await importOriginal()) as object;
+
   return {
+    ...original,
+    useUser: vi.fn().mockReturnValue({
+      user: null,
+    }),
     useScreenWidth: vi.fn().mockReturnValue({ screenWidth: 1000 }),
   };
 });
