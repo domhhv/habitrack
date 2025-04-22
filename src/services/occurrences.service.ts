@@ -5,16 +5,12 @@ import type {
   OccurrencesUpdate,
   Streak,
 } from '@models';
-import {
-  transformClientEntity,
-  transformServerEntities,
-  transformServerEntity,
-} from '@utils';
+import { deepSnakify, deepCamelize } from '@utils';
 
 export const createOccurrence = async (
   body: OccurrencesInsert
 ): Promise<Occurrence> => {
-  const serverBody = transformClientEntity(body);
+  const serverBody = deepSnakify(body);
 
   const { error, data } = await supabaseClient
     .from('occurrences')
@@ -28,7 +24,7 @@ export const createOccurrence = async (
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return deepCamelize(data);
 };
 
 export const listOccurrences = async (
@@ -47,16 +43,14 @@ export const listOccurrences = async (
     throw new Error(error.message);
   }
 
-  const result = transformServerEntities(data);
-
-  return result;
+  return data.map(deepCamelize);
 };
 
 export const patchOccurrence = async (
   id: number,
   body: OccurrencesUpdate
 ): Promise<Occurrence> => {
-  const serverUpdates = transformClientEntity({
+  const serverUpdates = deepSnakify({
     ...body,
     updatedAt: new Date().toISOString(),
   });
@@ -74,7 +68,7 @@ export const patchOccurrence = async (
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return deepCamelize(data);
 };
 
 export const destroyOccurrence = async (id: number) => {
@@ -89,7 +83,7 @@ export const destroyOccurrence = async (id: number) => {
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return deepCamelize(data);
 };
 
 export const getLatestHabitOccurrenceTimestamp = async (habitId: number) => {
@@ -124,7 +118,7 @@ export const getLongestHabitStreak = async (
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return deepCamelize(data);
 };
 
 export const getHabitTotalEntries = async (habitId: number) => {

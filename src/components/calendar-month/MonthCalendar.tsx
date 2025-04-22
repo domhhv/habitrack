@@ -7,7 +7,7 @@ import {
   useHabits,
   useTraits,
 } from '@stores';
-import { capitalizeFirstLetter } from '@utils';
+import { capitalize } from '@utils';
 import {
   endOfMonth,
   endOfWeek,
@@ -140,13 +140,13 @@ const MonthCalendar = () => {
         {`${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`}
       </title>
       <MonthCalendarHeader
-        activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
+        activeMonthLabel={capitalize(activeMonthLabel)}
         activeYear={activeYear}
         filters={filters}
         onFilterChange={setFilters}
       />
       <MonthCalendarGrid
-        activeMonthLabel={capitalizeFirstLetter(activeMonthLabel)}
+        activeMonthLabel={capitalize(activeMonthLabel)}
         activeYear={Number(activeYear)}
         state={calendarState}
         occurrences={occurrences.filter((occurrence) => {

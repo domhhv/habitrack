@@ -16,9 +16,8 @@ import {
   ArrowFatRight,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
-import isTruthy from '@root/src/utils/isTruthy';
 import { useTraits, useHabits } from '@stores';
-import { getHabitIconUrl } from '@utils';
+import { isTruthy, getHabitIconUrl } from '@utils';
 import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router';

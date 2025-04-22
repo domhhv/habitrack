@@ -1,13 +1,9 @@
 import { supabaseClient } from '@helpers';
 import type { Trait, TraitsInsert } from '@models';
-import {
-  transformClientEntity,
-  transformServerEntities,
-  transformServerEntity,
-} from '@utils';
+import { deepSnakify, deepCamelize } from '@utils';
 
 export const createTrait = async (body: TraitsInsert): Promise<Trait> => {
-  const serverBody = transformClientEntity(body);
+  const serverBody = deepSnakify(body);
 
   const { error, data } = await supabaseClient
     .from('traits')
@@ -19,7 +15,7 @@ export const createTrait = async (body: TraitsInsert): Promise<Trait> => {
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return deepCamelize(data);
 };
 
 export const listTraits = async (): Promise<Trait[]> => {
@@ -29,5 +25,5 @@ export const listTraits = async (): Promise<Trait[]> => {
     throw new Error(error.message);
   }
 
-  return transformServerEntities(data);
+  return data.map(deepCamelize);
 };

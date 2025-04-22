@@ -1,4 +1,4 @@
-export { default as handleAsyncAction } from './handleAsyncAction';
-export { default as supabaseClient } from './supabaseClient';
-export { default as tailwindConfig } from './tailwindConfig';
-export { default as getYearWeekNumberFromMonthWeek } from './getYearWeekNumberFromMonthWeek';
+export { default as handleAsyncAction } from './handle-async-action';
+export { default as supabaseClient } from './supabase-client';
+export { default as tailwindConfig } from './tailwind-config';
+export { default as getIsoWeek } from './get-iso-week';

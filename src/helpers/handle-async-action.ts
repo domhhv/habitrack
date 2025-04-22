@@ -1,5 +1,5 @@
 import { addToast } from '@heroui/react';
-import { capitalizeFirstLetter, getErrorMessage } from '@utils';
+import { capitalize, getErrorMessage } from '@utils';
 import nlp from 'compromise';
 
 type ActionVerb = 'add' | 'update' | 'remove' | 'fetch' | 'upload';
@@ -30,7 +30,7 @@ const getMessages = (actionType: ActionType) => {
   const pastTense = nlp(verb).verbs().toPastTense().text();
 
   return {
-    success: `${capitalizeFirstLetter(noun)} ${pastTense}`,
+    success: `${capitalize(noun)} ${pastTense}`,
     error: `Something went wrong while ${verb}ing your ${noun}`,
   };
 };
