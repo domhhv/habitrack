@@ -1,7 +1,8 @@
-import { PasswordInput } from '@components';
 import { Input, Button, cn } from '@heroui/react';
 import { useTextField } from '@hooks';
 import React from 'react';
+
+import PasswordInput from './PasswordInput';
 
 type AuthFormProps = {
   onSubmit: (email: string, password: string, name: string) => void;

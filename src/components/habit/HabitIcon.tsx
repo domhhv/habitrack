@@ -12,7 +12,7 @@ type HabitIconCellProps = {
   habit: Habit;
 };
 
-const HabitIconCell = ({ habit }: HabitIconCellProps) => {
+const HabitIcon = ({ habit }: HabitIconCellProps) => {
   const { updateHabit } = useHabitActions();
   const { user } = useUser();
   const [isUploading, setIsUploading] = React.useState(false);
@@ -59,4 +59,4 @@ const HabitIconCell = ({ habit }: HabitIconCellProps) => {
   );
 };
 
-export default HabitIconCell;
+export default HabitIcon;

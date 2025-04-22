@@ -1,7 +1,7 @@
 import { getHabitTotalEntries } from '@services';
 import React from 'react';
 
-const HabitsTotalEntriesCell = ({ id }: { id: number }) => {
+const HabitTotalEntries = ({ id }: { id: number }) => {
   const [entriesCount, setEntriesCount] = React.useState<number | null>(null);
 
   React.useEffect(() => {
@@ -15,4 +15,4 @@ const HabitsTotalEntriesCell = ({ id }: { id: number }) => {
   );
 };
 
-export default HabitsTotalEntriesCell;
+export default HabitTotalEntries;

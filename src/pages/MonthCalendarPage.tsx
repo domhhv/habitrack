@@ -1,3 +1,4 @@
+import { MonthCalendarGrid, MonthCalendarHeader } from '@components';
 import { MONTHS } from '@const';
 import { useUser } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
@@ -20,9 +21,6 @@ import React from 'react';
 import { useCalendar, useLocale } from 'react-aria';
 import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
-
-import MonthCalendarGrid from './MonthCalendarGrid';
-import MonthCalendarHeader from './MonthCalendarHeader';
 
 const createCalendar = (identifier: string) => {
   switch (identifier) {

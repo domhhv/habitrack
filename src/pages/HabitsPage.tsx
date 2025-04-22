@@ -3,6 +3,10 @@ import {
   ConfirmDialog,
   EditHabitDialog,
   TraitChip,
+  HabitIcon,
+  HabitLastEntry,
+  HabitLongestStreak,
+  HabitsTotalEntries,
 } from '@components';
 import { handleAsyncAction } from '@helpers';
 import {
@@ -22,11 +26,6 @@ import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
 import { useHabitActions, useHabits } from '@stores';
 import { format } from 'date-fns';
 import React from 'react';
-
-import HabitIconCell from './HabitIconCell';
-import HabitLastEntryCell from './HabitLastEntryCell';
-import HabitLongestStreakCell from './HabitLongestStreakCell';
-import HabitsTotalEntriesCell from './HabitsTotalEntriesCell';
 
 type Column = {
   key: string;
@@ -146,7 +145,7 @@ const HabitsPage = () => {
                 aria-labelledby={`habit-name-${habit.id}`}
               >
                 <TableCell>
-                  <HabitIconCell habit={habit} />
+                  <HabitIcon habit={habit} />
                 </TableCell>
                 <TableCell>
                   <h6 className="font-semibold" id={`habit-name-${habit.id}`}>
@@ -168,16 +167,16 @@ const HabitsPage = () => {
                   )}
                 </TableCell>
                 <TableCell>
-                  <HabitLastEntryCell id={habit.id} />
+                  <HabitLastEntry id={habit.id} />
                 </TableCell>
                 <TableCell>
-                  <HabitLongestStreakCell id={habit.id} />
+                  <HabitLongestStreak id={habit.id} />
                 </TableCell>
                 <TableCell
                   align="center"
                   aria-label={`Total entries for ${habit.name}`}
                 >
-                  <HabitsTotalEntriesCell id={habit.id} />
+                  <HabitsTotalEntries id={habit.id} />
                 </TableCell>
                 <TableCell aria-label="Actions">
                   <div
