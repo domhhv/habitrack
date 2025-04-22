@@ -1,17 +1,17 @@
+import { AppHeader } from '@components';
 import {
-  AppHeader,
-  MonthCalendar,
-  AccountPage,
   HabitsPage,
-  WeekCalendar,
-} from '@components';
+  AccountPage,
+  WeekCalendarPage,
+  MonthCalendarPage,
+} from '@pages';
 import { Analytics } from '@vercel/analytics/react';
 import { setDefaultOptions } from 'date-fns';
 import { enGB } from 'date-fns/locale';
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 
-import Providers from './Providers';
+import Providers from './components/Providers';
 
 setDefaultOptions({ locale: enGB });
 
@@ -27,11 +27,11 @@ const App = () => {
         <Routes>
           <Route
             path="/calendar/month/:year?/:month?/:day?"
-            element={<MonthCalendar />}
+            element={<MonthCalendarPage />}
           />
           <Route
             path="/calendar/week/:year?/:month?/:day?"
-            element={<WeekCalendar />}
+            element={<WeekCalendarPage />}
           />
           <Route path="/habits" element={<HabitsPage />} />
           <Route path="/account" element={<AccountPage />} />

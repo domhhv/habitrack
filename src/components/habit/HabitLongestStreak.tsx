@@ -12,7 +12,7 @@ const options: Intl.DateTimeFormatOptions = {
 
 const dateTimeFormat = new Intl.DateTimeFormat('en', options);
 
-const HabitLongestStreakCell = ({ id }: { id: number }) => {
+const HabitLongestStreak = ({ id }: { id: number }) => {
   const [longestStreak, setLongestStreak] = React.useState<Streak>({
     streakLength: null,
     streakStart: null,
@@ -37,4 +37,4 @@ const HabitLongestStreakCell = ({ id }: { id: number }) => {
   );
 };
 
-export default HabitLongestStreakCell;
+export default HabitLongestStreak;

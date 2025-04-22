@@ -33,7 +33,7 @@ const formatRelativeLocale: Record<string, string> = {
   other: `'on' LLL d, y`,
 };
 
-const HabitLastEntryCell = ({ id }: { id: number }) => {
+const HabitLastEntry = ({ id }: { id: number }) => {
   const [selectedDistanceFormat, setSelectedDistanceFormat] =
     React.useState<Selection>(new Set(['default']));
   const [latestOccurrenceTimestamp, setLatestOccurrenceTimestamp] =
@@ -135,4 +135,4 @@ const HabitLastEntryCell = ({ id }: { id: number }) => {
   );
 };
 
-export default HabitLastEntryCell;
+export default HabitLastEntry;

@@ -18,6 +18,7 @@
     "sourceMap": true,
     "baseUrl": "./src",
     "paths": {
+      "@pages": ["pages"],
       "@services": ["services"],
       "@context": ["context"],
       "@components": ["components"],

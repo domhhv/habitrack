@@ -3,6 +3,7 @@ import {
   ToastProvider,
 } from '@heroui/react';
 import React, { type ReactNode } from 'react';
+import { I18nProvider } from 'react-aria';
 import { BrowserRouter, useNavigate } from 'react-router';
 
 type ProviderProps = {
@@ -15,7 +16,7 @@ const HeroUIProvider = React.memo(function WrappedProvider({
   const navigate = useNavigate();
 
   return (
-    <OriginalHeroUIProvider navigate={navigate} locale="en-GB">
+    <OriginalHeroUIProvider navigate={navigate}>
       {children}
     </OriginalHeroUIProvider>
   );
@@ -26,15 +27,17 @@ const Providers = React.memo(function WrappedProviders({
 }: ProviderProps) {
   return (
     <BrowserRouter>
-      <HeroUIProvider>
-        <ToastProvider
-          toastProps={{
-            variant: 'solid',
-          }}
-          placement="top-center"
-        />
-        {children}
-      </HeroUIProvider>
+      <I18nProvider locale="en-GB">
+        <HeroUIProvider>
+          <ToastProvider
+            toastProps={{
+              variant: 'solid',
+            }}
+            placement="top-center"
+          />
+          {children}
+        </HeroUIProvider>
+      </I18nProvider>
     </BrowserRouter>
   );
 });
