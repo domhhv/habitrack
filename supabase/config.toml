@@ -85,7 +85,7 @@ enabled = true
 [storage.buckets.habit_icons]
 public = true
 file_size_limit = "100KB"
-allowed_mime_types = ["image/png", "image/jpeg", "image/svg"]
+allowed_mime_types = ["image/png", "image/jpeg", "image/svg", "image/svg+xml", "image/vnd.microsoft.icon"]
 objects_path = "./habit-icons"
 
 [storage.buckets.occurrence_photos]
