@@ -1,6 +1,6 @@
 import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
+import { handleAsyncAction } from '@helpers';
 import {
-  addToast,
   Button,
   Input,
   Modal,
@@ -15,7 +15,6 @@ import {
 import { useTextField, useFileField, useUser } from '@hooks';
 import { CloudArrowUp, Plus } from '@phosphor-icons/react';
 import { useHabitActions, useTraits } from '@stores';
-import { getErrorMessage } from '@utils';
 import React from 'react';
 
 const AddHabitDialogButton = () => {
@@ -48,10 +47,8 @@ const AddHabitDialogButton = () => {
       return null;
     }
 
-    setIsAdding(true);
-
-    try {
-      await addHabit(
+    void handleAsyncAction(
+      addHabit(
         {
           name,
           description,
@@ -59,27 +56,10 @@ const AddHabitDialogButton = () => {
           traitId: +traitId,
         },
         icon
-      );
-
-      addToast({
-        title: 'Habit added successfully',
-        description: 'Your habit has been added successfully.',
-        color: 'success',
-      });
-
-      handleDialogClose();
-    } catch (error) {
-      console.error(error);
-      addToast({
-        title: 'Something went wrong while adding your habit',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    } finally {
-      setIsAdding(false);
-    }
-
-    handleDialogClose();
+      ),
+      'add_habit',
+      setIsAdding
+    ).then(handleDialogClose);
   };
 
   return (

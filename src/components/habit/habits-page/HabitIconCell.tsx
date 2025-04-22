@@ -1,9 +1,10 @@
 import { VisuallyHiddenInput } from '@components';
-import { addToast, Button, Tooltip } from '@heroui/react';
+import { handleAsyncAction } from '@helpers';
+import { Button, Tooltip } from '@heroui/react';
 import { useUser } from '@hooks';
 import { type Habit } from '@models';
 import { useHabitActions } from '@stores';
-import { getErrorMessage, getHabitIconUrl } from '@utils';
+import { getHabitIconUrl } from '@utils';
 import React from 'react';
 
 type HabitIconCellProps = {
@@ -23,22 +24,13 @@ const HabitIconCell = ({ habit }: HabitIconCellProps) => {
       return null;
     }
 
-    setIsUploading(true);
-
     const [iconFile] = files;
 
-    try {
-      await updateHabit(habit.id, user.id, {}, iconFile);
-    } catch (error) {
-      console.error(error);
-      addToast({
-        title: 'Something went wrong while uploading your icon',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    } finally {
-      setIsUploading(false);
-    }
+    void handleAsyncAction(
+      updateHabit(habit.id, user.id, {}, iconFile),
+      'upload_icon',
+      setIsUploading
+    );
   };
 
   return (

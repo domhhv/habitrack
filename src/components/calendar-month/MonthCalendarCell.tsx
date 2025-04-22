@@ -9,6 +9,7 @@ import {
   NoteBlank,
 } from '@phosphor-icons/react';
 import { useNotes } from '@stores';
+import { toSqlDate } from '@utils';
 import { format, isToday } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
@@ -79,7 +80,7 @@ const MonthCalendarCell = ({
       <NoteDialog
         open={isNoteDialogOpen}
         onClose={closeNoteDialog}
-        date={date}
+        day={toSqlDate(date)}
       />
 
       <OccurrenceDialog

@@ -1,6 +1,6 @@
+import { handleAsyncAction } from '@helpers';
 import type { ButtonProps, TimeInputValue } from '@heroui/react';
 import {
-  addToast,
   NumberInput,
   Button,
   ListboxItem,
@@ -20,9 +20,8 @@ import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import type { Occurrence } from '@models';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
-import { getErrorMessage, getHabitIconUrl } from '@utils';
+import { getHabitIconUrl } from '@utils';
 import { format, isFuture, isToday, isYesterday } from 'date-fns';
-import pluralize from 'pluralize';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
@@ -204,7 +203,7 @@ const OccurrenceDialog = ({
     setIsSaving(true);
 
     if (existingOccurrence) {
-      try {
+      const updatePromise = async () => {
         await updateOccurrence(existingOccurrence.id, {
           timestamp: +occurrenceDateTime,
           habitId: +selectedHabitId,
@@ -234,18 +233,13 @@ const OccurrenceDialog = ({
             content: newNote.content,
           });
         }
+      };
 
-        handleClose();
-      } catch (error) {
-        console.error(error);
-        addToast({
-          title: 'Something went wrong while updating your occurrence',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
-        });
-      } finally {
-        setIsSaving(false);
-      }
+      void handleAsyncAction(
+        updatePromise(),
+        'update_occurrence',
+        setIsSaving
+      ).then(handleClose);
 
       return;
     }
@@ -272,25 +266,11 @@ const OccurrenceDialog = ({
       }
     });
 
-    try {
-      await Promise.all(addPromises);
-
-      addToast({
-        title: `Successfully added ${pluralize('occurrence', addPromises.length, true)}`,
-        color: 'success',
-      });
-
-      handleClose();
-    } catch (error) {
-      console.error(error);
-      addToast({
-        title: `Something went wrong while adding your ${pluralize('occurrence', addPromises.length)}`,
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    } finally {
-      setIsSaving(false);
-    }
+    void handleAsyncAction(
+      Promise.all(addPromises),
+      'add_occurrence',
+      setIsSaving
+    ).then(handleClose);
   };
 
   const handleClose = () => {
