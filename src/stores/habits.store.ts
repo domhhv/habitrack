@@ -1,11 +1,11 @@
 import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
+import { StorageBuckets } from '@models';
 import {
   createHabit,
   deleteFile,
   destroyHabit,
   listHabits,
   patchHabit,
-  StorageBuckets,
   uploadHabitIcon,
 } from '@services';
 import { create } from 'zustand';

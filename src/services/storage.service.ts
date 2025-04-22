@@ -1,12 +1,8 @@
 import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE_MB } from '@const';
 import { supabaseClient } from '@helpers';
+import type { UploadResult } from '@models';
+import { StorageBuckets } from '@models';
 import imageCompression from 'browser-image-compression';
-import type { AsyncReturnType } from 'type-fest';
-
-export enum StorageBuckets {
-  HABIT_ICONS = 'habit_icons',
-  OCCURRENCE_PHOTOS = 'occurrence_photos',
-}
 
 export const uploadFile = async (
   bucket: StorageBuckets,
@@ -34,18 +30,6 @@ export const deleteFile = async (bucket: StorageBuckets, path: string) => {
 
   return true;
 };
-
-export type SuccessfulUpload = {
-  status: 'success';
-  path: string;
-};
-
-export type FailedUpload = {
-  status: 'error';
-  error: string;
-};
-
-export type UploadResult = SuccessfulUpload | FailedUpload;
 
 export async function uploadImage(
   bucket: StorageBuckets,
@@ -98,5 +82,3 @@ export const createSignedUrls = async (
 
   return data;
 };
-
-export type SignedUrls = AsyncReturnType<typeof createSignedUrls>;

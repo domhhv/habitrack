@@ -1,11 +1,11 @@
 import { Button, Tooltip } from '@heroui/react';
+import type { SignedUrls } from '@models';
 import {
   ArrowSquareOut,
   CaretLeft,
   CaretRight,
   Trash,
 } from '@phosphor-icons/react';
-import type { SignedUrls } from '@services';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useRef } from 'react';
 

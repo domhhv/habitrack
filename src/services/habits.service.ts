@@ -1,6 +1,11 @@
 import { supabaseClient } from '@helpers';
-import { type Habit, type HabitsInsert, type HabitsUpdate } from '@models';
-import { StorageBuckets, uploadFile } from '@root/src/services/storage.service';
+import {
+  type Habit,
+  type HabitsInsert,
+  type HabitsUpdate,
+  StorageBuckets,
+} from '@models';
+import { uploadFile } from '@root/src/services/storage.service';
 import { deepSnakify, deepCamelize } from '@utils';
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
