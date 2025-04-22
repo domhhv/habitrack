@@ -1,6 +1,5 @@
 import { handleAsyncAction } from '@helpers';
 import {
-  addToast,
   Button,
   Modal,
   ModalBody,
@@ -11,36 +10,28 @@ import {
 } from '@heroui/react';
 import { useUser } from '@hooks';
 import { useNotes, useNoteActions } from '@stores';
-import { getErrorMessage } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
 
 type NoteDialogProps = {
   open: boolean;
   onClose: () => void;
-  date: Date;
+  day: string;
 };
 
-const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
+const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
   const { user } = useUser();
   const [content, setContent] = React.useState('');
   const [isSaving, setIsSaving] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [isRemoving, setIsRemoving] = React.useState(false);
   const notes = useNotes();
   const { addNote, updateNote, deleteNote } = useNoteActions();
 
-  const month =
-    date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth();
-  const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
-  const sqlDate = `${date.getFullYear()}-${month}-${day}`;
-
   const existingNote = React.useMemo(() => {
-    return date
-      ? notes.find((note) => {
-          return note.day === sqlDate;
-        })
-      : null;
-  }, [notes, sqlDate, date]);
+    return notes.find((note) => {
+      return note.day === day;
+    });
+  }, [notes, day]);
 
   React.useEffect(() => {
     if (open && existingNote?.content) {
@@ -55,7 +46,7 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
   }, [open]);
 
   const handleSubmit = async () => {
-    if (!user || !date) {
+    if (!user) {
       return null;
     }
 
@@ -63,70 +54,40 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
 
     if (content) {
       if (!existingNote) {
-        handleAsyncAction(
-          () => {
-            return addNote({
-              userId: user.id,
-              day: sqlDate,
-              content,
-            });
-          },
+        void handleAsyncAction(
+          addNote({
+            userId: user.id,
+            day,
+            content,
+          }),
           'add_note',
           setIsSaving
-        ).then(() => {
-          handleClose();
-        });
+        ).then(handleClose);
       } else if (existingNote.content !== content) {
-        try {
-          await updateNote(existingNote.id, {
+        void handleAsyncAction(
+          updateNote(existingNote.id, {
             content,
-            day: sqlDate,
-          });
-
-          addToast({
-            title: 'Note updated successfully',
-            color: 'success',
-          });
-
-          handleClose();
-        } catch (error) {
-          console.error(error);
-          addToast({
-            title: 'Something went wrong while updating your note',
-            description: `Error details: ${getErrorMessage(error)}`,
-            color: 'danger',
-          });
-        }
+            day,
+          }),
+          'update_note',
+          setIsSaving
+        ).then(handleClose);
       }
     }
   };
 
-  const handleDelete = async () => {
+  const handleRemove = async () => {
     if (!existingNote) {
       return;
     }
 
-    setIsDeleting(true);
-
-    try {
-      await deleteNote(existingNote.id);
-
-      addToast({
-        title: 'Note deleted successfully',
-        color: 'success',
-      });
-
+    void handleAsyncAction(
+      deleteNote(existingNote.id),
+      'remove_note',
+      setIsRemoving
+    ).then(() => {
       handleClose();
-    } catch (error) {
-      console.error(error);
-      addToast({
-        title: 'Something went wrong while deleted your note',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    } finally {
-      setIsDeleting(true);
-    }
+    });
   };
 
   const handleClose = () => {
@@ -137,11 +98,15 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
     });
   };
 
+  if (!day) {
+    return null;
+  }
+
   return (
     <Modal isOpen={open} onClose={handleClose}>
       <ModalContent>
         <ModalHeader>
-          {date && `Add a note about ${format(date || '', 'iii, LLL d, y')}`}
+          Add a note about ${format(day || '', 'iii, LLL d, y')}
         </ModalHeader>
         <ModalBody>
           <Textarea
@@ -152,16 +117,18 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
             value={content}
             placeholder="Note"
             variant="faded"
+            disabled={isSaving || isRemoving}
           />
         </ModalBody>
         <ModalFooter>
           {!!existingNote && (
             <Button
               color="danger"
-              onPress={handleDelete}
-              isLoading={isDeleting}
+              onPress={handleRemove}
+              isLoading={isRemoving}
+              disabled={isSaving}
             >
-              Delete
+              Remove
             </Button>
           )}
           <Button
@@ -169,7 +136,7 @@ const NoteDialog = ({ open, onClose, date }: NoteDialogProps) => {
             color="primary"
             isLoading={isSaving}
             onPress={handleSubmit}
-            isDisabled={!content}
+            isDisabled={!content || isRemoving}
           >
             {existingNote ? 'Save' : 'Add'}
           </Button>

@@ -93,10 +93,8 @@ const HabitsPage = () => {
       return null;
     }
 
-    handleAsyncAction(
-      () => {
-        return removeHabit(habitToRemove);
-      },
+    void handleAsyncAction(
+      removeHabit(habitToRemove),
       'remove_habit',
       setIsRemoving
     );

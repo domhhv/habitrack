@@ -1,5 +1,5 @@
+import { handleAsyncAction } from '@helpers';
 import {
-  addToast,
   Button,
   Input,
   Modal,
@@ -15,7 +15,7 @@ import {
 import { useTextField, useUser } from '@hooks';
 import type { Habit } from '@models';
 import { useHabitActions, useTraits } from '@stores';
-import { getErrorMessage, toEventLike } from '@utils';
+import { toEventLike } from '@utils';
 import React from 'react';
 
 export type EditHabitDialogProps = {
@@ -63,32 +63,15 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
       return null;
     }
 
-    setIsUpdating(true);
-
-    try {
-      await updateHabit(habit.id, user.id, {
+    void handleAsyncAction(
+      updateHabit(habit.id, user.id, {
         name,
         description,
         traitId: +traitId,
-      });
-
-      addToast({
-        title: 'Your habit has been updated!',
-        color: 'success',
-      });
-
-      handleClose();
-    } catch (error) {
-      console.error(error);
-      addToast({
-        title:
-          'Something went wrong while updating your habit. Please try again.',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    } finally {
-      setIsUpdating(false);
-    }
+      }),
+      'update_habit',
+      setIsUpdating
+    ).then(handleClose);
   };
 
   return (

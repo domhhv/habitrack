@@ -2,8 +2,14 @@ import { addToast } from '@heroui/react';
 import { capitalizeFirstLetter, getErrorMessage } from '@utils';
 import nlp from 'compromise';
 
-type ActionVerb = 'add' | 'update' | 'remove' | 'fetch';
-type EntityNoun = 'habit' | 'note' | 'occurrence' | 'trait' | 'account';
+type ActionVerb = 'add' | 'update' | 'remove' | 'fetch' | 'upload';
+type EntityNoun =
+  | 'habit'
+  | 'note'
+  | 'occurrence'
+  | 'trait'
+  | 'account'
+  | 'icon';
 
 type ActionType = `${ActionVerb}_${EntityNoun}`;
 
@@ -30,7 +36,7 @@ const getMessages = (actionType: ActionType) => {
 };
 
 const handleAsyncAction = <T>(
-  action: () => Promise<T>,
+  action: Promise<T>,
   actionType: ActionType,
   setState: (isLoading: boolean) => void
 ): Promise<T> => {
@@ -38,7 +44,7 @@ const handleAsyncAction = <T>(
 
   const messages = getMessages(actionType);
 
-  return action()
+  return action
     .then((result) => {
       addToast({
         title: messages.success,

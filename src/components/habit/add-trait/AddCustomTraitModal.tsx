@@ -1,6 +1,6 @@
 import { OccurrenceChip } from '@components';
+import { handleAsyncAction } from '@helpers';
 import {
-  addToast,
   Button,
   Input,
   Modal,
@@ -13,7 +13,7 @@ import {
 import { useTextField, useUser } from '@hooks';
 import { useTraitActions } from '@stores';
 import { makeTestOccurrence } from '@tests';
-import { getErrorMessage, toEventLike } from '@utils';
+import { toEventLike } from '@utils';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
@@ -50,27 +50,17 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
 
     setIsAdding(true);
 
-    try {
-      await addTrait({
+    void handleAsyncAction(
+      addTrait({
         name: label,
         description,
         slug,
         color,
         userId: user.id,
-      });
-    } catch (error) {
-      console.error(error);
-      addToast({
-        title:
-          'Something went wrong while adding your habit trait. Please try again.',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-    } finally {
-      setIsAdding(false);
-    }
-
-    handleDialogClose();
+      }),
+      'add_trait',
+      setIsAdding
+    ).then(handleDialogClose);
   };
 
   const handleTraitColorChange = (color: string) => {

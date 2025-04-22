@@ -1,8 +1,9 @@
 import { PasswordInput } from '@components';
-import { addToast, Alert, Button, Input, Spinner } from '@heroui/react';
+import { handleAsyncAction } from '@helpers';
+import { Alert, Button, Input, Spinner } from '@heroui/react';
 import { useTextField, useUser } from '@hooks';
 import { updateUser } from '@services';
-import { getErrorMessage, toEventLike } from '@utils';
+import { toEventLike } from '@utils';
 import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -24,39 +25,12 @@ const AccountPage = () => {
 
   const title = <title>My Account | Habitrack</title>;
 
-  const updateAccount = async () => {
-    try {
-      setIsUpdating(true);
-
-      await updateUser(email, password, name);
-
-      addToast({
-        title: 'Account updated!',
-        color: 'success',
-      });
-    } catch (error) {
-      addToast({
-        title:
-          'Something went wrong while updating your account. Please try again.',
-        description: `Error details: ${getErrorMessage(error)}`,
-        color: 'danger',
-      });
-
-      console.error(error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
   const containerClassName =
     'w-full mt-8 flex flex-col items-center justify-center';
 
   if (!user && isLoadingUser) {
     return (
-      <div
-        className={twMerge(containerClassName, 'pt-16')}
-        data-testid="account-page"
-      >
+      <div className={twMerge(containerClassName, 'pt-16')}>
         {title}
         <Spinner data-testid="loader" aria-label="Loading..." />
       </div>
@@ -65,10 +39,7 @@ const AccountPage = () => {
 
   if (!user && !isLoadingUser) {
     return (
-      <div
-        className={twMerge(containerClassName, 'items-start pt-16')}
-        data-testid="account-page"
-      >
+      <div className={twMerge(containerClassName, 'items-start pt-16')}>
         {title}
         <Alert
           title="Please log in to your account first"
@@ -81,11 +52,12 @@ const AccountPage = () => {
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
-    void updateAccount();
+    void handleAsyncAction(
+      updateUser(email, password, name),
+      'update_account',
+      setIsUpdating
+    );
   };
-
-  const isSubmitDisabled =
-    name === user?.userMetadata.name && email === user?.email && !password;
 
   return (
     <div className="flex h-lvh w-full flex-col items-start self-start px-8 py-2 lg:px-16 lg:py-4">
@@ -135,7 +107,11 @@ const AccountPage = () => {
                 type="submit"
                 isLoading={isUpdating}
                 color="primary"
-                isDisabled={isSubmitDisabled}
+                isDisabled={
+                  name === user?.userMetadata.name &&
+                  email === user?.email &&
+                  !password
+                }
               >
                 Save
               </Button>
