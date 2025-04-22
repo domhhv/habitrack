@@ -7,18 +7,21 @@ import imageCompression from 'browser-image-compression';
 export const uploadFile = async (
   bucket: StorageBuckets,
   path: string,
-  file: File
+  file: File,
+  cacheControl?: string
 ) => {
-  const { error } = await supabaseClient.storage
+  const { data, error } = await supabaseClient.storage
     .from(bucket)
     .upload(path, file, {
-      cacheControl: '3600',
       upsert: true,
+      cacheControl,
     });
 
   if (error) {
     throw new Error(error.message);
   }
+
+  return data.path;
 };
 
 export const deleteFile = async (bucket: StorageBuckets, path: string) => {
@@ -34,7 +37,8 @@ export const deleteFile = async (bucket: StorageBuckets, path: string) => {
 export async function uploadImage(
   bucket: StorageBuckets,
   file: File,
-  userId: string
+  userId: string,
+  metadata?: object
 ): Promise<UploadResult> {
   if (!ALLOWED_IMAGE_TYPES[bucket].includes(file.type)) {
     return { error: 'Invalid file type', status: 'error' };
@@ -59,6 +63,7 @@ export async function uploadImage(
     .from(bucket)
     .upload(filePath, compressedFile, {
       upsert: false,
+      metadata,
     });
 
   if (uploadError) {

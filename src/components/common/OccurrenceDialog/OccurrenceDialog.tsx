@@ -15,12 +15,12 @@ import {
   Textarea,
   TimeInput,
 } from '@heroui/react';
-import { useScreenWidth, useUser } from '@hooks';
+import { useScreenWidth, useTextField, useUser } from '@hooks';
 import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
 import type { Occurrence } from '@models';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
-import { getHabitIconUrl } from '@utils';
+import { getHabitIconUrl, toEventLike } from '@utils';
 import { format, isFuture, isToday, isYesterday } from 'date-fns';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
@@ -50,7 +50,7 @@ const OccurrenceDialog = ({
   const { addNote, updateNote } = useNoteActions();
   const { addOccurrence, updateOccurrence, updateOccurrenceNoteInState } =
     useOccurrenceActions();
-  const [note, setNote] = React.useState('');
+  const [note, handleNoteChange, clearNote] = useTextField();
   const [repeat, setRepeat] = React.useState(1);
   const [selectedHabitId, setSelectedHabitId] = React.useState('');
   const [time, setTime] = React.useState<TimeInputValue | null>(null);
@@ -75,7 +75,7 @@ const OccurrenceDialog = ({
 
     if (isOpen && existingOccurrence) {
       setSelectedHabitId(existingOccurrence.habitId.toString());
-      setNote(existingOccurrence.notes[0]?.content || '');
+      handleNoteChange(toEventLike(existingOccurrence.notes[0]?.content || ''));
       setTime(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -99,7 +99,7 @@ const OccurrenceDialog = ({
       // @ts-ignore
       setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
     }
-  }, [newOccurrenceDate, existingOccurrence, isOpen]);
+  }, [newOccurrenceDate, existingOccurrence, isOpen, handleNoteChange]);
 
   React.useEffect(() => {
     if (!habits.length) {
@@ -274,10 +274,8 @@ const OccurrenceDialog = ({
   };
 
   const handleClose = () => {
-    setTimeout(() => {
-      setSelectedHabitId('');
-      setNote('');
-    });
+    setSelectedHabitId('');
+    clearNote();
     onClose();
   };
 
@@ -371,7 +369,7 @@ const OccurrenceDialog = ({
             onKeyDown={() => {
               return null;
             }}
-            onValueChange={setNote}
+            onChange={handleNoteChange}
             value={note}
             placeholder="Note"
             variant="faded"

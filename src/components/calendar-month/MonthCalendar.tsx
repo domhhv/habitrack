@@ -85,23 +85,23 @@ const MonthCalendar = () => {
       day = currentMonth.getDate(),
     } = params;
 
-    const focusedDate = new Date(Number(year), Number(month) - 1, Number(day));
-
-    const rangeStart = startOfWeek(startOfMonth(focusedDate));
-    const rangeEnd = endOfWeek(endOfMonth(focusedDate));
-
-    void fetchOccurrences([+rangeStart, +rangeEnd]);
+    const paramsDate = new Date(Number(year), Number(month) - 1, Number(day));
 
     const nextFocusedDate = new CalendarDate(
-      focusedDate.getFullYear(),
-      focusedDate.getMonth() + 1,
-      focusedDate.getDate()
+      paramsDate.getFullYear(),
+      paramsDate.getMonth() + 1,
+      paramsDate.getDate()
     );
 
     const hasFocusedDateChanged =
       calendarState.focusedDate.toString() !== nextFocusedDate.toString();
 
     if (hasFocusedDateChanged) {
+      const rangeStart = startOfWeek(startOfMonth(paramsDate));
+      const rangeEnd = endOfWeek(endOfMonth(paramsDate));
+
+      void fetchOccurrences([+rangeStart, +rangeEnd]);
+
       calendarState.setFocusedDate(nextFocusedDate);
     }
   }, [

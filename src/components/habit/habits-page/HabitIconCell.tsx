@@ -3,6 +3,7 @@ import { handleAsyncAction } from '@helpers';
 import { Button, Tooltip } from '@heroui/react';
 import { useUser } from '@hooks';
 import { type Habit } from '@models';
+import { uploadHabitIcon } from '@services';
 import { useHabitActions } from '@stores';
 import { getHabitIconUrl } from '@utils';
 import React from 'react';
@@ -24,13 +25,15 @@ const HabitIconCell = ({ habit }: HabitIconCellProps) => {
       return null;
     }
 
-    const [iconFile] = files;
+    const [icon] = files;
 
-    void handleAsyncAction(
-      updateHabit(habit.id, user.id, {}, iconFile),
-      'upload_icon',
-      setIsUploading
-    );
+    const upload = async () => {
+      const iconPath = await uploadHabitIcon(user.id, icon, habit.iconPath);
+
+      return updateHabit(habit.id, { iconPath });
+    };
+
+    void handleAsyncAction(upload(), 'upload_icon', setIsUploading);
   };
 
   return (

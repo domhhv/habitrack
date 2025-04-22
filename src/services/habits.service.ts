@@ -9,11 +9,9 @@ import { uploadFile } from '@root/src/services/storage.service';
 import { deepSnakify, deepCamelize } from '@utils';
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
-  const serverBody = deepSnakify(body);
-
   const { error, data } = await supabaseClient
     .from('habits')
-    .insert(serverBody)
+    .insert(deepSnakify(body))
     .select('*, trait:traits(name, color)')
     .single();
 
@@ -39,16 +37,11 @@ export const listHabits = async () => {
 
 export const patchHabit = async (
   id: number,
-  body: HabitsUpdate
+  habit: HabitsUpdate
 ): Promise<Habit> => {
-  const serverUpdates = deepSnakify({
-    ...body,
-    updatedAt: new Date().toISOString(),
-  });
-
   const { error, data } = await supabaseClient
     .from('habits')
-    .update(serverUpdates)
+    .update(deepSnakify(habit))
     .eq('id', id)
     .select('*, trait:traits(id, name, color)')
     .single();
@@ -75,13 +68,15 @@ export const destroyHabit = async (id: number): Promise<Habit> => {
   return deepCamelize(data);
 };
 
-export const uploadHabitIcon = async (userId: string, icon?: File | null) => {
-  let iconPath = '';
-
-  if (icon) {
-    iconPath = `${userId}/${Date.now()}-${icon.name}`;
-    await uploadFile(StorageBuckets.HABIT_ICONS, iconPath, icon);
-  }
-
-  return iconPath;
+export const uploadHabitIcon = async (
+  userId: string,
+  icon: File,
+  iconPath: string | null = ''
+) => {
+  return uploadFile(
+    StorageBuckets.HABIT_ICONS,
+    iconPath || `${userId}/${Date.now()}-${icon.name}`,
+    icon,
+    '0'
+  );
 };

@@ -80,12 +80,8 @@ const HabitsPage = () => {
   const [isRemoving, setIsRemoving] = React.useState<boolean>(false);
   const { isMobile } = useScreenWidth();
 
-  const handleRemovalConfirmOpen = (habit: Habit) => {
+  const handleRemovalStart = (habit: Habit) => {
     setHabitToRemove(habit);
-  };
-
-  const handleRemovalCancel = () => {
-    setHabitToRemove(null);
   };
 
   const handleRemovalConfirmed = async () => {
@@ -97,7 +93,11 @@ const HabitsPage = () => {
       removeHabit(habitToRemove),
       'remove_habit',
       setIsRemoving
-    );
+    ).then(handleRemovalEnd);
+  };
+
+  const handleRemovalEnd = () => {
+    setHabitToRemove(null);
   };
 
   const handleEditStart = (habit: Habit) => {
@@ -224,7 +224,7 @@ const HabitsPage = () => {
                         aria-label={`Delete habit: ${habit.name}`}
                         aria-describedby={`delete-tooltip-${habit.id}`}
                         onPress={() => {
-                          return handleRemovalConfirmOpen(habit);
+                          return handleRemovalStart(habit);
                         }}
                         isDisabled={!user?.id}
                         role="delete-habit-button"
@@ -253,7 +253,7 @@ const HabitsPage = () => {
         open={!!habitToRemove}
         heading="Delete habit"
         onConfirm={handleRemovalConfirmed}
-        onCancel={handleRemovalCancel}
+        onCancel={handleRemovalEnd}
         loading={isRemoving}
       >
         <div>

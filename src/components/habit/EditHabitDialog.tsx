@@ -18,7 +18,7 @@ import { useHabitActions, useTraits } from '@stores';
 import { toEventLike } from '@utils';
 import React from 'react';
 
-export type EditHabitDialogProps = {
+type EditHabitDialogProps = {
   habit: Habit | null;
   onClose?: () => void;
 };
@@ -64,7 +64,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
     }
 
     void handleAsyncAction(
-      updateHabit(habit.id, user.id, {
+      updateHabit(habit.id, {
         name,
         description,
         traitId: +traitId,

@@ -8,20 +8,21 @@ import {
   ModalHeader,
   Textarea,
 } from '@heroui/react';
-import { useUser } from '@hooks';
+import { useUser, useTextField } from '@hooks';
 import { useNotes, useNoteActions } from '@stores';
+import { toEventLike } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
 
 type NoteDialogProps = {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
   day: string;
 };
 
-const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
+const NoteDialog = ({ isOpen, onClose, day }: NoteDialogProps) => {
   const { user } = useUser();
-  const [content, setContent] = React.useState('');
+  const [content, handleContentChange, clearContent] = useTextField();
   const [isSaving, setIsSaving] = React.useState(false);
   const [isRemoving, setIsRemoving] = React.useState(false);
   const notes = useNotes();
@@ -34,16 +35,16 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
   }, [notes, day]);
 
   React.useEffect(() => {
-    if (open && existingNote?.content) {
-      setContent(existingNote.content);
+    if (isOpen && existingNote?.content) {
+      handleContentChange(toEventLike(existingNote.content));
     }
-  }, [existingNote, open]);
+  }, [existingNote, handleContentChange, isOpen]);
 
   React.useEffect(() => {
-    if (!open) {
-      setContent('');
+    if (!isOpen) {
+      clearContent();
     }
-  }, [open]);
+  }, [isOpen, clearContent]);
 
   const handleSubmit = async () => {
     if (!user) {
@@ -93,9 +94,7 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
   const handleClose = () => {
     setIsSaving(false);
     onClose();
-    setTimeout(() => {
-      setContent('');
-    });
+    clearContent();
   };
 
   if (!day) {
@@ -103,7 +102,7 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
   }
 
   return (
-    <Modal isOpen={open} onClose={handleClose}>
+    <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalContent>
         <ModalHeader>
           Add a note about ${format(day || '', 'iii, LLL d, y')}
@@ -113,7 +112,7 @@ const NoteDialog = ({ open, onClose, day }: NoteDialogProps) => {
             onKeyDown={() => {
               return null;
             }}
-            onValueChange={setContent}
+            onChange={handleContentChange}
             value={content}
             placeholder="Note"
             variant="faded"

@@ -1,4 +1,5 @@
-export * from './add-habit';
-export * from './edit-habit';
+export { default as AddHabitDialogButton } from './AddHabitDialogButton';
+export { default as EditHabitDialog } from './EditHabitDialog';
+export { default as AddCustomTraitModal } from './AddCustomTraitModal';
+
 export * from './habits-page';
-export * from './add-trait';

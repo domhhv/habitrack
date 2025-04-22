@@ -24,7 +24,7 @@ import { Link } from 'react-router';
 
 import AuthForm from './AuthForm';
 
-export type AuthMode = 'login' | 'register' | 'reset-password';
+type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
   const { user } = useUser();
@@ -157,7 +157,9 @@ const AuthModalButton = () => {
         <ModalContent>
           <ModalHeader>{headerTitles[mode]}</ModalHeader>
           <ModalBody>
-            {mode !== 'reset-password' && (
+            {mode === 'reset-password' ? (
+              <AuthForm {...authFormProps} />
+            ) : (
               <Tabs
                 onSelectionChange={handleTabChange}
                 color="primary"
@@ -175,7 +177,6 @@ const AuthModalButton = () => {
                 </Tab>
               </Tabs>
             )}
-            {mode === 'reset-password' && <AuthForm {...authFormProps} />}
           </ModalBody>
         </ModalContent>
       </Modal>

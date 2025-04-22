@@ -8,13 +8,11 @@ import type {
 import { deepSnakify, deepCamelize } from '@utils';
 
 export const createOccurrence = async (
-  body: OccurrencesInsert
+  occurrence: OccurrencesInsert
 ): Promise<Occurrence> => {
-  const serverBody = deepSnakify(body);
-
   const { error, data } = await supabaseClient
     .from('occurrences')
-    .insert(serverBody)
+    .insert(deepSnakify(occurrence))
     .select(
       '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(id, content)'
     )
@@ -48,16 +46,11 @@ export const listOccurrences = async (
 
 export const patchOccurrence = async (
   id: number,
-  body: OccurrencesUpdate
+  occurrence: OccurrencesUpdate
 ): Promise<Occurrence> => {
-  const serverUpdates = deepSnakify({
-    ...body,
-    updatedAt: new Date().toISOString(),
-  });
-
   const { error, data } = await supabaseClient
     .from('occurrences')
-    .update(serverUpdates)
+    .update(deepSnakify(occurrence))
     .eq('id', id)
     .select(
       '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(id, content)'

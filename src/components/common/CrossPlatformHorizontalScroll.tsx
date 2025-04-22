@@ -1,8 +1,8 @@
 import { cn } from '@heroui/react';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 type HorizontalScrollProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 };
 
