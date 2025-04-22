@@ -1,3 +1,4 @@
+import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE_MB } from '@const';
 import { addToast, Input } from '@heroui/react';
 import { useUser } from '@hooks';
 import type {
@@ -7,14 +8,13 @@ import type {
   SuccessfulUpload,
 } from '@services';
 import {
-  ALLOWED_IMAGE_TYPES,
-  MAX_FILE_SIZE_MB,
   StorageBuckets,
   deleteFile,
   uploadImage,
   createSignedUrls,
 } from '@services';
 import { getErrorMessage, isFulfilled, isRejected } from '@utils';
+import pluralize from 'pluralize';
 import React from 'react';
 
 import ImageCarousel from './ImageCarousel';
@@ -124,7 +124,7 @@ const OccurrencePhotosUploader = ({
 
     if (failedUploadErrors.length) {
       addToast({
-        title: `Failed to upload ${failedUploadErrors.length} photos`,
+        title: `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
         description: `Error details: ${failedUploadErrors.join(', ')}`,
         color: 'danger',
       });
@@ -132,7 +132,7 @@ const OccurrencePhotosUploader = ({
 
     if (successfulUploadPaths.length) {
       addToast({
-        title: `Successfully uploaded ${successfulUploadPaths.length} photos`,
+        title: `Successfully uploaded ${pluralize('photo', successfulUploadPaths.length, true)}`,
         color: 'success',
       });
     }

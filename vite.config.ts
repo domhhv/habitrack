@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => {
         '@helpers': resolve(__dirname, './src/helpers'),
         '@models': resolve(__dirname, './src/models'),
         '@stores': resolve(__dirname, './src/stores'),
+        '@const': resolve(__dirname, './src/const'),
         '@db-types': resolve(__dirname, './supabase/database.types'),
         '@tests': resolve(__dirname, './tests'),
         '@root': resolve(__dirname, './'),

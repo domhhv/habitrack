@@ -1,10 +1,11 @@
+import { MONTHS } from '@const';
 import { useUser } from '@hooks';
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
 import type { OccurrenceFilters } from '@models';
 import {
-  useOccurrences,
-  useOccurrenceActions,
   useHabits,
+  useOccurrenceActions,
+  useOccurrences,
   useTraits,
 } from '@stores';
 import { capitalize } from '@utils';
@@ -12,8 +13,8 @@ import {
   endOfMonth,
   endOfWeek,
   startOfMonth,
-  startOfWeek,
   startOfToday,
+  startOfWeek,
 } from 'date-fns';
 import React from 'react';
 import { useCalendar, useLocale } from 'react-aria';
@@ -22,21 +23,6 @@ import { useCalendarState } from 'react-stately';
 
 import MonthCalendarGrid from './MonthCalendarGrid';
 import MonthCalendarHeader from './MonthCalendarHeader';
-
-export const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
 
 const createCalendar = (identifier: string) => {
   switch (identifier) {

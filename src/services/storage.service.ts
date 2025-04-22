@@ -1,3 +1,4 @@
+import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE_MB } from '@const';
 import { supabaseClient } from '@helpers';
 import imageCompression from 'browser-image-compression';
 import type { AsyncReturnType } from 'type-fest';
@@ -6,27 +7,6 @@ export enum StorageBuckets {
   HABIT_ICONS = 'habit_icons',
   OCCURRENCE_PHOTOS = 'occurrence_photos',
 }
-
-export const MAX_FILE_SIZE_MB = {
-  [StorageBuckets.HABIT_ICONS]: 0.1,
-  [StorageBuckets.OCCURRENCE_PHOTOS]: 5,
-};
-
-export const ALLOWED_IMAGE_TYPES = {
-  [StorageBuckets.HABIT_ICONS]: [
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/svg+xml',
-  ],
-  [StorageBuckets.OCCURRENCE_PHOTOS]: [
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/webp',
-    'image/heic',
-  ],
-};
 
 export const uploadFile = async (
   bucket: StorageBuckets,
@@ -77,7 +57,10 @@ export async function uploadImage(
   }
 
   if (file.size > MAX_FILE_SIZE_MB[bucket] * 1024 * 1024) {
-    return { error: 'File size exceeds 5 MB limit', status: 'error' };
+    return {
+      error: `File size exceeds ${MAX_FILE_SIZE_MB[bucket]} MB limit`,
+      status: 'error',
+    };
   }
 
   const compressedFile = await imageCompression(file, {
