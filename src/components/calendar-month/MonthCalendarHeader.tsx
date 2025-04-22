@@ -1,4 +1,5 @@
 import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
+import { MONTHS } from '@const';
 import type { SelectedItems } from '@heroui/react';
 import {
   Tooltip,
@@ -21,8 +22,6 @@ import { isTruthy, getHabitIconUrl } from '@utils';
 import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-
-import { MONTHS } from './MonthCalendar';
 
 export type MonthCalendarHeaderProps = {
   activeMonthLabel: string;
