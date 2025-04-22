@@ -117,6 +117,7 @@ const HabitsPage = () => {
       <Table
         shadow="none"
         isHeaderSticky
+        aria-label="Habits tracking table"
         classNames={{
           base: cn(
             'overflow-scroll scrollbar-hide px-8 py-2 lg:px-16 lg:py-4 [&>div]:bg-white [&>div]:dark:bg-background-800',
@@ -127,21 +128,30 @@ const HabitsPage = () => {
         <TableHeader columns={habitColumns}>
           {(column) => {
             return (
-              <TableColumn key={column.key} align={column.align || 'start'}>
+              <TableColumn
+                key={column.key}
+                align={column.align || 'start'}
+                aria-label={column.label}
+              >
                 {column.label}
               </TableColumn>
             );
           }}
         </TableHeader>
-        <TableBody emptyContent="No habits yet">
+        <TableBody emptyContent="No habits yet" aria-label="Habits data">
           {habits.map((habit) => {
             return (
-              <TableRow key={habit.id}>
+              <TableRow
+                key={habit.id}
+                aria-labelledby={`habit-name-${habit.id}`}
+              >
                 <TableCell>
                   <HabitIconCell habit={habit} />
                 </TableCell>
                 <TableCell>
-                  <h6 className="font-semibold">{habit.name}</h6>
+                  <h6 className="font-semibold" id={`habit-name-${habit.id}`}>
+                    {habit.name}
+                  </h6>
                   {habit.description && (
                     <p className="text-left text-xs">
                       <i>{habit.description}</i>
@@ -163,32 +173,56 @@ const HabitsPage = () => {
                 <TableCell>
                   <HabitLongestStreakCell id={habit.id} />
                 </TableCell>
-                <TableCell align="center">
+                <TableCell
+                  align="center"
+                  aria-label={`Total entries for ${habit.name}`}
+                >
                   <HabitsTotalEntriesCell id={habit.id} />
                 </TableCell>
-                <TableCell>
-                  <div className="flex justify-end gap-2">
-                    <Tooltip content="Edit habit">
+                <TableCell aria-label="Actions">
+                  <div
+                    className="flex justify-end gap-2"
+                    role="group"
+                    aria-label={`Actions for habit ${habit.name}`}
+                  >
+                    <Tooltip
+                      content="Edit habit"
+                      id={`edit-tooltip-${habit.id}`}
+                      role="tooltip"
+                    >
                       <Button
                         isIconOnly
                         size="sm"
                         variant="ghost"
                         color="secondary"
+                        aria-label={`Edit habit: ${habit.name}`}
+                        aria-describedby={`edit-tooltip-${habit.id}`}
                         onPress={() => {
                           return handleEditStart(habit);
                         }}
                         role="edit-habit-button"
                         data-testid={`edit-habit-id-${habit.id}-button`}
                       >
-                        <PencilSimple weight="bold" size={16} />
+                        <PencilSimple
+                          weight="bold"
+                          size={16}
+                          aria-hidden="true"
+                        />
                       </Button>
                     </Tooltip>
-                    <Tooltip content="Delete habit" color="danger">
+                    <Tooltip
+                      content="Delete habit"
+                      color="danger"
+                      id={`delete-tooltip-${habit.id}`}
+                      role="tooltip"
+                    >
                       <Button
                         isIconOnly
                         size="sm"
                         color="danger"
                         variant="ghost"
+                        aria-label={`Delete habit: ${habit.name}`}
+                        aria-describedby={`delete-tooltip-${habit.id}`}
                         onPress={() => {
                           return handleRemovalConfirmOpen(habit);
                         }}
@@ -197,7 +231,11 @@ const HabitsPage = () => {
                         data-testid={`delete-habit-id-${habit.id}-button`}
                         className="group"
                       >
-                        <TrashSimple weight="bold" size={16} />
+                        <TrashSimple
+                          weight="bold"
+                          size={16}
+                          aria-hidden="true"
+                        />
                       </Button>
                     </Tooltip>
                   </div>

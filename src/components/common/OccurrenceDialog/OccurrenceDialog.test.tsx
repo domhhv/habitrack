@@ -1,6 +1,6 @@
 import { useUser } from '@hooks';
-import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { useHabits, useNoteActions } from '@stores';
+import { fireEvent, render } from '@testing-library/react';
 import { makeTestHabit } from '@tests';
 import { format } from 'date-fns';
 import React from 'react';
@@ -8,6 +8,16 @@ import { BrowserRouter } from 'react-router';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import OccurrenceDialog from './OccurrenceDialog';
+
+Object.defineProperty(window, 'DataTransfer', {
+  writable: true,
+  value: class {
+    files = null;
+    items = {
+      add: () => {},
+    };
+  },
+});
 
 vi.mock('@stores', () => {
   return {
@@ -23,6 +33,12 @@ vi.mock('@stores', () => {
 vi.mock('@hooks', () => {
   return {
     useUser: vi.fn(),
+    useScreenWidth: vi.fn().mockReturnValue({
+      screenWidth: 1400,
+      isMobile: false,
+      isTablet: false,
+      isDesktop: true,
+    }),
   };
 });
 
@@ -94,21 +110,6 @@ describe(OccurrenceDialog.name, () => {
     expect(getByText('Test Habit')).toBeInTheDocument();
   });
 
-  it.skip('should select habit', async () => {
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
-    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
-    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
-    const { container, getAllByText, getByTestId } = render(
-      <OccurrenceDialog {...props} />
-    );
-    fireEvent.click(getByTestId('habit-select'));
-    fireEvent.click(getAllByText('Test Habit')[1]);
-    await waitFor(() => {
-      const elem = container.querySelector('span[data-slot="value"]');
-      expect(elem).toHaveTextContent('Test Habit');
-    });
-  });
-
   it('on close, should call onClose', () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
     (useNoteActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -116,52 +117,12 @@ describe(OccurrenceDialog.name, () => {
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
-    const { getByRole } = render(<OccurrenceDialog {...props} />);
+    const { getByRole } = render(
+      <BrowserRouter>
+        <OccurrenceDialog {...props} />
+      </BrowserRouter>
+    );
     fireEvent.click(getByRole('button', { name: 'Close' }));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
-  });
-
-  it.skip('on close, should unselect habit', () => {
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
-    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
-    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
-    const { getByRole, getByText } = render(<OccurrenceDialog {...props} />);
-    fireEvent.click(getByRole('habit-select'));
-    fireEvent.click(getByText('Test Habit'));
-    expect(
-      getByRole('habit-select').querySelector('[role="combobox"]')
-    ).toHaveTextContent('Test Habit');
-    fireEvent.click(getByRole('add-occurrence-modal-close'));
-    expect(
-      getByRole('habit-select').querySelector('[role="combobox"]')
-    ).toHaveTextContent('Select Habit');
-  });
-
-  it.skip('on submit, should call addOccurrence with proper arguments', () => {
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
-    (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
-    (format as ReturnType<typeof vi.fn>).mockReturnValue(
-      newOccurrenceDate.toISOString().split('T')[0]
-    );
-    const mockAddOccurrence = vi.fn();
-    (
-      useOccurrenceActions as unknown as ReturnType<typeof vi.fn>
-    ).mockReturnValue({
-      addOccurrence: mockAddOccurrence,
-    });
-    const { getByRole, getByText } = render(<OccurrenceDialog {...props} />);
-    fireEvent.click(getByRole('habit-select'));
-    fireEvent.click(getByText('Test Habit'));
-    expect(
-      getByRole('habit-select').querySelector('[role="combobox"]')
-    ).toHaveTextContent('Test Habit');
-    fireEvent.click(getByText('Submit'));
-    expect(mockAddOccurrence).toHaveBeenCalledWith({
-      day: '2021-02-01',
-      timestamp: +newOccurrenceDate,
-      habitId: 1,
-      userId: '1',
-      time: null,
-    });
   });
 });
