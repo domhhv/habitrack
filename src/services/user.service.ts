@@ -1,6 +1,6 @@
 import { supabaseClient } from '@helpers';
 import { type UserAttributes } from '@supabase/supabase-js';
-import { transformServerEntity } from '@utils';
+import { deepCamelize } from '@utils';
 
 export const signUp = async (email: string, password: string, name: string) => {
   const { error } = await supabaseClient.auth.signUp({
@@ -63,7 +63,7 @@ export const updateUser = async (
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data.user);
+  return deepCamelize(data.user);
 };
 
 export const sendPasswordResetEmail = async (email: string) => {

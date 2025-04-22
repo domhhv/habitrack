@@ -1,14 +1,10 @@
 import { supabaseClient } from '@helpers';
 import { type Habit, type HabitsInsert, type HabitsUpdate } from '@models';
 import { StorageBuckets, uploadFile } from '@root/src/services/storage.service';
-import {
-  transformClientEntity,
-  transformServerEntities,
-  transformServerEntity,
-} from '@utils';
+import { deepSnakify, deepCamelize } from '@utils';
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
-  const serverBody = transformClientEntity(body);
+  const serverBody = deepSnakify(body);
 
   const { error, data } = await supabaseClient
     .from('habits')
@@ -20,7 +16,7 @@ export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return deepCamelize(data);
 };
 
 export const listHabits = async () => {
@@ -33,14 +29,14 @@ export const listHabits = async () => {
     throw new Error(error.message);
   }
 
-  return transformServerEntities(data);
+  return data.map(deepCamelize);
 };
 
 export const patchHabit = async (
   id: number,
   body: HabitsUpdate
 ): Promise<Habit> => {
-  const serverUpdates = transformClientEntity({
+  const serverUpdates = deepSnakify({
     ...body,
     updatedAt: new Date().toISOString(),
   });
@@ -56,7 +52,7 @@ export const patchHabit = async (
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return deepCamelize(data);
 };
 
 export const destroyHabit = async (id: number): Promise<Habit> => {
@@ -71,7 +67,7 @@ export const destroyHabit = async (id: number): Promise<Habit> => {
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return deepCamelize(data);
 };
 
 export const uploadHabitIcon = async (userId: string, icon?: File | null) => {

@@ -1,9 +1,9 @@
-export * from './useThemeMode';
-export { default as useThemeMode } from './useThemeMode';
+export * from './use-theme-mode';
+export { default as useThemeMode } from './use-theme-mode';
 
-export { default as useAuthSearchParams } from './useAuthSearchParams';
-export { default as useScreenWidth } from './useScreenWidth';
-export { default as useTextField } from './useTextField';
-export { default as useFileField } from './useFileField';
-export { default as useFetchOnAuth } from './useFetchOnAuth';
-export { default as useUser } from './useUser';
+export { default as useAuthSearchParams } from './use-auth-search-params';
+export { default as useScreenWidth } from './use-screen-width';
+export { default as useTextField } from './use-text-field';
+export { default as useFileField } from './use-file-field';
+export { default as useFetchOnAuth } from './use-fetch-on-auth';
+export { default as useUser } from './use-user';

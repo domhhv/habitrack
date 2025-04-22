@@ -9,7 +9,7 @@ import {
 } from '@heroui/react';
 import { CaretDown } from '@phosphor-icons/react';
 import { getLatestHabitOccurrenceTimestamp } from '@services';
-import { capitalizeFirstLetter } from '@utils';
+import { capitalize } from '@utils';
 import {
   format,
   formatDistanceStrict,
@@ -106,9 +106,7 @@ const HabitLastEntryCell = ({ id }: { id: number }) => {
         showArrow
         offset={12}
       >
-        <span>
-          {capitalizeFirstLetter(formatRelativeDate(latestOccurrenceTimestamp))}
-        </span>
+        <span>{capitalize(formatRelativeDate(latestOccurrenceTimestamp))}</span>
       </Tooltip>
       <Dropdown>
         <DropdownTrigger>

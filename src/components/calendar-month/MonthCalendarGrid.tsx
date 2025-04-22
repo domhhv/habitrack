@@ -1,4 +1,4 @@
-import { getYearWeekNumberFromMonthWeek } from '@helpers';
+import { getIsoWeek } from '@helpers';
 import { Button, cn, Tooltip } from '@heroui/react';
 import { useScreenWidth } from '@hooks';
 import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
@@ -84,13 +84,9 @@ const MonthCalendarGrid = ({
           transition={{ duration: 0.1 }}
         >
           {weekIndexes.map((weekIndex) => {
-            const { week } = getYearWeekNumberFromMonthWeek(
-              activeMonthLabel,
-              activeYear,
-              weekIndex
-            );
-            const dates = state.getDatesInWeek(weekIndex).filter(isTruthy);
-            const [firstDate] = dates;
+            const [{ year, month, day }] = state
+              .getDatesInWeek(weekIndex)
+              .filter(isTruthy);
 
             return (
               <div
@@ -106,9 +102,9 @@ const MonthCalendarGrid = ({
                     )}
                     variant="ghost"
                     radius={isDesktop ? 'md' : 'sm'}
-                    to={`/calendar/week/${firstDate.year}/${firstDate.month}/${firstDate.day}`}
+                    to={`/calendar/week/${year}/${month}/${day}`}
                   >
-                    {week}
+                    {getIsoWeek(weekIndex, activeMonthLabel, activeYear)}
                   </Button>
                 </Tooltip>
                 <div

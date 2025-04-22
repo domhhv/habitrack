@@ -1,13 +1,9 @@
 import { supabaseClient } from '@helpers';
 import type { NotesUpdate, Note, NotesInsert } from '@models';
-import {
-  transformClientEntity,
-  transformServerEntities,
-  transformServerEntity,
-} from '@utils';
+import { deepSnakify, deepCamelize } from '@utils';
 
 export const createNote = async (body: NotesInsert): Promise<Note> => {
-  const serverBody = transformClientEntity(body);
+  const serverBody = deepSnakify(body);
 
   const { error, data } = await supabaseClient
     .from('notes')
@@ -19,7 +15,7 @@ export const createNote = async (body: NotesInsert): Promise<Note> => {
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data);
+  return deepCamelize(data);
 };
 
 export const listNotes = async (): Promise<Note[]> => {
@@ -29,14 +25,14 @@ export const listNotes = async (): Promise<Note[]> => {
     throw new Error(error.message);
   }
 
-  return transformServerEntities(data);
+  return data.map(deepCamelize);
 };
 
 export const updateNote = async (
   id: number,
   note: NotesUpdate
 ): Promise<Note> => {
-  const serverNote = transformClientEntity({
+  const serverNote = deepSnakify({
     ...note,
     updatedAt: new Date().toISOString(),
   });
@@ -51,7 +47,7 @@ export const updateNote = async (
     throw new Error(error.message);
   }
 
-  return transformServerEntity(data[0]);
+  return deepCamelize(data[0]);
 };
 
 export const destroyNote = async (id: number) => {

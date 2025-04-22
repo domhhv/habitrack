@@ -27,9 +27,7 @@ const shiftSundayToSeven = (day: number): number => {
   return day === 0 ? 7 : day;
 };
 
-const getISOWeekYearAndNumber = (
-  date: Date
-): { year: number; week: number } => {
+const getIsoWeekNumberFromDate = (date: Date): number => {
   const utcDate = new Date(
     Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
   );
@@ -39,20 +37,19 @@ const getISOWeekYearAndNumber = (
   const startOfIsoYear = new Date(Date.UTC(isoYear, 0, 1));
   const daysSinceYearStart =
     (utcDate.getTime() - startOfIsoYear.getTime()) / 86400000 + 1;
-  const weekNumber = Math.ceil(daysSinceYearStart / 7);
 
-  return { year: isoYear, week: weekNumber };
+  return Math.ceil(daysSinceYearStart / 7);
 };
 
-const getYearWeekNumberFromMonthWeek = (
+const getIsoWeek = (
+  weekIndex: number,
   monthLabel: string,
-  year: number,
-  weekIndex: number
-): { year: number; week: number } => {
+  year: number
+): number => {
   const monthIndex = getMonthIndex(monthLabel);
   const date = getDateForMonthWeek(year, monthIndex, weekIndex);
 
-  return getISOWeekYearAndNumber(date);
+  return getIsoWeekNumberFromDate(date);
 };
 
-export default getYearWeekNumberFromMonthWeek;
+export default getIsoWeek;

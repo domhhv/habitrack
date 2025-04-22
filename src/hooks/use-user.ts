@@ -1,6 +1,6 @@
 import { supabaseClient } from '@helpers';
 import type { User } from '@supabase/supabase-js';
-import { transformServerEntity } from '@utils';
+import { deepCamelize } from '@utils';
 import React from 'react';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
@@ -28,7 +28,7 @@ const useUser = () => {
           return;
         }
 
-        setUser(session?.user ? transformServerEntity(session.user) : null);
+        setUser(session?.user ? deepCamelize(session.user) : null);
         setIsLoading(false);
       }
     };
@@ -50,7 +50,7 @@ const useUser = () => {
           event === 'TOKEN_REFRESHED' ||
           event === 'USER_UPDATED')
       ) {
-        setUser(transformServerEntity(session.user));
+        setUser(deepCamelize(session.user));
       }
 
       if (event === 'SIGNED_OUT') {
