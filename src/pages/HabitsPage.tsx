@@ -8,8 +8,9 @@ import {
   TableCell,
   TableColumn,
   TableHeader,
+  useDisclosure,
 } from '@heroui/react';
-import { TrashSimple, PencilSimple } from '@phosphor-icons/react';
+import { Plus, TrashSimple, PencilSimple } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -78,7 +79,14 @@ const HabitsPage = () => {
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [habitToRemove, setHabitToRemove] = React.useState<Habit | null>(null);
   const [isRemoving, setIsRemoving] = React.useState<boolean>(false);
+  const [isAddDialogAnimatingClose, setIsAddDialogAnimatingClose] =
+    React.useState<boolean>(false);
   const { isMobile } = useScreenWidth();
+  const {
+    isOpen: isAddDialogOpen,
+    onClose: closeAddDialog,
+    onOpen: openAddDialog,
+  } = useDisclosure();
 
   const handleRemovalStart = (habit: Habit) => {
     setHabitToRemove(habit);
@@ -247,7 +255,29 @@ const HabitsPage = () => {
       </Table>
       <EditHabitDialog habit={habitToEdit} onClose={handleEditEnd} />
       <div className="m-auto my-4 flex w-full justify-end px-4 lg:px-16 lg:py-4">
-        <AddHabitDialogButton />
+        <Button
+          color="primary"
+          variant="solid"
+          isDisabled={!user}
+          onPress={openAddDialog}
+          className="w-full lg:w-auto"
+          data-testid="add-habit-button"
+          startContent={<Plus weight="bold" />}
+        >
+          Add habit
+        </Button>
+        {(isAddDialogOpen || isAddDialogAnimatingClose) && (
+          <AddHabitDialogButton
+            isOpen={isAddDialogOpen}
+            onClose={() => {
+              setIsAddDialogAnimatingClose(true);
+              closeAddDialog();
+              setTimeout(() => {
+                setIsAddDialogAnimatingClose(false);
+              }, 100);
+            }}
+          />
+        )}
       </div>
       <ConfirmDialog
         isLoading={isRemoving}
