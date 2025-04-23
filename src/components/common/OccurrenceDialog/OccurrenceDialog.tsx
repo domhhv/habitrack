@@ -7,10 +7,10 @@ import {
   ModalBody,
   TimeInput,
   SelectItem,
-  NumberInput,
   ListboxItem,
   ModalFooter,
   ModalHeader,
+  NumberInput,
   ModalContent,
   SelectSection,
 } from '@heroui/react';
@@ -24,6 +24,8 @@ import type { RequireAtLeastOne } from 'type-fest';
 import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
+import { StorageBuckets } from '@models';
+import { uploadImages } from '@services';
 import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
 import { toEventLike, getHabitIconUrl } from '@utils';
 
@@ -58,7 +60,7 @@ const OccurrenceDialog = ({
   const [isDateTimeInFuture, setIsDateTimeInFuture] = React.useState(false);
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
     React.useState(false);
-  const [photoPaths, setPhotoPaths] = React.useState<string[] | null>(null);
+  const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
   const { isDesktop, isMobile } = useScreenWidth();
 
   const habitsByTraitName = React.useMemo(() => {
@@ -84,7 +86,6 @@ const OccurrenceDialog = ({
           new Date(existingOccurrence.timestamp).toISOString()
         )
       );
-      setPhotoPaths(existingOccurrence.photoPaths);
 
       return;
     }
@@ -125,7 +126,10 @@ const OccurrenceDialog = ({
         selectedHabitId !== existingOccurrence.habitId.toString();
 
       const hasOccurrenceChanged =
-        hasNoteChanged || hasHabitChanged || hasTimeChanged;
+        hasNoteChanged ||
+        hasHabitChanged ||
+        hasTimeChanged ||
+        uploadedFiles.length > 0;
 
       setIsSubmitButtonDisabled(isSaving || !hasOccurrenceChanged);
 
@@ -134,6 +138,7 @@ const OccurrenceDialog = ({
   }, [
     newOccurrenceDate,
     existingOccurrence,
+    uploadedFiles.length,
     note,
     selectedHabitId,
     time,
@@ -205,8 +210,18 @@ const OccurrenceDialog = ({
 
     if (existingOccurrence) {
       const updatePromise = async () => {
+        const photoPaths = uploadedFiles.length
+          ? await uploadImages(
+              StorageBuckets.OCCURRENCE_PHOTOS,
+              user.id,
+              uploadedFiles,
+              selectedHabitId
+            )
+          : [];
+
         await updateOccurrence(existingOccurrence.id, {
           habitId: +selectedHabitId,
+          photoPaths: (existingOccurrence.photoPaths || []).concat(photoPaths),
           timestamp: +occurrenceDateTime,
           userId: user?.id as string,
         });
@@ -245,6 +260,15 @@ const OccurrenceDialog = ({
       return;
     }
 
+    const photoPaths = uploadedFiles.length
+      ? await uploadImages(
+          StorageBuckets.OCCURRENCE_PHOTOS,
+          user.id,
+          uploadedFiles,
+          selectedHabitId
+        )
+      : null;
+
     const addPromises = Array.from({ length: repeat || 1 }).map(async () => {
       const newOccurrence = await addOccurrence({
         habitId: +selectedHabitId,
@@ -274,9 +298,10 @@ const OccurrenceDialog = ({
     ).then(handleClose);
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
     setSelectedHabitId('');
     clearNote();
+    setUploadedFiles([]);
     onClose();
   };
 
@@ -422,8 +447,9 @@ const OccurrenceDialog = ({
             />
           </div>
           <OccurrencePhotosUploader
-            photoPaths={photoPaths}
-            onPhotoPathsChange={setPhotoPaths}
+            files={uploadedFiles}
+            onFilesChange={setUploadedFiles}
+            photoPaths={existingOccurrence?.photoPaths || null}
           />
         </ModalBody>
         <ModalFooter>

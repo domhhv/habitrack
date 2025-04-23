@@ -26,7 +26,8 @@ import {
 } from '@components';
 import { handleAsyncAction } from '@helpers';
 import { useUser, useScreenWidth } from '@hooks';
-import { type Habit } from '@models';
+import { type Habit, StorageBuckets } from '@models';
+import { listFiles, deleteFile } from '@services';
 import { useHabits, useHabitActions } from '@stores';
 
 type Column = {
@@ -93,15 +94,33 @@ const HabitsPage = () => {
   };
 
   const handleRemovalConfirmed = async () => {
-    if (!habitToRemove) {
+    if (!habitToRemove || !user) {
       return null;
     }
 
-    void handleAsyncAction(
-      removeHabit(habitToRemove),
-      'remove_habit',
-      setIsRemoving
-    ).then(handleRemovalEnd);
+    const remove = async () => {
+      const habitOccurrencePhotos = await listFiles(
+        StorageBuckets.OCCURRENCE_PHOTOS,
+        `${user.id}/${habitToRemove.id}/`
+      );
+
+      if (habitOccurrencePhotos.length > 0) {
+        await Promise.all(
+          habitOccurrencePhotos.map((photo) => {
+            return deleteFile(
+              StorageBuckets.OCCURRENCE_PHOTOS,
+              `${user.id}/${habitToRemove.id}/${photo.name}`
+            );
+          })
+        );
+      }
+
+      return removeHabit(habitToRemove);
+    };
+
+    void handleAsyncAction(remove(), 'remove_habit', setIsRemoving).then(
+      handleRemovalEnd
+    );
   };
 
   const handleRemovalEnd = () => {

@@ -1,45 +1,27 @@
-import { Input, addToast } from '@heroui/react';
-import pluralize from 'pluralize';
+import { Input, Button, addToast } from '@heroui/react';
+import { TrashSimple } from '@phosphor-icons/react';
 import React from 'react';
 
 import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
-import { useUser } from '@hooks';
-import type {
-  SignedUrls,
-  FailedUpload,
-  UploadResult,
-  SuccessfulUpload,
-} from '@models';
+import type { SignedUrls } from '@models';
 import { StorageBuckets } from '@models';
-import { deleteFile, uploadImage, createSignedUrls } from '@services';
-import { isRejected, isFulfilled, getErrorMessage } from '@utils';
+import { deleteFile, createSignedUrls } from '@services';
+import { getErrorMessage } from '@utils';
 
 import ImageCarousel from './ImageCarousel';
 
-const isSuccessfulUpload = (
-  input: PromiseFulfilledResult<UploadResult>
-): input is PromiseFulfilledResult<SuccessfulUpload> => {
-  return input.value.status === 'success';
-};
-
-const isFailedUpload = (
-  input: PromiseFulfilledResult<UploadResult>
-): input is PromiseFulfilledResult<FailedUpload> => {
-  return input.value.status === 'error';
-};
-
 type OccurrencePhotosUploaderProps = {
-  onPhotoPathsChange: React.Dispatch<React.SetStateAction<string[] | null>>;
+  files: File[];
   photoPaths: string[] | null;
+  onFilesChange: (files: File[]) => void;
 };
 
 const OccurrencePhotosUploader = ({
-  onPhotoPathsChange,
+  files,
+  onFilesChange,
   photoPaths,
 }: OccurrencePhotosUploaderProps) => {
-  const { user } = useUser();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [files, setFiles] = React.useState<File[]>([]);
   const [signedImageUrls, setSignedImageUrls] = React.useState<SignedUrls>([]);
 
   React.useEffect(() => {
@@ -78,61 +60,23 @@ const OccurrencePhotosUploader = ({
   }, [photoPaths]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+    const uploadedFiles = Array.from(e.target.files || []);
 
-    if (!files.length) {
+    if (!uploadedFiles.length) {
       return;
     }
 
-    setFiles(files);
-
-    const uploadRequests = files.map((file) => {
-      return uploadImage(
-        StorageBuckets.OCCURRENCE_PHOTOS,
-        file,
-        user?.id || ''
-      );
-    });
-
-    const results = await Promise.allSettled(uploadRequests);
-    const successfulUploadResults = results.filter(isFulfilled);
-    const failedUploadResults = results.filter(isRejected);
-
-    const successfulUploadPaths = successfulUploadResults
-      .filter(isSuccessfulUpload)
-      .map((result) => {
-        return result.value.path;
+    const newFiles = uploadedFiles.filter((file) => {
+      return !files.some((f) => {
+        return f.name === file.name;
       });
-
-    const failedUploadReasons = failedUploadResults.map((result) => {
-      return result.reason;
     });
 
-    const failedUploadErrors = successfulUploadResults
-      .filter(isFailedUpload)
-      .map((result) => {
-        return result.value.error;
-      })
-      .concat(failedUploadReasons);
-
-    onPhotoPathsChange((prev) => {
-      return [...(prev || []), ...successfulUploadPaths];
-    });
-
-    if (failedUploadErrors.length) {
-      addToast({
-        color: 'danger',
-        description: `Error details: ${failedUploadErrors.join(', ')}`,
-        title: `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
-      });
+    if (newFiles.length === 0) {
+      return;
     }
 
-    if (successfulUploadPaths.length) {
-      addToast({
-        color: 'success',
-        title: `Successfully uploaded ${pluralize('photo', successfulUploadPaths.length, true)}`,
-      });
-    }
+    onFilesChange(newFiles);
   };
 
   const handleDelete = async (index: number) => {
@@ -153,24 +97,11 @@ const OccurrencePhotosUploader = ({
       title: 'Successfully deleted photo',
     });
 
-    onPhotoPathsChange((prev) => {
-      if (!prev) {
-        return [];
-      }
+    setSignedImageUrls((prev) => {
+      const newUrls = [...prev];
+      newUrls.splice(index, 1);
 
-      return prev.filter((_, i) => {
-        return i !== index;
-      });
-    });
-
-    setFiles((prev) => {
-      if (!prev) {
-        return [];
-      }
-
-      return prev.filter((_, i) => {
-        return i !== index;
-      });
+      return newUrls;
     });
   };
 
@@ -193,6 +124,32 @@ const OccurrencePhotosUploader = ({
             ', '
           )}. Max size: ${MAX_FILE_SIZE_MB[StorageBuckets.OCCURRENCE_PHOTOS]}MB`}
       />
+
+      {files.map((file, index) => {
+        return (
+          <div
+            key={file.name}
+            className="flex items-center justify-between rounded-md border border-gray-300 bg-gray-50 p-1 dark:border-gray-700 dark:bg-gray-800"
+          >
+            <p className="pl-1 text-sm text-gray-700 dark:text-gray-100">
+              {file.name}
+            </p>
+            <Button
+              size="sm"
+              isIconOnly
+              color="danger"
+              variant="light"
+              onPress={() => {
+                const newFiles = [...files];
+                newFiles.splice(index, 1);
+                onFilesChange(newFiles);
+              }}
+            >
+              <TrashSimple size={16} weight="bold" />
+            </Button>
+          </div>
+        );
+      })}
 
       {signedImageUrls.length > 0 && (
         <>

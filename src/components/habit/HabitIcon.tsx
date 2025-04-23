@@ -4,8 +4,8 @@ import React from 'react';
 import { VisuallyHiddenInput } from '@components';
 import { handleAsyncAction } from '@helpers';
 import { useUser } from '@hooks';
-import { type Habit } from '@models';
-import { uploadHabitIcon } from '@services';
+import { type Habit, StorageBuckets } from '@models';
+import { deleteFile, uploadHabitIcon } from '@services';
 import { useHabitActions } from '@stores';
 import { getHabitIconUrl } from '@utils';
 
@@ -29,7 +29,11 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
     const [icon] = files;
 
     const upload = async () => {
-      const iconPath = await uploadHabitIcon(user.id, icon, habit.iconPath);
+      const iconPath = await uploadHabitIcon(user.id, icon);
+
+      if (habit.iconPath) {
+        await deleteFile(StorageBuckets.HABIT_ICONS, habit.iconPath);
+      }
 
       return updateHabit(habit.id, { iconPath });
     };
