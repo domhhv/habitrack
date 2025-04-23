@@ -76,7 +76,6 @@ export const uploadHabitIcon = async (
   return uploadFile(
     StorageBuckets.HABIT_ICONS,
     iconPath || `${userId}/${Date.now()}-${icon.name}`,
-    icon,
-    '0'
+    icon
   );
 };

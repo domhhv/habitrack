@@ -1,9 +1,34 @@
+import { addToast } from '@heroui/react';
+import type { SearchOptions } from '@supabase/storage-js';
 import imageCompression from 'browser-image-compression';
+import pluralize from 'pluralize';
 
 import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
 import { supabaseClient } from '@helpers';
 import type { UploadResult } from '@models';
 import { StorageBuckets } from '@models';
+import {
+  isRejected,
+  isFulfilled,
+  isFailedUpload,
+  isSuccessfulUpload,
+} from '@utils';
+
+export const listFiles = async (
+  bucket: StorageBuckets,
+  path: string,
+  options: SearchOptions = { limit: 100, offset: 0 }
+) => {
+  const { data, error } = await supabaseClient.storage
+    .from(bucket)
+    .list(path, options);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
 
 export const uploadFile = async (
   bucket: StorageBuckets,
@@ -35,11 +60,26 @@ export const deleteFile = async (bucket: StorageBuckets, path: string) => {
   return true;
 };
 
+export const createSignedUrls = async (
+  filePaths: string[],
+  expiresIn = 60 * 5
+) => {
+  const { data, error } = await supabaseClient.storage
+    .from(StorageBuckets.OCCURRENCE_PHOTOS)
+    .createSignedUrls(filePaths, expiresIn);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
 export async function uploadImage(
   bucket: StorageBuckets,
   file: File,
   userId: string,
-  metadata?: object
+  folder?: string
 ): Promise<UploadResult> {
   if (!ALLOWED_IMAGE_TYPES[bucket].includes(file.type)) {
     return { error: 'Invalid file type', status: 'error' };
@@ -58,14 +98,11 @@ export async function uploadImage(
     useWebWorker: true,
   });
 
-  const filePath = `${userId}/${Date.now()}_${compressedFile.name}`;
+  const filePath = `${userId}/${folder ? `${folder}/` : ''}${Date.now()}_${compressedFile.name}`;
 
   const { data: uploadData, error: uploadError } = await supabaseClient.storage
     .from(bucket)
-    .upload(filePath, compressedFile, {
-      metadata,
-      upsert: false,
-    });
+    .upload(filePath, compressedFile);
 
   if (uploadError) {
     return { error: uploadError.message, status: 'error' };
@@ -74,17 +111,41 @@ export async function uploadImage(
   return { path: uploadData.path, status: 'success' };
 }
 
-export const createSignedUrls = async (
-  filePaths: string[],
-  expiresIn = 60 * 5
+export const uploadImages = async (
+  bucket: StorageBuckets,
+  userId: string,
+  files: File[],
+  folder?: string
 ) => {
-  const { data, error } = await supabaseClient.storage
-    .from(StorageBuckets.OCCURRENCE_PHOTOS)
-    .createSignedUrls(filePaths, expiresIn);
+  const results = await Promise.allSettled(
+    files.map((file) => {
+      return uploadImage(bucket, file, userId, folder);
+    })
+  );
 
-  if (error) {
-    throw new Error(error.message);
+  const fulfilledUploadResults = results.filter(isFulfilled);
+  const rejectedUploadResults = results.filter(isRejected);
+
+  const rejectedUploadReasons = rejectedUploadResults.map((result) => {
+    return result.reason;
+  });
+
+  const failedUploadErrors = fulfilledUploadResults
+    .filter(isFailedUpload)
+    .map(({ value }) => {
+      return value.error;
+    })
+    .concat(rejectedUploadReasons);
+
+  if (failedUploadErrors.length) {
+    addToast({
+      color: 'danger',
+      description: `Error details: ${failedUploadErrors.join(', ')}`,
+      title: `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
+    });
   }
 
-  return data;
+  return fulfilledUploadResults.filter(isSuccessfulUpload).map(({ value }) => {
+    return value.path;
+  });
 };
