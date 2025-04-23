@@ -1,6 +1,7 @@
 import { addToast } from '@heroui/react';
-import { capitalize, getErrorMessage } from '@utils';
 import nlp from 'compromise';
+
+import { capitalize, getErrorMessage } from '@utils';
 
 type ActionVerb = 'add' | 'update' | 'remove' | 'fetch' | 'upload';
 type EntityNoun =
@@ -16,22 +17,22 @@ type ActionType = `${ActionVerb}_${EntityNoun}`;
 const parseActionType = (
   actionType: ActionType
 ): {
-  verb: string;
   noun: string;
+  verb: string;
 } => {
   const [verb, noun] = actionType.split('_');
 
-  return { verb, noun };
+  return { noun, verb };
 };
 
 const getMessages = (actionType: ActionType) => {
-  const { verb, noun } = parseActionType(actionType);
+  const { noun, verb } = parseActionType(actionType);
 
   const pastTense = nlp(verb).verbs().toPastTense().text();
 
   return {
-    success: `${capitalize(noun)} ${pastTense}`,
     error: `Something went wrong while ${verb}ing your ${noun}`,
+    success: `${capitalize(noun)} ${pastTense}`,
   };
 };
 
@@ -47,8 +48,8 @@ const handleAsyncAction = <T>(
   return action
     .then((result) => {
       addToast({
-        title: messages.success,
         color: 'success',
+        title: messages.success,
       });
 
       return result;
@@ -57,9 +58,9 @@ const handleAsyncAction = <T>(
       console.error(error);
 
       addToast({
-        title: messages.error,
-        description: `Error details: ${getErrorMessage(error)}`,
         color: 'danger',
+        description: `Error details: ${getErrorMessage(error)}`,
+        title: messages.error,
       });
 
       return Promise.reject();

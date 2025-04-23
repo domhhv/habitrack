@@ -1,22 +1,23 @@
 import { Tooltip } from '@heroui/react';
-import type { Streak } from '@models';
-import { getLongestHabitStreak } from '@services';
 import React from 'react';
 
+import type { Streak } from '@models';
+import { getLongestHabitStreak } from '@services';
+
 const options: Intl.DateTimeFormatOptions = {
+  day: 'numeric',
+  month: 'short',
   weekday: 'short',
   year: 'numeric',
-  month: 'short',
-  day: 'numeric',
 };
 
 const dateTimeFormat = new Intl.DateTimeFormat('en', options);
 
 const HabitLongestStreak = ({ id }: { id: number }) => {
   const [longestStreak, setLongestStreak] = React.useState<Streak>({
+    streakEnd: null,
     streakLength: null,
     streakStart: null,
-    streakEnd: null,
   });
 
   React.useEffect(() => {
@@ -29,7 +30,7 @@ const HabitLongestStreak = ({ id }: { id: number }) => {
   );
 
   return longestStreak.streakLength ? (
-    <Tooltip content={range} color="primary" showArrow offset={12}>
+    <Tooltip showArrow offset={12} content={range} color="primary">
       <span>{longestStreak.streakLength} days</span>
     </Tooltip>
   ) : (

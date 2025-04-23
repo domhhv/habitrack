@@ -1,48 +1,49 @@
-import { handleAsyncAction } from '@helpers';
 import type { ButtonProps, TimeInputValue } from '@heroui/react';
 import {
-  NumberInput,
-  Button,
-  ListboxItem,
   Modal,
+  Button,
+  Select,
+  Textarea,
   ModalBody,
-  ModalContent,
+  TimeInput,
+  SelectItem,
+  NumberInput,
+  ListboxItem,
   ModalFooter,
   ModalHeader,
-  Select,
-  SelectItem,
+  ModalContent,
   SelectSection,
-  Textarea,
-  TimeInput,
 } from '@heroui/react';
-import { useScreenWidth, useTextField, useUser } from '@hooks';
-import { parseAbsoluteToLocal, ZonedDateTime } from '@internationalized/date';
-import type { Occurrence } from '@models';
+import { ZonedDateTime, parseAbsoluteToLocal } from '@internationalized/date';
 import { ArrowsClockwise } from '@phosphor-icons/react';
-import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
-import { getHabitIconUrl, toEventLike } from '@utils';
-import { format, isFuture, isToday, isYesterday } from 'date-fns';
+import { format, isToday, isFuture, isYesterday } from 'date-fns';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
+
+import { handleAsyncAction } from '@helpers';
+import { useUser, useTextField, useScreenWidth } from '@hooks';
+import type { Occurrence } from '@models';
+import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
+import { toEventLike, getHabitIconUrl } from '@utils';
 
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 
 type OccurrenceDialogProps = RequireAtLeastOne<
   {
-    isOpen: boolean;
-    onClose: () => void;
-    newOccurrenceDate: Date | null;
     existingOccurrence: Occurrence | null;
+    isOpen: boolean;
+    newOccurrenceDate: Date | null;
+    onClose: () => void;
   },
   'newOccurrenceDate' | 'existingOccurrence'
 >;
 
 const OccurrenceDialog = ({
-  isOpen,
-  onClose,
-  newOccurrenceDate,
   existingOccurrence,
+  isOpen,
+  newOccurrenceDate,
+  onClose,
 }: OccurrenceDialogProps) => {
   const { user } = useUser();
   const habits = useHabits();
@@ -205,8 +206,8 @@ const OccurrenceDialog = ({
     if (existingOccurrence) {
       const updatePromise = async () => {
         await updateOccurrence(existingOccurrence.id, {
-          timestamp: +occurrenceDateTime,
           habitId: +selectedHabitId,
+          timestamp: +occurrenceDateTime,
           userId: user?.id as string,
         });
 
@@ -229,8 +230,8 @@ const OccurrenceDialog = ({
           }
 
           updateOccurrenceNoteInState(existingOccurrence.id, {
-            id: newNote.id,
             content: newNote.content,
+            id: newNote.id,
           });
         }
       };
@@ -246,10 +247,10 @@ const OccurrenceDialog = ({
 
     const addPromises = Array.from({ length: repeat || 1 }).map(async () => {
       const newOccurrence = await addOccurrence({
-        timestamp: +occurrenceDateTime,
         habitId: +selectedHabitId,
-        userId: user?.id as string,
         photoPaths,
+        timestamp: +occurrenceDateTime,
+        userId: user?.id as string,
       });
 
       if (note) {
@@ -260,8 +261,8 @@ const OccurrenceDialog = ({
         });
 
         updateOccurrenceNoteInState(newOccurrence.id, {
-          id: newNote.id,
           content: newNote.content,
+          id: newNote.id,
         });
       }
     });
@@ -306,16 +307,16 @@ const OccurrenceDialog = ({
 
   const submitButtonSharedProps: ButtonProps = {
     color: 'primary',
-    isLoading: isSaving,
     isDisabled: isSubmitButtonDisabled,
+    isLoading: isSaving,
   };
 
   return (
     <Modal
-      role="add-occurrence-modal"
       isOpen={isOpen}
-      onClose={handleClose}
       placement="center"
+      onClose={handleClose}
+      role="add-occurrence-modal"
       size={isMobile ? 'full' : 'md'}
     >
       <ModalContent className="overflow-y-auto">
@@ -324,22 +325,22 @@ const OccurrenceDialog = ({
         </ModalHeader>
         <ModalBody>
           <Select
-            disableSelectorIconRotation
             variant="faded"
+            data-testid="habit-select"
+            disableSelectorIconRotation
             selectedKeys={[selectedHabitId]}
+            selectorIcon={<ArrowsClockwise />}
             onChange={handleHabitSelectionChange}
+            description="Select from your habits"
             label={
               hasHabits
                 ? 'Habits'
                 : 'No habits yet. Create a habit to get started.'
             }
-            description="Select from your habits"
-            data-testid="habit-select"
-            selectorIcon={<ArrowsClockwise />}
           >
             {Object.keys(habitsByTraitName).map((traitName) => {
               return (
-                <SelectSection key={traitName} title={traitName} showDivider>
+                <SelectSection showDivider key={traitName} title={traitName}>
                   {habitsByTraitName[traitName] ? (
                     habitsByTraitName[traitName].map((habit) => {
                       const iconUrl = getHabitIconUrl(habit.iconPath);
@@ -366,13 +367,13 @@ const OccurrenceDialog = ({
             })}
           </Select>
           <Textarea
+            value={note}
+            variant="faded"
+            placeholder="Note"
+            onChange={handleNoteChange}
             onKeyDown={() => {
               return null;
             }}
-            onChange={handleNoteChange}
-            value={note}
-            placeholder="Note"
-            variant="faded"
             classNames={
               !isDesktop
                 ? {
@@ -383,17 +384,17 @@ const OccurrenceDialog = ({
           />
           {!existingOccurrence && (
             <NumberInput
-              onValueChange={setRepeat}
+              minValue={1}
               value={repeat}
               label="Repeat"
               variant="faded"
-              minValue={1}
+              onValueChange={setRepeat}
               classNames={
                 !isDesktop
                   ? {
+                      input: 'text-base',
                       inputWrapper: 'py-2 px-4 h-16',
                       label: 'text-small',
-                      input: 'text-base',
                     }
                   : undefined
               }
@@ -402,8 +403,8 @@ const OccurrenceDialog = ({
           <div className="flex w-full flex-col gap-y-2">
             <TimeInput
               label="Time"
-              variant="faded"
               value={time}
+              variant="faded"
               onChange={setTime}
               description={
                 isDateTimeInFuture &&
@@ -412,9 +413,9 @@ const OccurrenceDialog = ({
               classNames={
                 !isDesktop
                   ? {
+                      input: 'text-base',
                       inputWrapper: 'py-3 px-4 h-16',
                       label: 'text-small',
-                      input: 'text-base',
                     }
                   : undefined
               }

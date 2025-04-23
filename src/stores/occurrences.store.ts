@@ -1,3 +1,5 @@
+import { create } from 'zustand';
+
 import type {
   Note,
   Occurrence,
@@ -6,20 +8,19 @@ import type {
 } from '@models';
 import { StorageBuckets } from '@models';
 import {
-  createOccurrence,
   deleteFile,
-  destroyOccurrence,
   listOccurrences,
   patchOccurrence,
+  createOccurrence,
+  destroyOccurrence,
 } from '@services';
-import { create } from 'zustand';
 
 type OccurrencesState = {
   occurrences: Occurrence[];
   actions: {
-    fetchOccurrences: (range: [number, number]) => Promise<void>;
-    clearOccurrences: () => void;
     addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
+    clearOccurrences: () => void;
+    fetchOccurrences: (range: [number, number]) => Promise<void>;
     removeOccurrence: (occurrence: Occurrence) => Promise<void>;
     updateOccurrence: (id: number, body: OccurrencesUpdate) => Promise<void>;
     updateOccurrenceNoteInState: (
@@ -34,17 +35,6 @@ const useOccurrencesStore = create<OccurrencesState>((set) => {
     occurrences: [],
 
     actions: {
-      clearOccurrences: () => {
-        set(() => {
-          return { occurrences: [] };
-        });
-      },
-
-      fetchOccurrences: async (range: [number, number]) => {
-        const occurrences = await listOccurrences(range);
-        set({ occurrences });
-      },
-
       addOccurrence: async (occurrence: OccurrencesInsert) => {
         const nextOccurrence = await createOccurrence(occurrence);
 
@@ -55,6 +45,17 @@ const useOccurrencesStore = create<OccurrencesState>((set) => {
         });
 
         return nextOccurrence;
+      },
+
+      clearOccurrences: () => {
+        set(() => {
+          return { occurrences: [] };
+        });
+      },
+
+      fetchOccurrences: async (range: [number, number]) => {
+        const occurrences = await listOccurrences(range);
+        set({ occurrences });
       },
 
       removeOccurrence: async ({ id, photoPaths }: Occurrence) => {

@@ -1,17 +1,18 @@
-import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE_MB } from '@const';
-import { addToast, Input } from '@heroui/react';
+import { Input, addToast } from '@heroui/react';
+import pluralize from 'pluralize';
+import React from 'react';
+
+import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
 import { useUser } from '@hooks';
 import type {
-  FailedUpload,
   SignedUrls,
-  SuccessfulUpload,
+  FailedUpload,
   UploadResult,
+  SuccessfulUpload,
 } from '@models';
 import { StorageBuckets } from '@models';
 import { deleteFile, uploadImage, createSignedUrls } from '@services';
-import { getErrorMessage, isFulfilled, isRejected } from '@utils';
-import pluralize from 'pluralize';
-import React from 'react';
+import { isRejected, isFulfilled, getErrorMessage } from '@utils';
 
 import ImageCarousel from './ImageCarousel';
 
@@ -28,13 +29,13 @@ const isFailedUpload = (
 };
 
 type OccurrencePhotosUploaderProps = {
-  photoPaths: string[] | null;
   onPhotoPathsChange: React.Dispatch<React.SetStateAction<string[] | null>>;
+  photoPaths: string[] | null;
 };
 
 const OccurrencePhotosUploader = ({
-  photoPaths,
   onPhotoPathsChange,
+  photoPaths,
 }: OccurrencePhotosUploaderProps) => {
   const { user } = useUser();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -65,10 +66,10 @@ const OccurrencePhotosUploader = ({
         setSignedImageUrls(signedUrls);
       } catch (error) {
         addToast({
+          color: 'danger',
+          description: `Error details: ${getErrorMessage(error)}`,
           title:
             'Something went wrong while loading photo previews. Please try reloading the page.',
-          description: `Error details: ${getErrorMessage(error)}`,
-          color: 'danger',
         });
       }
     };
@@ -120,16 +121,16 @@ const OccurrencePhotosUploader = ({
 
     if (failedUploadErrors.length) {
       addToast({
-        title: `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
-        description: `Error details: ${failedUploadErrors.join(', ')}`,
         color: 'danger',
+        description: `Error details: ${failedUploadErrors.join(', ')}`,
+        title: `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
       });
     }
 
     if (successfulUploadPaths.length) {
       addToast({
-        title: `Successfully uploaded ${pluralize('photo', successfulUploadPaths.length, true)}`,
         color: 'success',
+        title: `Successfully uploaded ${pluralize('photo', successfulUploadPaths.length, true)}`,
       });
     }
   };
@@ -142,14 +143,14 @@ const OccurrencePhotosUploader = ({
 
     if (!success) {
       return addToast({
-        title: 'Failed to delete photo',
         color: 'danger',
+        title: 'Failed to delete photo',
       });
     }
 
     addToast({
-      title: 'Successfully deleted photo',
       color: 'success',
+      title: 'Successfully deleted photo',
     });
 
     onPhotoPathsChange((prev) => {
@@ -181,9 +182,9 @@ const OccurrencePhotosUploader = ({
         multiple
         type="file"
         ref={fileInputRef}
-        label={photoPaths?.length ? 'Add more photos' : 'Add photos'}
         onChange={handleFileChange}
         accept={allowedTypes.join(',')}
+        label={photoPaths?.length ? 'Add more photos' : 'Add photos'}
         description={`Supported formats: ${allowedTypes
           .map((type) => {
             return type.split('/')[1];
@@ -198,7 +199,7 @@ const OccurrencePhotosUploader = ({
           <p className="text-sm text-gray-500">
             You can add more photos or delete existing ones
           </p>
-          <ImageCarousel imageUrls={signedImageUrls} onDelete={handleDelete} />
+          <ImageCarousel onDelete={handleDelete} imageUrls={signedImageUrls} />
         </>
       )}
     </div>

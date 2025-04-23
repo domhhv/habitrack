@@ -1,24 +1,25 @@
-import { OccurrenceChip } from '@components';
 import { cn } from '@heroui/react';
-import { useUser } from '@hooks';
-import { useOccurrenceActions, useOccurrences } from '@stores';
 import {
-  addDays,
-  eachDayOfInterval,
-  eachMinuteOfInterval,
-  endOfDay,
   getDay,
+  addDays,
+  getWeek,
+  isToday,
+  endOfDay,
+  endOfWeek,
   startOfDay,
   startOfWeek,
-  endOfWeek,
-  getISOWeekYear,
-  getWeek,
   startOfToday,
-  isToday,
+  getISOWeekYear,
+  eachDayOfInterval,
+  eachMinuteOfInterval,
 } from 'date-fns';
 import { motion } from 'framer-motion';
 import React from 'react';
 import { useParams } from 'react-router';
+
+import { OccurrenceChip } from '@components';
+import { useUser } from '@hooks';
+import { useOccurrences, useOccurrenceActions } from '@stores';
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -26,7 +27,7 @@ const WeekCalendar = () => {
   const params = useParams();
   const { user } = useUser();
   const occurrences = useOccurrences();
-  const { fetchOccurrences, clearOccurrences } = useOccurrenceActions();
+  const { clearOccurrences, fetchOccurrences } = useOccurrenceActions();
   const [startOfTheWeek, setStartOfTheWeek] = React.useState(new Date());
 
   React.useEffect(() => {
@@ -41,9 +42,9 @@ const WeekCalendar = () => {
     const currentWeek = startOfWeek(startOfToday());
 
     const {
-      year = currentWeek.getFullYear(),
-      month = currentWeek.getMonth() + 1,
       day = currentWeek.getDate(),
+      month = currentWeek.getMonth() + 1,
+      year = currentWeek.getFullYear(),
     } = params;
 
     const date = new Date(Number(year), Number(month) - 1, Number(day) + 1);
@@ -59,8 +60,8 @@ const WeekCalendar = () => {
   }, [params, user, fetchOccurrences, clearOccurrences, occurrences.length]);
 
   const days = eachDayOfInterval({
-    start: startOfTheWeek,
     end: addDays(startOfTheWeek, 6),
+    start: startOfTheWeek,
   });
 
   const groupOccurrences = React.useCallback(
@@ -115,8 +116,8 @@ const WeekCalendar = () => {
               <div className="flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600">
                 {eachMinuteOfInterval(
                   {
-                    start: startOfDay(day),
                     end: endOfDay(day),
+                    start: startOfDay(day),
                   },
                   { step: 60 }
                 ).map((minute) => {
@@ -142,9 +143,9 @@ const WeekCalendar = () => {
                             return (
                               <motion.div
                                 key={habitId}
+                                exit={{ scale: 0 }}
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                exit={{ scale: 0 }}
                                 transition={{ duration: 0.5 }}
                               >
                                 <OccurrenceChip

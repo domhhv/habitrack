@@ -1,6 +1,7 @@
-import { type Database } from '@db-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@supabase/supabase-js';
+
+import { type Database } from '@db-types';
 
 class SupabaseClientSingleton {
   private static instance: SupabaseClient<Database> | null = null;

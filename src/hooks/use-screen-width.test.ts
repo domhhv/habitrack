@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { it, expect, describe } from 'vitest';
 
 import useScreenWidth from './use-screen-width';
 

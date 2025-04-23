@@ -1,12 +1,13 @@
+import { Button, Tooltip } from '@heroui/react';
+import React from 'react';
+
 import { VisuallyHiddenInput } from '@components';
 import { handleAsyncAction } from '@helpers';
-import { Button, Tooltip } from '@heroui/react';
 import { useUser } from '@hooks';
 import { type Habit } from '@models';
 import { uploadHabitIcon } from '@services';
 import { useHabitActions } from '@stores';
 import { getHabitIconUrl } from '@utils';
-import React from 'react';
 
 type HabitIconCellProps = {
   habit: Habit;
@@ -39,13 +40,13 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
   return (
     <Tooltip content="Upload new icon">
       <Button
-        isIconOnly
-        isLoading={isUploading}
         size="lg"
-        variant="light"
+        isIconOnly
         as="label"
-        className="mr-1 flex h-12 w-12 cursor-pointer p-1 opacity-100"
+        variant="light"
         isDisabled={!user?.id}
+        isLoading={isUploading}
+        className="mr-1 flex h-12 w-12 cursor-pointer p-1 opacity-100"
       >
         <img
           src={iconUrl}

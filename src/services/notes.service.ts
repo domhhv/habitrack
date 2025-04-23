@@ -1,9 +1,9 @@
 import { supabaseClient } from '@helpers';
-import type { NotesUpdate, Note, NotesInsert } from '@models';
+import type { Note, NotesUpdate, NotesInsert } from '@models';
 import { deepSnakify, deepCamelize } from '@utils';
 
 export const createNote = async (note: NotesInsert): Promise<Note> => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('notes')
     .insert(deepSnakify(note))
     .select()
@@ -17,7 +17,7 @@ export const createNote = async (note: NotesInsert): Promise<Note> => {
 };
 
 export const listNotes = async (): Promise<Note[]> => {
-  const { error, data } = await supabaseClient.from('notes').select();
+  const { data, error } = await supabaseClient.from('notes').select();
 
   if (error) {
     throw new Error(error.message);
@@ -30,7 +30,7 @@ export const updateNote = async (
   id: number,
   note: NotesUpdate
 ): Promise<Note> => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('notes')
     .update(deepSnakify(note))
     .eq('id', id)

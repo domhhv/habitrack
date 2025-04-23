@@ -1,5 +1,6 @@
-import type { createSignedUrls } from '@services';
 import type { AsyncReturnType } from 'type-fest';
+
+import type { createSignedUrls } from '@services';
 
 export enum StorageBuckets {
   HABIT_ICONS = 'habit_icons',
@@ -7,13 +8,13 @@ export enum StorageBuckets {
 }
 
 export type SuccessfulUpload = {
-  status: 'success';
   path: string;
+  status: 'success';
 };
 
 export type FailedUpload = {
-  status: 'error';
   error: string;
+  status: 'error';
 };
 
 export type UploadResult = SuccessfulUpload | FailedUpload;

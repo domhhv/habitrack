@@ -1,18 +1,19 @@
-import { NoteDialog, OccurrenceChip, OccurrenceDialog } from '@components';
-import { Button, cn, Tooltip, useDisclosure } from '@heroui/react';
-import { useScreenWidth, useUser } from '@hooks';
-import type { Occurrence } from '@models';
+import { cn, Button, Tooltip, useDisclosure } from '@heroui/react';
 import {
-  CalendarBlank,
-  CalendarPlus,
   Note,
   NoteBlank,
+  CalendarPlus,
+  CalendarBlank,
 } from '@phosphor-icons/react';
+import { format, isToday } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+
+import { NoteDialog, OccurrenceChip, OccurrenceDialog } from '@components';
+import { useUser, useScreenWidth } from '@hooks';
+import type { Occurrence } from '@models';
 import { useNotes } from '@stores';
 import { toSqlDate } from '@utils';
-import { format, isToday } from 'date-fns';
-import { AnimatePresence, motion } from 'framer-motion';
-import React from 'react';
 
 export type CellPosition =
   | 'top-left'
@@ -25,16 +26,16 @@ export type CellRangeStatus = 'below-range' | 'in-range' | 'above-range' | '';
 
 type CalendarCellProps = {
   date: Date;
-  rangeStatus: CellRangeStatus;
-  position: CellPosition;
   occurrences: Occurrence[];
+  position: CellPosition;
+  rangeStatus: CellRangeStatus;
 };
 
 const MonthCalendarCell = ({
   date,
-  rangeStatus,
-  position,
   occurrences,
+  position,
+  rangeStatus,
 }: CalendarCellProps) => {
   const notes = useNotes();
   const { user } = useUser();
@@ -46,13 +47,13 @@ const MonthCalendarCell = ({
   });
   const {
     isOpen: isNoteDialogOpen,
-    onOpen: openNoteDialog,
     onClose: closeNoteDialog,
+    onOpen: openNoteDialog,
   } = useDisclosure();
   const {
     isOpen: isOccurrenceDialogOpen,
-    onOpen: openOccurrenceDialog,
     onClose: closeOccurrenceDialog,
+    onOpen: openOccurrenceDialog,
   } = useDisclosure();
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => {
@@ -78,15 +79,15 @@ const MonthCalendarCell = ({
   return (
     <>
       <NoteDialog
+        day={toSqlDate(date)}
         isOpen={isNoteDialogOpen}
         onClose={closeNoteDialog}
-        day={toSqlDate(date)}
       />
 
       <OccurrenceDialog
+        newOccurrenceDate={date}
         isOpen={isOccurrenceDialogOpen}
         onClose={closeOccurrenceDialog}
-        newOccurrenceDate={date}
       />
 
       <div className={cellRootClassName}>
@@ -98,34 +99,34 @@ const MonthCalendarCell = ({
           <div className="flex items-center justify-between gap-2">
             {!isMobile && (
               <div className="flex items-center gap-1">
-                <Tooltip content="Log habit" closeDelay={0}>
+                <Tooltip closeDelay={0} content="Log habit">
                   <Button
-                    className="h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6"
-                    variant="light"
                     radius="sm"
-                    onPress={openOccurrenceDialog}
+                    tabIndex={0}
+                    variant="light"
                     color="secondary"
                     isDisabled={!user}
-                    tabIndex={0}
+                    onPress={openOccurrenceDialog}
+                    className="h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6"
                   >
                     <CalendarPlus weight="bold" size={isDesktop ? 18 : 14} />
                   </Button>
                 </Tooltip>
                 <Tooltip
-                  content={hasNote ? 'Edit note' : 'Add note'}
                   closeDelay={0}
+                  content={hasNote ? 'Edit note' : 'Add note'}
                 >
                   <Button
+                    radius="sm"
+                    tabIndex={0}
+                    variant="light"
+                    isDisabled={!user}
+                    onPress={openNoteDialog}
+                    color={hasNote ? 'primary' : 'secondary'}
                     className={cn(
                       'h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6',
                       hasNote && 'opacity-100'
                     )}
-                    variant="light"
-                    radius="sm"
-                    onPress={openNoteDialog}
-                    color={hasNote ? 'primary' : 'secondary'}
-                    isDisabled={!user}
-                    tabIndex={0}
                   >
                     {hasNote ? (
                       <Note weight="bold" size={isDesktop ? 18 : 14} />
@@ -137,7 +138,7 @@ const MonthCalendarCell = ({
               </div>
             )}
             {isTodayCell && (
-              <CalendarBlank size={isMobile ? 18 : 20} weight="fill" />
+              <CalendarBlank weight="fill" size={isMobile ? 18 : 20} />
             )}
           </div>
         </div>
@@ -152,9 +153,9 @@ const MonthCalendarCell = ({
                 return (
                   <motion.div
                     key={habitId}
+                    exit={{ scale: 0 }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ scale: 0 }}
                     transition={{ duration: 0.5 }}
                   >
                     <OccurrenceChip occurrences={habitOccurrences} />

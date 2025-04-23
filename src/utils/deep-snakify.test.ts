@@ -1,22 +1,22 @@
-import { describe, it, expect } from 'vitest';
+import { it, expect, describe } from 'vitest';
 
 import deepSnakify from './deep-snakify';
 
 describe(deepSnakify.name, () => {
   it('should deeply snakify an object', () => {
     const clientEntity = {
+      createdAt: 'Created at',
+      description: 'description',
       id: 'id',
       name: 'name',
-      description: 'description',
-      createdAt: 'Created at',
       updatedAt: 'Updated at',
     };
 
     const serverEntity = {
+      created_at: 'Created at',
+      description: 'description',
       id: 'id',
       name: 'name',
-      description: 'description',
-      created_at: 'Created at',
       updated_at: 'Updated at',
     };
 

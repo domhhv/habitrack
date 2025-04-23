@@ -5,17 +5,17 @@ const makeTestHabit = () => {
 
   return (override: Partial<Habit> = {}): Habit => {
     return {
+      createdAt: new Date().toISOString(),
+      description: 'Test Description',
+      iconPath: 'https://i.ibb.co/vvgw7bx/habitrack-logo.png',
       id: override.id || id++,
       name: 'Test Habit',
       traitId: 1,
-      description: 'Test Description',
-      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: '1',
-      iconPath: 'https://i.ibb.co/vvgw7bx/habitrack-logo.png',
       trait: {
-        name: 'Test Trait Name',
         color: '#000000',
+        name: 'Test Trait Name',
       },
       ...override,
     };

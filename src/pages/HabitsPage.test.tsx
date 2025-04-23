@@ -1,33 +1,34 @@
-import { useHabits, useTraits } from '@stores';
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import { makeTestHabit, makeTestTrait } from '@tests';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { it, vi, expect, describe } from 'vitest';
+
+import { useHabits, useTraits } from '@stores';
+import { makeTestHabit, makeTestTrait } from '@tests';
 
 import HabitsPage from './HabitsPage';
 
 vi.mock('@services', () => {
   return {
-    StorageBuckets: {
-      HABIT_ICONS: 'habit-icons',
-    },
+    getHabitTotalEntries: vi.fn().mockResolvedValue(0),
+    getLatestHabitOccurrenceTimestamp: vi.fn().mockResolvedValue(0),
+    getLongestHabitStreak: vi.fn().mockResolvedValue(0),
     listHabits: vi.fn().mockReturnValue(() => {
       return [];
     }),
-    getLatestHabitOccurrenceTimestamp: vi.fn().mockResolvedValue(0),
-    getLongestHabitStreak: vi.fn().mockResolvedValue(0),
-    getHabitTotalEntries: vi.fn().mockResolvedValue(0),
+    StorageBuckets: {
+      HABIT_ICONS: 'habit-icons',
+    },
   };
 });
 
 vi.mock('@stores', () => {
   return {
     useHabits: vi.fn(),
-    useHabitActions: vi.fn().mockReturnValue({
-      updateHabit: vi.fn(),
-      removeHabit: vi.fn(),
-    }),
     useTraits: vi.fn().mockReturnValue([]),
+    useHabitActions: vi.fn().mockReturnValue({
+      removeHabit: vi.fn(),
+      updateHabit: vi.fn(),
+    }),
     useNoteActions: vi.fn().mockReturnValue({
       addNote: vi.fn(),
     }),
@@ -39,21 +40,21 @@ vi.mock('@stores', () => {
 
 vi.mock('@hooks', () => {
   return {
+    useFileField: vi.fn().mockReturnValue([null, vi.fn(), vi.fn()]),
+    useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn(), vi.fn()]),
     ThemeMode: {
-      LIGHT: 'light',
       DARK: 'dark',
+      LIGHT: 'light',
       SYSTEM: 'system',
     },
+    useScreenWidth: vi.fn().mockReturnValue({
+      isDesktop: true,
+      isMobile: false,
+      screenWidth: 1400,
+    }),
     useUser: vi
       .fn()
       .mockReturnValue({ id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa' }),
-    useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn(), vi.fn()]),
-    useFileField: vi.fn().mockReturnValue([null, vi.fn(), vi.fn()]),
-    useScreenWidth: vi.fn().mockReturnValue({
-      screenWidth: 1400,
-      isMobile: false,
-      isDesktop: true,
-    }),
   };
 });
 
@@ -63,19 +64,19 @@ describe(HabitsPage.name, () => {
       () => {
         return [
           makeTestHabit({
+            description: 'Habit description #1',
             id: 1,
             name: 'Habit name #1',
-            description: 'Habit description #1',
           }),
           makeTestHabit({
+            description: 'Habit description #2',
             id: 2,
             name: 'Habit name #2',
-            description: 'Habit description #2',
           }),
         ];
       }
     );
-    const { getByText, getAllByRole } = render(<HabitsPage />);
+    const { getAllByRole, getByText } = render(<HabitsPage />);
     await waitFor(() => {
       expect(getByText('Your habits'));
       expect(getByText('Habit name #1'));
@@ -113,19 +114,19 @@ describe(HabitsPage.name, () => {
       () => {
         return [
           makeTestHabit({
+            description: 'Habit description #1',
             id: 1,
             name: 'Habit name #1',
-            description: 'Habit description #1',
           }),
           makeTestHabit({
+            description: 'Habit description #42',
             id: 42,
             name: 'Habit name #42',
-            description: 'Habit description #42',
           }),
         ];
       }
     );
-    const { queryByRole, getByRole, getByTestId, getAllByRole } = render(
+    const { getAllByRole, getByRole, getByTestId, queryByRole } = render(
       <HabitsPage />
     );
 

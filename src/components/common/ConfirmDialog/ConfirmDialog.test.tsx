@@ -1,21 +1,21 @@
 import { render } from '@testing-library/react';
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { it, vi, expect, describe } from 'vitest';
 
 import ConfirmDialog from './ConfirmDialog';
 
 describe(ConfirmDialog.name, () => {
   const props = {
-    open: true,
     heading: 'Heading',
+    isLoading: false,
+    isOpen: true,
     onCancel: vi.fn(),
     onConfirm: vi.fn(),
-    loading: false,
   };
 
   it('should not show modal if open is false', async () => {
     const { queryByText } = render(
-      <ConfirmDialog {...props} open={false}>
+      <ConfirmDialog {...props} isOpen={false}>
         Test
       </ConfirmDialog>
     );
@@ -38,7 +38,7 @@ describe(ConfirmDialog.name, () => {
 
   it('should disable action buttons when loading', () => {
     const { getByText } = render(
-      <ConfirmDialog {...props} loading>
+      <ConfirmDialog {...props} isLoading>
         Test
       </ConfirmDialog>
     );

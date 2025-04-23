@@ -1,10 +1,10 @@
 import {
-  HeroUIProvider as OriginalHeroUIProvider,
   ToastProvider,
+  HeroUIProvider as OriginalHeroUIProvider,
 } from '@heroui/react';
 import React, { type ReactNode } from 'react';
 import { I18nProvider } from 'react-aria';
-import { BrowserRouter, useNavigate } from 'react-router';
+import { useNavigate, BrowserRouter } from 'react-router';
 
 type ProviderProps = {
   children: ReactNode;
@@ -30,10 +30,10 @@ const Providers = React.memo(function WrappedProviders({
       <I18nProvider locale="en-GB">
         <HeroUIProvider>
           <ToastProvider
+            placement="top-center"
             toastProps={{
               variant: 'solid',
             }}
-            placement="top-center"
           />
           {children}
         </HeroUIProvider>

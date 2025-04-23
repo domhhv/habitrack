@@ -1,8 +1,9 @@
-import { supabaseClient } from '@helpers';
 import type { User } from '@supabase/supabase-js';
-import { deepCamelize } from '@utils';
 import React from 'react';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
+
+import { supabaseClient } from '@helpers';
+import { deepCamelize } from '@utils';
 
 const useUser = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -63,7 +64,7 @@ const useUser = () => {
     };
   }, []);
 
-  return { isLoading, error, user };
+  return { error, isLoading, user };
 };
 
 export default useUser;

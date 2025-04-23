@@ -1,5 +1,6 @@
-import { getHabitTotalEntries } from '@services';
 import React from 'react';
+
+import { getHabitTotalEntries } from '@services';
 
 const HabitTotalEntries = ({ id }: { id: number }) => {
   const [entriesCount, setEntriesCount] = React.useState<number | null>(null);

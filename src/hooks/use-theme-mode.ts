@@ -38,7 +38,7 @@ const useThemeMode = () => {
     };
   }, [themeMode]);
 
-  return { themeMode, setThemeMode };
+  return { setThemeMode, themeMode };
 };
 
 export default useThemeMode;

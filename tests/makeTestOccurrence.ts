@@ -5,23 +5,23 @@ const makeTestOccurrence = () => {
 
   return (override: Partial<Occurrence> = {}): Occurrence => {
     return {
-      id: id++,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      timestamp: new Date().getTime(),
       habitId: 1,
-      userId: '1',
-      habit: {
-        name: 'Test Habit Name',
-        iconPath: 'https://i.ibb.co/vvgw7bx/habitrack-logo.png',
-        trait: {
-          id: 1,
-          name: 'Test Trait Name',
-          color: '#000000',
-        },
-      },
+      id: id++,
       notes: [],
       photoPaths: [],
+      timestamp: new Date().getTime(),
+      updatedAt: new Date().toISOString(),
+      userId: '1',
+      habit: {
+        iconPath: 'https://i.ibb.co/vvgw7bx/habitrack-logo.png',
+        name: 'Test Habit Name',
+        trait: {
+          color: '#000000',
+          id: 1,
+          name: 'Test Trait Name',
+        },
+      },
       ...override,
     };
   };

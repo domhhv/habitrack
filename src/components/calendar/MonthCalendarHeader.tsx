@@ -1,27 +1,28 @@
-import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
-import { MONTHS } from '@const';
 import type { SelectedItems } from '@heroui/react';
 import {
-  Tooltip,
-  ListboxItem,
-  Select,
-  SelectItem,
-  Button,
-  SelectSection,
   cn,
+  Select,
+  Button,
+  Tooltip,
+  SelectItem,
+  ListboxItem,
+  SelectSection,
 } from '@heroui/react';
-import { useScreenWidth, useUser } from '@hooks';
-import type { Habit, OccurrenceFilters, Trait } from '@models';
 import {
   ArrowFatLeft,
   ArrowFatRight,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
-import { useTraits, useHabits } from '@stores';
-import { isTruthy, getHabitIconUrl } from '@utils';
 import { addMonths, startOfToday, startOfMonth } from 'date-fns';
 import React from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useParams, useNavigate } from 'react-router';
+
+import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
+import { MONTHS } from '@const';
+import { useUser, useScreenWidth } from '@hooks';
+import type { Habit, Trait, OccurrenceFilters } from '@models';
+import { useTraits, useHabits } from '@stores';
+import { isTruthy, getHabitIconUrl } from '@utils';
 
 export type MonthCalendarHeaderProps = {
   activeMonthLabel: string;
@@ -43,11 +44,11 @@ const MonthCalendarHeader = ({
   const habits = useHabits();
   const traits = useTraits();
   const { user } = useUser();
-  const { screenWidth, isMobile } = useScreenWidth();
+  const { isMobile, screenWidth } = useScreenWidth();
   const isOnCurrentMonth =
     activeMonthLabel === MONTHS[new Date().getMonth()] &&
     activeYear === new Date().getFullYear().toString();
-  const { year, month, day } = useParams();
+  const { day, month, year } = useParams();
   const navigate = useNavigate();
 
   const focusedDate = React.useMemo(() => {
@@ -117,12 +118,12 @@ const MonthCalendarHeader = ({
       <div className="flex flex-col items-stretch justify-end gap-0 max-[372px]:gap-4 min-[373px]:flex-row lg:justify-between lg:gap-2">
         <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
           <Select
-            variant="bordered"
-            color="secondary"
             radius="sm"
             label="Month"
-            selectedKeys={new Set([activeMonthLabel])}
+            color="secondary"
+            variant="bordered"
             onChange={handleMonthChange}
+            selectedKeys={new Set([activeMonthLabel])}
             classNames={{
               base: 'w-[100px]',
               popoverContent: 'w-[125px]',
@@ -137,12 +138,12 @@ const MonthCalendarHeader = ({
             })}
           </Select>
           <Select
-            variant="bordered"
-            color="secondary"
             radius="sm"
             label="Year"
-            selectedKeys={new Set([activeYear])}
+            color="secondary"
+            variant="bordered"
             onChange={handleYearChange}
+            selectedKeys={new Set([activeYear])}
             classNames={{
               base: 'w-[100px]',
             }}
@@ -158,15 +159,15 @@ const MonthCalendarHeader = ({
         </div>
         <div className="flex items-stretch gap-0 lg:gap-2">
           <Button
-            isIconOnly
             as={Link}
-            to={`/calendar/month/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}/${prevMonth.getDate()}`}
             size="md"
+            isIconOnly
             radius="sm"
             variant="light"
             color="secondary"
             className="h-auto"
             role="navigate-back"
+            to={`/calendar/month/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}/${prevMonth.getDate()}`}
           >
             <ArrowFatLeft size={20} />
           </Button>
@@ -177,23 +178,23 @@ const MonthCalendarHeader = ({
               radius="sm"
               variant="light"
               color="secondary"
+              startContent={<ArrowsClockwise size={20} />}
               className={cn('h-auto', isMobile && 'min-w-fit p-0')}
               to={`/calendar/month/${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`}
-              startContent={<ArrowsClockwise size={20} />}
             >
               {(!isMobile || screenWidth < 373) && 'Today'}
             </Button>
           )}
           <Button
             as={Link}
-            isIconOnly
             size="md"
+            isIconOnly
+            radius="sm"
             variant="light"
             color="secondary"
-            radius="sm"
-            to={`/calendar/month/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}/${nextMonth.getDate()}`}
             className="h-auto"
             role="navigate-forward"
+            to={`/calendar/month/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}/${nextMonth.getDate()}`}
           >
             <ArrowFatRight size={20} />
           </Button>
@@ -202,14 +203,14 @@ const MonthCalendarHeader = ({
       {shouldRenderFilters && (
         <div className="flex flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between">
           <Select
-            variant="bordered"
-            color="secondary"
             radius="sm"
+            color="secondary"
+            variant="bordered"
             label="Filter by habits"
-            selectedKeys={filters.habitIds}
-            onChange={handleHabitsFilterChange}
-            className="w-full md:w-[200px]"
             selectionMode="multiple"
+            selectedKeys={filters.habitIds}
+            className="w-full md:w-[200px]"
+            onChange={handleHabitsFilterChange}
             popoverProps={{
               crossOffset: isMobile ? -75 : 0,
             }}
@@ -225,15 +226,15 @@ const MonthCalendarHeader = ({
                       return null;
                     }
 
-                    const { id, name, iconPath } = habit;
+                    const { iconPath, id, name } = habit;
                     const iconUrl = getHabitIconUrl(iconPath);
 
                     return (
                       <Tooltip key={id} content={name}>
                         <img
                           src={iconUrl}
-                          alt={`${name} icon`}
                           className="h-4 w-4"
+                          alt={`${name} icon`}
                         />
                       </Tooltip>
                     );
@@ -244,7 +245,7 @@ const MonthCalendarHeader = ({
           >
             {Object.keys(habitsByTraitName).map((traitName) => {
               return (
-                <SelectSection key={traitName} title={traitName} showDivider>
+                <SelectSection showDivider key={traitName} title={traitName}>
                   {habitsByTraitName[traitName] ? (
                     habitsByTraitName[traitName].map((habit) => {
                       const iconUrl = getHabitIconUrl(habit.iconPath);
@@ -271,15 +272,15 @@ const MonthCalendarHeader = ({
             })}
           </Select>
           <Select
-            variant="bordered"
-            color="secondary"
-            radius="sm"
-            label="Filter by traits"
             size="md"
-            selectedKeys={filters.traitIds}
-            onChange={handleTraitsFilterChange}
-            className="w-full md:w-[250px]"
+            radius="sm"
+            color="secondary"
+            variant="bordered"
+            label="Filter by traits"
             selectionMode="multiple"
+            selectedKeys={filters.traitIds}
+            className="w-full md:w-[250px]"
+            onChange={handleTraitsFilterChange}
             renderValue={(selectedTraits: SelectedItems<Trait>) => {
               return (
                 <CrossPlatformHorizontalScroll className="space-x-2">
@@ -292,9 +293,9 @@ const MonthCalendarHeader = ({
                       return null;
                     }
 
-                    const { id, name, color } = trait;
+                    const { color, id, name } = trait;
 
-                    return <TraitChip key={id} trait={{ name, color }} />;
+                    return <TraitChip key={id} trait={{ color, name }} />;
                   })}
                 </CrossPlatformHorizontalScroll>
               );

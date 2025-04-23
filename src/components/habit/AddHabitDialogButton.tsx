@@ -1,22 +1,23 @@
-import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
-import { handleAsyncAction } from '@helpers';
 import {
-  Button,
   Input,
   Modal,
+  Button,
+  Select,
+  Textarea,
   ModalBody,
-  ModalContent,
+  SelectItem,
   ModalFooter,
   ModalHeader,
-  Select,
-  SelectItem,
-  Textarea,
+  ModalContent,
 } from '@heroui/react';
-import { useTextField, useFileField, useUser } from '@hooks';
-import { CloudArrowUp, Plus } from '@phosphor-icons/react';
-import { uploadHabitIcon } from '@services';
-import { useHabitActions, useTraits } from '@stores';
+import { Plus, CloudArrowUp } from '@phosphor-icons/react';
 import React from 'react';
+
+import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
+import { handleAsyncAction } from '@helpers';
+import { useUser, useTextField, useFileField } from '@hooks';
+import { uploadHabitIcon } from '@services';
+import { useTraits, useHabitActions } from '@stores';
 
 const AddHabitDialogButton = () => {
   const { user } = useUser();
@@ -52,11 +53,11 @@ const AddHabitDialogButton = () => {
       const iconPath = icon ? await uploadHabitIcon(user.id, icon) : '';
 
       return addHabit({
-        name,
         description,
-        userId: user.id,
-        traitId: +traitId,
         iconPath,
+        name,
+        traitId: +traitId,
+        userId: user.id,
       });
     };
 
@@ -71,15 +72,15 @@ const AddHabitDialogButton = () => {
         color="primary"
         variant="solid"
         isDisabled={!user}
-        startContent={<Plus weight="bold" />}
         onPress={handleDialogOpen}
-        data-testid="add-habit-button"
         className="w-full lg:w-auto"
+        data-testid="add-habit-button"
+        startContent={<Plus weight="bold" />}
       >
         Add habit
       </Button>
       <AddCustomTraitModal
-        open={addTraitModalOpen}
+        isOpen={addTraitModalOpen}
         onClose={() => {
           return setAddTraitModalOpen(false);
         }}
@@ -91,33 +92,33 @@ const AddHabitDialogButton = () => {
             <Input
               required
               value={name}
-              onChange={handleNameChange}
               label="Name"
-              placeholder="Enter habit name"
               variant="faded"
+              onChange={handleNameChange}
+              placeholder="Enter habit name"
             />
             <Textarea
-              value={description}
-              onChange={handleDescriptionChange}
-              label="Description"
-              placeholder="Enter habit description (optional)"
               variant="faded"
+              value={description}
+              label="Description"
+              onChange={handleDescriptionChange}
+              placeholder="Enter habit description (optional)"
             />
             <Select
               required
+              variant="faded"
               label="Choose a trait"
               selectedKeys={[traitId]}
               data-testid="habit-select"
-              variant="faded"
             >
               {traits.map((trait) => {
                 return (
                   <SelectItem
+                    textValue={trait.name}
                     key={trait.id.toString()}
                     onPress={() => {
                       setTraitId(trait.id.toString());
                     }}
-                    textValue={trait.name}
                   >
                     {trait.name}
                   </SelectItem>
@@ -125,8 +126,8 @@ const AddHabitDialogButton = () => {
               })}
             </Select>
             <Button
-              variant="ghost"
               size="sm"
+              variant="ghost"
               color="secondary"
               startContent={<Plus />}
               onPress={() => {
@@ -137,8 +138,8 @@ const AddHabitDialogButton = () => {
             </Button>
             <Button
               fullWidth
-              as="label"
               size="sm"
+              as="label"
               color="secondary"
               startContent={<CloudArrowUp />}
             >
@@ -150,11 +151,11 @@ const AddHabitDialogButton = () => {
           <ModalFooter>
             <Button
               fullWidth
-              isDisabled={!user?.id || !name || !traitId}
-              isLoading={isAdding}
               type="submit"
               color="primary"
               onPress={handleAdd}
+              isLoading={isAdding}
+              isDisabled={!user?.id || !name || !traitId}
             >
               Submit
             </Button>

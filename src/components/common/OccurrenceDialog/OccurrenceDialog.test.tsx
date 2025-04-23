@@ -1,11 +1,12 @@
-import { useUser } from '@hooks';
-import { useHabits, useNoteActions } from '@stores';
-import { fireEvent, render } from '@testing-library/react';
-import { makeTestHabit } from '@tests';
+import { render, fireEvent } from '@testing-library/react';
 import { format } from 'date-fns';
 import React from 'react';
 import { BrowserRouter } from 'react-router';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { it, vi, expect, describe, beforeEach } from 'vitest';
+
+import { useUser } from '@hooks';
+import { useHabits, useNoteActions } from '@stores';
+import { makeTestHabit } from '@tests';
 
 import OccurrenceDialog from './OccurrenceDialog';
 
@@ -22,11 +23,11 @@ Object.defineProperty(window, 'DataTransfer', {
 vi.mock('@stores', () => {
   return {
     useHabits: vi.fn(),
+    useNoteActions: vi.fn(),
     useOccurrences: vi.fn().mockReturnValue([]),
     useOccurrenceActions: vi.fn().mockReturnValue({
       addOccurrence: vi.fn(),
     }),
-    useNoteActions: vi.fn(),
   };
 });
 
@@ -34,20 +35,20 @@ vi.mock('@hooks', () => {
   return {
     useUser: vi.fn(),
     useScreenWidth: vi.fn().mockReturnValue({
-      screenWidth: 1400,
+      isDesktop: true,
       isMobile: false,
       isTablet: false,
-      isDesktop: true,
+      screenWidth: 1400,
     }),
   };
 });
 
 vi.mock('date-fns', () => {
   return {
-    isYesterday: vi.fn(),
-    isToday: vi.fn(),
-    isFuture: vi.fn(),
     format: vi.fn(),
+    isFuture: vi.fn(),
+    isToday: vi.fn(),
+    isYesterday: vi.fn(),
   };
 });
 
@@ -57,8 +58,8 @@ describe(OccurrenceDialog.name, () => {
 
   const props = {
     isOpen: true,
-    onClose: mockOnClose,
     newOccurrenceDate,
+    onClose: mockOnClose,
   };
 
   beforeEach(() => {

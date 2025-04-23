@@ -1,26 +1,27 @@
 import {
-  Button,
-  ButtonGroup,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalHeader,
   Tab,
   Tabs,
-  useDisclosure,
-  VisuallyHidden,
+  Modal,
+  Button,
   Tooltip,
   addToast,
+  ModalBody,
+  ButtonGroup,
+  ModalHeader,
+  ModalContent,
+  useDisclosure,
+  VisuallyHidden,
 } from '@heroui/react';
-import { useScreenWidth, useUser } from '@hooks';
 import {
-  SignOut as SignOutIcon,
   User as UserIcon,
+  SignOut as SignOutIcon,
 } from '@phosphor-icons/react';
-import { sendPasswordResetEmail, signIn, signOut, signUp } from '@services';
-import { getErrorMessage } from '@utils';
 import React from 'react';
 import { Link } from 'react-router';
+
+import { useUser, useScreenWidth } from '@hooks';
+import { signIn, signUp, signOut, sendPasswordResetEmail } from '@services';
+import { getErrorMessage } from '@utils';
 
 import AuthForm from './AuthForm';
 
@@ -29,7 +30,7 @@ type AuthMode = 'login' | 'register' | 'reset-password';
 const AuthModalButton = () => {
   const { user } = useUser();
   const { screenWidth } = useScreenWidth();
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const { isOpen, onClose, onOpen, onOpenChange } = useDisclosure();
   const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
 
@@ -92,14 +93,14 @@ const AuthModalButton = () => {
       handleClose();
 
       addToast({
-        title: successfulMessages[mode],
         color: 'success',
+        title: successfulMessages[mode],
       });
     } catch (error) {
       addToast({
-        title: errorMessages[mode],
-        description: `Error details: ${getErrorMessage(error)}`,
         color: 'danger',
+        description: `Error details: ${getErrorMessage(error)}`,
+        title: errorMessages[mode],
       });
     } finally {
       setAuthenticating(false);
@@ -107,16 +108,16 @@ const AuthModalButton = () => {
   };
 
   const authFormProps = {
+    isDisabled: authenticating,
     mode,
-    onModeChange: (nextMode: AuthMode) => {
-      return setMode(nextMode);
-    },
-    onSubmit: handleSubmit,
     onCancel: handleClose,
-    disabled: authenticating,
+    onSubmit: handleSubmit,
     submitButtonLabel: actionLabels[mode],
     goBackToLogin: () => {
       return setMode('login');
+    },
+    onModeChange: (nextMode: AuthMode) => {
+      return setMode(nextMode);
     },
   };
 
@@ -125,23 +126,23 @@ const AuthModalButton = () => {
       {user?.id ? (
         <ButtonGroup size={screenWidth > 1024 ? 'md' : 'sm'}>
           <Button
-            color="secondary"
-            isIconOnly={screenWidth < 1024}
             as={Link}
             to="/account"
+            color="secondary"
             data-testid="auth-button"
-            startContent={<UserIcon data-testid="user-icon" weight="bold" />}
+            isIconOnly={screenWidth < 1024}
+            startContent={<UserIcon weight="bold" data-testid="user-icon" />}
           >
             {screenWidth > 1024 && 'Account'}
           </Button>
           <Tooltip content="Log out">
             <Button
+              isIconOnly
               color="secondary"
               onPress={signOut}
-              isIconOnly
               className="border-l border-background-100 dark:border-background-900"
               startContent={
-                <SignOutIcon data-testid="sign-out-icon" weight="bold" />
+                <SignOutIcon weight="bold" data-testid="sign-out-icon" />
               }
             >
               <VisuallyHidden>Log Out</VisuallyHidden>
@@ -149,7 +150,7 @@ const AuthModalButton = () => {
           </Tooltip>
         </ButtonGroup>
       ) : (
-        <Button onPress={onOpen} data-testid="auth-button" color="primary">
+        <Button color="primary" onPress={onOpen} data-testid="auth-button">
           Log In
         </Button>
       )}
@@ -161,17 +162,17 @@ const AuthModalButton = () => {
               <AuthForm {...authFormProps} />
             ) : (
               <Tabs
-                onSelectionChange={handleTabChange}
-                color="primary"
                 fullWidth
+                color="primary"
+                onSelectionChange={handleTabChange}
               >
-                <Tab isDisabled={authenticating} key="login" title="Login">
+                <Tab key="login" title="Login" isDisabled={authenticating}>
                   <AuthForm {...authFormProps} />
                 </Tab>
                 <Tab
-                  isDisabled={authenticating}
                   key="register"
                   title="Register"
+                  isDisabled={authenticating}
                 >
                   <AuthForm {...authFormProps} />
                 </Tab>

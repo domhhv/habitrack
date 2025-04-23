@@ -1,8 +1,9 @@
-import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE_MB } from '@const';
+import imageCompression from 'browser-image-compression';
+
+import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
 import { supabaseClient } from '@helpers';
 import type { UploadResult } from '@models';
 import { StorageBuckets } from '@models';
-import imageCompression from 'browser-image-compression';
 
 export const uploadFile = async (
   bucket: StorageBuckets,
@@ -13,8 +14,8 @@ export const uploadFile = async (
   const { data, error } = await supabaseClient.storage
     .from(bucket)
     .upload(path, file, {
-      upsert: true,
       cacheControl,
+      upsert: true,
     });
 
   if (error) {
@@ -62,8 +63,8 @@ export async function uploadImage(
   const { data: uploadData, error: uploadError } = await supabaseClient.storage
     .from(bucket)
     .upload(filePath, compressedFile, {
-      upsert: false,
       metadata,
+      upsert: false,
     });
 
   if (uploadError) {

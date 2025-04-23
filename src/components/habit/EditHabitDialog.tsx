@@ -1,22 +1,23 @@
-import { handleAsyncAction } from '@helpers';
 import {
-  Button,
   Input,
   Modal,
+  Button,
+  Select,
+  Textarea,
   ModalBody,
-  ModalContent,
+  SelectItem,
   ModalFooter,
   ModalHeader,
-  Select,
-  SelectItem,
-  Textarea,
+  ModalContent,
   useDisclosure,
 } from '@heroui/react';
-import { useTextField, useUser } from '@hooks';
-import type { Habit } from '@models';
-import { useHabitActions, useTraits } from '@stores';
-import { toEventLike } from '@utils';
 import React from 'react';
+
+import { handleAsyncAction } from '@helpers';
+import { useUser, useTextField } from '@hooks';
+import type { Habit } from '@models';
+import { useTraits, useHabitActions } from '@stores';
+import { toEventLike } from '@utils';
 
 type EditHabitDialogProps = {
   habit: Habit | null;
@@ -24,7 +25,7 @@ type EditHabitDialogProps = {
 };
 
 const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
-  const { isOpen, onOpen, onClose: onDisclosureClose } = useDisclosure();
+  const { isOpen, onClose: onDisclosureClose, onOpen } = useDisclosure();
   const [name, handleNameChange] = useTextField();
   const [description, handleDescriptionChange] = useTextField();
   const [traitId, setTraitId] = React.useState('');
@@ -65,8 +66,8 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
 
     void handleAsyncAction(
       updateHabit(habit.id, {
-        name,
         description,
+        name,
         traitId: +traitId,
       }),
       'update_habit',
@@ -86,35 +87,35 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
         <ModalBody>
           <Input
             value={name}
-            onChange={handleNameChange}
             label="Name"
-            placeholder="Edit habit name"
-            isDisabled={isUpdating}
             variant="faded"
+            isDisabled={isUpdating}
+            onChange={handleNameChange}
+            placeholder="Edit habit name"
           />
           <Textarea
-            value={description}
-            onChange={handleDescriptionChange}
-            label="Description (optional)"
-            placeholder="Edit habit description"
-            isDisabled={isUpdating}
             variant="faded"
+            value={description}
+            isDisabled={isUpdating}
+            label="Description (optional)"
+            onChange={handleDescriptionChange}
+            placeholder="Edit habit description"
           />
           <Select
             required
             label="Trait"
+            variant="faded"
             selectedKeys={[traitId]}
             data-testid="habit-select"
-            variant="faded"
           >
             {traits.map((trait) => {
               return (
                 <SelectItem
+                  textValue={trait.name}
                   key={trait.id.toString()}
                   onPress={() => {
                     setTraitId(trait.id.toString());
                   }}
-                  textValue={trait.name}
                 >
                   {trait.name}
                 </SelectItem>
@@ -128,9 +129,9 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             type="submit"
             color="primary"
             isLoading={isUpdating}
-            role="submit-edited-habit-button"
             onPress={handleSubmit}
             isDisabled={!user?.id}
+            role="submit-edited-habit-button"
           >
             Done
           </Button>

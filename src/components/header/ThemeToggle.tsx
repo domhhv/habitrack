@@ -1,20 +1,21 @@
-import { ButtonGroup, Button, cn } from '@heroui/react';
-import { ThemeMode, useScreenWidth, useThemeMode } from '@hooks';
+import { cn, Button, ButtonGroup } from '@heroui/react';
 import {
+  Moon as MoonIcon,
   SunDim as SunIcon,
   Desktop as DesktopIcon,
-  Moon as MoonIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
 
+import { ThemeMode, useThemeMode, useScreenWidth } from '@hooks';
+
 const modesToIcons = {
+  [ThemeMode.DARK]: MoonIcon,
   [ThemeMode.LIGHT]: SunIcon,
   [ThemeMode.SYSTEM]: DesktopIcon,
-  [ThemeMode.DARK]: MoonIcon,
 };
 
 const ThemeToggle = () => {
-  const { themeMode, setThemeMode } = useThemeMode();
+  const { setThemeMode, themeMode } = useThemeMode();
   const { screenWidth } = useScreenWidth();
 
   const handleThemeChange = (newThemeMode: ThemeMode) => {
@@ -35,17 +36,17 @@ const ThemeToggle = () => {
         return (
           <Button
             key={mode}
-            className={buttonClassName}
-            onPress={handleThemeChange(mode)}
             isIconOnly
             variant="flat"
             color="secondary"
+            className={buttonClassName}
+            onPress={handleThemeChange(mode)}
             size={screenWidth > 1024 ? 'md' : 'sm'}
           >
             <Icon
-              className={cn('dark:text-neutral-200', iconClassName)}
-              weight={isSelected ? 'bold' : 'regular'}
               size={16}
+              weight={isSelected ? 'bold' : 'regular'}
+              className={cn('dark:text-neutral-200', iconClassName)}
             />
           </Button>
         );

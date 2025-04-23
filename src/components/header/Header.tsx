@@ -1,15 +1,16 @@
-import { AuthModalButton } from '@components';
 import { Button, Tooltip, Spinner } from '@heroui/react';
-import { useScreenWidth, useFetchOnAuth, useUser } from '@hooks';
-import { CalendarDots, GithubLogo, Repeat } from '@phosphor-icons/react';
+import { Repeat, GithubLogo, CalendarDots } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router';
+
+import { AuthModalButton } from '@components';
+import { useUser, useScreenWidth, useFetchOnAuth } from '@hooks';
 
 import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   useFetchOnAuth();
-  const { screenWidth, isMobile, isDesktop } = useScreenWidth();
+  const { isDesktop, isMobile, screenWidth } = useScreenWidth();
   const { isLoading } = useUser();
 
   return (
@@ -18,10 +19,10 @@ const Header = () => {
         <div className="absolute bottom-0 left-0 right-0 top-0 z-50 flex h-full flex-1 items-center justify-center bg-background-100 opacity-90 dark:bg-background-800">
           <div className="flex -translate-y-[73px] items-center justify-center">
             <Spinner
-              color="primary"
-              labelColor="primary"
               size="lg"
+              color="primary"
               label="Please wait"
+              labelColor="primary"
             />
           </div>
         </div>
@@ -30,24 +31,24 @@ const Header = () => {
         <div className="mx-auto flex w-full items-center justify-between gap-2 px-8 py-2 lg:gap-4 lg:px-16 lg:py-4">
           <div className="flex items-center gap-2">
             <Button
-              isIconOnly={screenWidth < 372}
-              color="primary"
               as={Link}
+              color="primary"
               to="/calendar/month"
+              isIconOnly={screenWidth < 372}
               size={isDesktop ? 'md' : 'sm'}
               className={screenWidth < 339 ? 'min-w-fit px-2' : ''}
             >
               {screenWidth < 372 ? (
-                <CalendarDots weight="bold" size={16} />
+                <CalendarDots size={16} weight="bold" />
               ) : (
                 'Calendar'
               )}
             </Button>
             <Button
-              isIconOnly={screenWidth < 372}
-              color="secondary"
               as={Link}
               to="/habits"
+              color="secondary"
+              isIconOnly={screenWidth < 372}
               size={isDesktop ? 'md' : 'sm'}
             >
               {screenWidth < 372 ? (
@@ -60,19 +61,19 @@ const Header = () => {
             {!isMobile && (
               <Tooltip
                 showArrow
-                content="View source code on GitHub"
                 delay={1000}
                 color="secondary"
                 placement="right"
+                content="View source code on GitHub"
               >
                 <Button
-                  variant="light"
-                  color="secondary"
-                  isIconOnly
                   as={Link}
-                  to="https://github.com/domhhv/habitrack"
+                  isIconOnly
+                  variant="light"
                   target="_blank"
+                  color="secondary"
                   size={isDesktop ? 'md' : 'sm'}
+                  to="https://github.com/domhhv/habitrack"
                 >
                   <GithubLogo size={isDesktop ? 20 : 16} />
                 </Button>

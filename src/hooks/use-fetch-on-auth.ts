@@ -1,13 +1,14 @@
-import { supabaseClient } from '@helpers';
 import { addToast } from '@heroui/react';
-import { useTraitActions, useNoteActions, useHabitActions } from '@stores';
-import { getErrorMessage } from '@utils';
 import React from 'react';
 
+import { supabaseClient } from '@helpers';
+import { useNoteActions, useTraitActions, useHabitActions } from '@stores';
+import { getErrorMessage } from '@utils';
+
 const useFetchOnAuth = () => {
-  const { fetchTraits, clearTraits } = useTraitActions();
-  const { fetchHabits, clearHabits } = useHabitActions();
-  const { fetchNotes, clearNotes } = useNoteActions();
+  const { clearTraits, fetchTraits } = useTraitActions();
+  const { clearHabits, fetchHabits } = useHabitActions();
+  const { clearNotes, fetchNotes } = useNoteActions();
 
   const fetchAllData = React.useCallback(async () => {
     try {
@@ -15,9 +16,9 @@ const useFetchOnAuth = () => {
     } catch (error) {
       console.error(error);
       addToast({
-        title: 'Something went wrong while fetching your data.',
-        description: `Error details: ${getErrorMessage(error)}`,
         color: 'danger',
+        description: `Error details: ${getErrorMessage(error)}`,
+        title: 'Something went wrong while fetching your data.',
       });
     }
   }, [fetchTraits, fetchHabits, fetchNotes]);
