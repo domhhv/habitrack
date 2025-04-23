@@ -1,7 +1,8 @@
-import { supabaseClient } from '@helpers';
 import { addToast } from '@heroui/react';
 import React from 'react';
-import { useSearchParams, useLocation } from 'react-router';
+import { useLocation, useSearchParams } from 'react-router';
+
+import { supabaseClient } from '@helpers';
 
 const useAuthSearchParams = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,8 +20,8 @@ const useAuthSearchParams = () => {
         })
         .then(() => {
           addToast({
-            title: `Email confirmed! You're now logged in 🎉`,
             color: 'success',
+            title: `Email confirmed! You're now logged in 🎉`,
           });
         });
     }
@@ -33,9 +34,9 @@ const useAuthSearchParams = () => {
         })
         .then(() => {
           addToast({
-            title: `You're now logged in to Habitrack`,
-            description: 'You can update your password on this page',
             color: 'success',
+            description: 'You can update your password on this page',
+            title: `You're now logged in to Habitrack`,
           });
         });
     }

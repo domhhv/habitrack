@@ -1,15 +1,15 @@
 import { supabaseClient } from '@helpers';
 import {
   type Habit,
+  StorageBuckets,
   type HabitsInsert,
   type HabitsUpdate,
-  StorageBuckets,
 } from '@models';
-import { uploadFile } from '@root/src/services/storage.service';
+import { uploadFile } from '@services';
 import { deepSnakify, deepCamelize } from '@utils';
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('habits')
     .insert(deepSnakify(body))
     .select('*, trait:traits(name, color)')
@@ -23,7 +23,7 @@ export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
 };
 
 export const listHabits = async () => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('habits')
     .select('*, trait:traits(id, name, color)')
     .order('id');
@@ -39,7 +39,7 @@ export const patchHabit = async (
   id: number,
   habit: HabitsUpdate
 ): Promise<Habit> => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('habits')
     .update(deepSnakify(habit))
     .eq('id', id)
@@ -54,7 +54,7 @@ export const patchHabit = async (
 };
 
 export const destroyHabit = async (id: number): Promise<Habit> => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('habits')
     .delete()
     .eq('id', id)

@@ -1,5 +1,6 @@
-import type { Tables, TablesInsert, TablesUpdate } from '@db-types';
 import type { RequireAtLeastOne, CamelCasedPropertiesDeep } from 'type-fest';
+
+import type { Tables, TablesInsert, TablesUpdate } from '@db-types';
 
 type NoteCheck<T extends Partial<Tables<'notes'>>> = RequireAtLeastOne<
   T,

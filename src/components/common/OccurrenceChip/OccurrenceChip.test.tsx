@@ -1,9 +1,10 @@
-import { useScreenWidth } from '@hooks';
 import { render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { it, vi, expect, describe } from 'vitest';
+
+import { useScreenWidth } from '@hooks';
 import { makeTestOccurrence } from '@tests';
 import { getHabitIconUrl } from '@utils';
-import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
 
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
 
@@ -29,10 +30,10 @@ vi.mock('@hooks', async (importOriginal) => {
 
   return {
     ...original,
+    useScreenWidth: vi.fn().mockReturnValue({ screenWidth: 1000 }),
     useUser: vi.fn().mockReturnValue({
       user: null,
     }),
-    useScreenWidth: vi.fn().mockReturnValue({ screenWidth: 1000 }),
   };
 });
 

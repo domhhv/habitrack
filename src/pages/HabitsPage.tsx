@@ -1,36 +1,37 @@
 import {
-  AddHabitDialogButton,
-  ConfirmDialog,
-  EditHabitDialog,
-  TraitChip,
-  HabitIcon,
-  HabitLastEntry,
-  HabitLongestStreak,
-  HabitsTotalEntries,
-} from '@components';
-import { handleAsyncAction } from '@helpers';
-import {
-  Button,
   cn,
   Table,
+  Button,
+  Tooltip,
+  TableRow,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
-  TableRow,
-  Tooltip,
 } from '@heroui/react';
-import { useScreenWidth, useUser } from '@hooks';
-import { type Habit } from '@models';
-import { PencilSimple, TrashSimple } from '@phosphor-icons/react';
-import { useHabitActions, useHabits } from '@stores';
+import { TrashSimple, PencilSimple } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import React from 'react';
 
+import {
+  TraitChip,
+  HabitIcon,
+  ConfirmDialog,
+  HabitLastEntry,
+  EditHabitDialog,
+  HabitLongestStreak,
+  HabitsTotalEntries,
+  AddHabitDialogButton,
+} from '@components';
+import { handleAsyncAction } from '@helpers';
+import { useUser, useScreenWidth } from '@hooks';
+import { type Habit } from '@models';
+import { useHabits, useHabitActions } from '@stores';
+
 type Column = {
+  align?: 'start' | 'center' | 'end';
   key: string;
   label: string;
-  align?: 'start' | 'center' | 'end';
 };
 
 const habitColumns: Column[] = [
@@ -59,14 +60,14 @@ const habitColumns: Column[] = [
     label: 'Longest streak',
   },
   {
+    align: 'center',
     key: 'total-entries',
     label: 'Total entries',
-    align: 'center',
   },
   {
+    align: 'end',
     key: 'actions',
     label: 'Actions',
-    align: 'end',
   },
 ];
 
@@ -129,15 +130,15 @@ const HabitsPage = () => {
             return (
               <TableColumn
                 key={column.key}
-                align={column.align || 'start'}
                 aria-label={column.label}
+                align={column.align || 'start'}
               >
                 {column.label}
               </TableColumn>
             );
           }}
         </TableHeader>
-        <TableBody emptyContent="No habits yet" aria-label="Habits data">
+        <TableBody aria-label="Habits data" emptyContent="No habits yet">
           {habits.map((habit) => {
             return (
               <TableRow
@@ -180,59 +181,59 @@ const HabitsPage = () => {
                 </TableCell>
                 <TableCell aria-label="Actions">
                   <div
-                    className="flex justify-end gap-2"
                     role="group"
+                    className="flex justify-end gap-2"
                     aria-label={`Actions for habit ${habit.name}`}
                   >
                     <Tooltip
+                      role="tooltip"
                       content="Edit habit"
                       id={`edit-tooltip-${habit.id}`}
-                      role="tooltip"
                     >
                       <Button
-                        isIconOnly
                         size="sm"
+                        isIconOnly
                         variant="ghost"
                         color="secondary"
+                        role="edit-habit-button"
                         aria-label={`Edit habit: ${habit.name}`}
                         aria-describedby={`edit-tooltip-${habit.id}`}
+                        data-testid={`edit-habit-id-${habit.id}-button`}
                         onPress={() => {
                           return handleEditStart(habit);
                         }}
-                        role="edit-habit-button"
-                        data-testid={`edit-habit-id-${habit.id}-button`}
                       >
                         <PencilSimple
-                          weight="bold"
                           size={16}
+                          weight="bold"
                           aria-hidden="true"
                         />
                       </Button>
                     </Tooltip>
                     <Tooltip
-                      content="Delete habit"
                       color="danger"
-                      id={`delete-tooltip-${habit.id}`}
                       role="tooltip"
+                      content="Delete habit"
+                      id={`delete-tooltip-${habit.id}`}
                     >
                       <Button
-                        isIconOnly
                         size="sm"
+                        isIconOnly
                         color="danger"
                         variant="ghost"
+                        className="group"
+                        isDisabled={!user?.id}
+                        role="delete-habit-button"
                         aria-label={`Delete habit: ${habit.name}`}
                         aria-describedby={`delete-tooltip-${habit.id}`}
+                        data-testid={`delete-habit-id-${habit.id}-button`}
                         onPress={() => {
                           return handleRemovalStart(habit);
                         }}
-                        isDisabled={!user?.id}
-                        role="delete-habit-button"
-                        data-testid={`delete-habit-id-${habit.id}-button`}
-                        className="group"
                       >
                         <TrashSimple
-                          weight="bold"
                           size={16}
+                          weight="bold"
                           aria-hidden="true"
                         />
                       </Button>
@@ -244,16 +245,16 @@ const HabitsPage = () => {
           })}
         </TableBody>
       </Table>
-      <EditHabitDialog onClose={handleEditEnd} habit={habitToEdit} />
+      <EditHabitDialog habit={habitToEdit} onClose={handleEditEnd} />
       <div className="m-auto my-4 flex w-full justify-end px-4 lg:px-16 lg:py-4">
         <AddHabitDialogButton />
       </div>
       <ConfirmDialog
-        open={!!habitToRemove}
+        isLoading={isRemoving}
         heading="Delete habit"
-        onConfirm={handleRemovalConfirmed}
+        isOpen={!!habitToRemove}
         onCancel={handleRemovalEnd}
-        loading={isRemoving}
+        onConfirm={handleRemovalConfirmed}
       >
         <div>
           Are you sure you want to delete <strong>{habitToRemove?.name}</strong>{' '}

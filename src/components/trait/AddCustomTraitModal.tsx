@@ -1,28 +1,29 @@
-import { OccurrenceChip } from '@components';
-import { handleAsyncAction } from '@helpers';
 import {
-  Button,
   Input,
   Modal,
+  Button,
+  Textarea,
   ModalBody,
-  ModalContent,
   ModalFooter,
   ModalHeader,
-  Textarea,
+  ModalContent,
 } from '@heroui/react';
-import { useTextField, useUser } from '@hooks';
-import { useTraitActions } from '@stores';
-import { makeTestOccurrence } from '@tests';
-import { toEventLike } from '@utils';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
+import { OccurrenceChip } from '@components';
+import { handleAsyncAction } from '@helpers';
+import { useUser, useTextField } from '@hooks';
+import { useTraitActions } from '@stores';
+import { makeTestOccurrence } from '@tests';
+import { toEventLike } from '@utils';
+
 type AddCustomTraitModalProps = {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
 };
 
-const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
+const AddCustomTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
   const [label, handleLabelChange, clearTraitLabel] = useTextField();
   const [slug, handleSlugChange] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
@@ -52,10 +53,10 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
 
     void handleAsyncAction(
       addTrait({
-        name: label,
-        description,
-        slug,
         color,
+        description,
+        name: label,
+        slug,
         userId: user.id,
       }),
       'add_trait',
@@ -68,7 +69,7 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
   };
 
   return (
-    <Modal isOpen={open} onClose={handleDialogClose}>
+    <Modal isOpen={isOpen} onClose={handleDialogClose}>
       <ModalContent>
         <ModalHeader>Add Custom Trait</ModalHeader>
         <ModalBody className="gap-4">
@@ -76,46 +77,46 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
             You can define a custom trait for your habits (e g. Moderately Bad)
           </p>
           <Input
-            variant="faded"
             value={label}
-            onChange={handleLabelChange}
-            isDisabled={isAdding}
+            variant="faded"
             label="Trait Label"
+            isDisabled={isAdding}
+            onChange={handleLabelChange}
           />
           <Input
-            variant="faded"
             value={slug}
-            onChange={handleSlugChange}
-            isDisabled={isAdding}
+            variant="faded"
             label="Trait Slug"
+            isDisabled={isAdding}
+            onChange={handleSlugChange}
           />
           <Textarea
             variant="faded"
             value={description}
-            onChange={handleDescriptionChange}
             isDisabled={isAdding}
             label="Trait Description"
+            onChange={handleDescriptionChange}
           />
           <div className="flex gap-2">
             <HexColorPicker color={color} onChange={handleTraitColorChange} />
             <div className="flex w-1/2 flex-col gap-2">
               <Input
                 variant="faded"
+                startContent="#"
                 value={color.slice(1)}
+                aria-label='"Trait Color"'
                 onChange={(event) => {
                   return handleTraitColorChange(event.target.value);
                 }}
-                aria-label='"Trait Color"'
-                startContent="#"
               />
               <p className="text-sm">
                 This is how habits of this trait will appear on your calendar
               </p>
               <div className="flex">
                 <OccurrenceChip
+                  colorOverride={color}
                   isInteractable={false}
                   occurrences={[makeTestOccurrence()]}
-                  colorOverride={color}
                 />
               </div>
             </div>
@@ -124,10 +125,10 @@ const AddCustomTraitModal = ({ open, onClose }: AddCustomTraitModalProps) => {
         <ModalFooter>
           <Button
             fullWidth
-            color="primary"
             type="submit"
-            isDisabled={isAdding || !user?.id}
+            color="primary"
             onPress={handleAdd}
+            isDisabled={isAdding || !user?.id}
           >
             Add Trait
           </Button>

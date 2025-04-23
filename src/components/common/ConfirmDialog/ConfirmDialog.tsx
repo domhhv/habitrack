@@ -1,41 +1,41 @@
 import {
+  Modal,
   Button,
   ModalBody,
   ModalHeader,
-  Modal,
   ModalContent,
 } from '@heroui/react';
 import React from 'react';
 
 type ConfirmDialogProps = {
-  open: boolean;
+  children: React.ReactNode;
   heading: string;
+  isLoading: boolean;
+  isOpen: boolean;
   onCancel: () => void;
   onConfirm: () => void;
-  children: React.ReactNode;
-  loading: boolean;
 };
 
 const ConfirmDialog = ({
-  open,
-  loading,
+  children,
   heading,
+  isLoading,
+  isOpen,
   onCancel,
   onConfirm,
-  children,
 }: ConfirmDialogProps) => {
   return (
-    <Modal isOpen={open} onClose={onCancel}>
+    <Modal isOpen={isOpen} onClose={onCancel}>
       <ModalContent>
         <ModalHeader>{heading}</ModalHeader>
         <ModalBody>
           {children}
           <div className="mb-4 mt-2 flex flex-row justify-end gap-4">
             <Button
-              color="secondary"
               variant="ghost"
+              color="secondary"
               onPress={onCancel}
-              isDisabled={loading}
+              isDisabled={isLoading}
               role="confirm-dialog-cancel"
             >
               Cancel
@@ -43,7 +43,7 @@ const ConfirmDialog = ({
             <Button
               color="danger"
               onPress={onConfirm}
-              isLoading={loading}
+              isLoading={isLoading}
               role="confirm-dialog-confirm"
             >
               Confirm

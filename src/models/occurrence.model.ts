@@ -1,11 +1,12 @@
-import type {
-  TablesInsert,
-  Tables,
-  CompositeTypes,
-  TablesUpdate,
-} from '@db-types';
-import type { Note } from '@root/src/models/note.model';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
+
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+  CompositeTypes,
+} from '@db-types';
+import type { Note } from '@models';
 
 import { type Habit } from './habit.model';
 import { type Trait } from './trait.model';

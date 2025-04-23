@@ -1,26 +1,27 @@
+import { CalendarDate, GregorianCalendar } from '@internationalized/date';
+import {
+  endOfWeek,
+  endOfMonth,
+  startOfWeek,
+  startOfMonth,
+  startOfToday,
+} from 'date-fns';
+import React from 'react';
+import { useLocale, useCalendar } from 'react-aria';
+import { useParams } from 'react-router';
+import { useCalendarState } from 'react-stately';
+
 import { MonthCalendarGrid, MonthCalendarHeader } from '@components';
 import { MONTHS } from '@const';
 import { useUser } from '@hooks';
-import { CalendarDate, GregorianCalendar } from '@internationalized/date';
 import type { OccurrenceFilters } from '@models';
 import {
   useHabits,
-  useOccurrenceActions,
-  useOccurrences,
   useTraits,
+  useOccurrences,
+  useOccurrenceActions,
 } from '@stores';
 import { capitalize } from '@utils';
-import {
-  endOfMonth,
-  endOfWeek,
-  startOfMonth,
-  startOfToday,
-  startOfWeek,
-} from 'date-fns';
-import React from 'react';
-import { useCalendar, useLocale } from 'react-aria';
-import { useParams } from 'react-router';
-import { useCalendarState } from 'react-stately';
 
 const createCalendar = (identifier: string) => {
   switch (identifier) {
@@ -37,16 +38,16 @@ const MonthCalendar = () => {
   const occurrences = useOccurrences();
   const habits = useHabits();
   const traits = useTraits();
-  const { fetchOccurrences, clearOccurrences } = useOccurrenceActions();
+  const { clearOccurrences, fetchOccurrences } = useOccurrenceActions();
   const [filters, setFilters] = React.useState<OccurrenceFilters>({
     habitIds: new Set(),
     traitIds: new Set(),
   });
   const { locale } = useLocale();
   const calendarState = useCalendarState({
-    locale,
     createCalendar,
     isReadOnly: true,
+    locale,
   });
   const { calendarProps, title } = useCalendar({}, calendarState);
   const params = useParams();
@@ -78,9 +79,9 @@ const MonthCalendar = () => {
     const currentMonth = startOfMonth(startOfToday());
 
     const {
-      year = currentMonth.getFullYear(),
-      month = currentMonth.getMonth() + 1,
       day = currentMonth.getDate(),
+      month = currentMonth.getMonth() + 1,
+      year = currentMonth.getFullYear(),
     } = params;
 
     const paramsDate = new Date(Number(year), Number(month) - 1, Number(day));
@@ -124,15 +125,15 @@ const MonthCalendar = () => {
         {`${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`}
       </title>
       <MonthCalendarHeader
-        activeMonthLabel={capitalize(activeMonthLabel)}
-        activeYear={activeYear}
         filters={filters}
+        activeYear={activeYear}
         onFilterChange={setFilters}
+        activeMonthLabel={capitalize(activeMonthLabel)}
       />
       <MonthCalendarGrid
-        activeMonthLabel={capitalize(activeMonthLabel)}
-        activeYear={Number(activeYear)}
         state={calendarState}
+        activeYear={Number(activeYear)}
+        activeMonthLabel={capitalize(activeMonthLabel)}
         occurrences={occurrences.filter((occurrence) => {
           return (
             filters.habitIds.has(occurrence.habitId.toString()) &&

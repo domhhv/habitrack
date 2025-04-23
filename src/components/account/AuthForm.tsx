@@ -1,27 +1,28 @@
-import { Input, Button, cn } from '@heroui/react';
-import { useTextField } from '@hooks';
+import { cn, Input, Button } from '@heroui/react';
 import React from 'react';
+
+import { useTextField } from '@hooks';
 
 import PasswordInput from './PasswordInput';
 
 type AuthFormProps = {
-  onSubmit: (email: string, password: string, name: string) => void;
-  onCancel: () => void;
-  disabled: boolean;
-  submitButtonLabel: string;
+  isDisabled: boolean;
   mode: 'login' | 'register' | 'reset-password';
-  onModeChange: (mode: 'login' | 'register' | 'reset-password') => void;
+  submitButtonLabel: string;
   goBackToLogin: () => void;
+  onCancel: () => void;
+  onModeChange: (mode: 'login' | 'register' | 'reset-password') => void;
+  onSubmit: (email: string, password: string, name: string) => void;
 };
 
 const AuthForm = ({
-  submitButtonLabel,
-  onSubmit,
-  onCancel,
-  disabled,
-  mode,
-  onModeChange,
   goBackToLogin,
+  isDisabled,
+  mode,
+  onCancel,
+  onModeChange,
+  onSubmit,
+  submitButtonLabel,
 }: AuthFormProps) => {
   const [email, handleEmailChange, clearEmail] = useTextField();
   const [name, handleNameChange, clearName] = useTextField();
@@ -59,20 +60,20 @@ const AuthForm = ({
           </p>
         )}
         <Input
-          value={email}
-          onChange={handleEmailChange}
           type="email"
+          value={email}
           label="Email"
-          isDisabled={disabled}
+          isDisabled={isDisabled}
+          onChange={handleEmailChange}
           classNames={{
             description: 'text-right',
           }}
           description={
             mode === 'reset-password' && (
               <Button
-                className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
-                onPress={goBackToLogin}
                 disableAnimation
+                onPress={goBackToLogin}
+                className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
               >
                 Back to login
               </Button>
@@ -82,17 +83,17 @@ const AuthForm = ({
         {mode === 'register' && (
           <Input
             value={name}
-            onChange={handleNameChange}
+            isDisabled={isDisabled}
             label="Name (optional)"
-            isDisabled={disabled}
+            onChange={handleNameChange}
           />
         )}
         {['login', 'register'].includes(mode) && (
           <PasswordInput
             value={password}
-            onChange={handlePasswordChange}
             label="Password"
-            isDisabled={disabled}
+            isDisabled={isDisabled}
+            onChange={handlePasswordChange}
             onReset={
               mode === 'login'
                 ? () => {
@@ -104,13 +105,13 @@ const AuthForm = ({
         )}
       </div>
       <div className="mt-4 flex justify-end gap-2">
-        <Button onPress={handleCancel} isDisabled={disabled} variant="flat">
+        <Button variant="flat" onPress={handleCancel} isDisabled={isDisabled}>
           Cancel
         </Button>
         <Button
-          color="primary"
-          isLoading={disabled}
           type="submit"
+          color="primary"
+          isLoading={isDisabled}
           data-testid="submit-button"
         >
           {submitButtonLabel}

@@ -1,3 +1,9 @@
+import { Analytics } from '@vercel/analytics/react';
+import { setDefaultOptions } from 'date-fns';
+import { enGB } from 'date-fns/locale';
+import React from 'react';
+import { Route, Routes, Navigate } from 'react-router';
+
 import { AppHeader } from '@components';
 import {
   HabitsPage,
@@ -5,11 +11,6 @@ import {
   WeekCalendarPage,
   MonthCalendarPage,
 } from '@pages';
-import { Analytics } from '@vercel/analytics/react';
-import { setDefaultOptions } from 'date-fns';
-import { enGB } from 'date-fns/locale';
-import React from 'react';
-import { Navigate, Route, Routes } from 'react-router';
 
 import Providers from './components/Providers';
 
@@ -26,16 +27,16 @@ const App = () => {
       <main className="flex h-full flex-1 flex-col items-start bg-background-50 dark:bg-background-700">
         <Routes>
           <Route
-            path="/calendar/month/:year?/:month?/:day?"
             element={<MonthCalendarPage />}
+            path="/calendar/month/:year?/:month?/:day?"
           />
           <Route
-            path="/calendar/week/:year?/:month?/:day?"
             element={<WeekCalendarPage />}
+            path="/calendar/week/:year?/:month?/:day?"
           />
           <Route path="/habits" element={<HabitsPage />} />
           <Route path="/account" element={<AccountPage />} />
-          <Route path="*" element={<Navigate to="/calendar/month" replace />} />
+          <Route path="*" element={<Navigate replace to="/calendar/month" />} />
         </Routes>
       </main>
       <Analytics />

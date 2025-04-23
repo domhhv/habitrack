@@ -8,8 +8,8 @@ const executable = isWindows ? 'supabase.exe' : 'supabase';
 const args = process.argv.slice(2);
 
 const supabaseProcess = spawn(executable, args, {
-  stdio: 'inherit',
   shell: true,
+  stdio: 'inherit',
 });
 
 supabaseProcess.on('close', (code) => {

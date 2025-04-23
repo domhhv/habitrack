@@ -1,13 +1,14 @@
+import { create } from 'zustand';
+
 import type { Trait, TraitsInsert } from '@models';
 import { listTraits, createTrait } from '@services';
-import { create } from 'zustand';
 
 type TraitsState = {
   traits: Trait[];
   actions: {
-    fetchTraits: () => Promise<void>;
-    clearTraits: () => void;
     addTrait: (trait: TraitsInsert) => Promise<void>;
+    clearTraits: () => void;
+    fetchTraits: () => Promise<void>;
   };
 };
 
@@ -16,6 +17,13 @@ const useTraitsStore = create<TraitsState>((set) => {
     traits: [],
 
     actions: {
+      addTrait: async (trait: TraitsInsert) => {
+        const newTrait = await createTrait(trait);
+        set((state) => {
+          return { traits: [...state.traits, newTrait] };
+        });
+      },
+
       clearTraits: () => {
         set({ traits: [] });
       },
@@ -23,13 +31,6 @@ const useTraitsStore = create<TraitsState>((set) => {
       fetchTraits: async () => {
         const traits = await listTraits();
         set({ traits });
-      },
-
-      addTrait: async (trait: TraitsInsert) => {
-        const newTrait = await createTrait(trait);
-        set((state) => {
-          return { traits: [...state.traits, newTrait] };
-        });
       },
     },
   };

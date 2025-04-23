@@ -1,16 +1,16 @@
 import { supabaseClient } from '@helpers';
 import type {
+  Streak,
   Occurrence,
   OccurrencesInsert,
   OccurrencesUpdate,
-  Streak,
 } from '@models';
 import { deepSnakify, deepCamelize } from '@utils';
 
 export const createOccurrence = async (
   occurrence: OccurrencesInsert
 ): Promise<Occurrence> => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('occurrences')
     .insert(deepSnakify(occurrence))
     .select(
@@ -28,7 +28,7 @@ export const createOccurrence = async (
 export const listOccurrences = async (
   range: [number, number]
 ): Promise<Occurrence[]> => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('occurrences')
     .select(
       '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(id, content)'
@@ -48,7 +48,7 @@ export const patchOccurrence = async (
   id: number,
   occurrence: OccurrencesUpdate
 ): Promise<Occurrence> => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('occurrences')
     .update(deepSnakify(occurrence))
     .eq('id', id)
@@ -65,7 +65,7 @@ export const patchOccurrence = async (
 };
 
 export const destroyOccurrence = async (id: number) => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('occurrences')
     .delete()
     .eq('id', id)
@@ -80,7 +80,7 @@ export const destroyOccurrence = async (id: number) => {
 };
 
 export const getLatestHabitOccurrenceTimestamp = async (habitId: number) => {
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('occurrences')
     .select('timestamp')
     .eq('habit_id', habitId)
@@ -103,7 +103,7 @@ export const getLatestHabitOccurrenceTimestamp = async (habitId: number) => {
 export const getLongestHabitStreak = async (
   habitId: number
 ): Promise<Streak> => {
-  const { error, data } = await supabaseClient.rpc('get_longest_streak', {
+  const { data, error } = await supabaseClient.rpc('get_longest_streak', {
     p_habit_id: habitId,
   });
 
@@ -115,7 +115,7 @@ export const getLongestHabitStreak = async (
 };
 
 export const getHabitTotalEntries = async (habitId: number) => {
-  const { error, count } = await supabaseClient
+  const { count, error } = await supabaseClient
     .from('occurrences')
     .select('*', {
       count: 'exact',

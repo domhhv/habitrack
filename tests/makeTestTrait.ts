@@ -5,12 +5,12 @@ const makeTestTrait = () => {
 
   return (override: Partial<Trait> = {}): Trait => {
     return {
+      color: 'black',
+      createdAt: new Date().toISOString(),
+      description: 'Test Description',
       id: id++,
       name: 'Test Trait',
       slug: 'test-trait',
-      description: 'Test Description',
-      color: 'black',
-      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: null,
       ...override,

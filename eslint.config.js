@@ -9,10 +9,12 @@ import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import importPlugin from 'eslint-plugin-import';
 import jsxA11Y from 'eslint-plugin-jsx-a11y';
+import perfectionist from 'eslint-plugin-perfectionist';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import switchCase from 'eslint-plugin-switch-case';
 import unusedImports from 'eslint-plugin-unused-imports';
+
 import globals from 'globals';
 
 const compat = new FlatCompat({
@@ -35,50 +37,45 @@ export default [
     )
   ),
   {
-    plugins: {
-      import: importPlugin,
-      react: fixupPluginRules(react),
-      'jsx-a11y': jsxA11Y,
-      'switch-case': switchCase,
-      '@stylistic/ts': stylisticTs,
-      'unused-imports': unusedImports,
-      'react-hooks': fixupPluginRules(reactHooks),
-      '@typescript-eslint': fixupPluginRules(typescriptEslint),
-    },
-
     languageOptions: {
+      ecmaVersion: 'latest',
+      parser: tsParser,
+      sourceType: 'module',
+
       globals: {
         ...globals.browser,
       },
 
-      parser: tsParser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-    },
-
-    settings: {
-      react: {
-        version: 'detect',
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
       },
     },
 
+    plugins: {
+      '@stylistic/ts': stylisticTs,
+      '@typescript-eslint': fixupPluginRules(typescriptEslint),
+      import: importPlugin,
+      'jsx-a11y': jsxA11Y,
+      perfectionist,
+      react: fixupPluginRules(react),
+      'react-hooks': fixupPluginRules(reactHooks),
+      'switch-case': switchCase,
+      'unused-imports': unusedImports,
+    },
+
     rules: {
+      '@typescript-eslint/consistent-type-imports': 'error',
+      'arrow-body-style': ['error', 'always'],
       curly: 'error',
-      'no-undef': 'off',
-      'object-shorthand': 'error',
-      'no-useless-rename': 'error',
       'import/no-duplicates': 'error',
+      'import/order': 'off',
+      'no-undef': 'off',
+      'no-useless-rename': 'error',
+      'object-shorthand': 'error',
       'react/react-in-jsx-scope': 'off',
       'switch-case/no-case-curly': 'off',
-      'arrow-body-style': ['error', 'always'],
-      '@typescript-eslint/consistent-type-imports': 'error',
-
-      'no-console': [
-        'warn',
-        {
-          allow: ['warn', 'error'],
-        },
-      ],
 
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -88,13 +85,84 @@ export default [
         },
       ],
 
+      'no-console': [
+        'warn',
+        {
+          allow: ['warn', 'error'],
+        },
+      ],
+
       'padding-line-between-statements': [
         'error',
-        { blankLine: 'always', prev: '*', next: 'return' },
-        { blankLine: 'always', prev: '*', next: 'block-like' },
-        { blankLine: 'always', prev: '*', next: 'block' },
-        { blankLine: 'always', prev: 'block-like', next: '*' },
-        { blankLine: 'always', prev: 'block', next: '*' },
+        { blankLine: 'always', next: 'return', prev: '*' },
+        { blankLine: 'always', next: 'block-like', prev: '*' },
+        { blankLine: 'always', next: 'block', prev: '*' },
+        { blankLine: 'always', next: '*', prev: 'block-like' },
+        { blankLine: 'always', next: '*', prev: 'block' },
+      ],
+
+      'perfectionist/sort-exports': [
+        'error',
+        {
+          ignoreCase: true,
+          order: 'asc',
+          type: 'alphabetical',
+        },
+      ],
+
+      'perfectionist/sort-imports': [
+        'error',
+        {
+          ignoreCase: true,
+          newlinesBetween: 'never',
+          order: 'asc',
+          tsconfigRootDir: '.',
+          type: 'alphabetical',
+          groups: [
+            'builtin',
+            { newlinesBetween: 'always' },
+            'external',
+            { newlinesBetween: 'always' },
+            'internal',
+            { newlinesBetween: 'always' },
+            'parent',
+            { newlinesBetween: 'always' },
+            ['index', 'sibling'],
+          ],
+        },
+      ],
+
+      'perfectionist/sort-jsx-props': [
+        'error',
+        {
+          type: 'line-length',
+        },
+      ],
+
+      'perfectionist/sort-named-imports': [
+        'error',
+        {
+          type: 'line-length',
+        },
+      ],
+
+      'perfectionist/sort-object-types': [
+        'error',
+        {
+          groups: ['unknown', 'method', 'multiline-member'],
+        },
+      ],
+
+      'perfectionist/sort-objects': [
+        'error',
+        {
+          groups: ['unknown', 'method', 'multiline-member'],
+        },
+      ],
+
+      'react/boolean-prop-naming': [
+        'error',
+        { propTypeNames: ['bool', 'mutuallyExclusiveTrueProps'] },
       ],
 
       'switch-case/newline-between-switch-case': [
@@ -102,25 +170,12 @@ export default [
         'always',
         { fallthrough: 'never' },
       ],
+    },
 
-      'import/order': [
-        'error',
-        {
-          'newlines-between': 'always',
-
-          alphabetize: {
-            order: 'asc',
-          },
-
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            ['index', 'sibling'],
-          ],
-        },
-      ],
+    settings: {
+      react: {
+        version: 'detect',
+      },
     },
   },
 ];

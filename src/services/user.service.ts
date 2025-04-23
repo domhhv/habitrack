@@ -1,5 +1,6 @@
-import { supabaseClient } from '@helpers';
 import { type UserAttributes } from '@supabase/supabase-js';
+
+import { supabaseClient } from '@helpers';
 import { deepCamelize } from '@utils';
 
 export const signUp = async (email: string, password: string, name: string) => {

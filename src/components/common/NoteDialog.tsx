@@ -1,32 +1,33 @@
-import { handleAsyncAction } from '@helpers';
 import {
-  Button,
   Modal,
+  Button,
+  Textarea,
   ModalBody,
-  ModalContent,
   ModalFooter,
   ModalHeader,
-  Textarea,
+  ModalContent,
 } from '@heroui/react';
-import { useUser, useTextField } from '@hooks';
-import { useNotes, useNoteActions } from '@stores';
-import { toEventLike } from '@utils';
 import { format } from 'date-fns';
 import React from 'react';
 
+import { handleAsyncAction } from '@helpers';
+import { useUser, useTextField } from '@hooks';
+import { useNotes, useNoteActions } from '@stores';
+import { toEventLike } from '@utils';
+
 type NoteDialogProps = {
+  day: string;
   isOpen: boolean;
   onClose: () => void;
-  day: string;
 };
 
-const NoteDialog = ({ isOpen, onClose, day }: NoteDialogProps) => {
+const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
   const { user } = useUser();
   const [content, handleContentChange, clearContent] = useTextField();
   const [isSaving, setIsSaving] = React.useState(false);
   const [isRemoving, setIsRemoving] = React.useState(false);
   const notes = useNotes();
-  const { addNote, updateNote, deleteNote } = useNoteActions();
+  const { addNote, deleteNote, updateNote } = useNoteActions();
 
   const existingNote = React.useMemo(() => {
     return notes.find((note) => {
@@ -57,9 +58,9 @@ const NoteDialog = ({ isOpen, onClose, day }: NoteDialogProps) => {
       if (!existingNote) {
         void handleAsyncAction(
           addNote({
-            userId: user.id,
-            day,
             content,
+            day,
+            userId: user.id,
           }),
           'add_note',
           setIsSaving
@@ -109,23 +110,23 @@ const NoteDialog = ({ isOpen, onClose, day }: NoteDialogProps) => {
         </ModalHeader>
         <ModalBody>
           <Textarea
+            value={content}
+            variant="faded"
+            placeholder="Note"
+            onChange={handleContentChange}
+            disabled={isSaving || isRemoving}
             onKeyDown={() => {
               return null;
             }}
-            onChange={handleContentChange}
-            value={content}
-            placeholder="Note"
-            variant="faded"
-            disabled={isSaving || isRemoving}
           />
         </ModalBody>
         <ModalFooter>
           {!!existingNote && (
             <Button
               color="danger"
+              disabled={isSaving}
               onPress={handleRemove}
               isLoading={isRemoving}
-              disabled={isSaving}
             >
               Remove
             </Button>

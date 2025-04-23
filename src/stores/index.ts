@@ -1,4 +1,4 @@
-export * from './traits.store';
 export * from './habits.store';
-export * from './occurrences.store';
 export * from './notes.store';
+export * from './occurrences.store';
+export * from './traits.store';

@@ -1,15 +1,16 @@
-import type { Note, NotesInsert, NotesUpdate } from '@models';
-import { createNote, destroyNote, listNotes, updateNote } from '@services';
 import { create } from 'zustand';
+
+import type { Note, NotesInsert, NotesUpdate } from '@models';
+import { listNotes, createNote, updateNote, destroyNote } from '@services';
 
 type NotesState = {
   notes: Note[];
   actions: {
-    fetchNotes: () => Promise<void>;
     addNote: (note: NotesInsert) => Promise<Note>;
-    updateNote: (id: number, note: NotesUpdate) => Promise<Note>;
-    deleteNote: (id: number) => Promise<void>;
     clearNotes: () => void;
+    deleteNote: (id: number) => Promise<void>;
+    fetchNotes: () => Promise<void>;
+    updateNote: (id: number, note: NotesUpdate) => Promise<Note>;
   };
 };
 
@@ -18,15 +19,6 @@ const useNotesStore = create<NotesState>((set) => {
     notes: [],
 
     actions: {
-      clearNotes: () => {
-        set({ notes: [] });
-      },
-
-      fetchNotes: async () => {
-        const notes = await listNotes();
-        set({ notes });
-      },
-
       addNote: async (note: NotesInsert) => {
         const newNote = await createNote(note);
 
@@ -35,6 +27,26 @@ const useNotesStore = create<NotesState>((set) => {
         });
 
         return newNote;
+      },
+
+      clearNotes: () => {
+        set({ notes: [] });
+      },
+
+      deleteNote: async (id: number) => {
+        await destroyNote(id);
+        set((state) => {
+          return {
+            notes: state.notes.filter((note) => {
+              return note.id !== id;
+            }),
+          };
+        });
+      },
+
+      fetchNotes: async () => {
+        const notes = await listNotes();
+        set({ notes });
       },
 
       updateNote: async (id: number, note: NotesUpdate) => {
@@ -49,17 +61,6 @@ const useNotesStore = create<NotesState>((set) => {
         });
 
         return updatedNote;
-      },
-
-      deleteNote: async (id: number) => {
-        await destroyNote(id);
-        set((state) => {
-          return {
-            notes: state.notes.filter((note) => {
-              return note.id !== id;
-            }),
-          };
-        });
       },
     },
   };

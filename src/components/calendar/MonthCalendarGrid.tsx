@@ -1,33 +1,34 @@
-import { getIsoWeek } from '@helpers';
-import { Button, cn, Tooltip } from '@heroui/react';
-import { useScreenWidth } from '@hooks';
-import { type CalendarDate, getWeeksInMonth } from '@internationalized/date';
-import type { Occurrence } from '@models';
-import { isTruthy, getMonthIndex } from '@utils';
-import { addMonths, endOfDay, isSameMonth, startOfDay } from 'date-fns';
-import { AnimatePresence, motion } from 'framer-motion';
+import { cn, Button, Tooltip } from '@heroui/react';
+import { getWeeksInMonth, type CalendarDate } from '@internationalized/date';
+import { endOfDay, addMonths, startOfDay, isSameMonth } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
-import { useCalendarGrid, useLocale } from 'react-aria';
+import { useLocale, useCalendarGrid } from 'react-aria';
 import { Link } from 'react-router';
 import { type CalendarState } from 'react-stately';
+
+import { getIsoWeek } from '@helpers';
+import { useScreenWidth } from '@hooks';
+import type { Occurrence } from '@models';
+import { isTruthy, getMonthIndex } from '@utils';
 
 import type { CellPosition, CellRangeStatus } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
 
 type CalendarGridProps = {
-  state: CalendarState;
   activeMonthLabel: string;
   activeYear: number;
   occurrences: Occurrence[];
+  state: CalendarState;
 };
 
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const MonthCalendarGrid = ({
-  state,
   activeMonthLabel,
   activeYear,
   occurrences,
+  state,
 }: CalendarGridProps) => {
   const { gridProps } = useCalendarGrid({}, state);
   const { isDesktop } = useScreenWidth();
@@ -76,15 +77,15 @@ const MonthCalendarGrid = ({
 
       <AnimatePresence mode="wait">
         <motion.div
-          className="flex flex-1 flex-col"
+          exit={{ opacity: 0 }}
           key={activeMonthLabel}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
           transition={{ duration: 0.1 }}
+          className="flex flex-1 flex-col"
         >
           {weekIndexes.map((weekIndex) => {
-            const [{ year, month, day }] = state
+            const [{ day, month, year }] = state
               .getDatesInWeek(weekIndex)
               .filter(isTruthy);
 
@@ -96,13 +97,13 @@ const MonthCalendarGrid = ({
                 <Tooltip content="Go to this week">
                   <Button
                     as={Link}
+                    variant="ghost"
+                    radius={isDesktop ? 'md' : 'sm'}
+                    to={`/calendar/week/${year}/${month}/${day}`}
                     className={cn(
                       'absolute -left-7 top-0 h-[32px] w-6 min-w-fit p-0 lg:-left-12 lg:h-[37px] lg:w-10',
                       weekIndex === 0 && 'top-0.5'
                     )}
-                    variant="ghost"
-                    radius={isDesktop ? 'md' : 'sm'}
-                    to={`/calendar/week/${year}/${month}/${day}`}
                   >
                     {getIsoWeek(weekIndex, activeMonthLabel, activeYear)}
                   </Button>
@@ -121,7 +122,7 @@ const MonthCalendarGrid = ({
                         return null;
                       }
 
-                      const { month, day, year } = calendarDate;
+                      const { day, month, year } = calendarDate;
 
                       const date = new Date(year, month - 1, day);
                       const prevMonth = addMonths(visibleMonth, -1);
@@ -146,10 +147,10 @@ const MonthCalendarGrid = ({
 
                       return (
                         <MonthCalendarCell
-                          key={cellKey}
                           date={date}
-                          rangeStatus={rangeStatus}
+                          key={cellKey}
                           position={position}
+                          rangeStatus={rangeStatus}
                           occurrences={occurrences.filter((occurrence) => {
                             return (
                               occurrence.timestamp >= +dayStart &&

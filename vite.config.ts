@@ -3,7 +3,7 @@ import { resolve } from 'path';
 
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { defineConfig, loadEnv, type UserConfig } from 'vite';
+import { loadEnv, defineConfig, type UserConfig } from 'vite';
 
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
@@ -12,40 +12,6 @@ export default defineConfig(({ mode }) => {
 
   return {
     clearScreen: false,
-    plugins: [
-      react(),
-      isProduction &&
-        visualizer({
-          filename: 'dist/stats.html',
-        }),
-    ],
-    define: {
-      SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
-      SUPABASE_ANON_KEY: JSON.stringify(env.SUPABASE_ANON_KEY),
-    },
-    test: {
-      environment: 'jsdom',
-      setupFiles: './tests/setup.ts',
-      coverage: {
-        reportsDirectory: './tests/coverage',
-      },
-    },
-    resolve: {
-      alias: {
-        '@pages': resolve(__dirname, './src/pages'),
-        '@services': resolve(__dirname, './src/services'),
-        '@components': resolve(__dirname, './src/components'),
-        '@hooks': resolve(__dirname, './src/hooks'),
-        '@utils': resolve(__dirname, './src/utils'),
-        '@helpers': resolve(__dirname, './src/helpers'),
-        '@models': resolve(__dirname, './src/models'),
-        '@stores': resolve(__dirname, './src/stores'),
-        '@const': resolve(__dirname, './src/const'),
-        '@db-types': resolve(__dirname, './supabase/database.types'),
-        '@tests': resolve(__dirname, './tests'),
-        '@root': resolve(__dirname, './'),
-      },
-    },
     build: {
       rollupOptions: {
         output: {
@@ -81,6 +47,40 @@ export default defineConfig(({ mode }) => {
             return 'index';
           },
         },
+      },
+    },
+    define: {
+      SUPABASE_ANON_KEY: JSON.stringify(env.SUPABASE_ANON_KEY),
+      SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
+    },
+    plugins: [
+      react(),
+      isProduction &&
+        visualizer({
+          filename: 'dist/stats.html',
+        }),
+    ],
+    resolve: {
+      alias: {
+        '@components': resolve(__dirname, './src/components'),
+        '@const': resolve(__dirname, './src/const'),
+        '@db-types': resolve(__dirname, './supabase/database.types'),
+        '@helpers': resolve(__dirname, './src/helpers'),
+        '@hooks': resolve(__dirname, './src/hooks'),
+        '@models': resolve(__dirname, './src/models'),
+        '@pages': resolve(__dirname, './src/pages'),
+        '@root': resolve(__dirname, './'),
+        '@services': resolve(__dirname, './src/services'),
+        '@stores': resolve(__dirname, './src/stores'),
+        '@tests': resolve(__dirname, './tests'),
+        '@utils': resolve(__dirname, './src/utils'),
+      },
+    },
+    test: {
+      environment: 'jsdom',
+      setupFiles: './tests/setup.ts',
+      coverage: {
+        reportsDirectory: './tests/coverage',
       },
     },
   } satisfies UserConfig;

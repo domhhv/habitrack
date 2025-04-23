@@ -5,7 +5,7 @@ import { deepSnakify, deepCamelize } from '@utils';
 export const createTrait = async (body: TraitsInsert): Promise<Trait> => {
   const serverBody = deepSnakify(body);
 
-  const { error, data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('traits')
     .insert(serverBody)
     .select()
@@ -19,7 +19,7 @@ export const createTrait = async (body: TraitsInsert): Promise<Trait> => {
 };
 
 export const listTraits = async (): Promise<Trait[]> => {
-  const { error, data } = await supabaseClient.from('traits').select();
+  const { data, error } = await supabaseClient.from('traits').select();
 
   if (error) {
     throw new Error(error.message);

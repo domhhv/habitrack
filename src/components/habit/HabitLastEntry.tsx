@@ -1,36 +1,37 @@
 import {
   Button,
+  Tooltip,
   Dropdown,
   DropdownItem,
   DropdownMenu,
-  DropdownTrigger,
-  Tooltip,
   type Selection,
+  DropdownTrigger,
 } from '@heroui/react';
 import { CaretDown } from '@phosphor-icons/react';
-import { getLatestHabitOccurrenceTimestamp } from '@services';
-import { capitalize } from '@utils';
 import {
   format,
-  formatDistanceStrict,
-  formatRelative,
   isThisWeek,
-  differenceInHours,
+  formatRelative,
   differenceInDays,
+  differenceInHours,
   differenceInWeeks,
   differenceInMonths,
+  formatDistanceStrict,
 } from 'date-fns';
 import { enGB } from 'date-fns/locale';
 import pluralize from 'pluralize';
 import React from 'react';
 
+import { getLatestHabitOccurrenceTimestamp } from '@services';
+import { capitalize } from '@utils';
+
 const formatRelativeLocale: Record<string, string> = {
-  yesterday: `'yesterday'`,
-  today: `'today'`,
-  tomorrow: `'tomorrow'`,
   lastWeek: `'this' EEEE`,
   nextWeek: `'next' EEEE`,
   other: `'on' LLL d, y`,
+  today: `'today'`,
+  tomorrow: `'tomorrow'`,
+  yesterday: `'yesterday'`,
 };
 
 const HabitLastEntry = ({ id }: { id: number }) => {
@@ -86,8 +87,8 @@ const HabitLastEntry = ({ id }: { id: number }) => {
         }
 
         return formatDistanceStrict(timestamp, new Date(), {
-          locale: enGB,
           addSuffix: true,
+          locale: enGB,
           unit: 'day',
         });
 
@@ -101,25 +102,25 @@ const HabitLastEntry = ({ id }: { id: number }) => {
   return latestOccurrenceTimestamp ? (
     <div className="flex items-center gap-2">
       <Tooltip
-        content={format(new Date(latestOccurrenceTimestamp), 'MMMM do, y')}
-        color="primary"
         showArrow
         offset={12}
+        color="primary"
+        content={format(new Date(latestOccurrenceTimestamp), 'MMMM do, y')}
       >
         <span>{capitalize(formatRelativeDate(latestOccurrenceTimestamp))}</span>
       </Tooltip>
       <Dropdown>
         <DropdownTrigger>
-          <Button isIconOnly variant="light" size="sm">
+          <Button size="sm" isIconOnly variant="light">
             <CaretDown />
           </Button>
         </DropdownTrigger>
         <DropdownMenu
+          variant="flat"
           disallowEmptySelection
+          selectionMode="single"
           aria-label="Single selection example"
           selectedKeys={selectedDistanceFormat}
-          selectionMode="single"
-          variant="flat"
           onSelectionChange={setSelectedDistanceFormat}
         >
           <DropdownItem key="default">Default</DropdownItem>

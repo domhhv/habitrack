@@ -1,11 +1,11 @@
 export { default as capitalize } from './capitalize';
+export { default as deepCamelize } from './deep-camelize';
+export { default as deepSnakify } from './deep-snakify';
 export { default as getErrorMessage } from './get-error-message';
 export { default as getHabitIconUrl } from './get-habit-icon-url';
 export { default as getMonthIndex } from './get-month-index';
-export { default as toSqlDate } from './to-sql-date';
-export { default as toEventLike } from './to-event-like';
-export { default as isTruthy } from './is-truthy';
 export { default as isFulfilled } from './is-fulfilled';
 export { default as isRejected } from './is-rejected';
-export { default as deepCamelize } from './deep-camelize';
-export { default as deepSnakify } from './deep-snakify';
+export { default as isTruthy } from './is-truthy';
+export { default as toEventLike } from './to-event-like';
+export { default as toSqlDate } from './to-sql-date';

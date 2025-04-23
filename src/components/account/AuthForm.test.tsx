@@ -1,6 +1,6 @@
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { it, vi, expect, describe } from 'vitest';
 
 import AuthForm from './AuthForm';
 
@@ -15,10 +15,10 @@ describe(AuthForm.name, () => {
         mode="login"
         onSubmit={onSubmit}
         onCancel={onCancel}
-        disabled={disabled}
-        submitButtonLabel={submitButtonLabel}
+        isDisabled={disabled}
         onModeChange={() => {}}
         goBackToLogin={() => {}}
+        submitButtonLabel={submitButtonLabel}
       />
     );
 
@@ -47,10 +47,10 @@ describe(AuthForm.name, () => {
         mode="login"
         onSubmit={onSubmit}
         onCancel={onCancel}
-        disabled={disabled}
-        submitButtonLabel={submitButtonLabel}
+        isDisabled={disabled}
         onModeChange={() => {}}
         goBackToLogin={() => {}}
+        submitButtonLabel={submitButtonLabel}
       />
     );
 

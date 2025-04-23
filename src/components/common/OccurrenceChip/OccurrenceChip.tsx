@@ -1,52 +1,53 @@
-import { OccurrenceDialog } from '@components';
-import { handleAsyncAction } from '@helpers';
 import {
+  cn,
   Badge,
   Button,
-  cn,
   Drawer,
+  Tooltip,
   DrawerBody,
-  DrawerContent,
   DrawerFooter,
   DrawerHeader,
-  Tooltip,
+  DrawerContent,
   useDisclosure,
 } from '@heroui/react';
-import { useScreenWidth } from '@hooks';
-import type { Occurrence } from '@models';
-import { Camera, Note, PencilSimple, TrashSimple } from '@phosphor-icons/react';
-import { useOccurrenceActions } from '@stores';
-import { getHabitIconUrl } from '@utils';
+import { Note, Camera, TrashSimple, PencilSimple } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import React from 'react';
 
+import { OccurrenceDialog } from '@components';
+import { handleAsyncAction } from '@helpers';
+import { useScreenWidth } from '@hooks';
+import type { Occurrence } from '@models';
+import { useOccurrenceActions } from '@stores';
+import { getHabitIconUrl } from '@utils';
+
 export type OccurrenceChipProps = {
+  colorOverride?: string;
   isInteractable?: boolean;
   occurrences: Occurrence[];
-  colorOverride?: string;
 };
 
 const OccurrenceChip = ({
+  colorOverride,
   isInteractable = true,
   occurrences,
-  colorOverride,
 }: OccurrenceChipProps) => {
   const {
     isOpen: isDrawerOpen,
-    onOpen: openDrawer,
     onClose: closeDrawer,
+    onOpen: openDrawer,
     onOpenChange: onDrawerOpenChange,
   } = useDisclosure();
   const {
     isOpen: isOccurrenceDialogOpen,
-    onOpen: openOccurrenceDialog,
     onClose: closeOccurrenceDialog,
+    onOpen: openOccurrenceDialog,
   } = useDisclosure();
   const [occurrenceToEdit, setOccurrenceToEdit] =
     React.useState<Occurrence | null>(null);
   const [occurrence] = occurrences;
   const { habit } = occurrence;
-  const { name: habitName, iconPath, trait } = habit || {};
+  const { iconPath, name: habitName, trait } = habit || {};
   const { color: traitColor } = trait || {};
   const iconUrl = getHabitIconUrl(iconPath);
   const { screenWidth } = useScreenWidth();
@@ -68,18 +69,18 @@ const OccurrenceChip = ({
 
   let chip = (
     <Tooltip
-      content={habitName}
+      delay={0}
       radius="sm"
+      closeDelay={100}
+      content={habitName}
       classNames={{
         content: 'px-2 py-1.5',
       }}
-      delay={0}
-      closeDelay={100}
     >
       <div
         role="button"
-        style={{ borderColor: colorOverride || traitColor }}
         onClick={openDrawer}
+        style={{ borderColor: colorOverride || traitColor }}
         className={cn(
           'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 dark:bg-slate-800 md:mb-1 md:mr-1',
           screenWidth < 400 && 'p-1',
@@ -99,10 +100,10 @@ const OccurrenceChip = ({
     chip = (
       <Badge
         size="sm"
-        content={occurrences.length}
         variant="solid"
-        placement="bottom-right"
         color="primary"
+        placement="bottom-right"
+        content={occurrences.length}
         className={cn(isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]')}
       >
         {chip}
@@ -118,8 +119,8 @@ const OccurrenceChip = ({
     chip = (
       <Badge
         size="sm"
-        content={<Note weight="fill" size={14} />}
         placement="top-right"
+        content={<Note size={14} weight="fill" />}
         className={cn(
           'right-1 top-1 border-none bg-transparent',
           isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]'
@@ -138,8 +139,8 @@ const OccurrenceChip = ({
     chip = (
       <Badge
         size="sm"
-        content={<Camera weight="fill" size={14} />}
         placement="top-left"
+        content={<Camera size={14} weight="fill" />}
         className={cn(
           'right-1 top-1 border-none bg-transparent',
           isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]'
@@ -156,14 +157,14 @@ const OccurrenceChip = ({
 
       <OccurrenceDialog
         isOpen={isOccurrenceDialogOpen}
-        existingOccurrence={occurrenceToEdit}
         onClose={handleOccurrenceModalClose}
+        existingOccurrence={occurrenceToEdit}
       />
 
       <Drawer
         placement="bottom"
-        isOpen={isDrawerOpen && isInteractable}
         onOpenChange={onDrawerOpenChange}
+        isOpen={isDrawerOpen && isInteractable}
       >
         <DrawerContent>
           <DrawerHeader>{habitName}</DrawerHeader>
@@ -193,14 +194,14 @@ const OccurrenceChip = ({
                         </div>
                         <div className="flex items-center">
                           <Button
+                            size="sm"
                             isIconOnly
                             variant="light"
-                            size="sm"
                             color="secondary"
+                            className="h-6 w-6 min-w-0 rounded-lg"
                             onPress={() => {
                               return handleOccurrenceModalOpen(o);
                             }}
-                            className="h-6 w-6 min-w-0 rounded-lg"
                           >
                             <PencilSimple
                               size={14}
@@ -210,13 +211,13 @@ const OccurrenceChip = ({
                           </Button>
                           <Button
                             isIconOnly
-                            variant="light"
                             color="danger"
+                            variant="light"
+                            role="habit-chip-delete-button"
+                            className="h-6 w-6 min-w-0 rounded-lg"
                             onPress={() => {
                               return handleRemoveOccurrence(o);
                             }}
-                            role="habit-chip-delete-button"
-                            className="h-6 w-6 min-w-0 rounded-lg"
                           >
                             <TrashSimple
                               size={14}
@@ -232,7 +233,7 @@ const OccurrenceChip = ({
             </div>
           </DrawerBody>
           <DrawerFooter>
-            <Button variant="light" color="danger" onPress={closeDrawer}>
+            <Button color="danger" variant="light" onPress={closeDrawer}>
               Close
             </Button>
           </DrawerFooter>
