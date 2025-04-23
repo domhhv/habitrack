@@ -9,40 +9,41 @@ import {
   ModalFooter,
   ModalHeader,
   ModalContent,
+  useDisclosure,
 } from '@heroui/react';
 import { Plus, CloudArrowUp } from '@phosphor-icons/react';
 import React from 'react';
 
-import { AddCustomTraitModal, VisuallyHiddenInput } from '@components';
+import { AddTraitModal, VisuallyHiddenInput } from '@components';
 import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField, useFileField } from '@hooks';
 import { uploadHabitIcon } from '@services';
 import { useTraits, useHabitActions } from '@stores';
 
-const AddHabitDialogButton = () => {
-  const { user } = useUser();
+type AddHabitDialogButtonProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+const AddHabitDialogButton = ({
+  isOpen,
+  onClose,
+}: AddHabitDialogButtonProps) => {
   const traits = useTraits();
+  const { user } = useUser();
   const { addHabit } = useHabitActions();
-  const [open, setOpen] = React.useState(false);
-  const [name, handleNameChange, clearName] = useTextField();
-  const [description, handleDescriptionChange, clearDescription] =
-    useTextField();
-  const [icon, handleIconChange, clearIcon] = useFileField();
+  const [name, handleNameChange] = useTextField();
+  const [description, handleDescriptionChange] = useTextField();
+  const [icon, handleIconChange] = useFileField();
   const [traitId, setTraitId] = React.useState('');
   const [isAdding, setIsAdding] = React.useState(false);
-  const [addTraitModalOpen, setAddTraitModalOpen] = React.useState(false);
-
-  const handleDialogOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setOpen(false);
-    clearName();
-    clearDescription();
-    setTraitId('');
-    clearIcon();
-  };
+  const [isTraitDialogAnimatingClose, setIsTraitDialogAnimatingClose] =
+    React.useState<boolean>(false);
+  const {
+    isOpen: isTraitModalOpen,
+    onClose: closeTraitModal,
+    onOpen: openTraitModal,
+  } = useDisclosure();
 
   const handleAdd = async () => {
     if (!user) {
@@ -61,31 +62,24 @@ const AddHabitDialogButton = () => {
       });
     };
 
-    void handleAsyncAction(add(), 'add_habit', setIsAdding).then(
-      handleDialogClose
-    );
+    void handleAsyncAction(add(), 'add_habit', setIsAdding).then(onClose);
   };
 
   return (
     <>
-      <Button
-        color="primary"
-        variant="solid"
-        isDisabled={!user}
-        onPress={handleDialogOpen}
-        className="w-full lg:w-auto"
-        data-testid="add-habit-button"
-        startContent={<Plus weight="bold" />}
-      >
-        Add habit
-      </Button>
-      <AddCustomTraitModal
-        isOpen={addTraitModalOpen}
-        onClose={() => {
-          return setAddTraitModalOpen(false);
-        }}
-      />
-      <Modal isOpen={open} role="add-habit-dialog" onClose={handleDialogClose}>
+      {(isTraitModalOpen || isTraitDialogAnimatingClose) && (
+        <AddTraitModal
+          isOpen={isTraitModalOpen}
+          onClose={() => {
+            setIsTraitDialogAnimatingClose(true);
+            closeTraitModal();
+            setTimeout(() => {
+              setIsTraitDialogAnimatingClose(false);
+            }, 100);
+          }}
+        />
+      )}
+      <Modal isOpen={isOpen} onClose={onClose} role="add-habit-dialog">
         <ModalContent>
           <ModalHeader>Add New Habit</ModalHeader>
           <ModalBody>
@@ -130,11 +124,9 @@ const AddHabitDialogButton = () => {
               variant="ghost"
               color="secondary"
               startContent={<Plus />}
-              onPress={() => {
-                return setAddTraitModalOpen(true);
-              }}
+              onPress={openTraitModal}
             >
-              Or add a custom trait
+              Or add a new trait
             </Button>
             <Button
               fullWidth
@@ -143,7 +135,7 @@ const AddHabitDialogButton = () => {
               color="secondary"
               startContent={<CloudArrowUp />}
             >
-              Upload Icon
+              Upload habit icon
               <VisuallyHiddenInput onChange={handleIconChange} />
             </Button>
             {icon && <p>{icon.name}</p>}

@@ -16,52 +16,35 @@ import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
 import { useTraitActions } from '@stores';
 import { makeTestOccurrence } from '@tests';
-import { toEventLike } from '@utils';
 
 type AddCustomTraitModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-const AddCustomTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
-  const [label, handleLabelChange, clearTraitLabel] = useTextField();
-  const [slug, handleSlugChange] = useTextField();
-  const [description, handleDescriptionChange, clearDescription] =
-    useTextField();
+const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
+  const [label, handleLabelChange] = useTextField();
+  const [description, handleDescriptionChange] = useTextField();
   const [color, setTraitColor] = React.useState('#94a3b8');
   const [isAdding, setIsAdding] = React.useState(false);
   const { addTrait } = useTraitActions();
   const { user } = useUser();
-
-  React.useEffect(() => {
-    handleSlugChange(toEventLike(label.toLowerCase().replace(/\s/g, '-')));
-  }, [label, handleSlugChange]);
-
-  const handleDialogClose = () => {
-    clearTraitLabel();
-    clearDescription();
-    setTraitColor('#94a3b8');
-    onClose();
-  };
 
   const handleAdd = async () => {
     if (!user) {
       return null;
     }
 
-    setIsAdding(true);
-
     void handleAsyncAction(
       addTrait({
         color,
         description,
         name: label,
-        slug,
         userId: user.id,
       }),
       'add_trait',
       setIsAdding
-    ).then(handleDialogClose);
+    ).then(onClose);
   };
 
   const handleTraitColorChange = (color: string) => {
@@ -69,32 +52,23 @@ const AddCustomTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleDialogClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <ModalContent>
-        <ModalHeader>Add Custom Trait</ModalHeader>
+        <ModalHeader>Add New Trait</ModalHeader>
         <ModalBody className="gap-4">
-          <p>
-            You can define a custom trait for your habits (e g. Moderately Bad)
-          </p>
           <Input
+            label="Name"
             value={label}
             variant="faded"
-            label="Trait Label"
             isDisabled={isAdding}
             onChange={handleLabelChange}
-          />
-          <Input
-            value={slug}
-            variant="faded"
-            label="Trait Slug"
-            isDisabled={isAdding}
-            onChange={handleSlugChange}
+            placeholder="e. g. Moderately Bad"
           />
           <Textarea
             variant="faded"
             value={description}
+            label="Description"
             isDisabled={isAdding}
-            label="Trait Description"
             onChange={handleDescriptionChange}
           />
           <div className="flex gap-2">
@@ -103,8 +77,8 @@ const AddCustomTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
               <Input
                 variant="faded"
                 startContent="#"
+                aria-label='"Color"'
                 value={color.slice(1)}
-                aria-label='"Trait Color"'
                 onChange={(event) => {
                   return handleTraitColorChange(event.target.value);
                 }}
@@ -138,4 +112,4 @@ const AddCustomTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
   );
 };
 
-export default AddCustomTraitModal;
+export default AddTraitModal;

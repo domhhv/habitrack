@@ -10,7 +10,6 @@ const makeTestTrait = () => {
       description: 'Test Description',
       id: id++,
       name: 'Test Trait',
-      slug: 'test-trait',
       updatedAt: new Date().toISOString(),
       userId: null,
       ...override,
