@@ -22,6 +22,7 @@ import { enGB } from 'date-fns/locale';
 import pluralize from 'pluralize';
 import React from 'react';
 
+import type { Habit } from '@models';
 import { getLatestHabitOccurrenceTimestamp } from '@services';
 import { capitalize } from '@utils';
 
@@ -34,7 +35,7 @@ const formatRelativeLocale: Record<string, string> = {
   yesterday: `'yesterday'`,
 };
 
-const HabitLastEntry = ({ id }: { id: number }) => {
+const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
   const [selectedDistanceFormat, setSelectedDistanceFormat] =
     React.useState<Selection>(new Set(['default']));
   const [latestOccurrenceTimestamp, setLatestOccurrenceTimestamp] =

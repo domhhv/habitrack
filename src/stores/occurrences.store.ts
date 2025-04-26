@@ -22,9 +22,12 @@ type OccurrencesState = {
     clearOccurrences: () => void;
     fetchOccurrences: (range: [number, number]) => Promise<void>;
     removeOccurrence: (occurrence: Occurrence) => Promise<void>;
-    updateOccurrence: (id: number, body: OccurrencesUpdate) => Promise<void>;
+    updateOccurrence: (
+      id: Occurrence['id'],
+      body: OccurrencesUpdate
+    ) => Promise<void>;
     updateOccurrenceNoteInState: (
-      occurrenceId: number,
+      occurrenceId: Occurrence['id'],
       note: Pick<Note, 'id' | 'content'>
     ) => void;
   };
@@ -78,7 +81,10 @@ const useOccurrencesStore = create<OccurrencesState>((set) => {
         });
       },
 
-      updateOccurrence: async (id: number, body: OccurrencesUpdate) => {
+      updateOccurrence: async (
+        id: Occurrence['id'],
+        body: OccurrencesUpdate
+      ) => {
         const updatedOccurrence = await patchOccurrence(id, body);
         set((state) => {
           return {
@@ -92,7 +98,7 @@ const useOccurrencesStore = create<OccurrencesState>((set) => {
       },
 
       updateOccurrenceNoteInState: (
-        occurrenceId: number,
+        occurrenceId: Occurrence['id'],
         note: Pick<Note, 'id' | 'content'>
       ) => {
         set((state) => {

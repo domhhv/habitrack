@@ -65,12 +65,12 @@ describe(HabitsPage.name, () => {
         return [
           makeTestHabit({
             description: 'Habit description #1',
-            id: 1,
+            id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
             name: 'Habit name #1',
           }),
           makeTestHabit({
             description: 'Habit description #2',
-            id: 2,
+            id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
             name: 'Habit name #2',
           }),
         ];
@@ -108,20 +108,25 @@ describe(HabitsPage.name, () => {
 
   it('should open edit dialog on edit icon button click', async () => {
     (useTraits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([
-      makeTestTrait(),
+      makeTestTrait({
+        id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
+        name: 'Trait name #1',
+      }),
     ]);
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
         return [
           makeTestHabit({
             description: 'Habit description #1',
-            id: 1,
+            id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
             name: 'Habit name #1',
+            traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
           }),
           makeTestHabit({
-            description: 'Habit description #42',
-            id: 42,
-            name: 'Habit name #42',
+            description: 'Habit description #2',
+            id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
+            name: 'Habit name #2',
+            traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
           }),
         ];
       }
@@ -138,7 +143,7 @@ describe(HabitsPage.name, () => {
     );
     expect(editButtons[1]).toHaveAttribute(
       'aria-label',
-      'Edit habit: Habit name #42'
+      'Edit habit: Habit name #2'
     );
     expect(deleteButtons[0]).toHaveAttribute(
       'aria-label',
@@ -146,11 +151,13 @@ describe(HabitsPage.name, () => {
     );
     expect(deleteButtons[1]).toHaveAttribute(
       'aria-label',
-      'Delete habit: Habit name #42'
+      'Delete habit: Habit name #2'
     );
 
     expect(queryByRole('submit-edited-habit-button')).toBeNull();
-    fireEvent.click(getByTestId('edit-habit-id-42-button'));
+    fireEvent.click(
+      getByTestId('edit-habit-id-4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa-button')
+    );
     expect(getByRole('submit-edited-habit-button')).toBeDefined();
   });
 });

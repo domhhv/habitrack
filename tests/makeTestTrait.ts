@@ -1,20 +1,16 @@
 import type { Trait } from '@models';
 
-const makeTestTrait = () => {
-  let id = 1;
-
-  return (override: Partial<Trait> = {}): Trait => {
-    return {
-      color: 'black',
-      createdAt: new Date().toISOString(),
-      description: 'Test Description',
-      id: id++,
-      name: 'Test Trait',
-      updatedAt: new Date().toISOString(),
-      userId: null,
-      ...override,
-    };
+const makeTestTrait = (override: Partial<Trait> = {}) => {
+  return {
+    color: 'black',
+    createdAt: new Date().toISOString(),
+    description: 'Test Description',
+    id: override.id || crypto.randomUUID(),
+    name: 'Test Trait',
+    updatedAt: new Date().toISOString(),
+    userId: null,
+    ...override,
   };
 };
 
-export default makeTestTrait();
+export default makeTestTrait;

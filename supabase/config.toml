@@ -79,7 +79,7 @@ enabled = true
 file_size_limit = "50MiB"
 
 [storage.image_transformation]
-enabled = true
+enabled = false
 
 # Uncomment to configure local storage buckets
 [storage.buckets.habit_icons]
@@ -125,7 +125,7 @@ enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
-max_frequency = "1s"
+max_frequency = "5s"
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -147,7 +147,7 @@ enable_signup = false
 # If enabled, users need to confirm their phone number before signing in.
 enable_confirmations = false
 # Template for sending OTP to users
-template = "Your code is {{ .Code }} ."
+template = "Your code is {{ .Code }}"
 # Controls the minimum amount of time that must pass before sending another sms otp.
 max_frequency = "5s"
 

@@ -724,7 +724,7 @@ export type Database = {
     }
     Functions: {
       get_longest_streak: {
-        Args: { p_habit_id: number }
+        Args: { p_habit_id: string }
         Returns: Database["public"]["CompositeTypes"]["streak_info"]
       }
     }
@@ -734,16 +734,16 @@ export type Database = {
           created_at?: string
           description?: string | null
           icon_path?: string | null
-          id?: number
+          id?: string
           name: string
-          trait_id: number
+          trait_id: string
           updated_at?: string | null
           user_id: string
         }
         Relationships: [
           {
             columns: ["trait_id"]
-            foreignKeyName: "public_habits_trait_id_fkey"
+            foreignKeyName: "habits_trait_id_fkey"
             isOneToOne: false
             referencedColumns: ["id"]
             referencedRelation: "traits"
@@ -753,9 +753,9 @@ export type Database = {
           created_at: string
           description: string | null
           icon_path: string | null
-          id: number
+          id: string
           name: string
-          trait_id: number
+          trait_id: string
           updated_at: string | null
           user_id: string
         }
@@ -763,9 +763,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           icon_path?: string | null
-          id?: number
+          id?: string
           name?: string
-          trait_id?: number
+          trait_id?: string
           updated_at?: string | null
           user_id?: string
         }
@@ -775,8 +775,8 @@ export type Database = {
           content: string
           created_at?: string
           day?: string | null
-          id?: number
-          occurrence_id?: number | null
+          id?: string
+          occurrence_id?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -793,8 +793,8 @@ export type Database = {
           content: string
           created_at: string
           day: string | null
-          id: number
-          occurrence_id: number | null
+          id: string
+          occurrence_id: string | null
           updated_at: string | null
           user_id: string
         }
@@ -802,8 +802,8 @@ export type Database = {
           content?: string
           created_at?: string
           day?: string | null
-          id?: number
-          occurrence_id?: number | null
+          id?: string
+          occurrence_id?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -811,8 +811,8 @@ export type Database = {
       occurrences: {
         Insert: {
           created_at?: string
-          habit_id: number
-          id?: number
+          habit_id: string
+          id?: string
           photo_paths?: string[] | null
           timestamp: number
           updated_at?: string | null
@@ -821,7 +821,7 @@ export type Database = {
         Relationships: [
           {
             columns: ["habit_id"]
-            foreignKeyName: "public_occurrences_habit_id_fkey"
+            foreignKeyName: "occurrences_habit_id_fkey"
             isOneToOne: false
             referencedColumns: ["id"]
             referencedRelation: "habits"
@@ -829,8 +829,8 @@ export type Database = {
         ]
         Row: {
           created_at: string
-          habit_id: number
-          id: number
+          habit_id: string
+          id: string
           photo_paths: string[] | null
           timestamp: number
           updated_at: string | null
@@ -838,8 +838,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          habit_id?: number
-          id?: number
+          habit_id?: string
+          id?: string
           photo_paths?: string[] | null
           timestamp?: number
           updated_at?: string | null
@@ -852,7 +852,7 @@ export type Database = {
           color: string
           created_at?: string
           description?: string | null
-          id?: number
+          id?: string
           name: string
           updated_at?: string | null
           user_id?: string | null
@@ -861,7 +861,7 @@ export type Database = {
           color: string
           created_at: string
           description: string | null
-          id: number
+          id: string
           name: string
           updated_at: string | null
           user_id: string | null
@@ -870,7 +870,7 @@ export type Database = {
           color?: string
           created_at?: string
           description?: string | null
-          id?: number
+          id?: string
           name?: string
           updated_at?: string | null
           user_id?: string | null

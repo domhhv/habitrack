@@ -51,7 +51,7 @@
     "db:diff:storage": "yarn supabase db diff --schema storage",
     "db:migration:up": "yarn supabase migration up",
     "db:migration:new": "yarn supabase migration new",
-    "db:gen-types": "yarn supabase gen types --lang=typescript --schema public --schema auth --schema storage --local > supabase/database.types.ts"
+    "db:gen-types": "yarn supabase gen types --lang=typescript --schema public --schema auth --schema storage --local > supabase/database.types.ts; yarn eslint:fix supabase/database.types.ts"
   },
   "dependencies": {
     "@heroui/react": "^2.7.6",

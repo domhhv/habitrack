@@ -1,5 +1,6 @@
 import { supabaseClient } from '@helpers';
 import type {
+  Habit,
   Streak,
   Occurrence,
   OccurrencesInsert,
@@ -45,7 +46,7 @@ export const listOccurrences = async (
 };
 
 export const patchOccurrence = async (
-  id: number,
+  id: Occurrence['id'],
   occurrence: OccurrencesUpdate
 ): Promise<Occurrence> => {
   const { data, error } = await supabaseClient
@@ -64,7 +65,7 @@ export const patchOccurrence = async (
   return deepCamelize(data);
 };
 
-export const destroyOccurrence = async (id: number) => {
+export const destroyOccurrence = async (id: Occurrence['id']) => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .delete()
@@ -79,7 +80,9 @@ export const destroyOccurrence = async (id: number) => {
   return deepCamelize(data);
 };
 
-export const getLatestHabitOccurrenceTimestamp = async (habitId: number) => {
+export const getLatestHabitOccurrenceTimestamp = async (
+  habitId: Habit['id']
+) => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .select('timestamp')
@@ -101,7 +104,7 @@ export const getLatestHabitOccurrenceTimestamp = async (habitId: number) => {
 };
 
 export const getLongestHabitStreak = async (
-  habitId: number
+  habitId: Habit['id']
 ): Promise<Streak> => {
   const { data, error } = await supabaseClient.rpc('get_longest_streak', {
     p_habit_id: habitId,
@@ -114,7 +117,7 @@ export const getLongestHabitStreak = async (
   return deepCamelize(data);
 };
 
-export const getHabitTotalEntries = async (habitId: number) => {
+export const getHabitTotalEntries = async (habitId: Habit['id']) => {
   const { count, error } = await supabaseClient
     .from('occurrences')
     .select('*', {

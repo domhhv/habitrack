@@ -8,9 +8,9 @@ type NotesState = {
   actions: {
     addNote: (note: NotesInsert) => Promise<Note>;
     clearNotes: () => void;
-    deleteNote: (id: number) => Promise<void>;
+    deleteNote: (id: Note['id']) => Promise<void>;
     fetchNotes: () => Promise<void>;
-    updateNote: (id: number, note: NotesUpdate) => Promise<Note>;
+    updateNote: (id: Note['id'], note: NotesUpdate) => Promise<Note>;
   };
 };
 
@@ -33,7 +33,7 @@ const useNotesStore = create<NotesState>((set) => {
         set({ notes: [] });
       },
 
-      deleteNote: async (id: number) => {
+      deleteNote: async (id: Note['id']) => {
         await destroyNote(id);
         set((state) => {
           return {
@@ -49,7 +49,7 @@ const useNotesStore = create<NotesState>((set) => {
         set({ notes });
       },
 
-      updateNote: async (id: number, note: NotesUpdate) => {
+      updateNote: async (id: Note['id'], note: NotesUpdate) => {
         const updatedNote = await updateNote(id, note);
 
         set((state) => {
