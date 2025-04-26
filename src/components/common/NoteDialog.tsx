@@ -12,6 +12,7 @@ import React from 'react';
 
 import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
+import { noteTargetIsPeriod } from '@models';
 import { useNotes, useNoteActions } from '@stores';
 import { toEventLike } from '@utils';
 
@@ -30,8 +31,8 @@ const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
   const { addNote, deleteNote, updateNote } = useNoteActions();
 
   const existingNote = React.useMemo(() => {
-    return notes.find((note) => {
-      return note.day === day;
+    return notes.filter(noteTargetIsPeriod).find((note) => {
+      return note.periodDate === day;
     });
   }, [notes, day]);
 
@@ -59,7 +60,8 @@ const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
         void handleAsyncAction(
           addNote({
             content,
-            day,
+            periodDate: day,
+            periodKind: 'day',
             userId: user.id,
           }),
           'add_note',
@@ -69,7 +71,8 @@ const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
         void handleAsyncAction(
           updateNote(existingNote.id, {
             content,
-            day,
+            periodDate: day,
+            periodKind: 'day',
           }),
           'update_note',
           setIsSaving

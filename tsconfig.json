@@ -17,6 +17,7 @@
     "noEmit": true,
     "sourceMap": true,
     "baseUrl": "./src",
+    "noErrorTruncation": true,
     "paths": {
       "@pages": ["pages"],
       "@services": ["services"],

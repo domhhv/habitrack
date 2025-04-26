@@ -1,13 +1,28 @@
-import type { RequireAtLeastOne, CamelCasedPropertiesDeep } from 'type-fest';
+import type {
+  SetRequired,
+  RequireAtLeastOne,
+  CamelCasedPropertiesDeep,
+} from 'type-fest';
 
 import type { Tables, TablesInsert, TablesUpdate } from '@db-types';
 
-type NoteCheck<T extends Partial<Tables<'notes'>>> = RequireAtLeastOne<
-  T,
-  'day' | 'occurrence_id'
+type BaseNote = CamelCasedPropertiesDeep<Tables<'notes'>>;
+
+type NoteOccurrence = Omit<
+  RequireAtLeastOne<BaseNote, 'occurrenceId'>,
+  'periodDate' | 'periodKind'
 >;
 
-export type Note = CamelCasedPropertiesDeep<NoteCheck<Tables<'notes'>>>;
+type NotePeriod = Omit<
+  SetRequired<BaseNote, 'periodDate' | 'periodKind'>,
+  'occurrenceId'
+>;
+
+export type Note = NoteOccurrence | NotePeriod;
+
+type NoteCheck<T extends Partial<Tables<'notes'>>> =
+  | Omit<RequireAtLeastOne<T, 'occurrence_id'>, 'period_date' | 'period_kind'>
+  | Omit<SetRequired<T, 'period_date' | 'period_kind'>, 'occurrence_id'>;
 
 export type NotesInsert = CamelCasedPropertiesDeep<
   NoteCheck<TablesInsert<'notes'>>
@@ -16,3 +31,11 @@ export type NotesInsert = CamelCasedPropertiesDeep<
 export type NotesUpdate = CamelCasedPropertiesDeep<
   NoteCheck<TablesUpdate<'notes'>>
 >;
+
+export const noteTargetIsPeriod = (input: Note): input is NotePeriod => {
+  if ('occurrenceId' in input) {
+    return false;
+  }
+
+  return input.periodKind !== null && input.periodDate !== null;
+};
