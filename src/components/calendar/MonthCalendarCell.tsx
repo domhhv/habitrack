@@ -12,6 +12,7 @@ import React from 'react';
 import { NoteDialog, OccurrenceChip, OccurrenceDialog } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
+import { noteTargetIsPeriod } from '@models';
 import { useNotes } from '@stores';
 import { toSqlDate } from '@utils';
 
@@ -42,8 +43,8 @@ const MonthCalendarCell = ({
   const { isDesktop, isMobile } = useScreenWidth();
   const isTodayCell = isToday(date);
   const formattedDay = format(date, 'yyyy-MM-dd');
-  const hasNote = notes.some((note) => {
-    return note.day === formattedDay;
+  const hasNote = notes.filter(noteTargetIsPeriod).some((note) => {
+    return note.periodDate === formattedDay;
   });
   const {
     isOpen: isNoteDialogOpen,

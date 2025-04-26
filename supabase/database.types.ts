@@ -720,7 +720,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      note_period_kind: "day" | "week" | "month"
     }
     Functions: {
       get_longest_streak: {
@@ -774,9 +774,10 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
-          day?: string | null
           id?: string
           occurrence_id?: string | null
+          period_date?: string | null
+          period_kind?: Database["public"]["Enums"]["note_period_kind"] | null
           updated_at?: string | null
           user_id: string
         }
@@ -792,18 +793,20 @@ export type Database = {
         Row: {
           content: string
           created_at: string
-          day: string | null
           id: string
           occurrence_id: string | null
+          period_date: string | null
+          period_kind: Database["public"]["Enums"]["note_period_kind"] | null
           updated_at: string | null
           user_id: string
         }
         Update: {
           content?: string
           created_at?: string
-          day?: string | null
           id?: string
           occurrence_id?: string | null
+          period_date?: string | null
+          period_kind?: Database["public"]["Enums"]["note_period_kind"] | null
           updated_at?: string | null
           user_id?: string
         }
@@ -1422,7 +1425,9 @@ export const Constants = {
     },
   },
   public: {
-    Enums: {},
+    Enums: {
+      note_period_kind: ["day", "week", "month"],
+    },
   },
   storage: {
     Enums: {},
