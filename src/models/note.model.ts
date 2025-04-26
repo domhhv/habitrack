@@ -13,12 +13,14 @@ type NoteOccurrence = Omit<
   'periodDate' | 'periodKind'
 >;
 
-type NotePeriod = Omit<
+export type NotePeriod = Omit<
   SetRequired<BaseNote, 'periodDate' | 'periodKind'>,
   'occurrenceId'
 >;
 
 export type Note = NoteOccurrence | NotePeriod;
+
+export type NotePeriodKind = Tables<'notes'>['period_kind'];
 
 type NoteCheck<T extends Partial<Tables<'notes'>>> =
   | Omit<RequireAtLeastOne<T, 'occurrence_id'>, 'period_date' | 'period_kind'>
@@ -31,11 +33,3 @@ export type NotesInsert = CamelCasedPropertiesDeep<
 export type NotesUpdate = CamelCasedPropertiesDeep<
   NoteCheck<TablesUpdate<'notes'>>
 >;
-
-export const noteTargetIsPeriod = (input: Note): input is NotePeriod => {
-  if ('occurrenceId' in input && input.occurrenceId !== null) {
-    return false;
-  }
-
-  return 'periodKind' in input && 'periodDate' in input;
-};

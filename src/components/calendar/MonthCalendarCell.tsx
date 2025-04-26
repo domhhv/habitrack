@@ -9,12 +9,11 @@ import { format, isToday } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 
-import { NoteDialog, OccurrenceChip, OccurrenceDialog } from '@components';
+import { OccurrenceChip, OccurrenceDialog } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
-import { noteTargetIsPeriod } from '@models';
 import { useNotes } from '@stores';
-import { toSqlDate } from '@utils';
+import { noteTargetIsPeriod } from '@utils';
 
 export type CellPosition =
   | 'top-left'
@@ -30,11 +29,13 @@ type CalendarCellProps = {
   occurrences: Occurrence[];
   position: CellPosition;
   rangeStatus: CellRangeStatus;
+  onNoteClick: () => void;
 };
 
 const MonthCalendarCell = ({
   date,
   occurrences,
+  onNoteClick,
   position,
   rangeStatus,
 }: CalendarCellProps) => {
@@ -46,11 +47,6 @@ const MonthCalendarCell = ({
   const hasNote = notes.filter(noteTargetIsPeriod).some((note) => {
     return note.periodDate === formattedDay;
   });
-  const {
-    isOpen: isNoteDialogOpen,
-    onClose: closeNoteDialog,
-    onOpen: openNoteDialog,
-  } = useDisclosure();
   const {
     isOpen: isOccurrenceDialogOpen,
     onClose: closeOccurrenceDialog,
@@ -79,12 +75,6 @@ const MonthCalendarCell = ({
 
   return (
     <>
-      <NoteDialog
-        day={toSqlDate(date)}
-        isOpen={isNoteDialogOpen}
-        onClose={closeNoteDialog}
-      />
-
       <OccurrenceDialog
         newOccurrenceDate={date}
         isOpen={isOccurrenceDialogOpen}
@@ -122,7 +112,7 @@ const MonthCalendarCell = ({
                     tabIndex={0}
                     variant="light"
                     isDisabled={!user}
-                    onPress={openNoteDialog}
+                    onPress={onNoteClick}
                     color={hasNote ? 'primary' : 'secondary'}
                     className={cn(
                       'h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6',
