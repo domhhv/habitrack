@@ -10,19 +10,25 @@ import {
 import { format } from 'date-fns';
 import React from 'react';
 
-import { handleAsyncAction } from '@helpers';
+import { getIsoWeek, handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
-import { noteTargetIsPeriod } from '@models';
+import { type NotePeriodKind } from '@models';
 import { useNotes, useNoteActions } from '@stores';
-import { toEventLike } from '@utils';
+import { toEventLike, noteTargetIsPeriod } from '@utils';
 
 type NoteDialogProps = {
-  day: string;
   isOpen: boolean;
+  periodDate: string;
+  periodKind: NotePeriodKind;
   onClose: () => void;
 };
 
-const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
+const NoteDialog = ({
+  isOpen,
+  onClose,
+  periodDate,
+  periodKind,
+}: NoteDialogProps) => {
   const { user } = useUser();
   const [content, handleContentChange, clearContent] = useTextField();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -32,9 +38,9 @@ const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
 
   const existingNote = React.useMemo(() => {
     return notes.filter(noteTargetIsPeriod).find((note) => {
-      return note.periodDate === day;
+      return note.periodDate === periodDate;
     });
-  }, [notes, day]);
+  }, [notes, periodDate]);
 
   React.useEffect(() => {
     if (isOpen && existingNote?.content) {
@@ -60,8 +66,8 @@ const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
         void handleAsyncAction(
           addNote({
             content,
-            periodDate: day,
-            periodKind: 'day',
+            periodDate,
+            periodKind,
             userId: user.id,
           }),
           'add_note',
@@ -71,8 +77,8 @@ const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
         void handleAsyncAction(
           updateNote(existingNote.id, {
             content,
-            periodDate: day,
-            periodKind: 'day',
+            periodDate,
+            periodKind,
           }),
           'update_note',
           setIsSaving
@@ -101,16 +107,19 @@ const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
     clearContent();
   };
 
-  if (!day) {
+  if (!periodDate) {
     return null;
   }
+
+  const period =
+    periodKind === 'day'
+      ? format(periodDate || '', 'iii, LLL d, y')
+      : `Week ${getIsoWeek(new Date(periodDate))} of ${format(periodDate || '', 'yyyy')}`;
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalContent>
-        <ModalHeader>
-          Add a note about {format(day || '', 'iii, LLL d, y')}
-        </ModalHeader>
+        <ModalHeader>Note about {period}</ModalHeader>
         <ModalBody>
           <Textarea
             value={content}
