@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "name": "habitrack-local",
+            "connectString": "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+        }
+    ]
+}

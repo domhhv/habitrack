@@ -17,7 +17,7 @@ type HabitsState = {
     clearHabits: () => void;
     fetchHabits: () => Promise<void>;
     removeHabit: (habit: Habit) => Promise<void>;
-    updateHabit: (id: number, habit: HabitsUpdate) => Promise<void>;
+    updateHabit: (id: Habit['id'], habit: HabitsUpdate) => Promise<void>;
   };
 };
 
@@ -58,7 +58,7 @@ const useHabitsStore = create<HabitsState>((set) => {
         });
       },
 
-      updateHabit: async (id: number, habit: HabitsUpdate) => {
+      updateHabit: async (id: Habit['id'], habit: HabitsUpdate) => {
         const updatedHabit = await patchHabit(id, habit);
 
         set((state) => {

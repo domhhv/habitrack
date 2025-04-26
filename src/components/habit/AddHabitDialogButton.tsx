@@ -57,7 +57,7 @@ const AddHabitDialogButton = ({
         description,
         iconPath,
         name,
-        traitId: +traitId,
+        traitId,
         userId: user.id,
       });
     };

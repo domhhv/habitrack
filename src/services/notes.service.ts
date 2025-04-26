@@ -27,7 +27,7 @@ export const listNotes = async (): Promise<Note[]> => {
 };
 
 export const updateNote = async (
-  id: number,
+  id: Note['id'],
   note: NotesUpdate
 ): Promise<Note> => {
   const { data, error } = await supabaseClient
@@ -43,7 +43,7 @@ export const updateNote = async (
   return deepCamelize(data[0]);
 };
 
-export const destroyNote = async (id: number) => {
+export const destroyNote = async (id: Note['id']) => {
   const { error } = await supabaseClient.from('notes').delete().eq('id', id);
 
   if (error) {

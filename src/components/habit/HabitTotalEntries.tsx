@@ -1,8 +1,9 @@
 import React from 'react';
 
+import type { Habit } from '@models';
 import { getHabitTotalEntries } from '@services';
 
-const HabitTotalEntries = ({ id }: { id: number }) => {
+const HabitTotalEntries = ({ id }: { id: Habit['id'] }) => {
   const [entriesCount, setEntriesCount] = React.useState<number | null>(null);
 
   React.useEffect(() => {

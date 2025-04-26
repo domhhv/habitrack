@@ -33,6 +33,7 @@ vi.mock('@stores', () => {
 
 vi.mock('@hooks', () => {
   return {
+    useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn()]),
     useUser: vi.fn(),
     useScreenWidth: vi.fn().mockReturnValue({
       isDesktop: true,

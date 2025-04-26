@@ -106,7 +106,7 @@ const NoteDialog = ({ day, isOpen, onClose }: NoteDialogProps) => {
     <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalContent>
         <ModalHeader>
-          Add a note about ${format(day || '', 'iii, LLL d, y')}
+          Add a note about {format(day || '', 'iii, LLL d, y')}
         </ModalHeader>
         <ModalBody>
           <Textarea

@@ -68,7 +68,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
       updateHabit(habit.id, {
         description,
         name,
-        traitId: +traitId,
+        traitId,
       }),
       'update_habit',
       setIsUpdating

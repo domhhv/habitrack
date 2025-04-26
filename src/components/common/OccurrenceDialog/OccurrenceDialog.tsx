@@ -109,9 +109,7 @@ const OccurrenceDialog = ({
     }
 
     if (newOccurrenceDate) {
-      setIsSubmitButtonDisabled(
-        !selectedHabitId || Number.isNaN(+selectedHabitId)
-      );
+      setIsSubmitButtonDisabled(!selectedHabitId);
 
       return;
     }
@@ -189,8 +187,7 @@ const OccurrenceDialog = ({
       !user ||
       !(newOccurrenceDate || existingOccurrence) ||
       !hasHabits ||
-      !selectedHabitId ||
-      Number.isNaN(+selectedHabitId)
+      !selectedHabitId
     ) {
       return null;
     }
@@ -220,7 +217,7 @@ const OccurrenceDialog = ({
           : [];
 
         await updateOccurrence(existingOccurrence.id, {
-          habitId: +selectedHabitId,
+          habitId: selectedHabitId,
           photoPaths: (existingOccurrence.photoPaths || []).concat(photoPaths),
           timestamp: +occurrenceDateTime,
           userId: user?.id as string,
@@ -271,7 +268,7 @@ const OccurrenceDialog = ({
 
     const addPromises = Array.from({ length: repeat || 1 }).map(async () => {
       const newOccurrence = await addOccurrence({
-        habitId: +selectedHabitId,
+        habitId: selectedHabitId,
         photoPaths,
         timestamp: +occurrenceDateTime,
         userId: user?.id as string,

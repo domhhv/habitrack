@@ -69,7 +69,7 @@ const MonthCalendarHeader = ({
     const filteredHabits = Array.from(filters.habitIds)
       .map((habitId) => {
         return habits.find((habit) => {
-          return habit.id === Number(habitId);
+          return habit.id === habitId;
         });
       })
       .filter(isTruthy);
@@ -219,7 +219,7 @@ const MonthCalendarHeader = ({
                 <CrossPlatformHorizontalScroll className="flex space-x-2">
                   {selectedHabits.map(({ key }) => {
                     const habit = habits.find((h) => {
-                      return h.id === Number(key);
+                      return h.id === key;
                     });
 
                     if (!habit) {
@@ -286,7 +286,7 @@ const MonthCalendarHeader = ({
                 <CrossPlatformHorizontalScroll className="space-x-2">
                   {selectedTraits.map(({ key }) => {
                     const trait = traits.find((t) => {
-                      return t.id === Number(key);
+                      return t.id === key;
                     });
 
                     if (!trait) {

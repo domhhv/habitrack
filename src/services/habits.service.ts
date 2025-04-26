@@ -36,7 +36,7 @@ export const listHabits = async () => {
 };
 
 export const patchHabit = async (
-  id: number,
+  id: Habit['id'],
   habit: HabitsUpdate
 ): Promise<Habit> => {
   const { data, error } = await supabaseClient
@@ -53,7 +53,7 @@ export const patchHabit = async (
   return deepCamelize(data);
 };
 
-export const destroyHabit = async (id: number): Promise<Habit> => {
+export const destroyHabit = async (id: Habit['id']): Promise<Habit> => {
   const { data, error } = await supabaseClient
     .from('habits')
     .delete()
