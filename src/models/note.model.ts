@@ -33,9 +33,9 @@ export type NotesUpdate = CamelCasedPropertiesDeep<
 >;
 
 export const noteTargetIsPeriod = (input: Note): input is NotePeriod => {
-  if ('occurrenceId' in input) {
+  if ('occurrenceId' in input && input.occurrenceId !== null) {
     return false;
   }
 
-  return input.periodKind !== null && input.periodDate !== null;
+  return 'periodKind' in input && 'periodDate' in input;
 };
