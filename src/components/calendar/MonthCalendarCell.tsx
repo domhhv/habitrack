@@ -1,4 +1,4 @@
-import { cn, Button, Tooltip, useDisclosure } from '@heroui/react';
+import { cn, Button, Tooltip } from '@heroui/react';
 import {
   Note,
   NoteBlank,
@@ -9,7 +9,7 @@ import { format, isToday } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 
-import { OccurrenceChip, OccurrenceDialog } from '@components';
+import { OccurrenceChip } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { useNotes } from '@stores';
