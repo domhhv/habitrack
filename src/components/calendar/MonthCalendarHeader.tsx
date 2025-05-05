@@ -22,7 +22,7 @@ import { MONTHS } from '@const';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Habit, Trait, OccurrenceFilters } from '@models';
 import { useTraits, useHabits } from '@stores';
-import { isTruthy, getHabitIconUrl } from '@utils';
+import { getHabitIconUrl } from '@utils';
 
 export type MonthCalendarHeaderProps = {
   activeMonthLabel: string;
