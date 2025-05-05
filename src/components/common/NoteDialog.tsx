@@ -38,9 +38,9 @@ const NoteDialog = ({
 
   const existingNote = React.useMemo(() => {
     return notes.filter(noteTargetIsPeriod).find((note) => {
-      return note.periodDate === periodDate;
+      return note.periodDate === periodDate && note.periodKind === periodKind;
     });
-  }, [notes, periodDate]);
+  }, [notes, periodDate, periodKind]);
 
   React.useEffect(() => {
     if (isOpen && existingNote?.content) {
