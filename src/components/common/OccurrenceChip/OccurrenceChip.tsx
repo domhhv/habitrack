@@ -133,7 +133,7 @@ const OccurrenceChip = ({
 
   if (
     occurrences.some((o) => {
-      return o.photoPaths;
+      return o.photoPaths?.length;
     })
   ) {
     chip = (

@@ -1,4 +1,4 @@
-import { cn, Button, Tooltip, useDisclosure } from '@heroui/react';
+import { cn, Button, Tooltip } from '@heroui/react';
 import {
   Note,
   NoteBlank,
@@ -9,7 +9,7 @@ import { format, isToday } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 
-import { OccurrenceChip, OccurrenceDialog } from '@components';
+import { OccurrenceChip } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { useNotes } from '@stores';
@@ -29,12 +29,14 @@ type CalendarCellProps = {
   occurrences: Occurrence[];
   position: CellPosition;
   rangeStatus: CellRangeStatus;
+  onNewOccurrenceClick: () => void;
   onNoteClick: () => void;
 };
 
 const MonthCalendarCell = ({
   date,
   occurrences,
+  onNewOccurrenceClick,
   onNoteClick,
   position,
   rangeStatus,
@@ -47,11 +49,6 @@ const MonthCalendarCell = ({
   const hasNote = notes.filter(noteTargetIsPeriod).some((note) => {
     return note.periodDate === formattedDay;
   });
-  const {
-    isOpen: isOccurrenceDialogOpen,
-    onClose: closeOccurrenceDialog,
-    onOpen: openOccurrenceDialog,
-  } = useDisclosure();
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => {
     return o.habitId;
@@ -75,16 +72,10 @@ const MonthCalendarCell = ({
 
   return (
     <>
-      <OccurrenceDialog
-        newOccurrenceDate={date}
-        isOpen={isOccurrenceDialogOpen}
-        onClose={closeOccurrenceDialog}
-      />
-
       <div className={cellRootClassName}>
         <div
           className={cellHeaderClassName}
-          onClick={isMobile ? openOccurrenceDialog : undefined}
+          onClick={isMobile ? onNewOccurrenceClick : undefined}
         >
           <p className="font-bold">{date.getDate()}</p>
           <div className="flex items-center justify-between gap-2">
@@ -97,7 +88,7 @@ const MonthCalendarCell = ({
                     variant="light"
                     color="secondary"
                     isDisabled={!user}
-                    onPress={openOccurrenceDialog}
+                    onPress={onNewOccurrenceClick}
                     className="h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6"
                   >
                     <CalendarPlus weight="bold" size={isDesktop ? 18 : 14} />

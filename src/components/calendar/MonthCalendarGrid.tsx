@@ -8,7 +8,7 @@ import { useLocale, useCalendarGrid } from 'react-aria';
 import { Link } from 'react-router';
 import { type CalendarState } from 'react-stately';
 
-import { NoteDialog } from '@components';
+import { NoteDialog, OccurrenceDialog } from '@components';
 import { getIsoWeek } from '@helpers';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence, NotePeriodKind } from '@models';
@@ -42,10 +42,18 @@ const MonthCalendarGrid = ({
   const notes = useNotes();
   const [noteDate, setNoteDate] = React.useState<Date | null>(null);
   const [notePeriod, setNotePeriod] = React.useState<NotePeriodKind>(null);
+  const [newOccurrenceDate, setNewOccurrenceDate] = React.useState<Date | null>(
+    null
+  );
   const {
     isOpen: isNoteDialogOpen,
     onClose: closeNoteDialog,
     onOpen: openNoteDialog,
+  } = useDisclosure();
+  const {
+    isOpen: isOccurrenceDialogOpen,
+    onClose: closeOccurrenceDialog,
+    onOpen: openOccurrenceDialog,
   } = useDisclosure();
 
   const handleNoteDialogOpen = (date: Date, period: NotePeriodKind) => {
@@ -91,6 +99,14 @@ const MonthCalendarGrid = ({
           );
         })}
       </div>
+
+      {newOccurrenceDate && (
+        <OccurrenceDialog
+          isOpen={isOccurrenceDialogOpen}
+          onClose={closeOccurrenceDialog}
+          newOccurrenceDate={newOccurrenceDate}
+        />
+      )}
 
       {noteDate && (
         <NoteDialog
@@ -219,6 +235,10 @@ const MonthCalendarGrid = ({
                           rangeStatus={rangeStatus}
                           onNoteClick={() => {
                             handleNoteDialogOpen(date, 'day');
+                          }}
+                          onNewOccurrenceClick={() => {
+                            setNewOccurrenceDate(date);
+                            openOccurrenceDialog();
                           }}
                           occurrences={occurrences.filter((occurrence) => {
                             return (
