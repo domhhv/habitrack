@@ -66,18 +66,10 @@ const MonthCalendarHeader = ({
   const shouldRenderFilters = !!user && habits.length > 0 && traits.length > 0;
 
   const habitsByTraitName = React.useMemo(() => {
-    const filteredHabits = Array.from(filters.habitIds)
-      .map((habitId) => {
-        return habits.find((habit) => {
-          return habit.id === habitId;
-        });
-      })
-      .filter(isTruthy);
-
-    return Object.groupBy(filteredHabits, (habit) => {
+    return Object.groupBy(habits, (habit) => {
       return habit.trait?.name || 'Unknown';
     });
-  }, [habits, filters.habitIds]);
+  }, [habits]);
 
   const handleMonthChange: React.ChangeEventHandler<HTMLSelectElement> = (
     event
