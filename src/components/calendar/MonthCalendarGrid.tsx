@@ -1,7 +1,13 @@
 import { cn, Button, Tooltip, useDisclosure } from '@heroui/react';
 import { getWeeksInMonth, type CalendarDate } from '@internationalized/date';
 import { NotePencil, Note as NoteIcon } from '@phosphor-icons/react';
-import { endOfDay, addMonths, startOfDay, isSameMonth } from 'date-fns';
+import {
+  endOfDay,
+  addMonths,
+  startOfDay,
+  getISOWeek,
+  isSameMonth,
+} from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useLocale, useCalendarGrid } from 'react-aria';
@@ -9,7 +15,6 @@ import { Link } from 'react-router';
 import { type CalendarState } from 'react-stately';
 
 import { NoteDialog, OccurrenceDialog } from '@components';
-import { getIsoWeek } from '@helpers';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence, NotePeriodKind } from '@models';
 import { useNotes } from '@stores';
@@ -155,7 +160,7 @@ const MonthCalendarGrid = ({
                         weekIndex === 0 && 'top-0.5'
                       )}
                     >
-                      {getIsoWeek(new Date(year, month - 1, day))}
+                      {getISOWeek(new Date(year, month - 1, day))}
                     </Button>
                   </Tooltip>
                   <Tooltip

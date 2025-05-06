@@ -46,6 +46,7 @@ const MonthCalendar = () => {
   const { locale } = useLocale();
   const calendarState = useCalendarState({
     createCalendar,
+    firstDayOfWeek: 'mon',
     isReadOnly: true,
     locale,
   });
