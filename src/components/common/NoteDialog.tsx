@@ -7,10 +7,10 @@ import {
   ModalHeader,
   ModalContent,
 } from '@heroui/react';
-import { format } from 'date-fns';
+import { format, getISOWeek } from 'date-fns';
 import React from 'react';
 
-import { getIsoWeek, handleAsyncAction } from '@helpers';
+import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
 import { type NotePeriodKind } from '@models';
 import { useNotes, useNoteActions } from '@stores';
@@ -114,7 +114,7 @@ const NoteDialog = ({
   const period =
     periodKind === 'day'
       ? format(periodDate || '', 'iii, LLL d, y')
-      : `Week ${getIsoWeek(new Date(periodDate))} of ${format(periodDate || '', 'yyyy')}`;
+      : `Week ${getISOWeek(new Date(periodDate))} of ${format(periodDate || '', 'yyyy')}`;
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
