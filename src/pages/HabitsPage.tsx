@@ -172,7 +172,7 @@ const HabitsPage = () => {
                 key={habit.id}
                 aria-labelledby={`habit-name-${habit.id}`}
               >
-                <TableCell>
+                <TableCell className="w-10">
                   <HabitIcon habit={habit} />
                 </TableCell>
                 <TableCell>
