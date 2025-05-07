@@ -1,5 +1,4 @@
 import { addToast } from '@heroui/react';
-import type { SearchOptions } from '@supabase/storage-js';
 import imageCompression from 'browser-image-compression';
 import pluralize from 'pluralize';
 
@@ -11,17 +10,27 @@ import {
   isRejected,
   isFulfilled,
   isFailedUpload,
+  getErrorMessage,
   isSuccessfulUpload,
 } from '@utils';
 
-export const listFiles = async (
-  bucket: StorageBuckets,
-  path: string,
-  options: SearchOptions = { limit: 100, offset: 0 }
+export const createSignedUrls = async (
+  filePaths: string[],
+  expiresIn = 60 * 5
 ) => {
   const { data, error } = await supabaseClient.storage
-    .from(bucket)
-    .list(path, options);
+    .from(StorageBuckets.OCCURRENCE_PHOTOS)
+    .createSignedUrls(filePaths, expiresIn);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
+export const listFiles = async (bucket: StorageBuckets, path: string) => {
+  const { data, error } = await supabaseClient.storage.from(bucket).list(path);
 
   if (error) {
     throw new Error(error.message);
@@ -33,15 +42,11 @@ export const listFiles = async (
 export const uploadFile = async (
   bucket: StorageBuckets,
   path: string,
-  file: File,
-  cacheControl?: string
+  file: File
 ) => {
   const { data, error } = await supabaseClient.storage
     .from(bucket)
-    .upload(path, file, {
-      cacheControl,
-      upsert: true,
-    });
+    .upload(path, file);
 
   if (error) {
     throw new Error(error.message);
@@ -58,21 +63,6 @@ export const deleteFile = async (bucket: StorageBuckets, path: string) => {
   }
 
   return true;
-};
-
-export const createSignedUrls = async (
-  filePaths: string[],
-  expiresIn = 60 * 5
-) => {
-  const { data, error } = await supabaseClient.storage
-    .from(StorageBuckets.OCCURRENCE_PHOTOS)
-    .createSignedUrls(filePaths, expiresIn);
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data;
 };
 
 export async function uploadImage(
@@ -98,17 +88,17 @@ export async function uploadImage(
     useWebWorker: true,
   });
 
-  const filePath = `${userId}/${folder ? `${folder}/` : ''}${Date.now()}_${compressedFile.name}`;
+  try {
+    const path = await uploadFile(
+      StorageBuckets.OCCURRENCE_PHOTOS,
+      `${userId}/${folder ? `${folder}/` : ''}${Date.now()}-${compressedFile.name}`,
+      compressedFile
+    );
 
-  const { data: uploadData, error: uploadError } = await supabaseClient.storage
-    .from(bucket)
-    .upload(filePath, compressedFile);
-
-  if (uploadError) {
-    return { error: uploadError.message, status: 'error' };
+    return { path, status: 'success' };
+  } catch (error) {
+    return { error: getErrorMessage(error), status: 'error' };
   }
-
-  return { path: uploadData.path, status: 'success' };
 }
 
 export const uploadImages = async (

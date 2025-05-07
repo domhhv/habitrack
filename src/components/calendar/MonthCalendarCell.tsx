@@ -7,7 +7,6 @@ import {
 } from '@phosphor-icons/react';
 import { format, isToday } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import React from 'react';
 
 import { OccurrenceChip } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
@@ -47,7 +46,7 @@ const MonthCalendarCell = ({
   const isTodayCell = isToday(date);
   const formattedDay = format(date, 'yyyy-MM-dd');
   const hasNote = notes.filter(noteTargetIsPeriod).some((note) => {
-    return note.periodDate === formattedDay;
+    return note.periodDate === formattedDay && note.periodKind === 'day';
   });
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => {

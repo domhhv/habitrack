@@ -50,7 +50,7 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
         variant="light"
         isDisabled={!user?.id}
         isLoading={isUploading}
-        className="mr-1 flex h-12 w-12 cursor-pointer p-1 opacity-100"
+        className="flex h-12 w-12 cursor-pointer p-1 opacity-100"
       >
         <img
           src={iconUrl}
