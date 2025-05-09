@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS "public"."habits" (
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone,
     "user_id" "uuid" NOT NULL,
-    "name" "text" NOT NULL,
+    "name" "text" NOT NULL CHECK ("name" <> ''), -- noqa: CV10
     "description" "text",
     "icon_path" "text",
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,

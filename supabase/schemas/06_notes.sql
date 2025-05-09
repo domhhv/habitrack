@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS "public"."notes" (
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone,
     "user_id" "uuid" NOT NULL,
-    "content" "text" NOT NULL,
+    "content" "text" NOT NULL CHECK ("content" <> ''), -- noqa: CV10
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "occurrence_id" "uuid",
     "period_kind" "public"."note_period_kind",
