@@ -13,7 +13,6 @@ export default {
     const cwd = process.cwd();
 
     const normalizedDockerPaths = filenames.map((filename) => {
-      // Get relative path and normalize to forward slashes for Docker
       return path.relative(cwd, filename).replace(/\\/g, '/');
     });
 
