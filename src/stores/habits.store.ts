@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 
 import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
 import { StorageBuckets } from '@models';
@@ -21,57 +22,63 @@ type HabitsState = {
   };
 };
 
-const useHabitsStore = create<HabitsState>((set) => {
-  return {
-    habits: [],
+const useHabitsStore = create<HabitsState>()(
+  immer((set) => {
+    return {
+      habits: [],
 
-    actions: {
-      addHabit: async (habit: HabitsInsert) => {
-        const newHabit = await createHabit(habit);
-        set((state) => {
-          return { habits: [...state.habits, newHabit] };
-        });
+      actions: {
+        addHabit: async (habit: HabitsInsert) => {
+          const newHabit = await createHabit(habit);
+          set((state) => {
+            state.habits.push(newHabit);
+          });
+        },
+
+        clearHabits: () => {
+          set({ habits: [] });
+        },
+
+        fetchHabits: async () => {
+          const habits = await listHabits();
+          set({ habits });
+        },
+
+        removeHabit: async ({ iconPath, id }: Habit) => {
+          await destroyHabit(id);
+
+          if (iconPath) {
+            await deleteFile(StorageBuckets.HABIT_ICONS, iconPath);
+          }
+
+          set((state) => {
+            const index = state.habits.findIndex((h) => {
+              return h.id === id;
+            });
+
+            if (index !== -1) {
+              state.habits.splice(index, 1);
+            }
+          });
+        },
+
+        updateHabit: async (id: Habit['id'], habit: HabitsUpdate) => {
+          const updatedHabit = await patchHabit(id, habit);
+
+          set((state) => {
+            const index = state.habits.findIndex((h) => {
+              return h.id === id;
+            });
+
+            if (index !== -1) {
+              state.habits[index] = updatedHabit;
+            }
+          });
+        },
       },
-
-      clearHabits: () => {
-        set({ habits: [] });
-      },
-
-      fetchHabits: async () => {
-        const habits = await listHabits();
-        set({ habits });
-      },
-
-      removeHabit: async ({ iconPath, id }: Habit) => {
-        await destroyHabit(id);
-
-        if (iconPath) {
-          await deleteFile(StorageBuckets.HABIT_ICONS, iconPath);
-        }
-
-        set((state) => {
-          return {
-            habits: state.habits.filter((habit) => {
-              return habit.id !== id;
-            }),
-          };
-        });
-      },
-
-      updateHabit: async (id: Habit['id'], habit: HabitsUpdate) => {
-        const updatedHabit = await patchHabit(id, habit);
-
-        set((state) => {
-          return {
-            habits: state.habits.map((h) => {
-              return h.id === id ? updatedHabit : h;
-            }),
-          };
-        });
-      },
-    },
-  };
-});
+    };
+  })
+);
 
 export const useHabits = () => {
   return useHabitsStore((state) => {
