@@ -96,9 +96,7 @@ const NoteDialog = ({
       deleteNote(existingNote.id),
       'remove_note',
       setIsRemoving
-    ).then(() => {
-      handleClose();
-    });
+    ).then(handleClose);
   };
 
   const handleClose = () => {

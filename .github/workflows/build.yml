@@ -1,0 +1,25 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - run: yarn install
+
+      - run: yarn build
+
+      - name: Upload webpack stats artifact
+        uses: relative-ci/agent-upload-artifact-action@v2
+        with:
+          webpackStatsFile: ./dist/webpack-stats.json

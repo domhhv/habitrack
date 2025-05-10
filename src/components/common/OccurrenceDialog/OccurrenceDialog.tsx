@@ -80,8 +80,6 @@ const OccurrenceDialog = ({
       setSelectedHabitId(existingOccurrence.habitId.toString());
       handleNoteChange(toEventLike(existingOccurrence.notes[0]?.content || ''));
       setTime(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         parseAbsoluteToLocal(
           new Date(existingOccurrence.timestamp).toISOString()
         )
@@ -97,8 +95,6 @@ const OccurrenceDialog = ({
       occurrenceDateTime.setMonth(newOccurrenceDate.getMonth());
       occurrenceDateTime.setDate(newOccurrenceDate.getDate());
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
     }
   }, [newOccurrenceDate, existingOccurrence, isOpen, handleNoteChange]);
@@ -129,7 +125,9 @@ const OccurrenceDialog = ({
         hasTimeChanged ||
         uploadedFiles.length > 0;
 
-      setIsSubmitButtonDisabled(isSaving || !hasOccurrenceChanged);
+      setIsSubmitButtonDisabled(
+        isSaving || !selectedHabitId || !hasOccurrenceChanged
+      );
 
       return;
     }
@@ -207,7 +205,7 @@ const OccurrenceDialog = ({
 
     if (existingOccurrence) {
       const updatePromise = async () => {
-        const photoPaths = uploadedFiles.length
+        const uploadedPhotoPaths = uploadedFiles.length
           ? await uploadImages(
               StorageBuckets.OCCURRENCE_PHOTOS,
               user.id,
@@ -216,9 +214,13 @@ const OccurrenceDialog = ({
             )
           : [];
 
+        const photoPaths = (existingOccurrence.photoPaths || []).concat(
+          uploadedPhotoPaths
+        );
+
         await updateOccurrence(existingOccurrence.id, {
           habitId: selectedHabitId,
-          photoPaths: (existingOccurrence.photoPaths || []).concat(photoPaths),
+          photoPaths: photoPaths.length ? photoPaths : null,
           timestamp: +occurrenceDateTime,
           userId: user?.id as string,
         });
