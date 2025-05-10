@@ -3,6 +3,7 @@ import { resolve } from 'path';
 
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
+import webpackStatsPlugin from 'rollup-plugin-webpack-stats';
 import { loadEnv, defineConfig, type UserConfig } from 'vite';
 
 export default defineConfig(({ mode }) => {
@@ -15,6 +16,9 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
+          assetFileNames: 'assets/[name].[hash][extname]',
+          chunkFileNames: 'assets/[name].[hash].js',
+          entryFileNames: 'assets/[name].[hash].js',
           manualChunks(id) {
             if (id.includes('@supabase')) {
               return 'supabase';
@@ -55,10 +59,14 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
-      isProduction &&
-        visualizer({
-          filename: 'dist/stats.html',
-        }),
+      ...(isProduction
+        ? [
+            webpackStatsPlugin(),
+            visualizer({
+              filename: 'dist/stats.html',
+            }),
+          ]
+        : []),
     ],
     resolve: {
       alias: {
