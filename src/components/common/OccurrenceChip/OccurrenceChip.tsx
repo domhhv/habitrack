@@ -155,11 +155,13 @@ const OccurrenceChip = ({
     <>
       {chip}
 
-      <OccurrenceDialog
-        isOpen={isOccurrenceDialogOpen}
-        onClose={handleOccurrenceModalClose}
-        existingOccurrence={occurrenceToEdit}
-      />
+      {occurrenceToEdit && (
+        <OccurrenceDialog
+          isOpen={isOccurrenceDialogOpen}
+          onClose={handleOccurrenceModalClose}
+          existingOccurrence={occurrenceToEdit}
+        />
+      )}
 
       <Drawer
         placement="bottom"

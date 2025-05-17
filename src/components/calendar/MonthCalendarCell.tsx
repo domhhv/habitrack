@@ -7,12 +7,12 @@ import {
 } from '@phosphor-icons/react';
 import { format, isToday } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
 
 import { OccurrenceChip } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
-import { useNotes } from '@stores';
-import { noteTargetIsPeriod } from '@utils';
+import { useDayNotes } from '@stores';
 
 export type CellPosition =
   | 'top-left'
@@ -40,16 +40,16 @@ const MonthCalendarCell = ({
   position,
   rangeStatus,
 }: CalendarCellProps) => {
-  const notes = useNotes();
+  const dayNotes = useDayNotes();
   const { user } = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
   const isTodayCell = isToday(date);
   const formattedDay = format(date, 'yyyy-MM-dd');
-  const hasNote = Object.values(notes)
-    .filter(noteTargetIsPeriod)
-    .some((note) => {
-      return note.periodDate === formattedDay && note.periodKind === 'day';
+  const hasNote = React.useMemo(() => {
+    return dayNotes.some((note) => {
+      return note.periodDate === formattedDay;
     });
+  }, [dayNotes, formattedDay]);
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => {
     return o.habitId;

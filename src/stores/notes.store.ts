@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 
 import type { Note, NotesInsert, NotesUpdate } from '@models';
 import { listNotes, createNote, updateNote, destroyNote } from '@services';
-import { toHashMap } from '@utils';
+import { toHashMap, noteTargetIsPeriod } from '@utils';
 
 type NotesState = {
   notes: Record<Note['id'], Note>;
@@ -72,6 +73,30 @@ export const useNotes = () => {
   return useNotesStore((state) => {
     return state.notes;
   });
+};
+
+export const useWeekNotes = () => {
+  return useNotesStore(
+    useShallow((state) => {
+      return Object.values(state.notes)
+        .filter(noteTargetIsPeriod)
+        .filter((note) => {
+          return note.periodKind === 'week';
+        });
+    })
+  );
+};
+
+export const useDayNotes = () => {
+  return useNotesStore(
+    useShallow((state) => {
+      return Object.values(state.notes)
+        .filter(noteTargetIsPeriod)
+        .filter((note) => {
+          return note.periodKind === 'day';
+        });
+    })
+  );
 };
 
 export const useNoteActions = () => {
