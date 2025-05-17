@@ -155,11 +155,13 @@ const OccurrenceChip = ({
     <>
       {chip}
 
-      <OccurrenceDialog
-        isOpen={isOccurrenceDialogOpen}
-        onClose={handleOccurrenceModalClose}
-        existingOccurrence={occurrenceToEdit}
-      />
+      {occurrenceToEdit && (
+        <OccurrenceDialog
+          isOpen={isOccurrenceDialogOpen}
+          onClose={handleOccurrenceModalClose}
+          existingOccurrence={occurrenceToEdit}
+        />
+      )}
 
       <Drawer
         placement="bottom"
@@ -182,7 +184,7 @@ const OccurrenceChip = ({
                         key={o.id}
                         className="mb-2 flex items-start justify-between gap-4 border-b border-neutral-500 py-2"
                       >
-                        <div className="max-w-48">
+                        <div className="max-w-48 whitespace-pre-wrap">
                           <span className="font-semibold">
                             {format(new Date(o.timestamp), 'p')}
                           </span>
