@@ -63,7 +63,7 @@ const MonthCalendarHeader = ({
   const today = startOfToday();
 
   const shouldRenderFilters =
-    !!user && Object.keys(habits).length > 0 && traits.length > 0;
+    !!user && Object.keys(habits).length > 0 && Object.keys(traits).length > 0;
 
   const habitsByTraitName = React.useMemo(() => {
     return Object.groupBy(Object.values(habits), (habit) => {
@@ -280,15 +280,11 @@ const MonthCalendarHeader = ({
               return (
                 <CrossPlatformHorizontalScroll className="space-x-2">
                   {selectedTraits.map(({ key }) => {
-                    const trait = traits.find((t) => {
-                      return t.id === key;
-                    });
-
-                    if (!trait) {
+                    if (typeof key !== 'string' || !traits[key]) {
                       return null;
                     }
 
-                    const { color, id, name } = trait;
+                    const { color, id, name } = traits[key];
 
                     return <TraitChip key={id} trait={{ color, name }} />;
                   })}
@@ -297,7 +293,7 @@ const MonthCalendarHeader = ({
             }}
           >
             <SelectSection title="Filter by traits">
-              {traits.map((trait) => {
+              {Object.values(traits).map((trait) => {
                 return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
               })}
             </SelectSection>

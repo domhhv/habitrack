@@ -24,7 +24,7 @@ vi.mock('@services', () => {
 vi.mock('@stores', () => {
   return {
     useHabits: vi.fn(),
-    useTraits: vi.fn().mockReturnValue([]),
+    useTraits: vi.fn().mockReturnValue({}),
     useHabitActions: vi.fn().mockReturnValue({
       removeHabit: vi.fn(),
       updateHabit: vi.fn(),
@@ -107,12 +107,12 @@ describe(HabitsPage.name, () => {
   });
 
   it('should open edit dialog on edit icon button click', async () => {
-    (useTraits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([
-      makeTestTrait({
+    (useTraits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac': makeTestTrait({
         id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
         name: 'Trait name #1',
       }),
-    ]);
+    });
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
         return {
