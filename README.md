@@ -1,6 +1,7 @@
 <h1 align="center">Habitrack</h1>
 
 <div align="center">
+
 <a href="https://react.dev/" target="_blank" title="React"><img src="https://i.ibb.co/dwS2knBp/atom.png" alt="React" width="32" height="32" /></a>
 &nbsp;
 <a href="https://www.typescriptlang.org/" target="_blank" title="TypeScript"><img src="https://i.ibb.co/Kq8DY4f/typescript.png" alt="TypeScript" width="32" height="32"></a>
@@ -11,7 +12,7 @@
 &nbsp;
 <a href="https://www.heroui.com/" target="_blank" title="HeroUI"><img src="https://i.ibb.co/xYjF5K6/nextui.png" alt="HeroUI" width="32" height="32"></a>
 &nbsp;
-<a href="https://supabase.com/" target="_blank" title="Supabase"><img src="https://i.ibb.co/WnJ9m8k/supabase-logo-icon.png" alt="Supabase" width="32" height="32"></a>
+<a href="https://supabase.com/" target="_blank" title="Supabase"><img src="https://i.ibb.co/s9hK6ZSn/supabase-logo-icon.png" alt="Supabase" width="32" height="32"></a>
 &nbsp;
 <a href="https://vitest.dev/" target="_blank" title="Vitest"><img src="https://i.ibb.co/99zTCxvx/vitest.png" alt="Vitest" width="32" height="32"></a>
 &nbsp;
