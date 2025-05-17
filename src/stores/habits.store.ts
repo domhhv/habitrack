@@ -36,20 +36,21 @@ const useHabitsStore = create<HabitsState>()(
         },
 
         clearHabits: () => {
-          set({ habits: {} });
+          set((state) => {
+            state.habits = {};
+          });
         },
 
         fetchHabits: async () => {
           const habits = await listHabits();
 
-          const habitsMap = habits.reduce((acc, habit) => {
-            return {
-              ...acc,
-              [habit.id]: habit,
-            };
-          }, {});
-
-          set({ habits: habitsMap });
+          set({
+            habits: Object.fromEntries(
+              habits.map((habit) => {
+                return [habit.id, habit];
+              })
+            ),
+          });
         },
 
         removeHabit: async ({ iconPath, id }: Habit) => {
