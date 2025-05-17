@@ -5,9 +5,8 @@ import { VisuallyHiddenInput } from '@components';
 import { handleAsyncAction } from '@helpers';
 import { useUser } from '@hooks';
 import { type Habit, StorageBuckets } from '@models';
-import { deleteFile, uploadHabitIcon } from '@services';
+import { deleteFile, getPublicUrl, uploadHabitIcon } from '@services';
 import { useHabitActions } from '@stores';
-import { getHabitIconUrl } from '@utils';
 
 type HabitIconCellProps = {
   habit: Habit;
@@ -17,7 +16,6 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
   const { updateHabit } = useHabitActions();
   const { user } = useUser();
   const [isUploading, setIsUploading] = React.useState(false);
-  const iconUrl = getHabitIconUrl(habit.iconPath);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async ({
     target: { files },
@@ -53,10 +51,10 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
         className="flex h-12 w-12 cursor-pointer p-1 opacity-100"
       >
         <img
-          src={iconUrl}
           alt={habit.name}
           role="habit-icon"
           className="h-8 w-8"
+          src={getPublicUrl(StorageBuckets.HABIT_ICONS, habit.iconPath)}
         />
         <VisuallyHiddenInput onChange={handleFileChange} />
       </Button>
