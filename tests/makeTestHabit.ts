@@ -9,7 +9,7 @@ const makeTestHabit = (override: Partial<Habit> = {}) => {
     name: 'Test Habit',
     traitId: crypto.randomUUID(),
     updatedAt: new Date().toISOString(),
-    userId: crypto.randomUUID,
+    userId: crypto.randomUUID(),
     trait: {
       color: '#000000',
       name: 'Test Trait Name',
