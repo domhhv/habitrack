@@ -138,7 +138,7 @@ const OccurrenceDialog = ({
     selectedHabitId,
     time,
     isSaving,
-    habits.length,
+    habits,
   ]);
 
   React.useEffect(() => {

@@ -16,9 +16,10 @@
 <a href="https://vitest.dev/" target="_blank" title="Vitest"><img src="https://i.ibb.co/99zTCxvx/vitest.png" alt="Vitest" width="32" height="32"></a>
 &nbsp;
 <a href="https://testing-library.com/" target="_blank" title="React Testing Library"><img src="https://i.ibb.co/YLnX0VY/octopus-64x64.png" alt="React Testing Library" width="32" height="32"></a>
-</div>
 
-<br />
+[![RelativeCI](https://badges.relative-ci.com/badges/ZMp2Jc2sGq2jCm6ArH0A?branch=main&style=flat)](https://app.relative-ci.com/projects/ZMp2Jc2sGq2jCm6ArH0A)
+
+</div>
 
 Habitrack is a simple and intuitive web app designed for logging habits and visualizing them on a calendar view.
 
