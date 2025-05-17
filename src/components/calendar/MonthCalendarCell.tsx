@@ -45,9 +45,11 @@ const MonthCalendarCell = ({
   const { isDesktop, isMobile } = useScreenWidth();
   const isTodayCell = isToday(date);
   const formattedDay = format(date, 'yyyy-MM-dd');
-  const hasNote = notes.filter(noteTargetIsPeriod).some((note) => {
-    return note.periodDate === formattedDay && note.periodKind === 'day';
-  });
+  const hasNote = Object.values(notes)
+    .filter(noteTargetIsPeriod)
+    .some((note) => {
+      return note.periodDate === formattedDay && note.periodKind === 'day';
+    });
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => {
     return o.habitId;

@@ -37,9 +37,11 @@ const NoteDialog = ({
   const { addNote, deleteNote, updateNote } = useNoteActions();
 
   const existingNote = React.useMemo(() => {
-    return notes.filter(noteTargetIsPeriod).find((note) => {
-      return note.periodDate === periodDate && note.periodKind === periodKind;
-    });
+    return Object.values(notes)
+      .filter(noteTargetIsPeriod)
+      .find((note) => {
+        return note.periodDate === periodDate && note.periodKind === periodKind;
+      });
   }, [notes, periodDate, periodKind]);
 
   React.useEffect(() => {

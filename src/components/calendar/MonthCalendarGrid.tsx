@@ -136,12 +136,14 @@ const MonthCalendarGrid = ({
               .getDatesInWeek(weekIndex)
               .filter(isTruthy);
 
-            const weekNote = notes.filter(noteTargetIsPeriod).find((note) => {
-              return (
-                note.periodKind === 'week' &&
-                note.periodDate === toSqlDate(new Date(year, month - 1, day))
-              );
-            });
+            const weekNote = Object.values(notes)
+              .filter(noteTargetIsPeriod)
+              .find((note) => {
+                return (
+                  note.periodKind === 'week' &&
+                  note.periodDate === toSqlDate(new Date(year, month - 1, day))
+                );
+              });
 
             return (
               <div

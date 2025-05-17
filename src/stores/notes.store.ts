@@ -1,10 +1,12 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 
 import type { Note, NotesInsert, NotesUpdate } from '@models';
 import { listNotes, createNote, updateNote, destroyNote } from '@services';
+import { toHashMap } from '@utils';
 
 type NotesState = {
-  notes: Note[];
+  notes: Record<Note['id'], Note>;
   actions: {
     addNote: (note: NotesInsert) => Promise<Note>;
     clearNotes: () => void;
@@ -14,57 +16,57 @@ type NotesState = {
   };
 };
 
-const useNotesStore = create<NotesState>((set) => {
-  return {
-    notes: [],
+const useNotesStore = create<NotesState>()(
+  immer((set) => {
+    return {
+      notes: {},
 
-    actions: {
-      addNote: async (note: NotesInsert) => {
-        const newNote = await createNote(note);
+      actions: {
+        addNote: async (note: NotesInsert) => {
+          const newNote = await createNote(note);
 
-        set((state) => {
-          return { notes: [...state.notes, newNote] };
-        });
+          set((state) => {
+            state.notes[newNote.id] = newNote;
+          });
 
-        return newNote;
+          return newNote;
+        },
+
+        clearNotes: () => {
+          set((state) => {
+            state.notes = {};
+          });
+        },
+
+        deleteNote: async (id: Note['id']) => {
+          await destroyNote(id);
+
+          set((state) => {
+            delete state.notes[id];
+          });
+        },
+
+        fetchNotes: async () => {
+          const notes = await listNotes();
+
+          set((state) => {
+            state.notes = toHashMap(notes);
+          });
+        },
+
+        updateNote: async (id: Note['id'], note: NotesUpdate) => {
+          const updatedNote = await updateNote(id, note);
+
+          set((state) => {
+            state.notes[id] = updatedNote;
+          });
+
+          return updatedNote;
+        },
       },
-
-      clearNotes: () => {
-        set({ notes: [] });
-      },
-
-      deleteNote: async (id: Note['id']) => {
-        await destroyNote(id);
-        set((state) => {
-          return {
-            notes: state.notes.filter((note) => {
-              return note.id !== id;
-            }),
-          };
-        });
-      },
-
-      fetchNotes: async () => {
-        const notes = await listNotes();
-        set({ notes });
-      },
-
-      updateNote: async (id: Note['id'], note: NotesUpdate) => {
-        const updatedNote = await updateNote(id, note);
-
-        set((state) => {
-          return {
-            notes: state.notes.map((n) => {
-              return n.id === updatedNote.id ? updatedNote : n;
-            }),
-          };
-        });
-
-        return updatedNote;
-      },
-    },
-  };
-});
+    };
+  })
+);
 
 export const useNotes = () => {
   return useNotesStore((state) => {
