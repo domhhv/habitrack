@@ -1,5 +1,4 @@
 import { addToast } from '@heroui/react';
-import nlp from 'compromise';
 
 import { capitalize, getErrorMessage } from '@utils';
 
@@ -28,7 +27,7 @@ const parseActionType = (
 const getMessages = (actionType: ActionType) => {
   const { noun, verb } = parseActionType(actionType);
 
-  const pastTense = nlp(verb).verbs().toPastTense().text();
+  const pastTense = verb.endsWith('e') ? `${verb}d` : `${verb}ed`;
 
   return {
     error: `Something went wrong while ${verb}ing your ${noun}`,

@@ -24,11 +24,15 @@ export default defineConfig(({ mode }) => {
               return 'supabase';
             }
 
+            if (id.includes('@phosphor-icons')) {
+              return 'phosphor-icons';
+            }
+
             if (id.includes('heroui')) {
               return 'heroui';
             }
 
-            if (id.includes('framer-motion')) {
+            if (id.includes('motion')) {
               return 'framer-motion';
             }
 
