@@ -53,8 +53,8 @@ const MonthCalendar = () => {
   const { calendarProps, title } = useCalendar({}, calendarState);
   const params = useParams();
 
-  React.useEffect(() => {
-    setFilters({
+  const derivedFilters = React.useMemo(() => {
+    return {
       habitIds: new Set(
         Object.values(habits).map((habit) => {
           return habit.id.toString();
@@ -65,8 +65,12 @@ const MonthCalendar = () => {
           return trait.id.toString();
         })
       ),
-    });
+    };
   }, [habits, traits]);
+
+  React.useEffect(() => {
+    setFilters(derivedFilters);
+  }, [derivedFilters]);
 
   React.useEffect(() => {
     if (!user) {
