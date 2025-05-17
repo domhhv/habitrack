@@ -4,7 +4,6 @@ import { it, vi, expect, describe } from 'vitest';
 
 import { useScreenWidth } from '@hooks';
 import { makeTestOccurrence } from '@tests';
-import { getHabitIconUrl } from '@utils';
 
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
 
@@ -37,6 +36,14 @@ vi.mock('@hooks', async (importOriginal) => {
   };
 });
 
+vi.mock('@services', () => {
+  return {
+    getPublicUrl: vi
+      .fn()
+      .mockReturnValue('https://i.ibb.co/vvgw7bx/habitrack-logo.png'),
+  };
+});
+
 describe(OccurrenceChip.name, () => {
   const props: OccurrenceChipProps = {
     occurrences: [makeTestOccurrence()],
@@ -49,7 +56,7 @@ describe(OccurrenceChip.name, () => {
     await waitFor(() => {
       expect(img).toHaveAttribute(
         'src',
-        getHabitIconUrl('https://i.ibb.co/vvgw7bx/habitrack-logo.png')
+        'https://i.ibb.co/vvgw7bx/habitrack-logo.png'
       );
     });
   });

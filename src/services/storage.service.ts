@@ -14,6 +14,14 @@ import {
   isSuccessfulUpload,
 } from '@utils';
 
+export const getPublicUrl = (bucket: StorageBuckets, path?: string | null) => {
+  const { data } = supabaseClient.storage
+    .from(bucket)
+    .getPublicUrl(path || 'default.png');
+
+  return data.publicUrl;
+};
+
 export const createSignedUrls = async (
   filePaths: string[],
   expiresIn = 60 * 5

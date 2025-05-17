@@ -5,9 +5,9 @@ const makeTestTrait = (override: Partial<Trait> = {}) => {
     color: 'black',
     createdAt: new Date().toISOString(),
     description: 'Test Description',
-    id: override.id || crypto.randomUUID(),
+    id: crypto.randomUUID(),
     name: 'Test Trait',
-    updatedAt: new Date().toISOString(),
+    updatedAt: null,
     userId: null,
     ...override,
   };

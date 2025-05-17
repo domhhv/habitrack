@@ -12,6 +12,7 @@ vi.mock('@services', () => {
     getHabitTotalEntries: vi.fn().mockResolvedValue(0),
     getLatestHabitOccurrenceTimestamp: vi.fn().mockResolvedValue(0),
     getLongestHabitStreak: vi.fn().mockResolvedValue(0),
+    getPublicUrl: vi.fn(),
     listHabits: vi.fn().mockReturnValue(() => {
       return [];
     }),
@@ -120,11 +121,13 @@ describe(HabitsPage.name, () => {
             description: 'Habit description #1',
             id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
             name: 'Habit name #1',
+            traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
           }),
           '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab': makeTestHabit({
             description: 'Habit description #2',
             id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
             name: 'Habit name #2',
+            traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
           }),
         };
       }
