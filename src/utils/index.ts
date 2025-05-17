@@ -2,7 +2,6 @@ export { default as capitalize } from './capitalize';
 export { default as deepCamelize } from './deep-camelize';
 export { default as deepSnakify } from './deep-snakify';
 export { default as getErrorMessage } from './get-error-message';
-export { default as getHabitIconUrl } from './get-habit-icon-url';
 export { default as getMonthIndex } from './get-month-index';
 export { default as isFailedUpload } from './is-failed-upload';
 export { default as isFulfilled } from './is-fulfilled';

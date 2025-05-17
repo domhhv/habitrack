@@ -20,6 +20,14 @@ Object.defineProperty(window, 'DataTransfer', {
   },
 });
 
+vi.mock('@services', () => {
+  return {
+    getPublicUrl: vi
+      .fn()
+      .mockReturnValue('https://i.ibb.co/vvgw7bx/habitrack-logo.png'),
+  };
+});
+
 vi.mock('@stores', () => {
   return {
     useHabits: vi.fn(),

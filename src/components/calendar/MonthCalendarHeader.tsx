@@ -1,8 +1,8 @@
 import type { SelectedItems } from '@heroui/react';
 import {
   cn,
-  Select,
   Button,
+  Select,
   Tooltip,
   SelectItem,
   SelectSection,
@@ -12,7 +12,7 @@ import {
   ArrowFatRight,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
-import { addMonths, startOfToday, startOfMonth } from 'date-fns';
+import { addMonths, startOfMonth, startOfToday } from 'date-fns';
 import React from 'react';
 import { Link, useParams, useNavigate } from 'react-router';
 
@@ -20,8 +20,9 @@ import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
 import { MONTHS } from '@const';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Habit, Trait, OccurrenceFilters } from '@models';
-import { useTraits, useHabits } from '@stores';
-import { getHabitIconUrl } from '@utils';
+import { StorageBuckets } from '@models';
+import { getPublicUrl } from '@services';
+import { useHabits, useTraits } from '@stores';
 
 export type MonthCalendarHeaderProps = {
   activeMonthLabel: string;
@@ -218,14 +219,16 @@ const MonthCalendarHeader = ({
                     }
 
                     const { iconPath, id, name } = habits[key];
-                    const iconUrl = getHabitIconUrl(iconPath);
 
                     return (
                       <Tooltip key={id} content={name}>
                         <img
-                          src={iconUrl}
                           className="h-4 w-4"
                           alt={`${name} icon`}
+                          src={getPublicUrl(
+                            StorageBuckets.HABIT_ICONS,
+                            iconPath
+                          )}
                         />
                       </Tooltip>
                     );
@@ -246,16 +249,17 @@ const MonthCalendarHeader = ({
                   }}
                 >
                   {habits!.map((habit) => {
-                    const iconUrl = getHabitIconUrl(habit.iconPath);
-
                     return (
                       <SelectItem key={habit.id} textValue={habit.name}>
                         <div className="flex items-center gap-2">
                           <img
-                            src={iconUrl}
                             alt={habit.name}
                             role="habit-icon"
                             className="h-4 w-4"
+                            src={getPublicUrl(
+                              StorageBuckets.HABIT_ICONS,
+                              habit.iconPath
+                            )}
                           />
                           <span>{habit.name}</span>
                         </div>

@@ -18,8 +18,9 @@ import { OccurrenceDialog } from '@components';
 import { handleAsyncAction } from '@helpers';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
+import { StorageBuckets } from '@models';
+import { getPublicUrl } from '@services';
 import { useOccurrenceActions } from '@stores';
-import { getHabitIconUrl } from '@utils';
 
 export type OccurrenceChipProps = {
   colorOverride?: string;
@@ -49,7 +50,6 @@ const OccurrenceChip = ({
   const { habit } = occurrence;
   const { iconPath, name: habitName, trait } = habit || {};
   const { color: traitColor } = trait || {};
-  const iconUrl = getHabitIconUrl(iconPath);
   const { screenWidth } = useScreenWidth();
   const { removeOccurrence } = useOccurrenceActions();
 
@@ -88,8 +88,8 @@ const OccurrenceChip = ({
         )}
       >
         <img
-          src={iconUrl}
           alt={`${habitName} icon`}
+          src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
           className={cn('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
         />
       </div>

@@ -24,9 +24,9 @@ import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
-import { uploadImages } from '@services';
+import { getPublicUrl, uploadImages } from '@services';
 import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
-import { toEventLike, getHabitIconUrl } from '@utils';
+import { toEventLike } from '@utils';
 
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 
@@ -376,16 +376,17 @@ const OccurrenceDialog = ({
                   }}
                 >
                   {habits!.map((habit) => {
-                    const iconUrl = getHabitIconUrl(habit.iconPath);
-
                     return (
                       <SelectItem key={habit.id} textValue={habit.name}>
                         <div className="flex items-center gap-2">
                           <img
-                            src={iconUrl}
                             alt={habit.name}
                             role="habit-icon"
                             className="h-4 w-4"
+                            src={getPublicUrl(
+                              StorageBuckets.HABIT_ICONS,
+                              habit.iconPath
+                            )}
                           />
                           <span>{habit.name}</span>
                         </div>
