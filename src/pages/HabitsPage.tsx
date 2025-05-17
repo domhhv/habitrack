@@ -166,7 +166,7 @@ const HabitsPage = () => {
           }}
         </TableHeader>
         <TableBody aria-label="Habits data" emptyContent="No habits yet">
-          {habits.map((habit) => {
+          {Object.values(habits).map((habit) => {
             return (
               <TableRow
                 key={habit.id}
@@ -273,7 +273,7 @@ const HabitsPage = () => {
         </TableBody>
       </Table>
       <EditHabitDialog habit={habitToEdit} onClose={handleEditEnd} />
-      <div className="m-auto my-4 flex w-full justify-end px-4 lg:px-16 lg:py-4">
+      <div className="m-auto my-4 flex w-full justify-end px-8 lg:px-16 lg:py-4">
         <Button
           color="primary"
           variant="solid"

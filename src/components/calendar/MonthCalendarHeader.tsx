@@ -5,7 +5,6 @@ import {
   Button,
   Tooltip,
   SelectItem,
-  ListboxItem,
   SelectSection,
 } from '@heroui/react';
 import {
@@ -63,10 +62,11 @@ const MonthCalendarHeader = ({
   const nextMonth = startOfMonth(addMonths(focusedDate, 1));
   const today = startOfToday();
 
-  const shouldRenderFilters = !!user && habits.length > 0 && traits.length > 0;
+  const shouldRenderFilters =
+    !!user && Object.keys(habits).length > 0 && traits.length > 0;
 
   const habitsByTraitName = React.useMemo(() => {
-    return Object.groupBy(habits, (habit) => {
+    return Object.groupBy(Object.values(habits), (habit) => {
       return habit.trait?.name || 'Unknown';
     });
   }, [habits]);
@@ -203,6 +203,9 @@ const MonthCalendarHeader = ({
             selectedKeys={filters.habitIds}
             className="w-full md:w-[200px]"
             onChange={handleHabitsFilterChange}
+            scrollShadowProps={{
+              visibility: 'bottom',
+            }}
             popoverProps={{
               crossOffset: isMobile ? -75 : 0,
             }}
@@ -210,15 +213,11 @@ const MonthCalendarHeader = ({
               return (
                 <CrossPlatformHorizontalScroll className="flex space-x-2">
                   {selectedHabits.map(({ key }) => {
-                    const habit = habits.find((h) => {
-                      return h.id === key;
-                    });
-
-                    if (!habit) {
+                    if (typeof key !== 'string' || !habits[key]) {
                       return null;
                     }
 
-                    const { iconPath, id, name } = habit;
+                    const { iconPath, id, name } = habits[key];
                     const iconUrl = getHabitIconUrl(iconPath);
 
                     return (
@@ -235,30 +234,34 @@ const MonthCalendarHeader = ({
               );
             }}
           >
-            {Object.keys(habitsByTraitName).map((traitName) => {
+            {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
               return (
-                <SelectSection showDivider key={traitName} title={traitName}>
-                  {habitsByTraitName[traitName] ? (
-                    habitsByTraitName[traitName].map((habit) => {
-                      const iconUrl = getHabitIconUrl(habit.iconPath);
+                <SelectSection
+                  showDivider
+                  key={traitName}
+                  title={traitName}
+                  classNames={{
+                    heading:
+                      'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
+                  }}
+                >
+                  {habits!.map((habit) => {
+                    const iconUrl = getHabitIconUrl(habit.iconPath);
 
-                      return (
-                        <SelectItem key={habit.id} textValue={habit.name}>
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={iconUrl}
-                              alt={habit.name}
-                              role="habit-icon"
-                              className="h-4 w-4"
-                            />
-                            <span>{habit.name}</span>
-                          </div>
-                        </SelectItem>
-                      );
-                    })
-                  ) : (
-                    <ListboxItem key="none">No habits</ListboxItem>
-                  )}
+                    return (
+                      <SelectItem key={habit.id} textValue={habit.name}>
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={iconUrl}
+                            alt={habit.name}
+                            role="habit-icon"
+                            className="h-4 w-4"
+                          />
+                          <span>{habit.name}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectSection>
               );
             })}
