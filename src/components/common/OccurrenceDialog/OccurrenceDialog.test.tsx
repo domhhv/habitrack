@@ -68,7 +68,7 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('should render', () => {
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({});
     (useNoteActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
     });
@@ -83,7 +83,7 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('if no habits are available, should show a message', () => {
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({});
     (useNoteActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
     });
@@ -100,9 +100,10 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('should render habit options', () => {
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([
-      makeTestHabit(),
-    ]);
+    const habitId = crypto.randomUUID();
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      [habitId]: makeTestHabit({ id: habitId }),
+    });
     (useNoteActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
     });
@@ -113,7 +114,7 @@ describe(OccurrenceDialog.name, () => {
   });
 
   it('on close, should call onClose', () => {
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({});
     (useNoteActions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       addNote: vi.fn(),
     });

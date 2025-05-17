@@ -62,18 +62,18 @@ describe(HabitsPage.name, () => {
   it('should display habits', async () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
-        return [
-          makeTestHabit({
+        return {
+          '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa': makeTestHabit({
             description: 'Habit description #1',
             id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
             name: 'Habit name #1',
           }),
-          makeTestHabit({
+          '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab': makeTestHabit({
             description: 'Habit description #2',
             id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
             name: 'Habit name #2',
           }),
-        ];
+        };
       }
     );
     const { getAllByRole, getByText } = render(<HabitsPage />);
@@ -115,20 +115,18 @@ describe(HabitsPage.name, () => {
     ]);
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
-        return [
-          makeTestHabit({
+        return {
+          '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa': makeTestHabit({
             description: 'Habit description #1',
             id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
             name: 'Habit name #1',
-            traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
           }),
-          makeTestHabit({
+          '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab': makeTestHabit({
             description: 'Habit description #2',
             id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
             name: 'Habit name #2',
-            traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
           }),
-        ];
+        };
       }
     );
     const { getAllByRole, getByRole, getByTestId, queryByRole } = render(

@@ -7,7 +7,6 @@ import {
   ModalBody,
   TimeInput,
   SelectItem,
-  ListboxItem,
   ModalFooter,
   ModalHeader,
   NumberInput,
@@ -64,12 +63,12 @@ const OccurrenceDialog = ({
   const { isDesktop, isMobile } = useScreenWidth();
 
   const habitsByTraitName = React.useMemo(() => {
-    return Object.groupBy(habits, (habit) => {
+    return Object.groupBy(Object.values(habits), (habit) => {
       return habit.trait?.name || 'Unknown';
     });
   }, [habits]);
 
-  const hasHabits = habits.length > 0;
+  const hasHabits = Object.keys(habits).length > 0;
 
   React.useEffect(() => {
     if (!newOccurrenceDate && !existingOccurrence) {
@@ -100,7 +99,7 @@ const OccurrenceDialog = ({
   }, [newOccurrenceDate, existingOccurrence, isOpen, handleNoteChange]);
 
   React.useEffect(() => {
-    if (!habits.length) {
+    if (!Object.keys(habits).length) {
       return;
     }
 
@@ -356,36 +355,43 @@ const OccurrenceDialog = ({
             selectorIcon={<ArrowsClockwise />}
             onChange={handleHabitSelectionChange}
             description="Select from your habits"
+            scrollShadowProps={{
+              visibility: 'bottom',
+            }}
             label={
               hasHabits
                 ? 'Habits'
                 : 'No habits yet. Create a habit to get started.'
             }
           >
-            {Object.keys(habitsByTraitName).map((traitName) => {
+            {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
               return (
-                <SelectSection showDivider key={traitName} title={traitName}>
-                  {habitsByTraitName[traitName] ? (
-                    habitsByTraitName[traitName].map((habit) => {
-                      const iconUrl = getHabitIconUrl(habit.iconPath);
+                <SelectSection
+                  showDivider
+                  key={traitName}
+                  title={traitName}
+                  classNames={{
+                    heading:
+                      'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
+                  }}
+                >
+                  {habits!.map((habit) => {
+                    const iconUrl = getHabitIconUrl(habit.iconPath);
 
-                      return (
-                        <SelectItem key={habit.id} textValue={habit.name}>
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={iconUrl}
-                              alt={habit.name}
-                              role="habit-icon"
-                              className="h-4 w-4"
-                            />
-                            <span>{habit.name}</span>
-                          </div>
-                        </SelectItem>
-                      );
-                    })
-                  ) : (
-                    <ListboxItem key="none">No habits</ListboxItem>
-                  )}
+                    return (
+                      <SelectItem key={habit.id} textValue={habit.name}>
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={iconUrl}
+                            alt={habit.name}
+                            role="habit-icon"
+                            className="h-4 w-4"
+                          />
+                          <span>{habit.name}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectSection>
               );
             })}

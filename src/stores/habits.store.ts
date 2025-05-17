@@ -12,7 +12,7 @@ import {
 } from '@services';
 
 type HabitsState = {
-  habits: Habit[];
+  habits: Record<Habit['id'], Habit>;
   actions: {
     addHabit: (habit: HabitsInsert) => Promise<void>;
     clearHabits: () => void;
@@ -25,23 +25,31 @@ type HabitsState = {
 const useHabitsStore = create<HabitsState>()(
   immer((set) => {
     return {
-      habits: [],
+      habits: {},
 
       actions: {
         addHabit: async (habit: HabitsInsert) => {
           const newHabit = await createHabit(habit);
           set((state) => {
-            state.habits.push(newHabit);
+            state.habits[newHabit.id] = newHabit;
           });
         },
 
         clearHabits: () => {
-          set({ habits: [] });
+          set({ habits: {} });
         },
 
         fetchHabits: async () => {
           const habits = await listHabits();
-          set({ habits });
+
+          const habitsMap = habits.reduce((acc, habit) => {
+            return {
+              ...acc,
+              [habit.id]: habit,
+            };
+          }, {});
+
+          set({ habits: habitsMap });
         },
 
         removeHabit: async ({ iconPath, id }: Habit) => {
@@ -52,13 +60,7 @@ const useHabitsStore = create<HabitsState>()(
           }
 
           set((state) => {
-            const index = state.habits.findIndex((h) => {
-              return h.id === id;
-            });
-
-            if (index !== -1) {
-              state.habits.splice(index, 1);
-            }
+            delete state.habits[id];
           });
         },
 
@@ -66,13 +68,7 @@ const useHabitsStore = create<HabitsState>()(
           const updatedHabit = await patchHabit(id, habit);
 
           set((state) => {
-            const index = state.habits.findIndex((h) => {
-              return h.id === id;
-            });
-
-            if (index !== -1) {
-              state.habits[index] = updatedHabit;
-            }
+            state.habits[id] = updatedHabit;
           });
         },
       },

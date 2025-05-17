@@ -56,7 +56,7 @@ const MonthCalendar = () => {
   React.useEffect(() => {
     setFilters({
       habitIds: new Set(
-        habits.map((habit) => {
+        Object.values(habits).map((habit) => {
           return habit.id.toString();
         })
       ),
