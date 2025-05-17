@@ -1,10 +1,12 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 
 import type { Trait, TraitsInsert } from '@models';
 import { listTraits, createTrait } from '@services';
+import { toHashMap } from '@utils';
 
 type TraitsState = {
-  traits: Trait[];
+  traits: Record<Trait['id'], Trait>;
   actions: {
     addTrait: (trait: TraitsInsert) => Promise<void>;
     clearTraits: () => void;
@@ -12,29 +14,37 @@ type TraitsState = {
   };
 };
 
-const useTraitsStore = create<TraitsState>((set) => {
-  return {
-    traits: [],
+const useTraitsStore = create<TraitsState>()(
+  immer((set) => {
+    return {
+      traits: {},
 
-    actions: {
-      addTrait: async (trait: TraitsInsert) => {
-        const newTrait = await createTrait(trait);
-        set((state) => {
-          return { traits: [...state.traits, newTrait] };
-        });
-      },
+      actions: {
+        addTrait: async (trait: TraitsInsert) => {
+          const newTrait = await createTrait(trait);
 
-      clearTraits: () => {
-        set({ traits: [] });
-      },
+          set((state) => {
+            state.traits[newTrait.id] = newTrait;
+          });
+        },
 
-      fetchTraits: async () => {
-        const traits = await listTraits();
-        set({ traits });
+        clearTraits: () => {
+          set((state) => {
+            state.traits = {};
+          });
+        },
+
+        fetchTraits: async () => {
+          const traits = await listTraits();
+
+          set((state) => {
+            state.traits = toHashMap(traits);
+          });
+        },
       },
-    },
-  };
-});
+    };
+  })
+);
 
 export const useTraits = () => {
   return useTraitsStore((state) => {

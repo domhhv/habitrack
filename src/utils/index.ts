@@ -11,4 +11,5 @@ export { default as isSuccessfulUpload } from './is-successful-upload';
 export { default as isTruthy } from './is-truthy';
 export { default as noteTargetIsPeriod } from './note-target-is-period';
 export { default as toEventLike } from './to-event-like';
+export { default as toHashMap } from './to-hash-map';
 export { default as toSqlDate } from './to-sql-date';

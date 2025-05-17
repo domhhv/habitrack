@@ -108,7 +108,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             selectedKeys={[traitId]}
             data-testid="habit-select"
           >
-            {traits.map((trait) => {
+            {Object.values(traits).map((trait) => {
               return (
                 <SelectItem
                   textValue={trait.name}

@@ -10,6 +10,7 @@ import {
   createHabit,
   destroyHabit,
 } from '@services';
+import { toHashMap } from '@utils';
 
 type HabitsState = {
   habits: Record<Habit['id'], Habit>;
@@ -30,6 +31,7 @@ const useHabitsStore = create<HabitsState>()(
       actions: {
         addHabit: async (habit: HabitsInsert) => {
           const newHabit = await createHabit(habit);
+
           set((state) => {
             state.habits[newHabit.id] = newHabit;
           });
@@ -44,12 +46,8 @@ const useHabitsStore = create<HabitsState>()(
         fetchHabits: async () => {
           const habits = await listHabits();
 
-          set({
-            habits: Object.fromEntries(
-              habits.map((habit) => {
-                return [habit.id, habit];
-              })
-            ),
+          set((state) => {
+            state.habits = toHashMap(habits);
           });
         },
 

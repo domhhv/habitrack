@@ -61,7 +61,7 @@ const MonthCalendar = () => {
         })
       ),
       traitIds: new Set(
-        traits.map((trait) => {
+        Object.values(traits).map((trait) => {
           return trait.id.toString();
         })
       ),
