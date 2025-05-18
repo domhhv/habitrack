@@ -13,8 +13,8 @@ import React from 'react';
 import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
 import { type NotePeriodKind } from '@models';
-import { useNotes, useNoteActions } from '@stores';
-import { toEventLike, noteTargetIsPeriod } from '@utils';
+import { useNoteActions, usePeriodNotes } from '@stores';
+import { toEventLike } from '@utils';
 
 type NoteDialogProps = {
   isOpen: boolean;
@@ -30,25 +30,24 @@ const NoteDialog = ({
   periodKind,
 }: NoteDialogProps) => {
   const { user } = useUser();
+  const [hasEdited, setHasEdited] = React.useState(false);
   const [content, handleContentChange, clearContent] = useTextField();
   const [isSaving, setIsSaving] = React.useState(false);
   const [isRemoving, setIsRemoving] = React.useState(false);
-  const notes = useNotes();
+  const notes = usePeriodNotes();
   const { addNote, deleteNote, updateNote } = useNoteActions();
 
   const existingNote = React.useMemo(() => {
-    return Object.values(notes)
-      .filter(noteTargetIsPeriod)
-      .find((note) => {
-        return note.periodDate === periodDate && note.periodKind === periodKind;
-      });
+    return notes.find((note) => {
+      return note.periodKind === periodKind && note.periodDate === periodDate;
+    });
   }, [notes, periodDate, periodKind]);
 
   React.useEffect(() => {
-    if (isOpen && existingNote?.content) {
+    if (isOpen && existingNote?.content && !hasEdited) {
       handleContentChange(toEventLike(existingNote.content));
     }
-  }, [existingNote, handleContentChange, isOpen]);
+  }, [existingNote, handleContentChange, isOpen, hasEdited]);
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -103,6 +102,7 @@ const NoteDialog = ({
 
   const handleClose = () => {
     setIsSaving(false);
+    setHasEdited(false);
     onClose();
     clearContent();
   };
@@ -125,10 +125,13 @@ const NoteDialog = ({
             value={content}
             variant="faded"
             placeholder="Note"
-            onChange={handleContentChange}
             disabled={isSaving || isRemoving}
             onKeyDown={() => {
               return null;
+            }}
+            onChange={(event) => {
+              setHasEdited(true);
+              handleContentChange(event);
             }}
           />
         </ModalBody>

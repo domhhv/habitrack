@@ -70,33 +70,27 @@ const useNotesStore = create<NotesState>()(
 );
 
 export const useNotes = () => {
-  return useNotesStore((state) => {
-    return state.notes;
-  });
+  return useNotesStore(
+    useShallow((state) => {
+      return Object.values(state.notes);
+    })
+  );
+};
+
+export const usePeriodNotes = () => {
+  return useNotes().filter(noteTargetIsPeriod);
 };
 
 export const useWeekNotes = () => {
-  return useNotesStore(
-    useShallow((state) => {
-      return Object.values(state.notes)
-        .filter(noteTargetIsPeriod)
-        .filter((note) => {
-          return note.periodKind === 'week';
-        });
-    })
-  );
+  return usePeriodNotes().filter((note) => {
+    return note.periodKind === 'week';
+  });
 };
 
 export const useDayNotes = () => {
-  return useNotesStore(
-    useShallow((state) => {
-      return Object.values(state.notes)
-        .filter(noteTargetIsPeriod)
-        .filter((note) => {
-          return note.periodKind === 'day';
-        });
-    })
-  );
+  return usePeriodNotes().filter((note) => {
+    return note.periodKind === 'day';
+  });
 };
 
 export const useNoteActions = () => {

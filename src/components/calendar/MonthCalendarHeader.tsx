@@ -261,7 +261,7 @@ const MonthCalendarHeader = ({
                               habit.iconPath
                             )}
                           />
-                          <span>{habit.name}</span>
+                          <span className="truncate">{habit.name}</span>
                         </div>
                       </SelectItem>
                     );

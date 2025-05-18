@@ -50,7 +50,7 @@ const OccurrenceDialog = ({
   const habits = useHabits();
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote, updateNote } = useNoteActions();
-  const { addOccurrence, updateOccurrence, updateOccurrenceNoteInState } =
+  const { addOccurrence, setOccurrenceNote, updateOccurrence } =
     useOccurrenceActions();
   const [note, handleNoteChange, clearNote] = useTextField();
   const [repeat, setRepeat] = React.useState(1);
@@ -242,7 +242,7 @@ const OccurrenceDialog = ({
             });
           }
 
-          updateOccurrenceNoteInState(existingOccurrence.id, {
+          setOccurrenceNote(existingOccurrence.id, {
             content: newNote.content,
             id: newNote.id,
           });
@@ -282,7 +282,7 @@ const OccurrenceDialog = ({
           userId: user.id,
         });
 
-        updateOccurrenceNoteInState(newOccurrence.id, {
+        setOccurrenceNote(newOccurrence.id, {
           content: newNote.content,
           id: newNote.id,
         });
