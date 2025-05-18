@@ -90,7 +90,7 @@ const useOccurrencesStore = create<OccurrencesState>()(
             const occurrence = state.occurrences[occurrenceId];
 
             if (!occurrence) {
-              return null;
+              return;
             }
 
             const noteIndex = occurrence.notes.findIndex((noteItem) => {
@@ -100,7 +100,7 @@ const useOccurrencesStore = create<OccurrencesState>()(
             if (noteIndex === -1) {
               occurrence.notes.push(note);
 
-              return null;
+              return;
             }
 
             occurrence.notes[noteIndex] = note;
