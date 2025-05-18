@@ -57,7 +57,7 @@ const WeekCalendar = () => {
     const rangeEnd = endOfWeek(startDate);
 
     void fetchOccurrences([+rangeStart, +rangeEnd]);
-  }, [params, user, fetchOccurrences, clearOccurrences, occurrences.length]);
+  }, [params, user, fetchOccurrences, clearOccurrences, occurrences]);
 
   const days = eachDayOfInterval({
     end: addDays(startOfTheWeek, 6),

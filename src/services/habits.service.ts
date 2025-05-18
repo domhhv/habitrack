@@ -26,7 +26,7 @@ export const listHabits = async () => {
   const { data, error } = await supabaseClient
     .from('habits')
     .select('*, trait:traits(id, name, color)')
-    .order('id');
+    .order('name');
 
   if (error) {
     throw new Error(error.message);

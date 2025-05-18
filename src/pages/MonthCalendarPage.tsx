@@ -69,8 +69,10 @@ const MonthCalendar = () => {
   }, [habits, traits]);
 
   React.useEffect(() => {
-    setFilters(derivedFilters);
-  }, [derivedFilters]);
+    if (!filters.habitIds.size || !filters.traitIds.size) {
+      setFilters(derivedFilters);
+    }
+  }, [derivedFilters, filters.habitIds.size, filters.traitIds.size]);
 
   React.useEffect(() => {
     if (!user) {

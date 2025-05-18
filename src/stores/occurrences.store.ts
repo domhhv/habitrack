@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 
 import type {
   Note,
@@ -14,114 +16,118 @@ import {
   createOccurrence,
   destroyOccurrence,
 } from '@services';
+import { toHashMap } from '@utils';
 
 type OccurrencesState = {
-  occurrences: Occurrence[];
+  occurrences: Record<Occurrence['id'], Occurrence>;
   actions: {
     addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
     clearOccurrences: () => void;
     fetchOccurrences: (range: [number, number]) => Promise<void>;
     removeOccurrence: (occurrence: Occurrence) => Promise<void>;
+    setOccurrenceNote: (
+      occurrenceId: Occurrence['id'],
+      note: Pick<Note, 'id' | 'content'>
+    ) => void;
     updateOccurrence: (
       id: Occurrence['id'],
       body: OccurrencesUpdate
     ) => Promise<void>;
-    updateOccurrenceNoteInState: (
-      occurrenceId: Occurrence['id'],
-      note: Pick<Note, 'id' | 'content'>
-    ) => void;
   };
 };
 
-const useOccurrencesStore = create<OccurrencesState>((set) => {
-  return {
-    occurrences: [],
+const useOccurrencesStore = create<OccurrencesState>()(
+  immer((set) => {
+    return {
+      occurrences: {},
 
-    actions: {
-      addOccurrence: async (occurrence: OccurrencesInsert) => {
-        const nextOccurrence = await createOccurrence(occurrence);
+      actions: {
+        addOccurrence: async (occurrence: OccurrencesInsert) => {
+          const nextOccurrence = await createOccurrence(occurrence);
 
-        set((state) => {
-          return {
-            occurrences: [...state.occurrences, nextOccurrence],
-          };
-        });
+          set((state) => {
+            state.occurrences[nextOccurrence.id] = nextOccurrence;
+          });
 
-        return nextOccurrence;
+          return nextOccurrence;
+        },
+
+        clearOccurrences: () => {
+          set((state) => {
+            state.occurrences = {};
+          });
+        },
+
+        fetchOccurrences: async (range: [number, number]) => {
+          const occurrences = await listOccurrences(range);
+
+          set((state) => {
+            state.occurrences = toHashMap(occurrences);
+          });
+        },
+
+        removeOccurrence: async ({ id, photoPaths }: Occurrence) => {
+          await destroyOccurrence(id);
+
+          if (photoPaths) {
+            await Promise.all(
+              photoPaths.map((photoPath) => {
+                return deleteFile(StorageBuckets.OCCURRENCE_PHOTOS, photoPath);
+              })
+            );
+          }
+
+          set((state) => {
+            delete state.occurrences[id];
+          });
+        },
+
+        setOccurrenceNote: (
+          occurrenceId: Occurrence['id'],
+          note: Pick<Note, 'id' | 'content'>
+        ) => {
+          set((state) => {
+            const occurrence = state.occurrences[occurrenceId];
+
+            if (!occurrence) {
+              return null;
+            }
+
+            const noteIndex = occurrence.notes.findIndex((noteItem) => {
+              return noteItem.id === note.id;
+            });
+
+            if (noteIndex === -1) {
+              occurrence.notes.push(note);
+
+              return null;
+            }
+
+            occurrence.notes[noteIndex] = note;
+          });
+        },
+
+        updateOccurrence: async (
+          id: Occurrence['id'],
+          body: OccurrencesUpdate
+        ) => {
+          const updatedOccurrence = await patchOccurrence(id, body);
+
+          set((state) => {
+            state.occurrences[id] = updatedOccurrence;
+          });
+        },
       },
-
-      clearOccurrences: () => {
-        set(() => {
-          return { occurrences: [] };
-        });
-      },
-
-      fetchOccurrences: async (range: [number, number]) => {
-        const occurrences = await listOccurrences(range);
-        set({ occurrences });
-      },
-
-      removeOccurrence: async ({ id, photoPaths }: Occurrence) => {
-        await destroyOccurrence(id);
-
-        if (photoPaths) {
-          await Promise.all(
-            photoPaths.map((photoPath) => {
-              return deleteFile(StorageBuckets.OCCURRENCE_PHOTOS, photoPath);
-            })
-          );
-        }
-
-        set((state) => {
-          return {
-            occurrences: state.occurrences.filter((occurrence) => {
-              return occurrence.id !== id;
-            }),
-          };
-        });
-      },
-
-      updateOccurrence: async (
-        id: Occurrence['id'],
-        body: OccurrencesUpdate
-      ) => {
-        const updatedOccurrence = await patchOccurrence(id, body);
-        set((state) => {
-          return {
-            occurrences: state.occurrences.map((occurrence) => {
-              return occurrence.id === updatedOccurrence.id
-                ? updatedOccurrence
-                : occurrence;
-            }),
-          };
-        });
-      },
-
-      updateOccurrenceNoteInState: (
-        occurrenceId: Occurrence['id'],
-        note: Pick<Note, 'id' | 'content'>
-      ) => {
-        set((state) => {
-          return {
-            occurrences: state.occurrences.map((occurrence) => {
-              return occurrence.id === occurrenceId
-                ? {
-                    ...occurrence,
-                    notes: [note],
-                  }
-                : occurrence;
-            }),
-          };
-        });
-      },
-    },
-  };
-});
+    };
+  })
+);
 
 export const useOccurrences = () => {
-  return useOccurrencesStore((state) => {
-    return state.occurrences;
-  });
+  return useOccurrencesStore(
+    useShallow((state) => {
+      return Object.values(state.occurrences);
+    })
+  );
 };
 
 export const useOccurrenceActions = () => {
