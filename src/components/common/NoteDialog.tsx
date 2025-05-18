@@ -102,6 +102,7 @@ const NoteDialog = ({
 
   const handleClose = () => {
     setIsSaving(false);
+    setHasEdited(false);
     onClose();
     clearContent();
   };

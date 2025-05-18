@@ -70,7 +70,7 @@ const useOccurrencesStore = create<OccurrencesState>()(
           await destroyOccurrence(id);
 
           if (photoPaths) {
-            await Promise.all(
+            await Promise.allSettled(
               photoPaths.map((photoPath) => {
                 return deleteFile(StorageBuckets.OCCURRENCE_PHOTOS, photoPath);
               })
