@@ -1,6 +1,6 @@
 import type { Habit } from '@models';
 
-const makeTestHabit = (override: Partial<Habit> = {}) => {
+const makeTestHabit = (override: Partial<Habit> = {}): Habit => {
   return {
     createdAt: new Date().toISOString(),
     description: 'Test Description',
@@ -8,7 +8,7 @@ const makeTestHabit = (override: Partial<Habit> = {}) => {
     id: crypto.randomUUID(),
     name: 'Test Habit',
     traitId: crypto.randomUUID(),
-    updatedAt: new Date().toISOString(),
+    updatedAt: null,
     userId: crypto.randomUUID(),
     trait: {
       color: '#000000',

@@ -53,19 +53,12 @@ export const patchHabit = async (
   return deepCamelize(data);
 };
 
-export const destroyHabit = async (id: Habit['id']): Promise<Habit> => {
-  const { data, error } = await supabaseClient
-    .from('habits')
-    .delete()
-    .eq('id', id)
-    .select('*, trait:traits(id, name, color)')
-    .single();
+export const destroyHabit = async (id: Habit['id']) => {
+  const { error } = await supabaseClient.from('habits').delete().eq('id', id);
 
   if (error) {
     throw new Error(error.message);
   }
-
-  return deepCamelize(data);
 };
 
 export const uploadHabitIcon = async (

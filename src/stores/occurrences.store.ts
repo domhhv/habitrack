@@ -8,9 +8,7 @@ import type {
   OccurrencesInsert,
   OccurrencesUpdate,
 } from '@models';
-import { StorageBuckets } from '@models';
 import {
-  deleteFile,
   listOccurrences,
   patchOccurrence,
   createOccurrence,
@@ -66,19 +64,11 @@ const useOccurrencesStore = create<OccurrencesState>()(
           });
         },
 
-        removeOccurrence: async ({ id, photoPaths }: Occurrence) => {
-          await destroyOccurrence(id);
-
-          if (photoPaths) {
-            await Promise.allSettled(
-              photoPaths.map((photoPath) => {
-                return deleteFile(StorageBuckets.OCCURRENCE_PHOTOS, photoPath);
-              })
-            );
-          }
+        removeOccurrence: async (occurrence: Occurrence) => {
+          await destroyOccurrence(occurrence);
 
           set((state) => {
-            delete state.occurrences[id];
+            delete state.occurrences[occurrence.id];
           });
         },
 
@@ -93,17 +83,7 @@ const useOccurrencesStore = create<OccurrencesState>()(
               return;
             }
 
-            const noteIndex = occurrence.notes.findIndex((noteItem) => {
-              return noteItem.id === note.id;
-            });
-
-            if (noteIndex === -1) {
-              occurrence.notes.push(note);
-
-              return;
-            }
-
-            occurrence.notes[noteIndex] = note;
+            occurrence.note = note;
           });
         },
 

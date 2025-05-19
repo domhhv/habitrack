@@ -6,6 +6,8 @@ import type {
   OccurrencesInsert,
   OccurrencesUpdate,
 } from '@models';
+import { StorageBuckets } from '@models';
+import { deleteFile } from '@root/src/services/storage.service';
 import { deepSnakify, deepCamelize } from '@utils';
 
 export const createOccurrence = async (
@@ -15,7 +17,7 @@ export const createOccurrence = async (
     .from('occurrences')
     .insert(deepSnakify(occurrence))
     .select(
-      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(id, content)'
+      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
     )
     .single();
 
@@ -32,7 +34,7 @@ export const listOccurrences = async (
   const { data, error } = await supabaseClient
     .from('occurrences')
     .select(
-      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(id, content)'
+      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
     )
     .order('timestamp')
     .gt('timestamp', range[0])
@@ -54,7 +56,7 @@ export const patchOccurrence = async (
     .update(deepSnakify(occurrence))
     .eq('id', id)
     .select(
-      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), notes(id, content)'
+      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
     )
     .single();
 
@@ -65,19 +67,23 @@ export const patchOccurrence = async (
   return deepCamelize(data);
 };
 
-export const destroyOccurrence = async (id: Occurrence['id']) => {
-  const { data, error } = await supabaseClient
+export const destroyOccurrence = async ({ id, photoPaths }: Occurrence) => {
+  const { error } = await supabaseClient
     .from('occurrences')
     .delete()
-    .eq('id', id)
-    .select()
-    .single();
+    .eq('id', id);
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return deepCamelize(data);
+  if (photoPaths) {
+    await Promise.allSettled(
+      photoPaths.map((photoPath) => {
+        return deleteFile(StorageBuckets.OCCURRENCE_PHOTOS, photoPath);
+      })
+    );
+  }
 };
 
 export const getLatestHabitOccurrenceTimestamp = async (

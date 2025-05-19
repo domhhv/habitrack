@@ -785,7 +785,7 @@ export type Database = {
           {
             columns: ["occurrence_id"]
             foreignKeyName: "notes_occurrence_id_fkey"
-            isOneToOne: false
+            isOneToOne: true
             referencedColumns: ["id"]
             referencedRelation: "occurrences"
           },

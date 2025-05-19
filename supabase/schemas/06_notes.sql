@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS "public"."notes" (
     "user_id" "uuid" NOT NULL,
     "content" "text" NOT NULL CHECK ("content" <> ''), -- noqa: CV10
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "occurrence_id" "uuid",
+    "occurrence_id" "uuid" UNIQUE,
     "period_kind" "public"."note_period_kind",
     "period_date" "date",
     CONSTRAINT "month_alignment" CHECK (
