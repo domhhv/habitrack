@@ -28,7 +28,7 @@
       "@helpers": ["helpers"],
       "@models": ["models"],
       "@stores": ["stores"],
-      "@const": ["const"],
+      "@const": ["constants"],
       "@tests": ["../tests"],
       "@db-types": ["../supabase/database.types"],
       "@root/*": ["../*"]

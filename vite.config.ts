@@ -75,7 +75,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@components': resolve(__dirname, './src/components'),
-        '@const': resolve(__dirname, './src/const'),
+        '@const': resolve(__dirname, './src/constants'),
         '@db-types': resolve(__dirname, './supabase/database.types'),
         '@helpers': resolve(__dirname, './src/helpers'),
         '@hooks': resolve(__dirname, './src/hooks'),
