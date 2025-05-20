@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { setDefaultOptions } from 'date-fns';
 import { enGB } from 'date-fns/locale';
 import React from 'react';
+import { useLocale } from 'react-aria';
 import { Route, Routes, Navigate } from 'react-router';
 
 import { AppHeader } from '@components';
@@ -17,18 +18,20 @@ import Providers from './components/Providers';
 setDefaultOptions({ locale: enGB });
 
 const App = () => {
+  const { locale } = useLocale();
+
   React.useEffect(() => {
     document.getElementById('root')?.classList.add('initialized');
   }, []);
 
   return (
-    <Providers>
+    <Providers locale={locale}>
       <AppHeader />
       <main className="flex h-full flex-1 flex-col items-start bg-background-50 dark:bg-background-700">
         <Routes>
           <Route
-            element={<MonthCalendarPage />}
             path="/calendar/month/:year?/:month?/:day?"
+            element={<MonthCalendarPage locale={locale} />}
           />
           <Route
             element={<WeekCalendarPage />}

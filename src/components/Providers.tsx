@@ -24,11 +24,12 @@ const HeroUIProvider = React.memo(function WrappedProvider({
 
 const Providers = React.memo(function WrappedProviders({
   children,
-}: ProviderProps) {
+  locale,
+}: ProviderProps & { locale: string }) {
   return (
     <BrowserRouter>
-      <I18nProvider locale="en-GB">
-        <HeroUIProvider>
+      <HeroUIProvider>
+        <I18nProvider locale={locale}>
           <ToastProvider
             placement="top-center"
             toastProps={{
@@ -36,8 +37,8 @@ const Providers = React.memo(function WrappedProviders({
             }}
           />
           {children}
-        </HeroUIProvider>
-      </I18nProvider>
+        </I18nProvider>
+      </HeroUIProvider>
     </BrowserRouter>
   );
 });

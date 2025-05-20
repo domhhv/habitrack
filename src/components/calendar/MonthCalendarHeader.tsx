@@ -17,7 +17,6 @@ import React from 'react';
 import { Link, useParams, useNavigate } from 'react-router';
 
 import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
-import { MONTHS } from '@const';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Habit, Trait, OccurrenceFilters } from '@models';
 import { StorageBuckets } from '@models';
@@ -28,6 +27,7 @@ export type MonthCalendarHeaderProps = {
   activeMonthLabel: string;
   activeYear: string;
   filters: OccurrenceFilters;
+  months: string[];
   onFilterChange: (filters: OccurrenceFilters) => void;
 };
 
@@ -39,6 +39,7 @@ const MonthCalendarHeader = ({
   activeMonthLabel,
   activeYear,
   filters,
+  months,
   onFilterChange,
 }: MonthCalendarHeaderProps) => {
   const habits = useHabits();
@@ -46,7 +47,7 @@ const MonthCalendarHeader = ({
   const { user } = useUser();
   const { isMobile, screenWidth } = useScreenWidth();
   const isOnCurrentMonth =
-    activeMonthLabel === MONTHS[new Date().getMonth()] &&
+    activeMonthLabel === months[new Date().getMonth()] &&
     activeYear === new Date().getFullYear().toString();
   const { day, month, year } = useParams();
   const navigate = useNavigate();
@@ -76,7 +77,7 @@ const MonthCalendarHeader = ({
     event
   ) => {
     navigate(
-      `/calendar/month/${focusedDate.getFullYear()}/${MONTHS.indexOf(event.target.value) + 1}/${focusedDate.getDate()}`
+      `/calendar/month/${focusedDate.getFullYear()}/${months.indexOf(event.target.value) + 1}/${focusedDate.getDate()}`
     );
   };
 
@@ -122,7 +123,7 @@ const MonthCalendarHeader = ({
               popoverContent: 'w-[125px]',
             }}
           >
-            {MONTHS.map((month) => {
+            {months.map((month) => {
               return (
                 <SelectItem key={month}>
                   {isMobile ? month.substring(0, 3) : month}

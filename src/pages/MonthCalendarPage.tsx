@@ -7,12 +7,11 @@ import {
   startOfToday,
 } from 'date-fns';
 import React from 'react';
-import { useLocale, useCalendar } from 'react-aria';
+import { useCalendar, useDateFormatter } from 'react-aria';
 import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { MonthCalendarGrid, MonthCalendarHeader } from '@components';
-import { MONTHS } from '@const';
 import { useUser } from '@hooks';
 import type { OccurrenceFilters } from '@models';
 import {
@@ -21,7 +20,6 @@ import {
   useOccurrences,
   useOccurrenceActions,
 } from '@stores';
-import { capitalize } from '@utils';
 
 const createCalendar = (identifier: string) => {
   switch (identifier) {
@@ -33,7 +31,11 @@ const createCalendar = (identifier: string) => {
   }
 };
 
-const MonthCalendar = () => {
+type MonthCalendarProps = {
+  locale: string;
+};
+
+const MonthCalendar = ({ locale }: MonthCalendarProps) => {
   const { user } = useUser();
   const occurrences = useOccurrences();
   const habits = useHabits();
@@ -43,15 +45,28 @@ const MonthCalendar = () => {
     habitIds: new Set(),
     traitIds: new Set(),
   });
-  const { locale } = useLocale();
   const calendarState = useCalendarState({
     createCalendar,
     firstDayOfWeek: 'mon',
     isReadOnly: true,
     locale,
   });
+  const formatter = useDateFormatter({
+    month: 'long',
+    timeZone: calendarState.timeZone,
+  });
   const { calendarProps, title } = useCalendar({}, calendarState);
   const params = useParams();
+  const months = [];
+
+  const numMonths = calendarState.focusedDate.calendar.getMonthsInYear(
+    calendarState.focusedDate
+  );
+
+  for (let i = 1; i <= numMonths; i++) {
+    const date = calendarState.focusedDate.set({ month: i });
+    months.push(formatter.format(date.toDate(calendarState.timeZone)));
+  }
 
   const derivedFilters = React.useMemo(() => {
     return {
@@ -119,9 +134,7 @@ const MonthCalendar = () => {
     occurrences.length,
   ]);
 
-  const [, activeYear] = title.split(' ');
-
-  const activeMonthLabel = MONTHS[calendarState.focusedDate.month - 1];
+  const [activeMonthLabel, activeYear] = title.split(' ');
 
   return (
     <div
@@ -132,15 +145,16 @@ const MonthCalendar = () => {
         {`${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`}
       </title>
       <MonthCalendarHeader
+        months={months}
         filters={filters}
         activeYear={activeYear}
         onFilterChange={setFilters}
-        activeMonthLabel={capitalize(activeMonthLabel)}
+        activeMonthLabel={activeMonthLabel}
       />
       <MonthCalendarGrid
         state={calendarState}
         activeYear={Number(activeYear)}
-        activeMonthLabel={capitalize(activeMonthLabel)}
+        activeMonthIndex={months.indexOf(activeMonthLabel)}
         occurrences={occurrences.filter((occurrence) => {
           return (
             filters.habitIds.has(occurrence.habitId.toString()) &&
