@@ -20,3 +20,9 @@ export const ALLOWED_IMAGE_TYPES = {
     'image/heic',
   ],
 };
+
+export enum ThemeModes {
+  LIGHT = 'light',
+  SYSTEM = 'system',
+  DARK = 'dark',
+}
