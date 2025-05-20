@@ -18,32 +18,35 @@ import { NoteDialog, OccurrenceDialog } from '@components';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence, NotePeriodKind } from '@models';
 import { useWeekNotes } from '@stores';
-import { isTruthy, toSqlDate, getMonthIndex } from '@utils';
+import { isTruthy, toSqlDate } from '@utils';
 
 import type { CellPosition, CellRangeStatus } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
 
 type CalendarGridProps = {
-  activeMonthLabel: string;
+  activeMonthIndex: number;
   activeYear: number;
   occurrences: Occurrence[];
   state: CalendarState;
 };
 
-const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
 const MonthCalendarGrid = ({
-  activeMonthLabel,
+  activeMonthIndex,
   activeYear,
   occurrences,
   state,
 }: CalendarGridProps) => {
-  const { gridProps } = useCalendarGrid({}, state);
+  const { gridProps, weekDays } = useCalendarGrid(
+    {
+      weekdayStyle: 'short',
+    },
+    state
+  );
   const { isDesktop } = useScreenWidth();
   const { locale } = useLocale();
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
-  const visibleMonth = new Date(activeYear, getMonthIndex(activeMonthLabel), 1);
+  const visibleMonth = new Date(activeYear, activeMonthIndex, 1);
   const weekNotes = useWeekNotes();
   const [noteDate, setNoteDate] = React.useState<Date | null>(null);
   const [notePeriod, setNotePeriod] = React.useState<NotePeriodKind>(null);
@@ -93,13 +96,13 @@ const MonthCalendarGrid = ({
   return (
     <div {...gridProps} className="flex flex-1 flex-col gap-0 lg:gap-4">
       <div className="mb-1 flex">
-        {[...Array(7)].map((_, index) => {
+        {weekDays.map((weekDay) => {
           return (
             <div
-              key={index}
+              key={weekDay}
               className="flex flex-1 items-center justify-center text-neutral-600 dark:text-neutral-300"
             >
-              <p className="font-bold">{WEEK_DAYS[index]}</p>
+              <p className="font-bold">{weekDay}</p>
             </div>
           );
         })}
@@ -125,7 +128,7 @@ const MonthCalendarGrid = ({
       <AnimatePresence mode="wait">
         <motion.div
           exit={{ opacity: 0 }}
-          key={activeMonthLabel}
+          key={activeMonthIndex}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.1 }}
