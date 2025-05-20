@@ -113,7 +113,7 @@ const OccurrenceChip = ({
 
   if (
     occurrences.some((o) => {
-      return o.notes[0];
+      return o.note;
     })
   ) {
     chip = (
@@ -188,9 +188,9 @@ const OccurrenceChip = ({
                           <span className="font-semibold">
                             {format(new Date(o.timestamp), 'p')}
                           </span>
-                          {!!o.notes[0] && (
+                          {!!o.note && (
                             <span className="font-normal">
-                              : {o.notes[0].content}
+                              : {o.note.content}
                             </span>
                           )}
                         </div>

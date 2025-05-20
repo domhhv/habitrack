@@ -1,6 +1,6 @@
 import type { Trait } from '@models';
 
-const makeTestTrait = (override: Partial<Trait> = {}) => {
+const makeTestTrait = (override: Partial<Trait> = {}): Trait => {
   return {
     color: 'black',
     createdAt: new Date().toISOString(),

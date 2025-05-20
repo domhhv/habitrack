@@ -5,7 +5,7 @@ const makeTestOccurrence = (override: Partial<Occurrence> = {}): Occurrence => {
     createdAt: new Date().toISOString(),
     habitId: crypto.randomUUID(),
     id: crypto.randomUUID(),
-    notes: [],
+    note: null,
     photoPaths: [],
     timestamp: new Date().getTime(),
     updatedAt: null,

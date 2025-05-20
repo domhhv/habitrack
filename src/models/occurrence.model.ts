@@ -24,7 +24,7 @@ type HabitWithTrait = OccurrenceHabit & {
 export type Occurrence = BaseOccurrence & {
   habit: HabitWithTrait | null;
 } & {
-  notes: Pick<Note, 'id' | 'content'>[];
+  note: Pick<Note, 'id' | 'content'> | null;
 };
 
 export type OccurrencesInsert = CamelCasedPropertiesDeep<

@@ -77,7 +77,7 @@ const OccurrenceDialog = ({
 
     if (isOpen && existingOccurrence) {
       setSelectedHabitId(existingOccurrence.habitId.toString());
-      handleNoteChange(toEventLike(existingOccurrence.notes[0]?.content || ''));
+      handleNoteChange(toEventLike(existingOccurrence.note?.content || ''));
       setTime(
         parseAbsoluteToLocal(
           new Date(existingOccurrence.timestamp).toISOString()
@@ -113,8 +113,7 @@ const OccurrenceDialog = ({
       const hasTimeChanged =
         time instanceof ZonedDateTime &&
         +time.toDate() !== +new Date(existingOccurrence.timestamp);
-      const hasNoteChanged =
-        note !== (existingOccurrence.notes[0]?.content || '');
+      const hasNoteChanged = note !== (existingOccurrence.note?.content || '');
       const hasHabitChanged =
         selectedHabitId !== existingOccurrence.habitId.toString();
 
@@ -225,12 +224,10 @@ const OccurrenceDialog = ({
         });
 
         if (note) {
-          const [existingNote] = existingOccurrence.notes;
-
           let newNote;
 
-          if (existingNote) {
-            newNote = await updateNote(existingNote.id, {
+          if (existingOccurrence.note) {
+            newNote = await updateNote(existingOccurrence.note.id, {
               content: note,
               occurrenceId: existingOccurrence.id,
             });
