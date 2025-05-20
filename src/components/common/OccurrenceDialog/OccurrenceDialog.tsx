@@ -113,7 +113,7 @@ const OccurrenceDialog = ({
       const hasTimeChanged =
         time instanceof ZonedDateTime &&
         +time.toDate() !== +new Date(existingOccurrence.timestamp);
-      const hasNoteChanged = note !== existingOccurrence.note?.content || '';
+      const hasNoteChanged = note !== (existingOccurrence.note?.content || '');
       const hasHabitChanged =
         selectedHabitId !== existingOccurrence.habitId.toString();
 
