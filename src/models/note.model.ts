@@ -6,25 +6,23 @@ import type {
 
 import type { Tables, TablesInsert, TablesUpdate } from '@db-types';
 
-type BaseNote = CamelCasedPropertiesDeep<Tables<'notes'>>;
+type NoteOfOccurrence<T extends Partial<Tables<'notes'>> = Tables<'notes'>> =
+  CamelCasedPropertiesDeep<
+    Omit<RequireAtLeastOne<T, 'occurrence_id'>, 'period_date' | 'period_kind'>
+  >;
 
-type NoteOccurrence = Omit<
-  RequireAtLeastOne<BaseNote, 'occurrenceId'>,
-  'periodDate' | 'periodKind'
->;
+export type NoteOfPeriod<T extends Partial<Tables<'notes'>> = Tables<'notes'>> =
+  CamelCasedPropertiesDeep<
+    Omit<SetRequired<T, 'period_date' | 'period_kind'>, 'occurrence_id'>
+  >;
 
-export type NotePeriod = Omit<
-  SetRequired<BaseNote, 'periodDate' | 'periodKind'>,
-  'occurrenceId'
->;
-
-export type Note = NoteOccurrence | NotePeriod;
+export type Note = NoteOfPeriod | NoteOfOccurrence;
 
 export type NotePeriodKind = Tables<'notes'>['period_kind'];
 
 type NoteCheck<T extends Partial<Tables<'notes'>>> =
-  | Omit<RequireAtLeastOne<T, 'occurrence_id'>, 'period_date' | 'period_kind'>
-  | Omit<SetRequired<T, 'period_date' | 'period_kind'>, 'occurrence_id'>;
+  | NoteOfPeriod<T>
+  | NoteOfOccurrence<T>;
 
 export type NotesInsert = CamelCasedPropertiesDeep<
   NoteCheck<TablesInsert<'notes'>>

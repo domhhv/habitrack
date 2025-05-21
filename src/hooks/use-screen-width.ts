@@ -3,6 +3,8 @@ import resolveConfig from 'tailwindcss/resolveConfig';
 
 import tailwindConfig from '@root/tailwind.config';
 
+const resolvedTailwindConfig = resolveConfig(tailwindConfig);
+
 const useScreenWidth = () => {
   const [screenWidth, setScreenWidth] = React.useState(() => {
     return window.innerWidth;
@@ -20,7 +22,7 @@ const useScreenWidth = () => {
     };
   }, []);
 
-  const { lg, md } = resolveConfig(tailwindConfig).theme.screens;
+  const { lg, md } = resolvedTailwindConfig.theme.screens;
 
   const isMobile = screenWidth < Number(md.slice(0, -2));
   const isDesktop = screenWidth >= Number(lg.slice(0, -2));

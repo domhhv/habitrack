@@ -4,7 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import type { Note, NotesInsert, NotesUpdate } from '@models';
 import { listNotes, createNote, updateNote, destroyNote } from '@services';
-import { toHashMap, noteTargetIsPeriod } from '@utils';
+import { toHashMap, isNoteOfPeriod } from '@utils';
 
 type NotesState = {
   notes: Record<Note['id'], Note>;
@@ -78,7 +78,7 @@ export const useNotes = () => {
 };
 
 export const usePeriodNotes = () => {
-  return useNotes().filter(noteTargetIsPeriod);
+  return useNotes().filter(isNoteOfPeriod);
 };
 
 export const useWeekNotes = () => {
