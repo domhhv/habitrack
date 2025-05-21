@@ -2,12 +2,8 @@ export { default as capitalize } from './capitalize';
 export { default as deepCamelize } from './deep-camelize';
 export { default as deepSnakify } from './deep-snakify';
 export { default as getErrorMessage } from './get-error-message';
-export { default as isFailedUpload } from './is-failed-upload';
-export { default as isFulfilled } from './is-fulfilled';
-export { default as isRejected } from './is-rejected';
-export { default as isSuccessfulUpload } from './is-successful-upload';
-export { default as isTruthy } from './is-truthy';
-export { default as noteTargetIsPeriod } from './note-target-is-period';
 export { default as toEventLike } from './to-event-like';
 export { default as toHashMap } from './to-hash-map';
 export { default as toSqlDate } from './to-sql-date';
+
+export * from './type-guards';
