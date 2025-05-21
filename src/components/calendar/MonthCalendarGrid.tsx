@@ -64,6 +64,10 @@ const MonthCalendarGrid = ({
     onOpen: openOccurrenceDialog,
   } = useDisclosure();
 
+  const periodNotes = React.useMemo(() => {
+    return Object.values(notes).filter(isNoteOfPeriod);
+  }, [notes]);
+
   const handleNoteDialogOpen = (date: Date, period: NotePeriodKind) => {
     setNoteDate(date);
     setNotePeriod(period);
@@ -139,14 +143,12 @@ const MonthCalendarGrid = ({
               .getDatesInWeek(weekIndex)
               .filter(isTruthy);
 
-            const weekNote = Object.values(notes)
-              .filter(isNoteOfPeriod)
-              .find((note) => {
-                return (
-                  note.periodKind === 'week' &&
-                  note.periodDate === toSqlDate(new Date(year, month - 1, day))
-                );
-              });
+            const weekNote = periodNotes.find((note) => {
+              return (
+                note.periodKind === 'week' &&
+                note.periodDate === toSqlDate(new Date(year, month - 1, day))
+              );
+            });
 
             return (
               <div

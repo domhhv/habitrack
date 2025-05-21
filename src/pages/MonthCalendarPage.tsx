@@ -136,6 +136,15 @@ const MonthCalendar = ({ locale }: MonthCalendarProps) => {
 
   const [activeMonthLabel, activeYear] = title.split(' ');
 
+  const filteredOccurrences = React.useMemo(() => {
+    return Object.values(occurrences).filter((occurrence) => {
+      return (
+        filters.habitIds.has(occurrence.habitId.toString()) &&
+        filters.traitIds.has(occurrence.habit?.trait?.id.toString() || '')
+      );
+    });
+  }, [occurrences, filters.habitIds, filters.traitIds]);
+
   return (
     <div
       {...calendarProps}
@@ -154,13 +163,8 @@ const MonthCalendar = ({ locale }: MonthCalendarProps) => {
       <MonthCalendarGrid
         state={calendarState}
         activeYear={Number(activeYear)}
+        occurrences={filteredOccurrences}
         activeMonthIndex={months.indexOf(activeMonthLabel)}
-        occurrences={Object.values(occurrences).filter((occurrence) => {
-          return (
-            filters.habitIds.has(occurrence.habitId.toString()) &&
-            filters.traitIds.has(occurrence.habit?.trait?.id.toString() || '')
-          );
-        })}
       />
     </div>
   );
