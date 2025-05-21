@@ -91,7 +91,7 @@ const MonthCalendar = ({ locale }: MonthCalendarProps) => {
 
   React.useEffect(() => {
     if (!user) {
-      if (occurrences.length) {
+      if (Object.keys(occurrences).length) {
         clearOccurrences();
       }
 
@@ -131,7 +131,7 @@ const MonthCalendar = ({ locale }: MonthCalendarProps) => {
     user,
     fetchOccurrences,
     clearOccurrences,
-    occurrences.length,
+    occurrences,
   ]);
 
   const [activeMonthLabel, activeYear] = title.split(' ');
@@ -155,7 +155,7 @@ const MonthCalendar = ({ locale }: MonthCalendarProps) => {
         state={calendarState}
         activeYear={Number(activeYear)}
         activeMonthIndex={months.indexOf(activeMonthLabel)}
-        occurrences={occurrences.filter((occurrence) => {
+        occurrences={Object.values(occurrences).filter((occurrence) => {
           return (
             filters.habitIds.has(occurrence.habitId.toString()) &&
             filters.traitIds.has(occurrence.habit?.trait?.id.toString() || '')

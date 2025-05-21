@@ -13,8 +13,8 @@ import React from 'react';
 import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
 import { type NotePeriodKind } from '@models';
-import { useNoteActions, usePeriodNotes } from '@stores';
-import { toEventLike } from '@utils';
+import { useNotes, useNoteActions } from '@stores';
+import { toEventLike, isNoteOfPeriod } from '@utils';
 
 type NoteDialogProps = {
   isOpen: boolean;
@@ -34,13 +34,15 @@ const NoteDialog = ({
   const [content, handleContentChange, clearContent] = useTextField();
   const [isSaving, setIsSaving] = React.useState(false);
   const [isRemoving, setIsRemoving] = React.useState(false);
-  const notes = usePeriodNotes();
+  const notes = useNotes();
   const { addNote, deleteNote, updateNote } = useNoteActions();
 
   const existingNote = React.useMemo(() => {
-    return notes.find((note) => {
-      return note.periodKind === periodKind && note.periodDate === periodDate;
-    });
+    return Object.values(notes)
+      .filter(isNoteOfPeriod)
+      .find((note) => {
+        return note.periodKind === periodKind && note.periodDate === periodDate;
+      });
   }, [notes, periodDate, periodKind]);
 
   React.useEffect(() => {
