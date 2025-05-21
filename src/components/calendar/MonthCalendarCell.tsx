@@ -12,7 +12,8 @@ import React from 'react';
 import { OccurrenceChip } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
-import { useDayNotes } from '@stores';
+import { useNotes } from '@stores';
+import { isNoteOfPeriod } from '@utils';
 
 export type CellPosition =
   | 'top-left'
@@ -40,16 +41,18 @@ const MonthCalendarCell = ({
   position,
   rangeStatus,
 }: CalendarCellProps) => {
-  const dayNotes = useDayNotes();
+  const notes = useNotes();
   const { user } = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
   const isTodayCell = isToday(date);
   const formattedDay = format(date, 'yyyy-MM-dd');
   const hasNote = React.useMemo(() => {
-    return dayNotes.some((note) => {
-      return note.periodDate === formattedDay;
-    });
-  }, [dayNotes, formattedDay]);
+    return Object.values(notes)
+      .filter(isNoteOfPeriod)
+      .some((note) => {
+        return note.periodDate === formattedDay;
+      });
+  }, [notes, formattedDay]);
 
   const groupedOccurrences = Object.groupBy(occurrences, (o) => {
     return o.habitId;

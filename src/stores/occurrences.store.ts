@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { useShallow } from 'zustand/react/shallow';
 
 import type {
   Note,
@@ -103,11 +102,9 @@ const useOccurrencesStore = create<OccurrencesState>()(
 );
 
 export const useOccurrences = () => {
-  return useOccurrencesStore(
-    useShallow((state) => {
-      return Object.values(state.occurrences);
-    })
-  );
+  return useOccurrencesStore((state) => {
+    return state.occurrences;
+  });
 };
 
 export const useOccurrenceActions = () => {
