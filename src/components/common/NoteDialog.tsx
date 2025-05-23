@@ -1,13 +1,28 @@
 import {
   Modal,
   Button,
+  Tooltip,
   Textarea,
   ModalBody,
   ModalFooter,
   ModalHeader,
   ModalContent,
 } from '@heroui/react';
-import { format, getISOWeek } from 'date-fns';
+import {
+  CaretLeft,
+  CaretRight,
+  ArrowLineUp,
+  ArrowLineDown,
+} from '@phosphor-icons/react';
+import {
+  format,
+  subDays,
+  addDays,
+  subWeeks,
+  addWeeks,
+  getISOWeek,
+  startOfWeek,
+} from 'date-fns';
 import React from 'react';
 
 import { handleAsyncAction } from '@helpers';
@@ -21,11 +36,13 @@ type NoteDialogProps = {
   periodDate: string;
   periodKind: NotePeriodKind;
   onClose: () => void;
+  onPeriodChange: (opts: { date?: Date; kind?: NotePeriodKind }) => void;
 };
 
 const NoteDialog = ({
   isOpen,
   onClose,
+  onPeriodChange,
   periodDate,
   periodKind,
 }: NoteDialogProps) => {
@@ -46,6 +63,8 @@ const NoteDialog = ({
   React.useEffect(() => {
     if (isOpen && existingNote?.content && !hasEdited) {
       handleContentChange(toEventLike(existingNote.content));
+    } else if (isOpen && !existingNote?.content) {
+      handleContentChange(toEventLike(''));
     }
   }, [existingNote, handleContentChange, isOpen, hasEdited]);
 
@@ -111,15 +130,101 @@ const NoteDialog = ({
     return null;
   }
 
+  const formatCurrentWeek = () => {
+    return `week ${getISOWeek(new Date(periodDate))} of ${format(periodDate || '', 'yyyy')}`;
+  };
+
   const period =
     periodKind === 'day'
       ? format(periodDate || '', 'iii, LLL d, y')
-      : `Week ${getISOWeek(new Date(periodDate))} of ${format(periodDate || '', 'yyyy')}`;
+      : formatCurrentWeek();
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalContent>
-        <ModalHeader>Note about {period}</ModalHeader>
+        <ModalHeader className="items-center gap-2">
+          <div className="space-x-2">
+            <Button
+              size="sm"
+              isIconOnly
+              variant="light"
+              onPress={() => {
+                switch (periodKind) {
+                  case 'day':
+                    return onPeriodChange({
+                      date: subDays(periodDate, 1),
+                      kind: 'day',
+                    });
+
+                  case 'week':
+                    return onPeriodChange({
+                      date: subWeeks(periodDate, 1),
+                      kind: 'week',
+                    });
+                }
+              }}
+            >
+              <CaretLeft size={18} weight="bold" />
+            </Button>
+            <Button
+              size="sm"
+              isIconOnly
+              variant="light"
+              onPress={() => {
+                switch (periodKind) {
+                  case 'day':
+                    return onPeriodChange({
+                      date: addDays(periodDate, 1),
+                      kind: 'day',
+                    });
+
+                  case 'week':
+                    return onPeriodChange({
+                      date: addWeeks(periodDate, 1),
+                      kind: 'week',
+                    });
+                }
+              }}
+            >
+              <CaretRight size={18} weight="bold" />
+            </Button>
+            <Tooltip
+              content={
+                periodKind === 'day'
+                  ? `Go to ${formatCurrentWeek()}`
+                  : 'Go to days of this week'
+              }
+            >
+              <Button
+                size="sm"
+                isIconOnly
+                variant="light"
+                onPress={() => {
+                  switch (periodKind) {
+                    case 'day':
+                      return onPeriodChange({
+                        date: startOfWeek(periodDate),
+                        kind: 'week',
+                      });
+
+                    case 'week':
+                      return onPeriodChange({
+                        date: startOfWeek(periodDate),
+                        kind: 'day',
+                      });
+                  }
+                }}
+              >
+                {periodKind === 'day' ? (
+                  <ArrowLineUp size={18} weight="bold" />
+                ) : (
+                  <ArrowLineDown size={18} weight="bold" />
+                )}
+              </Button>
+            </Tooltip>
+          </div>
+          Note about {period}
+        </ModalHeader>
         <ModalBody>
           <Textarea
             value={content}

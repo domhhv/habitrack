@@ -70,6 +70,16 @@ const MonthCalendarGrid = ({
     openNoteDialog();
   };
 
+  const handlePeriodChange = (opts: { date?: Date; kind?: NotePeriodKind }) => {
+    if (opts.date) {
+      setNoteDate(opts.date);
+    }
+
+    if (opts.kind) {
+      setNotePeriod(opts.kind);
+    }
+  };
+
   const getCellPosition = (
     weekIndex: number,
     dayIndex: number
@@ -122,6 +132,7 @@ const MonthCalendarGrid = ({
           isOpen={isNoteDialogOpen}
           onClose={closeNoteDialog}
           periodDate={toSqlDate(noteDate)}
+          onPeriodChange={handlePeriodChange}
         />
       )}
 
