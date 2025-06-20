@@ -32,7 +32,7 @@ const WeekCalendar = () => {
 
   React.useEffect(() => {
     if (!user) {
-      if (occurrences.length) {
+      if (Object.keys(occurrences).length) {
         clearOccurrences();
       }
 
@@ -68,7 +68,7 @@ const WeekCalendar = () => {
     (dayIndex: number, hour: number) => {
       const day = dayIndex === 6 ? 0 : dayIndex + 1;
 
-      const relatedOccurrences = occurrences.filter((o) => {
+      const relatedOccurrences = Object.values(occurrences).filter((o) => {
         const date = new Date(o.timestamp);
 
         return (

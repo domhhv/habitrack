@@ -17,8 +17,8 @@ import { type CalendarState } from 'react-stately';
 import { NoteDialog, OccurrenceDialog } from '@components';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence, NotePeriodKind } from '@models';
-import { useWeekNotes } from '@stores';
-import { isTruthy, toSqlDate } from '@utils';
+import { useNotes } from '@stores';
+import { isTruthy, toSqlDate, isNoteOfPeriod } from '@utils';
 
 import type { CellPosition, CellRangeStatus } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
@@ -47,7 +47,7 @@ const MonthCalendarGrid = ({
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const visibleMonth = new Date(activeYear, activeMonthIndex, 1);
-  const weekNotes = useWeekNotes();
+  const notes = useNotes();
   const [noteDate, setNoteDate] = React.useState<Date | null>(null);
   const [notePeriod, setNotePeriod] = React.useState<NotePeriodKind>(null);
   const [newOccurrenceDate, setNewOccurrenceDate] = React.useState<Date | null>(
@@ -63,6 +63,10 @@ const MonthCalendarGrid = ({
     onClose: closeOccurrenceDialog,
     onOpen: openOccurrenceDialog,
   } = useDisclosure();
+
+  const periodNotes = React.useMemo(() => {
+    return Object.values(notes).filter(isNoteOfPeriod);
+  }, [notes]);
 
   const handleNoteDialogOpen = (date: Date, period: NotePeriodKind) => {
     setNoteDate(date);
@@ -150,8 +154,9 @@ const MonthCalendarGrid = ({
               .getDatesInWeek(weekIndex)
               .filter(isTruthy);
 
-            const weekNote = weekNotes.find((note) => {
+            const weekNote = periodNotes.find((note) => {
               return (
+                note.periodKind === 'week' &&
                 note.periodDate === toSqlDate(new Date(year, month - 1, day))
               );
             });
