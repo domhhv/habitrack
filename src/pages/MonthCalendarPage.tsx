@@ -1,7 +1,9 @@
 import { CalendarDate, GregorianCalendar } from '@internationalized/date';
 import {
+  endOfDay,
   endOfWeek,
   endOfMonth,
+  startOfDay,
   startOfWeek,
   startOfMonth,
   startOfToday,
@@ -45,6 +47,7 @@ const MonthCalendar = ({ locale }: MonthCalendarProps) => {
     habitIds: new Set(),
     traitIds: new Set(),
   });
+  const [fetchedMonthYear, setFetchedMonthYear] = React.useState<string>('');
   const calendarState = useCalendarState({
     createCalendar,
     firstDayOfWeek: 'mon',
@@ -117,15 +120,20 @@ const MonthCalendar = ({ locale }: MonthCalendarProps) => {
     const hasFocusedDateChanged =
       calendarState.focusedDate.toString() !== nextFocusedDate.toString();
 
-    if (hasFocusedDateChanged) {
-      const rangeStart = startOfWeek(startOfMonth(paramsDate));
-      const rangeEnd = endOfWeek(endOfMonth(paramsDate));
+    const currentMonthYear = `${Number(year)}-${Number(month)}`;
+    const hasNotFetchedThisMonth = fetchedMonthYear !== currentMonthYear;
+
+    if (hasFocusedDateChanged || hasNotFetchedThisMonth) {
+      const rangeStart = startOfDay(startOfWeek(startOfMonth(paramsDate)));
+      const rangeEnd = endOfDay(endOfWeek(endOfMonth(paramsDate)));
 
       void fetchOccurrences([+rangeStart, +rangeEnd]);
+      setFetchedMonthYear(currentMonthYear);
 
       calendarState.setFocusedDate(nextFocusedDate);
     }
   }, [
+    fetchedMonthYear,
     params,
     calendarState,
     user,
