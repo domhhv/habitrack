@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { resolve } from 'path';
 
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import webpackStatsPlugin from 'rollup-plugin-webpack-stats';
@@ -62,6 +63,7 @@ export default defineConfig(({ mode }) => {
       SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
     },
     plugins: [
+      tailwindcss(),
       react(),
       ...(isProduction
         ? [

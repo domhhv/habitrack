@@ -27,7 +27,7 @@ const App = () => {
   return (
     <Providers locale={locale}>
       <AppHeader />
-      <main className="flex h-full flex-1 flex-col items-start bg-background-50 dark:bg-background-700">
+      <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 flex-col items-start">
         <Routes>
           <Route
             path="/calendar/month/:year?/:month?/:day?"

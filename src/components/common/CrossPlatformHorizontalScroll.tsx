@@ -38,7 +38,7 @@ const CrossPlatformHorizontalScroll = ({
     <div
       ref={scrollRef}
       className={cn(
-        'overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-hide',
+        'scrollbar-hide overflow-x-auto overflow-y-hidden whitespace-nowrap',
         className
       )}
     >

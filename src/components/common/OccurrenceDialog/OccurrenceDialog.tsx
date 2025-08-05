@@ -79,6 +79,8 @@ const OccurrenceDialog = ({
       setSelectedHabitId(existingOccurrence.habitId.toString());
       handleNoteChange(toEventLike(existingOccurrence.note?.content || ''));
       setTime(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         parseAbsoluteToLocal(
           new Date(existingOccurrence.timestamp).toISOString()
         )
@@ -94,6 +96,8 @@ const OccurrenceDialog = ({
       occurrenceDateTime.setMonth(newOccurrenceDate.getMonth());
       occurrenceDateTime.setDate(newOccurrenceDate.getDate());
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
     }
   }, [newOccurrenceDate, existingOccurrence, isOpen, handleNoteChange]);

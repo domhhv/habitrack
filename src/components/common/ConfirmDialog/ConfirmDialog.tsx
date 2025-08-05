@@ -30,7 +30,7 @@ const ConfirmDialog = ({
         <ModalHeader>{heading}</ModalHeader>
         <ModalBody>
           {children}
-          <div className="mb-4 mt-2 flex flex-row justify-end gap-4">
+          <div className="mt-2 mb-4 flex flex-row justify-end gap-4">
             <Button
               variant="ghost"
               color="secondary"

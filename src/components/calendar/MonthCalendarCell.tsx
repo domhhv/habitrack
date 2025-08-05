@@ -66,7 +66,7 @@ const MonthCalendarCell = ({
   );
 
   const cellHeaderClassName = cn(
-    'flex w-full items-center justify-between border-b-1 border-neutral-500 px-1.5 py-1.5 text-sm dark:border-neutral-400 md:text-base',
+    'flex w-full items-center justify-between border-b border-neutral-500 px-1.5 py-1.5 text-sm dark:border-neutral-400 md:text-base',
     rangeStatus !== 'in-range' && 'text-neutral-400 dark:text-neutral-600',
     isTodayCell ? 'w-full self-auto md:self-start' : 'w-full'
   );
@@ -90,7 +90,7 @@ const MonthCalendarCell = ({
                     color="secondary"
                     isDisabled={!user}
                     onPress={onNewOccurrenceClick}
-                    className="h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6"
+                    className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
                   >
                     <CalendarPlus weight="bold" size={isDesktop ? 18 : 14} />
                   </Button>
@@ -107,7 +107,7 @@ const MonthCalendarCell = ({
                     onPress={onNoteClick}
                     color={hasNote ? 'primary' : 'secondary'}
                     className={cn(
-                      'h-5 w-5 min-w-fit px-0 opacity-0 focus:opacity-100 group-hover/cell:opacity-100 lg:h-6 lg:w-6',
+                      'h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
                       hasNote && 'opacity-100'
                     )}
                   >

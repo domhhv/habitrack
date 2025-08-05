@@ -279,8 +279,8 @@ const MonthCalendarHeader = ({
             label="Filter by traits"
             selectionMode="multiple"
             selectedKeys={filters.traitIds}
-            className="w-full md:w-[250px]"
             onChange={handleTraitsFilterChange}
+            className="w-full min-[450px]:w-1/2 md:w-[250px]"
             renderValue={(selectedTraits: SelectedItems<Trait>) => {
               return (
                 <CrossPlatformHorizontalScroll className="space-x-2">

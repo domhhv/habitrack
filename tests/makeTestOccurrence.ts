@@ -11,7 +11,7 @@ const makeTestOccurrence = (override: Partial<Occurrence> = {}): Occurrence => {
     updatedAt: null,
     userId: crypto.randomUUID(),
     habit: {
-      iconPath: 'https://i.ibb.co/vvgw7bx/habitrack-logo.png',
+      iconPath: 'default.png',
       name: 'Test Habit Name',
       ...(override.habit || {}),
       trait: {
