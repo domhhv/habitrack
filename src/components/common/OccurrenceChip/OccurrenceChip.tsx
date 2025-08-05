@@ -82,9 +82,9 @@ const OccurrenceChip = ({
         onClick={openDrawer}
         style={{ borderColor: colorOverride || traitColor }}
         className={cn(
-          'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 dark:bg-slate-800 md:mb-1 md:mr-1',
+          'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 md:mr-1 md:mb-1 dark:bg-slate-800',
           screenWidth < 400 && 'p-1',
-          isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]'
+          isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
         )}
       >
         <img
@@ -104,7 +104,7 @@ const OccurrenceChip = ({
         color="primary"
         placement="bottom-right"
         content={occurrences.length}
-        className={cn(isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]')}
+        className={cn(isDrawerOpen && !isOccurrenceDialogOpen && 'z-51')}
       >
         {chip}
       </Badge>
@@ -122,8 +122,8 @@ const OccurrenceChip = ({
         placement="top-right"
         content={<Note size={14} weight="fill" />}
         className={cn(
-          'right-1 top-1 border-none bg-transparent',
-          isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]'
+          'top-1 right-1 border-none bg-transparent',
+          isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
         )}
       >
         {chip}
@@ -142,8 +142,8 @@ const OccurrenceChip = ({
         placement="top-left"
         content={<Camera size={14} weight="fill" />}
         className={cn(
-          'right-1 top-1 border-none bg-transparent',
-          isDrawerOpen && !isOccurrenceDialogOpen && 'z-[51]'
+          'top-1 right-1 border-none bg-transparent',
+          isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
         )}
       >
         {chip}

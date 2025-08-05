@@ -93,7 +93,7 @@ const WeekCalendar = () => {
         <h1 className="text-xl font-bold">
           Week {getWeek(startOfTheWeek)} of {getISOWeekYear(startOfTheWeek)}
         </h1>
-        <p className="text-sm italic text-stone-400 dark:text-stone-500">
+        <p className="text-sm text-stone-400 italic dark:text-stone-500">
           Logging & navigation coming soon
         </p>
       </div>
@@ -107,7 +107,7 @@ const WeekCalendar = () => {
                 className={cn(
                   'space-y-2 text-center text-stone-600 dark:text-stone-300',
                   isToday(day) &&
-                    'font-bold text-primary-600 dark:text-primary-400'
+                    'text-primary-600 dark:text-primary-400 font-bold'
                 )}
               >
                 <h3>{weekDayName}</h3>
@@ -129,7 +129,7 @@ const WeekCalendar = () => {
                       className="group/minutes-cell relative flex gap-4"
                     >
                       {dayIndex === 0 && (
-                        <p className="translate-0 absolute -left-[23px] -top-[13px] w-3 basis-0 self-start text-right text-stone-600 dark:text-stone-200 md:static md:-translate-y-3 md:text-base">
+                        <p className="absolute -top-[13px] -left-[23px] w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:text-base dark:text-stone-200">
                           {hour !== 0 && hour}
                         </p>
                       )}

@@ -140,7 +140,7 @@ const AuthModalButton = () => {
               isIconOnly
               color="secondary"
               onPress={signOut}
-              className="border-l border-background-100 dark:border-background-900"
+              className="border-background-100 dark:border-background-900 border-l"
               startContent={
                 <SignOutIcon weight="bold" data-testid="sign-out-icon" />
               }

@@ -56,13 +56,13 @@ const PasswordInput = ({
         <button
           type="button"
           onClick={toggleVisibility}
-          className="focus:outline-none"
+          className="focus:outline-hidden"
           aria-label="toggle password visibility"
         >
           {isVisible ? (
-            <EyeSlash className="pointer-events-none text-2xl text-default-400" />
+            <EyeSlash className="text-default-400 pointer-events-none text-2xl" />
           ) : (
-            <Eye className="pointer-events-none text-2xl text-default-400" />
+            <Eye className="text-default-400 pointer-events-none text-2xl" />
           )}
         </button>
       }

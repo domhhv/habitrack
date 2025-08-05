@@ -9,7 +9,7 @@ type TraitChipProps = {
 
 const TraitChip = ({ trait }: TraitChipProps) => {
   return (
-    <Chip size="sm" variant="faded" color="secondary" className="h-5 border-1">
+    <Chip size="sm" variant="faded" color="secondary" className="h-5 border">
       <div className="flex items-center gap-1 font-semibold">
         <span
           role="habit-trait-chip-color-indicator"

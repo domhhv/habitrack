@@ -16,7 +16,7 @@ const Header = () => {
   return (
     <>
       {isLoading && (
-        <div className="absolute bottom-0 left-0 right-0 top-0 z-50 flex h-full flex-1 items-center justify-center bg-background-100 opacity-90 dark:bg-background-800">
+        <div className="bg-background-100 dark:bg-background-800 absolute top-0 right-0 bottom-0 left-0 z-50 flex h-full flex-1 items-center justify-center opacity-90">
           <div className="flex -translate-y-[73px] items-center justify-center">
             <Spinner
               size="lg"
@@ -27,7 +27,7 @@ const Header = () => {
           </div>
         </div>
       )}
-      <header className="border-b border-b-slate-300 bg-background-100 dark:border-b-slate-800 dark:dark:bg-background-900">
+      <header className="bg-background-100 dark:dark:bg-background-900 border-b border-b-slate-300 dark:border-b-slate-800">
         <div className="mx-auto flex w-full items-center justify-between gap-2 px-8 py-2 lg:gap-4 lg:px-16 lg:py-4">
           <div className="flex items-center gap-2">
             <Button

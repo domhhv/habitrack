@@ -120,7 +120,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
           }}
         >
           {!!currentImageUrl.error && (
-            <div className="absolute inset-0 flex items-center justify-center rounded bg-red-500/50">
+            <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-red-500/50">
               <p className="text-white">Error loading image</p>
             </div>
           )}
@@ -167,13 +167,13 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
       </div>
 
       <Tooltip content="Open this photo in a new tab">
-        <div className="pointer-events-auto absolute right-14 top-4 z-10">
+        <div className="pointer-events-auto absolute top-4 right-14 z-10">
           <Button
             size="sm"
             isIconOnly
             variant="flat"
             isDisabled={isAnimating}
-            className="rounded-full bg-secondary-500 text-white shadow-lg transition-all hover:bg-secondary-600"
+            className="bg-secondary-500 hover:bg-secondary-600 rounded-full text-white shadow-lg transition-all"
             onPress={() => {
               return window.open(currentImageUrl.signedUrl, '_blank');
             }}
@@ -188,7 +188,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
       </Tooltip>
 
       <Tooltip content="Delete this photo">
-        <div className="pointer-events-auto absolute right-4 top-4 z-10">
+        <div className="pointer-events-auto absolute top-4 right-4 z-10">
           <Button
             size="sm"
             isIconOnly
@@ -208,8 +208,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
         </div>
       </Tooltip>
 
-      <div className="absolute bottom-4 left-0 right-0 z-10">
-        <div className="mx-auto flex w-max items-center justify-center gap-2 rounded-full bg-black/30 p-2 backdrop-blur-sm">
+      <div className="absolute right-0 bottom-4 left-0 z-10">
+        <div className="mx-auto flex w-max items-center justify-center gap-2 rounded-full bg-black/30 p-2 backdrop-blur-xs">
           {imageUrls.map((_, index) => {
             return (
               <button
@@ -223,7 +223,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
                   setDirection(index > currentIndex ? 1 : -1);
                   setCurrentIndex(index);
                 }}
-                className={`rounded-full border border-white/30 shadow-sm transition-all ${
+                className={`rounded-full border border-white/30 shadow-xs transition-all ${
                   currentIndex === index
                     ? 'h-2 w-6 bg-white'
                     : 'h-2 w-2 bg-white/50 hover:bg-white/70'

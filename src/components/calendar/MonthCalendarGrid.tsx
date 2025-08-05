@@ -161,7 +161,7 @@ const MonthCalendarGrid = ({
                 key={weekIndex}
                 className="group relative flex items-end gap-1 md:gap-2"
               >
-                <div className="absolute -left-7 top-0 flex h-full flex-col justify-between gap-1 lg:-left-12">
+                <div className="absolute top-0 -left-7 flex h-full flex-col justify-between gap-1 lg:-left-12">
                   <Tooltip content="Go to this week">
                     <Button
                       as={Link}
@@ -195,7 +195,7 @@ const MonthCalendarGrid = ({
                         );
                       }}
                       className={cn(
-                        'mb-1 w-6 min-w-fit basis-[70px] p-0 opacity-0 focus:opacity-100 group-hover:opacity-100 lg:mb-2 lg:w-10 lg:basis-[96px]',
+                        'mb-1 w-6 min-w-fit basis-[70px] p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:mb-2 lg:w-10 lg:basis-[96px]',
                         weekIndex === 0 && 'top-0.5',
                         (weekNote || !isDesktop) && 'opacity-100'
                       )}
@@ -210,7 +210,7 @@ const MonthCalendarGrid = ({
                 </div>
                 <div
                   className={cn(
-                    'flex h-[110px] w-full basis-full justify-between border-l-2 border-r-2 border-neutral-500 last-of-type:border-b-2 group-first-of-type:border-t-2 dark:border-neutral-400 lg:h-auto',
+                    'flex h-[110px] w-full basis-full justify-between border-r-2 border-l-2 border-neutral-500 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto dark:border-neutral-400',
                     weekIndex === 0 && 'rounded-t-lg',
                     weekIndex === weeksInMonthCount - 1 && 'rounded-b-lg'
                   )}
