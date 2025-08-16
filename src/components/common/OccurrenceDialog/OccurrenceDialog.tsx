@@ -366,6 +366,10 @@ const OccurrenceDialog = ({
             }
           >
             {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
+              if (!habits?.length) {
+                return null;
+              }
+
               return (
                 <SelectSection
                   showDivider
@@ -376,7 +380,7 @@ const OccurrenceDialog = ({
                       'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
                   }}
                 >
-                  {habits!.map((habit) => {
+                  {habits.map((habit) => {
                     return (
                       <SelectItem key={habit.id} textValue={habit.name}>
                         <div className="flex items-center gap-2">
