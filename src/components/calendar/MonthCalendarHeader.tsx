@@ -4,6 +4,7 @@ import {
   Button,
   Select,
   Tooltip,
+  Checkbox,
   SelectItem,
   SelectSection,
 } from '@heroui/react';
@@ -67,6 +68,22 @@ const MonthCalendarHeader = ({
   const shouldRenderFilters =
     !!user && Object.keys(habits).length > 0 && Object.keys(traits).length > 0;
 
+  const areAllHabitsSelected = React.useMemo(() => {
+    if (filters.habitIds.size === 1 && filters.habitIds.has('')) {
+      return false;
+    }
+
+    return filters.habitIds.size === Object.keys(habits).length;
+  }, [filters.habitIds, habits]);
+
+  const areAllTraitsSelected = React.useMemo(() => {
+    if (filters.traitIds.size === 1 && filters.traitIds.has('')) {
+      return false;
+    }
+
+    return filters.traitIds.size === Object.keys(traits).length;
+  }, [filters.traitIds, traits]);
+
   const habitsByTraitName = React.useMemo(() => {
     return Object.groupBy(Object.values(habits), (habit) => {
       return habit.trait?.name || 'Unknown';
@@ -92,6 +109,28 @@ const MonthCalendarHeader = ({
   const handleHabitsFilterChange: React.ChangeEventHandler<
     HTMLSelectElement
   > = (event) => {
+    if (event.target.value.includes('toggle-all')) {
+      if (areAllHabitsSelected) {
+        onFilterChange({
+          ...filters,
+          habitIds: new Set(['']),
+        });
+
+        return;
+      }
+
+      const allHabitIds = Object.keys(habits).filter((id) => {
+        return id !== '';
+      });
+
+      onFilterChange({
+        ...filters,
+        habitIds: new Set(allHabitIds),
+      });
+
+      return;
+    }
+
     onFilterChange({
       ...filters,
       habitIds: new Set(event.target.value.split(',')),
@@ -101,6 +140,28 @@ const MonthCalendarHeader = ({
   const handleTraitsFilterChange: React.ChangeEventHandler<
     HTMLSelectElement
   > = (event) => {
+    if (event.target.value.includes('toggle-all')) {
+      if (areAllTraitsSelected) {
+        onFilterChange({
+          ...filters,
+          traitIds: new Set(['']),
+        });
+
+        return;
+      }
+
+      const allTraitIds = Object.keys(traits).filter((id) => {
+        return id !== '';
+      });
+
+      onFilterChange({
+        ...filters,
+        traitIds: new Set(allTraitIds),
+      });
+
+      return;
+    }
+
     onFilterChange({
       ...filters,
       traitIds: new Set(event.target.value.split(',')),
@@ -144,9 +205,7 @@ const MonthCalendarHeader = ({
           >
             {YEARS.map((year) => {
               return (
-                <SelectItem as={Link} key={year.toString()}>
-                  {year.toString()}
-                </SelectItem>
+                <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
               );
             })}
           </Select>
@@ -238,38 +297,62 @@ const MonthCalendarHeader = ({
               );
             }}
           >
-            {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
-              return (
-                <SelectSection
-                  showDivider
-                  key={traitName}
-                  title={traitName}
-                  classNames={{
-                    heading:
-                      'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-                  }}
+            <>
+              {!!Object.keys(habits).length && (
+                <SelectItem
+                  key="toggle-all"
+                  className="mb-0.5"
+                  textValue="Toggle all"
                 >
-                  {habits!.map((habit) => {
-                    return (
-                      <SelectItem key={habit.id} textValue={habit.name}>
-                        <div className="flex items-center gap-2">
-                          <img
-                            alt={habit.name}
-                            role="habit-icon"
-                            className="h-4 w-4"
-                            src={getPublicUrl(
-                              StorageBuckets.HABIT_ICONS,
-                              habit.iconPath
-                            )}
-                          />
-                          <span className="truncate">{habit.name}</span>
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectSection>
-              );
-            })}
+                  <Checkbox
+                    color="secondary"
+                    isSelected={areAllHabitsSelected}
+                    isIndeterminate={
+                      !areAllHabitsSelected && filters.habitIds.size > 1
+                    }
+                  />
+                  <span>
+                    {areAllHabitsSelected ? 'Unselect' : 'Select'} all
+                  </span>
+                </SelectItem>
+              )}
+              {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
+                if (!habits?.length) {
+                  return null;
+                }
+
+                return (
+                  <SelectSection
+                    showDivider
+                    key={traitName}
+                    title={traitName}
+                    classNames={{
+                      heading:
+                        'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
+                    }}
+                  >
+                    {habits.map((habit) => {
+                      return (
+                        <SelectItem key={habit.id} textValue={habit.name}>
+                          <div className="flex items-center gap-2">
+                            <img
+                              alt={habit.name}
+                              role="habit-icon"
+                              className="h-4 w-4"
+                              src={getPublicUrl(
+                                StorageBuckets.HABIT_ICONS,
+                                habit.iconPath
+                              )}
+                            />
+                            <span className="truncate">{habit.name}</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectSection>
+                );
+              })}
+            </>
           </Select>
           <Select
             size="md"
@@ -297,11 +380,31 @@ const MonthCalendarHeader = ({
               );
             }}
           >
-            <SelectSection title="Filter by traits">
-              {Object.values(traits).map((trait) => {
-                return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
-              })}
-            </SelectSection>
+            <>
+              {!!Object.keys(traits).length && (
+                <SelectItem
+                  key="toggle-all"
+                  className="mb-0.5"
+                  textValue="Toggle all"
+                >
+                  <Checkbox
+                    color="secondary"
+                    isSelected={areAllTraitsSelected}
+                    isIndeterminate={
+                      !areAllTraitsSelected && filters.traitIds.size > 1
+                    }
+                  />
+                  <span>
+                    {areAllTraitsSelected ? 'Unselect' : 'Select'} all
+                  </span>
+                </SelectItem>
+              )}
+              <SelectSection title="Filter by traits">
+                {Object.values(traits).map((trait) => {
+                  return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
+                })}
+              </SelectSection>
+            </>
           </Select>
         </div>
       )}
