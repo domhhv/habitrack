@@ -20,30 +20,41 @@ import { useUser, useTextField, useFileField } from '@hooks';
 import { uploadHabitIcon } from '@services';
 import { useTraits, useHabitActions } from '@stores';
 
-type AddHabitDialogButtonProps = {
-  isOpen: boolean;
-  onClose: () => void;
-};
+const AddHabitDialogButton = () => {
+  const [traitId, setTraitId] = React.useState('');
+  const [isAdding, setIsAdding] = React.useState(false);
 
-const AddHabitDialogButton = ({
-  isOpen,
-  onClose,
-}: AddHabitDialogButtonProps) => {
   const traits = useTraits();
   const { user } = useUser();
   const { addHabit } = useHabitActions();
-  const [name, handleNameChange] = useTextField();
-  const [description, handleDescriptionChange] = useTextField();
-  const [icon, handleIconChange] = useFileField();
-  const [traitId, setTraitId] = React.useState('');
-  const [isAdding, setIsAdding] = React.useState(false);
-  const [isTraitDialogAnimatingClose, setIsTraitDialogAnimatingClose] =
-    React.useState<boolean>(false);
+  const [icon, handleIconChange, clearIcon] = useFileField();
+  const [name, handleNameChange, clearName] = useTextField();
+  const [description, handleDescriptionChange, clearDescription] =
+    useTextField();
+
+  const {
+    isOpen: isAddDialogOpen,
+    onClose: closeAddDialog,
+    onOpen: openAddDialog,
+  } = useDisclosure();
   const {
     isOpen: isTraitModalOpen,
     onClose: closeTraitModal,
     onOpen: openTraitModal,
   } = useDisclosure();
+
+  const clearFields = React.useCallback(() => {
+    clearName();
+    clearDescription();
+    clearIcon();
+    setTraitId('');
+  }, [clearName, clearDescription, clearIcon]);
+
+  React.useEffect(() => {
+    if (!isAddDialogOpen) {
+      clearFields();
+    }
+  }, [isAddDialogOpen, clearFields]);
 
   const handleAdd = async () => {
     if (!user) {
@@ -62,24 +73,31 @@ const AddHabitDialogButton = ({
       });
     };
 
-    void handleAsyncAction(add(), 'add_habit', setIsAdding).then(onClose);
+    void handleAsyncAction(add(), 'add_habit', setIsAdding)
+      .then(closeAddDialog)
+      .then(clearFields);
   };
 
   return (
     <>
-      {(isTraitModalOpen || isTraitDialogAnimatingClose) && (
-        <AddTraitModal
-          isOpen={isTraitModalOpen}
-          onClose={() => {
-            setIsTraitDialogAnimatingClose(true);
-            closeTraitModal();
-            setTimeout(() => {
-              setIsTraitDialogAnimatingClose(false);
-            }, 100);
-          }}
-        />
-      )}
-      <Modal isOpen={isOpen} onClose={onClose} role="add-habit-dialog">
+      <AddTraitModal isOpen={isTraitModalOpen} onClose={closeTraitModal} />
+
+      <Button
+        color="primary"
+        variant="solid"
+        onPress={openAddDialog}
+        className="w-full lg:w-auto"
+        data-testid="add-habit-button"
+        startContent={<Plus weight="bold" />}
+      >
+        Add habit
+      </Button>
+
+      <Modal
+        role="add-habit-dialog"
+        isOpen={isAddDialogOpen}
+        onClose={closeAddDialog}
+      >
         <ModalContent>
           <ModalHeader>Add New Habit</ModalHeader>
           <ModalBody>

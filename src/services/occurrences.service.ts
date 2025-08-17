@@ -7,8 +7,9 @@ import type {
   OccurrencesUpdate,
 } from '@models';
 import { StorageBuckets } from '@models';
-import { deleteFile } from '@root/src/services/storage.service';
 import { deepSnakify, deepCamelize } from '@utils';
+
+import { deleteFile } from './storage.service';
 
 export const createOccurrence = async (
   occurrence: OccurrencesInsert

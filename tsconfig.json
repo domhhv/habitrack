@@ -30,8 +30,7 @@
       "@stores": ["stores"],
       "@const": ["constants"],
       "@tests": ["../tests"],
-      "@db-types": ["../supabase/database.types"],
-      "@root/*": ["../*"]
+      "@db-types": ["../supabase/database.types"]
     }
   },
   "include": ["src", "tests", "./supabase/database.types.ts"]

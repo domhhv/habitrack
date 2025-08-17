@@ -23,12 +23,26 @@ type AddCustomTraitModalProps = {
 };
 
 const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
-  const [label, handleLabelChange] = useTextField();
-  const [description, handleDescriptionChange] = useTextField();
   const [color, setTraitColor] = React.useState('#94a3b8');
   const [isAdding, setIsAdding] = React.useState(false);
-  const { addTrait } = useTraitActions();
+
   const { user } = useUser();
+  const { addTrait } = useTraitActions();
+  const [label, handleLabelChange, clearLabel] = useTextField();
+  const [description, handleDescriptionChange, clearDescription] =
+    useTextField();
+
+  const clearFields = React.useCallback(() => {
+    clearLabel();
+    clearDescription();
+    setTraitColor('#94a3b8');
+  }, [clearLabel, clearDescription]);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      clearFields();
+    }
+  }, [isOpen, clearFields]);
 
   const handleAdd = async () => {
     if (!user) {
@@ -44,7 +58,9 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
       }),
       'add_trait',
       setIsAdding
-    ).then(onClose);
+    )
+      .then(onClose)
+      .then(clearFields);
   };
 
   const handleTraitColorChange = (color: string) => {
