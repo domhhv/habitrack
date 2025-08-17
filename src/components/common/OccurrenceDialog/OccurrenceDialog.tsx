@@ -15,7 +15,14 @@ import {
 } from '@heroui/react';
 import { ZonedDateTime, parseAbsoluteToLocal } from '@internationalized/date';
 import { ArrowsClockwise } from '@phosphor-icons/react';
-import { format, isToday, isFuture, isYesterday } from 'date-fns';
+import {
+  format,
+  isToday,
+  isFuture,
+  isSameDay,
+  isYesterday,
+  formatDistanceToNowStrict,
+} from 'date-fns';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
@@ -24,7 +31,11 @@ import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
-import { getPublicUrl, uploadImages } from '@services';
+import {
+  getPublicUrl,
+  uploadImages,
+  getLatestHabitOccurrenceTimestamp,
+} from '@services';
 import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
 import { toEventLike } from '@utils';
 
@@ -60,6 +71,7 @@ const OccurrenceDialog = ({
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
     React.useState(false);
   const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
+  const [lastLoggedAt, setLastLoggedAt] = React.useState<Date | null>(null);
   const { isDesktop, isMobile } = useScreenWidth();
 
   const habitsByTraitName = React.useMemo(() => {
@@ -69,6 +81,26 @@ const OccurrenceDialog = ({
   }, [habits]);
 
   const hasHabits = Object.keys(habits).length > 0;
+
+  React.useEffect(() => {
+    if (existingOccurrence) {
+      return;
+    }
+
+    if (
+      !selectedHabitId ||
+      !newOccurrenceDate ||
+      !isSameDay(newOccurrenceDate, new Date())
+    ) {
+      setLastLoggedAt(null);
+
+      return;
+    }
+
+    getLatestHabitOccurrenceTimestamp(selectedHabitId).then((timestamp) => {
+      setLastLoggedAt(timestamp ? new Date(timestamp) : null);
+    });
+  }, [existingOccurrence, selectedHabitId]);
 
   React.useEffect(() => {
     if (!newOccurrenceDate && !existingOccurrence) {
@@ -351,7 +383,6 @@ const OccurrenceDialog = ({
             selectedKeys={[selectedHabitId]}
             selectorIcon={<ArrowsClockwise />}
             onChange={handleHabitSelectionChange}
-            description="Select from your habits"
             scrollShadowProps={{
               visibility: 'bottom',
             }}
@@ -359,6 +390,11 @@ const OccurrenceDialog = ({
               hasHabits
                 ? 'Habits'
                 : 'No habits yet. Create a habit to get started.'
+            }
+            description={
+              lastLoggedAt
+                ? `Last logged ${formatDistanceToNowStrict(lastLoggedAt)} ago`
+                : 'Choose your habit'
             }
           >
             {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
