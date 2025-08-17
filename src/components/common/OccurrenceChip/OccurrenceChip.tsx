@@ -5,8 +5,8 @@ import {
   Drawer,
   Tooltip,
   DrawerBody,
-  DrawerFooter,
   DrawerHeader,
+  ScrollShadow,
   DrawerContent,
   useDisclosure,
 } from '@heroui/react';
@@ -35,7 +35,6 @@ const OccurrenceChip = ({
 }: OccurrenceChipProps) => {
   const {
     isOpen: isDrawerOpen,
-    onClose: closeDrawer,
     onOpen: openDrawer,
     onOpenChange: onDrawerOpenChange,
   } = useDisclosure();
@@ -83,8 +82,9 @@ const OccurrenceChip = ({
         style={{ borderColor: colorOverride || traitColor }}
         className={cn(
           'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 md:mr-1 md:mb-1 dark:bg-slate-800',
-          screenWidth < 400 && 'p-1',
-          isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
+          screenWidth < 400 && 'p-1'
+          // TODO: Implement automatic scrolling of the chip into view when drawer is open
+          // isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
         )}
       >
         <img
@@ -104,7 +104,7 @@ const OccurrenceChip = ({
         color="primary"
         placement="bottom-right"
         content={occurrences.length}
-        className={cn(isDrawerOpen && !isOccurrenceDialogOpen && 'z-51')}
+        className={cn(isDrawerOpen /* && !isOccurrenceDialogOpen && 'z-51' */)}
       >
         {chip}
       </Badge>
@@ -122,8 +122,8 @@ const OccurrenceChip = ({
         placement="top-right"
         content={<Note size={14} weight="fill" />}
         className={cn(
-          'top-1 right-1 border-none bg-transparent',
-          isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
+          'top-1 right-1 border-none bg-transparent'
+          // isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
         )}
       >
         {chip}
@@ -142,8 +142,8 @@ const OccurrenceChip = ({
         placement="top-left"
         content={<Camera size={14} weight="fill" />}
         className={cn(
-          'top-1 right-1 border-none bg-transparent',
-          isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
+          'top-1 right-1 border-none bg-transparent'
+          // isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
         )}
       >
         {chip}
@@ -169,10 +169,11 @@ const OccurrenceChip = ({
         isOpen={isDrawerOpen && isInteractable}
       >
         <DrawerContent>
-          <DrawerHeader>{habitName}</DrawerHeader>
+          <DrawerHeader className="pb-0">
+            {habitName} | {format(occurrence.timestamp, 'MMM dd, Y')}
+          </DrawerHeader>
           <DrawerBody>
-            <div className="max-h-96 space-y-2 overflow-x-hidden overflow-y-visible p-1">
-              <span className="font-bold">{habitName}</span>
+            <ScrollShadow className="max-h-96 space-y-2">
               <ul className="space-y-2 italic">
                 {occurrences
                   .toSorted((a, b) => {
@@ -182,9 +183,9 @@ const OccurrenceChip = ({
                     return (
                       <li
                         key={o.id}
-                        className="mb-2 flex items-start justify-between gap-4 border-b border-neutral-500 py-2"
+                        className="mb-2 flex items-start justify-between gap-4 border-neutral-500 py-2 not-last:border-b"
                       >
-                        <div className="max-w-48 whitespace-pre-wrap">
+                        <div className="whitespace-pre-wrap">
                           <span className="font-semibold">
                             {format(new Date(o.timestamp), 'p')}
                           </span>
@@ -232,13 +233,8 @@ const OccurrenceChip = ({
                     );
                   })}
               </ul>
-            </div>
+            </ScrollShadow>
           </DrawerBody>
-          <DrawerFooter>
-            <Button color="danger" variant="light" onPress={closeDrawer}>
-              Close
-            </Button>
-          </DrawerFooter>
         </DrawerContent>
       </Drawer>
     </>
