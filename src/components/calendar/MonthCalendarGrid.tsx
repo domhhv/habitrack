@@ -47,6 +47,8 @@ const MonthCalendarGrid = ({
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const visibleMonth = new Date(activeYear, activeMonthIndex, 1);
+  const prevMonth = addMonths(visibleMonth, -1);
+  const nextMonth = addMonths(visibleMonth, 1);
   const weekNotes = useWeekNotes();
   const [noteDate, setNoteDate] = React.useState<Date | null>(null);
   const [notePeriod, setNotePeriod] = React.useState<NotePeriodKind>(null);
@@ -225,8 +227,6 @@ const MonthCalendarGrid = ({
                       const { day, month, year } = calendarDate;
 
                       const date = new Date(year, month - 1, day);
-                      const prevMonth = addMonths(visibleMonth, -1);
-                      const nextMonth = addMonths(visibleMonth, 1);
                       const dayStart = startOfDay(date);
                       const dayEnd = endOfDay(date);
 
@@ -241,16 +241,12 @@ const MonthCalendarGrid = ({
                             ? 'above-range'
                             : '';
 
-                      const [cellKey] = calendarDate.toString().split('T');
-
-                      const position = getCellPosition(weekIndex, dayIndex);
-
                       return (
                         <MonthCalendarCell
                           date={date}
-                          key={cellKey}
-                          position={position}
                           rangeStatus={rangeStatus}
+                          key={calendarDate.toString()}
+                          position={getCellPosition(weekIndex, dayIndex)}
                           onNoteClick={() => {
                             handleNoteDialogOpen(date, 'day');
                           }}
