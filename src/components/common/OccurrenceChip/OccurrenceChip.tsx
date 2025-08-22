@@ -170,7 +170,7 @@ const OccurrenceChip = ({
       >
         <DrawerContent>
           <DrawerHeader className="pb-0">
-            {habitName} | {format(occurrence.timestamp, 'MMM dd, Y')}
+            {habitName} | {format(occurrence.timestamp, 'MMM dd, y')}
           </DrawerHeader>
           <DrawerBody>
             <ScrollShadow className="max-h-96 space-y-2">
