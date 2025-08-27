@@ -2,10 +2,10 @@ import { cn } from '@heroui/react';
 import {
   getDay,
   addDays,
-  getWeek,
   isToday,
   endOfDay,
   endOfWeek,
+  getISOWeek,
   startOfDay,
   startOfWeek,
   startOfToday,
@@ -39,7 +39,7 @@ const WeekCalendar = () => {
       return;
     }
 
-    const currentWeek = startOfWeek(startOfToday());
+    const currentWeek = startOfWeek(startOfToday(), { weekStartsOn: 1 });
 
     const {
       day = currentWeek.getDate(),
@@ -47,14 +47,14 @@ const WeekCalendar = () => {
       year = currentWeek.getFullYear(),
     } = params;
 
-    const date = new Date(Number(year), Number(month) - 1, Number(day) + 1);
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
 
-    const startDate = startOfWeek(startOfDay(date));
+    const startDate = startOfWeek(startOfDay(date), { weekStartsOn: 1 });
 
     setStartOfTheWeek(startDate);
 
-    const rangeStart = startOfWeek(startDate);
-    const rangeEnd = endOfWeek(startDate);
+    const rangeStart = startOfWeek(startDate, { weekStartsOn: 1 });
+    const rangeEnd = endOfWeek(startDate, { weekStartsOn: 1 });
 
     void fetchOccurrences([+rangeStart, +rangeEnd]);
   }, [params, user, fetchOccurrences, clearOccurrences, occurrences]);
@@ -93,7 +93,7 @@ const WeekCalendar = () => {
     <>
       <div className="space-y-2 text-center">
         <h1 className="text-xl font-bold">
-          Week {getWeek(startOfTheWeek)} of {getISOWeekYear(startOfTheWeek)}
+          Week {getISOWeek(startOfTheWeek)} of {getISOWeekYear(startOfTheWeek)}
         </h1>
         <p className="text-sm text-stone-400 italic dark:text-stone-500">
           Logging & navigation coming soon
