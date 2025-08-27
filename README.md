@@ -29,7 +29,7 @@ This app showcases the use of the following tools and technologies:
 - React 19 with TypeScript 5.8, bundled with [Vite 6](https://vite.dev/)
 - [React Router](https://reactrouter.com) v7 for routing (library mode)
 - [Zustand](https://zustand.docs.pmnd.rs/) v5 for global state management
-- [Tailwind CSS](https://tailwindcss.com) v3 for styling (HeroUI doesn't support v4 [yet](https://github.com/heroui-inc/heroui/issues/4644))
+- [Tailwind CSS](https://tailwindcss.com) v4 for styling
 - [HeroUI](https://www.heroui.com/) for the UI components
 - React Aria [calendar hooks](https://react-spectrum.adobe.com/react-aria/useCalendar.html) to generate the calendar view
 - [Supabase](https://supabase.io) for Authentication, Database and Storage
