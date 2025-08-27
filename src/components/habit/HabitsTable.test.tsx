@@ -5,7 +5,7 @@ import { it, vi, expect, describe } from 'vitest';
 import { useHabits, useTraits } from '@stores';
 import { makeTestHabit, makeTestTrait } from '@tests';
 
-import HabitsPage from './HabitsPage';
+import HabitsTable from './HabitsTable';
 
 vi.mock('@services', () => {
   return {
@@ -59,7 +59,7 @@ vi.mock('@hooks', () => {
   };
 });
 
-describe(HabitsPage.name, () => {
+describe(HabitsTable.name, () => {
   it('should display habits', async () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       () => {
@@ -77,9 +77,8 @@ describe(HabitsPage.name, () => {
         };
       }
     );
-    const { getAllByRole, getByText } = render(<HabitsPage />);
+    const { getAllByRole, getByText } = render(<HabitsTable />);
     await waitFor(() => {
-      expect(getByText('Your habits'));
       expect(getByText('Habit name #1'));
       expect(getByText('Habit name #2'));
       expect(getByText('Habit description #1'));
@@ -133,7 +132,7 @@ describe(HabitsPage.name, () => {
       }
     );
     const { getAllByRole, getByRole, getByTestId, queryByRole } = render(
-      <HabitsPage />
+      <HabitsTable />
     );
 
     const editButtons = getAllByRole('edit-habit-button');
