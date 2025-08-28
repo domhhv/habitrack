@@ -28,7 +28,6 @@ import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
 
-import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
@@ -38,6 +37,7 @@ import {
   getLatestHabitOccurrenceTimestamp,
 } from '@services';
 import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
+import { handleAsyncAction } from '@utils';
 
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 

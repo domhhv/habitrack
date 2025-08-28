@@ -1,7 +1,6 @@
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-import { supabaseClient } from '@helpers';
 import type {
   Habit,
   Streak,
@@ -10,6 +9,7 @@ import type {
   OccurrencesUpdate,
 } from '@models';
 import { StorageBuckets } from '@models';
+import { supabaseClient } from '@utils';
 
 import { deleteFile } from './storage.service';
 

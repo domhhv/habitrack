@@ -15,12 +15,12 @@ import { format } from 'date-fns';
 import React from 'react';
 
 import { OccurrenceDialog } from '@components';
-import { handleAsyncAction } from '@helpers';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import { useOccurrenceActions } from '@stores';
+import { handleAsyncAction } from '@utils';
 
 export type OccurrenceChipProps = {
   colorOverride?: string;

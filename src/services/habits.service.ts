@@ -1,7 +1,6 @@
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-import { supabaseClient } from '@helpers';
 import {
   type Habit,
   StorageBuckets,
@@ -9,6 +8,7 @@ import {
   type HabitsUpdate,
 } from '@models';
 import { uploadFile } from '@services';
+import { supabaseClient } from '@utils';
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
   const { data, error } = await supabaseClient

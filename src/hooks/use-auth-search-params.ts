@@ -2,7 +2,7 @@ import { addToast } from '@heroui/react';
 import React from 'react';
 import { useLocation, useSearchParams } from 'react-router';
 
-import { supabaseClient } from '@helpers';
+import { supabaseClient } from '@utils';
 
 const useAuthSearchParams = () => {
   const [searchParams, setSearchParams] = useSearchParams();

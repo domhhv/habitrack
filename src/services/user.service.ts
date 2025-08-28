@@ -1,6 +1,6 @@
 import { type UserAttributes } from '@supabase/supabase-js';
 
-import { supabaseClient } from '@helpers';
+import { supabaseClient } from '@utils';
 
 export const signUp = async (email: string, password: string, name: string) => {
   const { error } = await supabaseClient.auth.signUp({

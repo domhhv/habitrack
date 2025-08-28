@@ -25,10 +25,10 @@ import {
 } from 'date-fns';
 import React from 'react';
 
-import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
 import { type NotePeriodKind } from '@models';
 import { useNoteActions, usePeriodNotes } from '@stores';
+import { handleAsyncAction } from '@utils';
 
 type NoteDialogProps = {
   isOpen: boolean;

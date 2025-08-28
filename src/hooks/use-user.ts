@@ -3,7 +3,7 @@ import camelcaseKeys from 'camelcase-keys';
 import React from 'react';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
-import { supabaseClient } from '@helpers';
+import { supabaseClient } from '@utils';
 
 const useUser = () => {
   const [isLoading, setIsLoading] = React.useState(true);
