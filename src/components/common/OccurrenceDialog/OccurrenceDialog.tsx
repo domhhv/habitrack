@@ -38,7 +38,6 @@ import {
   getLatestHabitOccurrenceTimestamp,
 } from '@services';
 import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
-import { toEventLike } from '@utils';
 
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 
@@ -101,7 +100,7 @@ const OccurrenceDialog = ({
     getLatestHabitOccurrenceTimestamp(selectedHabitId).then((timestamp) => {
       setLastLoggedAt(timestamp ? new Date(timestamp) : null);
     });
-  }, [existingOccurrence, selectedHabitId]);
+  }, [existingOccurrence, selectedHabitId, newOccurrenceDate]);
 
   React.useEffect(() => {
     if (!newOccurrenceDate && !existingOccurrence) {
@@ -110,7 +109,7 @@ const OccurrenceDialog = ({
 
     if (isOpen && existingOccurrence) {
       setSelectedHabitId(existingOccurrence.habitId.toString());
-      handleNoteChange(toEventLike(existingOccurrence.note?.content || ''));
+      handleNoteChange(existingOccurrence.note?.content || '');
       setTime(
         parseAbsoluteToLocal(
           new Date(existingOccurrence.timestamp).toISOString()

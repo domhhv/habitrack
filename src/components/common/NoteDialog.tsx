@@ -29,7 +29,6 @@ import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
 import { type NotePeriodKind } from '@models';
 import { useNoteActions, usePeriodNotes } from '@stores';
-import { toEventLike } from '@utils';
 
 type NoteDialogProps = {
   isOpen: boolean;
@@ -62,9 +61,9 @@ const NoteDialog = ({
 
   React.useEffect(() => {
     if (isOpen && existingNote?.content && !hasEdited) {
-      handleContentChange(toEventLike(existingNote.content));
+      handleContentChange(existingNote.content);
     } else if (isOpen && !existingNote?.content) {
-      handleContentChange(toEventLike(''));
+      handleContentChange('');
     }
   }, [existingNote, handleContentChange, isOpen, hasEdited]);
 
