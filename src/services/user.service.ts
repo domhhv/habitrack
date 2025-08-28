@@ -1,5 +1,4 @@
 import { type UserAttributes } from '@supabase/supabase-js';
-import decamelizeKeys from 'decamelize-keys';
 
 import { supabaseClient } from '@helpers';
 
@@ -58,13 +57,11 @@ export const updateUser = async (
     userAttributes.data = { name };
   }
 
-  const { data, error } = await supabaseClient.auth.updateUser(userAttributes);
+  const { error } = await supabaseClient.auth.updateUser(userAttributes);
 
   if (error) {
     throw new Error(error.message);
   }
-
-  return decamelizeKeys(data.user, { deep: true });
 };
 
 export const sendPasswordResetEmail = async (email: string) => {

@@ -19,12 +19,12 @@ import {
   formatDistanceStrict,
 } from 'date-fns';
 import { enGB } from 'date-fns/locale';
+import capitalize from 'lodash.capitalize';
 import pluralize from 'pluralize';
 import React from 'react';
 
 import type { Habit } from '@models';
 import { getLatestHabitOccurrenceTimestamp } from '@services';
-import { capitalize } from '@utils';
 
 const formatRelativeLocale: Record<string, string> = {
   lastWeek: `'this' EEEE`,

@@ -1,6 +1,7 @@
 import { addToast } from '@heroui/react';
+import capitalize from 'lodash.capitalize';
 
-import { capitalize, getErrorMessage } from '@utils';
+import { getErrorMessage } from '@utils';
 
 type ActionVerb = 'add' | 'update' | 'remove' | 'fetch' | 'upload';
 type EntityNoun =
