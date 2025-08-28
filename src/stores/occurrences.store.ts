@@ -1,3 +1,4 @@
+import keyBy from 'lodash.keyby';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
@@ -14,7 +15,6 @@ import {
   createOccurrence,
   destroyOccurrence,
 } from '@services';
-import { toHashMap } from '@utils';
 
 type OccurrencesState = {
   occurrences: Record<Occurrence['id'], Occurrence>;
@@ -60,7 +60,7 @@ const useOccurrencesStore = create<OccurrencesState>()(
           const occurrences = await listOccurrences(range);
 
           set((state) => {
-            state.occurrences = toHashMap(occurrences);
+            state.occurrences = keyBy(occurrences, 'id');
           });
         },
 
