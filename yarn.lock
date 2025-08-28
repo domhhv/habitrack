@@ -4548,6 +4548,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash.groupby@npm:^4":
+  version: 4.6.9
+  resolution: "@types/lodash.groupby@npm:4.6.9"
+  dependencies:
+    "@types/lodash": "npm:*"
+  checksum: 10c0/1302531f76da99cc8f1bbd486a8c7048a833352b12c39eb5b2ded01173dd5fff76f2c7ace04f08b51c55840271170f1cfbffe4e454dde8597c3ee996e70d4e11
+  languageName: node
+  linkType: hard
+
 "@types/lodash@npm:*":
   version: 4.17.20
   resolution: "@types/lodash@npm:4.17.20"
@@ -7020,6 +7029,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.3.0"
     "@types/lodash.capitalize": "npm:^4"
+    "@types/lodash.groupby": "npm:^4"
     "@types/node": "npm:^22.15.12"
     "@types/pluralize": "npm:^0.0.33"
     "@types/react": "npm:^19.1.3"
@@ -7049,6 +7059,7 @@ __metadata:
     jsdom: "npm:^26.1.0"
     lint-staged: "npm:^15.5.2"
     lodash.capitalize: "npm:^4.2.1"
+    lodash.groupby: "npm:^4.6.0"
     pluralize: "npm:^8.0.0"
     prettier: "npm:^3.5.3"
     prettier-plugin-tailwindcss: "npm:^0.6.14"
@@ -8066,6 +8077,13 @@ __metadata:
   version: 4.2.1
   resolution: "lodash.capitalize@npm:4.2.1"
   checksum: 10c0/b289326497c2e24d6b8afa2af2ca4e068ef6ef007ade36bfb6f70af77ce10ea3f090eeee947d5fdcf2db4bcfa4703c8c10a5857a2b39e308bddfd1d11ad35970
+  languageName: node
+  linkType: hard
+
+"lodash.groupby@npm:^4.6.0":
+  version: 4.6.0
+  resolution: "lodash.groupby@npm:4.6.0"
+  checksum: 10c0/3d136cad438ad6c3a078984ef60e057a3498b1312aa3621b00246ecb99e8f2c4d447e2815460db7a0b661a4fe4e2eeee96c84cb661a824bad04b6cf1f7bc6e9b
   languageName: node
   linkType: hard
 
