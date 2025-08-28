@@ -227,8 +227,6 @@ const MonthCalendarGrid = ({
                       const { day, month, year } = calendarDate;
 
                       const date = new Date(year, month - 1, day);
-                      const dayStart = startOfDay(date);
-                      const dayEnd = endOfDay(date);
 
                       const rangeStatus: CellRangeStatus = isSameMonth(
                         date,
@@ -254,10 +252,10 @@ const MonthCalendarGrid = ({
                             setNewOccurrenceDate(date);
                             openOccurrenceDialog();
                           }}
-                          occurrences={occurrences.filter((occurrence) => {
+                          occurrences={occurrences.filter(({ timestamp }) => {
                             return (
-                              occurrence.timestamp >= +dayStart &&
-                              occurrence.timestamp <= +dayEnd
+                              timestamp >= Number(startOfDay(date)) &&
+                              timestamp <= Number(endOfDay(date))
                             );
                           })}
                         />

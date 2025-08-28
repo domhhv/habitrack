@@ -73,12 +73,12 @@ export const deleteFile = async (bucket: StorageBuckets, path: string) => {
   return true;
 };
 
-export async function uploadImage(
+export const uploadImage = async (
   bucket: StorageBuckets,
   file: File,
   userId: string,
   folder?: string
-): Promise<UploadResult> {
+): Promise<UploadResult> => {
   if (!ALLOWED_IMAGE_TYPES[bucket].includes(file.type)) {
     return { error: 'Invalid file type', status: 'error' };
   }
@@ -107,7 +107,7 @@ export async function uploadImage(
   } catch (error) {
     return { error: getErrorMessage(error), status: 'error' };
   }
-}
+};
 
 export const uploadImages = async (
   bucket: StorageBuckets,

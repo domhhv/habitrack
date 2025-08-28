@@ -1,7 +1,7 @@
 import { type UserAttributes } from '@supabase/supabase-js';
+import decamelizeKeys from 'decamelize-keys';
 
 import { supabaseClient } from '@helpers';
-import { deepCamelize } from '@utils';
 
 export const signUp = async (email: string, password: string, name: string) => {
   const { error } = await supabaseClient.auth.signUp({
@@ -64,7 +64,7 @@ export const updateUser = async (
     throw new Error(error.message);
   }
 
-  return deepCamelize(data.user);
+  return decamelizeKeys(data.user, { deep: true });
 };
 
 export const sendPasswordResetEmail = async (email: string) => {
