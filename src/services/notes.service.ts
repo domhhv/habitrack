@@ -1,11 +1,13 @@
+import camelcaseKeys from 'camelcase-keys';
+import decamelizeKeys from 'decamelize-keys';
+
 import { supabaseClient } from '@helpers';
 import type { Note, NotesUpdate, NotesInsert } from '@models';
-import { deepSnakify, deepCamelize } from '@utils';
 
 export const createNote = async (note: NotesInsert): Promise<Note> => {
   const { data, error } = await supabaseClient
     .from('notes')
-    .insert(deepSnakify(note))
+    .insert(decamelizeKeys(note))
     .select()
     .single();
 
@@ -13,7 +15,7 @@ export const createNote = async (note: NotesInsert): Promise<Note> => {
     throw new Error(error.message);
   }
 
-  return deepCamelize(data);
+  return camelcaseKeys(data);
 };
 
 export const listNotes = async (): Promise<Note[]> => {
@@ -23,7 +25,7 @@ export const listNotes = async (): Promise<Note[]> => {
     throw new Error(error.message);
   }
 
-  return data.map(deepCamelize);
+  return camelcaseKeys(data);
 };
 
 export const updateNote = async (
@@ -32,7 +34,7 @@ export const updateNote = async (
 ): Promise<Note> => {
   const { data, error } = await supabaseClient
     .from('notes')
-    .update(deepSnakify(note))
+    .update(decamelizeKeys(note))
     .eq('id', id)
     .select();
 
@@ -40,7 +42,7 @@ export const updateNote = async (
     throw new Error(error.message);
   }
 
-  return deepCamelize(data[0]);
+  return camelcaseKeys(data[0]);
 };
 
 export const destroyNote = async (id: Note['id']) => {
@@ -49,6 +51,4 @@ export const destroyNote = async (id: Note['id']) => {
   if (error) {
     throw new Error(error.message);
   }
-
-  return Promise.resolve();
 };

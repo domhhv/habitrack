@@ -1,3 +1,6 @@
+import camelcaseKeys from 'camelcase-keys';
+import decamelizeKeys from 'decamelize-keys';
+
 import { supabaseClient } from '@helpers';
 import {
   type Habit,
@@ -6,12 +9,11 @@ import {
   type HabitsUpdate,
 } from '@models';
 import { uploadFile } from '@services';
-import { deepSnakify, deepCamelize } from '@utils';
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
   const { data, error } = await supabaseClient
     .from('habits')
-    .insert(deepSnakify(body))
+    .insert(decamelizeKeys(body))
     .select('*, trait:traits(name, color)')
     .single();
 
@@ -19,7 +21,7 @@ export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
     throw new Error(error.message);
   }
 
-  return deepCamelize(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const listHabits = async () => {
@@ -32,7 +34,7 @@ export const listHabits = async () => {
     throw new Error(error.message);
   }
 
-  return data.map(deepCamelize);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const patchHabit = async (
@@ -41,7 +43,7 @@ export const patchHabit = async (
 ): Promise<Habit> => {
   const { data, error } = await supabaseClient
     .from('habits')
-    .update(deepSnakify(habit))
+    .update(decamelizeKeys(habit))
     .eq('id', id)
     .select('*, trait:traits(id, name, color)')
     .single();
@@ -50,7 +52,7 @@ export const patchHabit = async (
     throw new Error(error.message);
   }
 
-  return deepCamelize(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const destroyHabit = async (id: Habit['id']) => {

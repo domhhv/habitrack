@@ -1,13 +1,13 @@
+import camelcaseKeys from 'camelcase-keys';
+import decamelizeKeys from 'decamelize-keys';
+
 import { supabaseClient } from '@helpers';
 import type { Trait, TraitsInsert } from '@models';
-import { deepSnakify, deepCamelize } from '@utils';
 
 export const createTrait = async (body: TraitsInsert): Promise<Trait> => {
-  const serverBody = deepSnakify(body);
-
   const { data, error } = await supabaseClient
     .from('traits')
-    .insert(serverBody)
+    .insert(decamelizeKeys(body))
     .select()
     .single();
 
@@ -15,7 +15,7 @@ export const createTrait = async (body: TraitsInsert): Promise<Trait> => {
     throw new Error(error.message);
   }
 
-  return deepCamelize(data);
+  return camelcaseKeys(data);
 };
 
 export const listTraits = async (): Promise<Trait[]> => {
@@ -25,5 +25,5 @@ export const listTraits = async (): Promise<Trait[]> => {
     throw new Error(error.message);
   }
 
-  return data.map(deepCamelize);
+  return camelcaseKeys(data);
 };

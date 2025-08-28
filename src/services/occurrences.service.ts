@@ -1,3 +1,6 @@
+import camelcaseKeys from 'camelcase-keys';
+import decamelizeKeys from 'decamelize-keys';
+
 import { supabaseClient } from '@helpers';
 import type {
   Habit,
@@ -7,7 +10,6 @@ import type {
   OccurrencesUpdate,
 } from '@models';
 import { StorageBuckets } from '@models';
-import { deepSnakify, deepCamelize } from '@utils';
 
 import { deleteFile } from './storage.service';
 
@@ -16,7 +18,7 @@ export const createOccurrence = async (
 ): Promise<Occurrence> => {
   const { data, error } = await supabaseClient
     .from('occurrences')
-    .insert(deepSnakify(occurrence))
+    .insert(decamelizeKeys(occurrence))
     .select(
       '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
     )
@@ -26,7 +28,7 @@ export const createOccurrence = async (
     throw new Error(error.message);
   }
 
-  return deepCamelize(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const listOccurrences = async (
@@ -45,7 +47,7 @@ export const listOccurrences = async (
     throw new Error(error.message);
   }
 
-  return data.map(deepCamelize);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const patchOccurrence = async (
@@ -54,7 +56,7 @@ export const patchOccurrence = async (
 ): Promise<Occurrence> => {
   const { data, error } = await supabaseClient
     .from('occurrences')
-    .update(deepSnakify(occurrence))
+    .update(decamelizeKeys(occurrence))
     .eq('id', id)
     .select(
       '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
@@ -65,7 +67,7 @@ export const patchOccurrence = async (
     throw new Error(error.message);
   }
 
-  return deepCamelize(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const destroyOccurrence = async ({ id, photoPaths }: Occurrence) => {
@@ -121,7 +123,7 @@ export const getLongestHabitStreak = async (
     throw new Error(error.message);
   }
 
-  return deepCamelize(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const getHabitTotalEntries = async (habitId: Habit['id']) => {

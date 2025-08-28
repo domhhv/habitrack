@@ -1,9 +1,9 @@
 import type { User } from '@supabase/supabase-js';
+import camelcaseKeys from 'camelcase-keys';
 import React from 'react';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 import { supabaseClient } from '@helpers';
-import { deepCamelize } from '@utils';
 
 const useUser = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -29,7 +29,18 @@ const useUser = () => {
           return;
         }
 
-        setUser(session?.user ? deepCamelize(session.user) : null);
+        setUser(() => {
+          if (!session?.user) {
+            return null;
+          }
+
+          const transformedUser = camelcaseKeys(
+            session.user as User & Record<string, unknown>,
+            { deep: true }
+          );
+
+          return transformedUser as CamelCasedPropertiesDeep<User>;
+        });
         setIsLoading(false);
       }
     };
@@ -51,7 +62,11 @@ const useUser = () => {
           event === 'TOKEN_REFRESHED' ||
           event === 'USER_UPDATED')
       ) {
-        setUser(deepCamelize(session.user));
+        const transformedUser = camelcaseKeys(
+          session.user as User & Record<string, unknown>,
+          { deep: true }
+        );
+        setUser(transformedUser as CamelCasedPropertiesDeep<User>);
       }
 
       if (event === 'SIGNED_OUT') {
