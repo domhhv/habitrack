@@ -23,6 +23,7 @@ import {
   isYesterday,
   formatDistanceToNowStrict,
 } from 'date-fns';
+import groupBy from 'lodash.groupby';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
@@ -75,7 +76,7 @@ const OccurrenceDialog = ({
   const { isDesktop, isMobile } = useScreenWidth();
 
   const habitsByTraitName = React.useMemo(() => {
-    return Object.groupBy(Object.values(habits), (habit) => {
+    return groupBy(Object.values(habits), (habit) => {
       return habit.trait?.name || 'Unknown';
     });
   }, [habits]);

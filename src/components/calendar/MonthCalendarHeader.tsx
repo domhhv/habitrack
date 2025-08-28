@@ -14,6 +14,7 @@ import {
   ArrowsClockwise,
 } from '@phosphor-icons/react';
 import { addMonths, startOfMonth, startOfToday } from 'date-fns';
+import groupBy from 'lodash.groupby';
 import React from 'react';
 import { Link, useParams, useNavigate } from 'react-router';
 
@@ -85,7 +86,7 @@ const MonthCalendarHeader = ({
   }, [filters.traitIds, traits]);
 
   const habitsByTraitName = React.useMemo(() => {
-    return Object.groupBy(Object.values(habits), (habit) => {
+    return groupBy(Object.values(habits), (habit) => {
       return habit.trait?.name || 'Unknown';
     });
   }, [habits]);

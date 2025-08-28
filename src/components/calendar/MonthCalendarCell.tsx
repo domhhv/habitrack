@@ -7,6 +7,7 @@ import {
 } from '@phosphor-icons/react';
 import { format, isToday } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import groupBy from 'lodash.groupby';
 import React from 'react';
 
 import { OccurrenceChip } from '@components';
@@ -51,7 +52,7 @@ const MonthCalendarCell = ({
     });
   }, [dayNotes, formattedDay]);
 
-  const groupedOccurrences = Object.groupBy(occurrences, (o) => {
+  const groupedOccurrences = groupBy(occurrences, (o) => {
     return o.habitId;
   });
 

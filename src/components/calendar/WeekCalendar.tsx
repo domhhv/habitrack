@@ -14,6 +14,7 @@ import {
   eachMinuteOfInterval,
 } from 'date-fns';
 import { motion } from 'framer-motion';
+import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useParams } from 'react-router';
 
@@ -81,7 +82,7 @@ const WeekCalendar = () => {
       });
 
       return Object.entries(
-        Object.groupBy(relatedOccurrences, (o) => {
+        groupBy(relatedOccurrences, (o) => {
           return o.habitId;
         })
       );
