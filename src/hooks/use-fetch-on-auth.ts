@@ -1,9 +1,8 @@
 import { addToast } from '@heroui/react';
 import React from 'react';
 
-import { supabaseClient } from '@helpers';
 import { useNoteActions, useTraitActions, useHabitActions } from '@stores';
-import { getErrorMessage } from '@utils';
+import { supabaseClient, getErrorMessage } from '@utils';
 
 const useFetchOnAuth = () => {
   const { clearTraits, fetchTraits } = useTraitActions();

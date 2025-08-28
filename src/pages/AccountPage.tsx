@@ -3,9 +3,9 @@ import React, { type FormEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { PasswordInput } from '@components';
-import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField, useAuthSearchParams } from '@hooks';
 import { updateUser } from '@services';
+import { handleAsyncAction } from '@utils';
 
 const AccountPage = () => {
   useAuthSearchParams();

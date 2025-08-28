@@ -1,8 +1,8 @@
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-import { supabaseClient } from '@helpers';
 import type { Note, NotesUpdate, NotesInsert } from '@models';
+import { supabaseClient } from '@utils';
 
 export const createNote = async (note: NotesInsert): Promise<Note> => {
   const { data, error } = await supabaseClient

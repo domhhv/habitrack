@@ -1,8 +1,8 @@
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-import { supabaseClient } from '@helpers';
 import type { Trait, TraitsInsert } from '@models';
+import { supabaseClient } from '@utils';
 
 export const createTrait = async (body: TraitsInsert): Promise<Trait> => {
   const { data, error } = await supabaseClient

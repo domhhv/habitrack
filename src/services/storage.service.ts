@@ -3,12 +3,12 @@ import imageCompression from 'browser-image-compression';
 import pluralize from 'pluralize';
 
 import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
-import { supabaseClient } from '@helpers';
 import type { UploadResult } from '@models';
 import { StorageBuckets } from '@models';
 import {
   isRejected,
   isFulfilled,
+  supabaseClient,
   isFailedUpload,
   getErrorMessage,
   isSuccessfulUpload,

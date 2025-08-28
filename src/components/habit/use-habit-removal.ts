@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { handleAsyncAction } from '@helpers';
 import { useUser } from '@hooks';
 import type { Habit } from '@models';
 import { StorageBuckets } from '@models';
 import { listFiles, deleteFile } from '@services';
 import { useHabitActions } from '@stores';
+import { handleAsyncAction } from '@utils';
 
 const useHabitRemoval = () => {
   const { user } = useUser();

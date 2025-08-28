@@ -12,10 +12,10 @@ import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
 import { OccurrenceChip } from '@components';
-import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
 import { useTraitActions } from '@stores';
 import { makeTestOccurrence } from '@tests';
+import { handleAsyncAction } from '@utils';
 
 type AddCustomTraitModalProps = {
   isOpen: boolean;
