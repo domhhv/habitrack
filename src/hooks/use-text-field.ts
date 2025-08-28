@@ -1,19 +1,20 @@
-import React from 'react';
+import React, { type ChangeEvent } from 'react';
 
-type ChangeEventLike = {
-  target: {
-    value: string;
-  };
-};
-
-type ReturnValue = [string, (event: ChangeEventLike) => void, () => void];
+type ReturnValue = [
+  string,
+  (value: string | ChangeEvent<HTMLInputElement>) => void,
+  () => void,
+];
 
 const useTextField = (initialValue = ''): ReturnValue => {
   const [value, setValue] = React.useState(initialValue);
 
-  const handleChange = React.useCallback((event: ChangeEventLike) => {
-    setValue(event.target.value);
-  }, []);
+  const handleChange = React.useCallback(
+    (value: string | ChangeEvent<HTMLInputElement>) => {
+      setValue(typeof value === 'string' ? value : value.target.value);
+    },
+    []
+  );
 
   const clearValue = React.useCallback(() => {
     setValue('');

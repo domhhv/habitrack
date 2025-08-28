@@ -2,6 +2,7 @@ import { cn, Button, Tooltip, useDisclosure } from '@heroui/react';
 import { getWeeksInMonth, type CalendarDate } from '@internationalized/date';
 import { NotePencil, Note as NoteIcon } from '@phosphor-icons/react';
 import {
+  format,
   endOfDay,
   addMonths,
   startOfDay,
@@ -18,7 +19,7 @@ import { NoteDialog, OccurrenceDialog } from '@components';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence, NotePeriodKind } from '@models';
 import { useWeekNotes } from '@stores';
-import { isTruthy, toSqlDate } from '@utils';
+import { isTruthy } from '@utils';
 
 import type { CellPosition, CellRangeStatus } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
@@ -133,8 +134,8 @@ const MonthCalendarGrid = ({
           periodKind={notePeriod}
           isOpen={isNoteDialogOpen}
           onClose={closeNoteDialog}
-          periodDate={toSqlDate(noteDate)}
           onPeriodChange={handlePeriodChange}
+          periodDate={format(noteDate, 'yyyy-MM-dd')}
         />
       )}
 
@@ -154,7 +155,8 @@ const MonthCalendarGrid = ({
 
             const weekNote = weekNotes.find((note) => {
               return (
-                note.periodDate === toSqlDate(new Date(year, month - 1, day))
+                note.periodDate ===
+                format(new Date(year, month - 1, day), 'yyyy-MM-dd')
               );
             });
 

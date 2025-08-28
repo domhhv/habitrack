@@ -6,7 +6,6 @@ import { PasswordInput } from '@components';
 import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField, useAuthSearchParams } from '@hooks';
 import { updateUser } from '@services';
-import { toEventLike } from '@utils';
 
 const AccountPage = () => {
   useAuthSearchParams();
@@ -18,8 +17,8 @@ const AccountPage = () => {
   const [name, handleNameChange] = useTextField();
 
   React.useEffect(() => {
-    handleEmailChange(toEventLike(user?.email));
-    handleNameChange(toEventLike(user?.userMetadata.name || ''));
+    handleEmailChange(user?.email || '');
+    handleNameChange(user?.userMetadata.name || '');
   }, [user, handleEmailChange, handleNameChange]);
 
   const title = <title>My Account | Habitrack</title>;

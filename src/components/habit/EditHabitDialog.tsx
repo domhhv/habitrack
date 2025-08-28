@@ -17,7 +17,6 @@ import { handleAsyncAction } from '@helpers';
 import { useUser, useTextField } from '@hooks';
 import type { Habit } from '@models';
 import { useTraits, useHabitActions } from '@stores';
-import { toEventLike } from '@utils';
 
 type EditHabitDialogProps = {
   habit: Habit | null;
@@ -44,8 +43,8 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
 
   React.useEffect(() => {
     if (habit) {
-      handleNameChange(toEventLike(habit.name));
-      handleDescriptionChange(toEventLike(habit.description || ''));
+      handleNameChange(habit.name);
+      handleDescriptionChange(habit.description || '');
       setTraitId(habit.traitId.toString());
     }
   }, [habit, handleNameChange, handleDescriptionChange]);
