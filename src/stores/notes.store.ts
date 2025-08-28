@@ -1,10 +1,11 @@
+import keyBy from 'lodash.keyby';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 
 import type { Note, NotesInsert, NotesUpdate } from '@models';
 import { listNotes, createNote, updateNote, destroyNote } from '@services';
-import { toHashMap, isNoteOfPeriod } from '@utils';
+import { isNoteOfPeriod } from '@utils';
 
 type NotesState = {
   notes: Record<Note['id'], Note>;
@@ -51,7 +52,7 @@ const useNotesStore = create<NotesState>()(
           const notes = await listNotes();
 
           set((state) => {
-            state.notes = toHashMap(notes);
+            state.notes = keyBy(notes, 'id');
           });
         },
 

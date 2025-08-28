@@ -1,3 +1,4 @@
+import keyBy from 'lodash.keyby';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
@@ -10,7 +11,6 @@ import {
   createHabit,
   destroyHabit,
 } from '@services';
-import { toHashMap } from '@utils';
 
 type HabitsState = {
   habits: Record<Habit['id'], Habit>;
@@ -47,7 +47,7 @@ const useHabitsStore = create<HabitsState>()(
           const habits = await listHabits();
 
           set((state) => {
-            state.habits = toHashMap(habits);
+            state.habits = keyBy(habits, 'id');
           });
         },
 

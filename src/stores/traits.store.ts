@@ -1,9 +1,9 @@
+import keyBy from 'lodash.keyby';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
 import type { Trait, TraitsInsert } from '@models';
 import { listTraits, createTrait } from '@services';
-import { toHashMap } from '@utils';
 
 type TraitsState = {
   traits: Record<Trait['id'], Trait>;
@@ -38,7 +38,7 @@ const useTraitsStore = create<TraitsState>()(
           const traits = await listTraits();
 
           set((state) => {
-            state.traits = toHashMap(traits);
+            state.traits = keyBy(traits, 'id');
           });
         },
       },
