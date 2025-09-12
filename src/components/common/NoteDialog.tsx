@@ -140,7 +140,11 @@ const NoteDialog = ({
       : formatCurrentWeek();
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} placement={isMobile || isTablet ? "top" : "center"}>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      placement={isMobile || isTablet ? 'top' : 'center'}
+    >
       <ModalContent>
         <ModalHeader className="items-center gap-2">
           <div className="space-x-2">
