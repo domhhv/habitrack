@@ -46,7 +46,7 @@ const NoteDialog = ({
   periodKind,
 }: NoteDialogProps) => {
   const { user } = useUser();
-  const { isDesktop } = useScreenWidth();
+  const { isDesktop, isMobile, isTablet } = useScreenWidth();
   const [hasEdited, setHasEdited] = React.useState(false);
   const [content, handleContentChange, clearContent] = useTextField();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -140,7 +140,11 @@ const NoteDialog = ({
       : formatCurrentWeek();
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      placement={isMobile || isTablet ? 'top' : 'center'}
+    >
       <ModalContent>
         <ModalHeader className="items-center gap-2">
           <div className="space-x-2">
