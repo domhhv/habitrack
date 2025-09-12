@@ -25,7 +25,7 @@ import {
 } from 'date-fns';
 import React from 'react';
 
-import { useUser, useTextField } from '@hooks';
+import { useUser, useTextField, useScreenWidth } from '@hooks';
 import { type NotePeriodKind } from '@models';
 import { useNoteActions, usePeriodNotes } from '@stores';
 import { handleAsyncAction } from '@utils';
@@ -46,6 +46,7 @@ const NoteDialog = ({
   periodKind,
 }: NoteDialogProps) => {
   const { user } = useUser();
+  const { isDesktop } = useScreenWidth();
   const [hasEdited, setHasEdited] = React.useState(false);
   const [content, handleContentChange, clearContent] = useTextField();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -237,6 +238,13 @@ const NoteDialog = ({
               setHasEdited(true);
               handleContentChange(event);
             }}
+            classNames={
+              !isDesktop
+                ? {
+                    input: 'text-base',
+                  }
+                : undefined
+            }
           />
         </ModalBody>
         <ModalFooter>
