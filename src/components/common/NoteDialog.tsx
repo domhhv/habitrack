@@ -46,7 +46,7 @@ const NoteDialog = ({
   periodKind,
 }: NoteDialogProps) => {
   const { user } = useUser();
-  const { isMobile, isTablet } = useScreenWidth();
+  const { isDesktop, isMobile, isTablet } = useScreenWidth();
   const [hasEdited, setHasEdited] = React.useState(false);
   const [content, handleContentChange, clearContent] = useTextField();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -242,6 +242,13 @@ const NoteDialog = ({
               setHasEdited(true);
               handleContentChange(event);
             }}
+            classNames={
+              !isDesktop
+                ? {
+                    input: 'text-base',
+                  }
+                : undefined
+            }
           />
         </ModalBody>
         <ModalFooter>
