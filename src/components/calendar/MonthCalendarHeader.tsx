@@ -14,6 +14,7 @@ import {
   ArrowsClockwise,
 } from '@phosphor-icons/react';
 import { addMonths, startOfMonth, startOfToday } from 'date-fns';
+import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { Link, useParams, useNavigate } from 'react-router';
@@ -188,7 +189,7 @@ const MonthCalendarHeader = ({
             {months.map((month) => {
               return (
                 <SelectItem key={month}>
-                  {isMobile ? month.substring(0, 3) : month}
+                  {capitalize(isMobile ? month.substring(0, 3) : month)}
                 </SelectItem>
               );
             })}

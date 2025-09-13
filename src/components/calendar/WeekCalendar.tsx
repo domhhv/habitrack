@@ -1,83 +1,54 @@
 import { cn } from '@heroui/react';
-import {
-  getDay,
-  addDays,
-  isToday,
-  endOfDay,
-  endOfWeek,
-  getISOWeek,
-  startOfDay,
-  startOfWeek,
-  startOfToday,
-  getISOWeekYear,
-  eachDayOfInterval,
-  eachMinuteOfInterval,
-} from 'date-fns';
+import { isToday, CalendarDate, createCalendar } from '@internationalized/date';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { motion } from 'framer-motion';
+import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
+import { useLocale, useCalendar, useCalendarGrid } from 'react-aria';
 import { useParams } from 'react-router';
+import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
-import { useUser } from '@hooks';
 import { useOccurrences, useOccurrenceActions } from '@stores';
 
-const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
 const WeekCalendar = () => {
-  const params = useParams();
-  const { user } = useUser();
   const occurrences = useOccurrences();
-  const { clearOccurrences, fetchOccurrences } = useOccurrenceActions();
-  const [startOfTheWeek, setStartOfTheWeek] = React.useState(new Date());
+  const { fetchOccurrences } = useOccurrenceActions();
+  const { locale } = useLocale();
+  const { day, month, year } = useParams();
+  const state = useCalendarState({
+    createCalendar,
+    locale,
+    visibleDuration: { weeks: 1 },
+    defaultValue:
+      day && month && year ? new CalendarDate(+year, +month, +day) : undefined,
+  });
+  useCalendar({}, state);
+  const { weekDays } = useCalendarGrid(
+    {
+      weekdayStyle: 'long',
+    },
+    state
+  );
 
   React.useEffect(() => {
-    if (!user) {
-      if (occurrences.length) {
-        clearOccurrences();
-      }
-
-      return;
-    }
-
-    const currentWeek = startOfWeek(startOfToday(), { weekStartsOn: 1 });
-
-    const {
-      day = currentWeek.getDate(),
-      month = currentWeek.getMonth() + 1,
-      year = currentWeek.getFullYear(),
-    } = params;
-
-    const date = new Date(Number(year), Number(month) - 1, Number(day));
-
-    const startDate = startOfWeek(startOfDay(date), { weekStartsOn: 1 });
-
-    setStartOfTheWeek(startDate);
-
-    const rangeStart = startOfWeek(startDate, { weekStartsOn: 1 });
-    const rangeEnd = endOfWeek(startDate, { weekStartsOn: 1 });
-
-    void fetchOccurrences([+rangeStart, +rangeEnd]);
-  }, [params, user, fetchOccurrences, clearOccurrences, occurrences]);
-
-  const days = React.useMemo(() => {
-    return eachDayOfInterval({
-      end: addDays(startOfTheWeek, 6),
-      start: startOfTheWeek,
-    });
-  }, [startOfTheWeek]);
+    void fetchOccurrences([
+      +state.visibleRange.start.toDate(state.timeZone),
+      +state.visibleRange.end.toDate(state.timeZone),
+    ]);
+  }, [state, fetchOccurrences]);
 
   const groupOccurrences = React.useCallback(
-    (dayIndex: number, hour: number) => {
-      const day = dayIndex === 6 ? 0 : dayIndex + 1;
-
+    (day: CalendarDate, hour: number) => {
       const relatedOccurrences = occurrences.filter((o) => {
-        const date = new Date(o.timestamp);
+        const occurrenceDate = new Date(o.timestamp);
 
         return (
-          date.getDate() === days[dayIndex].getDate() &&
-          date.getDay() === day &&
-          date.getHours() === hour
+          occurrenceDate.getFullYear() === day.year &&
+          occurrenceDate.getMonth() + 1 === day.month &&
+          occurrenceDate.getDate() === day.day &&
+          occurrenceDate.getHours() === hour
         );
       });
 
@@ -87,51 +58,46 @@ const WeekCalendar = () => {
         })
       );
     },
-    [days, occurrences]
+    [occurrences]
   );
 
   return (
     <>
       <div className="space-y-2 text-center">
         <h1 className="text-xl font-bold">
-          Week {getISOWeek(startOfTheWeek)} of {getISOWeekYear(startOfTheWeek)}
+          Week {getISOWeek(+state.visibleRange.start.toDate(state.timeZone))} of{' '}
+          {getISOWeekYear(+state.visibleRange.start.toDate(state.timeZone))}
         </h1>
         <p className="text-sm text-stone-400 italic dark:text-stone-500">
           Logging & navigation coming soon
         </p>
       </div>
       <div className="flex justify-around">
-        {days.map((day, dayIndex) => {
-          const weekDayName = WEEK_DAYS[getDay(day) - 1] || WEEK_DAYS[6];
+        {state.getDatesInWeek(0).map((day, dayIndex) => {
+          if (!day) {
+            return null;
+          }
 
           return (
             <div key={dayIndex} className="group flex flex-1 flex-col gap-4">
               <div
                 className={cn(
                   'space-y-2 text-center text-stone-600 dark:text-stone-300',
-                  isToday(day) &&
+                  isToday(day, state.timeZone) &&
                     'text-primary-600 dark:text-primary-400 font-bold'
                 )}
               >
-                <h3>{weekDayName}</h3>
-                <h6>{day.getDate()}</h6>
+                <h3>{capitalize(weekDays[dayIndex])}</h3>
+                <h6>{day?.day}</h6>
               </div>
               <div
                 className={cn(
                   'flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600',
-                  isToday(day) &&
+                  isToday(day, state.timeZone) &&
                     'to-background-100 bg-linear-to-b from-transparent from-0% to-[4px]'
                 )}
               >
-                {eachMinuteOfInterval(
-                  {
-                    end: endOfDay(day),
-                    start: startOfDay(day),
-                  },
-                  { step: 60 }
-                ).map((minute) => {
-                  const hour = minute.getHours();
-
+                {[...Array(24).keys()].map((hour) => {
                   return (
                     <div
                       key={`${dayIndex}-${hour}`}
@@ -143,7 +109,7 @@ const WeekCalendar = () => {
                         </p>
                       )}
                       <div className="flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500">
-                        {groupOccurrences(dayIndex, hour).map(
+                        {groupOccurrences(day, hour).map(
                           ([habitId, habitOccurrences]) => {
                             if (!habitOccurrences) {
                               return null;

@@ -10,6 +10,7 @@ import {
   isSameMonth,
 } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import capitalize from 'lodash.capitalize';
 import React from 'react';
 import { useLocale, useCalendarGrid } from 'react-aria';
 import { Link } from 'react-router';
@@ -115,7 +116,7 @@ const MonthCalendarGrid = ({
               key={weekDay}
               className="flex flex-1 items-center justify-center text-neutral-600 dark:text-neutral-300"
             >
-              <p className="font-bold">{weekDay}</p>
+              <p className="font-bold">{capitalize(weekDay)}</p>
             </div>
           );
         })}

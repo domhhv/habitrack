@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
 import { setDefaultOptions } from 'date-fns';
-import { enGB } from 'date-fns/locale';
+import { uk, enGB, enUS } from 'date-fns/locale';
 import React from 'react';
 import { useLocale } from 'react-aria';
 import { Route, Routes, Navigate } from 'react-router';
@@ -19,6 +19,24 @@ setDefaultOptions({ locale: enGB });
 
 const App = () => {
   const { locale } = useLocale();
+
+  const dateFnsLocale = React.useMemo(() => {
+    switch (locale) {
+      case 'uk-UA':
+        return uk;
+
+      case 'en-US':
+        return enUS;
+
+      case 'en-GB':
+      default:
+        return enGB;
+    }
+  }, [locale]);
+
+  React.useEffect(() => {
+    setDefaultOptions({ locale: dateFnsLocale });
+  }, [dateFnsLocale]);
 
   React.useEffect(() => {
     document.getElementById('root')?.classList.add('initialized');
