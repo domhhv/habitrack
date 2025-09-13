@@ -1,5 +1,6 @@
-import { cn } from '@heroui/react';
+import { cn, Button } from '@heroui/react';
 import { isToday, CalendarDate, createCalendar } from '@internationalized/date';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { motion } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
@@ -14,6 +15,7 @@ import { useOccurrences, useOccurrenceActions } from '@stores';
 
 const WeekCalendar = () => {
   const occurrences = useOccurrences();
+  const [fetchedWeekYear, setFetchedWeekYear] = React.useState('');
   const { fetchOccurrences } = useOccurrenceActions();
   const { locale } = useLocale();
   const { day, month, year } = useParams();
@@ -25,7 +27,7 @@ const WeekCalendar = () => {
       day && month && year ? new CalendarDate(+year, +month, +day) : undefined,
   });
   useCalendar({}, state);
-  const { weekDays } = useCalendarGrid(
+  const { gridProps, weekDays } = useCalendarGrid(
     {
       weekdayStyle: 'long',
     },
@@ -33,11 +35,55 @@ const WeekCalendar = () => {
   );
 
   React.useEffect(() => {
+    const weekYear = `${getISOWeek(
+      +state.visibleRange.start.toDate(state.timeZone)
+    )}-${getISOWeekYear(+state.visibleRange.start.toDate(state.timeZone))}`;
+
+    if (fetchedWeekYear === weekYear) {
+      return;
+    }
+
+    setFetchedWeekYear(weekYear);
+
     void fetchOccurrences([
       +state.visibleRange.start.toDate(state.timeZone),
       +state.visibleRange.end.toDate(state.timeZone),
     ]);
-  }, [state, fetchOccurrences]);
+  }, [
+    fetchedWeekYear,
+    state.timeZone,
+    fetchOccurrences,
+    state.visibleRange.end,
+    state.visibleRange.start,
+  ]);
+
+  const navigateToPreviousWeek = React.useCallback(() => {
+    const previousWeekDate = state.visibleRange.start.subtract({ weeks: 1 });
+    state.setFocusedDate(previousWeekDate);
+  }, [state]);
+
+  const navigateToNextWeek = React.useCallback(() => {
+    const nextWeekDate = state.visibleRange.start.add({ weeks: 1 });
+    state.setFocusedDate(nextWeekDate);
+  }, [state]);
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        navigateToPreviousWeek();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        navigateToNextWeek();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [navigateToNextWeek, navigateToPreviousWeek]);
 
   const groupOccurrences = React.useCallback(
     (day: CalendarDate, hour: number) => {
@@ -63,16 +109,31 @@ const WeekCalendar = () => {
 
   return (
     <>
-      <div className="space-y-2 text-center">
+      <div className="flex items-center justify-center gap-4">
+        <Button
+          isIconOnly
+          variant="flat"
+          aria-label="Previous week"
+          onPress={navigateToPreviousWeek}
+          className="h-8 w-8 min-w-0 rounded-lg"
+        >
+          <CaretLeft />
+        </Button>
         <h1 className="text-xl font-bold">
           Week {getISOWeek(+state.visibleRange.start.toDate(state.timeZone))} of{' '}
           {getISOWeekYear(+state.visibleRange.start.toDate(state.timeZone))}
         </h1>
-        <p className="text-sm text-stone-400 italic dark:text-stone-500">
-          Logging & navigation coming soon
-        </p>
+        <Button
+          isIconOnly
+          variant="flat"
+          aria-label="Next week"
+          onPress={navigateToNextWeek}
+          className="h-8 w-8 min-w-0 rounded-lg"
+        >
+          <CaretRight />
+        </Button>
       </div>
-      <div className="flex justify-around">
+      <div {...gridProps} className="flex justify-around">
         {state.getDatesInWeek(0).map((day, dayIndex) => {
           if (!day) {
             return null;

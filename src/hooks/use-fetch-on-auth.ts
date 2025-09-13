@@ -45,7 +45,7 @@ const useFetchOnAuth = () => {
     return () => {
       data.subscription.unsubscribe();
     };
-  }, [fetchAllData, clearTraits, clearHabits, clearNotes]);
+  }, [fetchAllData, clearTraits, clearHabits, clearNotes, clearOccurrences]);
 };
 
 export default useFetchOnAuth;

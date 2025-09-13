@@ -15,8 +15,6 @@ import {
 
 import Providers from './components/Providers';
 
-setDefaultOptions({ locale: enGB });
-
 const App = () => {
   const { locale } = useLocale();
 
