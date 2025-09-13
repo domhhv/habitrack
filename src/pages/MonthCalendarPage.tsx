@@ -22,8 +22,6 @@ type MonthCalendarPageProps = {
 const MonthCalendarPage = ({ locale }: MonthCalendarPageProps) => {
   const calendarState = useCalendarState({
     createCalendar,
-    firstDayOfWeek: 'mon',
-    isReadOnly: true,
     locale,
   });
   const { calendarProps, title } = useCalendar({}, calendarState);

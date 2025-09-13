@@ -13,7 +13,6 @@ import { useDateFormatter } from 'react-aria';
 import { useParams } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
-import { useUser } from '@hooks';
 import type { OccurrenceFilters } from '@models';
 import {
   useHabits,
@@ -36,11 +35,10 @@ const MonthCalendar = ({
   activeYear,
   state,
 }: MonthCalendarProps) => {
-  const { user } = useUser();
   const occurrences = useOccurrences();
   const habits = useHabits();
   const traits = useTraits();
-  const { clearOccurrences, fetchOccurrences } = useOccurrenceActions();
+  const { fetchOccurrences } = useOccurrenceActions();
   const [filters, setFilters] = React.useState<OccurrenceFilters>({
     habitIds: new Set(),
     traitIds: new Set(),
@@ -84,14 +82,6 @@ const MonthCalendar = ({
   }, [derivedFilters, filters.habitIds.size, filters.traitIds.size]);
 
   React.useEffect(() => {
-    if (!user) {
-      if (occurrences.length) {
-        clearOccurrences();
-      }
-
-      return;
-    }
-
     const currentMonth = startOfMonth(startOfToday());
 
     const {
@@ -123,15 +113,7 @@ const MonthCalendar = ({
 
       state.setFocusedDate(nextFocusedDate);
     }
-  }, [
-    fetchedMonthYear,
-    params,
-    state,
-    user,
-    fetchOccurrences,
-    clearOccurrences,
-    occurrences.length,
-  ]);
+  }, [fetchedMonthYear, params, state, fetchOccurrences]);
 
   return (
     <>

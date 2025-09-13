@@ -1,10 +1,16 @@
 import { addToast } from '@heroui/react';
 import React from 'react';
 
-import { useNoteActions, useTraitActions, useHabitActions } from '@stores';
+import {
+  useNoteActions,
+  useTraitActions,
+  useHabitActions,
+  useOccurrenceActions,
+} from '@stores';
 import { supabaseClient, getErrorMessage } from '@utils';
 
 const useFetchOnAuth = () => {
+  const { clearOccurrences } = useOccurrenceActions();
   const { clearTraits, fetchTraits } = useTraitActions();
   const { clearHabits, fetchHabits } = useHabitActions();
   const { clearNotes, fetchNotes } = useNoteActions();
@@ -28,6 +34,7 @@ const useFetchOnAuth = () => {
         clearTraits();
         clearHabits();
         clearNotes();
+        clearOccurrences();
       }
 
       if (['TOKEN_REFRESHED', 'SIGNED_IN'].includes(event)) {
@@ -38,7 +45,7 @@ const useFetchOnAuth = () => {
     return () => {
       data.subscription.unsubscribe();
     };
-  }, [fetchAllData, clearTraits, clearHabits, clearNotes]);
+  }, [fetchAllData, clearTraits, clearHabits, clearNotes, clearOccurrences]);
 };
 
 export default useFetchOnAuth;

@@ -10,9 +10,11 @@
 &nbsp;
 <a href="https://tailwindcss.com/" target="_blank" title="TailwindCSS"><img src="https://i.ibb.co/mR0BWJx/Tailwind-CSS.png" alt="Tailwind" width="32" height="32" /></a>
 &nbsp;
-<a href="https://www.heroui.com/" target="_blank" title="HeroUI"><img src="https://i.ibb.co/xYjF5K6/nextui.png" alt="HeroUI" width="32" height="32"></a>
+<a href="https://www.heroui.com/" target="_blank" title="HeroUI"><img src="https://i.ibb.co/j0K0TCw/heroui-logo.png" alt="HeroUI" width="32" height="32"></a>
 &nbsp;
 <a href="https://supabase.com/" target="_blank" title="Supabase"><img src="https://i.ibb.co/s9hK6ZSn/supabase-logo-icon.png" alt="Supabase" width="32" height="32"></a>
+&nbsp;
+<a href="https://reactrouter.com/" target="_blank" title="React Router"><img src="https://i.ibb.co/zTzh8rCd/react-router-logo-light.png" alt="React Router" width="32" height="32"></a>
 &nbsp;
 <a href="https://vitest.dev/" target="_blank" title="Vitest"><img src="https://i.ibb.co/99zTCxvx/vitest.png" alt="Vitest" width="32" height="32"></a>
 &nbsp;
@@ -27,7 +29,7 @@ Habitrack is a simple and intuitive web app designed for logging habits and visu
 This app showcases the use of the following tools and technologies:
 
 - React 19 with TypeScript 5.8, bundled with [Vite 6](https://vite.dev/)
-- [React Router](https://reactrouter.com) v7 for routing (library mode)
+- [React Router](https://reactrouter.com) v7 for routing (declarative mode)
 - [Zustand](https://zustand.docs.pmnd.rs/) v5 for global state management
 - [Tailwind CSS](https://tailwindcss.com) v4 for styling
 - [HeroUI](https://www.heroui.com/) for the UI components
