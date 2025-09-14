@@ -92,10 +92,10 @@ const MonthCalendarCell = ({
               <Tooltip closeDelay={0} content="Log habit">
                 <Button
                   radius="sm"
-                  tabIndex={0}
                   variant="light"
                   color="secondary"
                   isDisabled={!user}
+                  aria-label="Log habit"
                   onPress={onNewOccurrenceClick}
                   className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
                 >
@@ -108,11 +108,11 @@ const MonthCalendarCell = ({
               >
                 <Button
                   radius="sm"
-                  tabIndex={0}
                   variant="light"
                   isDisabled={!user}
                   onPress={onNoteClick}
                   color={hasNote ? 'primary' : 'secondary'}
+                  aria-label={hasNote ? 'Edit note' : 'Add note'}
                   className={cn(
                     'h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
                     hasNote && 'opacity-100'

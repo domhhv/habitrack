@@ -1,7 +1,13 @@
-export function getISOWeek(value: Date) {
+const alignToISOWeekThursday = (value: Date) => {
   const date = new Date(value.getTime());
   date.setHours(0, 0, 0, 0);
   date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
+
+  return date;
+};
+
+export const getISOWeek = (value: Date) => {
+  const date = alignToISOWeekThursday(value);
   const firstWeekOfYear = new Date(date.getFullYear(), 0, 4);
 
   return (
@@ -13,11 +19,8 @@ export function getISOWeek(value: Date) {
         7
     )
   );
-}
+};
 
-export function getISOWeekYear(value: Date) {
-  const date = new Date(value.getTime());
-  date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
-
-  return date.getFullYear();
-}
+export const getISOWeekYear = (value: Date) => {
+  return alignToISOWeekThursday(value).getFullYear();
+};

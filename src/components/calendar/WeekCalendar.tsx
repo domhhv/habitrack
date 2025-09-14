@@ -1,6 +1,7 @@
 import { cn, Button } from '@heroui/react';
 import {
   isToday,
+  fromDate,
   CalendarDate,
   createCalendar,
   toCalendarDate,
@@ -102,13 +103,13 @@ const WeekCalendar = () => {
   const groupOccurrences = React.useCallback(
     (day: CalendarDate, hour: number) => {
       const relatedOccurrences = occurrences.filter((o) => {
-        const occurrenceDate = new Date(o.timestamp);
+        const occurrenceDate = fromDate(new Date(o.timestamp), state.timeZone);
 
         return (
-          occurrenceDate.getFullYear() === day.year &&
-          occurrenceDate.getMonth() + 1 === day.month &&
-          occurrenceDate.getDate() === day.day &&
-          occurrenceDate.getHours() === hour
+          occurrenceDate.year === day.year &&
+          occurrenceDate.month === day.month &&
+          occurrenceDate.day === day.day &&
+          occurrenceDate.hour === hour
         );
       });
 
@@ -118,7 +119,7 @@ const WeekCalendar = () => {
         })
       );
     },
-    [occurrences]
+    [occurrences, state.timeZone]
   );
 
   return (
@@ -199,6 +200,7 @@ const WeekCalendar = () => {
                                 transition={{ duration: 0.5 }}
                               >
                                 <OccurrenceChip
+                                  timeZone={state.timeZone}
                                   occurrences={habitOccurrences}
                                 />
                               </motion.div>

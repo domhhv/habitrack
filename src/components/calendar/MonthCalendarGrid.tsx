@@ -116,7 +116,7 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
         />
       )}
 
-      {noteDate && (
+      {noteDate && notePeriod && (
         <NoteDialog
           periodDate={noteDate}
           periodKind={notePeriod}

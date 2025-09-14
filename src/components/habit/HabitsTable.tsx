@@ -19,7 +19,7 @@ import {
   EditHabitDialog,
   AddHabitDialogButton,
 } from '@components';
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useSystemTimeZone } from '@hooks';
 import type { Habit } from '@models';
 import { useHabits } from '@stores';
 
@@ -32,10 +32,11 @@ import useHabitRemoval from './use-habit-removal';
 
 const HabitsTable = () => {
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
+  const timeZone = useSystemTimeZone();
   const dateFormatter = useDateFormatter({
     day: 'numeric',
     month: 'short',
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZone,
     year: 'numeric',
   });
 

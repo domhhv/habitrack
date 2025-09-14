@@ -33,7 +33,7 @@ const OccurrenceChip = ({
   colorOverride,
   isInteractable = true,
   occurrences,
-  timeZone,
+  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone,
 }: OccurrenceChipProps) => {
   const {
     isOpen: isDrawerOpen,
@@ -159,7 +159,7 @@ const OccurrenceChip = ({
     <>
       {chip}
 
-      {occurrenceToEdit && timeZone && (
+      {occurrenceToEdit && (
         <OccurrenceDialog
           timeZone={timeZone}
           isOpen={isOccurrenceDialogOpen}

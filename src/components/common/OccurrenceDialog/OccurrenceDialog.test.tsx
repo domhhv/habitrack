@@ -1,6 +1,7 @@
 import { CalendarDate } from '@internationalized/date';
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { I18nProvider } from 'react-aria';
 import { BrowserRouter } from 'react-router';
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
@@ -75,7 +76,9 @@ describe(OccurrenceDialog.name, () => {
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
     const { getByText } = render(
       <BrowserRouter>
-        <OccurrenceDialog {...props} />
+        <I18nProvider locale="en-US">
+          <OccurrenceDialog {...props} />
+        </I18nProvider>
       </BrowserRouter>
     );
     expect(

@@ -11,20 +11,22 @@ import { CaretDown } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
+import { useSystemTimeZone } from '@hooks';
 import type { Habit } from '@models';
 import { getLatestHabitOccurrenceTimestamp } from '@services';
 
 const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
+  const timeZone = useSystemTimeZone();
   const dateFormatter = useDateFormatter({
     day: 'numeric',
     month: 'short',
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZone,
     year: 'numeric',
   });
   const timeFormatter = useDateFormatter({
     hour: 'numeric',
     minute: 'numeric',
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZone,
   });
   const [selectedDistanceFormat, setSelectedDistanceFormat] =
     React.useState<Selection>(new Set(['default']));

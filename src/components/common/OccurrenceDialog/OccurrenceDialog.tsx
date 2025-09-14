@@ -89,14 +89,14 @@ const OccurrenceDialog = ({
   });
 
   const existingOccurrenceDateTime = React.useMemo(() => {
-    if (!existingOccurrence) {
+    if (!existingOccurrence?.timestamp) {
       return null;
     }
 
     return parseAbsoluteToLocal(
       new Date(existingOccurrence.timestamp).toISOString()
     );
-  }, [existingOccurrence]);
+  }, [existingOccurrence?.timestamp]);
 
   const habitsByTraitName = React.useMemo(() => {
     return groupBy(Object.values(habits), (habit) => {
@@ -208,7 +208,7 @@ const OccurrenceDialog = ({
         minute: time.minute,
       });
 
-      setIsDateTimeInFuture(userEnteredDateTime.compare(today(timeZone)) > 0);
+      setIsDateTimeInFuture(userEnteredDateTime.compare(now(timeZone)) > 0);
 
       return;
     }
