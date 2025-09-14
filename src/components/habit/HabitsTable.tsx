@@ -10,8 +10,8 @@ import {
   TableHeader,
 } from '@heroui/react';
 import { TrashSimple, PencilSimple } from '@phosphor-icons/react';
-import { format } from 'date-fns';
 import React from 'react';
+import { useDateFormatter } from 'react-aria';
 
 import {
   TraitChip,
@@ -19,7 +19,7 @@ import {
   EditHabitDialog,
   AddHabitDialogButton,
 } from '@components';
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useSystemTimeZone } from '@hooks';
 import type { Habit } from '@models';
 import { useHabits } from '@stores';
 
@@ -32,6 +32,13 @@ import useHabitRemoval from './use-habit-removal';
 
 const HabitsTable = () => {
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
+  const timeZone = useSystemTimeZone();
+  const dateFormatter = useDateFormatter({
+    day: 'numeric',
+    month: 'short',
+    timeZone,
+    year: 'numeric',
+  });
 
   const habits = useHabits();
   const { isMobile } = useScreenWidth();
@@ -101,10 +108,7 @@ const HabitsTable = () => {
                   <TraitChip trait={habit.trait} />
                 </TableCell>
                 <TableCell>
-                  {format(
-                    habit.createdAt,
-                    isMobile ? 'MMM d, y' : 'LLLL do, y'
-                  )}
+                  {dateFormatter.format(new Date(habit.createdAt))}
                 </TableCell>
                 <TableCell>
                   <HabitLastEntry id={habit.id} />

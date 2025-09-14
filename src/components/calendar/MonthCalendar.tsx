@@ -1,15 +1,14 @@
-import { CalendarDate } from '@internationalized/date';
 import {
-  endOfDay,
+  today,
   endOfWeek,
   endOfMonth,
-  startOfDay,
   startOfWeek,
+  CalendarDate,
   startOfMonth,
-  startOfToday,
-} from 'date-fns';
+  toCalendarDateTime,
+} from '@internationalized/date';
 import React from 'react';
-import { useDateFormatter } from 'react-aria';
+import { useLocale } from 'react-aria';
 import { useParams } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
@@ -26,42 +25,22 @@ import MonthCalendarGrid from './MonthCalendarGrid';
 import MonthCalendarHeader from './MonthCalendarHeader';
 
 type MonthCalendarProps = {
-  activeMonthLabel: string;
-  activeYear: string;
   state: CalendarState;
 };
 
-const MonthCalendar = ({
-  activeMonthLabel,
-  activeYear,
-  state,
-}: MonthCalendarProps) => {
+const MonthCalendar = ({ state }: MonthCalendarProps) => {
   const occurrences = useOccurrences();
   const habits = useHabits();
   const traits = useTraits();
-  const { fetchOccurrences } = useOccurrenceActions();
+  const params = useParams();
+  const { locale } = useLocale();
   const { fetchNotes } = useNoteActions();
+  const { fetchOccurrences } = useOccurrenceActions();
   const [filters, setFilters] = React.useState<OccurrenceFilters>({
     habitIds: new Set(),
     traitIds: new Set(),
   });
   const [fetchedMonthYear, setFetchedMonthYear] = React.useState<string>('');
-  const formatter = useDateFormatter({
-    month: 'long',
-    timeZone: state.timeZone,
-  });
-  const params = useParams();
-  const months = React.useMemo(() => {
-    return [
-      ...Array(
-        state.focusedDate.calendar.getMonthsInYear(state.focusedDate)
-      ).keys(),
-    ].map((i) => {
-      const date = state.focusedDate.set({ month: i + 1 });
-
-      return formatter.format(date.toDate(state.timeZone));
-    });
-  }, [formatter, state.focusedDate, state.timeZone]);
 
   const derivedFilters = React.useMemo(() => {
     return {
@@ -85,53 +64,56 @@ const MonthCalendar = ({
   }, [derivedFilters, filters.habitIds.size, filters.traitIds.size]);
 
   React.useEffect(() => {
-    const currentMonth = startOfMonth(startOfToday());
+    const currentMonth = startOfMonth(today(state.timeZone));
 
     const {
-      day = currentMonth.getDate(),
-      month = currentMonth.getMonth() + 1,
-      year = currentMonth.getFullYear(),
+      day = currentMonth.day,
+      month = currentMonth.month,
+      year = currentMonth.year,
     } = params;
 
-    const paramsDate = new Date(Number(year), Number(month) - 1, Number(day));
-
-    const nextFocusedDate = new CalendarDate(
-      paramsDate.getFullYear(),
-      paramsDate.getMonth() + 1,
-      paramsDate.getDate()
+    const paramsDate = new CalendarDate(
+      Number(year),
+      Number(month),
+      Number(day)
     );
 
-    const hasFocusedDateChanged =
-      state.focusedDate.toString() !== nextFocusedDate.toString();
-
-    const currentMonthYear = `${Number(year)}-${Number(month)}`;
-    const hasNotFetchedThisMonth = fetchedMonthYear !== currentMonthYear;
-
-    if (hasFocusedDateChanged || hasNotFetchedThisMonth) {
-      const rangeStart = startOfDay(startOfWeek(startOfMonth(paramsDate)));
-      const rangeEnd = endOfDay(endOfWeek(endOfMonth(paramsDate)));
-
-      void fetchOccurrences([+rangeStart, +rangeEnd]);
-      void fetchNotes([rangeStart, rangeEnd]);
-      setFetchedMonthYear(currentMonthYear);
-
-      state.setFocusedDate(nextFocusedDate);
+    if (state.focusedDate.toString() !== paramsDate.toString()) {
+      state.setFocusedDate(paramsDate);
     }
-  }, [fetchedMonthYear, params, state, fetchOccurrences, fetchNotes]);
+
+    if (fetchedMonthYear === paramsDate.toString()) {
+      return;
+    }
+
+    setFetchedMonthYear(paramsDate.toString());
+
+    const rangeStart = startOfWeek(startOfMonth(paramsDate), locale);
+    const rangeEnd = toCalendarDateTime(
+      endOfWeek(endOfMonth(paramsDate), locale)
+    ).set({
+      hour: 23,
+      millisecond: 999,
+      minute: 59,
+      second: 59,
+    });
+
+    void fetchOccurrences([
+      +rangeStart.toDate(state.timeZone),
+      +rangeEnd.toDate(state.timeZone),
+    ]);
+    void fetchNotes([rangeStart, rangeEnd]);
+  }, [params, state, locale, fetchNotes, fetchOccurrences, fetchedMonthYear]);
 
   return (
     <>
       <MonthCalendarHeader
-        months={months}
+        state={state}
         filters={filters}
-        activeYear={activeYear}
         onFilterChange={setFilters}
-        activeMonthLabel={activeMonthLabel}
       />
       <MonthCalendarGrid
         state={state}
-        activeYear={Number(activeYear)}
-        activeMonthIndex={months.indexOf(activeMonthLabel)}
         occurrences={occurrences.filter((occurrence) => {
           return (
             filters.habitIds.has(occurrence.habitId.toString()) &&

@@ -1,3 +1,4 @@
+import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
 import keyBy from 'lodash.keyby';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
@@ -18,7 +19,9 @@ type NotesState = {
     addNote: (note: NotesInsert) => Promise<Note>;
     clearNotes: () => void;
     deleteNote: (id: Note['id']) => Promise<void>;
-    fetchNotes: (range: [Date, Date]) => Promise<void>;
+    fetchNotes: (
+      range: [CalendarDate | CalendarDateTime, CalendarDate | CalendarDateTime]
+    ) => Promise<void>;
     updateNote: (id: Note['id'], note: NotesUpdate) => Promise<Note>;
   };
 };
@@ -53,7 +56,12 @@ const useNotesStore = create<NotesState>()(
           });
         },
 
-        fetchNotes: async (range: [Date, Date]) => {
+        fetchNotes: async (
+          range: [
+            CalendarDate | CalendarDateTime,
+            CalendarDate | CalendarDateTime,
+          ]
+        ) => {
           const notes = await listPeriodNotes(range);
 
           set((state) => {

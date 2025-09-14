@@ -1,9 +1,11 @@
-const toSqlDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
 
-  return `${year}-${month}-${day}`;
+const toSqlDate = ({
+  day,
+  month,
+  year,
+}: CalendarDate | CalendarDateTime): string => {
+  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
 };
 
 export default toSqlDate;

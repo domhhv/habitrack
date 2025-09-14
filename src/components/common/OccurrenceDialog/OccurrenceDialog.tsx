@@ -13,18 +13,22 @@ import {
   ModalContent,
   SelectSection,
 } from '@heroui/react';
-import { ZonedDateTime, parseAbsoluteToLocal } from '@internationalized/date';
-import { ArrowsClockwise } from '@phosphor-icons/react';
 import {
-  format,
+  now,
+  today,
+  toZoned,
   isToday,
-  isFuture,
   isSameDay,
-  isYesterday,
-  formatDistanceToNowStrict,
-} from 'date-fns';
+  ZonedDateTime,
+  type CalendarDate,
+  toCalendarDateTime,
+  parseAbsoluteToLocal,
+} from '@internationalized/date';
+import { ArrowsClockwise } from '@phosphor-icons/react';
 import groupBy from 'lodash.groupby';
+import pluralize from 'pluralize';
 import React, { type ChangeEventHandler } from 'react';
+import { useDateFormatter } from 'react-aria';
 import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
 
@@ -43,9 +47,10 @@ import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 
 type OccurrenceDialogProps = RequireAtLeastOne<
   {
-    existingOccurrence: Occurrence | null;
+    existingOccurrence?: Occurrence | null;
     isOpen: boolean;
-    newOccurrenceDate: Date | null;
+    newOccurrenceDate?: CalendarDate | null;
+    timeZone: string;
     onClose: () => void;
   },
   'newOccurrenceDate' | 'existingOccurrence'
@@ -56,6 +61,7 @@ const OccurrenceDialog = ({
   isOpen,
   newOccurrenceDate,
   onClose,
+  timeZone,
 }: OccurrenceDialogProps) => {
   const { user } = useUser();
   const habits = useHabits();
@@ -71,8 +77,26 @@ const OccurrenceDialog = ({
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
     React.useState(false);
   const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
-  const [lastLoggedAt, setLastLoggedAt] = React.useState<Date | null>(null);
+  const [lastLoggedAt, setLastLoggedAt] = React.useState<ZonedDateTime | null>(
+    null
+  );
   const { isDesktop, isMobile } = useScreenWidth();
+  const dateFormatter = useDateFormatter({
+    day: 'numeric',
+    month: 'long',
+    timeZone,
+    year: 'numeric',
+  });
+
+  const existingOccurrenceDateTime = React.useMemo(() => {
+    if (!existingOccurrence?.timestamp) {
+      return null;
+    }
+
+    return parseAbsoluteToLocal(
+      new Date(existingOccurrence.timestamp).toISOString()
+    );
+  }, [existingOccurrence?.timestamp]);
 
   const habitsByTraitName = React.useMemo(() => {
     return groupBy(Object.values(habits), (habit) => {
@@ -90,7 +114,7 @@ const OccurrenceDialog = ({
     if (
       !selectedHabitId ||
       !newOccurrenceDate ||
-      !isSameDay(newOccurrenceDate, new Date())
+      !isSameDay(newOccurrenceDate, today(timeZone))
     ) {
       setLastLoggedAt(null);
 
@@ -98,9 +122,13 @@ const OccurrenceDialog = ({
     }
 
     getLatestHabitOccurrenceTimestamp(selectedHabitId).then((timestamp) => {
-      setLastLoggedAt(timestamp ? new Date(timestamp) : null);
+      setLastLoggedAt(
+        timestamp
+          ? parseAbsoluteToLocal(new Date(timestamp).toISOString())
+          : null
+      );
     });
-  }, [existingOccurrence, selectedHabitId, newOccurrenceDate]);
+  }, [existingOccurrence, selectedHabitId, newOccurrenceDate, timeZone]);
 
   React.useEffect(() => {
     if (!newOccurrenceDate && !existingOccurrence) {
@@ -110,25 +138,22 @@ const OccurrenceDialog = ({
     if (isOpen && existingOccurrence) {
       setSelectedHabitId(existingOccurrence.habitId.toString());
       handleNoteChange(existingOccurrence.note?.content || '');
-      setTime(
-        parseAbsoluteToLocal(
-          new Date(existingOccurrence.timestamp).toISOString()
-        )
-      );
+      setTime(existingOccurrenceDateTime);
 
       return;
     }
 
     if (isOpen && newOccurrenceDate) {
-      const occurrenceDateTime = new Date();
-
-      occurrenceDateTime.setFullYear(newOccurrenceDate.getFullYear());
-      occurrenceDateTime.setMonth(newOccurrenceDate.getMonth());
-      occurrenceDateTime.setDate(newOccurrenceDate.getDate());
-
-      setTime(parseAbsoluteToLocal(occurrenceDateTime.toISOString()));
+      setTime(toZoned(newOccurrenceDate, timeZone));
     }
-  }, [newOccurrenceDate, existingOccurrence, isOpen, handleNoteChange]);
+  }, [
+    newOccurrenceDate,
+    existingOccurrence,
+    existingOccurrenceDateTime,
+    isOpen,
+    handleNoteChange,
+    timeZone,
+  ]);
 
   React.useEffect(() => {
     if (!Object.keys(habits).length) {
@@ -178,37 +203,27 @@ const OccurrenceDialog = ({
     }
 
     if (newOccurrenceDate) {
-      setIsDateTimeInFuture(
-        isFuture(
-          new Date(
-            newOccurrenceDate.getFullYear(),
-            newOccurrenceDate.getMonth(),
-            newOccurrenceDate.getDate(),
-            time.hour,
-            time.minute
-          )
-        )
-      );
+      const userEnteredDateTime = toCalendarDateTime(newOccurrenceDate).set({
+        hour: time.hour,
+        minute: time.minute,
+      });
+
+      setIsDateTimeInFuture(userEnteredDateTime.compare(now(timeZone)) > 0);
 
       return;
     }
 
-    if (existingOccurrence) {
-      const existingOccurrenceDate = new Date(existingOccurrence.timestamp);
-
+    if (existingOccurrenceDateTime) {
       setIsDateTimeInFuture(
-        isFuture(
-          new Date(
-            existingOccurrenceDate.getFullYear(),
-            existingOccurrenceDate.getMonth(),
-            existingOccurrenceDate.getDate(),
-            time?.hour || 0,
-            time?.minute || 0
-          )
-        )
+        existingOccurrenceDateTime
+          .set({
+            hour: time.hour,
+            minute: time.minute,
+          })
+          .compare(today(timeZone)) > 0
       );
     }
-  }, [newOccurrenceDate, existingOccurrence, time]);
+  }, [newOccurrenceDate, existingOccurrenceDateTime, time, timeZone]);
 
   const handleSubmit = async () => {
     if (
@@ -221,7 +236,7 @@ const OccurrenceDialog = ({
     }
 
     const occurrenceDateTime = newOccurrenceDate
-      ? new Date(newOccurrenceDate)
+      ? newOccurrenceDate.toDate(timeZone)
       : time instanceof ZonedDateTime
         ? time.toDate()
         : new Date();
@@ -338,23 +353,37 @@ const OccurrenceDialog = ({
     setSelectedHabitId(e.target.value);
   };
 
-  const formatDate = () => {
-    if (!newOccurrenceDate && !existingOccurrence) {
+  const formatDate = (date: CalendarDate | ZonedDateTime | null) => {
+    if (!date || isToday(date, timeZone)) {
       return 'today';
     }
 
-    const dateToFormat =
-      newOccurrenceDate || new Date(existingOccurrence?.timestamp || '');
-
-    if (isToday(dateToFormat)) {
-      return 'today';
-    }
-
-    if (isYesterday(dateToFormat)) {
+    if (isSameDay(date, date.subtract({ days: 1 }))) {
       return 'yesterday';
     }
 
-    return format(dateToFormat || '', 'iii, LLL d, y');
+    return dateFormatter.format(date.toDate(timeZone));
+  };
+
+  const formatDistanceToNow = (date: ZonedDateTime) => {
+    if (['today', 'yesterday'].includes(formatDate(date))) {
+      const hoursDifference = Math.abs(date.hour - now(timeZone).hour);
+
+      if (hoursDifference < 1) {
+        return 'less than an hour';
+      }
+
+      return `${hoursDifference} ${pluralize('hour', hoursDifference)}`;
+    }
+
+    const daysDifference = Math.abs(
+      Math.floor(
+        (now(timeZone).toDate().getTime() - date.toDate().getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
+    );
+
+    return `${daysDifference} ${pluralize('day', daysDifference)}`;
   };
 
   const submitButtonSharedProps: ButtonProps = {
@@ -373,7 +402,8 @@ const OccurrenceDialog = ({
     >
       <ModalContent className="overflow-y-auto">
         <ModalHeader>
-          {existingOccurrence ? 'Edit' : 'Add'} habit entry for {formatDate()}
+          {existingOccurrence ? 'Edit' : 'Add'} habit entry for{' '}
+          {formatDate(newOccurrenceDate || existingOccurrenceDateTime)}
         </ModalHeader>
         <ModalBody>
           <Select
@@ -393,7 +423,7 @@ const OccurrenceDialog = ({
             }
             description={
               lastLoggedAt
-                ? `Last logged ${formatDistanceToNowStrict(lastLoggedAt)} ago`
+                ? `Last logged ${formatDistanceToNow(lastLoggedAt)} ago`
                 : 'Choose your habit'
             }
           >

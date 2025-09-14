@@ -8,34 +8,26 @@ import {
   DropdownTrigger,
 } from '@heroui/react';
 import { CaretDown } from '@phosphor-icons/react';
-import {
-  format,
-  isThisWeek,
-  formatRelative,
-  differenceInDays,
-  differenceInHours,
-  differenceInWeeks,
-  differenceInMonths,
-  formatDistanceStrict,
-} from 'date-fns';
-import { enGB } from 'date-fns/locale';
-import capitalize from 'lodash.capitalize';
-import pluralize from 'pluralize';
 import React from 'react';
+import { useDateFormatter } from 'react-aria';
 
+import { useSystemTimeZone } from '@hooks';
 import type { Habit } from '@models';
 import { getLatestHabitOccurrenceTimestamp } from '@services';
 
-const formatRelativeLocale: Record<string, string> = {
-  lastWeek: `'this' EEEE`,
-  nextWeek: `'next' EEEE`,
-  other: `'on' LLL d, y`,
-  today: `'today'`,
-  tomorrow: `'tomorrow'`,
-  yesterday: `'yesterday'`,
-};
-
 const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
+  const timeZone = useSystemTimeZone();
+  const dateFormatter = useDateFormatter({
+    day: 'numeric',
+    month: 'short',
+    timeZone,
+    year: 'numeric',
+  });
+  const timeFormatter = useDateFormatter({
+    hour: 'numeric',
+    minute: 'numeric',
+    timeZone,
+  });
   const [selectedDistanceFormat, setSelectedDistanceFormat] =
     React.useState<Selection>(new Set(['default']));
   const [latestOccurrenceTimestamp, setLatestOccurrenceTimestamp] =
@@ -45,70 +37,15 @@ const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
     getLatestHabitOccurrenceTimestamp(id).then(setLatestOccurrenceTimestamp);
   }, [id]);
 
-  const selectedValue = React.useMemo(() => {
-    return Array.from(selectedDistanceFormat).join(', ').replace(/_/g, '');
-  }, [selectedDistanceFormat]);
-
-  const formatRelativeDate = (timestamp: number) => {
-    switch (selectedValue) {
-      case 'hours': {
-        const hours = differenceInHours(new Date(), timestamp);
-
-        return `${pluralize('hour', hours, true)} ago`;
-      }
-
-      case 'days': {
-        const days = differenceInDays(new Date(), timestamp);
-
-        return `${pluralize('day', days, true)} ago`;
-      }
-
-      case 'weeks': {
-        const weeks = differenceInWeeks(new Date(), timestamp);
-
-        return `${pluralize('week', weeks, true)} ago`;
-      }
-
-      case 'months': {
-        const months = differenceInMonths(new Date(), timestamp);
-
-        return `${pluralize('month', months, true)} ago`;
-      }
-
-      case 'default':
-        if (isThisWeek(timestamp)) {
-          return formatRelative(timestamp, new Date(), {
-            locale: {
-              ...enGB,
-              formatRelative: (token: string) => {
-                return formatRelativeLocale[token];
-              },
-            },
-          });
-        }
-
-        return formatDistanceStrict(timestamp, new Date(), {
-          addSuffix: true,
-          locale: enGB,
-          unit: 'day',
-        });
-
-      default:
-        return format(timestamp, 'MMMM do, y', {
-          locale: enGB,
-        });
-    }
-  };
-
   return latestOccurrenceTimestamp ? (
     <div className="flex items-center gap-2">
       <Tooltip
         showArrow
         offset={12}
         color="primary"
-        content={format(new Date(latestOccurrenceTimestamp), 'MMMM do, y')}
+        content={timeFormatter.format(new Date(latestOccurrenceTimestamp))}
       >
-        <span>{capitalize(formatRelativeDate(latestOccurrenceTimestamp))}</span>
+        <span>{dateFormatter.format(new Date(latestOccurrenceTimestamp))}</span>
       </Tooltip>
       <Dropdown>
         <DropdownTrigger>
