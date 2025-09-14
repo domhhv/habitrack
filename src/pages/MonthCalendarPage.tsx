@@ -27,21 +27,13 @@ const MonthCalendarPage = ({ locale }: MonthCalendarPageProps) => {
   });
   const { calendarProps, title } = useCalendar({}, calendarState);
 
-  const [activeMonthLabel, activeYear] = title.split(' ');
-
   return (
     <div
       {...calendarProps}
       className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 md:gap-4 md:py-4 lg:px-16"
     >
-      <title>
-        {`${capitalize(activeMonthLabel.slice(0, 3))} ${activeYear} | Habitrack Calendar`}
-      </title>
-      <MonthCalendar
-        state={calendarState}
-        activeYear={activeYear}
-        activeMonthLabel={activeMonthLabel}
-      />
+      <title>{`${capitalize(title)} | Habitrack Calendar`}</title>
+      <MonthCalendar state={calendarState} />
     </div>
   );
 };

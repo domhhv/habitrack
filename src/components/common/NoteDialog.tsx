@@ -8,34 +8,31 @@ import {
   ModalHeader,
   ModalContent,
 } from '@heroui/react';
+import { startOfWeek, type CalendarDate } from '@internationalized/date';
 import {
   CaretLeft,
   CaretRight,
   ArrowLineUp,
   ArrowLineDown,
 } from '@phosphor-icons/react';
-import {
-  format,
-  subDays,
-  addDays,
-  subWeeks,
-  addWeeks,
-  getISOWeek,
-  startOfWeek,
-} from 'date-fns';
 import React from 'react';
+import { useLocale, useDateFormatter } from 'react-aria';
 
 import { useUser, useTextField, useScreenWidth } from '@hooks';
 import { type NotePeriodKind } from '@models';
 import { useNoteActions, usePeriodNotes } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { toSqlDate, getISOWeek, handleAsyncAction } from '@utils';
 
 type NoteDialogProps = {
   isOpen: boolean;
-  periodDate: string;
+  periodDate: CalendarDate;
   periodKind: NotePeriodKind;
+  timeZone: string;
   onClose: () => void;
-  onPeriodChange: (opts: { date?: Date; kind?: NotePeriodKind }) => void;
+  onPeriodChange: (opts: {
+    date?: CalendarDate;
+    kind?: NotePeriodKind;
+  }) => void;
 };
 
 const NoteDialog = ({
@@ -44,8 +41,10 @@ const NoteDialog = ({
   onPeriodChange,
   periodDate,
   periodKind,
+  timeZone,
 }: NoteDialogProps) => {
   const { user } = useUser();
+  const { locale } = useLocale();
   const { isDesktop, isMobile, isTablet } = useScreenWidth();
   const [hasEdited, setHasEdited] = React.useState(false);
   const [content, handleContentChange, clearContent] = useTextField();
@@ -53,10 +52,24 @@ const NoteDialog = ({
   const [isRemoving, setIsRemoving] = React.useState(false);
   const notes = usePeriodNotes();
   const { addNote, deleteNote, updateNote } = useNoteActions();
+  const dayFormatter = useDateFormatter({
+    day: 'numeric',
+    month: 'short',
+    timeZone,
+    weekday: 'short',
+    year: 'numeric',
+  });
+  const monthFormatter = useDateFormatter({
+    month: 'long',
+    timeZone,
+  });
 
   const existingNote = React.useMemo(() => {
     return notes.find((note) => {
-      return note.periodKind === periodKind && note.periodDate === periodDate;
+      return (
+        note.periodKind === periodKind &&
+        note.periodDate === toSqlDate(periodDate)
+      );
     });
   }, [notes, periodDate, periodKind]);
 
@@ -86,7 +99,7 @@ const NoteDialog = ({
         void handleAsyncAction(
           addNote({
             content,
-            periodDate,
+            periodDate: toSqlDate(periodDate),
             periodKind,
             userId: user.id,
           }),
@@ -97,7 +110,7 @@ const NoteDialog = ({
         void handleAsyncAction(
           updateNote(existingNote.id, {
             content,
-            periodDate,
+            periodDate: toSqlDate(periodDate),
             periodKind,
           }),
           'update_note',
@@ -131,12 +144,12 @@ const NoteDialog = ({
   }
 
   const formatCurrentWeek = () => {
-    return `week ${getISOWeek(new Date(periodDate))} of ${format(periodDate || '', 'yyyy')}`;
+    return `week ${getISOWeek(periodDate.toDate(timeZone))} of ${monthFormatter.format(periodDate.toDate(timeZone))}`;
   };
 
   const period =
     periodKind === 'day'
-      ? format(periodDate || '', 'iii, LLL d, y')
+      ? dayFormatter.format(periodDate.toDate(timeZone))
       : formatCurrentWeek();
 
   return (
@@ -156,13 +169,13 @@ const NoteDialog = ({
                 switch (periodKind) {
                   case 'day':
                     return onPeriodChange({
-                      date: subDays(periodDate, 1),
+                      date: periodDate.subtract({ days: 1 }),
                       kind: 'day',
                     });
 
                   case 'week':
                     return onPeriodChange({
-                      date: subWeeks(periodDate, 1),
+                      date: periodDate.subtract({ weeks: 1 }),
                       kind: 'week',
                     });
                 }
@@ -178,13 +191,13 @@ const NoteDialog = ({
                 switch (periodKind) {
                   case 'day':
                     return onPeriodChange({
-                      date: addDays(periodDate, 1),
+                      date: periodDate.add({ days: 1 }),
                       kind: 'day',
                     });
 
                   case 'week':
                     return onPeriodChange({
-                      date: addWeeks(periodDate, 1),
+                      date: periodDate.add({ weeks: 1 }),
                       kind: 'week',
                     });
                 }
@@ -207,13 +220,13 @@ const NoteDialog = ({
                   switch (periodKind) {
                     case 'day':
                       return onPeriodChange({
-                        date: startOfWeek(periodDate),
+                        date: startOfWeek(periodDate, locale),
                         kind: 'week',
                       });
 
                     case 'week':
                       return onPeriodChange({
-                        date: startOfWeek(periodDate),
+                        date: startOfWeek(periodDate, locale),
                         kind: 'day',
                       });
                   }

@@ -11,8 +11,8 @@ import {
   useDisclosure,
 } from '@heroui/react';
 import { Note, Camera, TrashSimple, PencilSimple } from '@phosphor-icons/react';
-import { format } from 'date-fns';
 import React from 'react';
+import { useDateFormatter } from 'react-aria';
 
 import { OccurrenceDialog } from '@components';
 import { useScreenWidth } from '@hooks';
@@ -26,12 +26,14 @@ export type OccurrenceChipProps = {
   colorOverride?: string;
   isInteractable?: boolean;
   occurrences: Occurrence[];
+  timeZone?: string;
 };
 
 const OccurrenceChip = ({
   colorOverride,
   isInteractable = true,
   occurrences,
+  timeZone,
 }: OccurrenceChipProps) => {
   const {
     isOpen: isDrawerOpen,
@@ -51,6 +53,17 @@ const OccurrenceChip = ({
   const { color: traitColor } = trait || {};
   const { screenWidth } = useScreenWidth();
   const { removeOccurrence } = useOccurrenceActions();
+  const dateFormatter = useDateFormatter({
+    day: 'numeric',
+    month: 'short',
+    timeZone,
+    year: 'numeric',
+  });
+  const timeFormatter = useDateFormatter({
+    hour: 'numeric',
+    minute: 'numeric',
+    timeZone,
+  });
 
   const handleOccurrenceModalClose = () => {
     setOccurrenceToEdit(null);
@@ -83,8 +96,6 @@ const OccurrenceChip = ({
         className={cn(
           'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 md:mr-1 md:mb-1 dark:bg-slate-800',
           screenWidth < 400 && 'p-1'
-          // TODO: Implement automatic scrolling of the chip into view when drawer is open
-          // isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
         )}
       >
         <img
@@ -104,7 +115,6 @@ const OccurrenceChip = ({
         color="primary"
         placement="bottom-right"
         content={occurrences.length}
-        className={cn(isDrawerOpen /* && !isOccurrenceDialogOpen && 'z-51' */)}
       >
         {chip}
       </Badge>
@@ -121,10 +131,7 @@ const OccurrenceChip = ({
         size="sm"
         placement="top-right"
         content={<Note size={14} weight="fill" />}
-        className={cn(
-          'top-1 right-1 border-none bg-transparent'
-          // isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
-        )}
+        className="top-1 right-1 border-none bg-transparent"
       >
         {chip}
       </Badge>
@@ -141,10 +148,7 @@ const OccurrenceChip = ({
         size="sm"
         placement="top-left"
         content={<Camera size={14} weight="fill" />}
-        className={cn(
-          'top-1 right-1 border-none bg-transparent'
-          // isDrawerOpen && !isOccurrenceDialogOpen && 'z-51'
-        )}
+        className="top-1 right-1 border-none bg-transparent"
       >
         {chip}
       </Badge>
@@ -155,8 +159,9 @@ const OccurrenceChip = ({
     <>
       {chip}
 
-      {occurrenceToEdit && (
+      {occurrenceToEdit && timeZone && (
         <OccurrenceDialog
+          timeZone={timeZone}
           isOpen={isOccurrenceDialogOpen}
           onClose={handleOccurrenceModalClose}
           existingOccurrence={occurrenceToEdit}
@@ -170,7 +175,7 @@ const OccurrenceChip = ({
       >
         <DrawerContent>
           <DrawerHeader className="pb-0">
-            {habitName} | {format(occurrence.timestamp, 'MMM dd, y')}
+            {habitName} | {dateFormatter.format(new Date(occurrence.timestamp))}
           </DrawerHeader>
           <DrawerBody>
             <ScrollShadow className="max-h-96 space-y-2">
@@ -187,7 +192,7 @@ const OccurrenceChip = ({
                       >
                         <div className="whitespace-pre-wrap">
                           <span className="font-semibold">
-                            {format(new Date(o.timestamp), 'p')}
+                            {timeFormatter.format(new Date(o.timestamp))}
                           </span>
                           {!!o.note && (
                             <span className="font-normal">

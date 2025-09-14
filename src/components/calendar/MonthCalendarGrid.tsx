@@ -1,43 +1,29 @@
 import { cn, Button, Tooltip, useDisclosure } from '@heroui/react';
-import { getWeeksInMonth, type CalendarDate } from '@internationalized/date';
+import type { CalendarDate } from '@internationalized/date';
+import { getWeeksInMonth, toCalendarDateTime } from '@internationalized/date';
 import { NotePencil, Note as NoteIcon } from '@phosphor-icons/react';
-import {
-  format,
-  endOfDay,
-  addMonths,
-  startOfDay,
-  getISOWeek,
-  isSameMonth,
-} from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
 import { useLocale, useCalendarGrid } from 'react-aria';
 import { Link } from 'react-router';
-import { type CalendarState } from 'react-stately';
+import type { CalendarState } from 'react-stately';
 
 import { NoteDialog, OccurrenceDialog } from '@components';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence, NotePeriodKind } from '@models';
 import { useWeekNotes } from '@stores';
-import { isTruthy } from '@utils';
+import { isTruthy, toSqlDate, getISOWeek } from '@utils';
 
-import type { CellPosition, CellRangeStatus } from './MonthCalendarCell';
+import type { CellPosition } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
 
 type CalendarGridProps = {
-  activeMonthIndex: number;
-  activeYear: number;
   occurrences: Occurrence[];
   state: CalendarState;
 };
 
-const MonthCalendarGrid = ({
-  activeMonthIndex,
-  activeYear,
-  occurrences,
-  state,
-}: CalendarGridProps) => {
+const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
   const { gridProps, weekDays } = useCalendarGrid(
     {
       weekdayStyle: 'short',
@@ -48,15 +34,11 @@ const MonthCalendarGrid = ({
   const { locale } = useLocale();
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
-  const visibleMonth = new Date(activeYear, activeMonthIndex, 1);
-  const prevMonth = addMonths(visibleMonth, -1);
-  const nextMonth = addMonths(visibleMonth, 1);
   const weekNotes = useWeekNotes();
-  const [noteDate, setNoteDate] = React.useState<Date | null>(null);
+  const [noteDate, setNoteDate] = React.useState<CalendarDate | null>(null);
   const [notePeriod, setNotePeriod] = React.useState<NotePeriodKind>(null);
-  const [newOccurrenceDate, setNewOccurrenceDate] = React.useState<Date | null>(
-    null
-  );
+  const [newOccurrenceDate, setNewOccurrenceDate] =
+    React.useState<CalendarDate | null>(null);
   const {
     isOpen: isNoteDialogOpen,
     onClose: closeNoteDialog,
@@ -68,13 +50,16 @@ const MonthCalendarGrid = ({
     onOpen: openOccurrenceDialog,
   } = useDisclosure();
 
-  const handleNoteDialogOpen = (date: Date, period: NotePeriodKind) => {
+  const handleNoteDialogOpen = (date: CalendarDate, period: NotePeriodKind) => {
     setNoteDate(date);
     setNotePeriod(period);
     openNoteDialog();
   };
 
-  const handlePeriodChange = (opts: { date?: Date; kind?: NotePeriodKind }) => {
+  const handlePeriodChange = (opts: {
+    date?: CalendarDate;
+    kind?: NotePeriodKind;
+  }) => {
     if (opts.date) {
       setNoteDate(opts.date);
     }
@@ -124,6 +109,7 @@ const MonthCalendarGrid = ({
 
       {newOccurrenceDate && (
         <OccurrenceDialog
+          timeZone={state.timeZone}
           isOpen={isOccurrenceDialogOpen}
           onClose={closeOccurrenceDialog}
           newOccurrenceDate={newOccurrenceDate}
@@ -132,33 +118,33 @@ const MonthCalendarGrid = ({
 
       {noteDate && (
         <NoteDialog
+          periodDate={noteDate}
           periodKind={notePeriod}
+          timeZone={state.timeZone}
           isOpen={isNoteDialogOpen}
           onClose={closeNoteDialog}
           onPeriodChange={handlePeriodChange}
-          periodDate={format(noteDate, 'yyyy-MM-dd')}
         />
       )}
 
       <AnimatePresence mode="wait">
         <motion.div
           exit={{ opacity: 0 }}
-          key={activeMonthIndex}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.1 }}
           className="flex flex-1 flex-col"
+          key={state.focusedDate.toString()}
         >
           {weekIndexes.map((weekIndex) => {
-            const [{ day, month, year }] = state
-              .getDatesInWeek(weekIndex)
-              .filter(isTruthy);
+            const daysOfWeek = state.getDatesInWeek(weekIndex).filter(isTruthy);
+            const [firstDayOfWeek] = daysOfWeek;
+            const monday = daysOfWeek.find((d) => {
+              return d.toDate(state.timeZone).getDay() === 1;
+            })!;
 
             const weekNote = weekNotes.find((note) => {
-              return (
-                note.periodDate ===
-                format(new Date(year, month - 1, day), 'yyyy-MM-dd')
-              );
+              return note.periodDate === toSqlDate(monday);
             });
 
             return (
@@ -172,13 +158,13 @@ const MonthCalendarGrid = ({
                       as={Link}
                       variant="ghost"
                       radius={isDesktop ? 'md' : 'sm'}
-                      to={`/calendar/week/${year}/${month}/${day}`}
+                      to={`/calendar/week/${firstDayOfWeek.year}/${firstDayOfWeek.month}/${firstDayOfWeek.day}`}
                       className={cn(
                         'mt-0.5 w-6 min-w-fit basis-[30px] p-0 md:basis-[35px] lg:w-10 lg:basis-[37px]',
                         weekIndex === 0 && 'top-0.5'
                       )}
                     >
-                      {getISOWeek(new Date(year, month - 1, day))}
+                      {getISOWeek(firstDayOfWeek.toDate(state.timeZone))}
                     </Button>
                   </Tooltip>
                   <Tooltip
@@ -194,10 +180,7 @@ const MonthCalendarGrid = ({
                       radius={isDesktop ? 'md' : 'sm'}
                       variant={isDesktop ? 'flat' : weekNote ? 'solid' : 'flat'}
                       onPress={() => {
-                        handleNoteDialogOpen(
-                          new Date(year, month - 1, day),
-                          'week'
-                        );
+                        handleNoteDialogOpen(monday, 'week');
                       }}
                       className={cn(
                         'mb-1 w-6 min-w-fit basis-[70px] p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:mb-2 lg:w-10 lg:basis-[96px]',
@@ -227,38 +210,41 @@ const MonthCalendarGrid = ({
                         return null;
                       }
 
-                      const { day, month, year } = calendarDate;
+                      const startDate = toCalendarDateTime(calendarDate)
+                        .set({
+                          hour: 0,
+                          millisecond: 0,
+                          minute: 0,
+                          second: 0,
+                        })
+                        .toDate(state.timeZone);
 
-                      const date = new Date(year, month - 1, day);
-
-                      const rangeStatus: CellRangeStatus = isSameMonth(
-                        date,
-                        visibleMonth
-                      )
-                        ? 'in-range'
-                        : isSameMonth(date, prevMonth)
-                          ? 'below-range'
-                          : isSameMonth(date, nextMonth)
-                            ? 'above-range'
-                            : '';
+                      const endDate = toCalendarDateTime(calendarDate)
+                        .set({
+                          hour: 23,
+                          millisecond: 999,
+                          minute: 59,
+                          second: 59,
+                        })
+                        .toDate(state.timeZone);
 
                       return (
                         <MonthCalendarCell
-                          date={date}
-                          rangeStatus={rangeStatus}
+                          state={state}
+                          date={calendarDate}
                           key={calendarDate.toString()}
                           position={getCellPosition(weekIndex, dayIndex)}
                           onNoteClick={() => {
-                            handleNoteDialogOpen(date, 'day');
+                            handleNoteDialogOpen(calendarDate, 'day');
                           }}
                           onNewOccurrenceClick={() => {
-                            setNewOccurrenceDate(date);
+                            setNewOccurrenceDate(calendarDate);
                             openOccurrenceDialog();
                           }}
                           occurrences={occurrences.filter(({ timestamp }) => {
                             return (
-                              timestamp >= Number(startOfDay(date)) &&
-                              timestamp <= Number(endOfDay(date))
+                              timestamp >= Number(startDate) &&
+                              timestamp <= Number(endDate)
                             );
                           })}
                         />

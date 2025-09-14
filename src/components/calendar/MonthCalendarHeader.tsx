@@ -1,4 +1,4 @@
-import type { SelectedItems } from '@heroui/react';
+import { useDisclosure, type SelectedItems } from '@heroui/react';
 import {
   cn,
   Button,
@@ -8,16 +8,18 @@ import {
   SelectItem,
   SelectSection,
 } from '@heroui/react';
+import { today, isSameMonth } from '@internationalized/date';
 import {
   ArrowFatLeft,
   ArrowFatRight,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
-import { addMonths, startOfMonth, startOfToday } from 'date-fns';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
-import { Link, useParams, useNavigate } from 'react-router';
+import { useDateFormatter } from 'react-aria';
+import { Link } from 'react-router';
+import type { CalendarState } from 'react-stately';
 
 import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
@@ -27,10 +29,8 @@ import { getPublicUrl } from '@services';
 import { useHabits, useTraits } from '@stores';
 
 export type MonthCalendarHeaderProps = {
-  activeMonthLabel: string;
-  activeYear: string;
   filters: OccurrenceFilters;
-  months: string[];
+  state: CalendarState;
   onFilterChange: (filters: OccurrenceFilters) => void;
 };
 
@@ -39,33 +39,45 @@ const YEARS = Array.from({ length: 31 }, (_, i) => {
 });
 
 const MonthCalendarHeader = ({
-  activeMonthLabel,
-  activeYear,
   filters,
-  months,
   onFilterChange,
+  state,
 }: MonthCalendarHeaderProps) => {
   const habits = useHabits();
   const traits = useTraits();
   const { user } = useUser();
   const { isMobile, screenWidth } = useScreenWidth();
-  const isOnCurrentMonth =
-    activeMonthLabel === months[new Date().getMonth()] &&
-    activeYear === new Date().getFullYear().toString();
-  const { day, month, year } = useParams();
-  const navigate = useNavigate();
+  const formatter = useDateFormatter({
+    month: 'long',
+    timeZone: state.timeZone,
+  });
+  const months = React.useMemo(() => {
+    return [
+      ...Array(
+        state.focusedDate.calendar.getMonthsInYear(state.focusedDate)
+      ).keys(),
+    ].map((i) => {
+      const date = state.focusedDate.set({ month: i + 1 });
 
-  const focusedDate = React.useMemo(() => {
-    if (!year || !month || !day) {
-      return new Date();
-    }
-
-    return new Date(Number(year), Number(month) - 1, Number(day));
-  }, [year, month, day]);
-
-  const prevMonth = startOfMonth(addMonths(focusedDate, -1));
-  const nextMonth = startOfMonth(addMonths(focusedDate, 1));
-  const today = startOfToday();
+      return formatter.format(date.toDate(state.timeZone));
+    });
+  }, [formatter, state.focusedDate, state.timeZone]);
+  const { nextMonth, prevMonth } = React.useMemo(() => {
+    return {
+      nextMonth: state.focusedDate.add({ months: 1 }).set({ day: 1 }),
+      prevMonth: state.focusedDate.subtract({ months: 1 }).set({ day: 1 }),
+    };
+  }, [state.focusedDate]);
+  const {
+    isOpen: isMonthSelectOpen,
+    onClose: closeMonthSelect,
+    onOpenChange: onMonthSelectOpenChange,
+  } = useDisclosure();
+  const {
+    isOpen: isYearSelectOpen,
+    onClose: closeYearSelect,
+    onOpenChange: onYearSelectOpenChange,
+  } = useDisclosure();
 
   const shouldRenderFilters =
     !!user && Object.keys(habits).length > 0 && Object.keys(traits).length > 0;
@@ -91,22 +103,6 @@ const MonthCalendarHeader = ({
       return habit.trait?.name || 'Unknown';
     });
   }, [habits]);
-
-  const handleMonthChange: React.ChangeEventHandler<HTMLSelectElement> = (
-    event
-  ) => {
-    navigate(
-      `/calendar/month/${focusedDate.getFullYear()}/${months.indexOf(event.target.value) + 1}/${focusedDate.getDate()}`
-    );
-  };
-
-  const handleYearChange: React.ChangeEventHandler<HTMLSelectElement> = (
-    event
-  ) => {
-    navigate(
-      `/calendar/month/${event.target.value}/${focusedDate.getMonth() + 1}/${focusedDate.getDate()}`
-    );
-  };
 
   const handleHabitsFilterChange: React.ChangeEventHandler<
     HTMLSelectElement
@@ -179,16 +175,22 @@ const MonthCalendarHeader = ({
             label="Month"
             color="secondary"
             variant="bordered"
-            onChange={handleMonthChange}
-            selectedKeys={new Set([activeMonthLabel])}
+            isOpen={isMonthSelectOpen}
+            onOpenChange={onMonthSelectOpenChange}
+            selectedKeys={String(state.focusedDate.month)}
             classNames={{
               base: 'w-[100px]',
               popoverContent: 'w-[125px]',
             }}
           >
-            {months.map((month) => {
+            {months.map((month, index) => {
               return (
-                <SelectItem key={month}>
+                <SelectItem
+                  as={Link}
+                  key={String(index + 1)}
+                  onClick={closeMonthSelect}
+                  href={`/calendar/month/${state.focusedDate.year}/${index + 1}/1`}
+                >
                   {capitalize(isMobile ? month.substring(0, 3) : month)}
                 </SelectItem>
               );
@@ -199,15 +201,23 @@ const MonthCalendarHeader = ({
             label="Year"
             color="secondary"
             variant="bordered"
-            onChange={handleYearChange}
-            selectedKeys={new Set([activeYear])}
+            isOpen={isYearSelectOpen}
+            onOpenChange={onYearSelectOpenChange}
+            selectedKeys={[state.focusedDate.year.toString()]}
             classNames={{
               base: 'w-[100px]',
             }}
           >
             {YEARS.map((year) => {
               return (
-                <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
+                <SelectItem
+                  as={Link}
+                  key={year.toString()}
+                  onClick={closeYearSelect}
+                  href={`/calendar/month/${year}/${state.focusedDate.month}/1`}
+                >
+                  {year.toString()}
+                </SelectItem>
               );
             })}
           </Select>
@@ -222,11 +232,11 @@ const MonthCalendarHeader = ({
             color="secondary"
             className="h-auto"
             role="navigate-back"
-            to={`/calendar/month/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}/${prevMonth.getDate()}`}
+            to={`/calendar/month/${prevMonth.year}/${prevMonth.month}/${prevMonth.day}`}
           >
             <ArrowFatLeft size={20} />
           </Button>
-          {!isOnCurrentMonth && (
+          {!isSameMonth(state.focusedDate, today(state.timeZone)) && (
             <Button
               as={Link}
               size="md"
@@ -235,7 +245,7 @@ const MonthCalendarHeader = ({
               color="secondary"
               startContent={<ArrowsClockwise size={20} />}
               className={cn('h-auto', isMobile && 'min-w-fit p-0')}
-              to={`/calendar/month/${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`}
+              to={`/calendar/month/${today(state.timeZone).year}/${today(state.timeZone).month}/${today(state.timeZone).day}`}
             >
               {(!isMobile || screenWidth < 373) && 'Today'}
             </Button>
@@ -249,7 +259,7 @@ const MonthCalendarHeader = ({
             color="secondary"
             className="h-auto"
             role="navigate-forward"
-            to={`/calendar/month/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}/${nextMonth.getDate()}`}
+            to={`/calendar/month/${nextMonth.year}/${nextMonth.month}/${nextMonth.day}`}
           >
             <ArrowFatRight size={20} />
           </Button>

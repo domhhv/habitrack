@@ -1,7 +1,12 @@
 import { cn, Button } from '@heroui/react';
-import { isToday, CalendarDate, createCalendar } from '@internationalized/date';
+import {
+  isToday,
+  CalendarDate,
+  createCalendar,
+  toCalendarDate,
+  toCalendarDateTime,
+} from '@internationalized/date';
 import { CaretLeft, CaretRight } from '@phosphor-icons/react';
-import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { motion } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
@@ -12,6 +17,7 @@ import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
 import { useOccurrences, useNoteActions, useOccurrenceActions } from '@stores';
+import { getISOWeek, getISOWeekYear } from '@utils';
 
 const WeekCalendar = () => {
   const occurrences = useOccurrences();
@@ -34,30 +40,33 @@ const WeekCalendar = () => {
     },
     state
   );
-  const startDate = React.useMemo(() => {
-    return state.visibleRange.start.toDate(state.timeZone);
-  }, [state]);
 
   React.useEffect(() => {
-    const weekYear = `${getISOWeek(startDate)}-${getISOWeekYear(startDate)}`;
-
-    if (fetchedWeekYear === weekYear) {
+    if (fetchedWeekYear === state.focusedDate.toString()) {
       return;
     }
 
-    setFetchedWeekYear(weekYear);
+    setFetchedWeekYear(state.focusedDate.toString());
+
+    const rangeStart = state.visibleRange.start;
+    const rangeEnd = toCalendarDateTime(state.visibleRange.end).set({
+      hour: 23,
+      millisecond: 999,
+      minute: 59,
+      second: 59,
+    });
 
     void fetchOccurrences([
-      +startDate,
-      +state.visibleRange.end.toDate(state.timeZone),
+      +rangeStart.toDate(state.timeZone),
+      +rangeEnd.toDate(state.timeZone),
     ]);
-    void fetchNotes([startDate, state.visibleRange.end.toDate(state.timeZone)]);
+    void fetchNotes([rangeStart, toCalendarDate(rangeEnd)]);
   }, [
-    startDate,
     fetchNotes,
     state.timeZone,
     fetchedWeekYear,
     fetchOccurrences,
+    state.focusedDate,
     state.visibleRange.end,
     state.visibleRange.start,
   ]);
@@ -125,8 +134,8 @@ const WeekCalendar = () => {
           <CaretLeft />
         </Button>
         <h1 className="text-xl font-bold">
-          Week {getISOWeek(+state.visibleRange.start.toDate(state.timeZone))} of{' '}
-          {getISOWeekYear(+state.visibleRange.start.toDate(state.timeZone))}
+          Week {getISOWeek(state.visibleRange.start.toDate(state.timeZone))} of{' '}
+          {getISOWeekYear(state.visibleRange.start.toDate(state.timeZone))}
         </h1>
         <Button
           isIconOnly

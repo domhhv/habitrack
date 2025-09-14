@@ -1,5 +1,5 @@
+import { CalendarDate } from '@internationalized/date';
 import { render, fireEvent } from '@testing-library/react';
-import { format } from 'date-fns';
 import React from 'react';
 import { BrowserRouter } from 'react-router';
 import { it, vi, expect, describe, beforeEach } from 'vitest';
@@ -52,23 +52,15 @@ vi.mock('@hooks', () => {
   };
 });
 
-vi.mock('date-fns', () => {
-  return {
-    format: vi.fn(),
-    isFuture: vi.fn(),
-    isToday: vi.fn(),
-    isYesterday: vi.fn(),
-  };
-});
-
 describe(OccurrenceDialog.name, () => {
   const mockOnClose = vi.fn();
-  const newOccurrenceDate = new Date(2021, 1, 1, 12);
+  const newOccurrenceDate = new CalendarDate(2021, 1, 1);
 
   const props = {
     isOpen: true,
     newOccurrenceDate,
     onClose: mockOnClose,
+    timeZone: 'America/New_York',
   };
 
   beforeEach(() => {
@@ -81,13 +73,14 @@ describe(OccurrenceDialog.name, () => {
       addNote: vi.fn(),
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
-    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
     const { getByText } = render(
       <BrowserRouter>
         <OccurrenceDialog {...props} />
       </BrowserRouter>
     );
-    expect(getByText('Add habit entry for 2021-01-01')).toBeInTheDocument();
+    expect(
+      getByText('Add habit entry for January 1, 2021')
+    ).toBeInTheDocument();
   });
 
   it('if no habits are available, should show a message', () => {
@@ -96,7 +89,6 @@ describe(OccurrenceDialog.name, () => {
       addNote: vi.fn(),
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
-    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
     const { getAllByText } = render(
       <BrowserRouter>
         <OccurrenceDialog {...props} />
@@ -116,7 +108,6 @@ describe(OccurrenceDialog.name, () => {
       addNote: vi.fn(),
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
-    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
     const { getByText } = render(<OccurrenceDialog {...props} />);
     expect(getByText('Test Habit')).toBeInTheDocument();
   });
@@ -127,7 +118,6 @@ describe(OccurrenceDialog.name, () => {
       addNote: vi.fn(),
     });
     (useUser as ReturnType<typeof vi.fn>).mockReturnValue({ id: '1' });
-    (format as ReturnType<typeof vi.fn>).mockReturnValue('2021-01-01');
     const { getByRole } = render(
       <BrowserRouter>
         <OccurrenceDialog {...props} />
