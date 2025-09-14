@@ -18,6 +18,7 @@ import {
   useHabits,
   useTraits,
   useOccurrences,
+  useNoteActions,
   useOccurrenceActions,
 } from '@stores';
 
@@ -39,6 +40,7 @@ const MonthCalendar = ({
   const habits = useHabits();
   const traits = useTraits();
   const { fetchOccurrences } = useOccurrenceActions();
+  const { fetchNotes } = useNoteActions();
   const [filters, setFilters] = React.useState<OccurrenceFilters>({
     habitIds: new Set(),
     traitIds: new Set(),
@@ -49,16 +51,17 @@ const MonthCalendar = ({
     timeZone: state.timeZone,
   });
   const params = useParams();
-  const months = [];
+  const months = React.useMemo(() => {
+    return [
+      ...Array(
+        state.focusedDate.calendar.getMonthsInYear(state.focusedDate)
+      ).keys(),
+    ].map((i) => {
+      const date = state.focusedDate.set({ month: i + 1 });
 
-  const numMonths = state.focusedDate.calendar.getMonthsInYear(
-    state.focusedDate
-  );
-
-  for (let i = 1; i <= numMonths; i++) {
-    const date = state.focusedDate.set({ month: i });
-    months.push(formatter.format(date.toDate(state.timeZone)));
-  }
+      return formatter.format(date.toDate(state.timeZone));
+    });
+  }, [formatter, state.focusedDate, state.timeZone]);
 
   const derivedFilters = React.useMemo(() => {
     return {
@@ -109,11 +112,12 @@ const MonthCalendar = ({
       const rangeEnd = endOfDay(endOfWeek(endOfMonth(paramsDate)));
 
       void fetchOccurrences([+rangeStart, +rangeEnd]);
+      void fetchNotes([rangeStart, rangeEnd]);
       setFetchedMonthYear(currentMonthYear);
 
       state.setFocusedDate(nextFocusedDate);
     }
-  }, [fetchedMonthYear, params, state, fetchOccurrences]);
+  }, [fetchedMonthYear, params, state, fetchOccurrences, fetchNotes]);
 
   return (
     <>
