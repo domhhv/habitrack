@@ -1,4 +1,5 @@
 import { GregorianCalendar } from '@internationalized/date';
+import capitalize from 'lodash.capitalize';
 import React from 'react';
 import { useCalendar } from 'react-aria';
 import { useCalendarState } from 'react-stately';
@@ -34,7 +35,7 @@ const MonthCalendarPage = ({ locale }: MonthCalendarPageProps) => {
       className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 md:gap-4 md:py-4 lg:px-16"
     >
       <title>
-        {`${activeMonthLabel.slice(0, 3)} ${activeYear} | Habitrack Calendar`}
+        {`${capitalize(activeMonthLabel.slice(0, 3))} ${activeYear} | Habitrack Calendar`}
       </title>
       <MonthCalendar
         state={calendarState}

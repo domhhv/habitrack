@@ -11,12 +11,13 @@ import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
-import { useOccurrences, useOccurrenceActions } from '@stores';
+import { useOccurrences, useNoteActions, useOccurrenceActions } from '@stores';
 
 const WeekCalendar = () => {
   const occurrences = useOccurrences();
   const [fetchedWeekYear, setFetchedWeekYear] = React.useState('');
   const { fetchOccurrences } = useOccurrenceActions();
+  const { fetchNotes } = useNoteActions();
   const { locale } = useLocale();
   const { day, month, year } = useParams();
   const state = useCalendarState({
@@ -33,11 +34,12 @@ const WeekCalendar = () => {
     },
     state
   );
+  const startDate = React.useMemo(() => {
+    return state.visibleRange.start.toDate(state.timeZone);
+  }, [state]);
 
   React.useEffect(() => {
-    const weekYear = `${getISOWeek(
-      +state.visibleRange.start.toDate(state.timeZone)
-    )}-${getISOWeekYear(+state.visibleRange.start.toDate(state.timeZone))}`;
+    const weekYear = `${getISOWeek(startDate)}-${getISOWeekYear(startDate)}`;
 
     if (fetchedWeekYear === weekYear) {
       return;
@@ -46,12 +48,15 @@ const WeekCalendar = () => {
     setFetchedWeekYear(weekYear);
 
     void fetchOccurrences([
-      +state.visibleRange.start.toDate(state.timeZone),
+      +startDate,
       +state.visibleRange.end.toDate(state.timeZone),
     ]);
+    void fetchNotes([startDate, state.visibleRange.end.toDate(state.timeZone)]);
   }, [
-    fetchedWeekYear,
+    startDate,
+    fetchNotes,
     state.timeZone,
+    fetchedWeekYear,
     fetchOccurrences,
     state.visibleRange.end,
     state.visibleRange.start,

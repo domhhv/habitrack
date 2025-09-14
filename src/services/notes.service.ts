@@ -2,7 +2,7 @@ import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
 import type { Note, NotesUpdate, NotesInsert } from '@models';
-import { supabaseClient } from '@utils';
+import { toSqlDate, supabaseClient } from '@utils';
 
 export const createNote = async (note: NotesInsert): Promise<Note> => {
   const { data, error } = await supabaseClient
@@ -18,8 +18,13 @@ export const createNote = async (note: NotesInsert): Promise<Note> => {
   return camelcaseKeys(data);
 };
 
-export const listNotes = async (): Promise<Note[]> => {
-  const { data, error } = await supabaseClient.from('notes').select();
+export const listPeriodNotes = async (range: [Date, Date]): Promise<Note[]> => {
+  const { data, error } = await supabaseClient
+    .from('notes')
+    .select()
+    .in('period_kind', ['day', 'week', 'month'])
+    .gt('period_date', toSqlDate(range[0]))
+    .lt('period_date', toSqlDate(range[1]));
 
   if (error) {
     throw new Error(error.message);

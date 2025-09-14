@@ -11,13 +11,13 @@ import { supabaseClient, getErrorMessage } from '@utils';
 
 const useFetchOnAuth = () => {
   const { clearOccurrences } = useOccurrenceActions();
+  const { clearNotes } = useNoteActions();
   const { clearTraits, fetchTraits } = useTraitActions();
   const { clearHabits, fetchHabits } = useHabitActions();
-  const { clearNotes, fetchNotes } = useNoteActions();
 
   const fetchAllData = React.useCallback(async () => {
     try {
-      await Promise.all([fetchTraits(), fetchHabits(), fetchNotes()]);
+      await Promise.all([fetchTraits(), fetchHabits()]);
     } catch (error) {
       console.error(error);
       addToast({
@@ -26,7 +26,7 @@ const useFetchOnAuth = () => {
         title: 'Something went wrong while fetching your data.',
       });
     }
-  }, [fetchTraits, fetchHabits, fetchNotes]);
+  }, [fetchTraits, fetchHabits]);
 
   React.useEffect(() => {
     const { data } = supabaseClient.auth.onAuthStateChange((event) => {

@@ -4,7 +4,12 @@ import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 
 import type { Note, NotesInsert, NotesUpdate } from '@models';
-import { listNotes, createNote, updateNote, destroyNote } from '@services';
+import {
+  createNote,
+  updateNote,
+  destroyNote,
+  listPeriodNotes,
+} from '@services';
 import { isNoteOfPeriod } from '@utils';
 
 type NotesState = {
@@ -13,7 +18,7 @@ type NotesState = {
     addNote: (note: NotesInsert) => Promise<Note>;
     clearNotes: () => void;
     deleteNote: (id: Note['id']) => Promise<void>;
-    fetchNotes: () => Promise<void>;
+    fetchNotes: (range: [Date, Date]) => Promise<void>;
     updateNote: (id: Note['id'], note: NotesUpdate) => Promise<Note>;
   };
 };
@@ -48,8 +53,8 @@ const useNotesStore = create<NotesState>()(
           });
         },
 
-        fetchNotes: async () => {
-          const notes = await listNotes();
+        fetchNotes: async (range: [Date, Date]) => {
+          const notes = await listPeriodNotes(range);
 
           set((state) => {
             state.notes = keyBy(notes, 'id');
