@@ -9,6 +9,7 @@ import {
   TableColumn,
   TableHeader,
 } from '@heroui/react';
+import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimple, PencilSimple } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
@@ -19,7 +20,7 @@ import {
   EditHabitDialog,
   AddHabitDialogButton,
 } from '@components';
-import { useScreenWidth, useSystemTimeZone } from '@hooks';
+import { useScreenWidth } from '@hooks';
 import type { Habit } from '@models';
 import { useHabits } from '@stores';
 
@@ -32,11 +33,10 @@ import useHabitRemoval from './use-habit-removal';
 
 const HabitsTable = () => {
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
-  const timeZone = useSystemTimeZone();
   const dateFormatter = useDateFormatter({
     day: 'numeric',
     month: 'short',
-    timeZone,
+    timeZone: getLocalTimeZone(),
     year: 'numeric',
   });
 
