@@ -13,14 +13,15 @@ import {
   ModalContent,
   SelectSection,
 } from '@heroui/react';
+import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
 import {
   now,
   today,
   toZoned,
   isToday,
+  fromDate,
   isSameDay,
   ZonedDateTime,
-  type CalendarDate,
   toCalendarDateTime,
   parseAbsoluteToLocal,
 } from '@internationalized/date';
@@ -77,9 +78,8 @@ const OccurrenceDialog = ({
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
     React.useState(false);
   const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
-  const [lastLoggedAt, setLastLoggedAt] = React.useState<ZonedDateTime | null>(
-    null
-  );
+  const [lastLoggedAt, setLastLoggedAt] =
+    React.useState<CalendarDateTime | null>(null);
   const { isDesktop, isMobile } = useScreenWidth();
   const dateFormatter = useDateFormatter({
     day: 'numeric',
@@ -121,13 +121,17 @@ const OccurrenceDialog = ({
       return;
     }
 
-    getLatestHabitOccurrenceTimestamp(selectedHabitId).then((timestamp) => {
-      setLastLoggedAt(
-        timestamp
-          ? parseAbsoluteToLocal(new Date(timestamp).toISOString())
-          : null
-      );
-    });
+    getLatestHabitOccurrenceTimestamp(selectedHabitId)
+      .then((timestamp) => {
+        setLastLoggedAt(
+          timestamp
+            ? toCalendarDateTime(fromDate(new Date(timestamp), timeZone))
+            : null
+        );
+      })
+      .catch(() => {
+        setLastLoggedAt(null);
+      });
   }, [existingOccurrence, selectedHabitId, newOccurrenceDate, timeZone]);
 
   React.useEffect(() => {
@@ -144,7 +148,14 @@ const OccurrenceDialog = ({
     }
 
     if (isOpen && newOccurrenceDate) {
-      setTime(toZoned(newOccurrenceDate, timeZone));
+      const { hour, minute } = now(timeZone);
+
+      setTime(
+        toZoned(
+          toCalendarDateTime(newOccurrenceDate).set({ hour, minute }),
+          timeZone
+        )
+      );
     }
   }, [
     newOccurrenceDate,
@@ -208,7 +219,9 @@ const OccurrenceDialog = ({
         minute: time.minute,
       });
 
-      setIsDateTimeInFuture(userEnteredDateTime.compare(now(timeZone)) > 0);
+      setIsDateTimeInFuture(
+        toZoned(userEnteredDateTime, timeZone).compare(now(timeZone)) > 0
+      );
 
       return;
     }
@@ -220,7 +233,7 @@ const OccurrenceDialog = ({
             hour: time.hour,
             minute: time.minute,
           })
-          .compare(today(timeZone)) > 0
+          .compare(now(timeZone)) > 0
       );
     }
   }, [newOccurrenceDate, existingOccurrenceDateTime, time, timeZone]);
@@ -235,16 +248,20 @@ const OccurrenceDialog = ({
       return null;
     }
 
-    const occurrenceDateTime = newOccurrenceDate
-      ? newOccurrenceDate.toDate(timeZone)
+    const baseNow = now(timeZone);
+    const occurrenceZdt = newOccurrenceDate
+      ? toZoned(
+          toCalendarDateTime(newOccurrenceDate).set({
+            hour: time instanceof ZonedDateTime ? time.hour : baseNow.hour,
+            minute:
+              time instanceof ZonedDateTime ? time.minute : baseNow.minute,
+          }),
+          timeZone
+        )
       : time instanceof ZonedDateTime
-        ? time.toDate()
-        : new Date();
-
-    if (time instanceof ZonedDateTime) {
-      occurrenceDateTime.setHours(time.hour);
-      occurrenceDateTime.setMinutes(time.minute);
-    }
+        ? time
+        : (existingOccurrenceDateTime ?? baseNow);
+    const occurrenceDateTime = occurrenceZdt.toDate();
 
     setIsSaving(true);
 
@@ -353,21 +370,35 @@ const OccurrenceDialog = ({
     setSelectedHabitId(e.target.value);
   };
 
-  const formatDate = (date: CalendarDate | ZonedDateTime | null) => {
-    if (!date || isToday(date, timeZone)) {
+  const formatDate = (
+    date: CalendarDate | CalendarDateTime | ZonedDateTime | null
+  ) => {
+    const asZoned =
+      date == null
+        ? null
+        : date instanceof ZonedDateTime
+          ? date
+          : toZoned(date, timeZone);
+
+    if (!asZoned || isToday(asZoned, timeZone)) {
       return 'today';
     }
 
-    if (isSameDay(date, date.subtract({ days: 1 }))) {
+    if (isSameDay(asZoned, now(timeZone).subtract({ days: 1 }))) {
       return 'yesterday';
     }
 
-    return dateFormatter.format(date.toDate(timeZone));
+    return dateFormatter.format(asZoned.toDate());
   };
 
-  const formatDistanceToNow = (date: ZonedDateTime) => {
+  const formatDistanceToNow = (date: CalendarDateTime) => {
+    const dateZ = toZoned(date, timeZone);
+
+    const nowZ = now(timeZone);
+    const diffMs = nowZ.toDate().getTime() - dateZ.toDate().getTime();
+
     if (['today', 'yesterday'].includes(formatDate(date))) {
-      const hoursDifference = Math.abs(date.hour - now(timeZone).hour);
+      const hoursDifference = Math.floor(diffMs / (1000 * 60 * 60));
 
       if (hoursDifference < 1) {
         return 'less than an hour';
@@ -376,14 +407,9 @@ const OccurrenceDialog = ({
       return `${hoursDifference} ${pluralize('hour', hoursDifference)}`;
     }
 
-    const daysDifference = Math.abs(
-      Math.floor(
-        (now(timeZone).toDate().getTime() - date.toDate().getTime()) /
-          (1000 * 60 * 60 * 24)
-      )
-    );
+    const daysDifference = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    return `${daysDifference} ${pluralize('day', daysDifference)}`;
+    return `${pluralize('day', daysDifference, true)}`;
   };
 
   const submitButtonSharedProps: ButtonProps = {
