@@ -26,8 +26,8 @@ const App = () => {
       <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 flex-col items-start">
         <Routes>
           <Route
+            element={<MonthCalendarPage />}
             path="/calendar/month/:year?/:month?/:day?"
-            element={<MonthCalendarPage locale={locale} />}
           />
           <Route
             element={<WeekCalendarPage />}

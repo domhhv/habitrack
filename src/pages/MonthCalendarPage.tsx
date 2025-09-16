@@ -1,7 +1,7 @@
 import { GregorianCalendar } from '@internationalized/date';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
-import { useCalendar } from 'react-aria';
+import { useLocale, useCalendar } from 'react-aria';
 import { useCalendarState } from 'react-stately';
 
 import { MonthCalendar } from '@components';
@@ -16,11 +16,8 @@ const createCalendar = (identifier: string) => {
   }
 };
 
-type MonthCalendarPageProps = {
-  locale: string;
-};
-
-const MonthCalendarPage = ({ locale }: MonthCalendarPageProps) => {
+const MonthCalendarPage = () => {
+  const { locale } = useLocale();
   const calendarState = useCalendarState({
     createCalendar,
     locale,

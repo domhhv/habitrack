@@ -53,12 +53,19 @@ export const differenceInDays = (
   from: CalendarDate | CalendarDateTime,
   to: CalendarDate | CalendarDateTime
 ) => {
-  const dateFrom = from.toDate(getLocalTimeZone());
-  const dateTo = to.toDate(getLocalTimeZone());
+  const tz = getLocalTimeZone();
+
+  const dateFrom = toCalendarDateTime(from)
+    .set({ hour: 0, millisecond: 0, minute: 0, second: 0 })
+    .toDate(tz);
+
+  const dateTo = toCalendarDateTime(to)
+    .set({ hour: 0, millisecond: 0, minute: 0, second: 0 })
+    .toDate(tz);
 
   const diff = dateTo.getTime() - dateFrom.getTime();
 
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
+  return Math.round(diff / (1000 * 60 * 60 * 24));
 };
 
 export const differenceInWeeks = (
@@ -88,8 +95,12 @@ export const differenceInHours = (
 };
 
 export const isThisWeek = (date: CalendarDate | CalendarDateTime) => {
-  const currentDate = getCurrentCalendarDateTime();
-  const daysDifference = Math.abs(differenceInDays(date, currentDate));
+  const tz = getLocalTimeZone();
+  const d = date.toDate(tz);
+  const nowDate = new Date();
 
-  return daysDifference <= 7;
+  return (
+    getISOWeek(d) === getISOWeek(nowDate) &&
+    getISOWeekYear(d) === getISOWeekYear(nowDate)
+  );
 };

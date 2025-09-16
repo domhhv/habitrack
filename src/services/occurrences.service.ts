@@ -96,7 +96,7 @@ export const getLatestHabitOccurrenceTimestamp = async (
     .from('occurrences')
     .select('timestamp')
     .eq('habit_id', habitId)
-    .lt('timestamp', new Date().getTime())
+    .lt('timestamp', Date.now())
     .limit(1)
     .order('timestamp', { ascending: false });
 

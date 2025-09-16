@@ -71,7 +71,9 @@ const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
         case 'hours': {
           const hours = differenceInHours(timestampDate, currentDate);
 
-          return `${pluralize('hour', hours, true)} ago`;
+          return hours === 0
+            ? 'just now'
+            : `${pluralize('hour', hours, true)} ago`;
         }
 
         case 'days': {
@@ -96,27 +98,27 @@ const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
           if (isSameDay(timestampDate, currentDate)) {
             const hours = differenceInHours(timestampDate, currentDate);
 
-            return `${pluralize('hour', hours, true)} ago`;
+            return hours === 0
+              ? 'just now'
+              : `${pluralize('hour', hours, true)} ago`;
           }
 
           if (isThisWeek(timestampDate)) {
             const daysDiff = differenceInDays(timestampDate, currentDate);
 
-            if (daysDiff === 0) {
+            if (daysDiff === 1) {
               return 'yesterday';
             }
 
-            if (daysDiff === 1) {
-              return 'before yesterday';
+            if (daysDiff === 2) {
+              return 'day before yesterday';
             }
 
-            if (daysDiff < 0 && daysDiff >= -7) {
-              const dayName = dayFormatter.format(
-                timestampDate.toDate(localTimeZone)
-              );
+            const dayName = dayFormatter.format(
+              timestampDate.toDate(localTimeZone)
+            );
 
-              return `this ${dayName}`;
-            }
+            return `this ${dayName}`;
           }
 
           const days = Math.abs(differenceInDays(timestampDate, currentDate));

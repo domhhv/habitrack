@@ -19,6 +19,7 @@ import {
   today,
   toZoned,
   isToday,
+  fromDate,
   isSameDay,
   ZonedDateTime,
   toCalendarDateTime,
@@ -41,13 +42,7 @@ import {
   getLatestHabitOccurrenceTimestamp,
 } from '@services';
 import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
-import {
-  differenceInDays,
-  differenceInHours,
-  handleAsyncAction,
-  getCurrentCalendarDateTime,
-  getCalendarDateTimeFromTimestamp,
-} from '@utils';
+import { handleAsyncAction } from '@utils';
 
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 
@@ -126,11 +121,17 @@ const OccurrenceDialog = ({
       return;
     }
 
-    getLatestHabitOccurrenceTimestamp(selectedHabitId).then((timestamp) => {
-      setLastLoggedAt(
-        timestamp ? getCalendarDateTimeFromTimestamp(timestamp) : null
-      );
-    });
+    getLatestHabitOccurrenceTimestamp(selectedHabitId)
+      .then((timestamp) => {
+        setLastLoggedAt(
+          timestamp
+            ? toCalendarDateTime(fromDate(new Date(timestamp), timeZone))
+            : null
+        );
+      })
+      .catch(() => {
+        setLastLoggedAt(null);
+      });
   }, [existingOccurrence, selectedHabitId, newOccurrenceDate, timeZone]);
 
   React.useEffect(() => {
@@ -218,7 +219,9 @@ const OccurrenceDialog = ({
         minute: time.minute,
       });
 
-      setIsDateTimeInFuture(userEnteredDateTime.compare(now(timeZone)) > 0);
+      setIsDateTimeInFuture(
+        toZoned(userEnteredDateTime, timeZone).compare(now(timeZone)) > 0
+      );
 
       return;
     }
@@ -230,7 +233,7 @@ const OccurrenceDialog = ({
             hour: time.hour,
             minute: time.minute,
           })
-          .compare(today(timeZone)) > 0
+          .compare(now(timeZone)) > 0
       );
     }
   }, [newOccurrenceDate, existingOccurrenceDateTime, time, timeZone]);
@@ -245,16 +248,20 @@ const OccurrenceDialog = ({
       return null;
     }
 
-    const occurrenceDateTime = newOccurrenceDate
-      ? newOccurrenceDate.toDate(timeZone)
+    const baseNow = now(timeZone);
+    const occurrenceZdt = newOccurrenceDate
+      ? toZoned(
+          toCalendarDateTime(newOccurrenceDate).set({
+            hour: time instanceof ZonedDateTime ? time.hour : baseNow.hour,
+            minute:
+              time instanceof ZonedDateTime ? time.minute : baseNow.minute,
+          }),
+          timeZone
+        )
       : time instanceof ZonedDateTime
-        ? time.toDate()
-        : new Date();
-
-    if (time instanceof ZonedDateTime) {
-      occurrenceDateTime.setHours(time.hour);
-      occurrenceDateTime.setMinutes(time.minute);
-    }
+        ? time
+        : (existingOccurrenceDateTime ?? baseNow);
+    const occurrenceDateTime = occurrenceZdt.toDate();
 
     setIsSaving(true);
 
@@ -366,23 +373,32 @@ const OccurrenceDialog = ({
   const formatDate = (
     date: CalendarDate | CalendarDateTime | ZonedDateTime | null
   ) => {
-    if (!date || isToday(date, timeZone)) {
+    const asZoned =
+      date == null
+        ? null
+        : date instanceof ZonedDateTime
+          ? date
+          : toZoned(date, timeZone);
+
+    if (!asZoned || isToday(asZoned, timeZone)) {
       return 'today';
     }
 
-    if (isSameDay(date, now(timeZone).subtract({ days: 1 }))) {
+    if (isSameDay(asZoned, now(timeZone).subtract({ days: 1 }))) {
       return 'yesterday';
     }
 
-    return dateFormatter.format(date.toDate(timeZone));
+    return dateFormatter.format(asZoned.toDate());
   };
 
   const formatDistanceToNow = (date: CalendarDateTime) => {
+    const dateZ = toZoned(date, timeZone);
+
+    const nowZ = now(timeZone);
+    const diffMs = nowZ.toDate().getTime() - dateZ.toDate().getTime();
+
     if (['today', 'yesterday'].includes(formatDate(date))) {
-      const hoursDifference = differenceInHours(
-        date,
-        getCurrentCalendarDateTime()
-      );
+      const hoursDifference = Math.floor(diffMs / (1000 * 60 * 60));
 
       if (hoursDifference < 1) {
         return 'less than an hour';
@@ -391,7 +407,7 @@ const OccurrenceDialog = ({
       return `${hoursDifference} ${pluralize('hour', hoursDifference)}`;
     }
 
-    const daysDifference = differenceInDays(date, getCurrentCalendarDateTime());
+    const daysDifference = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
     return `${pluralize('day', daysDifference, true)}`;
   };
