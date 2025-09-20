@@ -10,7 +10,12 @@ import {
   DrawerContent,
   useDisclosure,
 } from '@heroui/react';
-import { Note, Camera, TrashSimple, PencilSimple } from '@phosphor-icons/react';
+import {
+  NoteIcon,
+  CameraIcon,
+  TrashSimpleIcon,
+  PencilSimpleIcon,
+} from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
@@ -130,7 +135,7 @@ const OccurrenceChip = ({
       <Badge
         size="sm"
         placement="top-right"
-        content={<Note size={14} weight="fill" />}
+        content={<NoteIcon size={14} weight="fill" />}
         className="top-1 right-1 border-none bg-transparent"
       >
         {chip}
@@ -147,7 +152,7 @@ const OccurrenceChip = ({
       <Badge
         size="sm"
         placement="top-left"
-        content={<Camera size={14} weight="fill" />}
+        content={<CameraIcon size={14} weight="fill" />}
         className="top-1 right-1 border-none bg-transparent"
       >
         {chip}
@@ -211,7 +216,7 @@ const OccurrenceChip = ({
                               return handleOccurrenceModalOpen(o);
                             }}
                           >
-                            <PencilSimple
+                            <PencilSimpleIcon
                               size={14}
                               fill="bold"
                               className="dark:fill-white"
@@ -227,7 +232,7 @@ const OccurrenceChip = ({
                               return handleRemoveOccurrence(o);
                             }}
                           >
-                            <TrashSimple
+                            <TrashSimpleIcon
                               size={14}
                               fill="bold"
                               className="dark:fill-white"

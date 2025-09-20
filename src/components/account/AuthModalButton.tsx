@@ -12,10 +12,7 @@ import {
   useDisclosure,
   VisuallyHidden,
 } from '@heroui/react';
-import {
-  User as UserIcon,
-  SignOut as SignOutIcon,
-} from '@phosphor-icons/react';
+import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router';
 

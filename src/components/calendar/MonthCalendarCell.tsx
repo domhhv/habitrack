@@ -2,10 +2,10 @@ import { cn, Button, Tooltip } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { isToday } from '@internationalized/date';
 import {
-  Note,
-  NoteBlank,
-  CalendarPlus,
-  CalendarBlank,
+  NoteIcon,
+  NoteBlankIcon,
+  CalendarPlusIcon,
+  CalendarBlankIcon,
 } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import groupBy from 'lodash.groupby';
@@ -99,7 +99,7 @@ const MonthCalendarCell = ({
                   onPress={onNewOccurrenceClick}
                   className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
                 >
-                  <CalendarPlus weight="bold" size={isDesktop ? 18 : 14} />
+                  <CalendarPlusIcon weight="bold" size={isDesktop ? 18 : 14} />
                 </Button>
               </Tooltip>
               <Tooltip
@@ -119,16 +119,16 @@ const MonthCalendarCell = ({
                   )}
                 >
                   {hasNote ? (
-                    <Note weight="bold" size={isDesktop ? 18 : 14} />
+                    <NoteIcon weight="bold" size={isDesktop ? 18 : 14} />
                   ) : (
-                    <NoteBlank weight="bold" size={isDesktop ? 18 : 14} />
+                    <NoteBlankIcon weight="bold" size={isDesktop ? 18 : 14} />
                   )}
                 </Button>
               </Tooltip>
             </div>
           )}
           {isTodayCell && (
-            <CalendarBlank weight="fill" size={isMobile ? 18 : 20} />
+            <CalendarBlankIcon weight="fill" size={isMobile ? 18 : 20} />
           )}
         </div>
       </div>

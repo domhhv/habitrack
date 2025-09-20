@@ -10,7 +10,7 @@ import {
   TableHeader,
 } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
-import { TrashSimple, PencilSimple } from '@phosphor-icons/react';
+import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
@@ -146,7 +146,7 @@ const HabitsTable = () => {
                           return handleEditStart(habit);
                         }}
                       >
-                        <PencilSimple
+                        <PencilSimpleIcon
                           size={16}
                           weight="bold"
                           aria-hidden="true"
@@ -173,7 +173,7 @@ const HabitsTable = () => {
                           return handleRemovalStart(habit);
                         }}
                       >
-                        <TrashSimple
+                        <TrashSimpleIcon
                           size={16}
                           weight="bold"
                           aria-hidden="true"

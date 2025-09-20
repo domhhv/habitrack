@@ -10,10 +10,10 @@ import {
 } from '@heroui/react';
 import { startOfWeek, type CalendarDate } from '@internationalized/date';
 import {
-  CaretLeft,
-  CaretRight,
-  ArrowLineUp,
-  ArrowLineDown,
+  CaretLeftIcon,
+  CaretRightIcon,
+  ArrowLineUpIcon,
+  ArrowLineDownIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
@@ -181,7 +181,7 @@ const NoteDialog = ({
                 }
               }}
             >
-              <CaretLeft size={18} weight="bold" />
+              <CaretLeftIcon size={18} weight="bold" />
             </Button>
             <Button
               size="sm"
@@ -203,7 +203,7 @@ const NoteDialog = ({
                 }
               }}
             >
-              <CaretRight size={18} weight="bold" />
+              <CaretRightIcon size={18} weight="bold" />
             </Button>
             <Tooltip
               content={
@@ -233,9 +233,9 @@ const NoteDialog = ({
                 }}
               >
                 {periodKind === 'day' ? (
-                  <ArrowLineUp size={18} weight="bold" />
+                  <ArrowLineUpIcon size={18} weight="bold" />
                 ) : (
-                  <ArrowLineDown size={18} weight="bold" />
+                  <ArrowLineDownIcon size={18} weight="bold" />
                 )}
               </Button>
             </Tooltip>

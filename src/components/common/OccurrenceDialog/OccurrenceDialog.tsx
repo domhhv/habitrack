@@ -25,7 +25,7 @@ import {
   toCalendarDateTime,
   parseAbsoluteToLocal,
 } from '@internationalized/date';
-import { ArrowsClockwise } from '@phosphor-icons/react';
+import { ArrowsClockwiseIcon } from '@phosphor-icons/react';
 import groupBy from 'lodash.groupby';
 import pluralize from 'pluralize';
 import React, { type ChangeEventHandler } from 'react';
@@ -437,8 +437,8 @@ const OccurrenceDialog = ({
             data-testid="habit-select"
             disableSelectorIconRotation
             selectedKeys={[selectedHabitId]}
-            selectorIcon={<ArrowsClockwise />}
             onChange={handleHabitSelectionChange}
+            selectorIcon={<ArrowsClockwiseIcon />}
             scrollShadowProps={{
               visibility: 'bottom',
             }}

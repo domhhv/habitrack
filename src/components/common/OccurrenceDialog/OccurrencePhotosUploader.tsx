@@ -1,5 +1,5 @@
 import { Input, Button, addToast } from '@heroui/react';
-import { TrashSimple } from '@phosphor-icons/react';
+import { TrashSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
@@ -145,7 +145,7 @@ const OccurrencePhotosUploader = ({
                 onFilesChange(newFiles);
               }}
             >
-              <TrashSimple size={16} weight="bold" />
+              <TrashSimpleIcon size={16} weight="bold" />
             </Button>
           </div>
         );

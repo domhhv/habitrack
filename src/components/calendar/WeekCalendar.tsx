@@ -7,7 +7,7 @@ import {
   toCalendarDate,
   toCalendarDateTime,
 } from '@internationalized/date';
-import { CaretLeft, CaretRight } from '@phosphor-icons/react';
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
@@ -132,7 +132,7 @@ const WeekCalendar = () => {
           onPress={navigateToPreviousWeek}
           className="h-8 w-8 min-w-0 rounded-lg"
         >
-          <CaretLeft />
+          <CaretLeftIcon />
         </Button>
         <h1 className="text-xl font-bold">
           Week {getISOWeek(state.visibleRange.start.toDate(state.timeZone))} of{' '}
@@ -145,7 +145,7 @@ const WeekCalendar = () => {
           onPress={navigateToNextWeek}
           className="h-8 w-8 min-w-0 rounded-lg"
         >
-          <CaretRight />
+          <CaretRightIcon />
         </Button>
       </div>
       <div {...gridProps} className="flex justify-around">
