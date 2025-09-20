@@ -1,9 +1,9 @@
 import { Button, Tooltip } from '@heroui/react';
 import {
-  Trash,
-  CaretLeft,
-  CaretRight,
-  ArrowSquareOut,
+  TrashIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
+  ArrowSquareOutIcon,
 } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useRef, useState } from 'react';
@@ -147,7 +147,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
             boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
           }}
         >
-          <CaretLeft size={20} weight="bold" />
+          <CaretLeftIcon size={20} weight="bold" />
         </Button>
 
         <Button
@@ -162,7 +162,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
             boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
           }}
         >
-          <CaretRight size={20} weight="bold" />
+          <CaretRightIcon size={20} weight="bold" />
         </Button>
       </div>
 
@@ -182,7 +182,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
               boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
             }}
           >
-            <ArrowSquareOut size={18} weight="bold" />
+            <ArrowSquareOutIcon size={18} weight="bold" />
           </Button>
         </div>
       </Tooltip>
@@ -203,7 +203,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
               boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
             }}
           >
-            <Trash size={18} weight="bold" />
+            <TrashIcon size={18} weight="bold" />
           </Button>
         </div>
       </Tooltip>

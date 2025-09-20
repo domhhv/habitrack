@@ -1,5 +1,9 @@
 import { Button, Tooltip, Spinner } from '@heroui/react';
-import { Repeat, GithubLogo, CalendarDots } from '@phosphor-icons/react';
+import {
+  RepeatIcon,
+  GithubLogoIcon,
+  CalendarDotsIcon,
+} from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router';
 
@@ -39,7 +43,7 @@ const Header = () => {
               className={screenWidth < 339 ? 'min-w-fit px-2' : ''}
             >
               {screenWidth < 372 ? (
-                <CalendarDots size={16} weight="bold" />
+                <CalendarDotsIcon size={16} weight="bold" />
               ) : (
                 'Calendar'
               )}
@@ -52,7 +56,7 @@ const Header = () => {
               size={isDesktop ? 'md' : 'sm'}
             >
               {screenWidth < 372 ? (
-                <Repeat size={16} weight="bold" />
+                <RepeatIcon size={16} weight="bold" />
               ) : (
                 'Habits'
               )}
@@ -75,7 +79,7 @@ const Header = () => {
                   size={isDesktop ? 'md' : 'sm'}
                   to="https://github.com/domhhv/habitrack"
                 >
-                  <GithubLogo size={isDesktop ? 20 : 16} />
+                  <GithubLogoIcon size={isDesktop ? 20 : 16} />
                 </Button>
               </Tooltip>
             )}

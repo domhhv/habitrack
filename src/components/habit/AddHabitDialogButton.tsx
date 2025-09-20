@@ -11,7 +11,7 @@ import {
   ModalContent,
   useDisclosure,
 } from '@heroui/react';
-import { Plus, CloudArrowUp } from '@phosphor-icons/react';
+import { PlusIcon, CloudArrowUpIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { AddTraitModal, VisuallyHiddenInput } from '@components';
@@ -88,7 +88,7 @@ const AddHabitDialogButton = () => {
         onPress={openAddDialog}
         className="w-full lg:w-auto"
         data-testid="add-habit-button"
-        startContent={<Plus weight="bold" />}
+        startContent={<PlusIcon weight="bold" />}
       >
         Add habit
       </Button>
@@ -141,8 +141,8 @@ const AddHabitDialogButton = () => {
               size="sm"
               variant="ghost"
               color="secondary"
-              startContent={<Plus />}
               onPress={openTraitModal}
+              startContent={<PlusIcon />}
             >
               Or add a new trait
             </Button>
@@ -151,7 +151,7 @@ const AddHabitDialogButton = () => {
               size="sm"
               as="label"
               color="secondary"
-              startContent={<CloudArrowUp />}
+              startContent={<CloudArrowUpIcon />}
             >
               Upload habit icon
               <VisuallyHiddenInput onChange={handleIconChange} />

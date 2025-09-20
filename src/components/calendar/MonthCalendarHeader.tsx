@@ -10,9 +10,9 @@ import {
 } from '@heroui/react';
 import { today, isSameMonth } from '@internationalized/date';
 import {
-  ArrowFatLeft,
-  ArrowFatRight,
-  ArrowsClockwise,
+  ArrowFatLeftIcon,
+  ArrowFatRightIcon,
+  ArrowsClockwiseIcon,
 } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
@@ -234,7 +234,7 @@ const MonthCalendarHeader = ({
             role="navigate-back"
             to={`/calendar/month/${prevMonth.year}/${prevMonth.month}/${prevMonth.day}`}
           >
-            <ArrowFatLeft size={20} />
+            <ArrowFatLeftIcon size={20} />
           </Button>
           {!isSameMonth(state.focusedDate, today(state.timeZone)) && (
             <Button
@@ -243,7 +243,7 @@ const MonthCalendarHeader = ({
               radius="sm"
               variant="light"
               color="secondary"
-              startContent={<ArrowsClockwise size={20} />}
+              startContent={<ArrowsClockwiseIcon size={20} />}
               className={cn('h-auto', isMobile && 'min-w-fit p-0')}
               to={`/calendar/month/${today(state.timeZone).year}/${today(state.timeZone).month}/${today(state.timeZone).day}`}
             >
@@ -261,7 +261,7 @@ const MonthCalendarHeader = ({
             role="navigate-forward"
             to={`/calendar/month/${nextMonth.year}/${nextMonth.month}/${nextMonth.day}`}
           >
-            <ArrowFatRight size={20} />
+            <ArrowFatRightIcon size={20} />
           </Button>
         </div>
       </div>

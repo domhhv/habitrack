@@ -8,7 +8,7 @@ import {
   DropdownTrigger,
 } from '@heroui/react';
 import { isSameDay, getLocalTimeZone } from '@internationalized/date';
-import { CaretDown } from '@phosphor-icons/react';
+import { CaretDownIcon } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
 import pluralize from 'pluralize';
 import React from 'react';
@@ -153,7 +153,7 @@ const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
       <Dropdown>
         <DropdownTrigger>
           <Button size="sm" isIconOnly variant="light">
-            <CaretDown />
+            <CaretDownIcon />
           </Button>
         </DropdownTrigger>
         <DropdownMenu

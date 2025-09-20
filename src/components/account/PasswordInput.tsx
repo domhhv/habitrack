@@ -1,5 +1,5 @@
 import { Input, Button } from '@heroui/react';
-import { Eye, EyeSlash } from '@phosphor-icons/react';
+import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import React, { type ChangeEventHandler } from 'react';
 
 type PasswordInputProps = {
@@ -60,9 +60,9 @@ const PasswordInput = ({
           aria-label="toggle password visibility"
         >
           {isVisible ? (
-            <EyeSlash className="text-default-400 pointer-events-none text-2xl" />
+            <EyeSlashIcon className="text-default-400 pointer-events-none text-2xl" />
           ) : (
-            <Eye className="text-default-400 pointer-events-none text-2xl" />
+            <EyeIcon className="text-default-400 pointer-events-none text-2xl" />
           )}
         </button>
       }

@@ -1,7 +1,7 @@
 import { cn, Button, Tooltip, useDisclosure } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { getWeeksInMonth, toCalendarDateTime } from '@internationalized/date';
-import { NotePencil, Note as NoteIcon } from '@phosphor-icons/react';
+import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
@@ -191,7 +191,7 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                       {weekNote ? (
                         <NoteIcon size={16} weight="bold" />
                       ) : (
-                        <NotePencil size={16} weight="bold" />
+                        <NotePencilIcon size={16} weight="bold" />
                       )}
                     </Button>
                   </Tooltip>

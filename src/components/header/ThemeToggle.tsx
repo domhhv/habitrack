@@ -1,14 +1,14 @@
 import { cn, Button, ButtonGroup } from '@heroui/react';
-import { Moon, SunDim, Desktop } from '@phosphor-icons/react';
+import { MoonIcon, SunDimIcon, DesktopIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { ThemeModes } from '@const';
 import { useThemeMode, useScreenWidth } from '@hooks';
 
 const modesToIcons = {
-  [ThemeModes.DARK]: Moon,
-  [ThemeModes.LIGHT]: SunDim,
-  [ThemeModes.SYSTEM]: Desktop,
+  [ThemeModes.DARK]: MoonIcon,
+  [ThemeModes.LIGHT]: SunDimIcon,
+  [ThemeModes.SYSTEM]: DesktopIcon,
 };
 
 const ThemeToggle = () => {
