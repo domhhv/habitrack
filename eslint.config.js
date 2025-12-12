@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { fixupConfigRules, fixupPluginRules } from '@eslint/compat';
 import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
-import stylisticTs from '@stylistic/eslint-plugin-ts';
+import stylistic from '@stylistic/eslint-plugin';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import importPlugin from 'eslint-plugin-import';
@@ -54,7 +54,7 @@ export default [
     },
 
     plugins: {
-      '@stylistic/ts': stylisticTs,
+      '@stylistic': stylistic,
       '@typescript-eslint': fixupPluginRules(typescriptEslint),
       import: importPlugin,
       'jsx-a11y': jsxA11Y,
