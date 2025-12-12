@@ -28,7 +28,7 @@ Habitrack is a simple and intuitive web app designed for logging habits and visu
 
 This app showcases the use of the following tools and technologies:
 
-- React 19 with TypeScript 5.8, bundled with [Vite 6](https://vite.dev/)
+- React 19 with TypeScript 5.9, bundled with [Vite 7](https://vite.dev/)
 - [React Router](https://reactrouter.com) v7 for routing (declarative mode)
 - [Zustand](https://zustand.docs.pmnd.rs/) v5 for global state management
 - [Tailwind CSS](https://tailwindcss.com) v4 for styling
@@ -72,7 +72,7 @@ This app showcases the use of the following tools and technologies:
 ### Prerequisites
 
 - [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en/) (LTS)
+- [Node.js](https://nodejs.org/en/) (22)
 - [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (v2)
 - [Docker](https://docs.docker.com/get-started/get-docker/)
 
