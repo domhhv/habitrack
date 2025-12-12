@@ -119,7 +119,7 @@
     "vitest": "^4.0.15"
   },
   "engines": {
-    "node": "^22.15.0"
+    "node": "^22.21.1"
   },
-  "packageManager": "yarn@4.9.4"
+  "packageManager": "yarn@4.12.0"
 }

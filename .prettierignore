@@ -1,5 +1,5 @@
 dist/
 supabase/
 tests/coverage/
-.yarn/releases/yarn-4.9.4.cjs
+.yarn/releases/
 vercel.json
