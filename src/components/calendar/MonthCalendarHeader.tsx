@@ -1,4 +1,8 @@
-import { useDisclosure, type SelectedItems } from '@heroui/react';
+import {
+  useDisclosure,
+  type Selection,
+  type SelectedItems,
+} from '@heroui/react';
 import {
   cn,
   Button,
@@ -18,7 +22,7 @@ import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
@@ -47,6 +51,12 @@ const MonthCalendarHeader = ({
   const traits = useTraits();
   const { user } = useUser();
   const { isMobile, screenWidth } = useScreenWidth();
+  const [monthSelectValue, setMonthSelectValue] = React.useState<Selection>(
+    new Set([])
+  );
+  const [yearSelectValue, setYearSelectValue] = React.useState<Selection>(
+    new Set([])
+  );
   const formatter = useDateFormatter({
     month: 'long',
     timeZone: state.timeZone,
@@ -68,16 +78,21 @@ const MonthCalendarHeader = ({
       prevMonth: state.focusedDate.subtract({ months: 1 }).set({ day: 1 }),
     };
   }, [state.focusedDate]);
-  const {
-    isOpen: isMonthSelectOpen,
-    onClose: closeMonthSelect,
-    onOpenChange: onMonthSelectOpenChange,
-  } = useDisclosure();
-  const {
-    isOpen: isYearSelectOpen,
-    onClose: closeYearSelect,
-    onOpenChange: onYearSelectOpenChange,
-  } = useDisclosure();
+  const { isOpen: isMonthSelectOpen, onOpenChange: onMonthSelectOpenChange } =
+    useDisclosure();
+  const { isOpen: isYearSelectOpen, onOpenChange: onYearSelectOpenChange } =
+    useDisclosure();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const newMonth = String(state.focusedDate.month);
+    setMonthSelectValue(new Set([newMonth]));
+  }, [state.focusedDate.month]);
+
+  React.useEffect(() => {
+    const newYear = String(state.focusedDate.year);
+    setYearSelectValue(new Set([newYear]));
+  }, [state.focusedDate.year]);
 
   const shouldRenderFilters =
     !!user && Object.keys(habits).length > 0 && Object.keys(traits).length > 0;
@@ -103,6 +118,10 @@ const MonthCalendarHeader = ({
       return habit.trait?.name || 'Unknown';
     });
   }, [habits]);
+
+  const navigateToMonth = (year: number, month: number) => {
+    navigate(`/calendar/month/${year}/${month}/1`);
+  };
 
   const handleHabitsFilterChange: React.ChangeEventHandler<
     HTMLSelectElement
@@ -176,21 +195,23 @@ const MonthCalendarHeader = ({
             color="secondary"
             variant="bordered"
             isOpen={isMonthSelectOpen}
+            selectedKeys={monthSelectValue}
             onOpenChange={onMonthSelectOpenChange}
-            selectedKeys={String(state.focusedDate.month)}
             classNames={{
-              base: 'w-[100px]',
+              base: 'w-[125px]',
               popoverContent: 'w-[125px]',
+            }}
+            onSelectionChange={(value) => {
+              const [newMonth] = Array.from(value);
+
+              if (typeof newMonth === 'string') {
+                navigateToMonth(state.focusedDate.year, Number(newMonth));
+              }
             }}
           >
             {months.map((month, index) => {
               return (
-                <SelectItem
-                  as={Link}
-                  key={String(index + 1)}
-                  onClick={closeMonthSelect}
-                  href={`/calendar/month/${state.focusedDate.year}/${index + 1}/1`}
-                >
+                <SelectItem key={String(index + 1)}>
                   {capitalize(isMobile ? month.substring(0, 3) : month)}
                 </SelectItem>
               );
@@ -202,22 +223,22 @@ const MonthCalendarHeader = ({
             color="secondary"
             variant="bordered"
             isOpen={isYearSelectOpen}
+            selectedKeys={yearSelectValue}
             onOpenChange={onYearSelectOpenChange}
-            selectedKeys={[state.focusedDate.year.toString()]}
             classNames={{
               base: 'w-[100px]',
+            }}
+            onSelectionChange={(value) => {
+              const [newYear] = Array.from(value);
+
+              if (typeof newYear === 'string') {
+                navigateToMonth(Number(newYear), state.focusedDate.month);
+              }
             }}
           >
             {YEARS.map((year) => {
               return (
-                <SelectItem
-                  as={Link}
-                  key={year.toString()}
-                  onClick={closeYearSelect}
-                  href={`/calendar/month/${year}/${state.focusedDate.month}/1`}
-                >
-                  {year.toString()}
-                </SelectItem>
+                <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
               );
             })}
           </Select>
