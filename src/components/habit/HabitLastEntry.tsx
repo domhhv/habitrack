@@ -31,7 +31,9 @@ const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
     React.useState<Selection>(new Set(['default']));
   const [latestOccurrenceTimestamp, setLatestOccurrenceTimestamp] =
     React.useState<number | null>(null);
-  const localTimeZone = React.useMemo(getLocalTimeZone, []);
+  const localTimeZone = React.useMemo(() => {
+    return getLocalTimeZone();
+  }, []);
 
   const fullDateTimeFormatter = useDateFormatter({
     day: 'numeric',

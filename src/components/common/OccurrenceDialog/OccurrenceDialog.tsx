@@ -96,7 +96,7 @@ const OccurrenceDialog = ({
     return parseAbsoluteToLocal(
       new Date(existingOccurrence.timestamp).toISOString()
     );
-  }, [existingOccurrence?.timestamp]);
+  }, [existingOccurrence]);
 
   const habitsByTraitName = React.useMemo(() => {
     return groupBy(Object.values(habits), (habit) => {
