@@ -209,6 +209,7 @@ const MonthCalendarHeader = ({
               radius="sm"
               variant="light"
               color="secondary"
+              aria-label="Toggle filters"
               className={cn(isMobile && 'min-w-fit p-0')}
               onPress={() => {
                 setIsFilteringShownOnMobile((prev) => {
