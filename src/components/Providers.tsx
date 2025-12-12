@@ -10,9 +10,7 @@ type ProviderProps = {
   children: ReactNode;
 };
 
-const HeroUIProvider = React.memo(function WrappedProvider({
-  children,
-}: ProviderProps) {
+const HeroUIProvider = React.memo(({ children }: ProviderProps) => {
   const navigate = useNavigate();
 
   return (
@@ -21,15 +19,13 @@ const HeroUIProvider = React.memo(function WrappedProvider({
     </OriginalHeroUIProvider>
   );
 });
+HeroUIProvider.displayName = 'HeroUIProvider';
 
-const Providers = React.memo(function WrappedProviders({
-  children,
-  locale,
-}: ProviderProps & { locale: string }) {
+const Providers = React.memo(({ children }: ProviderProps) => {
   return (
     <BrowserRouter>
       <HeroUIProvider>
-        <I18nProvider locale={locale}>
+        <I18nProvider>
           <ToastProvider
             placement="top-center"
             toastProps={{
@@ -42,5 +38,6 @@ const Providers = React.memo(function WrappedProviders({
     </BrowserRouter>
   );
 });
+Providers.displayName = 'Providers';
 
 export default Providers;

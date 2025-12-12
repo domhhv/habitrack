@@ -1,6 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
 import React from 'react';
-import { useLocale } from 'react-aria';
 import { Route, Routes, Navigate } from 'react-router';
 
 import { AppHeader } from '@components';
@@ -14,14 +13,12 @@ import {
 import Providers from './components/Providers';
 
 const App = () => {
-  const { locale } = useLocale();
-
   React.useEffect(() => {
     document.getElementById('root')?.classList.add('initialized');
   }, []);
 
   return (
-    <Providers locale={locale}>
+    <Providers>
       <AppHeader />
       <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 flex-col items-start">
         <Routes>
