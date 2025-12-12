@@ -20,7 +20,6 @@ import {
   EditHabitDialog,
   AddHabitDialogButton,
 } from '@components';
-import { useScreenWidth } from '@hooks';
 import type { Habit } from '@models';
 import { useHabits } from '@stores';
 
@@ -41,7 +40,6 @@ const HabitsTable = () => {
   });
 
   const habits = useHabits();
-  const { isMobile } = useScreenWidth();
   const {
     habitToRemove,
     handleRemovalConfirmed,
@@ -59,15 +57,22 @@ const HabitsTable = () => {
   };
 
   return (
-    <>
+    <div className="w-full space-y-4 px-8 pt-4 pb-2 lg:px-16">
+      <div className="flex w-full items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-300">
+          Your habits
+        </h1>
+
+        <AddHabitDialogButton />
+      </div>
+
       <Table
         shadow="none"
         isHeaderSticky
         aria-label="Habits tracking table"
         classNames={{
           base: cn(
-            'overflow-scroll scrollbar-hide px-8 py-2 lg:px-16 lg:py-4 [&>div]:bg-white [&>div]:dark:bg-background-800',
-            isMobile ? 'max-h-[400px]' : 'max-h-[600px]'
+            'overflow-scroll scrollbar-hide w-full [&>div]:bg-white [&>div]:dark:bg-background-800 h-[calc(100vh-148px)] min-h-[400px]'
           ),
         }}
       >
@@ -188,10 +193,6 @@ const HabitsTable = () => {
         </TableBody>
       </Table>
 
-      <div className="m-auto my-4 flex w-full justify-end px-8 lg:px-16 lg:py-4">
-        <AddHabitDialogButton />
-      </div>
-
       <EditHabitDialog habit={habitToEdit} onClose={handleEditEnd} />
 
       <ConfirmDialog
@@ -212,7 +213,7 @@ const HabitsTable = () => {
           </i>
         </div>
       </ConfirmDialog>
-    </>
+    </div>
   );
 };
 
