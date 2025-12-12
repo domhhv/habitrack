@@ -19,8 +19,12 @@ const ThemeToggle = () => {
     <ButtonGroup>
       {Object.values(ThemeModes).map((mode) => {
         const isSelected = themeMode === mode;
-        const iconClassName = cn(isSelected && 'text-white');
-        const buttonClassName = cn(isSelected && 'bg-secondary-500');
+        const iconClassName = cn(
+          isSelected && 'text-secondary-700 dark:text-secondary-300'
+        );
+        const buttonClassName = cn(
+          isSelected && 'bg-secondary-300 dark:bg-secondary-700'
+        );
 
         const Icon = modesToIcons[mode];
 

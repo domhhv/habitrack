@@ -27,7 +27,7 @@ const MonthCalendarPage = () => {
   return (
     <div
       {...calendarProps}
-      className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 md:gap-4 md:py-4 lg:px-16"
+      className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 md:gap-3 md:py-3 lg:px-16"
     >
       <title>{`${capitalize(title)} | Habitrack Calendar`}</title>
       <MonthCalendar state={calendarState} />

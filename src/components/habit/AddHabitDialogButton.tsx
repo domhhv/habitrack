@@ -86,7 +86,6 @@ const AddHabitDialogButton = () => {
         color="primary"
         variant="solid"
         onPress={openAddDialog}
-        className="w-full lg:w-auto"
         data-testid="add-habit-button"
         startContent={<PlusIcon weight="bold" />}
       >

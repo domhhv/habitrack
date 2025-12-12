@@ -5,7 +5,7 @@ import {
   CalendarDotsIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import { AuthModalButton } from '@components';
 import { useUser, useScreenWidth, useFetchOnAuth } from '@hooks';
@@ -16,6 +16,7 @@ const Header = () => {
   useFetchOnAuth();
   const { isDesktop, isMobile, screenWidth } = useScreenWidth();
   const { isLoading } = useUser();
+  const { pathname } = useLocation();
 
   return (
     <>
@@ -32,15 +33,16 @@ const Header = () => {
         </div>
       )}
       <header className="bg-background-100 dark:dark:bg-background-900 border-b border-b-slate-300 dark:border-b-slate-800">
-        <div className="mx-auto flex w-full items-center justify-between gap-2 px-8 py-2 lg:gap-4 lg:px-16 lg:py-4">
+        <div className="mx-auto flex w-full items-center justify-between gap-2 px-8 py-2 lg:gap-4 lg:px-16 lg:py-3">
           <div className="flex items-center gap-2">
             <Button
               as={Link}
-              color="primary"
+              color="secondary"
               to="/calendar/month"
               isIconOnly={screenWidth < 372}
               size={isDesktop ? 'md' : 'sm'}
               className={screenWidth < 339 ? 'min-w-fit px-2' : ''}
+              variant={pathname.startsWith('/calendar') ? 'solid' : 'bordered'}
             >
               {screenWidth < 372 ? (
                 <CalendarDotsIcon size={16} weight="bold" />
@@ -54,6 +56,7 @@ const Header = () => {
               color="secondary"
               isIconOnly={screenWidth < 372}
               size={isDesktop ? 'md' : 'sm'}
+              variant={pathname === '/habits' ? 'solid' : 'bordered'}
             >
               {screenWidth < 372 ? (
                 <RepeatIcon size={16} weight="bold" />

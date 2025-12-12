@@ -15,9 +15,11 @@ import {
 import { today, isSameMonth } from '@internationalized/date';
 import {
   ArrowFatLeftIcon,
+  FunnelSimpleIcon,
   ArrowFatRightIcon,
   ArrowsClockwiseIcon,
 } from '@phosphor-icons/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
@@ -50,13 +52,15 @@ const MonthCalendarHeader = ({
   const habits = useHabits();
   const traits = useTraits();
   const { user } = useUser();
-  const { isMobile, screenWidth } = useScreenWidth();
+  const { isDesktop, isMobile, screenWidth } = useScreenWidth();
   const [monthSelectValue, setMonthSelectValue] = React.useState<Selection>(
     new Set([])
   );
   const [yearSelectValue, setYearSelectValue] = React.useState<Selection>(
     new Set([])
   );
+  const [isFilteringShownOnMobile, setIsFilteringShownOnMobile] =
+    React.useState(false);
   const formatter = useDateFormatter({
     month: 'long',
     timeZone: state.timeZone,
@@ -94,8 +98,17 @@ const MonthCalendarHeader = ({
     setYearSelectValue(new Set([newYear]));
   }, [state.focusedDate.year]);
 
-  const shouldRenderFilters =
-    !!user && Object.keys(habits).length > 0 && Object.keys(traits).length > 0;
+  const shouldRenderFilters = React.useMemo(() => {
+    if (!isDesktop && !isFilteringShownOnMobile) {
+      return false;
+    }
+
+    if (Object.keys(habits).length <= 1 && Object.keys(traits).length <= 1) {
+      return false;
+    }
+
+    return Boolean(user);
+  }, [habits, isFilteringShownOnMobile, isDesktop, traits, user]);
 
   const areAllHabitsSelected = React.useMemo(() => {
     if (filters.habitIds.size === 1 && filters.habitIds.has('')) {
@@ -186,20 +199,38 @@ const MonthCalendarHeader = ({
   };
 
   return (
-    <div className="flex flex-col items-stretch justify-between gap-4 px-0 pt-2 md:pt-0 lg:flex-row lg:gap-0 lg:px-0">
-      <div className="flex flex-col items-stretch justify-end gap-0 max-[372px]:gap-4 min-[373px]:flex-row lg:justify-between lg:gap-2">
+    <div className="flex flex-col items-stretch justify-between gap-2 px-0 pt-2 md:pt-0 lg:flex-row lg:gap-0 lg:px-0">
+      <div className="flex flex-col items-stretch justify-end gap-2 max-[372px]:gap-4 min-[373px]:flex-row lg:justify-between lg:gap-2">
         <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
+          {!isDesktop && (
+            <Button
+              size="sm"
+              isIconOnly
+              radius="sm"
+              variant="light"
+              color="secondary"
+              className={cn(isMobile && 'min-w-fit p-0')}
+              onPress={() => {
+                setIsFilteringShownOnMobile((prev) => {
+                  return !prev;
+                });
+              }}
+            >
+              <FunnelSimpleIcon size={20} />
+            </Button>
+          )}
           <Select
+            size="sm"
             radius="sm"
-            label="Month"
             color="secondary"
             variant="bordered"
+            description="Month"
             isOpen={isMonthSelectOpen}
             selectedKeys={monthSelectValue}
             onOpenChange={onMonthSelectOpenChange}
             classNames={{
-              base: 'w-[125px]',
-              popoverContent: 'w-[125px]',
+              base: 'w-[75px] md:w-[125px]',
+              popoverContent: 'w-[100px] md:w-[125px]',
             }}
             onSelectionChange={(value) => {
               const [newMonth] = Array.from(value);
@@ -218,9 +249,10 @@ const MonthCalendarHeader = ({
             })}
           </Select>
           <Select
+            size="sm"
             radius="sm"
-            label="Year"
             color="secondary"
+            description="Year"
             variant="bordered"
             isOpen={isYearSelectOpen}
             selectedKeys={yearSelectValue}
@@ -243,15 +275,14 @@ const MonthCalendarHeader = ({
             })}
           </Select>
         </div>
-        <div className="flex items-stretch gap-0 lg:gap-2">
+        <div className="flex gap-1 lg:gap-2">
           <Button
             as={Link}
-            size="md"
+            size="sm"
             isIconOnly
             radius="sm"
             variant="light"
             color="secondary"
-            className="h-auto"
             role="navigate-back"
             to={`/calendar/month/${prevMonth.year}/${prevMonth.month}/${prevMonth.day}`}
           >
@@ -260,12 +291,12 @@ const MonthCalendarHeader = ({
           {!isSameMonth(state.focusedDate, today(state.timeZone)) && (
             <Button
               as={Link}
-              size="md"
+              size="sm"
               radius="sm"
               variant="light"
               color="secondary"
+              className={cn(isMobile && 'min-w-fit p-0')}
               startContent={<ArrowsClockwiseIcon size={20} />}
-              className={cn('h-auto', isMobile && 'min-w-fit p-0')}
               to={`/calendar/month/${today(state.timeZone).year}/${today(state.timeZone).month}/${today(state.timeZone).day}`}
             >
               {(!isMobile || screenWidth < 373) && 'Today'}
@@ -273,12 +304,11 @@ const MonthCalendarHeader = ({
           )}
           <Button
             as={Link}
-            size="md"
+            size="sm"
             isIconOnly
             radius="sm"
             variant="light"
             color="secondary"
-            className="h-auto"
             role="navigate-forward"
             to={`/calendar/month/${nextMonth.year}/${nextMonth.month}/${nextMonth.day}`}
           >
@@ -286,161 +316,171 @@ const MonthCalendarHeader = ({
           </Button>
         </div>
       </div>
-      {shouldRenderFilters && (
-        <div className="flex flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between">
-          <Select
-            radius="sm"
-            color="secondary"
-            variant="bordered"
-            label="Filter by habits"
-            selectionMode="multiple"
-            selectedKeys={filters.habitIds}
-            className="w-full md:w-[200px]"
-            onChange={handleHabitsFilterChange}
-            scrollShadowProps={{
-              visibility: 'bottom',
-            }}
-            popoverProps={{
-              crossOffset: isMobile ? -75 : 0,
-            }}
-            renderValue={(selectedHabits: SelectedItems<Habit>) => {
-              return (
-                <CrossPlatformHorizontalScroll className="flex space-x-2">
-                  {selectedHabits.map(({ key }) => {
-                    if (typeof key !== 'string' || !habits[key]) {
-                      return null;
-                    }
-
-                    const { iconPath, id, name } = habits[key];
-
-                    return (
-                      <Tooltip key={id} content={name}>
-                        <img
-                          className="h-4 w-4"
-                          alt={`${name} icon`}
-                          src={getPublicUrl(
-                            StorageBuckets.HABIT_ICONS,
-                            iconPath
-                          )}
-                        />
-                      </Tooltip>
-                    );
-                  })}
-                </CrossPlatformHorizontalScroll>
-              );
+      <AnimatePresence>
+        {shouldRenderFilters && (
+          <motion.div
+            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0, opacity: 0 }}
+            className="flex flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between"
+            animate={{
+              height: shouldRenderFilters ? 'auto' : 0,
+              opacity: shouldRenderFilters ? 1 : 0,
             }}
           >
-            <>
-              {!!Object.keys(habits).length && (
-                <SelectItem
-                  key="toggle-all"
-                  className="mb-0.5"
-                  textValue="Toggle all"
-                >
-                  <Checkbox
-                    color="secondary"
-                    isSelected={areAllHabitsSelected}
-                    isIndeterminate={
-                      !areAllHabitsSelected && filters.habitIds.size > 1
-                    }
-                  />
-                  <span>
-                    {areAllHabitsSelected ? 'Unselect' : 'Select'} all
-                  </span>
-                </SelectItem>
-              )}
-              {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
-                if (!habits?.length) {
-                  return null;
-                }
-
+            <Select
+              size="sm"
+              radius="sm"
+              color="secondary"
+              variant="bordered"
+              selectionMode="multiple"
+              description="Filter by habits"
+              selectedKeys={filters.habitIds}
+              className="w-full md:w-[200px]"
+              onChange={handleHabitsFilterChange}
+              scrollShadowProps={{
+                visibility: 'bottom',
+              }}
+              renderValue={(selectedHabits: SelectedItems<Habit>) => {
                 return (
-                  <SelectSection
-                    showDivider
-                    key={traitName}
-                    title={traitName}
-                    classNames={{
-                      heading:
-                        'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-                    }}
-                  >
-                    {habits.map((habit) => {
+                  <CrossPlatformHorizontalScroll className="flex space-x-2">
+                    {selectedHabits.map(({ key }) => {
+                      if (typeof key !== 'string' || !habits[key]) {
+                        return null;
+                      }
+
+                      const { iconPath, id, name } = habits[key];
+
                       return (
-                        <SelectItem key={habit.id} textValue={habit.name}>
-                          <div className="flex items-center gap-2">
-                            <img
-                              alt={habit.name}
-                              role="habit-icon"
-                              className="h-4 w-4"
-                              src={getPublicUrl(
-                                StorageBuckets.HABIT_ICONS,
-                                habit.iconPath
-                              )}
-                            />
-                            <span className="truncate">{habit.name}</span>
-                          </div>
-                        </SelectItem>
+                        <Tooltip key={id} content={name}>
+                          <img
+                            className="h-4 w-4"
+                            alt={`${name} icon`}
+                            src={getPublicUrl(
+                              StorageBuckets.HABIT_ICONS,
+                              iconPath
+                            )}
+                          />
+                        </Tooltip>
                       );
                     })}
-                  </SelectSection>
+                  </CrossPlatformHorizontalScroll>
                 );
-              })}
-            </>
-          </Select>
-          <Select
-            size="md"
-            radius="sm"
-            color="secondary"
-            variant="bordered"
-            label="Filter by traits"
-            selectionMode="multiple"
-            selectedKeys={filters.traitIds}
-            onChange={handleTraitsFilterChange}
-            className="w-full min-[450px]:w-1/2 md:w-[250px]"
-            renderValue={(selectedTraits: SelectedItems<Trait>) => {
-              return (
-                <CrossPlatformHorizontalScroll className="space-x-2">
-                  {selectedTraits.map(({ key }) => {
-                    if (typeof key !== 'string' || !traits[key]) {
+              }}
+            >
+              <>
+                {!!Object.keys(habits).length && (
+                  <SelectItem
+                    key="toggle-all"
+                    className="mb-0.5"
+                    textValue="Toggle all"
+                  >
+                    <Checkbox
+                      color="secondary"
+                      isSelected={areAllHabitsSelected}
+                      isIndeterminate={
+                        !areAllHabitsSelected && filters.habitIds.size > 1
+                      }
+                    />
+                    <span>
+                      {areAllHabitsSelected ? 'Unselect' : 'Select'} all
+                    </span>
+                  </SelectItem>
+                )}
+                {Object.entries(habitsByTraitName).map(
+                  ([traitName, habits]) => {
+                    if (!habits?.length) {
                       return null;
                     }
 
-                    const { color, id, name } = traits[key];
+                    return (
+                      <SelectSection
+                        showDivider
+                        key={traitName}
+                        title={traitName}
+                        classNames={{
+                          heading:
+                            'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
+                        }}
+                      >
+                        {habits.map((habit) => {
+                          return (
+                            <SelectItem key={habit.id} textValue={habit.name}>
+                              <div className="flex items-center gap-2">
+                                <img
+                                  alt={habit.name}
+                                  role="habit-icon"
+                                  className="h-4 w-4"
+                                  src={getPublicUrl(
+                                    StorageBuckets.HABIT_ICONS,
+                                    habit.iconPath
+                                  )}
+                                />
+                                <span className="truncate">{habit.name}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectSection>
+                    );
+                  }
+                )}
+              </>
+            </Select>
+            <Select
+              size="sm"
+              radius="sm"
+              color="secondary"
+              variant="bordered"
+              selectionMode="multiple"
+              description="Filter by traits"
+              selectedKeys={filters.traitIds}
+              onChange={handleTraitsFilterChange}
+              className="w-full min-[450px]:w-1/2 md:w-[250px]"
+              renderValue={(selectedTraits: SelectedItems<Trait>) => {
+                return (
+                  <CrossPlatformHorizontalScroll className="flex space-x-2">
+                    {selectedTraits.map(({ key }) => {
+                      if (typeof key !== 'string' || !traits[key]) {
+                        return null;
+                      }
 
-                    return <TraitChip key={id} trait={{ color, name }} />;
+                      const { color, id, name } = traits[key];
+
+                      return <TraitChip key={id} trait={{ color, name }} />;
+                    })}
+                  </CrossPlatformHorizontalScroll>
+                );
+              }}
+            >
+              <>
+                {!!Object.keys(traits).length && (
+                  <SelectItem
+                    key="toggle-all"
+                    className="mb-0.5"
+                    textValue="Toggle all"
+                  >
+                    <Checkbox
+                      color="secondary"
+                      isSelected={areAllTraitsSelected}
+                      isIndeterminate={
+                        !areAllTraitsSelected && filters.traitIds.size > 1
+                      }
+                    />
+                    <span>
+                      {areAllTraitsSelected ? 'Unselect' : 'Select'} all
+                    </span>
+                  </SelectItem>
+                )}
+                <SelectSection title="Filter by traits">
+                  {Object.values(traits).map((trait) => {
+                    return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
                   })}
-                </CrossPlatformHorizontalScroll>
-              );
-            }}
-          >
-            <>
-              {!!Object.keys(traits).length && (
-                <SelectItem
-                  key="toggle-all"
-                  className="mb-0.5"
-                  textValue="Toggle all"
-                >
-                  <Checkbox
-                    color="secondary"
-                    isSelected={areAllTraitsSelected}
-                    isIndeterminate={
-                      !areAllTraitsSelected && filters.traitIds.size > 1
-                    }
-                  />
-                  <span>
-                    {areAllTraitsSelected ? 'Unselect' : 'Select'} all
-                  </span>
-                </SelectItem>
-              )}
-              <SelectSection title="Filter by traits">
-                {Object.values(traits).map((trait) => {
-                  return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
-                })}
-              </SelectSection>
-            </>
-          </Select>
-        </div>
-      )}
+                </SelectSection>
+              </>
+            </Select>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
