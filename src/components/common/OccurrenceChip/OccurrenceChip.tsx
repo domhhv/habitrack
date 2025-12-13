@@ -86,9 +86,8 @@ const OccurrenceChip = ({
 
   let chip = (
     <Tooltip
-      delay={0}
       radius="sm"
-      closeDelay={100}
+      closeDelay={0}
       content={habitName}
       classNames={{
         content: 'px-2 py-1.5',

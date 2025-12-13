@@ -125,6 +125,7 @@ const AuthModalButton = () => {
         <ButtonGroup size={screenWidth > 1024 ? 'md' : 'sm'}>
           <Button
             as={Link}
+            size="sm"
             to="/account"
             color="secondary"
             data-testid="auth-button"
@@ -134,8 +135,9 @@ const AuthModalButton = () => {
           >
             {screenWidth > 1024 && 'Account'}
           </Button>
-          <Tooltip content="Log out">
+          <Tooltip closeDelay={0} content="Log out">
             <Button
+              size="sm"
               isIconOnly
               color="secondary"
               onPress={signOut}
@@ -149,7 +151,12 @@ const AuthModalButton = () => {
           </Tooltip>
         </ButtonGroup>
       ) : (
-        <Button color="primary" onPress={onOpen} data-testid="auth-button">
+        <Button
+          size="sm"
+          color="primary"
+          onPress={onOpen}
+          data-testid="auth-button"
+        >
           Log In
         </Button>
       )}

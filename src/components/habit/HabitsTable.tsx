@@ -134,6 +134,7 @@ const HabitsTable = () => {
                     aria-label={`Actions for habit ${habit.name}`}
                   >
                     <Tooltip
+                      closeDelay={0}
                       role="tooltip"
                       content="Edit habit"
                       id={`edit-tooltip-${habit.id}`}
@@ -159,6 +160,7 @@ const HabitsTable = () => {
                       </Button>
                     </Tooltip>
                     <Tooltip
+                      closeDelay={0}
                       color="danger"
                       role="tooltip"
                       content="Delete habit"

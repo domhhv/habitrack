@@ -40,7 +40,7 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
   };
 
   return (
-    <Tooltip content="Upload new icon">
+    <Tooltip closeDelay={0} content="Upload new icon">
       <Button
         size="lg"
         isIconOnly

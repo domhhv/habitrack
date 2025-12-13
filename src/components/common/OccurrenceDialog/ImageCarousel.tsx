@@ -166,7 +166,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
         </Button>
       </div>
 
-      <Tooltip content="Open this photo in a new tab">
+      <Tooltip closeDelay={0} content="Open this photo in a new tab">
         <div className="pointer-events-auto absolute top-4 right-14 z-10">
           <Button
             size="sm"
@@ -187,7 +187,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
         </div>
       </Tooltip>
 
-      <Tooltip content="Delete this photo">
+      <Tooltip closeDelay={0} content="Delete this photo">
         <div className="pointer-events-auto absolute top-4 right-4 z-10">
           <Button
             size="sm"

@@ -30,7 +30,13 @@ const HabitLongestStreak = ({ id }: { id: Habit['id'] }) => {
   );
 
   return longestStreak.streakLength ? (
-    <Tooltip showArrow offset={12} content={range} color="primary">
+    <Tooltip
+      showArrow
+      offset={12}
+      closeDelay={0}
+      content={range}
+      color="primary"
+    >
       <span>{longestStreak.streakLength} days</span>
     </Tooltip>
   ) : (
