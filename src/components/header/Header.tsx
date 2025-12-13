@@ -14,7 +14,7 @@ import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   useFetchOnAuth();
-  const { isDesktop, isMobile, screenWidth } = useScreenWidth();
+  const { isDesktop, screenWidth } = useScreenWidth();
   const { isLoading } = useUser();
   const { pathname } = useLocation();
 
@@ -33,18 +33,18 @@ const Header = () => {
         </div>
       )}
       <header className="bg-background-100 dark:dark:bg-background-900 border-b border-b-slate-300 dark:border-b-slate-800">
-        <div className="mx-auto flex w-full items-center justify-between gap-2 px-8 py-2 lg:gap-4 lg:px-16 lg:py-3">
+        <div className="mx-auto flex w-full items-center justify-between gap-2 px-4 py-2 min-[373px]:px-8 lg:gap-4 lg:px-16">
           <div className="flex items-center gap-2">
             <Button
               as={Link}
+              size="sm"
               color="secondary"
               to="/calendar/month"
-              isIconOnly={screenWidth < 372}
-              size={isDesktop ? 'md' : 'sm'}
+              isIconOnly={screenWidth < 424}
               className={screenWidth < 339 ? 'min-w-fit px-2' : ''}
               variant={pathname.startsWith('/calendar') ? 'solid' : 'bordered'}
             >
-              {screenWidth < 372 ? (
+              {screenWidth < 424 ? (
                 <CalendarDotsIcon size={16} weight="bold" />
               ) : (
                 'Calendar'
@@ -52,40 +52,39 @@ const Header = () => {
             </Button>
             <Button
               as={Link}
+              size="sm"
               to="/habits"
               color="secondary"
-              isIconOnly={screenWidth < 372}
-              size={isDesktop ? 'md' : 'sm'}
+              isIconOnly={screenWidth < 424}
               variant={pathname === '/habits' ? 'solid' : 'bordered'}
             >
-              {screenWidth < 372 ? (
+              {screenWidth < 424 ? (
                 <RepeatIcon size={16} weight="bold" />
               ) : (
                 'Habits'
               )}
             </Button>
             <ThemeToggle />
-            {!isMobile && (
-              <Tooltip
-                showArrow
-                delay={1000}
+            <Tooltip
+              showArrow
+              delay={500}
+              closeDelay={0}
+              color="secondary"
+              placement="right"
+              content="View source code on GitHub"
+            >
+              <Button
+                as={Link}
+                size="sm"
+                isIconOnly
+                variant="light"
+                target="_blank"
                 color="secondary"
-                placement="right"
-                content="View source code on GitHub"
+                to="https://github.com/domhhv/habitrack"
               >
-                <Button
-                  as={Link}
-                  isIconOnly
-                  variant="light"
-                  target="_blank"
-                  color="secondary"
-                  size={isDesktop ? 'md' : 'sm'}
-                  to="https://github.com/domhhv/habitrack"
-                >
-                  <GithubLogoIcon size={isDesktop ? 20 : 16} />
-                </Button>
-              </Tooltip>
-            )}
+                <GithubLogoIcon size={isDesktop ? 18 : 16} />
+              </Button>
+            </Tooltip>
           </div>
           <AuthModalButton />
         </div>

@@ -46,7 +46,6 @@ const NoteDialog = ({
   const { user } = useUser();
   const { locale } = useLocale();
   const { isDesktop, isMobile, isTablet } = useScreenWidth();
-  const [hasEdited, setHasEdited] = React.useState(false);
   const [content, handleContentChange, clearContent] = useTextField();
   const [isSaving, setIsSaving] = React.useState(false);
   const [isRemoving, setIsRemoving] = React.useState(false);
@@ -74,12 +73,12 @@ const NoteDialog = ({
   }, [notes, periodDate, periodKind]);
 
   React.useEffect(() => {
-    if (isOpen && existingNote?.content && !hasEdited) {
+    if (isOpen && existingNote?.content) {
       handleContentChange(existingNote.content);
     } else if (isOpen && !existingNote?.content) {
       handleContentChange('');
     }
-  }, [existingNote, handleContentChange, isOpen, hasEdited]);
+  }, [existingNote, handleContentChange, isOpen]);
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -134,7 +133,6 @@ const NoteDialog = ({
 
   const handleClose = () => {
     setIsSaving(false);
-    setHasEdited(false);
     onClose();
     clearContent();
   };
@@ -144,7 +142,7 @@ const NoteDialog = ({
   }
 
   const formatCurrentWeek = () => {
-    return `week ${getISOWeek(periodDate.toDate(timeZone))} of ${monthFormatter.format(periodDate.toDate(timeZone))}`;
+    return `week ${getISOWeek(periodDate.toDate(timeZone))} of ${monthFormatter.format(periodDate.toDate(timeZone))} ${periodDate.year}`;
   };
 
   const period =
@@ -152,10 +150,16 @@ const NoteDialog = ({
       ? dayFormatter.format(periodDate.toDate(timeZone))
       : formatCurrentWeek();
 
+  const scaleButtonLabel =
+    periodKind === 'day'
+      ? `Go to the note about ${formatCurrentWeek()} and other weeks`
+      : 'Go to notes about days of this and other weeks';
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
+      className="max-w-[540px]"
       placement={isMobile || isTablet ? 'top' : 'center'}
     >
       <ModalContent>
@@ -183,39 +187,36 @@ const NoteDialog = ({
             >
               <CaretLeftIcon size={18} weight="bold" />
             </Button>
-            <Button
-              size="sm"
-              isIconOnly
-              variant="light"
-              onPress={() => {
-                switch (periodKind) {
-                  case 'day':
-                    return onPeriodChange({
-                      date: periodDate.add({ days: 1 }),
-                      kind: 'day',
-                    });
-
-                  case 'week':
-                    return onPeriodChange({
-                      date: periodDate.add({ weeks: 1 }),
-                      kind: 'week',
-                    });
-                }
-              }}
-            >
-              <CaretRightIcon size={18} weight="bold" />
-            </Button>
-            <Tooltip
-              content={
-                periodKind === 'day'
-                  ? `Go to ${formatCurrentWeek()}`
-                  : 'Go to days of this week'
-              }
-            >
+            <Tooltip delay={500} closeDelay={0} content={scaleButtonLabel}>
               <Button
                 size="sm"
                 isIconOnly
                 variant="light"
+                onPress={() => {
+                  switch (periodKind) {
+                    case 'day':
+                      return onPeriodChange({
+                        date: periodDate.add({ days: 1 }),
+                        kind: 'day',
+                      });
+
+                    case 'week':
+                      return onPeriodChange({
+                        date: periodDate.add({ weeks: 1 }),
+                        kind: 'week',
+                      });
+                  }
+                }}
+              >
+                <CaretRightIcon size={18} weight="bold" />
+              </Button>
+            </Tooltip>
+            <Tooltip delay={500} closeDelay={0} content={scaleButtonLabel}>
+              <Button
+                size="sm"
+                isIconOnly
+                variant="light"
+                aria-label={scaleButtonLabel}
                 onPress={() => {
                   switch (periodKind) {
                     case 'day':
@@ -242,26 +243,23 @@ const NoteDialog = ({
           </div>
           Note about {period}
         </ModalHeader>
-        <ModalBody>
+        <ModalBody className="py-0">
           <Textarea
             value={content}
             variant="faded"
+            disableAutosize
             placeholder="Note"
+            onChange={handleContentChange}
             disabled={isSaving || isRemoving}
             onKeyDown={() => {
               return null;
             }}
-            onChange={(event) => {
-              setHasEdited(true);
-              handleContentChange(event);
+            classNames={{
+              inputWrapper: 'h-25!',
+              ...(!isDesktop && {
+                input: 'text-base',
+              }),
             }}
-            classNames={
-              !isDesktop
-                ? {
-                    input: 'text-base',
-                  }
-                : undefined
-            }
           />
         </ModalBody>
         <ModalFooter>

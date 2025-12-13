@@ -45,7 +45,7 @@ const MonthCalendarCell = ({
 }: CalendarCellProps) => {
   const dayNotes = useDayNotes();
   const { user } = useUser();
-  const { isDesktop, isMobile } = useScreenWidth();
+  const { isDesktop, isMobile, screenWidth } = useScreenWidth();
   const ref = React.useRef<HTMLDivElement | null>(null);
   const { cellProps, formattedDate, isOutsideVisibleRange } = useCalendarCell(
     { date },
@@ -74,7 +74,7 @@ const MonthCalendarCell = ({
   );
 
   const cellHeaderClassName = cn(
-    'flex w-full items-center justify-between border-b border-neutral-500 px-1.5 py-1.5 text-sm dark:border-neutral-400 md:text-base',
+    'flex w-full items-center justify-between border-b border-neutral-500 pl-1.5 pr-0.5 py-0.5 text-sm dark:border-neutral-400',
     isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600',
     isTodayCell ? 'w-full self-auto md:self-start' : 'w-full'
   );
@@ -127,7 +127,7 @@ const MonthCalendarCell = ({
               </Tooltip>
             </div>
           )}
-          {isTodayCell && (
+          {isTodayCell && screenWidth > 380 && (
             <CalendarBlankIcon weight="fill" size={isMobile ? 18 : 20} />
           )}
         </div>

@@ -93,7 +93,7 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
   };
 
   return (
-    <div {...gridProps} className="flex flex-1 flex-col gap-0 lg:gap-4">
+    <div {...gridProps} className="flex flex-1 flex-col gap-0 lg:gap-1">
       <div className="mb-1 flex">
         {weekDays.map((weekDay) => {
           return (
@@ -152,15 +152,20 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                 key={weekIndex}
                 className="group relative flex items-end gap-1 md:gap-2"
               >
-                <div className="absolute top-0 -left-7 flex h-full flex-col justify-between gap-1 lg:-left-12">
-                  <Tooltip content="Go to this week">
+                <div
+                  className={cn(
+                    'absolute -top-1 -left-7 flex h-full flex-col lg:-left-9',
+                    weekIndex === 0 ? 'gap-1 lg:gap-1.5' : 'gap-0.5 lg:gap-1'
+                  )}
+                >
+                  <Tooltip closeDelay={0} content="Go to this week">
                     <Button
                       as={Link}
                       variant="ghost"
                       radius={isDesktop ? 'md' : 'sm'}
                       to={`/calendar/week/${firstDayOfWeek.year}/${firstDayOfWeek.month}/${firstDayOfWeek.day}`}
                       className={cn(
-                        'mt-0.5 w-6 min-w-fit basis-[30px] p-0 md:basis-[35px] lg:w-10 lg:basis-[37px]',
+                        'mt-0.5 w-6 min-w-fit basis-[27px] p-0 md:basis-[27px] lg:w-7 lg:basis-[31px]',
                         weekIndex === 0 && 'top-0.5'
                       )}
                     >
@@ -168,6 +173,7 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                     </Button>
                   </Tooltip>
                   <Tooltip
+                    closeDelay={0}
                     content={
                       weekNote
                         ? 'Edit note about this week'
@@ -183,9 +189,9 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                         handleNoteDialogOpen(monday, 'week');
                       }}
                       className={cn(
-                        'mb-1 w-6 min-w-fit basis-[70px] p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:mb-2 lg:w-10 lg:basis-[96px]',
-                        weekIndex === 0 && 'top-0.5',
-                        (weekNote || !isDesktop) && 'opacity-100'
+                        'mb-0 w-6 min-w-fit basis-[79px] p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:w-7 lg:basis-[107px]',
+                        (weekNote || !isDesktop) && 'opacity-100',
+                        weekIndex === 0 && 'basis-[77px] lg:basis-[107px]'
                       )}
                     >
                       {weekNote ? (

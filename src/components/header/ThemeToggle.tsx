@@ -3,7 +3,7 @@ import { MoonIcon, SunDimIcon, DesktopIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { ThemeModes } from '@const';
-import { useThemeMode, useScreenWidth } from '@hooks';
+import { useThemeMode } from '@hooks';
 
 const modesToIcons = {
   [ThemeModes.DARK]: MoonIcon,
@@ -13,7 +13,6 @@ const modesToIcons = {
 
 const ThemeToggle = () => {
   const { setThemeMode, themeMode } = useThemeMode();
-  const { isDesktop } = useScreenWidth();
 
   return (
     <ButtonGroup>
@@ -30,18 +29,18 @@ const ThemeToggle = () => {
 
         return (
           <Button
+            size="sm"
             key={mode}
             isIconOnly
             variant="flat"
             color="secondary"
             className={buttonClassName}
-            size={isDesktop ? 'md' : 'sm'}
             onPress={() => {
               setThemeMode(mode);
             }}
           >
             <Icon
-              size={16}
+              size={14}
               weight={isSelected ? 'bold' : 'regular'}
               className={cn('dark:text-neutral-200', iconClassName)}
             />

@@ -127,7 +127,7 @@ const WeekCalendar = () => {
       <div className="flex items-center justify-center gap-4">
         <Button
           isIconOnly
-          variant="flat"
+          variant="light"
           aria-label="Previous week"
           onPress={navigateToPreviousWeek}
           className="h-8 w-8 min-w-0 rounded-lg"
@@ -140,7 +140,7 @@ const WeekCalendar = () => {
         </h1>
         <Button
           isIconOnly
-          variant="flat"
+          variant="light"
           aria-label="Next week"
           onPress={navigateToNextWeek}
           className="h-8 w-8 min-w-0 rounded-lg"

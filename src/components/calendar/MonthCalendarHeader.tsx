@@ -86,6 +86,14 @@ const MonthCalendarHeader = ({
     useDisclosure();
   const { isOpen: isYearSelectOpen, onOpenChange: onYearSelectOpenChange } =
     useDisclosure();
+  const {
+    isOpen: isHabitsFilterSelectOpen,
+    onOpenChange: onHabitsFilterSelectOpenChange,
+  } = useDisclosure();
+  const {
+    isOpen: isTraitsFilterSelectOpen,
+    onOpenChange: onTraitsFilterSelectOpenChange,
+  } = useDisclosure();
   const navigate = useNavigate();
 
   React.useEffect(() => {
@@ -225,10 +233,12 @@ const MonthCalendarHeader = ({
             radius="sm"
             color="secondary"
             variant="bordered"
-            description="Month"
             isOpen={isMonthSelectOpen}
             selectedKeys={monthSelectValue}
             onOpenChange={onMonthSelectOpenChange}
+            scrollShadowProps={{
+              visibility: 'bottom',
+            }}
             classNames={{
               base: 'w-[75px] md:w-[125px]',
               popoverContent: 'w-[100px] md:w-[125px]',
@@ -241,25 +251,35 @@ const MonthCalendarHeader = ({
               }
             }}
           >
-            {months.map((month, index) => {
-              return (
-                <SelectItem key={String(index + 1)}>
-                  {capitalize(isMobile ? month.substring(0, 3) : month)}
-                </SelectItem>
-              );
-            })}
+            <SelectSection
+              title="Month"
+              classNames={{
+                heading:
+                  'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
+              }}
+            >
+              {months.map((month, index) => {
+                return (
+                  <SelectItem key={String(index + 1)}>
+                    {capitalize(isMobile ? month.substring(0, 3) : month)}
+                  </SelectItem>
+                );
+              })}
+            </SelectSection>
           </Select>
           <Select
             size="sm"
             radius="sm"
             color="secondary"
-            description="Year"
             variant="bordered"
             isOpen={isYearSelectOpen}
             selectedKeys={yearSelectValue}
             onOpenChange={onYearSelectOpenChange}
             classNames={{
               base: 'w-[100px]',
+            }}
+            scrollShadowProps={{
+              visibility: 'bottom',
             }}
             onSelectionChange={(value) => {
               const [newYear] = Array.from(value);
@@ -269,11 +289,21 @@ const MonthCalendarHeader = ({
               }
             }}
           >
-            {YEARS.map((year) => {
-              return (
-                <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
-              );
-            })}
+            <SelectSection
+              title="Year"
+              classNames={{
+                heading:
+                  'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
+              }}
+            >
+              {YEARS.map((year) => {
+                return (
+                  <SelectItem key={year.toString()}>
+                    {year.toString()}
+                  </SelectItem>
+                );
+              })}
+            </SelectSection>
           </Select>
         </div>
         <div className="flex gap-1 lg:gap-2">
@@ -334,10 +364,11 @@ const MonthCalendarHeader = ({
               color="secondary"
               variant="bordered"
               selectionMode="multiple"
-              description="Filter by habits"
               selectedKeys={filters.habitIds}
               className="w-full md:w-[200px]"
+              isOpen={isHabitsFilterSelectOpen}
               onChange={handleHabitsFilterChange}
+              onOpenChange={onHabitsFilterSelectOpenChange}
               scrollShadowProps={{
                 visibility: 'bottom',
               }}
@@ -352,7 +383,7 @@ const MonthCalendarHeader = ({
                       const { iconPath, id, name } = habits[key];
 
                       return (
-                        <Tooltip key={id} content={name}>
+                        <Tooltip key={id} closeDelay={0} content={name}>
                           <img
                             className="h-4 w-4"
                             alt={`${name} icon`}
@@ -388,16 +419,16 @@ const MonthCalendarHeader = ({
                   </SelectItem>
                 )}
                 {Object.entries(habitsByTraitName).map(
-                  ([traitName, habits]) => {
+                  ([traitName, habits], index, array) => {
                     if (!habits?.length) {
                       return null;
                     }
 
                     return (
                       <SelectSection
-                        showDivider
                         key={traitName}
                         title={traitName}
+                        showDivider={index < array.length - 1}
                         classNames={{
                           heading:
                             'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
@@ -433,9 +464,10 @@ const MonthCalendarHeader = ({
               color="secondary"
               variant="bordered"
               selectionMode="multiple"
-              description="Filter by traits"
               selectedKeys={filters.traitIds}
+              isOpen={isTraitsFilterSelectOpen}
               onChange={handleTraitsFilterChange}
+              onOpenChange={onTraitsFilterSelectOpenChange}
               className="w-full min-[450px]:w-1/2 md:w-[250px]"
               renderValue={(selectedTraits: SelectedItems<Trait>) => {
                 return (

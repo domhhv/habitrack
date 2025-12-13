@@ -145,6 +145,7 @@ const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
       <Tooltip
         showArrow
         offset={12}
+        closeDelay={0}
         color="primary"
         content={fullDateTimeFormatter.format(
           new Date(latestOccurrenceTimestamp)
