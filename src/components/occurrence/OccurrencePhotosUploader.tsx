@@ -2,13 +2,12 @@ import { Input, Button, addToast } from '@heroui/react';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 
+import { ImageCarousel } from '@components';
 import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
 import type { SignedUrls } from '@models';
 import { StorageBuckets } from '@models';
 import { deleteFile, createSignedUrls } from '@services';
 import { getErrorMessage } from '@utils';
-
-import ImageCarousel from './ImageCarousel';
 
 type OccurrencePhotosUploaderProps = {
   files: File[];
