@@ -6,6 +6,8 @@ import type {
 
 import type { Tables, TablesInsert, TablesUpdate } from '@db-types';
 
+import type { Habit } from './habit.model';
+
 type NoteOfOccurrence<T extends Partial<Tables<'notes'>> = Tables<'notes'>> =
   CamelCasedPropertiesDeep<
     Omit<RequireAtLeastOne<T, 'occurrence_id'>, 'period_date' | 'period_kind'>
@@ -17,6 +19,10 @@ export type NoteOfPeriod<T extends Partial<Tables<'notes'>> = Tables<'notes'>> =
   >;
 
 export type Note = NoteOfPeriod | NoteOfOccurrence;
+
+export type NoteWithHabit = Note & {
+  habit?: Pick<Habit, 'name' | 'iconPath'> | null;
+};
 
 export type NotePeriodKind = Tables<'notes'>['period_kind'];
 

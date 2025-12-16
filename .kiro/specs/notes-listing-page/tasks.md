@@ -1,0 +1,72 @@
+# Implementation Plan
+
+- [x] 1. Add notes listing service function
+  - [x] 1.1 Create `listAllNotes` function in `src/services/notes.service.ts`
+    - Implement paginated query with `page` and `limit` parameters
+    - Join with occurrences and habits tables to get habit info for occurrence notes
+    - Order by `created_at` descending
+    - Return `NoteWithHabit[]` type
+    - _Requirements: 2.1, 4.1_
+  - [x] 1.2 Add `NoteWithHabit` type to `src/models/note.model.ts`
+    - Extend Note type with optional habit information
+    - _Requirements: 3.2, 3.6_
+  - [ ]\* 1.3 Write property test for notes sorting
+    - **Property 1: Notes are sorted by creation date descending**
+    - **Validates: Requirements 2.1**
+
+- [x] 2. Create NoteListItem component
+  - [x] 2.1 Create `src/components/note/NoteListItem.tsx`
+    - Accept `NoteWithHabit` as prop
+    - Display icon based on note type (period kind icon or habit icon)
+    - Display title (formatted date for period notes, habit name for occurrence notes)
+    - Display content as body text
+    - Display formatted `updatedAt` timestamp
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
+  - [x] 2.2 Export NoteListItem from `src/components/note/index.ts`
+    - _Requirements: 3.1_
+  - [ ]\* 2.3 Write property tests for NoteListItem
+    - **Property 2: Period note title contains formatted date**
+    - **Property 3: Occurrence note title contains habit name**
+    - **Property 4: Note content is displayed**
+    - **Property 5: Note updated timestamp is displayed**
+    - **Property 6: Period note icon matches period kind**
+    - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6**
+
+- [x] 3. Create NotesPage component
+  - [x] 3.1 Create `src/pages/NotesPage.tsx`
+    - Implement pagination state (page, hasMore, isLoading)
+    - Fetch initial notes on mount
+    - Use ScrollShadow component as container
+    - Set container to fill available viewport height (calc(100vh - header height))
+    - Render NoteListItem for each note
+    - _Requirements: 2.2, 2.3, 2.4, 5.1, 5.2, 5.3, 5.4_
+  - [x] 3.2 Implement infinite scroll in NotesPage
+    - Detect scroll to bottom of container
+    - Trigger fetch for next page when scrolled to bottom
+    - Append new notes to existing list
+    - Display loading indicator while fetching
+    - Display "end of list" message when no more notes
+    - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+  - [x] 3.3 Export NotesPage from `src/pages/index.ts`
+    - _Requirements: 1.2_
+  - [ ]\* 3.4 Write property test for pagination accumulation
+    - **Property 7: Pagination appends without replacing**
+    - **Validates: Requirements 4.3**
+
+- [x] 4. Integrate NotesPage into application
+  - [x] 4.1 Add route for `/notes` in `src/App.tsx`
+    - Import NotesPage
+    - Add Route element for `/notes` path
+    - _Requirements: 1.2_
+  - [x] 4.2 Add Notes navigation link to Header
+    - Add Button with Link to `/notes` in `src/components/header/Header.tsx`
+    - Apply solid variant when pathname is `/notes`
+    - Use appropriate icon for mobile view
+    - _Requirements: 1.1, 1.3_
+  - [ ]\* 4.3 Write unit tests for Header navigation
+    - Test Notes link is rendered
+    - Test active state styling on /notes route
+    - _Requirements: 1.1, 1.3_
+
+- [ ] 5. Checkpoint - Make sure all tests are passing
+  - Ensure all tests pass, ask the user if questions arise.

@@ -1,5 +1,6 @@
 import { Button, Tooltip, Spinner } from '@heroui/react';
 import {
+  NoteIcon,
   RepeatIcon,
   GithubLogoIcon,
   CalendarDotsIcon,
@@ -64,27 +65,43 @@ const Header = () => {
                 'Habits'
               )}
             </Button>
-            <ThemeToggle />
-            <Tooltip
-              showArrow
-              delay={500}
-              closeDelay={0}
+            <Button
+              as={Link}
+              size="sm"
+              to="/notes"
               color="secondary"
-              placement="right"
-              content="View source code on GitHub"
+              isIconOnly={screenWidth < 424}
+              variant={pathname === '/notes' ? 'solid' : 'bordered'}
             >
-              <Button
-                as={Link}
-                size="sm"
-                isIconOnly
-                variant="light"
-                target="_blank"
+              {screenWidth < 424 ? (
+                <NoteIcon size={16} weight="bold" />
+              ) : (
+                'Notes'
+              )}
+            </Button>
+            <ThemeToggle />
+            {screenWidth > 390 && (
+              <Tooltip
+                showArrow
+                delay={500}
+                closeDelay={0}
                 color="secondary"
-                to="https://github.com/domhhv/habitrack"
+                placement="right"
+                content="View source code on GitHub"
               >
-                <GithubLogoIcon size={isDesktop ? 18 : 16} />
-              </Button>
-            </Tooltip>
+                <Button
+                  as={Link}
+                  size="sm"
+                  isIconOnly
+                  variant="light"
+                  target="_blank"
+                  color="secondary"
+                  to="https://github.com/domhhv/habitrack"
+                >
+                  <GithubLogoIcon size={isDesktop ? 18 : 16} />
+                </Button>
+              </Tooltip>
+            )}
           </div>
           <AuthModalButton />
         </div>
