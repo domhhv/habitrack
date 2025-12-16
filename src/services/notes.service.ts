@@ -2,7 +2,7 @@ import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-import type { Note, NotesUpdate, NotesInsert } from '@models';
+import type { Note, NotesUpdate, NotesInsert, NoteWithHabit } from '@models';
 import { toSqlDate, supabaseClient } from '@utils';
 
 export const createNote = async (note: NotesInsert): Promise<Note> => {
@@ -59,4 +59,52 @@ export const destroyNote = async (id: Note['id']) => {
   if (error) {
     throw new Error(error.message);
   }
+};
+
+export type ListAllNotesParams = {
+  limit: number;
+  page: number;
+};
+
+export const listAllNotes = async ({
+  limit,
+  page,
+}: ListAllNotesParams): Promise<NoteWithHabit[]> => {
+  const offset = page * limit;
+
+  const { data, error } = await supabaseClient
+    .from('notes')
+    .select(
+      `
+      *,
+      occurrences (
+        habits (
+          name,
+          icon_path
+        )
+      )
+    `
+    )
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data.map((note) => {
+    const habit = note.occurrences?.habits ?? null;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { occurrences, ...noteWithoutOccurrences } = note;
+
+    return camelcaseKeys({
+      ...noteWithoutOccurrences,
+      habit: habit
+        ? {
+            iconPath: habit.icon_path,
+            name: habit.name,
+          }
+        : null,
+    });
+  });
 };

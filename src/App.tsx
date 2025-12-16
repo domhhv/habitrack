@@ -4,6 +4,7 @@ import { Route, Routes, Navigate } from 'react-router';
 
 import { AppHeader } from '@components';
 import {
+  NotesPage,
   HabitsPage,
   AccountPage,
   WeekCalendarPage,
@@ -31,6 +32,7 @@ const App = () => {
             path="/calendar/week/:year?/:month?/:day?"
           />
           <Route path="/habits" element={<HabitsPage />} />
+          <Route path="/notes" element={<NotesPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate replace to="/calendar/month" />} />
         </Routes>
