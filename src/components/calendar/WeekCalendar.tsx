@@ -13,7 +13,7 @@ import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useLocale, useCalendar, useCalendarGrid } from 'react-aria';
-import { useParams } from 'react-router';
+import { Link, useParams, useNavigate } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
@@ -26,13 +26,16 @@ const WeekCalendar = () => {
   const { fetchOccurrences } = useOccurrenceActions();
   const { fetchNotes } = useNoteActions();
   const { locale } = useLocale();
-  const { day, month, year } = useParams();
+  const params = useParams();
+  const navigate = useNavigate();
   const state = useCalendarState({
     createCalendar,
     locale,
     visibleDuration: { weeks: 1 },
     defaultValue:
-      day && month && year ? new CalendarDate(+year, +month, +day) : undefined,
+      params.day && params.month && params.year
+        ? new CalendarDate(+params.year, +params.month, +params.day)
+        : undefined,
   });
   useCalendar({}, state);
   const { gridProps, weekDays } = useCalendarGrid(
@@ -43,6 +46,24 @@ const WeekCalendar = () => {
   );
 
   React.useEffect(() => {
+    const currentWeek = state.visibleRange.start;
+
+    const {
+      day = currentWeek.day,
+      month = currentWeek.month,
+      year = currentWeek.year,
+    } = params;
+
+    const paramsDate = new CalendarDate(
+      Number(year),
+      Number(month),
+      Number(day)
+    );
+
+    if (state.focusedDate.toString() !== paramsDate.toString()) {
+      state.setFocusedDate(paramsDate);
+    }
+
     if (fetchedWeekYear === state.focusedDate.toString()) {
       return;
     }
@@ -67,29 +88,36 @@ const WeekCalendar = () => {
     state.timeZone,
     fetchedWeekYear,
     fetchOccurrences,
-    state.focusedDate,
-    state.visibleRange.end,
-    state.visibleRange.start,
+    state,
+    params,
   ]);
 
-  const navigateToPreviousWeek = React.useCallback(() => {
-    const previousWeekDate = state.visibleRange.start.subtract({ weeks: 1 });
-    state.setFocusedDate(previousWeekDate);
-  }, [state]);
+  const [previousWeekPath, nextWeekPath] = React.useMemo(() => {
+    const previousWeek = state.visibleRange.start
+      .subtract({ weeks: 1 })
+      .toString()
+      .split('-')
+      .map(Number)
+      .join('/');
 
-  const navigateToNextWeek = React.useCallback(() => {
-    const nextWeekDate = state.visibleRange.start.add({ weeks: 1 });
-    state.setFocusedDate(nextWeekDate);
-  }, [state]);
+    const nextWeek = state.visibleRange.start
+      .add({ weeks: 1 })
+      .toString()
+      .split('-')
+      .map(Number)
+      .join('/');
+
+    return [`/calendar/week/${previousWeek}`, `/calendar/week/${nextWeek}`];
+  }, [state.visibleRange.start]);
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        navigateToPreviousWeek();
+        navigate(previousWeekPath);
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        navigateToNextWeek();
+        navigate(nextWeekPath);
       }
     };
 
@@ -98,7 +126,7 @@ const WeekCalendar = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [navigateToNextWeek, navigateToPreviousWeek]);
+  }, [previousWeekPath, nextWeekPath, navigate]);
 
   const groupOccurrences = React.useCallback(
     (day: CalendarDate, hour: number) => {
@@ -126,10 +154,11 @@ const WeekCalendar = () => {
     <>
       <div className="flex items-center justify-center gap-4">
         <Button
+          as={Link}
           isIconOnly
           variant="light"
+          to={previousWeekPath}
           aria-label="Previous week"
-          onPress={navigateToPreviousWeek}
           className="h-8 w-8 min-w-0 rounded-lg"
         >
           <CaretLeftIcon />
@@ -139,10 +168,11 @@ const WeekCalendar = () => {
           {getISOWeekYear(state.visibleRange.start.toDate(state.timeZone))}
         </h1>
         <Button
+          as={Link}
           isIconOnly
           variant="light"
+          to={nextWeekPath}
           aria-label="Next week"
-          onPress={navigateToNextWeek}
           className="h-8 w-8 min-w-0 rounded-lg"
         >
           <CaretRightIcon />
