@@ -255,6 +255,7 @@ const NoteDialog = ({
               return null;
             }}
             classNames={{
+              input: 'h-full',
               inputWrapper: 'h-25!',
               ...(!isDesktop && {
                 input: 'text-base',
