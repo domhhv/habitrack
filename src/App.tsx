@@ -2,7 +2,7 @@ import { Analytics } from '@vercel/analytics/react';
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router';
 
-import { AppHeader } from '@components';
+import { AppHeader, NoteDrawer } from '@components';
 import {
   NotesPage,
   HabitsPage,
@@ -21,6 +21,7 @@ const App = () => {
   return (
     <Providers>
       <AppHeader />
+      <NoteDrawer />
       <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 flex-col items-start">
         <Routes>
           <Route

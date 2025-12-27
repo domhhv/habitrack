@@ -1,4 +1,5 @@
 import { Button, Tooltip, Spinner } from '@heroui/react';
+import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
   RepeatIcon,
@@ -11,6 +12,8 @@ import { Link, useLocation } from 'react-router';
 import { AuthModalButton } from '@components';
 import { useUser, useScreenWidth, useFetchOnAuth } from '@hooks';
 
+import { useNoteDrawerActions } from '../../stores/ui.store';
+
 import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
@@ -18,6 +21,7 @@ const Header = () => {
   const { isDesktop, screenWidth } = useScreenWidth();
   const { isLoading } = useUser();
   const { pathname } = useLocation();
+  const { openNoteDrawer } = useNoteDrawerActions();
 
   return (
     <>
@@ -103,7 +107,19 @@ const Header = () => {
               </Tooltip>
             )}
           </div>
-          <AuthModalButton />
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="solid"
+              color="secondary"
+              onPress={() => {
+                openNoteDrawer(today(getLocalTimeZone()), 'day');
+              }}
+            >
+              Note
+            </Button>
+            <AuthModalButton />
+          </div>
         </div>
       </header>
     </>

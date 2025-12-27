@@ -3,7 +3,7 @@ import capitalize from 'lodash.capitalize';
 
 import getErrorMessage from './get-error-message';
 
-type ActionVerb = 'add' | 'update' | 'remove' | 'fetch' | 'upload';
+type ActionVerb = 'add' | 'update' | 'remove' | 'fetch' | 'upload' | 'log';
 type EntityNoun =
   | 'habit'
   | 'note'
@@ -14,25 +14,31 @@ type EntityNoun =
 
 type ActionType = `${ActionVerb}_${EntityNoun}`;
 
-const parseActionType = (
-  actionType: ActionType
-): {
-  noun: string;
-  verb: string;
-} => {
-  const [verb, noun] = actionType.split('_');
-
-  return { noun, verb };
+const tenses: Record<string, Record<string, string>> = {
+  continuous: {
+    add: 'adding',
+    fetch: 'fetching',
+    log: 'logging',
+    remove: 'removing',
+    update: 'updating',
+    upload: 'uploading',
+  },
+  past: {
+    add: 'added',
+    fetch: 'fetched',
+    log: 'logged',
+    remove: 'removed',
+    update: 'updated',
+    upload: 'uploaded',
+  },
 };
 
 const getMessages = (actionType: ActionType) => {
-  const { noun, verb } = parseActionType(actionType);
-
-  const pastTense = verb.endsWith('e') ? `${verb}d` : `${verb}ed`;
+  const [verb, noun] = actionType.split('_');
 
   return {
-    error: `Something went wrong while ${verb}ing your ${noun}`,
-    success: `${capitalize(noun)} ${pastTense}`,
+    error: `Something went wrong while ${tenses.continuous[verb]} your ${noun}`,
+    success: `${capitalize(noun)} ${tenses.past[verb]}`,
   };
 };
 
