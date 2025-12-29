@@ -1,15 +1,22 @@
-import { Button, Tooltip, Spinner } from '@heroui/react';
+import { cn, Kbd, Button, Tooltip, Spinner } from '@heroui/react';
+import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
   RepeatIcon,
   GithubLogoIcon,
+  NotePencilIcon,
   CalendarDotsIcon,
 } from '@phosphor-icons/react';
-import React from 'react';
 import { Link, useLocation } from 'react-router';
 
 import { AuthModalButton } from '@components';
-import { useUser, useScreenWidth, useFetchOnAuth } from '@hooks';
+import {
+  useUser,
+  useScreenWidth,
+  useFetchOnAuth,
+  useKeyboardShortcut,
+} from '@hooks';
+import { useNoteDrawerActions } from '@stores';
 
 import ThemeToggle from './ThemeToggle';
 
@@ -18,12 +25,19 @@ const Header = () => {
   const { isDesktop, screenWidth } = useScreenWidth();
   const { isLoading } = useUser();
   const { pathname } = useLocation();
+  const { openNoteDrawer } = useNoteDrawerActions();
+
+  const openDrawer = () => {
+    openNoteDrawer(today(getLocalTimeZone()), 'day');
+  };
+
+  useKeyboardShortcut('n', openDrawer);
 
   return (
     <>
       {isLoading && (
         <div className="bg-background-100 dark:bg-background-800 absolute top-0 right-0 bottom-0 left-0 z-50 flex h-full flex-1 items-center justify-center opacity-90">
-          <div className="flex -translate-y-[73px] items-center justify-center">
+          <div className="flex -translate-y-18.25 items-center justify-center">
             <Spinner
               size="lg"
               color="primary"
@@ -41,11 +55,14 @@ const Header = () => {
               size="sm"
               color="secondary"
               to="/calendar/month"
-              isIconOnly={screenWidth < 424}
-              className={screenWidth < 339 ? 'min-w-fit px-2' : ''}
-              variant={pathname.startsWith('/calendar') ? 'solid' : 'bordered'}
+              isIconOnly={screenWidth < 498}
+              variant={pathname.startsWith('/calendar') ? 'flat' : 'light'}
+              className={cn(
+                pathname.startsWith('/calendar') && 'dark:text-secondary-500',
+                screenWidth < 339 && 'min-w-fit px-2'
+              )}
             >
-              {screenWidth < 424 ? (
+              {screenWidth < 498 ? (
                 <CalendarDotsIcon size={16} weight="bold" />
               ) : (
                 'Calendar'
@@ -56,10 +73,13 @@ const Header = () => {
               size="sm"
               to="/habits"
               color="secondary"
-              isIconOnly={screenWidth < 424}
-              variant={pathname === '/habits' ? 'solid' : 'bordered'}
+              isIconOnly={screenWidth < 498}
+              variant={pathname === '/habits' ? 'flat' : 'light'}
+              className={cn(
+                pathname === '/habits' && 'dark:text-secondary-500'
+              )}
             >
-              {screenWidth < 424 ? (
+              {screenWidth < 498 ? (
                 <RepeatIcon size={16} weight="bold" />
               ) : (
                 'Habits'
@@ -70,10 +90,11 @@ const Header = () => {
               size="sm"
               to="/notes"
               color="secondary"
-              isIconOnly={screenWidth < 424}
-              variant={pathname === '/notes' ? 'solid' : 'bordered'}
+              isIconOnly={screenWidth < 498}
+              variant={pathname === '/notes' ? 'flat' : 'light'}
+              className={cn(pathname === '/notes' && 'dark:text-secondary-500')}
             >
-              {screenWidth < 424 ? (
+              {screenWidth < 498 ? (
                 <NoteIcon size={16} weight="bold" />
               ) : (
                 'Notes'
@@ -103,7 +124,22 @@ const Header = () => {
               </Tooltip>
             )}
           </div>
-          <AuthModalButton />
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="solid"
+              color="secondary"
+              onPress={openDrawer}
+              className="hidden md:inline-flex"
+            >
+              <NotePencilIcon size={16} weight="bold" />
+              Note
+              <Kbd className="bg-secondary-300 hidden px-1 py-0 lg:block">
+                N
+              </Kbd>
+            </Button>
+            <AuthModalButton />
+          </div>
         </div>
       </header>
     </>

@@ -16,7 +16,7 @@ import type { CalendarState } from 'react-stately';
 import { OccurrenceChip } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
-import { useDayNotes } from '@stores';
+import { useDayNotes, useNoteDrawerActions } from '@stores';
 import { toSqlDate } from '@utils';
 
 export type CellPosition =
@@ -32,27 +32,28 @@ type CalendarCellProps = {
   position: CellPosition;
   state: CalendarState;
   onNewOccurrenceClick: () => void;
-  onNoteClick: () => void;
 };
 
 const MonthCalendarCell = ({
   date,
   occurrences,
   onNewOccurrenceClick,
-  onNoteClick,
   position,
   state,
 }: CalendarCellProps) => {
   const dayNotes = useDayNotes();
   const { user } = useUser();
+  const { openNoteDrawer } = useNoteDrawerActions();
   const { isDesktop, isMobile, screenWidth } = useScreenWidth();
-  const ref = React.useRef<HTMLDivElement | null>(null);
+  const calendarCellRef = React.useRef<HTMLDivElement | null>(null);
   const { cellProps, formattedDate, isOutsideVisibleRange } = useCalendarCell(
     { date },
     state,
-    ref
+    calendarCellRef
   );
+
   const isTodayCell = isToday(date, state.timeZone);
+
   const hasNote = React.useMemo(() => {
     return dayNotes.some((note) => {
       return note.periodDate === toSqlDate(date);
@@ -70,7 +71,7 @@ const MonthCalendarCell = ({
     position === 'bottom-left' && 'rounded-bl-md',
     position === 'bottom-right' && 'rounded-br-md',
     isTodayCell &&
-      'bg-background-100 hover:bg-background-300 dark:bg-background-700 dark:hover:bg-background-700'
+      'bg-background-100 hover:bg-background-300 dark:bg-background-500 dark:hover:bg-background-300'
   );
 
   const cellHeaderClassName = cn(
@@ -80,7 +81,7 @@ const MonthCalendarCell = ({
   );
 
   return (
-    <div ref={ref} {...cellProps} className={cellRootClassName}>
+    <div ref={calendarCellRef} {...cellProps} className={cellRootClassName}>
       <div
         className={cellHeaderClassName}
         onClick={isMobile ? onNewOccurrenceClick : undefined}
@@ -110,9 +111,11 @@ const MonthCalendarCell = ({
                   radius="sm"
                   variant="light"
                   isDisabled={!user}
-                  onPress={onNoteClick}
                   color={hasNote ? 'primary' : 'secondary'}
                   aria-label={hasNote ? 'Edit note' : 'Add note'}
+                  onPress={() => {
+                    openNoteDrawer(date, 'day');
+                  }}
                   className={cn(
                     'h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
                     hasNote && 'opacity-100'

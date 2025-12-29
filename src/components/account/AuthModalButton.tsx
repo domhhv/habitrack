@@ -14,7 +14,7 @@ import {
 } from '@heroui/react';
 import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
 import React from 'react';
-import { Link, useLocation } from 'react-router';
+import { Link } from 'react-router';
 
 import { useUser, useScreenWidth } from '@hooks';
 import { signIn, signUp, signOut, sendPasswordResetEmail } from '@services';
@@ -26,7 +26,6 @@ type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
   const { user } = useUser();
-  const { pathname } = useLocation();
   const { screenWidth } = useScreenWidth();
   const { isOpen, onClose, onOpen, onOpenChange } = useDisclosure();
   const [authenticating, setAuthenticating] = React.useState(false);
@@ -127,10 +126,10 @@ const AuthModalButton = () => {
             as={Link}
             size="sm"
             to="/account"
+            variant="solid"
             color="secondary"
             data-testid="auth-button"
             isIconOnly={screenWidth < 1024}
-            variant={pathname === '/account' ? 'solid' : 'bordered'}
             startContent={<UserIcon weight="bold" data-testid="user-icon" />}
           >
             {screenWidth > 1024 && 'Account'}
@@ -139,9 +138,9 @@ const AuthModalButton = () => {
             <Button
               size="sm"
               isIconOnly
+              variant="solid"
               color="secondary"
               onPress={signOut}
-              variant={pathname === '/account' ? 'solid' : 'bordered'}
               startContent={
                 <SignOutIcon weight="bold" data-testid="sign-out-icon" />
               }

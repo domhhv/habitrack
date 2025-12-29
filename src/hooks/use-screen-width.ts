@@ -2,12 +2,12 @@ import React from 'react';
 
 const useScreenWidth = () => {
   const [screenWidth, setScreenWidth] = React.useState(() => {
-    return window.innerWidth;
+    return window.screen.availWidth;
   });
 
   React.useEffect(() => {
-    const handleResize = (event: UIEvent) => {
-      setScreenWidth((event.target as typeof window)?.innerWidth);
+    const handleResize = () => {
+      setScreenWidth(window.screen.availWidth);
     };
 
     window.addEventListener('resize', handleResize);
