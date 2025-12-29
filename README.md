@@ -20,7 +20,13 @@
 &nbsp;
 <a href="https://testing-library.com/" target="_blank" title="React Testing Library"><img src="https://i.ibb.co/YLnX0VY/octopus-64x64.png" alt="React Testing Library" width="32" height="32"></a>
 
+<div style="display: flex; justify-content: center; gap: 8px;">
+
 [![RelativeCI](https://badges.relative-ci.com/badges/ZMp2Jc2sGq2jCm6ArH0A?branch=main&style=flat)](https://app.relative-ci.com/projects/ZMp2Jc2sGq2jCm6ArH0A)
+
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/domhhv/textual?utm_source=oss&utm_medium=github&utm_campaign=domhhv%2Ftextual&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
+</div>
 
 </div>
 
