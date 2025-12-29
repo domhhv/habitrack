@@ -1,4 +1,5 @@
 import type { CalendarDate } from '@internationalized/date';
+import { today, getLocalTimeZone } from '@internationalized/date';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
@@ -7,17 +8,17 @@ import type { NotePeriodKind } from '@models';
 type UiState = {
   noteDrawer: {
     isOpen: boolean;
-    periodDate: CalendarDate | null;
-    periodKind: NotePeriodKind;
+    periodDate: CalendarDate;
+    periodKind: NonNullable<NotePeriodKind>;
   };
   noteDrawerActions: {
     closeNoteDrawer: () => void;
     openNoteDrawer: (
       periodDate: CalendarDate,
-      periodKind: NotePeriodKind
+      periodKind: NonNullable<NotePeriodKind>
     ) => void;
     setPeriodDate: (date: CalendarDate) => void;
-    setPeriodKind: (kind: NotePeriodKind) => void;
+    setPeriodKind: (kind: NonNullable<NotePeriodKind>) => void;
   };
 };
 
@@ -26,20 +27,20 @@ const useUiStore = create<UiState>()(
     return {
       noteDrawer: {
         isOpen: false,
-        periodDate: null,
-        periodKind: null,
+        periodDate: today(getLocalTimeZone()),
+        periodKind: 'day',
       },
       noteDrawerActions: {
         closeNoteDrawer: () => {
           set((state) => {
             state.noteDrawer.isOpen = false;
-            state.noteDrawer.periodDate = null;
-            state.noteDrawer.periodKind = null;
+            state.noteDrawer.periodDate = today(getLocalTimeZone());
+            state.noteDrawer.periodKind = 'day';
           });
         },
         openNoteDrawer: (
           periodDate: CalendarDate,
-          periodKind: NotePeriodKind
+          periodKind: NonNullable<NotePeriodKind>
         ) => {
           set((state) => {
             state.noteDrawer.isOpen = true;
@@ -52,7 +53,7 @@ const useUiStore = create<UiState>()(
             state.noteDrawer.periodDate = date;
           });
         },
-        setPeriodKind: (kind: NotePeriodKind) => {
+        setPeriodKind: (kind: NonNullable<NotePeriodKind>) => {
           set((state) => {
             state.noteDrawer.periodKind = kind;
           });

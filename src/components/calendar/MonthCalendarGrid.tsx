@@ -9,10 +9,10 @@ import { useLocale, useCalendarGrid } from 'react-aria';
 import { Link } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
-import { NoteDialog, OccurrenceDialog } from '@components';
+import { OccurrenceDialog } from '@components';
 import { useScreenWidth } from '@hooks';
-import type { Occurrence, NotePeriodKind } from '@models';
-import { useWeekNotes } from '@stores';
+import type { Occurrence } from '@models';
+import { useWeekNotes, useNoteDrawerActions } from '@stores';
 import { isTruthy, toSqlDate, getISOWeek } from '@utils';
 
 import type { CellPosition } from './MonthCalendarCell';
@@ -35,39 +35,14 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const weekNotes = useWeekNotes();
-  const [noteDate, setNoteDate] = React.useState<CalendarDate | null>(null);
-  const [notePeriod, setNotePeriod] = React.useState<NotePeriodKind>(null);
   const [newOccurrenceDate, setNewOccurrenceDate] =
     React.useState<CalendarDate | null>(null);
-  const {
-    isOpen: isNoteDialogOpen,
-    onClose: closeNoteDialog,
-    onOpen: openNoteDialog,
-  } = useDisclosure();
   const {
     isOpen: isOccurrenceDialogOpen,
     onClose: closeOccurrenceDialog,
     onOpen: openOccurrenceDialog,
   } = useDisclosure();
-
-  const handleNoteDialogOpen = (date: CalendarDate, period: NotePeriodKind) => {
-    setNoteDate(date);
-    setNotePeriod(period);
-    openNoteDialog();
-  };
-
-  const handlePeriodChange = (opts: {
-    date?: CalendarDate;
-    kind?: NotePeriodKind;
-  }) => {
-    if (opts.date) {
-      setNoteDate(opts.date);
-    }
-
-    if (opts.kind) {
-      setNotePeriod(opts.kind);
-    }
-  };
+  const { openNoteDrawer } = useNoteDrawerActions();
 
   const getCellPosition = (
     weekIndex: number,
@@ -116,17 +91,6 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
         />
       )}
 
-      {noteDate && notePeriod && (
-        <NoteDialog
-          periodDate={noteDate}
-          periodKind={notePeriod}
-          timeZone={state.timeZone}
-          isOpen={isNoteDialogOpen}
-          onClose={closeNoteDialog}
-          onPeriodChange={handlePeriodChange}
-        />
-      )}
-
       <AnimatePresence mode="wait">
         <motion.div
           exit={{ opacity: 0 }}
@@ -165,11 +129,11 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                       radius={isDesktop ? 'md' : 'sm'}
                       to={`/calendar/week/${firstDayOfWeek.year}/${firstDayOfWeek.month}/${firstDayOfWeek.day}`}
                       className={cn(
-                        'mt-0.5 w-6 min-w-fit basis-[27px] p-0 md:basis-[27px] lg:w-7 lg:basis-[31px]',
+                        'mt-0.5 w-6 min-w-fit basis-6.75 p-0 lg:w-7 lg:basis-7.75',
                         weekIndex === 0 && 'top-0.5'
                       )}
                     >
-                      {getISOWeek(firstDayOfWeek.toDate(state.timeZone))}
+                      {getISOWeek(monday.toDate(state.timeZone))}
                     </Button>
                   </Tooltip>
                   <Tooltip
@@ -186,12 +150,12 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                       radius={isDesktop ? 'md' : 'sm'}
                       variant={isDesktop ? 'flat' : weekNote ? 'solid' : 'flat'}
                       onPress={() => {
-                        handleNoteDialogOpen(monday, 'week');
+                        openNoteDrawer(monday, 'week');
                       }}
                       className={cn(
-                        'mb-0 w-6 min-w-fit basis-[79px] p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:w-7 lg:basis-[107px]',
+                        'mb-0 w-6 min-w-fit basis-19.75 p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:w-7 lg:basis-26.75',
                         (weekNote || !isDesktop) && 'opacity-100',
-                        weekIndex === 0 && 'basis-[77px] lg:basis-[107px]'
+                        weekIndex === 0 && 'basis-19.25 lg:basis-26.75'
                       )}
                     >
                       {weekNote ? (
@@ -204,7 +168,7 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                 </div>
                 <div
                   className={cn(
-                    'flex h-[110px] w-full basis-full justify-between border-r-2 border-l-2 border-neutral-500 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto dark:border-neutral-400',
+                    'flex h-27.5 w-full basis-full justify-between border-r-2 border-l-2 border-neutral-500 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto dark:border-neutral-400',
                     weekIndex === 0 && 'rounded-t-lg',
                     weekIndex === weeksInMonthCount - 1 && 'rounded-b-lg'
                   )}
@@ -240,9 +204,6 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                           date={calendarDate}
                           key={calendarDate.toString()}
                           position={getCellPosition(weekIndex, dayIndex)}
-                          onNoteClick={() => {
-                            handleNoteDialogOpen(calendarDate, 'day');
-                          }}
                           onNewOccurrenceClick={() => {
                             setNewOccurrenceDate(calendarDate);
                             openOccurrenceDialog();

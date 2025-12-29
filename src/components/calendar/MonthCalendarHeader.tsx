@@ -12,8 +12,9 @@ import {
   SelectItem,
   SelectSection,
 } from '@heroui/react';
-import { today, isSameMonth } from '@internationalized/date';
+import { today, isSameMonth, getLocalTimeZone } from '@internationalized/date';
 import {
+  NotePencilIcon,
   ArrowFatLeftIcon,
   FunnelSimpleIcon,
   ArrowFatRightIcon,
@@ -32,7 +33,7 @@ import { useUser, useScreenWidth } from '@hooks';
 import type { Habit, Trait, OccurrenceFilters } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
-import { useHabits, useTraits } from '@stores';
+import { useHabits, useTraits, useNoteDrawerActions } from '@stores';
 
 export type MonthCalendarHeaderProps = {
   filters: OccurrenceFilters;
@@ -95,6 +96,7 @@ const MonthCalendarHeader = ({
     onOpenChange: onTraitsFilterSelectOpenChange,
   } = useDisclosure();
   const navigate = useNavigate();
+  const { openNoteDrawer } = useNoteDrawerActions();
 
   React.useEffect(() => {
     const newMonth = String(state.focusedDate.month);
@@ -208,7 +210,19 @@ const MonthCalendarHeader = ({
 
   return (
     <div className="flex flex-col items-stretch justify-between gap-2 px-0 pt-2 md:pt-0 lg:flex-row lg:gap-0 lg:px-0">
-      <div className="flex flex-col items-stretch justify-end gap-2 max-[372px]:gap-4 min-[373px]:flex-row lg:justify-between lg:gap-2">
+      <div className="flex flex-col items-stretch justify-end gap-2 max-[445px]:gap-4 min-[446px]:flex-row lg:justify-between lg:gap-2">
+        <Button
+          size="sm"
+          variant="flat"
+          color="secondary"
+          className="md:hidden"
+          onPress={() => {
+            openNoteDrawer(today(getLocalTimeZone()), 'day');
+          }}
+        >
+          <NotePencilIcon size={16} weight="bold" />
+          Note
+        </Button>
         <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
           {!isDesktop && (
             <Button
@@ -330,7 +344,7 @@ const MonthCalendarHeader = ({
               startContent={<ArrowsClockwiseIcon size={20} />}
               to={`/calendar/month/${today(state.timeZone).year}/${today(state.timeZone).month}/${today(state.timeZone).day}`}
             >
-              {(!isMobile || screenWidth < 373) && 'Today'}
+              {(!isMobile || screenWidth < 446) && 'Today'}
             </Button>
           )}
           <Button
@@ -347,15 +361,38 @@ const MonthCalendarHeader = ({
           </Button>
         </div>
       </div>
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {shouldRenderFilters && (
           <motion.div
-            exit={{ height: 0, opacity: 0 }}
-            initial={{ height: 0, opacity: 0 }}
+            initial={{
+              height: 0,
+              opacity: 0,
+            }}
             className="flex flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between"
+            exit={{
+              height: 0,
+              opacity: 0,
+              transition: {
+                height: {
+                  duration: 0.4,
+                },
+                opacity: {
+                  duration: 0.25,
+                },
+              },
+            }}
             animate={{
-              height: shouldRenderFilters ? 'auto' : 0,
-              opacity: shouldRenderFilters ? 1 : 0,
+              height: 'auto',
+              opacity: 1,
+              transition: {
+                height: {
+                  duration: 0.4,
+                },
+                opacity: {
+                  delay: 0.15,
+                  duration: 0.25,
+                },
+              },
             }}
           >
             <Select
@@ -364,8 +401,8 @@ const MonthCalendarHeader = ({
               color="secondary"
               variant="bordered"
               selectionMode="multiple"
+              className="w-full md:w-50"
               selectedKeys={filters.habitIds}
-              className="w-full md:w-[200px]"
               isOpen={isHabitsFilterSelectOpen}
               onChange={handleHabitsFilterChange}
               onOpenChange={onHabitsFilterSelectOpenChange}
