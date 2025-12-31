@@ -281,7 +281,10 @@ const NoteDrawer = () => {
               color="primary"
               isLoading={isSaving}
               isDisabled={
-                isRemoving || !content || existingNote?.content === content
+                !user ||
+                isRemoving ||
+                !content ||
+                existingNote?.content === content
               }
             >
               {hasKeyboard && (
