@@ -1,4 +1,4 @@
-import { cn, Button } from '@heroui/react';
+import { cn, Button, Tooltip, ScrollShadow } from '@heroui/react';
 import {
   isToday,
   fromDate,
@@ -7,7 +7,12 @@ import {
   toCalendarDate,
   toCalendarDateTime,
 } from '@internationalized/date';
-import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
+import {
+  NoteIcon,
+  CaretLeftIcon,
+  NoteBlankIcon,
+  CaretRightIcon,
+} from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
@@ -17,10 +22,20 @@ import { Link, useParams, useNavigate } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
-import { useOccurrences, useNoteActions, useOccurrenceActions } from '@stores';
-import { getISOWeek, getISOWeekYear } from '@utils';
+import { useScreenWidth } from '@hooks';
+import {
+  useDayNotes,
+  useOccurrences,
+  useNoteActions,
+  useOccurrenceActions,
+  useNoteDrawerActions,
+} from '@stores';
+import { toSqlDate, getISOWeek, getISOWeekYear } from '@utils';
 
 const WeekCalendar = () => {
+  const dayNotes = useDayNotes();
+  const { isDesktop } = useScreenWidth();
+  const { openNoteDrawer } = useNoteDrawerActions();
   const occurrences = useOccurrences();
   const [fetchedWeekYear, setFetchedWeekYear] = React.useState('');
   const { fetchOccurrences } = useOccurrenceActions();
@@ -40,7 +55,7 @@ const WeekCalendar = () => {
   useCalendar({}, state);
   const { gridProps, weekDays } = useCalendarGrid(
     {
-      weekdayStyle: 'long',
+      weekdayStyle: isDesktop ? 'long' : 'short',
     },
     state
   );
@@ -91,6 +106,15 @@ const WeekCalendar = () => {
     state,
     params,
   ]);
+
+  const hasNote = React.useCallback(
+    (date: CalendarDate) => {
+      return dayNotes.some((note) => {
+        return note.periodDate === toSqlDate(date);
+      });
+    },
+    [dayNotes]
+  );
 
   const [previousWeekPath, nextWeekPath] = React.useMemo(() => {
     const previousWeek = state.visibleRange.start
@@ -151,7 +175,10 @@ const WeekCalendar = () => {
   );
 
   return (
-    <>
+    <ScrollShadow
+      orientation="horizontal"
+      className="relative w-full overflow-y-scroll"
+    >
       <div className="flex items-center justify-center gap-4">
         <Button
           as={Link}
@@ -164,8 +191,11 @@ const WeekCalendar = () => {
           <CaretLeftIcon />
         </Button>
         <h1 className="text-xl font-bold">
-          Week {getISOWeek(state.visibleRange.start.toDate(state.timeZone))} of{' '}
-          {getISOWeekYear(state.visibleRange.start.toDate(state.timeZone))}
+          Week{' '}
+          {getISOWeek(
+            state.visibleRange.start.add({ days: 1 }).toDate(state.timeZone)
+          )}{' '}
+          of {getISOWeekYear(state.visibleRange.start.toDate(state.timeZone))}
         </h1>
         <Button
           as={Link}
@@ -178,11 +208,16 @@ const WeekCalendar = () => {
           <CaretRightIcon />
         </Button>
       </div>
-      <div {...gridProps} className="flex justify-around">
+      <div
+        {...gridProps}
+        className="flex min-w-lg justify-around px-8 py-2 lg:px-16 lg:py-4"
+      >
         {state.getDatesInWeek(0).map((day, dayIndex) => {
           if (!day) {
             return null;
           }
+
+          const isNoteAdded = hasNote(day);
 
           return (
             <div key={dayIndex} className="group flex flex-1 flex-col gap-4">
@@ -193,14 +228,43 @@ const WeekCalendar = () => {
                     'text-primary-600 dark:text-primary-400 font-bold'
                 )}
               >
-                <h3>{capitalize(weekDays[dayIndex])}</h3>
-                <h6>{day?.day}</h6>
+                <div className="flex items-center justify-center gap-2">
+                  <h3>{capitalize(weekDays[dayIndex])}</h3>
+                  <Tooltip
+                    closeDelay={0}
+                    content={isNoteAdded ? 'Edit note' : 'Add note'}
+                  >
+                    <Button
+                      radius="sm"
+                      variant="light"
+                      color={isNoteAdded ? 'primary' : 'secondary'}
+                      aria-label={isNoteAdded ? 'Edit note' : 'Add note'}
+                      onPress={() => {
+                        openNoteDrawer(day, 'day');
+                      }}
+                      className={cn(
+                        'h-5 w-5 min-w-fit px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                        isNoteAdded && 'opacity-100'
+                      )}
+                    >
+                      {isNoteAdded ? (
+                        <NoteIcon weight="bold" size={isDesktop ? 18 : 14} />
+                      ) : (
+                        <NoteBlankIcon
+                          weight="bold"
+                          size={isDesktop ? 18 : 14}
+                        />
+                      )}
+                    </Button>
+                  </Tooltip>
+                </div>
+                <h6>{day.day}</h6>
               </div>
               <div
                 className={cn(
                   'flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600',
                   isToday(day, state.timeZone) &&
-                    'to-background-100 bg-linear-to-b from-transparent from-0% to-[4px]'
+                    'to-background-100 dark:to-background-500 bg-linear-to-b from-transparent from-0% to-[4px]'
                 )}
               >
                 {[...Array(24).keys()].map((hour) => {
@@ -210,7 +274,7 @@ const WeekCalendar = () => {
                       className="group/minutes-cell relative flex gap-4"
                     >
                       {dayIndex === 0 && (
-                        <p className="absolute -top-[13px] -left-[23px] w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:text-base dark:text-stone-200">
+                        <p className="absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:text-base dark:text-stone-200">
                           {hour !== 0 && hour}
                         </p>
                       )}
@@ -246,7 +310,7 @@ const WeekCalendar = () => {
           );
         })}
       </div>
-    </>
+    </ScrollShadow>
   );
 };
 
