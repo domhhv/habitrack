@@ -134,7 +134,7 @@ const Header = () => {
             >
               <NotePencilIcon size={16} weight="bold" />
               Note
-              <Kbd className="bg-secondary-300 hidden px-1 py-0 lg:block">
+              <Kbd className="bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0 lg:block">
                 N
               </Kbd>
             </Button>

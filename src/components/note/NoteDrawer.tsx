@@ -1,36 +1,32 @@
 import {
   cn,
+  Kbd,
+  Form,
   Drawer,
   Button,
-  Slider,
   Textarea,
   DrawerBody,
   DrawerHeader,
   DrawerFooter,
   DrawerContent,
-  RangeCalendar,
 } from '@heroui/react';
 import {
-  today,
   endOfWeek,
   endOfMonth,
-  startOfWeek,
-  startOfMonth,
   getLocalTimeZone,
 } from '@internationalized/date';
-import {
-  SunIcon,
-  CaretLeftIcon,
-  CaretDownIcon,
-  CaretRightIcon,
-  NumberSevenIcon,
-  CalendarDotsIcon,
-} from '@phosphor-icons/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { CaretDownIcon } from '@phosphor-icons/react';
+import type { FormEvent } from 'react';
 import React from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
 
-import { useUser, useTextField, useScreenWidth } from '@hooks';
+import {
+  useUser,
+  useTextField,
+  useScreenWidth,
+  useHasKeyboard,
+  useModifierKeys,
+} from '@hooks';
 import {
   usePeriodNotes,
   useNoteActions,
@@ -39,20 +35,23 @@ import {
 } from '@stores';
 import { toSqlDate, getISOWeek, handleAsyncAction } from '@utils';
 
+import NotePeriodPicker from './NotePeriodPicker';
+
 const NoteDrawer = () => {
   const timeZone = getLocalTimeZone();
   const notes = usePeriodNotes();
   const { addNote, deleteNote, updateNote } = useNoteActions();
   const { locale } = useLocale();
   const { user } = useUser();
-  const [content, handleContentChange, clearContent] = useTextField();
-  const { isDesktop, isMobile, screenWidth } = useScreenWidth();
+  const [content, changeContent, clearContent] = useTextField();
+  const { isDesktop, isMobile } = useScreenWidth();
   const [isPeriodPickerShown, setIsPeriodPickerShown] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isRemoving, setIsRemoving] = React.useState(false);
+  const { mod } = useModifierKeys();
+  const hasKeyboard = useHasKeyboard();
   const { isOpen, periodDate, periodKind } = useNoteDrawerState();
-  const { closeNoteDrawer, setPeriodDate, setPeriodKind } =
-    useNoteDrawerActions();
+  const { closeNoteDrawer } = useNoteDrawerActions();
   const dayFormatter = useDateFormatter({
     day: 'numeric',
     month: 'short',
@@ -80,11 +79,11 @@ const NoteDrawer = () => {
 
   React.useEffect(() => {
     if (isOpen && existingNote?.content) {
-      handleContentChange(existingNote.content);
+      changeContent(existingNote.content);
     } else {
       clearContent();
     }
-  }, [existingNote, handleContentChange, isOpen, clearContent]);
+  }, [existingNote, changeContent, isOpen, clearContent]);
 
   const closeDrawer = () => {
     setIsRemoving(false);
@@ -93,8 +92,10 @@ const NoteDrawer = () => {
     clearContent();
   };
 
-  const submitNote = async () => {
-    if (!user || !periodDate || !content) {
+  const submitNote = async (e?: FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
+
+    if (!user || !periodDate || !content || existingNote?.content === content) {
       return null;
     }
 
@@ -176,11 +177,15 @@ const NoteDrawer = () => {
     }
 
     if (periodKind === 'week') {
-      return `You're ${action} a note for an entire week: ${shortMonthFormatter.format(periodDate.toDate(timeZone))} ${periodDate.day} to ${shortMonthFormatter.format(getEndRangeDate().toDate(timeZone))} ${getEndRangeDate().day}. It will live independently from notes added for any days of this week.`;
+      const duration = `${shortMonthFormatter.format(periodDate.toDate(timeZone))} ${periodDate.day} to ${shortMonthFormatter.format(getEndRangeDate().toDate(timeZone))} ${getEndRangeDate().day}`;
+
+      return `You're ${action} a note for an entire week: ${duration}. It will live independently from notes added for any days of this week.`;
     }
 
     if (periodKind === 'month') {
-      return `You're ${action} a note for the whole month: ${shortMonthFormatter.format(periodDate.toDate(timeZone))} ${periodDate.day}-${getEndRangeDate().day}. It will live independently from notes added for any days or weeks of this month.`;
+      const duration = `${shortMonthFormatter.format(periodDate.toDate(timeZone))} ${periodDate.day}-${getEndRangeDate().day}`;
+
+      return `You're ${action} a note for the whole month: ${duration}. It will live independently from notes added for any days or weeks of this month.`;
     }
 
     return '';
@@ -214,223 +219,86 @@ const NoteDrawer = () => {
             variant="light"
             onPress={togglePeriodPicker}
           >
-            <CaretDownIcon size={16} />
+            <CaretDownIcon
+              size={16}
+              className={cn(
+                'transition-transform',
+                isPeriodPickerShown && 'rotate-180'
+              )}
+            />
           </Button>
         </DrawerHeader>
-        <DrawerBody>
-          <AnimatePresence mode="wait">
-            {isPeriodPickerShown && (
-              <motion.div
-                initial={{
-                  height: 0,
-                  opacity: 0,
-                }}
-                className="flex justify-between gap-2 max-[446px]:flex-col max-[446px]:items-center max-[446px]:justify-start max-[446px]:gap-4"
-                exit={{
-                  height: 0,
-                  opacity: 0,
-                  transition: {
-                    height: {
-                      duration: 0.4,
-                    },
-                    opacity: {
-                      duration: 0.25,
-                    },
-                  },
-                }}
-                animate={{
-                  height: screenWidth > 445 ? 296 : 380,
-                  opacity: 1,
-                  transition: {
-                    height: {
-                      duration: 0.4,
-                    },
-                    opacity: {
-                      delay: 0.15,
-                      duration: 0.25,
-                    },
-                  },
-                }}
+        <Form onSubmit={submitNote}>
+          <DrawerBody className="w-full space-y-4">
+            <NotePeriodPicker
+              endRange={getEndRangeDate()}
+              isShown={isPeriodPickerShown}
+            />
+            <Textarea
+              autoFocus
+              isRequired
+              name="content"
+              value={content}
+              variant="faded"
+              disableAutosize
+              label="Your note"
+              labelPlacement="outside"
+              onChange={changeContent}
+              disabled={isSaving || isRemoving}
+              description={getTextareaDescription()}
+              defaultValue={existingNote?.content || ''}
+              placeholder={`Start typing your note about this ${periodKind}...`}
+              errorMessage={`Empty notes are not allowed. ${existingNote ? 'If you want to empty an existing note, please remove it instead.' : ''}`}
+              onKeyDown={(event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                  void submitNote();
+                }
+
+                return null;
+              }}
+              classNames={{
+                label: 'after:hidden',
+                input: cn(
+                  'resize-y min-h-25 field-sizing-content max-h-96',
+                  !isDesktop && 'text-base'
+                ),
+              }}
+            />
+          </DrawerBody>
+          <DrawerFooter className="self-end">
+            {!!existingNote && (
+              <Button
+                color="danger"
+                onPress={removeNote}
+                disabled={isRemoving}
+                isLoading={isRemoving}
               >
-                <Slider
-                  showSteps
-                  showTooltip
-                  minValue={1}
-                  maxValue={3}
-                  value={['day', 'week', 'month'].indexOf(periodKind) + 1}
-                  orientation={screenWidth > 445 ? 'vertical' : 'horizontal'}
-                  classNames={{
-                    mark: 'min-[446px]:data-[in-range=true]:ml-4 max-[446px]:mt-2',
-                  }}
-                  marks={[
-                    {
-                      label: 'Day',
-                      value: 1,
-                    },
-                    {
-                      label: 'Week',
-                      value: 2,
-                    },
-                    {
-                      label: 'Month',
-                      value: 3,
-                    },
-                  ]}
-                  getTooltipValue={(value) => {
-                    if (value === 1) {
-                      return 'Day note';
-                    }
-
-                    if (value === 2) {
-                      return 'Week note';
-                    }
-
-                    if (value === 3) {
-                      return 'Month note';
-                    }
-
-                    return '';
-                  }}
-                  renderThumb={(props) => {
-                    return (
-                      <div
-                        {...props}
-                        className="bg-primary-600 top-1/2 left-1/2 mx-auto flex h-8 w-8 items-center justify-center rounded-full text-white"
-                      >
-                        {periodKind === 'day' && <SunIcon size={20} />}
-                        {periodKind === 'week' && <NumberSevenIcon size={20} />}
-                        {periodKind === 'month' && (
-                          <CalendarDotsIcon size={20} />
-                        )}
-                      </div>
-                    );
-                  }}
-                  onChange={(value) => {
-                    const nextValue = Array.isArray(value) ? value[0] : value;
-
-                    switch (nextValue) {
-                      case 1:
-                        setPeriodDate(periodDate);
-                        setPeriodKind('day');
-                        break;
-
-                      case 2: {
-                        const weekStart = startOfWeek(periodDate, locale);
-                        setPeriodDate(weekStart);
-                        setPeriodKind('week');
-                        break;
-                      }
-
-                      case 3: {
-                        const monthStart = startOfMonth(periodDate);
-                        setPeriodDate(monthStart);
-                        setPeriodKind('month');
-                        break;
-                      }
-                    }
-                  }}
-                />
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    isIconOnly
-                    variant="light"
-                    className="h-full w-5! min-w-auto"
-                    onPress={() => {
-                      switch (periodKind) {
-                        case 'day':
-                          return setPeriodDate(
-                            periodDate.subtract({ days: 1 })
-                          );
-
-                        case 'week':
-                          return setPeriodDate(
-                            periodDate.subtract({ weeks: 1 })
-                          );
-
-                        case 'month':
-                          return setPeriodDate(
-                            periodDate.subtract({ months: 1 })
-                          );
-                      }
-                    }}
-                  >
-                    <CaretLeftIcon />
-                  </Button>
-                  <RangeCalendar
-                    isReadOnly
-                    focusedValue={periodDate}
-                    value={{
-                      end: getEndRangeDate(),
-                      start: periodDate || today(timeZone),
-                    }}
-                    classNames={{
-                      cell: '[&_span]:cursor-default! cursor-default',
-                      nextButton: 'hidden',
-                      prevButton: 'hidden',
-                    }}
-                  />
-                  <Button
-                    size="sm"
-                    isIconOnly
-                    variant="light"
-                    className="h-full w-5! min-w-auto"
-                    onPress={() => {
-                      switch (periodKind) {
-                        case 'day':
-                          return setPeriodDate(periodDate.add({ days: 1 }));
-
-                        case 'week':
-                          return setPeriodDate(periodDate.add({ weeks: 1 }));
-
-                        case 'month':
-                          return setPeriodDate(periodDate.add({ months: 1 }));
-                      }
-                    }}
-                  >
-                    <CaretRightIcon />
-                  </Button>
-                </div>
-              </motion.div>
+                Remove
+              </Button>
             )}
-          </AnimatePresence>
-          <Textarea
-            value={content}
-            variant="faded"
-            disableAutosize
-            placeholder="Note"
-            onChange={handleContentChange}
-            disabled={isSaving || isRemoving}
-            description={getTextareaDescription()}
-            onKeyDown={() => {
-              return null;
-            }}
-            classNames={{
-              input: cn('resize-y min-h-25', !isDesktop && 'text-base'),
-            }}
-          />
-        </DrawerBody>
-        <DrawerFooter>
-          {!!existingNote && (
             <Button
-              color="danger"
-              onPress={removeNote}
-              disabled={isRemoving}
-              isLoading={isRemoving}
+              type="submit"
+              color="primary"
+              isLoading={isSaving}
+              isDisabled={
+                isRemoving || !content || existingNote?.content === content
+              }
             >
-              Remove
+              {hasKeyboard && (
+                <>
+                  <Kbd className="[&_span]:text-default-500 dark:[&_span]:text-default-700">
+                    {mod}
+                  </Kbd>
+                  <Kbd
+                    keys={['enter']}
+                    className="[&_abbr]:text-default-500 dark:[&_abbr]:text-default-700"
+                  />
+                </>
+              )}
+              {existingNote ? 'Save' : 'Add'}
             </Button>
-          )}
-          <Button
-            type="submit"
-            color="primary"
-            isLoading={isSaving}
-            onPress={submitNote}
-            isDisabled={!content || isRemoving}
-          >
-            {existingNote ? 'Save' : 'Add'}
-          </Button>
-        </DrawerFooter>
+          </DrawerFooter>
+        </Form>
       </DrawerContent>
     </Drawer>
   );
