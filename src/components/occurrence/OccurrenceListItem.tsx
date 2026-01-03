@@ -67,6 +67,7 @@ const OccurrenceListItem = ({
           variant="light"
           onPress={onEdit}
           color="secondary"
+          aria-label="edit-habit-entry"
           className="h-6 w-6 min-w-0 rounded-lg"
         >
           <PencilSimpleIcon size={14} fill="bold" className="dark:fill-white" />
@@ -76,7 +77,7 @@ const OccurrenceListItem = ({
           color="danger"
           variant="light"
           onPress={onRemove}
-          role="habit-chip-delete-button"
+          aria-label="delete-habit-entry"
           className="h-6 w-6 min-w-0 rounded-lg"
         >
           <TrashSimpleIcon size={14} fill="bold" className="dark:fill-white" />

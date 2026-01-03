@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { it, expect, describe } from 'vitest';
+import { it, vi, expect, describe } from 'vitest';
 
 import useScreenWidth from './use-screen-width';
 
@@ -11,8 +11,8 @@ describe(useScreenWidth.name, () => {
     expect(typeof result.current.screenWidth).toBe('number');
   });
 
-  it('should return the window innerWidth', () => {
-    (window.innerWidth as number) = 1000;
+  it('should return the window availWidth', () => {
+    vi.spyOn(window.screen, 'availWidth', 'get').mockReturnValue(1000);
     const { result } = renderHook(() => {
       return useScreenWidth();
     });

@@ -147,7 +147,7 @@ Supabase storage buckets:
 
 ### Environment Requirements
 
-- Node.js 22.21.0+
+- Node.js 22.21.1+
 - Yarn 4.12.0
 - Docker (for local Supabase)
 - Supabase CLI v2

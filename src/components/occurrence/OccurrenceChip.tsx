@@ -150,13 +150,19 @@ const OccurrenceChip = ({
     );
   }
 
+  const occurrencesWithTime = occurrences.filter((o) => {
+    return !o.hasSpecificTime;
+  });
+
+  const occurrencesWithoutTime = occurrences.filter((o) => {
+    return o.hasSpecificTime;
+  });
+
+  const hasOccurrencesWithTime = !!occurrencesWithTime.length;
+  const hasOccurrencesWithoutTime = !!occurrencesWithoutTime.length;
+
   const hasOccurrencesWithAndWithoutTime =
-    occurrences.some((o) => {
-      return o.hasSpecificTime;
-    }) &&
-    occurrences.some((o) => {
-      return !o.hasSpecificTime;
-    });
+    hasOccurrencesWithTime && hasOccurrencesWithoutTime;
 
   return (
     <>
@@ -194,55 +200,56 @@ const OccurrenceChip = ({
                 hasOccurrencesWithAndWithoutTime && 'space-y-4'
               )}
             >
-              <ul>
-                {hasOccurrencesWithAndWithoutTime && (
-                  <p className="mb-1">Without time</p>
-                )}
-                {occurrences
-                  .filter((o) => {
-                    return !o.hasSpecificTime;
-                  })
-                  .map((o) => {
-                    return (
-                      <OccurrenceListItem
-                        key={o.id}
-                        occurrence={o}
-                        onRemove={() => {
-                          handleRemoveOccurrence(o);
-                        }}
-                        onEdit={() => {
-                          handleOccurrenceModalOpen(o);
-                        }}
-                      />
-                    );
-                  })}
-              </ul>
-              <ul>
-                {hasOccurrencesWithAndWithoutTime && (
-                  <p className="mb-1">With time</p>
-                )}
-                {occurrences
-                  .filter((o) => {
-                    return o.hasSpecificTime;
-                  })
-                  .toSorted((a, b) => {
-                    return a.timestamp - b.timestamp;
-                  })
-                  .map((o) => {
-                    return (
-                      <OccurrenceListItem
-                        key={o.id}
-                        occurrence={o}
-                        onRemove={() => {
-                          handleRemoveOccurrence(o);
-                        }}
-                        onEdit={() => {
-                          handleOccurrenceModalOpen(o);
-                        }}
-                      />
-                    );
-                  })}
-              </ul>
+              {hasOccurrencesWithoutTime && (
+                <div>
+                  {hasOccurrencesWithAndWithoutTime && (
+                    <p className="mb-1">Without time</p>
+                  )}
+                  <ul>
+                    {occurrencesWithoutTime.map((o) => {
+                      return (
+                        <OccurrenceListItem
+                          key={o.id}
+                          occurrence={o}
+                          onRemove={() => {
+                            handleRemoveOccurrence(o);
+                          }}
+                          onEdit={() => {
+                            handleOccurrenceModalOpen(o);
+                          }}
+                        />
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+              {hasOccurrencesWithTime && (
+                <div>
+                  {hasOccurrencesWithAndWithoutTime && (
+                    <p className="mb-1">With time</p>
+                  )}
+                  <ul>
+                    {occurrencesWithTime
+                      .toSorted((a, b) => {
+                        return a.timestamp - b.timestamp;
+                      })
+                      .map((o) => {
+                        return (
+                          <OccurrenceListItem
+                            key={o.id}
+                            occurrence={o}
+                            onRemove={() => {
+                              handleRemoveOccurrence(o);
+                            }}
+                            onEdit={() => {
+                              handleOccurrenceModalOpen(o);
+                            }}
+                          />
+                        );
+                      })}
+                  </ul>
+                </div>
+              )}
             </ScrollShadow>
           </DrawerBody>
         </DrawerContent>

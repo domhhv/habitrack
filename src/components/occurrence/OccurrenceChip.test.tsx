@@ -65,8 +65,8 @@ describe(OccurrenceChip.name, () => {
     (useScreenWidth as ReturnType<typeof vi.fn>).mockReturnValue({
       screenWidth: 1024,
     });
-    const { queryByRole } = render(<OccurrenceChip {...props} />);
-    const chipDelete = queryByRole('habit-chip-delete-button');
+    const { queryByLabelText } = render(<OccurrenceChip {...props} />);
+    const chipDelete = queryByLabelText('delete-habit-entry');
     expect(chipDelete).toBeNull();
   });
 });
