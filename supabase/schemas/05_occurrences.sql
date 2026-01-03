@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS "public"."occurrences" (
     "timestamp" bigint NOT NULL,
     "photo_paths" "text" [],
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "habit_id" "uuid" NOT NULL
+    "habit_id" "uuid" NOT NULL,
+    "has_specific_time" boolean DEFAULT true NOT NULL
 );
 
 ALTER TABLE "public"."occurrences" OWNER TO "postgres";

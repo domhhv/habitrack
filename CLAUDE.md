@@ -33,8 +33,10 @@ yarn test:coverage    # Run tests with coverage
 ```bash
 yarn db:start          # Start local Supabase (requires Docker)
 yarn db:stop           # Stop local Supabase
+yarn db:status         # Check current status of local database
 yarn db:reset          # Reset DB with migrations and seeds
-yarn db:diff           # Generate migration from schema changes
+yarn db:diff           # Generate migration from schema changes, additionally supplying migration name after -f flag
+yarn db:migration:up   # Apply current migrations
 yarn db:gen-types      # Generate TypeScript types from schema
 yarn lint:sql          # SQLFluff SQL linting
 yarn fix:sql           # Fix SQL formatting
@@ -61,7 +63,6 @@ Use these aliases throughout the codebase:
 - `@hooks` → `src/hooks`
 - `@models` → `src/models`
 - `@utils` → `src/utils`
-- `@const` → `src/constants`
 - `@db-types` → `supabase/database.types`
 - `@tests` → `tests`
 
@@ -84,6 +85,44 @@ Use these aliases throughout the codebase:
 - Use `yarn db:diff` to generate migrations from schema changes
 - Local Supabase runs on Docker - ensure Docker is installed
 - Database types are auto-generated in `supabase/database.types.ts`
+
+### Database Schema Changes - Quick Reference
+
+#### 1. Modify the Declarative Schema
+
+Edit the appropriate schema file in `supabase/schemas/`:
+
+- `03_traits.sql` - Traits table
+- `04_habits.sql` - Habits table
+- `05_occurrences.sql` - Occurrences table
+- `06_notes.sql` - Notes table
+
+Create a new declarative schema file for any new standalone entity introduced
+
+#### 2. Run Migration Workflow
+
+```bash
+# Stop local db (required before diffing)
+yarn db:stop
+
+# Generate migration file from schema diff
+yarn db:diff -f <migration_name>
+
+# Review the generated migration in supabase/migrations/
+# Ensure it only contains intended changes (remove any unrelated drops/alters)
+
+# Start db (applies pending migrations automatically)
+yarn db:start
+
+# Regenerate TypeScript types
+yarn db:gen-types
+```
+
+#### 3. Key Notes
+
+- Always review the generated migration - db:diff may include unintended changes (e.g., storage policy drops)
+- After db:gen-types, new fields appear in supabase/database.types.ts and flow through to model types via TablesInsert<'tablename'> and TablesUpdate<'tablename'>
+- Use DEFAULT values for new columns to ensure backwards compatibility with existing data
 
 ### Component Architecture
 
@@ -108,8 +147,8 @@ Supabase storage buckets:
 
 ### Environment Requirements
 
-- Node.js 22.15.0+
-- Yarn 4.9.4
+- Node.js 22.21.1+
+- Yarn 4.12.0
 - Docker (for local Supabase)
 - Supabase CLI v2
 

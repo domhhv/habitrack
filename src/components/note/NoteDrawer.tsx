@@ -222,7 +222,7 @@ const NoteDrawer = () => {
             <CaretDownIcon
               size={16}
               className={cn(
-                'transition-transform',
+                'transition-transform duration-300 ease-linear',
                 isPeriodPickerShown && 'rotate-180'
               )}
             />
@@ -249,19 +249,23 @@ const NoteDrawer = () => {
               defaultValue={existingNote?.content || ''}
               placeholder={`Start typing your note about this ${periodKind}...`}
               errorMessage={`Empty notes are not allowed. ${existingNote ? 'If you want to empty an existing note, please remove it instead.' : ''}`}
-              onKeyDown={(event) => {
-                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-                  void submitNote();
-                }
-
-                return null;
-              }}
               classNames={{
                 label: 'after:hidden',
                 input: cn(
                   'resize-y min-h-25 field-sizing-content max-h-96',
                   !isDesktop && 'text-base'
                 ),
+              }}
+              onKeyDown={(event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                  void submitNote();
+                }
+
+                if (event.key === 'Escape') {
+                  closeNoteDrawer();
+                }
+
+                return null;
               }}
             />
           </DrawerBody>

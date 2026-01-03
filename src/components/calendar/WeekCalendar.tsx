@@ -156,13 +156,16 @@ const WeekCalendar = () => {
     (day: CalendarDate, hour: number) => {
       const relatedOccurrences = occurrences.filter((o) => {
         const occurrenceDate = fromDate(new Date(o.timestamp), state.timeZone);
-
-        return (
+        const matchesDay =
           occurrenceDate.year === day.year &&
           occurrenceDate.month === day.month &&
-          occurrenceDate.day === day.day &&
-          occurrenceDate.hour === hour
-        );
+          occurrenceDate.day === day.day;
+
+        if (!o.hasSpecificTime) {
+          return matchesDay && hour === 0;
+        }
+
+        return matchesDay && occurrenceDate.hour === hour;
       });
 
       return Object.entries(

@@ -4,6 +4,7 @@ const makeTestOccurrence = (override: Partial<Occurrence> = {}): Occurrence => {
   return {
     createdAt: new Date().toISOString(),
     habitId: crypto.randomUUID(),
+    hasSpecificTime: true,
     id: crypto.randomUUID(),
     note: null,
     photoPaths: [],
