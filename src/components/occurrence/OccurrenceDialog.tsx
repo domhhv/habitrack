@@ -1,8 +1,10 @@
 import type { ButtonProps, TimeInputValue } from '@heroui/react';
 import {
+  cn,
   Modal,
   Button,
   Select,
+  Switch,
   Textarea,
   ModalBody,
   TimeInput,
@@ -74,6 +76,7 @@ const OccurrenceDialog = ({
   const [repeat, setRepeat] = React.useState(1);
   const [selectedHabitId, setSelectedHabitId] = React.useState('');
   const [time, setTime] = React.useState<TimeInputValue | null>(null);
+  const [hasSpecificTime, setHasSpecificTime] = React.useState(true);
   const [isDateTimeInFuture, setIsDateTimeInFuture] = React.useState(false);
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
     React.useState(false);
@@ -143,6 +146,7 @@ const OccurrenceDialog = ({
       setSelectedHabitId(existingOccurrence.habitId.toString());
       handleNoteChange(existingOccurrence.note?.content || '');
       setTime(existingOccurrenceDateTime);
+      setHasSpecificTime(existingOccurrence.hasSpecificTime);
 
       return;
     }
@@ -184,11 +188,14 @@ const OccurrenceDialog = ({
       const hasNoteChanged = note !== (existingOccurrence.note?.content || '');
       const hasHabitChanged =
         selectedHabitId !== existingOccurrence.habitId.toString();
+      const hasSpecificTimeChanged =
+        hasSpecificTime !== existingOccurrence.hasSpecificTime;
 
       const hasOccurrenceChanged =
         hasNoteChanged ||
         hasHabitChanged ||
         hasTimeChanged ||
+        hasSpecificTimeChanged ||
         uploadedFiles.length > 0;
 
       setIsSubmitButtonDisabled(
@@ -204,6 +211,7 @@ const OccurrenceDialog = ({
     note,
     selectedHabitId,
     time,
+    hasSpecificTime,
     isSaving,
     habits,
   ]);
@@ -249,18 +257,36 @@ const OccurrenceDialog = ({
     }
 
     const baseNow = now(timeZone);
+
+    // Use noon (12:00) as sentinel time for all-day occurrences to avoid DST edge cases
+    const allDayTime = { hour: 12, minute: 0 };
+
     const occurrenceZdt = newOccurrenceDate
       ? toZoned(
-          toCalendarDateTime(newOccurrenceDate).set({
-            hour: time instanceof ZonedDateTime ? time.hour : baseNow.hour,
-            minute:
-              time instanceof ZonedDateTime ? time.minute : baseNow.minute,
-          }),
+          toCalendarDateTime(newOccurrenceDate).set(
+            hasSpecificTime
+              ? {
+                  hour:
+                    time instanceof ZonedDateTime ? time.hour : baseNow.hour,
+                  minute:
+                    time instanceof ZonedDateTime
+                      ? time.minute
+                      : baseNow.minute,
+                }
+              : allDayTime
+          ),
           timeZone
         )
-      : time instanceof ZonedDateTime
-        ? time
-        : (existingOccurrenceDateTime ?? baseNow);
+      : hasSpecificTime
+        ? time instanceof ZonedDateTime
+          ? time
+          : (existingOccurrenceDateTime ?? baseNow)
+        : toZoned(
+            toCalendarDateTime(existingOccurrenceDateTime ?? baseNow).set(
+              allDayTime
+            ),
+            timeZone
+          );
     const occurrenceDateTime = occurrenceZdt.toDate();
 
     setIsSaving(true);
@@ -282,6 +308,7 @@ const OccurrenceDialog = ({
 
         await updateOccurrence(existingOccurrence.id, {
           habitId: selectedHabitId,
+          hasSpecificTime,
           photoPaths: photoPaths.length ? photoPaths : null,
           timestamp: +occurrenceDateTime,
           userId: user?.id as string,
@@ -331,6 +358,7 @@ const OccurrenceDialog = ({
     const addPromises = Array.from({ length: repeat || 1 }).map(async () => {
       const newOccurrence = await addOccurrence({
         habitId: selectedHabitId,
+        hasSpecificTime,
         photoPaths,
         timestamp: +occurrenceDateTime,
         userId: user?.id as string,
@@ -361,6 +389,7 @@ const OccurrenceDialog = ({
     setSelectedHabitId('');
     clearNote();
     setUploadedFiles([]);
+    setHasSpecificTime(true);
     onClose();
   };
 
@@ -524,26 +553,43 @@ const OccurrenceDialog = ({
               }
             />
           )}
-          <div className="flex w-full flex-col gap-y-2">
-            <TimeInput
-              label="Time"
-              value={time}
-              variant="faded"
-              onChange={setTime}
-              description={
-                isDateTimeInFuture &&
-                'You are logging a habit for the future. Are you a time traveler?'
-              }
-              classNames={
-                !isDesktop
-                  ? {
-                      input: 'text-base',
-                      inputWrapper: 'py-3 px-4 h-16',
-                      label: 'text-small',
-                    }
-                  : undefined
-              }
-            />
+          <div className="space-y-2">
+            <div
+              className={cn(
+                'flex w-full gap-2',
+                !hasSpecificTime && isMobile ? 'py-7' : 'py-2'
+              )}
+            >
+              <Switch
+                size="sm"
+                className="basis-full"
+                isSelected={hasSpecificTime}
+                onValueChange={setHasSpecificTime}
+              >
+                Specify time
+              </Switch>
+              {hasSpecificTime && (
+                <TimeInput
+                  value={time}
+                  variant="faded"
+                  onChange={setTime}
+                  classNames={
+                    !isDesktop
+                      ? {
+                          input: 'text-base',
+                          inputWrapper: 'py-3 px-4 h-16',
+                          label: 'text-small',
+                        }
+                      : undefined
+                  }
+                />
+              )}
+            </div>
+            {isDateTimeInFuture && hasSpecificTime && (
+              <p className="text-sm text-gray-600">
+                You are logging a habit for the future. Are you a time traveler?
+              </p>
+            )}
           </div>
           <OccurrencePhotosUploader
             files={uploadedFiles}

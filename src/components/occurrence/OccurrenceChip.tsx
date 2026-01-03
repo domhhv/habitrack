@@ -1,7 +1,6 @@
 import {
   cn,
   Badge,
-  Button,
   Drawer,
   Tooltip,
   DrawerBody,
@@ -10,12 +9,7 @@ import {
   DrawerContent,
   useDisclosure,
 } from '@heroui/react';
-import {
-  NoteIcon,
-  CameraIcon,
-  TrashSimpleIcon,
-  PencilSimpleIcon,
-} from '@phosphor-icons/react';
+import { NoteIcon, CameraIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
@@ -26,6 +20,8 @@ import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import { useOccurrenceActions } from '@stores';
 import { handleAsyncAction } from '@utils';
+
+import OccurrenceListItem from './OccurrenceListItem';
 
 export type OccurrenceChipProps = {
   colorOverride?: string;
@@ -63,11 +59,6 @@ const OccurrenceChip = ({
     month: 'short',
     timeZone,
     year: 'numeric',
-  });
-  const timeFormatter = useDateFormatter({
-    hour: 'numeric',
-    minute: 'numeric',
-    timeZone,
   });
 
   const handleOccurrenceModalClose = () => {
@@ -159,6 +150,14 @@ const OccurrenceChip = ({
     );
   }
 
+  const hasOccurrencesWithAndWithoutTime =
+    occurrences.some((o) => {
+      return o.hasSpecificTime;
+    }) &&
+    occurrences.some((o) => {
+      return !o.hasSpecificTime;
+    });
+
   return (
     <>
       {chip}
@@ -173,72 +172,74 @@ const OccurrenceChip = ({
       )}
 
       <Drawer
-        placement="bottom"
         onOpenChange={onDrawerOpenChange}
         isOpen={isDrawerOpen && isInteractable}
       >
         <DrawerContent>
-          <DrawerHeader className="pb-0">
-            {habitName} | {dateFormatter.format(new Date(occurrence.timestamp))}
+          <DrawerHeader className="flex-col">
+            <p>
+              {habitName} |{' '}
+              {dateFormatter.format(new Date(occurrence.timestamp))}
+            </p>
+            {hasOccurrencesWithAndWithoutTime && (
+              <p className="text-default-400 dark:text-default-600 text-xs">
+                Has occurrences with and without specific times
+              </p>
+            )}
           </DrawerHeader>
           <DrawerBody>
-            <ScrollShadow className="max-h-96 space-y-2">
-              <ul className="space-y-2 italic">
+            <ScrollShadow
+              className={cn(
+                'max-h-full',
+                hasOccurrencesWithAndWithoutTime && 'space-y-4'
+              )}
+            >
+              <ul>
+                {hasOccurrencesWithAndWithoutTime && (
+                  <p className="mb-1">Without time</p>
+                )}
                 {occurrences
+                  .filter((o) => {
+                    return !o.hasSpecificTime;
+                  })
+                  .map((o) => {
+                    return (
+                      <OccurrenceListItem
+                        key={o.id}
+                        occurrence={o}
+                        onRemove={() => {
+                          handleRemoveOccurrence(o);
+                        }}
+                        onEdit={() => {
+                          handleOccurrenceModalOpen(o);
+                        }}
+                      />
+                    );
+                  })}
+              </ul>
+              <ul>
+                {hasOccurrencesWithAndWithoutTime && (
+                  <p className="mb-1">With time</p>
+                )}
+                {occurrences
+                  .filter((o) => {
+                    return o.hasSpecificTime;
+                  })
                   .toSorted((a, b) => {
                     return a.timestamp - b.timestamp;
                   })
                   .map((o) => {
                     return (
-                      <li
+                      <OccurrenceListItem
                         key={o.id}
-                        className="mb-2 flex items-start justify-between gap-4 border-neutral-500 py-2 not-last:border-b"
-                      >
-                        <div className="whitespace-pre-wrap">
-                          <span className="font-semibold">
-                            {timeFormatter.format(new Date(o.timestamp))}
-                          </span>
-                          {!!o.note && (
-                            <span className="font-normal">
-                              : {o.note.content}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center">
-                          <Button
-                            size="sm"
-                            isIconOnly
-                            variant="light"
-                            color="secondary"
-                            className="h-6 w-6 min-w-0 rounded-lg"
-                            onPress={() => {
-                              return handleOccurrenceModalOpen(o);
-                            }}
-                          >
-                            <PencilSimpleIcon
-                              size={14}
-                              fill="bold"
-                              className="dark:fill-white"
-                            />
-                          </Button>
-                          <Button
-                            isIconOnly
-                            color="danger"
-                            variant="light"
-                            role="habit-chip-delete-button"
-                            className="h-6 w-6 min-w-0 rounded-lg"
-                            onPress={() => {
-                              return handleRemoveOccurrence(o);
-                            }}
-                          >
-                            <TrashSimpleIcon
-                              size={14}
-                              fill="bold"
-                              className="dark:fill-white"
-                            />
-                          </Button>
-                        </div>
-                      </li>
+                        occurrence={o}
+                        onRemove={() => {
+                          handleRemoveOccurrence(o);
+                        }}
+                        onEdit={() => {
+                          handleOccurrenceModalOpen(o);
+                        }}
+                      />
                     );
                   })}
               </ul>
