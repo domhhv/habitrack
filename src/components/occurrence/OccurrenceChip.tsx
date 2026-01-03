@@ -151,11 +151,11 @@ const OccurrenceChip = ({
   }
 
   const occurrencesWithTime = occurrences.filter((o) => {
-    return !o.hasSpecificTime;
+    return o.hasSpecificTime;
   });
 
   const occurrencesWithoutTime = occurrences.filter((o) => {
-    return o.hasSpecificTime;
+    return !o.hasSpecificTime;
   });
 
   const hasOccurrencesWithTime = !!occurrencesWithTime.length;
