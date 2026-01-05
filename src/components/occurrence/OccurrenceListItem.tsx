@@ -57,31 +57,40 @@ const OccurrenceListItem = ({
   return (
     <li
       key={occurrence.id}
-      className="mb-2 flex items-start justify-between gap-4 border-neutral-500 py-2 not-last:border-b"
+      className="mb-2 border-neutral-500 py-2 not-last:border-b"
     >
-      <div className="whitespace-pre-wrap">{getTextContent()}</div>
-      <div className="flex items-center">
-        <Button
-          size="sm"
-          isIconOnly
-          variant="light"
-          onPress={onEdit}
-          color="secondary"
-          aria-label="edit-habit-entry"
-          className="h-6 w-6 min-w-0 rounded-lg"
-        >
-          <PencilSimpleIcon size={14} fill="bold" className="dark:fill-white" />
-        </Button>
-        <Button
-          isIconOnly
-          color="danger"
-          variant="light"
-          onPress={onRemove}
-          aria-label="delete-habit-entry"
-          className="h-6 w-6 min-w-0 rounded-lg"
-        >
-          <TrashSimpleIcon size={14} fill="bold" className="dark:fill-white" />
-        </Button>
+      <div className="flex items-start justify-between gap-4">
+        <div className="whitespace-pre-wrap">{getTextContent()}</div>
+        <div className="flex items-center">
+          <Button
+            isIconOnly
+            variant="light"
+            onPress={onEdit}
+            color="secondary"
+            aria-label="edit-habit-entry"
+            className="h-6 w-6 min-w-0 rounded-lg"
+          >
+            <PencilSimpleIcon
+              size={14}
+              fill="bold"
+              className="dark:fill-white"
+            />
+          </Button>
+          <Button
+            isIconOnly
+            color="danger"
+            variant="light"
+            onPress={onRemove}
+            aria-label="delete-habit-entry"
+            className="h-6 w-6 min-w-0 rounded-lg"
+          >
+            <TrashSimpleIcon
+              size={14}
+              fill="bold"
+              className="dark:fill-white"
+            />
+          </Button>
+        </div>
       </div>
     </li>
   );

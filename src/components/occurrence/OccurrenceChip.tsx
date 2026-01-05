@@ -1,79 +1,30 @@
-import {
-  cn,
-  Badge,
-  Drawer,
-  Tooltip,
-  DrawerBody,
-  DrawerHeader,
-  ScrollShadow,
-  DrawerContent,
-  useDisclosure,
-} from '@heroui/react';
+import { cn, Badge, Tooltip } from '@heroui/react';
 import { NoteIcon, CameraIcon } from '@phosphor-icons/react';
 import React from 'react';
-import { useDateFormatter } from 'react-aria';
 
-import { OccurrenceDialog } from '@components';
 import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
-import { useOccurrenceActions } from '@stores';
-import { handleAsyncAction } from '@utils';
-
-import OccurrenceListItem from './OccurrenceListItem';
+import { useOccurrenceDrawerActions } from '@stores';
 
 export type OccurrenceChipProps = {
   colorOverride?: string;
   isInteractable?: boolean;
   occurrences: Occurrence[];
-  timeZone?: string;
 };
 
 const OccurrenceChip = ({
   colorOverride,
   isInteractable = true,
   occurrences,
-  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone,
 }: OccurrenceChipProps) => {
-  const {
-    isOpen: isDrawerOpen,
-    onOpen: openDrawer,
-    onOpenChange: onDrawerOpenChange,
-  } = useDisclosure();
-  const {
-    isOpen: isOccurrenceDialogOpen,
-    onClose: closeOccurrenceDialog,
-    onOpen: openOccurrenceDialog,
-  } = useDisclosure();
-  const [occurrenceToEdit, setOccurrenceToEdit] =
-    React.useState<Occurrence | null>(null);
+  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const [occurrence] = occurrences;
   const { habit } = occurrence;
   const { iconPath, name: habitName, trait } = habit || {};
   const { color: traitColor } = trait || {};
   const { screenWidth } = useScreenWidth();
-  const { removeOccurrence } = useOccurrenceActions();
-  const dateFormatter = useDateFormatter({
-    day: 'numeric',
-    month: 'short',
-    timeZone,
-    year: 'numeric',
-  });
-
-  const handleOccurrenceModalClose = () => {
-    setOccurrenceToEdit(null);
-    closeOccurrenceDialog();
-  };
-
-  const handleOccurrenceModalOpen = (occurrence: Occurrence) => {
-    setOccurrenceToEdit(occurrence);
-    openOccurrenceDialog();
-  };
-
-  const handleRemoveOccurrence = async (occurrence: Occurrence) => {
-    handleAsyncAction(removeOccurrence(occurrence), 'remove_occurrence');
-  };
 
   let chip = (
     <Tooltip
@@ -86,12 +37,18 @@ const OccurrenceChip = ({
     >
       <div
         role="button"
-        onClick={openDrawer}
         style={{ borderColor: colorOverride || traitColor }}
         className={cn(
-          'relative mb-0 min-w-8 rounded-md border-2 bg-slate-100 p-1.5 md:mr-1 md:mb-1 dark:bg-slate-800',
+          'relative mb-0 min-w-8 rounded-md border-2 bg-white p-1.5 md:mr-1 md:mb-1 dark:bg-black',
           screenWidth < 400 && 'p-1'
         )}
+        onClick={() => {
+          if (isInteractable) {
+            openOccurrenceDrawer({
+              habitOccurrences: occurrences,
+            });
+          }
+        }}
       >
         <img
           alt={`${habitName} icon`}
@@ -150,112 +107,7 @@ const OccurrenceChip = ({
     );
   }
 
-  const occurrencesWithTime = occurrences.filter((o) => {
-    return o.hasSpecificTime;
-  });
-
-  const occurrencesWithoutTime = occurrences.filter((o) => {
-    return !o.hasSpecificTime;
-  });
-
-  const hasOccurrencesWithTime = !!occurrencesWithTime.length;
-  const hasOccurrencesWithoutTime = !!occurrencesWithoutTime.length;
-
-  const hasOccurrencesWithAndWithoutTime =
-    hasOccurrencesWithTime && hasOccurrencesWithoutTime;
-
-  return (
-    <>
-      {chip}
-
-      {occurrenceToEdit && (
-        <OccurrenceDialog
-          timeZone={timeZone}
-          isOpen={isOccurrenceDialogOpen}
-          onClose={handleOccurrenceModalClose}
-          existingOccurrence={occurrenceToEdit}
-        />
-      )}
-
-      <Drawer
-        onOpenChange={onDrawerOpenChange}
-        isOpen={isDrawerOpen && isInteractable}
-      >
-        <DrawerContent>
-          <DrawerHeader className="flex-col">
-            <p>
-              {habitName} |{' '}
-              {dateFormatter.format(new Date(occurrence.timestamp))}
-            </p>
-            {hasOccurrencesWithAndWithoutTime && (
-              <p className="text-default-400 dark:text-default-600 text-xs">
-                Has occurrences with and without specific times
-              </p>
-            )}
-          </DrawerHeader>
-          <DrawerBody>
-            <ScrollShadow
-              className={cn(
-                'max-h-full',
-                hasOccurrencesWithAndWithoutTime && 'space-y-4'
-              )}
-            >
-              {hasOccurrencesWithoutTime && (
-                <div>
-                  {hasOccurrencesWithAndWithoutTime && (
-                    <p className="mb-1">Without time</p>
-                  )}
-                  <ul>
-                    {occurrencesWithoutTime.map((o) => {
-                      return (
-                        <OccurrenceListItem
-                          key={o.id}
-                          occurrence={o}
-                          onRemove={() => {
-                            handleRemoveOccurrence(o);
-                          }}
-                          onEdit={() => {
-                            handleOccurrenceModalOpen(o);
-                          }}
-                        />
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-              {hasOccurrencesWithTime && (
-                <div>
-                  {hasOccurrencesWithAndWithoutTime && (
-                    <p className="mb-1">With time</p>
-                  )}
-                  <ul>
-                    {occurrencesWithTime
-                      .toSorted((a, b) => {
-                        return a.timestamp - b.timestamp;
-                      })
-                      .map((o) => {
-                        return (
-                          <OccurrenceListItem
-                            key={o.id}
-                            occurrence={o}
-                            onRemove={() => {
-                              handleRemoveOccurrence(o);
-                            }}
-                            onEdit={() => {
-                              handleOccurrenceModalOpen(o);
-                            }}
-                          />
-                        );
-                      })}
-                  </ul>
-                </div>
-              )}
-            </ScrollShadow>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-    </>
-  );
+  return chip;
 };
 
 export default OccurrenceChip;

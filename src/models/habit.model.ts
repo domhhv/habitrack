@@ -7,7 +7,7 @@ import { type Trait } from './trait.model';
 type BaseHabit = CamelCasedPropertiesDeep<Tables<'habits'>>;
 
 export type Habit = BaseHabit & {
-  trait: Pick<Trait, 'name' | 'color'> | null;
+  trait: Pick<Trait, 'name' | 'color'>;
 };
 
 export type HabitsInsert = CamelCasedPropertiesDeep<TablesInsert<'habits'>>;

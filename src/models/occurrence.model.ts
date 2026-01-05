@@ -18,11 +18,11 @@ type BaseOccurrence = CamelCasedPropertiesDeep<Tables<'occurrences'>>;
 type OccurrenceHabit = Pick<Habit, 'name' | 'iconPath'>;
 
 type HabitWithTrait = OccurrenceHabit & {
-  trait: Pick<Trait, 'id' | 'name' | 'color'> | null;
+  trait: Pick<Trait, 'id' | 'name' | 'color'>;
 };
 
 export type Occurrence = BaseOccurrence & {
-  habit: HabitWithTrait | null;
+  habit: HabitWithTrait;
 } & {
   note: Pick<Note, 'id' | 'content'> | null;
 };

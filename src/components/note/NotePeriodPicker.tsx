@@ -1,9 +1,7 @@
 import { Button, Slider, RangeCalendar } from '@heroui/react';
 import {
-  today,
   startOfWeek,
   startOfMonth,
-  getLocalTimeZone,
   type CalendarDate,
 } from '@internationalized/date';
 import {
@@ -168,7 +166,7 @@ const NotePeriodPicker = ({ endRange, isShown }: NotePeriodPickerProps) => {
               focusedValue={periodDate}
               value={{
                 end: endRange,
-                start: periodDate || today(getLocalTimeZone()),
+                start: periodDate,
               }}
               classNames={{
                 cell: '[&_span]:cursor-default! cursor-default',

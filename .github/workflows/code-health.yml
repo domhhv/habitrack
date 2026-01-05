@@ -43,6 +43,8 @@ jobs:
             command: eslint:check
           - name: Prettier
             command: prettier:check
+          - name: Unit Tests
+            command: test
       fail-fast: false
     name: ${{ matrix.check.name }}
 

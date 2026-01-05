@@ -297,7 +297,6 @@ const WeekCalendar = () => {
                                 transition={{ duration: 0.5 }}
                               >
                                 <OccurrenceChip
-                                  timeZone={state.timeZone}
                                   occurrences={habitOccurrences}
                                 />
                               </motion.div>
