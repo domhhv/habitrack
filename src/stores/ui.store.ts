@@ -83,6 +83,8 @@ const useUiStore = create<UiState>()(
         closeOccurrenceDrawer: () => {
           set((state) => {
             state.occurrenceDrawer.isOpen = false;
+            state.occurrenceDrawer.dayOccurrences = undefined;
+            state.occurrenceDrawer.habitOccurrences = undefined;
             state.occurrenceDrawer.newOccurrenceDate =
               today(getLocalTimeZone());
           });

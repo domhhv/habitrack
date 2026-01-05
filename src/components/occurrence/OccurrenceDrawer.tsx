@@ -74,7 +74,7 @@ const OccurrenceDrawer = () => {
 
   const closeOccurrenceDialog = () => {
     setOccurrenceToEdit(null);
-    setIsOccurrenceDialogOpen(true);
+    setIsOccurrenceDialogOpen(false);
   };
 
   const openOccurrenceDialog = (occurrence: Occurrence) => {
@@ -97,7 +97,7 @@ const OccurrenceDrawer = () => {
       return null;
     }
 
-    if (occurrencesData.habitOccurrences) {
+    if (occurrencesData.habitOccurrences?.length) {
       const [
         {
           timestamp,

@@ -63,7 +63,6 @@ const OccurrenceListItem = ({
         <div className="whitespace-pre-wrap">{getTextContent()}</div>
         <div className="flex items-center">
           <Button
-            size="sm"
             isIconOnly
             variant="light"
             onPress={onEdit}
