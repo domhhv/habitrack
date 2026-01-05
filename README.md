@@ -194,8 +194,6 @@ Once the migration ends up in the `main` branch, it will be automatically applie
 
 The project uses [Vitest](https://vitest.dev/) as the test runner and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) for unit testing of React components.
 
-At the moment, tests are incomplete and disabled in CI.
-
 To run the tests, use the following command:
 
 ```bash

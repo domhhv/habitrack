@@ -462,6 +462,7 @@ const OccurrenceDialog = ({
         </ModalHeader>
         <ModalBody>
           <Select
+            size="sm"
             variant="faded"
             data-testid="habit-select"
             disableSelectorIconRotation
@@ -555,10 +556,7 @@ const OccurrenceDialog = ({
           )}
           <div className="space-y-2">
             <div
-              className={cn(
-                'flex w-full gap-2',
-                !hasSpecificTime && isMobile ? 'py-7' : 'py-2'
-              )}
+              className={cn('flex w-full gap-2', !hasSpecificTime && 'py-2')}
             >
               <Switch
                 size="sm"
@@ -573,12 +571,12 @@ const OccurrenceDialog = ({
                   value={time}
                   variant="faded"
                   onChange={setTime}
+                  size={isMobile ? 'sm' : 'md'}
                   classNames={
                     !isDesktop
                       ? {
                           input: 'text-base',
-                          inputWrapper: 'py-3 px-4 h-16',
-                          label: 'text-small',
+                          inputWrapper: 'h-10',
                         }
                       : undefined
                   }

@@ -27,6 +27,15 @@ SET default_tablespace = ''; -- noqa: CV10
 
 SET default_table_access_method = "heap";
 
+CREATE SCHEMA IF NOT EXISTS "supabase_migrations";
+
+CREATE TABLE IF NOT EXISTS "supabase_migrations"."seed_files" (
+    "path" TEXT NOT NULL PRIMARY KEY,
+    "hash" TEXT NOT NULL
+);
+
+ALTER TABLE "supabase_migrations"."seed_files" OWNER TO "postgres";
+
 CREATE TABLE IF NOT EXISTS "public"."accounts" (
     "id" "uuid" NOT NULL,
     "updated_at" timestamp with time zone,

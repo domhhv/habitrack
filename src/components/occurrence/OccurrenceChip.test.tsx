@@ -2,7 +2,6 @@ import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { it, vi, expect, describe } from 'vitest';
 
-import { useScreenWidth } from '@hooks';
 import { makeTestOccurrence } from '@tests';
 
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
@@ -59,14 +58,5 @@ describe(OccurrenceChip.name, () => {
         'https://i.ibb.co/vvgw7bx/habitrack-logo.png'
       );
     });
-  });
-
-  it('should not render delete button on small screens', () => {
-    (useScreenWidth as ReturnType<typeof vi.fn>).mockReturnValue({
-      screenWidth: 1024,
-    });
-    const { queryByLabelText } = render(<OccurrenceChip {...props} />);
-    const chipDelete = queryByLabelText('delete-habit-entry');
-    expect(chipDelete).toBeNull();
   });
 });

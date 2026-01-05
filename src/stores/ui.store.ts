@@ -1,9 +1,16 @@
 import type { CalendarDate } from '@internationalized/date';
 import { today, getLocalTimeZone } from '@internationalized/date';
+import type { RequireAtLeastOne, RequireExactlyOne } from 'type-fest';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-import type { NotePeriodKind } from '@models';
+import type { Occurrence, NotePeriodKind } from '@models';
+
+type OccurrenceDrawerOptions = {
+  dayOccurrences: Occurrence[];
+  habitOccurrences: Occurrence[];
+  newOccurrenceDate: CalendarDate;
+};
 
 type UiState = {
   noteDrawer: {
@@ -19,6 +26,15 @@ type UiState = {
     ) => void;
     setPeriodDate: (date: CalendarDate) => void;
     setPeriodKind: (kind: NonNullable<NotePeriodKind>) => void;
+  };
+  occurrenceDrawer: {
+    isOpen: boolean;
+  } & RequireAtLeastOne<OccurrenceDrawerOptions>;
+  occurrenceDrawerActions: {
+    closeOccurrenceDrawer: () => void;
+    openOccurrenceDrawer: (
+      opts: RequireExactlyOne<OccurrenceDrawerOptions>
+    ) => void;
   };
 };
 
@@ -59,9 +75,40 @@ const useUiStore = create<UiState>()(
           });
         },
       },
+      occurrenceDrawer: {
+        isOpen: false,
+        newOccurrenceDate: today(getLocalTimeZone()),
+      },
+      occurrenceDrawerActions: {
+        closeOccurrenceDrawer: () => {
+          set((state) => {
+            state.occurrenceDrawer.isOpen = false;
+            state.occurrenceDrawer.newOccurrenceDate =
+              today(getLocalTimeZone());
+          });
+        },
+        openOccurrenceDrawer: (opts) => {
+          set((state) => {
+            state.occurrenceDrawer.isOpen = true;
+            Object.assign(state.occurrenceDrawer, opts);
+          });
+        },
+      },
     };
   })
 );
+
+export const useOccurrenceDrawerState = () => {
+  return useUiStore((state) => {
+    return state.occurrenceDrawer;
+  });
+};
+
+export const useOccurrenceDrawerActions = () => {
+  return useUiStore((state) => {
+    return state.occurrenceDrawerActions;
+  });
+};
 
 export const useNoteDrawerState = () => {
   return useUiStore((state) => {

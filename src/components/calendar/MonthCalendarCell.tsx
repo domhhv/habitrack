@@ -60,9 +60,25 @@ const MonthCalendarCell = ({
     });
   }, [dayNotes, date]);
 
-  const groupedOccurrences = groupBy(occurrences, (o) => {
-    return o.habitId;
-  });
+  const groupedOccurrences = groupBy(
+    occurrences.toSorted((l, r) => {
+      const lName = l.habit.name.toLowerCase();
+      const rName = r.habit.name.toLowerCase();
+
+      if (lName < rName) {
+        return -1;
+      }
+
+      if (lName > rName) {
+        return 1;
+      }
+
+      return 0;
+    }),
+    (o) => {
+      return o.habitId;
+    }
+  );
 
   const cellRootClassName = cn(
     'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 focus:border-neutral-100 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-36',
@@ -151,10 +167,7 @@ const MonthCalendarCell = ({
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <OccurrenceChip
-                    timeZone={state.timeZone}
-                    occurrences={habitOccurrences}
-                  />
+                  <OccurrenceChip occurrences={habitOccurrences} />
                 </motion.div>
               );
             }
