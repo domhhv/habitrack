@@ -1,4 +1,9 @@
 import { cn, Badge, Tooltip } from '@heroui/react';
+import {
+  parseAbsolute,
+  toCalendarDate,
+  getLocalTimeZone,
+} from '@internationalized/date';
 import { NoteIcon, CameraIcon } from '@phosphor-icons/react';
 import React from 'react';
 
@@ -10,56 +15,80 @@ import { useOccurrenceDrawerActions } from '@stores';
 
 export type OccurrenceChipProps = {
   colorOverride?: string;
+  hasCounter?: boolean;
+  hasMargin?: boolean;
+  hasTooltip?: boolean;
+  isHabitNameShown?: boolean;
   isInteractable?: boolean;
   occurrences: Occurrence[];
 };
 
 const OccurrenceChip = ({
   colorOverride,
+  hasCounter = true,
+  hasMargin = true,
+  hasTooltip = true,
+  isHabitNameShown = false,
   isInteractable = true,
   occurrences,
 }: OccurrenceChipProps) => {
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const [occurrence] = occurrences;
-  const { habit } = occurrence;
+  const { habit, habitId } = occurrence;
   const { iconPath, name: habitName, trait } = habit || {};
   const { color: traitColor } = trait || {};
   const { screenWidth } = useScreenWidth();
+  const timeZone = getLocalTimeZone();
 
   let chip = (
-    <Tooltip
-      radius="sm"
-      closeDelay={0}
-      content={habitName}
-      classNames={{
-        content: 'px-2 py-1.5',
-      }}
+    <div
+      {...(isInteractable && {
+        role: 'button',
+        onClick: () => {
+          openOccurrenceDrawer({
+            habitIdToDisplay: habitId,
+            dayToDisplay: toCalendarDate(
+              parseAbsolute(
+                new Date(occurrence.timestamp).toISOString(),
+                timeZone
+              )
+            ),
+          });
+        },
+      })}
+      style={{ borderColor: colorOverride || traitColor }}
+      className={cn(
+        'relative rounded-md border-2 bg-white p-1.5 dark:bg-black',
+        isHabitNameShown && 'flex items-center gap-2 px-1 py-0.5',
+        hasMargin && 'md:mr-1 md:mb-1',
+        screenWidth < 400 && 'p-1'
+      )}
     >
-      <div
-        role="button"
-        style={{ borderColor: colorOverride || traitColor }}
-        className={cn(
-          'relative mb-0 min-w-8 rounded-md border-2 bg-white p-1.5 md:mr-1 md:mb-1 dark:bg-black',
-          screenWidth < 400 && 'p-1'
-        )}
-        onClick={() => {
-          if (isInteractable) {
-            openOccurrenceDrawer({
-              habitOccurrences: occurrences,
-            });
-          }
-        }}
-      >
-        <img
-          alt={`${habitName} icon`}
-          src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
-          className={cn('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
-        />
-      </div>
-    </Tooltip>
+      <img
+        alt={`${habitName} icon`}
+        src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
+        className={cn('h-4 w-4', screenWidth < 400 && 'h-3 w-3')}
+      />
+      {isHabitNameShown && <span>{habitName}</span>}
+    </div>
   );
 
-  if (occurrences.length > 1) {
+  if (isInteractable || hasTooltip) {
+    chip = (
+      <Tooltip
+        radius="sm"
+        closeDelay={0}
+        content={habitName}
+        classNames={{
+          content: 'px-2 py-1.5',
+        }}
+      >
+        {chip}
+      </Tooltip>
+    );
+  }
+
+  if (hasCounter && occurrences.length > 1) {
     chip = (
       <Badge
         size="sm"

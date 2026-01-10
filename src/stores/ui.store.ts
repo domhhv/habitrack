@@ -1,15 +1,15 @@
 import type { CalendarDate } from '@internationalized/date';
 import { today, getLocalTimeZone } from '@internationalized/date';
-import type { RequireAtLeastOne, RequireExactlyOne } from 'type-fest';
+import type { RequireAtLeastOne } from 'type-fest';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-import type { Occurrence, NotePeriodKind } from '@models';
+import type { Habit, NotePeriodKind } from '@models';
 
 type OccurrenceDrawerOptions = {
-  dayOccurrences: Occurrence[];
-  habitOccurrences: Occurrence[];
-  newOccurrenceDate: CalendarDate;
+  dayToDisplay: CalendarDate | null;
+  dayToLog: CalendarDate | null;
+  habitIdToDisplay: Habit['id'] | null;
 };
 
 type UiState = {
@@ -33,7 +33,7 @@ type UiState = {
   occurrenceDrawerActions: {
     closeOccurrenceDrawer: () => void;
     openOccurrenceDrawer: (
-      opts: RequireExactlyOne<OccurrenceDrawerOptions>
+      opts: RequireAtLeastOne<OccurrenceDrawerOptions>
     ) => void;
   };
 };
@@ -76,17 +76,18 @@ const useUiStore = create<UiState>()(
         },
       },
       occurrenceDrawer: {
+        dayToDisplay: null,
+        dayToLog: null,
+        habitIdToDisplay: null,
         isOpen: false,
-        newOccurrenceDate: today(getLocalTimeZone()),
       },
       occurrenceDrawerActions: {
         closeOccurrenceDrawer: () => {
           set((state) => {
             state.occurrenceDrawer.isOpen = false;
-            state.occurrenceDrawer.dayOccurrences = undefined;
-            state.occurrenceDrawer.habitOccurrences = undefined;
-            state.occurrenceDrawer.newOccurrenceDate =
-              today(getLocalTimeZone());
+            state.occurrenceDrawer.dayToDisplay = null;
+            state.occurrenceDrawer.habitIdToDisplay = null;
+            state.occurrenceDrawer.dayToLog = null;
           });
         },
         openOccurrenceDrawer: (opts) => {

@@ -4,6 +4,7 @@ import { isToday } from '@internationalized/date';
 import {
   NoteIcon,
   NoteBlankIcon,
+  SquareHalfIcon,
   CalendarPlusIcon,
   CalendarBlankIcon,
 } from '@phosphor-icons/react';
@@ -16,7 +17,11 @@ import type { CalendarState } from 'react-stately';
 import { OccurrenceChip } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
-import { useDayNotes, useNoteDrawerActions } from '@stores';
+import {
+  useDayNotes,
+  useNoteDrawerActions,
+  useOccurrenceDrawerActions,
+} from '@stores';
 import { toSqlDate } from '@utils';
 
 export type CellPosition =
@@ -43,6 +48,7 @@ const MonthCalendarCell = ({
 }: CalendarCellProps) => {
   const dayNotes = useDayNotes();
   const { user } = useUser();
+  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { isDesktop, isMobile, screenWidth } = useScreenWidth();
   const calendarCellRef = React.useRef<HTMLDivElement | null>(null);
@@ -106,6 +112,23 @@ const MonthCalendarCell = ({
         <div className="flex items-center justify-between gap-2">
           {!isMobile && (
             <div className="flex items-center gap-1">
+              <Tooltip closeDelay={0} content="Show habit log">
+                <Button
+                  radius="sm"
+                  variant="light"
+                  color="secondary"
+                  isDisabled={!user}
+                  aria-label="Log habit"
+                  className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+                  onPress={() => {
+                    openOccurrenceDrawer({
+                      dayToDisplay: date,
+                    });
+                  }}
+                >
+                  <SquareHalfIcon weight="bold" size={isDesktop ? 18 : 14} />
+                </Button>
+              </Tooltip>
               <Tooltip closeDelay={0} content="Log habit">
                 <Button
                   radius="sm"
