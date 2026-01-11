@@ -9,6 +9,7 @@ export const signUp = async (email: string, password: string, name: string) => {
     options: {
       emailRedirectTo: `${window.location.origin}/account?emailConfirmed=true`,
       data: {
+        firstDayOfWeek: 0,
         name,
       },
     },
@@ -38,23 +39,34 @@ export const signOut = async () => {
   }
 };
 
-export const updateUser = async (
-  email: string,
-  password: string,
-  name: string
-) => {
+export const updateUser = async (opts: {
+  email?: string;
+  firstDayOfWeek?: number;
+  name?: string;
+  password?: string;
+}) => {
   const userAttributes: UserAttributes = {};
 
-  if (email) {
-    userAttributes.email = email;
+  if (opts.email) {
+    userAttributes.email = opts.email;
   }
 
-  if (password) {
-    userAttributes.password = password;
+  if (opts.password) {
+    userAttributes.password = opts.password;
   }
 
-  if (name) {
-    userAttributes.data = { name };
+  const userMetadata: Record<string, string | number> = {};
+
+  if (opts.name) {
+    userMetadata.name = opts.name;
+  }
+
+  if (typeof opts.firstDayOfWeek === 'number') {
+    userMetadata.firstDayOfWeek = opts.firstDayOfWeek;
+  }
+
+  if (Object.keys(userMetadata).length > 0) {
+    userAttributes.data = userMetadata;
   }
 
   const { error } = await supabaseClient.auth.updateUser(userAttributes);

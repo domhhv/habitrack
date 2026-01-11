@@ -19,13 +19,19 @@ import type { CellPosition } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
 
 type CalendarGridProps = {
+  firstDayOfWeek: 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
   occurrences: Occurrence[];
   state: CalendarState;
 };
 
-const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
+const MonthCalendarGrid = ({
+  firstDayOfWeek,
+  occurrences,
+  state,
+}: CalendarGridProps) => {
   const { gridProps, weekDays } = useCalendarGrid(
     {
+      firstDayOfWeek,
       weekdayStyle: 'short',
     },
     state
