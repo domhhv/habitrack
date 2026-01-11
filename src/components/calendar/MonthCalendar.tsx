@@ -25,10 +25,11 @@ import MonthCalendarGrid from './MonthCalendarGrid';
 import MonthCalendarHeader from './MonthCalendarHeader';
 
 type MonthCalendarProps = {
+  firstDayOfWeek: 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
   state: CalendarState;
 };
 
-const MonthCalendar = ({ state }: MonthCalendarProps) => {
+const MonthCalendar = ({ firstDayOfWeek, state }: MonthCalendarProps) => {
   const occurrences = useOccurrences();
   const habits = useHabits();
   const traits = useTraits();
@@ -114,6 +115,7 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
       />
       <MonthCalendarGrid
         state={state}
+        firstDayOfWeek={firstDayOfWeek}
         occurrences={occurrences.filter((occurrence) => {
           return (
             filters.habitIds.has(occurrence.habitId.toString()) &&

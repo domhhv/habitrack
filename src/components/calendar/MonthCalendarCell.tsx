@@ -99,7 +99,8 @@ const MonthCalendarCell = ({
   const cellHeaderClassName = cn(
     'flex w-full items-center justify-between border-b border-neutral-500 pl-1.5 pr-0.5 py-0.5 text-sm dark:border-neutral-400',
     isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600',
-    isTodayCell ? 'w-full self-auto md:self-start' : 'w-full'
+    isTodayCell ? 'w-full self-auto md:self-start' : 'w-full',
+    isMobile && 'pl-1'
   );
 
   return (
@@ -108,9 +109,14 @@ const MonthCalendarCell = ({
         className={cellHeaderClassName}
         onClick={isMobile ? onNewOccurrenceClick : undefined}
       >
-        <p className="font-bold">{formattedDate}</p>
+        <p className={cn('font-bold', isMobile && 'text-sm')}>
+          {formattedDate}
+        </p>
         <div className="flex items-center justify-between gap-2">
-          {!isMobile && (
+          {isMobile && screenWidth > 360 && hasNote && (
+            <NoteIcon size={12} weight="bold" />
+          )}
+          {isDesktop && (
             <div className="flex items-center gap-1">
               <Tooltip closeDelay={0} content="Show habit log">
                 <Button
@@ -169,7 +175,7 @@ const MonthCalendarCell = ({
               </Tooltip>
             </div>
           )}
-          {isTodayCell && screenWidth > 380 && (
+          {isTodayCell && !isMobile && (
             <CalendarBlankIcon weight="fill" size={isMobile ? 18 : 20} />
           )}
         </div>
