@@ -1,19 +1,18 @@
+import { Drawer, DrawerBody, DrawerHeader, DrawerContent } from '@heroui/react';
 import {
-  cn,
-  Drawer,
-  DrawerBody,
-  DrawerHeader,
-  ScrollShadow,
-  DrawerContent,
-} from '@heroui/react';
-import { getLocalTimeZone } from '@internationalized/date';
+  today,
+  isSameDay,
+  parseAbsolute,
+  toCalendarDate,
+  getLocalTimeZone,
+} from '@internationalized/date';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
 import { useScreenWidth } from '@hooks';
-import { StorageBuckets, type Occurrence } from '@models';
-import { getPublicUrl } from '@services';
+import { type Occurrence } from '@models';
 import {
+  useOccurrences,
   useOccurrenceActions,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
@@ -21,18 +20,19 @@ import {
 import { handleAsyncAction } from '@utils';
 
 import { OccurrenceDialog } from './index';
-import OccurrenceListItem from './OccurrenceListItem';
+import OccurrenceChip from './OccurrenceChip';
+import OccurrenceList from './OccurrenceList';
 
 const OccurrenceDrawer = () => {
   const timeZone = getLocalTimeZone();
+  const occurrences = useOccurrences();
   const [isOccurrenceDialogOpen, setIsOccurrenceDialogOpen] =
     React.useState(false);
   const [occurrenceToEdit, setOccurrenceToEdit] =
     React.useState<Occurrence | null>(null);
   const { removeOccurrence } = useOccurrenceActions();
   const { isMobile } = useScreenWidth();
-  const { dayOccurrences, habitOccurrences, isOpen } =
-    useOccurrenceDrawerState();
+  const { dayToDisplay, habitIdToDisplay, isOpen } = useOccurrenceDrawerState();
   const { closeOccurrenceDrawer } = useOccurrenceDrawerActions();
   const dateFormatter = useDateFormatter({
     day: 'numeric',
@@ -41,17 +41,26 @@ const OccurrenceDrawer = () => {
     year: 'numeric',
   });
   const occurrencesData = React.useMemo(() => {
-    const occurrences = dayOccurrences || habitOccurrences;
-
-    if (!occurrences) {
+    if (!dayToDisplay && !habitIdToDisplay) {
       return null;
     }
 
-    const occurrencesWithTime = occurrences.filter((o) => {
+    const filteredOccurrences = occurrences.filter((o) => {
+      const occurrenceDate = toCalendarDate(
+        parseAbsolute(new Date(o.timestamp).toISOString(), timeZone)
+      );
+
+      return (
+        isSameDay(occurrenceDate, dayToDisplay || today(timeZone)) &&
+        (habitIdToDisplay ? o.habitId === habitIdToDisplay : true)
+      );
+    });
+
+    const occurrencesWithTime = filteredOccurrences.filter((o) => {
       return o.hasSpecificTime;
     });
 
-    const occurrencesWithoutTime = occurrences.filter((o) => {
+    const occurrencesWithoutTime = filteredOccurrences.filter((o) => {
       return !o.hasSpecificTime;
     });
 
@@ -62,15 +71,15 @@ const OccurrenceDrawer = () => {
       hasOccurrencesWithTime && hasOccurrencesWithoutTime;
 
     return {
-      dayOccurrences,
-      habitOccurrences,
+      dayOccurrences: habitIdToDisplay ? null : filteredOccurrences,
+      habitOccurrences: habitIdToDisplay ? filteredOccurrences : null,
       hasOccurrencesWithAndWithoutTime,
       hasOccurrencesWithoutTime,
       hasOccurrencesWithTime,
       occurrencesWithoutTime,
       occurrencesWithTime,
     };
-  }, [habitOccurrences, dayOccurrences]);
+  }, [dayToDisplay, habitIdToDisplay, occurrences, timeZone]);
 
   const closeOccurrenceDialog = () => {
     setOccurrenceToEdit(null);
@@ -82,8 +91,8 @@ const OccurrenceDrawer = () => {
     setIsOccurrenceDialogOpen(true);
   };
 
-  const dispatchOccurrenceRemoval = async (occurrence: Occurrence) => {
-    handleAsyncAction(removeOccurrence(occurrence), 'remove_occurrence');
+  const dispatchOccurrenceRemoval = (occurrence: Occurrence) => {
+    void handleAsyncAction(removeOccurrence(occurrence), 'remove_occurrence');
   };
 
   const changeOpen = (isOpen: boolean) => {
@@ -98,32 +107,30 @@ const OccurrenceDrawer = () => {
     }
 
     if (occurrencesData.habitOccurrences?.length) {
-      const [
-        {
-          timestamp,
-          habit: {
-            iconPath,
-            name,
-            trait: { color },
-          },
-        },
-      ] = occurrencesData.habitOccurrences;
+      const [{ habit, timestamp }] = occurrencesData.habitOccurrences;
 
       return (
         <div className="flex items-center gap-2">
-          <div
-            style={{ borderColor: color }}
-            className="relative min-w-8 rounded-md border-2 bg-white p-1.5 dark:bg-black"
-          >
-            <img
-              className="h-4 w-4"
-              alt={`${name} icon`}
-              src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
-            />
-          </div>
+          <OccurrenceChip
+            hasMargin={false}
+            hasCounter={false}
+            hasTooltip={false}
+            isClickable={false}
+            occurrences={occurrencesData.habitOccurrences}
+          />
           <p>
-            {name} | {dateFormatter.format(new Date(timestamp))}
+            {habit.name} | {dateFormatter.format(new Date(timestamp))}
           </p>
+        </div>
+      );
+    }
+
+    if (occurrencesData.dayOccurrences?.length) {
+      const [{ timestamp }] = occurrencesData.dayOccurrences;
+
+      return (
+        <div className="flex items-center gap-2">
+          <p>Habits Log | {dateFormatter.format(new Date(timestamp))}</p>
         </div>
       );
     }
@@ -140,70 +147,6 @@ const OccurrenceDrawer = () => {
             </p>
           )}
         </>
-      );
-    }
-  };
-
-  const getBodyContent = () => {
-    if (occurrencesData) {
-      return (
-        <ScrollShadow
-          className={cn(
-            'max-h-full',
-            occurrencesData.hasOccurrencesWithAndWithoutTime && 'space-y-4'
-          )}
-        >
-          {occurrencesData.hasOccurrencesWithoutTime && (
-            <div>
-              {occurrencesData.hasOccurrencesWithAndWithoutTime && (
-                <p className="mb-1">Without time</p>
-              )}
-              <ol className="list-decimal pl-6">
-                {occurrencesData.occurrencesWithoutTime.map((o) => {
-                  return (
-                    <OccurrenceListItem
-                      key={o.id}
-                      occurrence={o}
-                      onEdit={() => {
-                        openOccurrenceDialog(o);
-                      }}
-                      onRemove={() => {
-                        void dispatchOccurrenceRemoval(o);
-                      }}
-                    />
-                  );
-                })}
-              </ol>
-            </div>
-          )}
-          {occurrencesData.hasOccurrencesWithTime && (
-            <div>
-              {occurrencesData.hasOccurrencesWithAndWithoutTime && (
-                <p className="mb-1">With time</p>
-              )}
-              <ul>
-                {occurrencesData.occurrencesWithTime
-                  .toSorted((a, b) => {
-                    return a.timestamp - b.timestamp;
-                  })
-                  .map((o) => {
-                    return (
-                      <OccurrenceListItem
-                        key={o.id}
-                        occurrence={o}
-                        onEdit={() => {
-                          openOccurrenceDialog(o);
-                        }}
-                        onRemove={() => {
-                          void dispatchOccurrenceRemoval(o);
-                        }}
-                      />
-                    );
-                  })}
-              </ul>
-            </div>
-          )}
-        </ScrollShadow>
       );
     }
   };
@@ -226,7 +169,24 @@ const OccurrenceDrawer = () => {
       >
         <DrawerContent>
           <DrawerHeader className="flex-col">{getHeaderContent()}</DrawerHeader>
-          <DrawerBody>{getBodyContent()}</DrawerBody>
+          <DrawerBody>
+            {occurrencesData && (
+              <OccurrenceList
+                onEdit={openOccurrenceDialog}
+                onRemove={dispatchOccurrenceRemoval}
+                hasChips={!!occurrencesData.dayOccurrences}
+                occurrencesWithTime={occurrencesData.occurrencesWithTime}
+                occurrencesWithoutTime={occurrencesData.occurrencesWithoutTime}
+                hasOccurrencesWithTime={occurrencesData.hasOccurrencesWithTime}
+                hasOccurrencesWithoutTime={
+                  occurrencesData.hasOccurrencesWithoutTime
+                }
+                hasOccurrencesWithAndWithoutTime={
+                  occurrencesData.hasOccurrencesWithAndWithoutTime
+                }
+              />
+            )}
+          </DrawerBody>
         </DrawerContent>
       </Drawer>
     </>

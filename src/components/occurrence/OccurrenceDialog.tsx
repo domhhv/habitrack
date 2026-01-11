@@ -388,6 +388,7 @@ const OccurrenceDialog = ({
   const handleClose = async () => {
     setSelectedHabitId('');
     clearNote();
+    setRepeat(1);
     setUploadedFiles([]);
     setHasSpecificTime(true);
     onClose();
