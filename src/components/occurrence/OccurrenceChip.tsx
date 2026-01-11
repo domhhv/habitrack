@@ -7,7 +7,7 @@ import {
 import { NoteIcon, CameraIcon } from '@phosphor-icons/react';
 import React from 'react';
 
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useKeyboardShortcut } from '@hooks';
 import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
@@ -18,8 +18,8 @@ export type OccurrenceChipProps = {
   hasCounter?: boolean;
   hasMargin?: boolean;
   hasTooltip?: boolean;
+  isClickable?: boolean;
   isHabitNameShown?: boolean;
-  isInteractable?: boolean;
   occurrences: Occurrence[];
 };
 
@@ -28,8 +28,8 @@ const OccurrenceChip = ({
   hasCounter = true,
   hasMargin = true,
   hasTooltip = true,
+  isClickable = true,
   isHabitNameShown = false,
-  isInteractable = true,
   occurrences,
 }: OccurrenceChipProps) => {
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
@@ -39,24 +39,37 @@ const OccurrenceChip = ({
   const { color: traitColor } = trait || {};
   const { screenWidth } = useScreenWidth();
   const timeZone = getLocalTimeZone();
+  const [isFocused, setIsFocused] = React.useState(false);
+
+  const handleClick = () => {
+    openOccurrenceDrawer({
+      habitIdToDisplay: habitId,
+      dayToDisplay: toCalendarDate(
+        parseAbsolute(new Date(occurrence.timestamp).toISOString(), timeZone)
+      ),
+    });
+  };
+
+  useKeyboardShortcut(['Enter', ' '], () => {
+    if (isClickable && isFocused) {
+      handleClick();
+    }
+  });
 
   let chip = (
     <div
-      {...(isInteractable && {
+      {...(isClickable && {
+        onClick: handleClick,
         role: 'button',
-        onClick: () => {
-          openOccurrenceDrawer({
-            habitIdToDisplay: habitId,
-            dayToDisplay: toCalendarDate(
-              parseAbsolute(
-                new Date(occurrence.timestamp).toISOString(),
-                timeZone
-              )
-            ),
-          });
-        },
+        tabIndex: 0,
       })}
       style={{ borderColor: colorOverride || traitColor }}
+      onFocus={() => {
+        return setIsFocused(true);
+      }}
+      onBlur={() => {
+        return setIsFocused(false);
+      }}
       className={cn(
         'relative rounded-md border-2 bg-white p-1.5 dark:bg-black',
         isHabitNameShown && 'flex items-center gap-2 px-1 py-0.5',
@@ -73,7 +86,7 @@ const OccurrenceChip = ({
     </div>
   );
 
-  if (isInteractable || hasTooltip) {
+  if (hasTooltip) {
     chip = (
       <Tooltip
         radius="sm"

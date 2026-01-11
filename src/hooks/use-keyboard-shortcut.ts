@@ -6,7 +6,7 @@ type Options = {
 };
 
 const useKeyboardShortcut = (
-  key: string,
+  key: string | string[],
   callback: () => void,
   options: Options = {}
 ) => {
@@ -34,9 +34,15 @@ const useKeyboardShortcut = (
         }
       }
 
-      if (event.key.toLowerCase() === key.toLowerCase()) {
-        event.preventDefault();
-        callbackRef.current();
+      const keys = Array.isArray(key) ? key : [key];
+
+      for (const k of keys) {
+        if (event.key.toLowerCase() === k.toLowerCase()) {
+          event.preventDefault();
+          callbackRef.current();
+
+          return;
+        }
       }
     };
 

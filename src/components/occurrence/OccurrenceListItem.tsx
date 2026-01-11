@@ -67,7 +67,7 @@ const OccurrenceListItem = ({
                   hasMargin={false}
                   hasCounter={false}
                   hasTooltip={false}
-                  isInteractable={false}
+                  isClickable={false}
                   isHabitNameShown={true}
                   occurrences={[occurrence]}
                 />

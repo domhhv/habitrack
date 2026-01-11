@@ -91,8 +91,8 @@ const OccurrenceDrawer = () => {
     setIsOccurrenceDialogOpen(true);
   };
 
-  const dispatchOccurrenceRemoval = async (occurrence: Occurrence) => {
-    handleAsyncAction(removeOccurrence(occurrence), 'remove_occurrence');
+  const dispatchOccurrenceRemoval = (occurrence: Occurrence) => {
+    void handleAsyncAction(removeOccurrence(occurrence), 'remove_occurrence');
   };
 
   const changeOpen = (isOpen: boolean) => {
@@ -115,7 +115,7 @@ const OccurrenceDrawer = () => {
             hasMargin={false}
             hasCounter={false}
             hasTooltip={false}
-            isInteractable={false}
+            isClickable={false}
             occurrences={occurrencesData.habitOccurrences}
           />
           <p>

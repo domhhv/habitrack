@@ -118,7 +118,7 @@ const MonthCalendarCell = ({
                   variant="light"
                   color="secondary"
                   isDisabled={!user}
-                  aria-label="Log habit"
+                  aria-label="Show habit log"
                   className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
                   onPress={() => {
                     openOccurrenceDrawer({

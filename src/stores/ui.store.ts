@@ -7,9 +7,9 @@ import { immer } from 'zustand/middleware/immer';
 import type { Habit, NotePeriodKind } from '@models';
 
 type OccurrenceDrawerOptions = {
-  dayToDisplay: CalendarDate | null;
-  dayToLog: CalendarDate | null;
-  habitIdToDisplay: Habit['id'] | null;
+  dayToDisplay?: CalendarDate;
+  dayToLog?: CalendarDate;
+  habitIdToDisplay?: Habit['id'];
 };
 
 type UiState = {
@@ -29,11 +29,14 @@ type UiState = {
   };
   occurrenceDrawer: {
     isOpen: boolean;
-  } & RequireAtLeastOne<OccurrenceDrawerOptions>;
+  } & RequireAtLeastOne<OccurrenceDrawerOptions, 'dayToLog' | 'dayToDisplay'>;
   occurrenceDrawerActions: {
     closeOccurrenceDrawer: () => void;
     openOccurrenceDrawer: (
-      opts: RequireAtLeastOne<OccurrenceDrawerOptions>
+      opts: RequireAtLeastOne<
+        OccurrenceDrawerOptions,
+        'dayToLog' | 'dayToDisplay'
+      >
     ) => void;
   };
 };
@@ -76,23 +79,22 @@ const useUiStore = create<UiState>()(
         },
       },
       occurrenceDrawer: {
-        dayToDisplay: null,
-        dayToLog: null,
-        habitIdToDisplay: null,
+        dayToLog: today(getLocalTimeZone()),
         isOpen: false,
       },
       occurrenceDrawerActions: {
         closeOccurrenceDrawer: () => {
           set((state) => {
             state.occurrenceDrawer.isOpen = false;
-            state.occurrenceDrawer.dayToDisplay = null;
-            state.occurrenceDrawer.habitIdToDisplay = null;
-            state.occurrenceDrawer.dayToLog = null;
+            state.occurrenceDrawer.dayToLog = today(getLocalTimeZone());
           });
         },
         openOccurrenceDrawer: (opts) => {
           set((state) => {
             state.occurrenceDrawer.isOpen = true;
+            state.occurrenceDrawer.dayToDisplay = undefined;
+            state.occurrenceDrawer.habitIdToDisplay = '';
+            state.occurrenceDrawer.dayToLog = undefined;
             Object.assign(state.occurrenceDrawer, opts);
           });
         },
