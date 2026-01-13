@@ -26,6 +26,7 @@ vi.mock('@stores', () => {
   return {
     useHabits: vi.fn(),
     useTraits: vi.fn().mockReturnValue({}),
+    useUser: vi.fn().mockReturnValue({}),
     useHabitActions: vi.fn().mockReturnValue({
       removeHabit: vi.fn(),
       updateHabit: vi.fn(),

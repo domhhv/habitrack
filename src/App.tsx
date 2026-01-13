@@ -3,6 +3,7 @@ import React from 'react';
 import { Route, Routes, Navigate } from 'react-router';
 
 import { AppHeader, NoteDrawer, OccurrenceDrawer } from '@components';
+import { useSession } from '@hooks';
 import {
   NotesPage,
   HabitsPage,
@@ -14,6 +15,8 @@ import {
 import Providers from './components/Providers';
 
 const App = () => {
+  useSession();
+
   React.useEffect(() => {
     document.getElementById('root')?.classList.add('initialized');
   }, []);

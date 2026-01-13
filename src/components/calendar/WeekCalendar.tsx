@@ -1,7 +1,9 @@
-import { cn, Button, Tooltip, ScrollShadow } from '@heroui/react';
+import { cn, Button, Tooltip, Skeleton, ScrollShadow } from '@heroui/react';
 import {
   isToday,
   fromDate,
+  endOfWeek,
+  startOfWeek,
   CalendarDate,
   createCalendar,
   toCalendarDate,
@@ -22,7 +24,7 @@ import { Link, useParams, useNavigate } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useDayNotes,
   useOccurrences,
@@ -43,8 +45,11 @@ const WeekCalendar = () => {
   const { locale } = useLocale();
   const params = useParams();
   const navigate = useNavigate();
+  const { firstDayOfWeek, firstDayOfWeekIndex, isLoadingFirstDayOfWeek } =
+    useFirstDayOfWeek();
   const state = useCalendarState({
     createCalendar,
+    firstDayOfWeek,
     locale,
     visibleDuration: { weeks: 1 },
     defaultValue:
@@ -52,9 +57,10 @@ const WeekCalendar = () => {
         ? new CalendarDate(+params.year, +params.month, +params.day)
         : undefined,
   });
-  useCalendar({}, state);
+  useCalendar({ firstDayOfWeek }, state);
   const { gridProps, weekDays } = useCalendarGrid(
     {
+      firstDayOfWeek,
       weekdayStyle: isDesktop ? 'long' : 'short',
     },
     state
@@ -79,14 +85,21 @@ const WeekCalendar = () => {
       state.setFocusedDate(paramsDate);
     }
 
-    if (fetchedWeekYear === state.focusedDate.toString()) {
+    if (
+      isLoadingFirstDayOfWeek ||
+      fetchedWeekYear === state.focusedDate.toString()
+    ) {
       return;
     }
 
     setFetchedWeekYear(state.focusedDate.toString());
 
-    const rangeStart = state.visibleRange.start;
-    const rangeEnd = toCalendarDateTime(state.visibleRange.end).set({
+    const rangeStart = startOfWeek(paramsDate, locale, firstDayOfWeek);
+    const rangeEnd = endOfWeek(
+      toCalendarDateTime(paramsDate),
+      locale,
+      firstDayOfWeek
+    ).set({
       hour: 23,
       millisecond: 999,
       minute: 59,
@@ -99,12 +112,16 @@ const WeekCalendar = () => {
     ]);
     void fetchNotes([rangeStart, toCalendarDate(rangeEnd)]);
   }, [
+    firstDayOfWeek,
     fetchNotes,
     state.timeZone,
     fetchedWeekYear,
     fetchOccurrences,
     state,
+    state.visibleRange.start,
     params,
+    isLoadingFirstDayOfWeek,
+    locale,
   ]);
 
   const hasNote = React.useCallback(
@@ -118,21 +135,21 @@ const WeekCalendar = () => {
 
   const [previousWeekPath, nextWeekPath] = React.useMemo(() => {
     const previousWeek = state.visibleRange.start
-      .subtract({ weeks: 1 })
+      .add({ days: firstDayOfWeekIndex, weeks: -1 })
       .toString()
       .split('-')
       .map(Number)
       .join('/');
 
     const nextWeek = state.visibleRange.start
-      .add({ weeks: 1 })
+      .add({ days: firstDayOfWeekIndex, weeks: 1 })
       .toString()
       .split('-')
       .map(Number)
       .join('/');
 
     return [`/calendar/week/${previousWeek}`, `/calendar/week/${nextWeek}`];
-  }, [state.visibleRange.start]);
+  }, [state.visibleRange.start, firstDayOfWeekIndex]);
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -215,102 +232,109 @@ const WeekCalendar = () => {
         {...gridProps}
         className="flex min-w-lg justify-around px-8 py-2 lg:px-16 lg:py-4"
       >
-        {state.getDatesInWeek(0).map((day, dayIndex) => {
-          if (!day) {
-            return null;
-          }
+        {state
+          .getDatesInWeek(firstDayOfWeek === 'sun' ? 0 : 1)
+          .map((day, dayIndex) => {
+            if (!day) {
+              return null;
+            }
 
-          const isNoteAdded = hasNote(day);
+            const isNoteAdded = hasNote(day);
 
-          return (
-            <div key={dayIndex} className="group flex flex-1 flex-col gap-4">
-              <div
-                className={cn(
-                  'space-y-2 text-center text-stone-600 dark:text-stone-300',
-                  isToday(day, state.timeZone) &&
-                    'text-primary-600 dark:text-primary-400 font-bold'
-                )}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <h3>{capitalize(weekDays[dayIndex])}</h3>
-                  <Tooltip
-                    closeDelay={0}
-                    content={isNoteAdded ? 'Edit note' : 'Add note'}
-                  >
-                    <Button
-                      radius="sm"
-                      variant="light"
-                      color={isNoteAdded ? 'primary' : 'secondary'}
-                      aria-label={isNoteAdded ? 'Edit note' : 'Add note'}
-                      onPress={() => {
-                        openNoteDrawer(day, 'day');
-                      }}
-                      className={cn(
-                        'h-5 w-5 min-w-fit px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                        isNoteAdded && 'opacity-100'
-                      )}
+            return (
+              <div key={dayIndex} className="group flex flex-1 flex-col gap-4">
+                <div
+                  className={cn(
+                    'space-y-2 text-center text-stone-600 dark:text-stone-300',
+                    isToday(day, state.timeZone) &&
+                      'text-primary-600 dark:text-primary-400 font-bold'
+                  )}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Skeleton
+                      isLoaded={!isLoadingFirstDayOfWeek}
+                      className="h-6 w-fit rounded-lg text-center"
                     >
-                      {isNoteAdded ? (
-                        <NoteIcon weight="bold" size={isDesktop ? 18 : 14} />
-                      ) : (
-                        <NoteBlankIcon
-                          weight="bold"
-                          size={isDesktop ? 18 : 14}
-                        />
-                      )}
-                    </Button>
-                  </Tooltip>
-                </div>
-                <h6>{day.day}</h6>
-              </div>
-              <div
-                className={cn(
-                  'flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600',
-                  isToday(day, state.timeZone) &&
-                    'to-background-100 dark:to-background-500 bg-linear-to-b from-transparent from-0% to-[4px]'
-                )}
-              >
-                {[...Array(24).keys()].map((hour) => {
-                  return (
-                    <div
-                      key={`${dayIndex}-${hour}`}
-                      className="group/minutes-cell relative flex gap-4"
+                      <h3>{capitalize(weekDays[dayIndex])}</h3>
+                    </Skeleton>
+                    <Tooltip
+                      closeDelay={0}
+                      content={isNoteAdded ? 'Edit note' : 'Add note'}
                     >
-                      {dayIndex === 0 && (
-                        <p className="absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:text-base dark:text-stone-200">
-                          {hour !== 0 && hour}
-                        </p>
-                      )}
-                      <div className="flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500">
-                        {groupOccurrences(day, hour).map(
-                          ([habitId, habitOccurrences]) => {
-                            if (!habitOccurrences) {
-                              return null;
-                            }
-
-                            return (
-                              <motion.div
-                                key={habitId}
-                                exit={{ scale: 0 }}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.5 }}
-                              >
-                                <OccurrenceChip
-                                  occurrences={habitOccurrences}
-                                />
-                              </motion.div>
-                            );
-                          }
+                      <Button
+                        radius="sm"
+                        variant="light"
+                        color={isNoteAdded ? 'primary' : 'secondary'}
+                        aria-label={isNoteAdded ? 'Edit note' : 'Add note'}
+                        onPress={() => {
+                          openNoteDrawer(day, 'day');
+                        }}
+                        className={cn(
+                          'h-5 w-5 min-w-fit px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                          isNoteAdded && 'opacity-100'
                         )}
+                      >
+                        {isNoteAdded ? (
+                          <NoteIcon weight="bold" size={isDesktop ? 18 : 14} />
+                        ) : (
+                          <NoteBlankIcon
+                            weight="bold"
+                            size={isDesktop ? 18 : 14}
+                          />
+                        )}
+                      </Button>
+                    </Tooltip>
+                  </div>
+                  <h6>{day.day}</h6>
+                </div>
+                <div
+                  className={cn(
+                    'flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600',
+                    isToday(day, state.timeZone) &&
+                      'to-background-100 dark:to-background-500 bg-linear-to-b from-transparent from-0% to-[4px]'
+                  )}
+                >
+                  {[...Array(24).keys()].map((hour) => {
+                    return (
+                      <div
+                        key={`${dayIndex}-${hour}`}
+                        className="group/minutes-cell relative flex gap-4"
+                      >
+                        {dayIndex === 0 && (
+                          <p className="absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:text-base dark:text-stone-200">
+                            {hour !== 0 && hour}
+                          </p>
+                        )}
+                        <div className="flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500">
+                          {groupOccurrences(day, hour).map(
+                            ([habitId, habitOccurrences]) => {
+                              if (!habitOccurrences) {
+                                return null;
+                              }
+
+                              return (
+                                <motion.div
+                                  key={habitId}
+                                  exit={{ scale: 0 }}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ duration: 0.5 }}
+                                >
+                                  <OccurrenceChip
+                                    occurrences={habitOccurrences}
+                                  />
+                                </motion.div>
+                              );
+                            }
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </ScrollShadow>
   );

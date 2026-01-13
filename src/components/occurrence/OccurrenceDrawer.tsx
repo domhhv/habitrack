@@ -134,6 +134,17 @@ const OccurrenceDrawer = () => {
         </div>
       );
     }
+
+    if (dayToDisplay) {
+      return (
+        <div className="space-y-2">
+          <p>
+            Habits Log | {dateFormatter.format(dayToDisplay.toDate(timeZone))}
+          </p>
+          <p className="text-sm">No habits found</p>
+        </div>
+      );
+    }
   };
 
   const getHeaderContent = () => {

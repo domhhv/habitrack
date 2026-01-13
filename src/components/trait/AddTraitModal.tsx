@@ -12,8 +12,8 @@ import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
 import { OccurrenceChip } from '@components';
-import { useUser, useTextField } from '@hooks';
-import { useTraitActions } from '@stores';
+import { useTextField } from '@hooks';
+import { useUser, useTraitActions } from '@stores';
 import { makeTestOccurrence } from '@tests';
 import { handleAsyncAction } from '@utils';
 

@@ -21,13 +21,13 @@ import React from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
 
 import {
-  useUser,
   useTextField,
   useScreenWidth,
   useHasKeyboard,
   useModifierKeys,
 } from '@hooks';
 import {
+  useUser,
   usePeriodNotes,
   useNoteActions,
   useNoteDrawerState,

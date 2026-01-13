@@ -1,4 +1,5 @@
 import { type UserAttributes } from '@supabase/supabase-js';
+import camelcaseKeys from 'camelcase-keys';
 
 import { supabaseClient } from '@utils';
 
@@ -9,6 +10,7 @@ export const signUp = async (email: string, password: string, name: string) => {
     options: {
       emailRedirectTo: `${window.location.origin}/account?emailConfirmed=true`,
       data: {
+        firstDayOfWeek: 0,
         name,
       },
     },
@@ -38,30 +40,14 @@ export const signOut = async () => {
   }
 };
 
-export const updateUser = async (
-  email: string,
-  password: string,
-  name: string
-) => {
-  const userAttributes: UserAttributes = {};
-
-  if (email) {
-    userAttributes.email = email;
-  }
-
-  if (password) {
-    userAttributes.password = password;
-  }
-
-  if (name) {
-    userAttributes.data = { name };
-  }
-
-  const { error } = await supabaseClient.auth.updateUser(userAttributes);
+export const updateUser = async (attributes: UserAttributes) => {
+  const { data, error } = await supabaseClient.auth.updateUser(attributes);
 
   if (error) {
     throw new Error(error.message);
   }
+
+  return camelcaseKeys(data.user, { deep: true });
 };
 
 export const sendPasswordResetEmail = async (email: string) => {
@@ -72,4 +58,21 @@ export const sendPasswordResetEmail = async (email: string) => {
   if (error) {
     throw new Error(error.message);
   }
+};
+
+export const getSession = async () => {
+  const {
+    data: { session },
+    error,
+  } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!session?.user) {
+    return null;
+  }
+
+  return camelcaseKeys(session.user, { deep: true });
 };

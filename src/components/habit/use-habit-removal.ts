@@ -1,10 +1,9 @@
 import React from 'react';
 
-import { useUser } from '@hooks';
 import type { Habit } from '@models';
 import { StorageBuckets } from '@models';
 import { listFiles, deleteFile } from '@services';
-import { useHabitActions } from '@stores';
+import { useUser, useHabitActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 const useHabitRemoval = () => {

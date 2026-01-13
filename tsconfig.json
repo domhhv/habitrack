@@ -21,11 +21,9 @@
     "paths": {
       "@pages": ["pages"],
       "@services": ["services"],
-      "@context": ["context"],
       "@components": ["components"],
       "@utils": ["utils"],
       "@hooks": ["hooks"],
-      "@helpers": ["helpers"],
       "@models": ["models"],
       "@stores": ["stores"],
       "@const": ["constants"],

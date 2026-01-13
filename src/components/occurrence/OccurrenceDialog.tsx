@@ -35,7 +35,7 @@ import { useDateFormatter } from 'react-aria';
 import { Link } from 'react-router';
 import type { RequireAtLeastOne } from 'type-fest';
 
-import { useUser, useTextField, useScreenWidth } from '@hooks';
+import { useTextField, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
 import {
@@ -43,7 +43,12 @@ import {
   uploadImages,
   getLatestHabitOccurrenceTimestamp,
 } from '@services';
-import { useHabits, useNoteActions, useOccurrenceActions } from '@stores';
+import {
+  useUser,
+  useHabits,
+  useNoteActions,
+  useOccurrenceActions,
+} from '@stores';
 import { handleAsyncAction } from '@utils';
 
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';

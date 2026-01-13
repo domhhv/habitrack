@@ -2,10 +2,9 @@ import { Button, Tooltip } from '@heroui/react';
 import React from 'react';
 
 import { VisuallyHiddenInput } from '@components';
-import { useUser } from '@hooks';
 import { type Habit, StorageBuckets } from '@models';
 import { deleteFile, getPublicUrl, uploadHabitIcon } from '@services';
-import { useHabitActions } from '@stores';
+import { useUser, useHabitActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 type HabitIconCellProps = {

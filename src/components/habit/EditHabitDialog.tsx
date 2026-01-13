@@ -13,9 +13,9 @@ import {
 } from '@heroui/react';
 import React from 'react';
 
-import { useUser, useTextField } from '@hooks';
+import { useTextField } from '@hooks';
 import type { Habit } from '@models';
-import { useTraits, useHabitActions } from '@stores';
+import { useUser, useTraits, useHabitActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 type EditHabitDialogProps = {

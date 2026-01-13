@@ -5,6 +5,7 @@ import { useLocale, useCalendar } from 'react-aria';
 import { useCalendarState } from 'react-stately';
 
 import { MonthCalendar } from '@components';
+import { useFirstDayOfWeek } from '@hooks';
 
 const createCalendar = (identifier: string) => {
   switch (identifier) {
@@ -18,8 +19,10 @@ const createCalendar = (identifier: string) => {
 
 const MonthCalendarPage = () => {
   const { locale } = useLocale();
+  const { firstDayOfWeek } = useFirstDayOfWeek();
   const calendarState = useCalendarState({
     createCalendar,
+    firstDayOfWeek,
     locale,
   });
   const { calendarProps, title } = useCalendar({}, calendarState);
