@@ -91,6 +91,7 @@ const Header = () => {
                 variant="light"
                 target="_blank"
                 color="secondary"
+                rel="noopener noreferrer"
                 to="https://github.com/domhhv/habitrack"
               >
                 <GithubLogoIcon size={isDesktop ? 18 : 16} />
