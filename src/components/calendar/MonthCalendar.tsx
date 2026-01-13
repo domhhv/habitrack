@@ -12,6 +12,7 @@ import { useLocale } from 'react-aria';
 import { useParams } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
+import { useFirstDayOfWeek } from '@hooks';
 import type { OccurrenceFilters } from '@models';
 import {
   useHabits,
@@ -25,11 +26,10 @@ import MonthCalendarGrid from './MonthCalendarGrid';
 import MonthCalendarHeader from './MonthCalendarHeader';
 
 type MonthCalendarProps = {
-  firstDayOfWeek: 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
   state: CalendarState;
 };
 
-const MonthCalendar = ({ firstDayOfWeek, state }: MonthCalendarProps) => {
+const MonthCalendar = ({ state }: MonthCalendarProps) => {
   const occurrences = useOccurrences();
   const habits = useHabits();
   const traits = useTraits();
@@ -41,6 +41,7 @@ const MonthCalendar = ({ firstDayOfWeek, state }: MonthCalendarProps) => {
     habitIds: new Set(),
     traitIds: new Set(),
   });
+  const { firstDayOfWeek, isLoadingFirstDayOfWeek } = useFirstDayOfWeek();
   const [fetchedMonthYear, setFetchedMonthYear] = React.useState<string>('');
 
   const derivedFilters = React.useMemo(() => {
@@ -83,15 +84,19 @@ const MonthCalendar = ({ firstDayOfWeek, state }: MonthCalendarProps) => {
       state.setFocusedDate(paramsDate);
     }
 
-    if (fetchedMonthYear === paramsDate.toString()) {
+    if (isLoadingFirstDayOfWeek || fetchedMonthYear === paramsDate.toString()) {
       return;
     }
 
     setFetchedMonthYear(paramsDate.toString());
 
-    const rangeStart = startOfWeek(startOfMonth(paramsDate), locale);
+    const rangeStart = startOfWeek(
+      startOfMonth(paramsDate),
+      locale,
+      firstDayOfWeek
+    );
     const rangeEnd = toCalendarDateTime(
-      endOfWeek(endOfMonth(paramsDate), locale)
+      endOfWeek(endOfMonth(paramsDate), locale, firstDayOfWeek)
     ).set({
       hour: 23,
       millisecond: 999,
@@ -104,7 +109,16 @@ const MonthCalendar = ({ firstDayOfWeek, state }: MonthCalendarProps) => {
       +rangeEnd.toDate(state.timeZone),
     ]);
     void fetchNotes([rangeStart, rangeEnd]);
-  }, [params, state, locale, fetchNotes, fetchOccurrences, fetchedMonthYear]);
+  }, [
+    params,
+    state,
+    locale,
+    fetchNotes,
+    fetchOccurrences,
+    fetchedMonthYear,
+    isLoadingFirstDayOfWeek,
+    firstDayOfWeek,
+  ]);
 
   return (
     <>
@@ -115,7 +129,6 @@ const MonthCalendar = ({ firstDayOfWeek, state }: MonthCalendarProps) => {
       />
       <MonthCalendarGrid
         state={state}
-        firstDayOfWeek={firstDayOfWeek}
         occurrences={occurrences.filter((occurrence) => {
           return (
             filters.habitIds.has(occurrence.habitId.toString()) &&

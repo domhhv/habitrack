@@ -16,8 +16,9 @@ import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router';
 
-import { useUser, useScreenWidth } from '@hooks';
+import { useScreenWidth } from '@hooks';
 import { signIn, signUp, signOut, sendPasswordResetEmail } from '@services';
+import { useUser } from '@stores';
 import { getErrorMessage } from '@utils';
 
 import AuthForm from './AuthForm';

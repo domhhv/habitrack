@@ -1,4 +1,4 @@
-import { cn, Button, Tooltip, useDisclosure } from '@heroui/react';
+import { cn, Button, Tooltip, Skeleton, useDisclosure } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { getWeeksInMonth, toCalendarDateTime } from '@internationalized/date';
 import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
@@ -10,7 +10,7 @@ import { Link } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { OccurrenceDialog } from '@components';
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import type { Occurrence } from '@models';
 import { useWeekNotes, useNoteDrawerActions } from '@stores';
 import { isTruthy, toSqlDate, getISOWeek } from '@utils';
@@ -19,16 +19,12 @@ import type { CellPosition } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
 
 type CalendarGridProps = {
-  firstDayOfWeek: 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
   occurrences: Occurrence[];
   state: CalendarState;
 };
 
-const MonthCalendarGrid = ({
-  firstDayOfWeek,
-  occurrences,
-  state,
-}: CalendarGridProps) => {
+const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
+  const { firstDayOfWeek, isLoadingFirstDayOfWeek } = useFirstDayOfWeek();
   const { gridProps, weekDays } = useCalendarGrid(
     {
       firstDayOfWeek,
@@ -82,7 +78,12 @@ const MonthCalendarGrid = ({
               key={weekDay}
               className="flex flex-1 items-center justify-center text-neutral-600 dark:text-neutral-300"
             >
-              <p className="font-bold">{capitalize(weekDay)}</p>
+              <Skeleton
+                isLoaded={!isLoadingFirstDayOfWeek}
+                className="h-6 w-9 rounded-lg text-center"
+              >
+                <p className="font-bold">{capitalize(weekDay)}</p>
+              </Skeleton>
             </div>
           );
         })}

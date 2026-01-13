@@ -1,4 +1,5 @@
 import { type UserAttributes } from '@supabase/supabase-js';
+import camelcaseKeys from 'camelcase-keys';
 
 import { supabaseClient } from '@utils';
 
@@ -39,41 +40,14 @@ export const signOut = async () => {
   }
 };
 
-export const updateUser = async (opts: {
-  email?: string;
-  firstDayOfWeek?: number;
-  name?: string;
-  password?: string;
-}) => {
-  const userAttributes: UserAttributes = {};
-
-  if (opts.email) {
-    userAttributes.email = opts.email;
-  }
-
-  if (opts.password) {
-    userAttributes.password = opts.password;
-  }
-
-  const userMetadata: Record<string, string | number> = {};
-
-  if (opts.name) {
-    userMetadata.name = opts.name;
-  }
-
-  if (typeof opts.firstDayOfWeek === 'number') {
-    userMetadata.firstDayOfWeek = opts.firstDayOfWeek;
-  }
-
-  if (Object.keys(userMetadata).length > 0) {
-    userAttributes.data = userMetadata;
-  }
-
-  const { error } = await supabaseClient.auth.updateUser(userAttributes);
+export const updateUser = async (attributes: UserAttributes) => {
+  const { data, error } = await supabaseClient.auth.updateUser(attributes);
 
   if (error) {
     throw new Error(error.message);
   }
+
+  return camelcaseKeys(data.user, { deep: true });
 };
 
 export const sendPasswordResetEmail = async (email: string) => {
@@ -84,4 +58,21 @@ export const sendPasswordResetEmail = async (email: string) => {
   if (error) {
     throw new Error(error.message);
   }
+};
+
+export const getSession = async () => {
+  const {
+    data: { session },
+    error,
+  } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!session?.user) {
+    return null;
+  }
+
+  return camelcaseKeys(session.user, { deep: true });
 };

@@ -15,9 +15,9 @@ import { PlusIcon, CloudArrowUpIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { AddTraitModal, VisuallyHiddenInput } from '@components';
-import { useUser, useTextField, useFileField } from '@hooks';
+import { useTextField, useFileField } from '@hooks';
 import { uploadHabitIcon } from '@services';
-import { useTraits, useHabitActions } from '@stores';
+import { useUser, useTraits, useHabitActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 const AddHabitDialogButton = () => {

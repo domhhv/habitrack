@@ -29,11 +29,11 @@ import { Link, useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
-import { useUser, useScreenWidth } from '@hooks';
+import { useScreenWidth } from '@hooks';
 import type { Habit, Trait, OccurrenceFilters } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
-import { useHabits, useTraits, useNoteDrawerActions } from '@stores';
+import { useUser, useHabits, useTraits, useNoteDrawerActions } from '@stores';
 
 export type MonthCalendarHeaderProps = {
   filters: OccurrenceFilters;

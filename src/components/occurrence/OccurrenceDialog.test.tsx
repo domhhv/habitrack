@@ -5,8 +5,7 @@ import { I18nProvider } from 'react-aria';
 import { BrowserRouter } from 'react-router';
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
-import { useUser } from '@hooks';
-import { useHabits, useNoteActions } from '@stores';
+import { useUser, useHabits, useNoteActions } from '@stores';
 import { makeTestHabit } from '@tests';
 
 import OccurrenceDialog from './OccurrenceDialog';
@@ -34,6 +33,7 @@ vi.mock('@stores', () => {
     useHabits: vi.fn(),
     useNoteActions: vi.fn(),
     useOccurrences: vi.fn().mockReturnValue([]),
+    useUser: vi.fn(),
     useOccurrenceActions: vi.fn().mockReturnValue({
       addOccurrence: vi.fn(),
     }),
@@ -43,7 +43,6 @@ vi.mock('@stores', () => {
 vi.mock('@hooks', () => {
   return {
     useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn()]),
-    useUser: vi.fn(),
     useScreenWidth: vi.fn().mockReturnValue({
       isDesktop: true,
       isMobile: false,

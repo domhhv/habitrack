@@ -5,7 +5,7 @@ import { useLocale, useCalendar } from 'react-aria';
 import { useCalendarState } from 'react-stately';
 
 import { MonthCalendar } from '@components';
-import { useUser } from '@hooks';
+import { useFirstDayOfWeek } from '@hooks';
 
 const createCalendar = (identifier: string) => {
   switch (identifier) {
@@ -17,21 +17,9 @@ const createCalendar = (identifier: string) => {
   }
 };
 
-const firstDaysOfWeek = [
-  'sun',
-  'mon',
-  'tue',
-  'wed',
-  'thu',
-  'fri',
-  'sat',
-] as const;
-
 const MonthCalendarPage = () => {
   const { locale } = useLocale();
-  const { user } = useUser();
-  const firstDayOfWeek =
-    firstDaysOfWeek[user?.userMetadata.firstDayOfWeek ?? 0];
+  const { firstDayOfWeek } = useFirstDayOfWeek();
   const calendarState = useCalendarState({
     createCalendar,
     firstDayOfWeek,
@@ -45,7 +33,7 @@ const MonthCalendarPage = () => {
       className="flex h-full w-full max-w-full flex-1 flex-col gap-2 p-0 px-8 pb-8 md:gap-3 md:py-3 lg:px-16"
     >
       <title>{`${capitalize(title)} | Habitrack Calendar`}</title>
-      <MonthCalendar state={calendarState} firstDayOfWeek={firstDayOfWeek} />
+      <MonthCalendar state={calendarState} />
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import {
+  cn,
   Alert,
   Input,
   Button,
@@ -7,17 +8,17 @@ import {
   SelectItem,
 } from '@heroui/react';
 import React, { type FormEventHandler } from 'react';
-import { twMerge } from 'tailwind-merge';
 
 import { PasswordInput } from '@components';
-import { useUser, useTextField, useAuthSearchParams } from '@hooks';
-import { updateUser } from '@services';
+import { useTextField, useAuthSearchParams } from '@hooks';
+import { useUser, useUserActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 const AccountPage = () => {
   useAuthSearchParams();
 
   const { isLoading: isLoadingUser, user } = useUser();
+  const { updateUser } = useUserActions();
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [email, handleEmailChange] = useTextField();
   const [password, handlePasswordChange] = useTextField();
@@ -37,7 +38,7 @@ const AccountPage = () => {
 
   if (!user && isLoadingUser) {
     return (
-      <div className={twMerge(containerClassName, 'pt-16')}>
+      <div className={cn(containerClassName, 'pt-16')}>
         {title}
         <Spinner data-testid="loader" aria-label="Loading..." />
       </div>
@@ -46,7 +47,7 @@ const AccountPage = () => {
 
   if (!user && !isLoadingUser) {
     return (
-      <div className={twMerge(containerClassName, 'items-start pt-16')}>
+      <div className={cn(containerClassName, 'items-start pt-16')}>
         {title}
         <Alert
           color="danger"
@@ -60,33 +61,16 @@ const AccountPage = () => {
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
 
-    if (!user) {
-      return;
-    }
-
-    const data: Record<string, string | number> = {};
-
-    if (firstDayOfWeek !== user.userMetadata.firstDayOfWeek?.toString()) {
-      data.firstDayOfWeek = Number(firstDayOfWeek);
-    }
-
-    if (email !== user.email) {
-      data.email = email;
-    }
-
-    if (name !== user.userMetadata.name) {
-      data.name = name;
-    }
-
-    if (password) {
-      data.password = password;
-    }
-
-    if (Object.keys(data).length === 0) {
-      return;
-    }
-
-    void handleAsyncAction(updateUser(data), 'update_account', setIsUpdating);
+    void handleAsyncAction(
+      updateUser({
+        email,
+        firstDayOfWeek,
+        name,
+        password,
+      }),
+      'update_account',
+      setIsUpdating
+    );
   };
 
   return (
@@ -127,10 +111,9 @@ const AccountPage = () => {
             />
             <Select
               variant="bordered"
+              label="Start week on"
               isDisabled={isUpdating}
-              label="First day of the week"
               selectedKeys={[firstDayOfWeek]}
-              data-testid="first-day-of-week-select"
               onSelectionChange={(value) => {
                 const [newDay] = Array.from(value);
 
@@ -142,11 +125,6 @@ const AccountPage = () => {
               {[
                 { key: '0', label: 'Sunday' },
                 { key: '1', label: 'Monday' },
-                { key: '2', label: 'Tuesday' },
-                { key: '3', label: 'Wednesday' },
-                { key: '4', label: 'Thursday' },
-                { key: '5', label: 'Friday' },
-                { key: '6', label: 'Saturday' },
               ].map((day) => {
                 return <SelectItem key={day.key}>{day.label}</SelectItem>;
               })}
@@ -158,7 +136,7 @@ const AccountPage = () => {
               isLoading={isUpdating}
               isDisabled={
                 firstDayOfWeek ===
-                  user?.userMetadata.firstDayOfWeek?.toString() &&
+                  (user?.userMetadata.firstDayOfWeek?.toString() ?? '0') &&
                 name === user?.userMetadata.name &&
                 email === user?.email &&
                 !password
