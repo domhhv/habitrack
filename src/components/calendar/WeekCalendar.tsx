@@ -31,10 +31,12 @@ import {
   useNoteActions,
   useOccurrenceActions,
   useNoteDrawerActions,
+  useCalendarRangeChange,
 } from '@stores';
 import { toSqlDate, getISOWeek, getISOWeekYear } from '@utils';
 
 const WeekCalendar = () => {
+  const changeCalendarRange = useCalendarRangeChange();
   const dayNotes = useDayNotes();
   const { isDesktop } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
@@ -106,10 +108,14 @@ const WeekCalendar = () => {
       second: 59,
     });
 
-    void fetchOccurrences([
+    const nextRange: [number, number] = [
       +rangeStart.toDate(state.timeZone),
       +rangeEnd.toDate(state.timeZone),
-    ]);
+    ];
+
+    changeCalendarRange(nextRange);
+
+    void fetchOccurrences(nextRange);
     void fetchNotes([rangeStart, toCalendarDate(rangeEnd)]);
   }, [
     firstDayOfWeek,
