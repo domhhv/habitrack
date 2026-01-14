@@ -185,8 +185,8 @@ const OccurrenceDrawer = () => {
     <Drawer
       isOpen={isOpen}
       onOpenChange={changeOpen}
-      size={dayToLog ? 'full' : 'md'}
       placement={isMobile ? 'bottom' : 'right'}
+      size={dayToLog && isMobile ? 'full' : 'md'}
     >
       <DrawerContent>
         <DrawerHeader className="flex-col">

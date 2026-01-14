@@ -91,8 +91,10 @@ const useUiStore = create<UiState>()(
           set((state) => {
             state.occurrenceDrawer.isOpen = false;
             setTimeout(() => {
-              state.occurrenceDrawer.dayToLog = today(getLocalTimeZone());
-            });
+              set((state) => {
+                state.occurrenceDrawer.dayToLog = today(getLocalTimeZone());
+              });
+            }, 50);
           });
         },
         openOccurrenceDrawer: (opts) => {
