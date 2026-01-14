@@ -68,7 +68,7 @@ const OccurrenceForm = ({
   const { user } = useUser();
   const habits = useHabits();
   const [isSaving, setIsSaving] = React.useState(false);
-  const { addNote, updateNote } = useNoteActions();
+  const { addNote, deleteNote, updateNote } = useNoteActions();
   const { addOccurrence, setOccurrenceNote, updateOccurrence } =
     useOccurrenceActions();
   const [note, handleNoteChange, clearNote] = useTextField();
@@ -88,7 +88,7 @@ const OccurrenceForm = ({
     const baseNow = now(timeZone);
 
     const getTimeValues = () => {
-      if (time instanceof ZonedDateTime) {
+      if (time) {
         return { hour: time.hour, minute: time.minute };
       }
 
@@ -105,11 +105,13 @@ const OccurrenceForm = ({
     }
 
     if (hasSpecificTime) {
-      if (time instanceof ZonedDateTime) {
-        return time.toDate();
-      }
+      const base = existingOccurrenceDateTime ?? baseNow;
+      const { hour, minute } = getTimeValues();
 
-      return (existingOccurrenceDateTime ?? baseNow).toDate();
+      return toZoned(
+        toCalendarDateTime(base).set({ hour, minute }),
+        timeZone
+      ).toDate();
     }
 
     const baseDateTime = existingOccurrenceDateTime ?? baseNow;
@@ -319,6 +321,10 @@ const OccurrenceForm = ({
             content: newNote.content,
             id: newNote.id,
           });
+        } else if (occurrenceToEdit.note) {
+          await deleteNote(occurrenceToEdit.note.id);
+
+          setOccurrenceNote(occurrenceToEdit.id, null);
         }
       };
 
@@ -456,7 +462,6 @@ const OccurrenceForm = ({
                     <div className="flex items-center gap-2">
                       <img
                         alt={habit.name}
-                        role="habit-icon"
                         className="h-4 w-4"
                         src={getPublicUrl(
                           StorageBuckets.HABIT_ICONS,
@@ -544,7 +549,21 @@ const OccurrenceForm = ({
         onFilesChange={setUploadedFiles}
         photoPaths={occurrenceToEdit?.photoPaths || null}
       />
-      <SignedImageViewer paths={occurrenceToEdit?.photoPaths || null} />
+      <SignedImageViewer
+        bucket={StorageBuckets.OCCURRENCE_PHOTOS}
+        paths={occurrenceToEdit?.photoPaths || null}
+        onDelete={(path) => {
+          if (!occurrenceToEdit?.photoPaths) {
+            return;
+          }
+
+          void updateOccurrence(occurrenceToEdit.id, {
+            photoPaths: occurrenceToEdit.photoPaths.filter((p) => {
+              return p !== path;
+            }),
+          });
+        }}
+      />
       {hasHabits ? (
         <Button {...submitButtonSharedProps} fullWidth onPress={handleSubmit}>
           {occurrenceToEdit ? 'Update' : 'Add'}

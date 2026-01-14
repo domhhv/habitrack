@@ -25,7 +25,7 @@ type OccurrencesState = {
     removeOccurrence: (occurrence: Occurrence) => Promise<void>;
     setOccurrenceNote: (
       occurrenceId: Occurrence['id'],
-      note: Pick<Note, 'id' | 'content'>
+      note: Pick<Note, 'id' | 'content'> | null
     ) => void;
     updateOccurrence: (
       id: Occurrence['id'],
@@ -74,7 +74,7 @@ const useOccurrencesStore = create<OccurrencesState>()(
 
         setOccurrenceNote: (
           occurrenceId: Occurrence['id'],
-          note: Pick<Note, 'id' | 'content'>
+          note: Pick<Note, 'id' | 'content'> | null
         ) => {
           set((state) => {
             const occurrence = state.occurrences[occurrenceId];

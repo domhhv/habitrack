@@ -1,18 +1,23 @@
 import { addToast } from '@heroui/react';
 import React from 'react';
 
-import type { SignedUrls } from '@models';
-import { StorageBuckets } from '@models';
+import type { SignedUrls, StorageBuckets } from '@models';
 import { deleteFile, createSignedUrls } from '@services';
 import { getErrorMessage } from '@utils';
 
 import { ImageCarousel } from './index';
 
 type SignedImageViewerProps = {
+  bucket: StorageBuckets;
   paths: string[] | null;
+  onDelete: (path: string) => void;
 };
 
-const SignedImageViewer = ({ paths }: SignedImageViewerProps) => {
+const SignedImageViewer = ({
+  bucket,
+  onDelete,
+  paths,
+}: SignedImageViewerProps) => {
   const [signedImageUrls, setSignedImageUrls] = React.useState<SignedUrls>([]);
 
   React.useEffect(() => {
@@ -41,29 +46,35 @@ const SignedImageViewer = ({ paths }: SignedImageViewerProps) => {
   }, [paths]);
 
   const deleteImage = async (index: number) => {
-    const success = await deleteFile(
-      StorageBuckets.OCCURRENCE_PHOTOS,
-      paths?.[index] || ''
-    );
+    const path = paths?.[index];
 
-    if (!success) {
+    if (!path) {
+      return;
+    }
+
+    try {
+      await deleteFile(bucket, path);
+
+      addToast({
+        color: 'success',
+        title: 'Successfully deleted photo',
+      });
+
+      setSignedImageUrls((prev) => {
+        const newUrls = [...prev];
+        newUrls.splice(index, 1);
+
+        return newUrls;
+      });
+
+      onDelete(path);
+    } catch (error) {
       return addToast({
         color: 'danger',
+        description: `Error details: ${getErrorMessage(error)}`,
         title: 'Failed to delete photo',
       });
     }
-
-    addToast({
-      color: 'success',
-      title: 'Successfully deleted photo',
-    });
-
-    setSignedImageUrls((prev) => {
-      const newUrls = [...prev];
-      newUrls.splice(index, 1);
-
-      return newUrls;
-    });
   };
 
   return (

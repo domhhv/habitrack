@@ -103,6 +103,10 @@ const MonthCalendarCell = ({
   );
 
   const openLoggingDrawer = () => {
+    if (!user) {
+      return;
+    }
+
     openOccurrenceDrawer({
       dayToLog: date,
     });

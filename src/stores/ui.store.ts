@@ -90,7 +90,9 @@ const useUiStore = create<UiState>()(
         closeOccurrenceDrawer: () => {
           set((state) => {
             state.occurrenceDrawer.isOpen = false;
-            state.occurrenceDrawer.dayToLog = today(getLocalTimeZone());
+            setTimeout(() => {
+              state.occurrenceDrawer.dayToLog = today(getLocalTimeZone());
+            });
           });
         },
         openOccurrenceDrawer: (opts) => {
@@ -99,7 +101,7 @@ const useUiStore = create<UiState>()(
             state.occurrenceDrawer.dayToDisplay = undefined;
             state.occurrenceDrawer.dayToLog = undefined;
             state.occurrenceDrawer.occurrenceToEdit = undefined;
-            state.occurrenceDrawer.habitIdToDisplay = '';
+            state.occurrenceDrawer.habitIdToDisplay = undefined;
             Object.assign(state.occurrenceDrawer, opts);
           });
         },
