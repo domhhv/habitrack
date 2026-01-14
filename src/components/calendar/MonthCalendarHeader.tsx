@@ -18,6 +18,7 @@ import {
   ArrowFatLeftIcon,
   FunnelSimpleIcon,
   ArrowFatRightIcon,
+  CalendarCheckIcon,
   ArrowsClockwiseIcon,
 } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -33,7 +34,13 @@ import { useScreenWidth } from '@hooks';
 import type { Habit, Trait, OccurrenceFilters } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
-import { useUser, useHabits, useTraits, useNoteDrawerActions } from '@stores';
+import {
+  useUser,
+  useHabits,
+  useTraits,
+  useNoteDrawerActions,
+  useOccurrenceDrawerActions,
+} from '@stores';
 
 export type MonthCalendarHeaderProps = {
   filters: OccurrenceFilters;
@@ -97,6 +104,7 @@ const MonthCalendarHeader = ({
   } = useDisclosure();
   const navigate = useNavigate();
   const { openNoteDrawer } = useNoteDrawerActions();
+  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
 
   React.useEffect(() => {
     const newMonth = String(state.focusedDate.month);
@@ -211,18 +219,34 @@ const MonthCalendarHeader = ({
   return (
     <div className="flex flex-col items-stretch justify-between gap-2 px-0 pt-2 md:pt-0 lg:flex-row lg:gap-0 lg:px-0">
       <div className="flex flex-col items-stretch justify-end gap-2 max-[445px]:gap-4 min-[446px]:flex-row lg:justify-between lg:gap-2">
-        <Button
-          size="sm"
-          variant="flat"
-          color="secondary"
-          className="md:hidden"
-          onPress={() => {
-            openNoteDrawer(today(getLocalTimeZone()), 'day');
-          }}
-        >
-          <NotePencilIcon size={16} weight="bold" />
-          Note
-        </Button>
+        <div className="flex w-full gap-2">
+          <Button
+            size="sm"
+            variant="flat"
+            color="secondary"
+            className="h-6 w-1/2 md:hidden"
+            onPress={() => {
+              openOccurrenceDrawer({
+                dayToLog: today(getLocalTimeZone()),
+              });
+            }}
+          >
+            <CalendarCheckIcon size={16} weight="bold" />
+            Log
+          </Button>
+          <Button
+            size="sm"
+            variant="flat"
+            color="secondary"
+            className="h-6 w-1/2 md:hidden"
+            onPress={() => {
+              openNoteDrawer(today(getLocalTimeZone()), 'day');
+            }}
+          >
+            <NotePencilIcon size={16} weight="bold" />
+            Note
+          </Button>
+        </div>
         <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
           {!isDesktop && (
             <Button

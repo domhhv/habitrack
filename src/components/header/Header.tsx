@@ -6,12 +6,13 @@ import {
   GithubLogoIcon,
   NotePencilIcon,
   CalendarDotsIcon,
+  CalendarCheckIcon,
 } from '@phosphor-icons/react';
 import { Link, useLocation } from 'react-router';
 
 import { AuthModalButton } from '@components';
 import { useScreenWidth, useKeyboardShortcut } from '@hooks';
-import { useNoteDrawerActions } from '@stores';
+import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
 
 import ThemeToggle from './ThemeToggle';
 
@@ -19,12 +20,20 @@ const Header = () => {
   const { isDesktop, screenWidth } = useScreenWidth();
   const { pathname } = useLocation();
   const { openNoteDrawer } = useNoteDrawerActions();
+  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
 
-  const openDrawer = () => {
+  const dispatchNoteDrawerOpen = () => {
     openNoteDrawer(today(getLocalTimeZone()), 'day');
   };
 
-  useKeyboardShortcut('n', openDrawer);
+  const dispatchOccurrenceDrawerOpen = () => {
+    openOccurrenceDrawer({
+      dayToLog: today(getLocalTimeZone()),
+    });
+  };
+
+  useKeyboardShortcut('n', dispatchNoteDrawerOpen);
+  useKeyboardShortcut('l', dispatchOccurrenceDrawerOpen);
 
   return (
     <header className="bg-background-100 dark:dark:bg-background-900 border-b border-b-slate-300 dark:border-b-slate-800">
@@ -104,7 +113,20 @@ const Header = () => {
             size="sm"
             variant="solid"
             color="secondary"
-            onPress={openDrawer}
+            className="hidden md:inline-flex"
+            onPress={dispatchOccurrenceDrawerOpen}
+          >
+            <CalendarCheckIcon size={16} weight="bold" />
+            Log
+            <Kbd className="bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0 lg:block">
+              L
+            </Kbd>
+          </Button>
+          <Button
+            size="sm"
+            variant="solid"
+            color="secondary"
+            onPress={dispatchNoteDrawerOpen}
             className="hidden md:inline-flex"
           >
             <NotePencilIcon size={16} weight="bold" />

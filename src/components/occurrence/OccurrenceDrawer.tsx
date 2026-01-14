@@ -1,10 +1,17 @@
 import { Drawer, DrawerBody, DrawerHeader, DrawerContent } from '@heroui/react';
 import {
+  now,
   today,
+  toZoned,
+  isToday,
   isSameDay,
   parseAbsolute,
+  ZonedDateTime,
   toCalendarDate,
   getLocalTimeZone,
+  type CalendarDate,
+  parseAbsoluteToLocal,
+  type CalendarDateTime,
 } from '@internationalized/date';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
@@ -19,20 +26,17 @@ import {
 } from '@stores';
 import { handleAsyncAction } from '@utils';
 
-import { OccurrenceDialog } from './index';
 import OccurrenceChip from './OccurrenceChip';
+import OccurrenceForm from './OccurrenceForm';
 import OccurrenceList from './OccurrenceList';
 
 const OccurrenceDrawer = () => {
   const timeZone = getLocalTimeZone();
   const occurrences = useOccurrences();
-  const [isOccurrenceDialogOpen, setIsOccurrenceDialogOpen] =
-    React.useState(false);
-  const [occurrenceToEdit, setOccurrenceToEdit] =
-    React.useState<Occurrence | null>(null);
   const { removeOccurrence } = useOccurrenceActions();
   const { isMobile } = useScreenWidth();
-  const { dayToDisplay, habitIdToDisplay, isOpen } = useOccurrenceDrawerState();
+  const { dayToDisplay, dayToLog, habitIdToDisplay, isOpen, occurrenceToEdit } =
+    useOccurrenceDrawerState();
   const { closeOccurrenceDrawer } = useOccurrenceDrawerActions();
   const dateFormatter = useDateFormatter({
     day: 'numeric',
@@ -81,16 +85,6 @@ const OccurrenceDrawer = () => {
     };
   }, [dayToDisplay, habitIdToDisplay, occurrences, timeZone]);
 
-  const closeOccurrenceDialog = () => {
-    setOccurrenceToEdit(null);
-    setIsOccurrenceDialogOpen(false);
-  };
-
-  const openOccurrenceDialog = (occurrence: Occurrence) => {
-    setOccurrenceToEdit(occurrence);
-    setIsOccurrenceDialogOpen(true);
-  };
-
   const dispatchOccurrenceRemoval = (occurrence: Occurrence) => {
     void handleAsyncAction(removeOccurrence(occurrence), 'remove_occurrence');
   };
@@ -101,7 +95,47 @@ const OccurrenceDrawer = () => {
     }
   };
 
+  const existingOccurrenceDateTime = React.useMemo(() => {
+    if (!occurrenceToEdit?.timestamp) {
+      return null;
+    }
+
+    return parseAbsoluteToLocal(
+      new Date(occurrenceToEdit.timestamp).toISOString()
+    );
+  }, [occurrenceToEdit]);
+
+  const formatDate = (
+    date: CalendarDate | CalendarDateTime | ZonedDateTime | null
+  ) => {
+    const asZoned =
+      date == null
+        ? null
+        : date instanceof ZonedDateTime
+          ? date
+          : toZoned(date, timeZone);
+
+    if (!asZoned || isToday(asZoned, timeZone)) {
+      return 'today';
+    }
+
+    if (isSameDay(asZoned, now(timeZone).subtract({ days: 1 }))) {
+      return 'yesterday';
+    }
+
+    return dateFormatter.format(asZoned.toDate());
+  };
+
   const getMainTitle = () => {
+    if (dayToLog || occurrenceToEdit) {
+      return (
+        <>
+          {occurrenceToEdit ? 'Edit' : 'Add'} habit entry for{' '}
+          {formatDate(dayToLog || existingOccurrenceDateTime)}
+        </>
+      );
+    }
+
     if (!occurrencesData) {
       return null;
     }
@@ -147,60 +181,47 @@ const OccurrenceDrawer = () => {
     }
   };
 
-  const getHeaderContent = () => {
-    if (occurrencesData) {
-      return (
-        <>
+  return (
+    <Drawer
+      isOpen={isOpen}
+      onOpenChange={changeOpen}
+      placement={isMobile ? 'bottom' : 'right'}
+      size={dayToLog && isMobile ? 'full' : 'md'}
+    >
+      <DrawerContent>
+        <DrawerHeader className="flex-col">
           {getMainTitle()}
-          {occurrencesData.hasOccurrencesWithAndWithoutTime && (
+          {occurrencesData?.hasOccurrencesWithAndWithoutTime && (
             <p className="text-default-400 dark:text-default-600 text-xs">
               Has occurrences with and without specific times
             </p>
           )}
-        </>
-      );
-    }
-  };
-
-  return (
-    <>
-      {occurrenceToEdit && (
-        <OccurrenceDialog
-          timeZone={timeZone}
-          isOpen={isOccurrenceDialogOpen}
-          onClose={closeOccurrenceDialog}
-          existingOccurrence={occurrenceToEdit}
-        />
-      )}
-
-      <Drawer
-        isOpen={isOpen}
-        onOpenChange={changeOpen}
-        placement={isMobile ? 'bottom' : 'right'}
-      >
-        <DrawerContent>
-          <DrawerHeader className="flex-col">{getHeaderContent()}</DrawerHeader>
-          <DrawerBody>
-            {occurrencesData && (
-              <OccurrenceList
-                onEdit={openOccurrenceDialog}
-                onRemove={dispatchOccurrenceRemoval}
-                hasChips={!!occurrencesData.dayOccurrences}
-                occurrencesWithTime={occurrencesData.occurrencesWithTime}
-                occurrencesWithoutTime={occurrencesData.occurrencesWithoutTime}
-                hasOccurrencesWithTime={occurrencesData.hasOccurrencesWithTime}
-                hasOccurrencesWithoutTime={
-                  occurrencesData.hasOccurrencesWithoutTime
-                }
-                hasOccurrencesWithAndWithoutTime={
-                  occurrencesData.hasOccurrencesWithAndWithoutTime
-                }
-              />
-            )}
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-    </>
+        </DrawerHeader>
+        <DrawerBody>
+          {occurrencesData && (
+            <OccurrenceList
+              onRemove={dispatchOccurrenceRemoval}
+              hasChips={!!occurrencesData.dayOccurrences}
+              occurrencesWithTime={occurrencesData.occurrencesWithTime}
+              occurrencesWithoutTime={occurrencesData.occurrencesWithoutTime}
+              hasOccurrencesWithTime={occurrencesData.hasOccurrencesWithTime}
+              hasOccurrencesWithoutTime={
+                occurrencesData.hasOccurrencesWithoutTime
+              }
+              hasOccurrencesWithAndWithoutTime={
+                occurrencesData.hasOccurrencesWithAndWithoutTime
+              }
+            />
+          )}
+          {(dayToLog || occurrenceToEdit) && (
+            <OccurrenceForm
+              formatDate={formatDate}
+              existingOccurrenceDateTime={existingOccurrenceDateTime}
+            />
+          )}
+        </DrawerBody>
+      </DrawerContent>
+    </Drawer>
   );
 };
 
