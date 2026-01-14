@@ -14,6 +14,8 @@ type OccurrenceDrawerOptions = {
 };
 
 type UiState = {
+  calendarRange: [number, number];
+  changeCalendarRange: (range: [number, number]) => void;
   noteDrawer: {
     isOpen: boolean;
     periodDate: CalendarDate;
@@ -48,6 +50,12 @@ type UiState = {
 const useUiStore = create<UiState>()(
   immer((set) => {
     return {
+      calendarRange: [0, 0],
+      changeCalendarRange: (range: [number, number]) => {
+        set((state) => {
+          state.calendarRange = range;
+        });
+      },
       noteDrawer: {
         isOpen: false,
         periodDate: today(getLocalTimeZone()),
@@ -111,6 +119,18 @@ const useUiStore = create<UiState>()(
     };
   })
 );
+
+export const useCalendarRange = () => {
+  return useUiStore((state) => {
+    return state.calendarRange;
+  });
+};
+
+export const useCalendarRangeChange = () => {
+  return useUiStore((state) => {
+    return state.changeCalendarRange;
+  });
+};
 
 export const useOccurrenceDrawerState = () => {
   return useUiStore((state) => {

@@ -20,6 +20,7 @@ import {
   useOccurrences,
   useNoteActions,
   useOccurrenceActions,
+  useCalendarRangeChange,
 } from '@stores';
 
 import MonthCalendarGrid from './MonthCalendarGrid';
@@ -30,6 +31,7 @@ type MonthCalendarProps = {
 };
 
 const MonthCalendar = ({ state }: MonthCalendarProps) => {
+  const changeCalendarRange = useCalendarRangeChange();
   const occurrences = useOccurrences();
   const habits = useHabits();
   const traits = useTraits();
@@ -104,12 +106,17 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
       second: 59,
     });
 
-    void fetchOccurrences([
+    const nextRange: [number, number] = [
       +rangeStart.toDate(state.timeZone),
       +rangeEnd.toDate(state.timeZone),
-    ]);
+    ];
+
+    changeCalendarRange(nextRange);
+
+    void fetchOccurrences(nextRange);
     void fetchNotes([rangeStart, rangeEnd]);
   }, [
+    changeCalendarRange,
     params,
     state,
     locale,

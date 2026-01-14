@@ -1,3 +1,8 @@
+import {
+  fromDate,
+  getLocalTimeZone,
+  toCalendarDateTime,
+} from '@internationalized/date';
 import keyBy from 'lodash.keyby';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
@@ -59,8 +64,19 @@ const useOccurrencesStore = create<OccurrencesState>()(
         fetchOccurrences: async (range: [number, number]) => {
           const occurrences = await listOccurrences(range);
 
+          const occurrencesWithCalendarDateTime = occurrences.map(
+            (occurrence) => {
+              return {
+                ...occurrence,
+                occurredAt: toCalendarDateTime(
+                  fromDate(new Date(occurrence.timestamp), getLocalTimeZone())
+                ),
+              };
+            }
+          );
+
           set((state) => {
-            state.occurrences = keyBy(occurrences, 'id');
+            state.occurrences = keyBy(occurrencesWithCalendarDateTime, 'id');
           });
         },
 

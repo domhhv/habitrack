@@ -1,3 +1,8 @@
+import {
+  fromDate,
+  getLocalTimeZone,
+  toCalendarDateTime,
+} from '@internationalized/date';
 import camelcaseKeys from 'camelcase-keys';
 import React from 'react';
 
@@ -7,14 +12,16 @@ import {
   useUserActions,
   useHabitActions,
   useTraitActions,
+  useCalendarRange,
   useOccurrenceActions,
 } from '@stores';
 import { supabaseClient } from '@utils';
 
 const useSession = () => {
+  const range = useCalendarRange();
   const { setError, setIsLoading, setUser } = useUserActions();
-  const { clearOccurrences } = useOccurrenceActions();
-  const { clearNotes } = useNoteActions();
+  const { clearOccurrences, fetchOccurrences } = useOccurrenceActions();
+  const { clearNotes, fetchNotes } = useNoteActions();
   const { clearTraits, fetchTraits } = useTraitActions();
   const { clearHabits, fetchHabits } = useHabitActions();
 
@@ -43,6 +50,18 @@ const useSession = () => {
         setUser(camelcaseKeys(session.user, { deep: true }));
         void fetchTraits();
         void fetchHabits();
+
+        if (range.every(Boolean)) {
+          void fetchOccurrences(range);
+          void fetchNotes([
+            toCalendarDateTime(
+              fromDate(new Date(range[0]), getLocalTimeZone())
+            ),
+            toCalendarDateTime(
+              fromDate(new Date(range[1]), getLocalTimeZone())
+            ),
+          ]);
+        }
       }
 
       if (event === 'SIGNED_OUT') {
@@ -58,6 +77,7 @@ const useSession = () => {
       subscription.unsubscribe();
     };
   }, [
+    range,
     setUser,
     fetchTraits,
     fetchHabits,
