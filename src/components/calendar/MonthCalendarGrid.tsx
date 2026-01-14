@@ -1,4 +1,4 @@
-import { cn, Button, Tooltip, Skeleton, useDisclosure } from '@heroui/react';
+import { cn, Button, Tooltip, Skeleton } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { getWeeksInMonth, toCalendarDateTime } from '@internationalized/date';
 import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
@@ -9,7 +9,6 @@ import { useLocale, useCalendarGrid } from 'react-aria';
 import { Link } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
-import { OccurrenceDialog } from '@components';
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import type { Occurrence } from '@models';
 import { useWeekNotes, useNoteDrawerActions } from '@stores';
@@ -37,13 +36,6 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
   const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const weekNotes = useWeekNotes();
-  const [newOccurrenceDate, setNewOccurrenceDate] =
-    React.useState<CalendarDate | null>(null);
-  const {
-    isOpen: isOccurrenceDialogOpen,
-    onClose: closeOccurrenceDialog,
-    onOpen: openOccurrenceDialog,
-  } = useDisclosure();
   const { openNoteDrawer } = useNoteDrawerActions();
 
   const getCellPosition = (
@@ -88,15 +80,6 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
           );
         })}
       </div>
-
-      {newOccurrenceDate && (
-        <OccurrenceDialog
-          timeZone={state.timeZone}
-          isOpen={isOccurrenceDialogOpen}
-          onClose={closeOccurrenceDialog}
-          newOccurrenceDate={newOccurrenceDate}
-        />
-      )}
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -211,10 +194,6 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                           date={calendarDate}
                           key={calendarDate.toString()}
                           position={getCellPosition(weekIndex, dayIndex)}
-                          onNewOccurrenceClick={() => {
-                            setNewOccurrenceDate(calendarDate);
-                            openOccurrenceDialog();
-                          }}
                           occurrences={occurrences.filter(({ timestamp }) => {
                             return (
                               timestamp >= Number(startDate) &&

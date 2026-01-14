@@ -2,6 +2,7 @@ import { cn, ScrollShadow } from '@heroui/react';
 import React from 'react';
 
 import type { Occurrence } from '@models';
+import { useOccurrenceDrawerActions } from '@stores';
 
 import OccurrenceListItem from './OccurrenceListItem';
 
@@ -12,7 +13,6 @@ type OccurrenceListProps = {
   hasOccurrencesWithTime: boolean;
   occurrencesWithoutTime: Occurrence[];
   occurrencesWithTime: Occurrence[];
-  onEdit: (o: Occurrence) => void;
   onRemove: (o: Occurrence) => void;
 };
 
@@ -23,9 +23,10 @@ const OccurrenceList = ({
   hasOccurrencesWithTime,
   occurrencesWithoutTime,
   occurrencesWithTime,
-  onEdit,
   onRemove,
 }: OccurrenceListProps) => {
+  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
+
   return (
     <ScrollShadow
       className={cn(
@@ -45,11 +46,11 @@ const OccurrenceList = ({
                   key={o.id}
                   occurrence={o}
                   hasChip={hasChips}
-                  onEdit={() => {
-                    onEdit(o);
-                  }}
                   onRemove={() => {
                     void onRemove(o);
+                  }}
+                  onEdit={() => {
+                    openOccurrenceDrawer({ occurrenceToEdit: o });
                   }}
                 />
               );
@@ -73,11 +74,11 @@ const OccurrenceList = ({
                     key={o.id}
                     occurrence={o}
                     hasChip={hasChips}
-                    onEdit={() => {
-                      onEdit(o);
-                    }}
                     onRemove={() => {
                       void onRemove(o);
+                    }}
+                    onEdit={() => {
+                      openOccurrenceDrawer({ occurrenceToEdit: o });
                     }}
                   />
                 );

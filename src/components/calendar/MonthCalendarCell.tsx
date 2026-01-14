@@ -37,13 +37,11 @@ type CalendarCellProps = {
   occurrences: Occurrence[];
   position: CellPosition;
   state: CalendarState;
-  onNewOccurrenceClick: () => void;
 };
 
 const MonthCalendarCell = ({
   date,
   occurrences,
-  onNewOccurrenceClick,
   position,
   state,
 }: CalendarCellProps) => {
@@ -104,11 +102,17 @@ const MonthCalendarCell = ({
     isMobile && 'pl-1'
   );
 
+  const openLoggingDrawer = () => {
+    openOccurrenceDrawer({
+      dayToLog: date,
+    });
+  };
+
   return (
     <div ref={calendarCellRef} {...cellProps} className={cellRootClassName}>
       <div
         className={cellHeaderClassName}
-        onClick={isMobile ? onNewOccurrenceClick : undefined}
+        onClick={isMobile ? openLoggingDrawer : undefined}
       >
         <p className={cn('font-bold', isMobile && 'text-sm')}>
           {formattedDate}
@@ -143,7 +147,7 @@ const MonthCalendarCell = ({
                   color="secondary"
                   isDisabled={!user}
                   aria-label="Log habit"
-                  onPress={onNewOccurrenceClick}
+                  onPress={openLoggingDrawer}
                   className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
                 >
                   <CalendarPlusIcon weight="bold" size={isDesktop ? 18 : 14} />

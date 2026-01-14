@@ -4,12 +4,13 @@ import type { RequireAtLeastOne } from 'type-fest';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-import type { Habit, NotePeriodKind } from '@models';
+import type { Habit, Occurrence, NotePeriodKind } from '@models';
 
 type OccurrenceDrawerOptions = {
   dayToDisplay?: CalendarDate;
   dayToLog?: CalendarDate;
   habitIdToDisplay?: Habit['id'];
+  occurrenceToEdit?: Occurrence;
 };
 
 type UiState = {
@@ -29,13 +30,16 @@ type UiState = {
   };
   occurrenceDrawer: {
     isOpen: boolean;
-  } & RequireAtLeastOne<OccurrenceDrawerOptions, 'dayToLog' | 'dayToDisplay'>;
+  } & RequireAtLeastOne<
+    OccurrenceDrawerOptions,
+    'dayToLog' | 'dayToDisplay' | 'occurrenceToEdit'
+  >;
   occurrenceDrawerActions: {
     closeOccurrenceDrawer: () => void;
     openOccurrenceDrawer: (
       opts: RequireAtLeastOne<
         OccurrenceDrawerOptions,
-        'dayToLog' | 'dayToDisplay'
+        'dayToLog' | 'dayToDisplay' | 'occurrenceToEdit'
       >
     ) => void;
   };
@@ -93,8 +97,9 @@ const useUiStore = create<UiState>()(
           set((state) => {
             state.occurrenceDrawer.isOpen = true;
             state.occurrenceDrawer.dayToDisplay = undefined;
-            state.occurrenceDrawer.habitIdToDisplay = '';
             state.occurrenceDrawer.dayToLog = undefined;
+            state.occurrenceDrawer.occurrenceToEdit = undefined;
+            state.occurrenceDrawer.habitIdToDisplay = '';
             Object.assign(state.occurrenceDrawer, opts);
           });
         },

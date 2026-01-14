@@ -1,13 +1,9 @@
-import { Input, Button, addToast } from '@heroui/react';
+import { Input, Button } from '@heroui/react';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 
-import { ImageCarousel } from '@components';
 import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
-import type { SignedUrls } from '@models';
 import { StorageBuckets } from '@models';
-import { deleteFile, createSignedUrls } from '@services';
-import { getErrorMessage } from '@utils';
 
 type OccurrencePhotosUploaderProps = {
   files: File[];
@@ -21,7 +17,6 @@ const OccurrencePhotosUploader = ({
   photoPaths,
 }: OccurrencePhotosUploaderProps) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [signedImageUrls, setSignedImageUrls] = React.useState<SignedUrls>([]);
 
   React.useEffect(() => {
     if (fileInputRef.current) {
@@ -32,31 +27,6 @@ const OccurrencePhotosUploader = ({
       fileInputRef.current.files = dataTransfer.files;
     }
   }, [files]);
-
-  React.useEffect(() => {
-    const loadSignedUrls = async () => {
-      if (!photoPaths || photoPaths.length === 0) {
-        setSignedImageUrls([]);
-
-        return;
-      }
-
-      try {
-        const signedUrls = await createSignedUrls(photoPaths);
-
-        setSignedImageUrls(signedUrls);
-      } catch (error) {
-        addToast({
-          color: 'danger',
-          description: `Error details: ${getErrorMessage(error)}`,
-          title:
-            'Something went wrong while loading photo previews. Please try reloading the page.',
-        });
-      }
-    };
-
-    void loadSignedUrls();
-  }, [photoPaths]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(e.target.files || []);
@@ -75,39 +45,13 @@ const OccurrencePhotosUploader = ({
       return;
     }
 
-    onFilesChange(newFiles);
-  };
-
-  const handleDelete = async (index: number) => {
-    const success = await deleteFile(
-      StorageBuckets.OCCURRENCE_PHOTOS,
-      photoPaths?.[index] || ''
-    );
-
-    if (!success) {
-      return addToast({
-        color: 'danger',
-        title: 'Failed to delete photo',
-      });
-    }
-
-    addToast({
-      color: 'success',
-      title: 'Successfully deleted photo',
-    });
-
-    setSignedImageUrls((prev) => {
-      const newUrls = [...prev];
-      newUrls.splice(index, 1);
-
-      return newUrls;
-    });
+    onFilesChange(files.concat(newFiles));
   };
 
   const allowedTypes = ALLOWED_IMAGE_TYPES[StorageBuckets.OCCURRENCE_PHOTOS];
 
   return (
-    <div className="space-y-2">
+    <div className="w-full space-y-2">
       <Input
         multiple
         type="file"
@@ -149,15 +93,6 @@ const OccurrencePhotosUploader = ({
           </div>
         );
       })}
-
-      {signedImageUrls.length > 0 && (
-        <>
-          <p className="text-sm text-gray-500">
-            You can add more photos or delete existing ones
-          </p>
-          <ImageCarousel onDelete={handleDelete} imageUrls={signedImageUrls} />
-        </>
-      )}
     </div>
   );
 };
