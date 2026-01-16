@@ -118,6 +118,7 @@ const WeekCalendar = () => {
     void fetchOccurrences(nextRange);
     void fetchNotes([rangeStart, toCalendarDate(rangeEnd)]);
   }, [
+    changeCalendarRange,
     firstDayOfWeek,
     fetchNotes,
     state.timeZone,

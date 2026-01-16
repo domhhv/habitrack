@@ -1,6 +1,4 @@
 import keyBy from 'lodash.keyby';
-import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
 
 import type { Habit, HabitsInsert, HabitsUpdate } from '@models';
 import { StorageBuckets } from '@models';
@@ -12,9 +10,11 @@ import {
   destroyHabit,
 } from '@services';
 
-type HabitsState = {
+import { useBoundStore, type SliceCreator } from './bound.store';
+
+export type HabitsSlice = {
   habits: Record<Habit['id'], Habit>;
-  actions: {
+  habitActions: {
     addHabit: (habit: HabitsInsert) => Promise<void>;
     clearHabits: () => void;
     fetchHabits: () => Promise<void>;
@@ -23,66 +23,64 @@ type HabitsState = {
   };
 };
 
-const useHabitsStore = create<HabitsState>()(
-  immer((set) => {
-    return {
-      habits: {},
+export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
+  return {
+    habits: {},
 
-      actions: {
-        addHabit: async (habit: HabitsInsert) => {
-          const newHabit = await createHabit(habit);
+    habitActions: {
+      addHabit: async (habit: HabitsInsert) => {
+        const newHabit = await createHabit(habit);
 
-          set((state) => {
-            state.habits[newHabit.id] = newHabit;
-          });
-        },
-
-        clearHabits: () => {
-          set((state) => {
-            state.habits = {};
-          });
-        },
-
-        fetchHabits: async () => {
-          const habits = await listHabits();
-
-          set((state) => {
-            state.habits = keyBy(habits, 'id');
-          });
-        },
-
-        removeHabit: async ({ iconPath, id }: Habit) => {
-          await destroyHabit(id);
-
-          if (iconPath) {
-            await deleteFile(StorageBuckets.HABIT_ICONS, iconPath);
-          }
-
-          set((state) => {
-            delete state.habits[id];
-          });
-        },
-
-        updateHabit: async (id: Habit['id'], habit: HabitsUpdate) => {
-          const updatedHabit = await patchHabit(id, habit);
-
-          set((state) => {
-            state.habits[id] = updatedHabit;
-          });
-        },
+        set((state) => {
+          state.habits[newHabit.id] = newHabit;
+        });
       },
-    };
-  })
-);
+
+      clearHabits: () => {
+        set((state) => {
+          state.habits = {};
+        });
+      },
+
+      fetchHabits: async () => {
+        const habits = await listHabits();
+
+        set((state) => {
+          state.habits = keyBy(habits, 'id');
+        });
+      },
+
+      removeHabit: async ({ iconPath, id }: Habit) => {
+        await destroyHabit(id);
+
+        if (iconPath) {
+          await deleteFile(StorageBuckets.HABIT_ICONS, iconPath);
+        }
+
+        set((state) => {
+          delete state.habits[id];
+        });
+      },
+
+      updateHabit: async (id: Habit['id'], habit: HabitsUpdate) => {
+        const updatedHabit = await patchHabit(id, habit);
+
+        set((state) => {
+          state.habits[id] = updatedHabit;
+        });
+      },
+    },
+  };
+};
 
 export const useHabits = () => {
-  return useHabitsStore((state) => {
+  return useBoundStore((state) => {
     return state.habits;
   });
 };
 
 export const useHabitActions = () => {
-  return useHabitsStore((state) => {
-    return state.actions;
+  return useBoundStore((state) => {
+    return state.habitActions;
   });
 };

@@ -4,8 +4,6 @@ import {
   toCalendarDateTime,
 } from '@internationalized/date';
 import keyBy from 'lodash.keyby';
-import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 
 import type {
@@ -21,9 +19,11 @@ import {
   destroyOccurrence,
 } from '@services';
 
-type OccurrencesState = {
+import { useBoundStore, type SliceCreator } from './bound.store';
+
+export type OccurrencesSlice = {
   occurrences: Record<Occurrence['id'], Occurrence>;
-  actions: {
+  occurrencesActions: {
     addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
     clearOccurrences: () => void;
     fetchOccurrences: (range: [number, number]) => Promise<void>;
@@ -39,87 +39,87 @@ type OccurrencesState = {
   };
 };
 
-const useOccurrencesStore = create<OccurrencesState>()(
-  immer((set) => {
-    return {
-      occurrences: {},
+export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
+  set
+) => {
+  return {
+    occurrences: {},
 
-      actions: {
-        addOccurrence: async (occurrence: OccurrencesInsert) => {
-          const nextOccurrence = await createOccurrence(occurrence);
+    occurrencesActions: {
+      addOccurrence: async (occurrence: OccurrencesInsert) => {
+        const nextOccurrence = await createOccurrence(occurrence);
 
-          set((state) => {
-            state.occurrences[nextOccurrence.id] = nextOccurrence;
-          });
+        set((state) => {
+          state.occurrences[nextOccurrence.id] = nextOccurrence;
+        });
 
-          return nextOccurrence;
-        },
-
-        clearOccurrences: () => {
-          set((state) => {
-            state.occurrences = {};
-          });
-        },
-
-        fetchOccurrences: async (range: [number, number]) => {
-          const occurrences = await listOccurrences(range);
-
-          const occurrencesWithCalendarDateTime = occurrences.map(
-            (occurrence) => {
-              return {
-                ...occurrence,
-                occurredAt: toCalendarDateTime(
-                  fromDate(new Date(occurrence.timestamp), getLocalTimeZone())
-                ),
-              };
-            }
-          );
-
-          set((state) => {
-            state.occurrences = keyBy(occurrencesWithCalendarDateTime, 'id');
-          });
-        },
-
-        removeOccurrence: async (occurrence: Occurrence) => {
-          await destroyOccurrence(occurrence);
-
-          set((state) => {
-            delete state.occurrences[occurrence.id];
-          });
-        },
-
-        setOccurrenceNote: (
-          occurrenceId: Occurrence['id'],
-          note: Pick<Note, 'id' | 'content'> | null
-        ) => {
-          set((state) => {
-            const occurrence = state.occurrences[occurrenceId];
-
-            if (!occurrence) {
-              return;
-            }
-
-            occurrence.note = note;
-          });
-        },
-
-        updateOccurrence: async (
-          id: Occurrence['id'],
-          body: OccurrencesUpdate
-        ) => {
-          const updatedOccurrence = await patchOccurrence(id, body);
-
-          set((state) => {
-            state.occurrences[id] = updatedOccurrence;
-          });
-        },
+        return nextOccurrence;
       },
-    };
-  })
-);
+
+      clearOccurrences: () => {
+        set((state) => {
+          state.occurrences = {};
+        });
+      },
+
+      fetchOccurrences: async (range: [number, number]) => {
+        const occurrences = await listOccurrences(range);
+
+        const occurrencesWithCalendarDateTime = occurrences.map(
+          (occurrence) => {
+            return {
+              ...occurrence,
+              occurredAt: toCalendarDateTime(
+                fromDate(new Date(occurrence.timestamp), getLocalTimeZone())
+              ),
+            };
+          }
+        );
+
+        set((state) => {
+          state.occurrences = keyBy(occurrencesWithCalendarDateTime, 'id');
+        });
+      },
+
+      removeOccurrence: async (occurrence: Occurrence) => {
+        await destroyOccurrence(occurrence);
+
+        set((state) => {
+          delete state.occurrences[occurrence.id];
+        });
+      },
+
+      setOccurrenceNote: (
+        occurrenceId: Occurrence['id'],
+        note: Pick<Note, 'id' | 'content'> | null
+      ) => {
+        set((state) => {
+          const occurrence = state.occurrences[occurrenceId];
+
+          if (!occurrence) {
+            return;
+          }
+
+          occurrence.note = note;
+        });
+      },
+
+      updateOccurrence: async (
+        id: Occurrence['id'],
+        body: OccurrencesUpdate
+      ) => {
+        const updatedOccurrence = await patchOccurrence(id, body);
+
+        set((state) => {
+          state.occurrences[id] = updatedOccurrence;
+        });
+      },
+    },
+  };
+};
 
 export const useOccurrences = () => {
-  return useOccurrencesStore(
+  return useBoundStore(
     useShallow((state) => {
       return Object.values(state.occurrences);
     })
@@ -127,7 +127,7 @@ export const useOccurrences = () => {
 };
 
 export const useOccurrenceActions = () => {
-  return useOccurrencesStore((state) => {
-    return state.actions;
+  return useBoundStore((state) => {
+    return state.occurrencesActions;
   });
 };
