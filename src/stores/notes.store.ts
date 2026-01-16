@@ -1,7 +1,5 @@
 import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
 import keyBy from 'lodash.keyby';
-import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 
 import type { Note, NotesInsert, NotesUpdate } from '@models';
@@ -13,9 +11,11 @@ import {
 } from '@services';
 import { isNoteOfPeriod } from '@utils';
 
-type NotesState = {
+import { useBoundStore, type SliceCreator } from './bound.store';
+
+export type NotesSlice = {
   notes: Record<Note['id'], Note>;
-  actions: {
+  noteActions: {
     addNote: (note: NotesInsert) => Promise<Note>;
     clearNotes: () => void;
     deleteNote: (id: Note['id']) => Promise<void>;
@@ -26,65 +26,63 @@ type NotesState = {
   };
 };
 
-const useNotesStore = create<NotesState>()(
-  immer((set) => {
-    return {
-      notes: {},
+export const createNotesSlice: SliceCreator<keyof NotesSlice> = (set) => {
+  return {
+    notes: {},
 
-      actions: {
-        addNote: async (note: NotesInsert) => {
-          const newNote = await createNote(note);
+    noteActions: {
+      addNote: async (note: NotesInsert) => {
+        const newNote = await createNote(note);
 
-          set((state) => {
-            state.notes[newNote.id] = newNote;
-          });
+        set((state) => {
+          state.notes[newNote.id] = newNote;
+        });
 
-          return newNote;
-        },
-
-        clearNotes: () => {
-          set((state) => {
-            state.notes = {};
-          });
-        },
-
-        deleteNote: async (id: Note['id']) => {
-          await destroyNote(id);
-
-          set((state) => {
-            delete state.notes[id];
-          });
-        },
-
-        fetchNotes: async (
-          range: [
-            CalendarDate | CalendarDateTime,
-            CalendarDate | CalendarDateTime,
-          ]
-        ) => {
-          const notes = await listPeriodNotes(range);
-
-          set((state) => {
-            state.notes = keyBy(notes, 'id');
-          });
-        },
-
-        updateNote: async (id: Note['id'], note: NotesUpdate) => {
-          const updatedNote = await updateNote(id, note);
-
-          set((state) => {
-            state.notes[id] = updatedNote;
-          });
-
-          return updatedNote;
-        },
+        return newNote;
       },
-    };
-  })
-);
+
+      clearNotes: () => {
+        set((state) => {
+          state.notes = {};
+        });
+      },
+
+      deleteNote: async (id: Note['id']) => {
+        await destroyNote(id);
+
+        set((state) => {
+          delete state.notes[id];
+        });
+      },
+
+      fetchNotes: async (
+        range: [
+          CalendarDate | CalendarDateTime,
+          CalendarDate | CalendarDateTime,
+        ]
+      ) => {
+        const notes = await listPeriodNotes(range);
+
+        set((state) => {
+          state.notes = keyBy(notes, 'id');
+        });
+      },
+
+      updateNote: async (id: Note['id'], note: NotesUpdate) => {
+        const updatedNote = await updateNote(id, note);
+
+        set((state) => {
+          state.notes[id] = updatedNote;
+        });
+
+        return updatedNote;
+      },
+    },
+  };
+};
 
 export const useNotes = () => {
-  return useNotesStore(
+  return useBoundStore(
     useShallow((state) => {
       return Object.values(state.notes);
     })
@@ -108,7 +106,7 @@ export const useDayNotes = () => {
 };
 
 export const useNoteActions = () => {
-  return useNotesStore((state) => {
-    return state.actions;
+  return useBoundStore((state) => {
+    return state.noteActions;
   });
 };

@@ -79,11 +79,13 @@ const useSession = () => {
   }, [
     range,
     setUser,
-    fetchTraits,
-    fetchHabits,
-    clearTraits,
-    clearHabits,
+    fetchNotes,
     clearNotes,
+    fetchTraits,
+    clearTraits,
+    fetchHabits,
+    clearHabits,
+    fetchOccurrences,
     clearOccurrences,
   ]);
 };

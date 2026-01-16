@@ -1,3 +1,4 @@
+export * from './bound.store';
 export * from './habits.store';
 export * from './notes.store';
 export * from './occurrences.store';

@@ -1,59 +1,57 @@
 import keyBy from 'lodash.keyby';
-import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
 
 import type { Trait, TraitsInsert } from '@models';
 import { listTraits, createTrait } from '@services';
 
-type TraitsState = {
+import { useBoundStore, type SliceCreator } from './bound.store';
+
+export type TraitsSlice = {
   traits: Record<Trait['id'], Trait>;
-  actions: {
+  traitActions: {
     addTrait: (trait: TraitsInsert) => Promise<void>;
     clearTraits: () => void;
     fetchTraits: () => Promise<void>;
   };
 };
 
-const useTraitsStore = create<TraitsState>()(
-  immer((set) => {
-    return {
-      traits: {},
+export const createTraitsSlice: SliceCreator<keyof TraitsSlice> = (set) => {
+  return {
+    traits: {},
 
-      actions: {
-        addTrait: async (trait: TraitsInsert) => {
-          const newTrait = await createTrait(trait);
+    traitActions: {
+      addTrait: async (trait: TraitsInsert) => {
+        const newTrait = await createTrait(trait);
 
-          set((state) => {
-            state.traits[newTrait.id] = newTrait;
-          });
-        },
-
-        clearTraits: () => {
-          set((state) => {
-            state.traits = {};
-          });
-        },
-
-        fetchTraits: async () => {
-          const traits = await listTraits();
-
-          set((state) => {
-            state.traits = keyBy(traits, 'id');
-          });
-        },
+        set((state) => {
+          state.traits[newTrait.id] = newTrait;
+        });
       },
-    };
-  })
-);
+
+      clearTraits: () => {
+        set((state) => {
+          state.traits = {};
+        });
+      },
+
+      fetchTraits: async () => {
+        const traits = await listTraits();
+
+        set((state) => {
+          state.traits = keyBy(traits, 'id');
+        });
+      },
+    },
+  };
+};
 
 export const useTraits = () => {
-  return useTraitsStore((state) => {
+  return useBoundStore((state) => {
     return state.traits;
   });
 };
 
 export const useTraitActions = () => {
-  return useTraitsStore((state) => {
-    return state.actions;
+  return useBoundStore((state) => {
+    return state.traitActions;
   });
 };
