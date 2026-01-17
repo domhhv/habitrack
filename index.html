@@ -19,10 +19,10 @@
         font-weight: 600;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-      }
 
-      body * {
-        box-sizing: border-box;
+        * {
+          box-sizing: border-box;
+        }
       }
 
       #root {
@@ -31,26 +31,33 @@
         display: flex;
         flex-direction: column;
         position: relative;
+
+        &.initialized {
+          height: auto;
+        }
       }
 
-      #root.initialized {
-        height: auto;
+      html.dark .loader-container {
+        background-color: #0d140f;
+        color: #e5f5f1;
       }
 
       .loader-container {
+        background-color: #f3fbf7;
+        color: #333333;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100%;
 
         span {
-          font-size: 1.2rem;
+          font-size: 1rem;
         }
 
         img {
-          width: 24px;
-          height: 24px;
-          margin-right: 8px;
+          width: 26px;
+          height: 26px;
+          margin-right: 16px;
         }
       }
 
@@ -67,6 +74,16 @@
         }
       }
     </style>
+    <script>
+      const { theme = 'system' } = localStorage;
+      const isSystemDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      document.documentElement.classList.toggle(
+        'dark',
+        theme === 'dark' || (theme === 'system' && isSystemDark)
+      );
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
