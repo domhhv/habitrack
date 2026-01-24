@@ -21,6 +21,7 @@ import { type Occurrence } from '@models';
 import {
   useOccurrences,
   useOccurrenceActions,
+  useConfirmationActions,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
 } from '@stores';
@@ -33,6 +34,9 @@ import OccurrenceList from './OccurrenceList';
 const OccurrenceDrawer = () => {
   const timeZone = getLocalTimeZone();
   const occurrences = useOccurrences();
+  const [occurrenceIdBeingRemoved, setOccurrenceIdBeingRemoved] =
+    React.useState('');
+  const { askConfirmation } = useConfirmationActions();
   const { removeOccurrence } = useOccurrenceActions();
   const { isMobile } = useScreenWidth();
   const { dayToDisplay, dayToLog, habitIdToDisplay, isOpen, occurrenceToEdit } =
@@ -85,8 +89,16 @@ const OccurrenceDrawer = () => {
     };
   }, [dayToDisplay, habitIdToDisplay, occurrences, timeZone]);
 
-  const dispatchOccurrenceRemoval = (occurrence: Occurrence) => {
-    void handleAsyncAction(removeOccurrence(occurrence), 'remove_occurrence');
+  const dispatchOccurrenceRemoval = async (occurrence: Occurrence) => {
+    if (await askConfirmation()) {
+      setOccurrenceIdBeingRemoved(occurrence.id);
+      handleAsyncAction(
+        removeOccurrence(occurrence),
+        'remove_occurrence'
+      ).finally(() => {
+        setOccurrenceIdBeingRemoved('');
+      });
+    }
   };
 
   const changeOpen = (isOpen: boolean) => {
@@ -202,6 +214,7 @@ const OccurrenceDrawer = () => {
             <OccurrenceList
               onRemove={dispatchOccurrenceRemoval}
               hasChips={!!occurrencesData.dayOccurrences}
+              occurrenceIdBeingRemoved={occurrenceIdBeingRemoved}
               occurrencesWithTime={occurrencesData.occurrencesWithTime}
               occurrencesWithoutTime={occurrencesData.occurrencesWithoutTime}
               hasOccurrencesWithTime={occurrencesData.hasOccurrencesWithTime}

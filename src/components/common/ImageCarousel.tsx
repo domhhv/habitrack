@@ -10,19 +10,21 @@ import React, { useRef, useState } from 'react';
 
 import type { SignedUrls } from '@models';
 
-interface ImageCarouselProps {
-  imageUrls: SignedUrls;
+type ImageCarouselProps = {
   height?: string;
+  imagePathBeingDeleted: string;
+  imageUrls: SignedUrls;
   width?: string;
   onDelete: (index: number) => void;
-}
+};
 
-const ImageCarousel: React.FC<ImageCarouselProps> = ({
+const ImageCarousel = ({
   height = 'h-64',
+  imagePathBeingDeleted,
   imageUrls,
   onDelete,
   width = 'w-full',
-}) => {
+}: ImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -194,6 +196,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
             isIconOnly
             variant="flat"
             isDisabled={isAnimating}
+            isLoading={imagePathBeingDeleted === currentImageUrl.path}
             onPress={() => {
               return handleDelete(currentIndex);
             }}

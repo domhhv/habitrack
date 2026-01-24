@@ -10,7 +10,12 @@ import React from 'react';
 import { I18nProvider } from 'react-aria';
 import { Route, Routes, Navigate, useNavigate } from 'react-router';
 
-import { AppHeader, NoteDrawer, OccurrenceDrawer } from '@components';
+import {
+  AppHeader,
+  NoteDrawer,
+  OccurrenceDrawer,
+  ConfirmationDialog,
+} from '@components';
 import { useSession } from '@hooks';
 import {
   NotesPage,
@@ -75,6 +80,7 @@ const App = () => {
         <AppHeader />
         <NoteDrawer />
         <OccurrenceDrawer />
+        <ConfirmationDialog />
         <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 flex-col items-start">
           <Routes>
             <Route
