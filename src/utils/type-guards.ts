@@ -6,10 +6,6 @@ import type {
   SuccessfulUpload,
 } from '@models';
 
-export const isTruthy = <T>(value: T | null | undefined): value is T => {
-  return Boolean(value);
-};
-
 export const isFulfilled = <T>(
   input: PromiseSettledResult<T>
 ): input is PromiseFulfilledResult<T> => {

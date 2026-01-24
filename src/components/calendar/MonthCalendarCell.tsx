@@ -23,7 +23,6 @@ import {
   useNoteDrawerActions,
   useOccurrenceDrawerActions,
 } from '@stores';
-import { toSqlDate } from '@utils';
 
 export type CellPosition =
   | 'top-left'
@@ -61,7 +60,7 @@ const MonthCalendarCell = ({
 
   const hasNote = React.useMemo(() => {
     return dayNotes.some((note) => {
-      return note.periodDate === toSqlDate(date);
+      return note.periodDate === date.toString();
     });
   }, [dayNotes, date]);
 

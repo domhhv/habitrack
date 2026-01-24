@@ -26,7 +26,7 @@ export type OccurrencesSlice = {
   occurrencesActions: {
     addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
     clearOccurrences: () => void;
-    fetchOccurrences: (range: [number, number]) => Promise<void>;
+    fetchOccurrences: () => Promise<void>;
     removeOccurrence: (occurrence: Occurrence) => Promise<void>;
     setOccurrenceNote: (
       occurrenceId: Occurrence['id'],
@@ -40,7 +40,8 @@ export type OccurrencesSlice = {
 };
 
 export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
-  set
+  set,
+  getState
 ) => {
   return {
     occurrences: {},
@@ -62,8 +63,20 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         });
       },
 
-      fetchOccurrences: async (range: [number, number]) => {
-        const occurrences = await listOccurrences(range);
+      fetchOccurrences: async () => {
+        const {
+          calendarRange: [rangeStart, rangeEnd],
+          user,
+        } = getState();
+
+        if (!user || rangeStart.compare(rangeEnd) === 0) {
+          return;
+        }
+
+        const occurrences = await listOccurrences([
+          +rangeStart.toDate(getLocalTimeZone()),
+          +rangeEnd.toDate(getLocalTimeZone()),
+        ]);
 
         const occurrencesWithCalendarDateTime = occurrences.map(
           (occurrence) => {

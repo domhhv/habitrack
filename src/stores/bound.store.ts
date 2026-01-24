@@ -3,7 +3,7 @@ import {
   type StateCreator,
   type StoreMutatorIdentifier,
 } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 import { type HabitsSlice, createHabitsSlice } from './habits.store';
@@ -35,15 +35,61 @@ export type SliceCreator<TSlice extends keyof BoundStore> = (
 
 export const useBoundStore = create<BoundStore>()(
   devtools(
-    immer((set, get, store) => {
-      return {
-        ...createUiSlice(set, get, store),
-        ...createUserSlice(set, get, store),
-        ...createNotesSlice(set, get, store),
-        ...createTraitsSlice(set, get, store),
-        ...createHabitsSlice(set, get, store),
-        ...createOccurrencesSlice(set, get, store),
-      };
-    })
+    subscribeWithSelector(
+      immer((set, get, store) => {
+        return {
+          ...createUiSlice(set, get, store),
+          ...createUserSlice(set, get, store),
+          ...createNotesSlice(set, get, store),
+          ...createTraitsSlice(set, get, store),
+          ...createHabitsSlice(set, get, store),
+          ...createOccurrencesSlice(set, get, store),
+        };
+      })
+    )
   )
+);
+
+useBoundStore.subscribe(
+  ({ calendarRange: [calendarRangeStart, calendarRangeEnd], user }) => {
+    return {
+      calendarRangeEnd,
+      calendarRangeStart,
+      userId: user?.id,
+    };
+  },
+  (newState, prevState) => {
+    const { habitActions, noteActions, occurrencesActions, traitActions } =
+      useBoundStore.getState();
+
+    if (!newState.userId && prevState.userId) {
+      habitActions.clearHabits();
+      traitActions.clearTraits();
+      occurrencesActions.clearOccurrences();
+      noteActions.clearNotes();
+
+      return;
+    }
+
+    if (newState.userId && newState.userId !== prevState.userId) {
+      void habitActions.fetchHabits();
+      void traitActions.fetchTraits();
+      void occurrencesActions.fetchOccurrences();
+      void noteActions.fetchNotes();
+
+      return;
+    }
+
+    const hasRangeEndChanged = !!newState.calendarRangeEnd.compare(
+      prevState.calendarRangeEnd
+    );
+    const hasRangeStartChanged = !!newState.calendarRangeStart.compare(
+      prevState.calendarRangeStart
+    );
+
+    if (hasRangeEndChanged || hasRangeStartChanged) {
+      void occurrencesActions.fetchOccurrences();
+      void noteActions.fetchNotes();
+    }
+  }
 );

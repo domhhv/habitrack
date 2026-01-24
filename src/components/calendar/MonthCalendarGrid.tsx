@@ -1,4 +1,4 @@
-import { cn, Button, Tooltip, Skeleton } from '@heroui/react';
+import { cn, Button, Tooltip } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { getWeeksInMonth, toCalendarDateTime } from '@internationalized/date';
 import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
@@ -12,7 +12,7 @@ import type { CalendarState } from 'react-stately';
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import type { Occurrence } from '@models';
 import { useWeekNotes, useNoteDrawerActions } from '@stores';
-import { isTruthy, toSqlDate, getISOWeek } from '@utils';
+import { getISOWeek } from '@utils';
 
 import type { CellPosition } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
@@ -23,7 +23,7 @@ type CalendarGridProps = {
 };
 
 const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
-  const { firstDayOfWeek, isLoadingFirstDayOfWeek } = useFirstDayOfWeek();
+  const { firstDayOfWeek } = useFirstDayOfWeek();
   const { gridProps, weekDays } = useCalendarGrid(
     {
       firstDayOfWeek,
@@ -33,7 +33,11 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
   );
   const { isDesktop } = useScreenWidth();
   const { locale } = useLocale();
-  const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
+  const weeksInMonthCount = getWeeksInMonth(
+    state.visibleRange.start,
+    locale,
+    firstDayOfWeek
+  );
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const weekNotes = useWeekNotes();
   const { openNoteDrawer } = useNoteDrawerActions();
@@ -70,12 +74,7 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
               key={weekDay}
               className="flex flex-1 items-center justify-center text-neutral-600 dark:text-neutral-300"
             >
-              <Skeleton
-                isLoaded={!isLoadingFirstDayOfWeek}
-                className="h-6 w-9 rounded-lg text-center"
-              >
-                <p className="font-bold">{capitalize(weekDay)}</p>
-              </Skeleton>
+              <p className="font-bold">{capitalize(weekDay)}</p>
             </div>
           );
         })}
@@ -91,14 +90,22 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
           key={state.focusedDate.toString()}
         >
           {weekIndexes.map((weekIndex) => {
-            const daysOfWeek = state.getDatesInWeek(weekIndex).filter(isTruthy);
+            const daysOfWeek = state
+              .getDatesInWeek(weekIndex)
+              .filter((value): value is CalendarDate => {
+                return Boolean(value);
+              });
             const [firstDayOfWeek] = daysOfWeek;
             const monday = daysOfWeek.find((d) => {
               return d.toDate(state.timeZone).getDay() === 1;
-            })!;
+            });
+
+            if (!monday) {
+              return null;
+            }
 
             const weekNote = weekNotes.find((note) => {
-              return note.periodDate === toSqlDate(monday);
+              return note.periodDate === monday.toString();
             });
 
             return (
@@ -140,7 +147,7 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                       radius={isDesktop ? 'md' : 'sm'}
                       variant={isDesktop ? 'flat' : weekNote ? 'solid' : 'flat'}
                       onPress={() => {
-                        openNoteDrawer(monday, 'week');
+                        openNoteDrawer(firstDayOfWeek, 'week');
                       }}
                       className={cn(
                         'mb-0 w-6 min-w-fit basis-19.75 p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:w-7 lg:basis-26.75',
@@ -165,7 +172,7 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                 >
                   {state
                     .getDatesInWeek(weekIndex)
-                    .map((calendarDate: CalendarDate | null, dayIndex) => {
+                    .map((calendarDate, dayIndex) => {
                       if (!calendarDate) {
                         return null;
                       }

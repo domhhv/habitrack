@@ -1,4 +1,4 @@
-import type { User, AuthError, UserAttributes } from '@supabase/supabase-js';
+import type { User, UserAttributes } from '@supabase/supabase-js';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -7,12 +7,8 @@ import { updateUser } from '@services';
 import { useBoundStore, type SliceCreator } from './bound.store';
 
 export type UserSlice = {
-  error: AuthError | null;
-  isLoading: boolean;
   user: null | CamelCasedPropertiesDeep<User>;
   actions: {
-    setError: (error: AuthError | null) => void;
-    setIsLoading: (isLoading: boolean) => void;
     setUser: (user: null | CamelCasedPropertiesDeep<User>) => void;
     updateUser: (opts: {
       email?: string;
@@ -28,20 +24,8 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
   getState
 ) => {
   return {
-    error: null,
-    isLoading: true,
     user: null,
     actions: {
-      setError: (error) => {
-        set((state) => {
-          state.error = error;
-        });
-      },
-      setIsLoading: (isLoading) => {
-        set((state) => {
-          state.isLoading = isLoading;
-        });
-      },
       setUser: (user) => {
         set((state) => {
           state.user = user;
@@ -97,8 +81,6 @@ export const useUser = () => {
   return useBoundStore(
     useShallow((state) => {
       return {
-        error: state.error,
-        isLoading: state.isLoading,
         user: state.user,
       };
     })

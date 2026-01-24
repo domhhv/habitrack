@@ -1,12 +1,4 @@
-import {
-  cn,
-  Alert,
-  Input,
-  Button,
-  Select,
-  Spinner,
-  SelectItem,
-} from '@heroui/react';
+import { cn, Alert, Input, Button, Select, SelectItem } from '@heroui/react';
 import React, { type FormEventHandler } from 'react';
 
 import { PasswordInput } from '@components';
@@ -17,7 +9,7 @@ import { handleAsyncAction } from '@utils';
 const AccountPage = () => {
   useAuthSearchParams();
 
-  const { isLoading: isLoadingUser, user } = useUser();
+  const { user } = useUser();
   const { updateUser } = useUserActions();
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [email, handleEmailChange] = useTextField();
@@ -36,16 +28,7 @@ const AccountPage = () => {
   const containerClassName =
     'w-full mt-8 flex flex-col items-center justify-center';
 
-  if (!user && isLoadingUser) {
-    return (
-      <div className={cn(containerClassName, 'pt-16')}>
-        {title}
-        <Spinner data-testid="loader" aria-label="Loading..." />
-      </div>
-    );
-  }
-
-  if (!user && !isLoadingUser) {
+  if (!user) {
     return (
       <div className={cn(containerClassName, 'items-start pt-16')}>
         {title}

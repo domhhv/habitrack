@@ -1,5 +1,10 @@
-import type { CalendarDate } from '@internationalized/date';
-import { today, getLocalTimeZone } from '@internationalized/date';
+import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
+import {
+  now,
+  today,
+  getLocalTimeZone,
+  toCalendarDateTime,
+} from '@internationalized/date';
 import type { RequireAtLeastOne } from 'type-fest';
 
 import type { Habit, Occurrence, NotePeriodKind } from '@models';
@@ -14,8 +19,8 @@ type OccurrenceDrawerOptions = {
 };
 
 export type UiSlice = {
-  calendarRange: [number, number];
-  changeCalendarRange: (range: [number, number]) => void;
+  calendarRange: [CalendarDateTime, CalendarDateTime];
+  changeCalendarRange: (range: [CalendarDateTime, CalendarDateTime]) => void;
   noteDrawer: {
     isOpen: boolean;
     periodDate: CalendarDate;
@@ -49,12 +54,15 @@ export type UiSlice = {
 
 export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
   return {
-    calendarRange: [0, 0],
-    changeCalendarRange: (range: [number, number]) => {
+    changeCalendarRange: (range) => {
       set((state) => {
         state.calendarRange = range;
       });
     },
+    calendarRange: [
+      toCalendarDateTime(now(getLocalTimeZone())),
+      toCalendarDateTime(now(getLocalTimeZone())),
+    ],
     noteDrawer: {
       isOpen: false,
       periodDate: today(getLocalTimeZone()),
