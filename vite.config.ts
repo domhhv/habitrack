@@ -16,6 +16,13 @@ export default defineConfig(({ mode }) => {
     clearScreen: false,
     build: {
       rollupOptions: {
+        onwarn(warning, warn) {
+          if (warning.message.includes('Module "os" has been externalized')) {
+            return;
+          }
+
+          warn(warning);
+        },
         output: {
           assetFileNames: 'assets/[name].[hash][extname]',
           chunkFileNames: 'assets/[name].[hash].js',
@@ -83,6 +90,10 @@ export default defineConfig(({ mode }) => {
         '@stores': resolve(__dirname, './src/stores'),
         '@tests': resolve(__dirname, './tests'),
         '@utils': resolve(__dirname, './src/utils'),
+        '@supabase/supabase-js': resolve(
+          __dirname,
+          './node_modules/@supabase/supabase-js/dist/index.cjs'
+        ),
       },
     },
     test: {
