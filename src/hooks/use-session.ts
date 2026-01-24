@@ -1,27 +1,14 @@
-import type { AuthError } from '@supabase/supabase-js';
 import camelcaseKeys from 'camelcase-keys';
 import React from 'react';
 
 import { getSession } from '@services';
-import {
-  useNoteActions,
-  useUserActions,
-  useHabitActions,
-  useTraitActions,
-  useCalendarRange,
-  useOccurrenceActions,
-} from '@stores';
+import { useUserActions } from '@stores';
 import { supabaseClient } from '@utils';
 
 const useSession = () => {
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState<AuthError>();
-  const range = useCalendarRange();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<Error>();
   const { setUser } = useUserActions();
-  const { clearOccurrences } = useOccurrenceActions();
-  const { clearNotes } = useNoteActions();
-  const { clearTraits } = useTraitActions();
-  const { clearHabits } = useHabitActions();
 
   React.useEffect(() => {
     getSession()
@@ -50,17 +37,13 @@ const useSession = () => {
 
       if (event === 'SIGNED_OUT') {
         setUser(null);
-        clearTraits();
-        clearHabits();
-        clearNotes();
-        clearOccurrences();
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [range, setUser, clearNotes, clearTraits, clearHabits, clearOccurrences]);
+  }, [setUser]);
 
   return { error, isLoading };
 };

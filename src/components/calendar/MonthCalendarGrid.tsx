@@ -33,7 +33,11 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
   );
   const { isDesktop } = useScreenWidth();
   const { locale } = useLocale();
-  const weeksInMonthCount = getWeeksInMonth(state.visibleRange.start, locale);
+  const weeksInMonthCount = getWeeksInMonth(
+    state.visibleRange.start,
+    locale,
+    firstDayOfWeek
+  );
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const weekNotes = useWeekNotes();
   const { openNoteDrawer } = useNoteDrawerActions();

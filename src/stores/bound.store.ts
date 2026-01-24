@@ -62,6 +62,15 @@ useBoundStore.subscribe(
     const { habitActions, noteActions, occurrencesActions, traitActions } =
       useBoundStore.getState();
 
+    if (!newState.userId && prevState.userId) {
+      habitActions.clearHabits();
+      traitActions.clearTraits();
+      occurrencesActions.clearOccurrences();
+      noteActions.clearNotes();
+
+      return;
+    }
+
     if (newState.userId && newState.userId !== prevState.userId) {
       void habitActions.fetchHabits();
       void traitActions.fetchTraits();
