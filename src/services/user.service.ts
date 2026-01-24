@@ -67,7 +67,7 @@ export const getSession = async () => {
   } = await supabaseClient.auth.getSession();
 
   if (error) {
-    throw new Error(error.message);
+    throw error;
   }
 
   if (!session?.user) {

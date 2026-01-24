@@ -5,6 +5,7 @@ import {
   startOfWeek,
   CalendarDate,
   startOfMonth,
+  toCalendarDate,
   toCalendarDateTime,
 } from '@internationalized/date';
 import React from 'react';
@@ -15,11 +16,10 @@ import type { CalendarState } from 'react-stately';
 import { useFirstDayOfWeek } from '@hooks';
 import type { OccurrenceFilters } from '@models';
 import {
+  useUser,
   useHabits,
   useTraits,
   useOccurrences,
-  useNoteActions,
-  useOccurrenceActions,
   useCalendarRangeChange,
 } from '@stores';
 
@@ -31,19 +31,18 @@ type MonthCalendarProps = {
 };
 
 const MonthCalendar = ({ state }: MonthCalendarProps) => {
+  const { user } = useUser();
   const changeCalendarRange = useCalendarRangeChange();
   const occurrences = useOccurrences();
   const habits = useHabits();
   const traits = useTraits();
   const params = useParams();
   const { locale } = useLocale();
-  const { fetchNotes } = useNoteActions();
-  const { fetchOccurrences } = useOccurrenceActions();
   const [filters, setFilters] = React.useState<OccurrenceFilters>({
     habitIds: new Set(),
     traitIds: new Set(),
   });
-  const { firstDayOfWeek, isLoadingFirstDayOfWeek } = useFirstDayOfWeek();
+  const { firstDayOfWeek } = useFirstDayOfWeek();
   const [fetchedMonthYear, setFetchedMonthYear] = React.useState<string>('');
 
   const derivedFilters = React.useMemo(() => {
@@ -83,22 +82,26 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
     );
 
     if (state.focusedDate.toString() !== paramsDate.toString()) {
-      state.setFocusedDate(paramsDate);
+      state.setFocusedDate(toCalendarDate(paramsDate));
     }
 
-    if (isLoadingFirstDayOfWeek || fetchedMonthYear === paramsDate.toString()) {
+    if (!user || fetchedMonthYear === paramsDate.toString()) {
       return;
     }
 
     setFetchedMonthYear(paramsDate.toString());
 
+    const paramsDateTime = toCalendarDateTime(paramsDate);
+
     const rangeStart = startOfWeek(
-      startOfMonth(paramsDate),
+      startOfMonth(paramsDateTime),
       locale,
       firstDayOfWeek
     );
-    const rangeEnd = toCalendarDateTime(
-      endOfWeek(endOfMonth(paramsDate), locale, firstDayOfWeek)
+    const rangeEnd = endOfWeek(
+      endOfMonth(paramsDateTime),
+      locale,
+      firstDayOfWeek
     ).set({
       hour: 23,
       millisecond: 999,
@@ -106,24 +109,14 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
       second: 59,
     });
 
-    const nextRange: [number, number] = [
-      +rangeStart.toDate(state.timeZone),
-      +rangeEnd.toDate(state.timeZone),
-    ];
-
-    changeCalendarRange(nextRange);
-
-    void fetchOccurrences(nextRange);
-    void fetchNotes([rangeStart, rangeEnd]);
+    changeCalendarRange([rangeStart, rangeEnd]);
   }, [
+    user,
     changeCalendarRange,
     params,
     state,
     locale,
-    fetchNotes,
-    fetchOccurrences,
     fetchedMonthYear,
-    isLoadingFirstDayOfWeek,
     firstDayOfWeek,
   ]);
 

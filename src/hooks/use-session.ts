@@ -1,8 +1,4 @@
-import {
-  fromDate,
-  getLocalTimeZone,
-  toCalendarDateTime,
-} from '@internationalized/date';
+import type { AuthError } from '@supabase/supabase-js';
 import camelcaseKeys from 'camelcase-keys';
 import React from 'react';
 
@@ -18,12 +14,14 @@ import {
 import { supabaseClient } from '@utils';
 
 const useSession = () => {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<AuthError>();
   const range = useCalendarRange();
-  const { setError, setIsLoading, setUser } = useUserActions();
-  const { clearOccurrences, fetchOccurrences } = useOccurrenceActions();
-  const { clearNotes, fetchNotes } = useNoteActions();
-  const { clearTraits, fetchTraits } = useTraitActions();
-  const { clearHabits, fetchHabits } = useHabitActions();
+  const { setUser } = useUserActions();
+  const { clearOccurrences } = useOccurrenceActions();
+  const { clearNotes } = useNoteActions();
+  const { clearTraits } = useTraitActions();
+  const { clearHabits } = useHabitActions();
 
   React.useEffect(() => {
     getSession()
@@ -32,7 +30,7 @@ const useSession = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [setIsLoading, setError, setUser]);
+  }, [setUser]);
 
   React.useEffect(() => {
     const {
@@ -48,20 +46,6 @@ const useSession = () => {
         ].includes(event)
       ) {
         setUser(camelcaseKeys(session.user, { deep: true }));
-        void fetchTraits();
-        void fetchHabits();
-
-        if (range.every(Boolean)) {
-          void fetchOccurrences(range);
-          void fetchNotes([
-            toCalendarDateTime(
-              fromDate(new Date(range[0]), getLocalTimeZone())
-            ),
-            toCalendarDateTime(
-              fromDate(new Date(range[1]), getLocalTimeZone())
-            ),
-          ]);
-        }
       }
 
       if (event === 'SIGNED_OUT') {
@@ -76,18 +60,9 @@ const useSession = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [
-    range,
-    setUser,
-    fetchNotes,
-    clearNotes,
-    fetchTraits,
-    clearTraits,
-    fetchHabits,
-    clearHabits,
-    fetchOccurrences,
-    clearOccurrences,
-  ]);
+  }, [range, setUser, clearNotes, clearTraits, clearHabits, clearOccurrences]);
+
+  return { error, isLoading };
 };
 
 export default useSession;

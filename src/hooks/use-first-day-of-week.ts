@@ -3,7 +3,7 @@ import { useUser } from '@stores';
 const firstDaysOfWeek = ['sun', 'mon'] as const;
 
 const useFirstDayOfWeek = () => {
-  const { isLoading, user } = useUser();
+  const { user } = useUser();
   const userFirstDayOfWeek = user?.userMetadata.firstDayOfWeek;
   const firstDayOfWeekIndex =
     typeof userFirstDayOfWeek === 'number' &&
@@ -17,7 +17,6 @@ const useFirstDayOfWeek = () => {
   return {
     firstDayOfWeek,
     firstDayOfWeekIndex,
-    isLoadingFirstDayOfWeek: isLoading,
   };
 };
 

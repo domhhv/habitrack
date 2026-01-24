@@ -1,4 +1,4 @@
-import { cn, Button, Tooltip, Skeleton, ScrollShadow } from '@heroui/react';
+import { cn, Button, Tooltip, ScrollShadow } from '@heroui/react';
 import {
   isToday,
   fromDate,
@@ -26,29 +26,26 @@ import { useCalendarState } from 'react-stately';
 import { OccurrenceChip } from '@components';
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
+  useUser,
   useDayNotes,
   useOccurrences,
-  useNoteActions,
-  useOccurrenceActions,
   useNoteDrawerActions,
   useCalendarRangeChange,
 } from '@stores';
-import { toSqlDate, getISOWeek, getISOWeekYear } from '@utils';
+import { getISOWeek, getISOWeekYear } from '@utils';
 
 const WeekCalendar = () => {
+  const { user } = useUser();
   const changeCalendarRange = useCalendarRangeChange();
   const dayNotes = useDayNotes();
   const { isDesktop } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
   const occurrences = useOccurrences();
   const [fetchedWeekYear, setFetchedWeekYear] = React.useState('');
-  const { fetchOccurrences } = useOccurrenceActions();
-  const { fetchNotes } = useNoteActions();
   const { locale } = useLocale();
   const params = useParams();
   const navigate = useNavigate();
-  const { firstDayOfWeek, firstDayOfWeekIndex, isLoadingFirstDayOfWeek } =
-    useFirstDayOfWeek();
+  const { firstDayOfWeek, firstDayOfWeekIndex } = useFirstDayOfWeek();
   const state = useCalendarState({
     createCalendar,
     firstDayOfWeek,
@@ -84,57 +81,39 @@ const WeekCalendar = () => {
     );
 
     if (state.focusedDate.toString() !== paramsDate.toString()) {
-      state.setFocusedDate(paramsDate);
+      state.setFocusedDate(toCalendarDate(paramsDate));
     }
 
-    if (
-      isLoadingFirstDayOfWeek ||
-      fetchedWeekYear === state.focusedDate.toString()
-    ) {
+    if (!user || fetchedWeekYear === state.focusedDate.toString()) {
       return;
     }
 
     setFetchedWeekYear(state.focusedDate.toString());
 
-    const rangeStart = startOfWeek(paramsDate, locale, firstDayOfWeek);
-    const rangeEnd = endOfWeek(
-      toCalendarDateTime(paramsDate),
-      locale,
-      firstDayOfWeek
-    ).set({
+    const paramsDateTime = toCalendarDateTime(paramsDate);
+    const rangeStart = startOfWeek(paramsDateTime, locale, firstDayOfWeek);
+    const rangeEnd = endOfWeek(paramsDateTime, locale, firstDayOfWeek).set({
       hour: 23,
       millisecond: 999,
       minute: 59,
       second: 59,
     });
 
-    const nextRange: [number, number] = [
-      +rangeStart.toDate(state.timeZone),
-      +rangeEnd.toDate(state.timeZone),
-    ];
-
-    changeCalendarRange(nextRange);
-
-    void fetchOccurrences(nextRange);
-    void fetchNotes([rangeStart, toCalendarDate(rangeEnd)]);
+    changeCalendarRange([rangeStart, rangeEnd]);
   }, [
+    user,
     changeCalendarRange,
     firstDayOfWeek,
-    fetchNotes,
-    state.timeZone,
     fetchedWeekYear,
-    fetchOccurrences,
     state,
-    state.visibleRange.start,
     params,
-    isLoadingFirstDayOfWeek,
     locale,
   ]);
 
   const hasNote = React.useCallback(
     (date: CalendarDate) => {
       return dayNotes.some((note) => {
-        return note.periodDate === toSqlDate(date);
+        return note.periodDate === date.toString();
       });
     },
     [dayNotes]
@@ -258,12 +237,7 @@ const WeekCalendar = () => {
                   )}
                 >
                   <div className="flex items-center justify-center gap-2">
-                    <Skeleton
-                      isLoaded={!isLoadingFirstDayOfWeek}
-                      className="h-6 w-fit rounded-lg text-center"
-                    >
-                      <h3>{capitalize(weekDays[dayIndex])}</h3>
-                    </Skeleton>
+                    <h3>{capitalize(weekDays[dayIndex])}</h3>
                     <Tooltip
                       closeDelay={0}
                       content={isNoteAdded ? 'Edit note' : 'Add note'}

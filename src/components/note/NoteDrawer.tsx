@@ -25,6 +25,7 @@ import {
   useScreenWidth,
   useHasKeyboard,
   useModifierKeys,
+  useFirstDayOfWeek,
 } from '@hooks';
 import {
   useUser,
@@ -33,11 +34,12 @@ import {
   useNoteDrawerState,
   useNoteDrawerActions,
 } from '@stores';
-import { toSqlDate, getISOWeek, handleAsyncAction } from '@utils';
+import { getISOWeek, handleAsyncAction } from '@utils';
 
 import NotePeriodPicker from './NotePeriodPicker';
 
 const NoteDrawer = () => {
+  const { firstDayOfWeek } = useFirstDayOfWeek();
   const timeZone = getLocalTimeZone();
   const notes = usePeriodNotes();
   const { addNote, deleteNote, updateNote } = useNoteActions();
@@ -68,14 +70,17 @@ const NoteDrawer = () => {
     timeZone,
   });
 
+  const alignPeriodDate = React.useCallback(() => {
+    return periodKind === 'week' && firstDayOfWeek === 'sun'
+      ? periodDate.add({ days: 1 }).toString()
+      : periodDate.toString();
+  }, [periodKind, periodDate, firstDayOfWeek]);
+
   const existingNote = React.useMemo(() => {
-    return notes.find((note) => {
-      return (
-        note.periodKind === periodKind &&
-        note.periodDate === toSqlDate(periodDate)
-      );
+    return notes.find((n) => {
+      return n.periodKind === periodKind && n.periodDate === alignPeriodDate();
     });
-  }, [notes, periodDate, periodKind]);
+  }, [notes, periodKind, alignPeriodDate]);
 
   React.useEffect(() => {
     if (isOpen && existingNote?.content) {
@@ -103,7 +108,7 @@ const NoteDrawer = () => {
       return handleAsyncAction(
         addNote({
           content,
-          periodDate: toSqlDate(periodDate),
+          periodDate: alignPeriodDate(),
           periodKind,
           userId: user.id,
         }),
@@ -116,7 +121,7 @@ const NoteDrawer = () => {
       return handleAsyncAction(
         updateNote(existingNote.id, {
           content,
-          periodDate: toSqlDate(periodDate),
+          periodDate: alignPeriodDate(),
           periodKind,
         }),
         'update_note',
@@ -159,7 +164,7 @@ const NoteDrawer = () => {
         return periodDate;
 
       case 'week':
-        return endOfWeek(periodDate, locale);
+        return endOfWeek(periodDate, locale, firstDayOfWeek);
 
       case 'month':
         return endOfMonth(periodDate);

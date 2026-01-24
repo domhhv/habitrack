@@ -1,4 +1,4 @@
-import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
+import { toCalendarDate } from '@internationalized/date';
 import keyBy from 'lodash.keyby';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -19,14 +19,15 @@ export type NotesSlice = {
     addNote: (note: NotesInsert) => Promise<Note>;
     clearNotes: () => void;
     deleteNote: (id: Note['id']) => Promise<void>;
-    fetchNotes: (
-      range: [CalendarDate | CalendarDateTime, CalendarDate | CalendarDateTime]
-    ) => Promise<void>;
+    fetchNotes: () => Promise<void>;
     updateNote: (id: Note['id'], note: NotesUpdate) => Promise<Note>;
   };
 };
 
-export const createNotesSlice: SliceCreator<keyof NotesSlice> = (set) => {
+export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
+  set,
+  getState
+) => {
   return {
     notes: {},
 
@@ -55,13 +56,20 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (set) => {
         });
       },
 
-      fetchNotes: async (
-        range: [
-          CalendarDate | CalendarDateTime,
-          CalendarDate | CalendarDateTime,
-        ]
-      ) => {
-        const notes = await listPeriodNotes(range);
+      fetchNotes: async () => {
+        const {
+          calendarRange: [rangeStart, rangeEnd],
+          user,
+        } = getState();
+
+        if (!user || rangeStart.compare(rangeEnd) === 0) {
+          return;
+        }
+
+        const notes = await listPeriodNotes([
+          toCalendarDate(rangeStart),
+          toCalendarDate(rangeEnd),
+        ]);
 
         set((state) => {
           state.notes = keyBy(notes, 'id');

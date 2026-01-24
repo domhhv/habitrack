@@ -19,12 +19,10 @@ import {
   WeekCalendarPage,
   MonthCalendarPage,
 } from '@pages';
-import { useUser } from '@stores';
 import { getErrorMessage } from '@utils';
 
 const App = () => {
-  useSession();
-  const { error, isLoading } = useUser();
+  const { error, isLoading } = useSession();
   const navigate = useNavigate();
 
   React.useEffect(() => {

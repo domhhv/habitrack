@@ -31,17 +31,18 @@ export const createOccurrence = async (
   return camelcaseKeys(data, { deep: true });
 };
 
-export const listOccurrences = async (
-  range: [number, number]
-): Promise<Occurrence[]> => {
+export const listOccurrences = async ([rangeStart, rangeEnd]: [
+  number,
+  number,
+]): Promise<Occurrence[]> => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .select(
       '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
     )
     .order('timestamp')
-    .gt('timestamp', range[0])
-    .lt('timestamp', range[1]);
+    .gt('timestamp', rangeStart)
+    .lt('timestamp', rangeEnd);
 
   if (error) {
     throw new Error(error.message);

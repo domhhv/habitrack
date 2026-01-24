@@ -1,9 +1,9 @@
-import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
+import type { CalendarDate } from '@internationalized/date';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
 import type { Note, NotesUpdate, NotesInsert, NoteWithHabit } from '@models';
-import { toSqlDate, supabaseClient } from '@utils';
+import { supabaseClient } from '@utils';
 
 export const createNote = async (note: NotesInsert): Promise<Note> => {
   const { data, error } = await supabaseClient
@@ -19,15 +19,16 @@ export const createNote = async (note: NotesInsert): Promise<Note> => {
   return camelcaseKeys(data);
 };
 
-export const listPeriodNotes = async (
-  range: [CalendarDate | CalendarDateTime, CalendarDate | CalendarDateTime]
-): Promise<Note[]> => {
+export const listPeriodNotes = async ([rangeStart, rangeEnd]: [
+  CalendarDate,
+  CalendarDate,
+]): Promise<Note[]> => {
   const { data, error } = await supabaseClient
     .from('notes')
     .select()
     .in('period_kind', ['day', 'week', 'month'])
-    .gte('period_date', toSqlDate(range[0]))
-    .lte('period_date', toSqlDate(range[1]));
+    .gte('period_date', rangeStart.toString())
+    .lte('period_date', rangeEnd.toString());
 
   if (error) {
     throw new Error(error.message);

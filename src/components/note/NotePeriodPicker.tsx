@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useLocale } from 'react-aria';
 
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import { useNoteDrawerState, useNoteDrawerActions } from '@stores';
 
 type NotePeriodPickerProps = {
@@ -24,6 +24,7 @@ type NotePeriodPickerProps = {
 };
 
 const NotePeriodPicker = ({ endRange, isShown }: NotePeriodPickerProps) => {
+  const { firstDayOfWeek } = useFirstDayOfWeek();
   const { locale } = useLocale();
   const { screenWidth } = useScreenWidth();
   const { periodDate, periodKind } = useNoteDrawerState();
@@ -125,7 +126,11 @@ const NotePeriodPicker = ({ endRange, isShown }: NotePeriodPickerProps) => {
                   break;
 
                 case 2: {
-                  const weekStart = startOfWeek(periodDate, locale);
+                  const weekStart = startOfWeek(
+                    periodDate,
+                    locale,
+                    firstDayOfWeek
+                  );
                   setPeriodDate(weekStart);
                   setPeriodKind('week');
                   break;
@@ -164,6 +169,7 @@ const NotePeriodPicker = ({ endRange, isShown }: NotePeriodPickerProps) => {
             <RangeCalendar
               isReadOnly
               focusedValue={periodDate}
+              firstDayOfWeek={firstDayOfWeek}
               value={{
                 end: endRange,
                 start: periodDate,
