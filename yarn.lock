@@ -7255,7 +7255,7 @@ __metadata:
     tailwindcss: "npm:^4.1.18"
     type-fest: "npm:^5.4.1"
     typescript: "npm:^5.9.3"
-    vite: "npm:^7.2.7"
+    vite: "npm:^7.3.1"
     vitest: "npm:^4.0.18"
     zustand: "npm:^5.0.10"
   languageName: unknown
@@ -10566,7 +10566,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^7.2.7":
+"vite@npm:^7.3.1":
   version: 7.3.1
   resolution: "vite@npm:7.3.1"
   dependencies:

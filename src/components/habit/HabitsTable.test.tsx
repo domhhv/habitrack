@@ -27,6 +27,9 @@ vi.mock('@stores', () => {
     useHabits: vi.fn(),
     useTraits: vi.fn().mockReturnValue({}),
     useUser: vi.fn().mockReturnValue({}),
+    useConfirmationActions: vi.fn().mockReturnValue({
+      confirm: vi.fn().mockResolvedValue(false),
+    }),
     useHabitActions: vi.fn().mockReturnValue({
       removeHabit: vi.fn(),
       updateHabit: vi.fn(),

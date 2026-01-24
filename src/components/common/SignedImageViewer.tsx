@@ -3,6 +3,7 @@ import React from 'react';
 
 import type { SignedUrls, StorageBuckets } from '@models';
 import { deleteFile, createSignedUrls } from '@services';
+import { useConfirmationActions } from '@stores';
 import { getErrorMessage } from '@utils';
 
 import { ImageCarousel } from './index';
@@ -18,6 +19,8 @@ const SignedImageViewer = ({
   onDelete,
   paths,
 }: SignedImageViewerProps) => {
+  const { askConfirmation } = useConfirmationActions();
+  const [imagePathBeingDeleted, setImagePathBeingDeleted] = React.useState('');
   const [signedImageUrls, setSignedImageUrls] = React.useState<SignedUrls>([]);
 
   React.useEffect(() => {
@@ -48,9 +51,15 @@ const SignedImageViewer = ({
   const deleteImage = async (index: number) => {
     const path = paths?.[index];
 
-    if (!path) {
+    const confirmed = await askConfirmation({
+      description: 'Deleting this image cannot be undone.',
+    });
+
+    if (!path || !confirmed) {
       return;
     }
+
+    setImagePathBeingDeleted(path);
 
     try {
       await deleteFile(bucket, path);
@@ -74,6 +83,8 @@ const SignedImageViewer = ({
         description: `Error details: ${getErrorMessage(error)}`,
         title: 'Failed to delete photo',
       });
+    } finally {
+      setImagePathBeingDeleted('');
     }
   };
 
@@ -83,7 +94,11 @@ const SignedImageViewer = ({
         <p className="text-sm text-gray-500">
           You can add more photos or delete existing ones
         </p>
-        <ImageCarousel onDelete={deleteImage} imageUrls={signedImageUrls} />
+        <ImageCarousel
+          onDelete={deleteImage}
+          imageUrls={signedImageUrls}
+          imagePathBeingDeleted={imagePathBeingDeleted}
+        />
       </>
     )
   );

@@ -14,21 +14,23 @@ import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
-import {
-  TraitChip,
-  ConfirmDialog,
-  EditHabitDialog,
-  AddHabitDialogButton,
-} from '@components';
+import { TraitChip, EditHabitDialog, AddHabitDialogButton } from '@components';
 import type { Habit } from '@models';
-import { useHabits } from '@stores';
+import { StorageBuckets } from '@models';
+import { listFiles, deleteFile } from '@services';
+import {
+  useUser,
+  useHabits,
+  useHabitActions,
+  useConfirmationActions,
+} from '@stores';
+import { handleAsyncAction } from '@utils';
 
 import habitColumns from './habit-columns';
 import HabitIcon from './HabitIcon';
 import HabitLastEntry from './HabitLastEntry';
 import HabitLongestStreak from './HabitLongestStreak';
 import HabitTotalEntries from './HabitTotalEntries';
-import useHabitRemoval from './use-habit-removal';
 
 const HabitsTable = () => {
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
@@ -39,14 +41,10 @@ const HabitsTable = () => {
     year: 'numeric',
   });
 
+  const { user } = useUser();
   const habits = useHabits();
-  const {
-    habitToRemove,
-    handleRemovalConfirmed,
-    handleRemovalEnd,
-    handleRemovalStart,
-    isRemoving,
-  } = useHabitRemoval();
+  const { removeHabit } = useHabitActions();
+  const { askConfirmation } = useConfirmationActions();
 
   const handleEditStart = (habit: Habit) => {
     setHabitToEdit(habit);
@@ -54,6 +52,50 @@ const HabitsTable = () => {
 
   const handleEditEnd = () => {
     setHabitToEdit(null);
+  };
+
+  const handleDelete = async (habit: Habit) => {
+    const confirmed = await askConfirmation({
+      color: 'danger',
+      title: 'Delete habit',
+      description: (
+        <div>
+          Are you sure you want to delete <strong>{habit.name}</strong> habit?
+          <br />
+          <br />
+          <i className="text-sm">
+            This action deletes all related calendar entries and can&apos;t be
+            undone
+          </i>
+        </div>
+      ),
+    });
+
+    if (!confirmed || !user) {
+      return;
+    }
+
+    const remove = async () => {
+      const habitOccurrencePhotos = await listFiles(
+        StorageBuckets.OCCURRENCE_PHOTOS,
+        `${user.id}/${habit.id}/`
+      );
+
+      if (habitOccurrencePhotos.length > 0) {
+        await Promise.all(
+          habitOccurrencePhotos.map((photo) => {
+            return deleteFile(
+              StorageBuckets.OCCURRENCE_PHOTOS,
+              `${user.id}/${habit.id}/${photo.name}`
+            );
+          })
+        );
+      }
+
+      return removeHabit(habit);
+    };
+
+    void handleAsyncAction(remove(), 'remove_habit');
   };
 
   return (
@@ -177,7 +219,7 @@ const HabitsTable = () => {
                         aria-describedby={`delete-tooltip-${habit.id}`}
                         data-testid={`delete-habit-id-${habit.id}-button`}
                         onPress={() => {
-                          return handleRemovalStart(habit);
+                          return handleDelete(habit);
                         }}
                       >
                         <TrashSimpleIcon
@@ -196,25 +238,6 @@ const HabitsTable = () => {
       </Table>
 
       <EditHabitDialog habit={habitToEdit} onClose={handleEditEnd} />
-
-      <ConfirmDialog
-        isLoading={isRemoving}
-        heading="Delete habit"
-        isOpen={!!habitToRemove}
-        onCancel={handleRemovalEnd}
-        onConfirm={handleRemovalConfirmed}
-      >
-        <div>
-          Are you sure you want to delete <strong>{habitToRemove?.name}</strong>{' '}
-          habit?
-          <br />
-          <br />
-          <i className="text-sm">
-            This action deletes all related calendar entries and can&apos;t be
-            undone
-          </i>
-        </div>
-      </ConfirmDialog>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { cn, Button } from '@heroui/react';
+import { cn, Button, Spinner } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
@@ -10,6 +10,7 @@ import OccurrenceChip from './OccurrenceChip';
 
 type OccurrenceListItemProps = {
   hasChip: boolean;
+  isBeingRemoved: boolean;
   occurrence: Occurrence;
   onEdit: () => void;
   onRemove: () => void;
@@ -17,6 +18,7 @@ type OccurrenceListItemProps = {
 
 const OccurrenceListItem = ({
   hasChip,
+  isBeingRemoved,
   occurrence,
   onEdit,
   onRemove,
@@ -91,6 +93,7 @@ const OccurrenceListItem = ({
             variant="light"
             onPress={onEdit}
             color="secondary"
+            isDisabled={isBeingRemoved}
             aria-label="edit-habit-entry"
             className="h-6 w-6 min-w-0 rounded-lg"
           >
@@ -105,8 +108,16 @@ const OccurrenceListItem = ({
             color="danger"
             variant="light"
             onPress={onRemove}
+            isLoading={isBeingRemoved}
             aria-label="delete-habit-entry"
             className="h-6 w-6 min-w-0 rounded-lg"
+            spinner={
+              <Spinner
+                size="sm"
+                color="danger"
+                className="size-3.5 [&>div]:size-3.5"
+              />
+            }
           >
             <TrashSimpleIcon
               size={14}

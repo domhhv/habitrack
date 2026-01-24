@@ -1,3 +1,4 @@
+import type { ButtonProps } from '@heroui/react';
 import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
 import {
   now,
@@ -5,6 +6,7 @@ import {
   getLocalTimeZone,
   toCalendarDateTime,
 } from '@internationalized/date';
+import type { ReactNode } from 'react';
 import type { RequireAtLeastOne } from 'type-fest';
 
 import type { Habit, Occurrence, NotePeriodKind } from '@models';
@@ -18,9 +20,27 @@ type OccurrenceDrawerOptions = {
   occurrenceToEdit?: Occurrence;
 };
 
+export type ConfirmationOptions = {
+  cancelText?: string;
+  color?: ButtonProps['color'];
+  confirmText?: string;
+  description?: ReactNode;
+  title?: string;
+};
+
+type ConfirmationState = ConfirmationOptions & {
+  isOpen: boolean;
+};
+
 export type UiSlice = {
   calendarRange: [CalendarDateTime, CalendarDateTime];
+  confirmation: ConfirmationState;
   changeCalendarRange: (range: [CalendarDateTime, CalendarDateTime]) => void;
+  confirmationActions: {
+    approveConfirmation: () => void;
+    askConfirmation: (options?: ConfirmationOptions) => Promise<boolean>;
+    rejectConfirmation: () => void;
+  };
   noteDrawer: {
     isOpen: boolean;
     periodDate: CalendarDate;
@@ -52,8 +72,20 @@ export type UiSlice = {
   };
 };
 
+let resolveConfirm: ((value: boolean) => void) | null = null;
+
+const initialConfirmationState = {
+  cancelText: undefined,
+  color: undefined,
+  confirmText: undefined,
+  description: undefined,
+  isOpen: false,
+  title: undefined,
+};
+
 export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
   return {
+    confirmation: initialConfirmationState,
     changeCalendarRange: (range) => {
       set((state) => {
         state.calendarRange = range;
@@ -63,6 +95,46 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
       toCalendarDateTime(now(getLocalTimeZone())),
       toCalendarDateTime(now(getLocalTimeZone())),
     ],
+    confirmationActions: {
+      approveConfirmation: () => {
+        if (resolveConfirm) {
+          resolveConfirm(true);
+          resolveConfirm = null;
+        }
+
+        set((state) => {
+          state.confirmation = initialConfirmationState;
+        });
+      },
+      askConfirmation: (
+        options: ConfirmationOptions = {}
+      ): Promise<boolean> => {
+        return new Promise((resolve) => {
+          resolveConfirm = resolve;
+
+          set((state) => {
+            state.confirmation = {
+              cancelText: options.cancelText,
+              color: options.color,
+              confirmText: options.confirmText,
+              description: options.description,
+              isOpen: true,
+              title: options.title,
+            };
+          });
+        });
+      },
+      rejectConfirmation: () => {
+        if (resolveConfirm) {
+          resolveConfirm(false);
+          resolveConfirm = null;
+        }
+
+        set((state) => {
+          state.confirmation = initialConfirmationState;
+        });
+      },
+    },
     noteDrawer: {
       isOpen: false,
       periodDate: today(getLocalTimeZone()),
@@ -159,5 +231,17 @@ export const useNoteDrawerState = () => {
 export const useNoteDrawerActions = () => {
   return useBoundStore((state) => {
     return state.noteDrawerActions;
+  });
+};
+
+export const useConfirmationState = () => {
+  return useBoundStore((state) => {
+    return state.confirmation;
+  });
+};
+
+export const useConfirmationActions = () => {
+  return useBoundStore((state) => {
+    return state.confirmationActions;
   });
 };

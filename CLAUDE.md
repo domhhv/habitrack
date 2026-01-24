@@ -165,3 +165,13 @@ Supabase storage buckets:
 - **Bundle analysis** available in production builds
 - **PWA capabilities** with installable web app features
 - **Vercel** deployment with preview environments for PRs
+
+### Important Conventions
+
+- **Imports**: Use `@` path aliases as defined in tsconfig.json
+- **Components**: Arrow functions preferred over function declarations
+- **Export Style**: Default exports preferred for components and hooks; named exports preferred for service methods
+- **Barrel Files**: When adding a new component, hook, model, service, store, or util, export them from the respective barrel files and then import using a corresponding import alias
+- **File Naming**: Use PascalCase for React component files and lowercase-with-hyphens for directories and any other files
+- **Types Inference**: Prefer inferred types over explicit annotations where possible
+- **Object Shapes**: Prefer TypeScript's type aliases over interfaces for defining object shapes

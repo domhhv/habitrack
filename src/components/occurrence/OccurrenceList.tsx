@@ -11,6 +11,7 @@ type OccurrenceListProps = {
   hasOccurrencesWithAndWithoutTime: boolean;
   hasOccurrencesWithoutTime: boolean;
   hasOccurrencesWithTime: boolean;
+  occurrenceIdBeingRemoved: Occurrence['id'];
   occurrencesWithoutTime: Occurrence[];
   occurrencesWithTime: Occurrence[];
   onRemove: (o: Occurrence) => void;
@@ -21,6 +22,7 @@ const OccurrenceList = ({
   hasOccurrencesWithAndWithoutTime,
   hasOccurrencesWithoutTime,
   hasOccurrencesWithTime,
+  occurrenceIdBeingRemoved,
   occurrencesWithoutTime,
   occurrencesWithTime,
   onRemove,
@@ -46,6 +48,7 @@ const OccurrenceList = ({
                   key={o.id}
                   occurrence={o}
                   hasChip={hasChips}
+                  isBeingRemoved={occurrenceIdBeingRemoved === o.id}
                   onRemove={() => {
                     void onRemove(o);
                   }}
@@ -74,6 +77,7 @@ const OccurrenceList = ({
                     key={o.id}
                     occurrence={o}
                     hasChip={hasChips}
+                    isBeingRemoved={occurrenceIdBeingRemoved === o.id}
                     onRemove={() => {
                       void onRemove(o);
                     }}
