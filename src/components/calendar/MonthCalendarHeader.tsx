@@ -419,106 +419,108 @@ const MonthCalendarHeader = ({
               },
             }}
           >
-            <Select
-              size="sm"
-              radius="sm"
-              color="secondary"
-              variant="bordered"
-              selectionMode="multiple"
-              className="w-full md:w-50"
-              selectedKeys={filters.habitIds}
-              isOpen={isHabitsFilterSelectOpen}
-              onChange={handleHabitsFilterChange}
-              onOpenChange={onHabitsFilterSelectOpenChange}
-              scrollShadowProps={{
-                visibility: 'bottom',
-              }}
-              renderValue={(selectedHabits: SelectedItems<Habit>) => {
-                return (
-                  <CrossPlatformHorizontalScroll className="flex space-x-2">
-                    {selectedHabits.map(({ key }) => {
-                      if (typeof key !== 'string' || !habits[key]) {
+            {!!habits.length && (
+              <Select
+                size="sm"
+                radius="sm"
+                color="secondary"
+                variant="bordered"
+                selectionMode="multiple"
+                className="w-full md:w-50"
+                selectedKeys={filters.habitIds}
+                isOpen={isHabitsFilterSelectOpen}
+                onChange={handleHabitsFilterChange}
+                onOpenChange={onHabitsFilterSelectOpenChange}
+                scrollShadowProps={{
+                  visibility: 'bottom',
+                }}
+                renderValue={(selectedHabits: SelectedItems<Habit>) => {
+                  return (
+                    <CrossPlatformHorizontalScroll className="flex space-x-2">
+                      {selectedHabits.map(({ key }) => {
+                        if (typeof key !== 'string' || !habits[key]) {
+                          return null;
+                        }
+
+                        const { iconPath, id, name } = habits[key];
+
+                        return (
+                          <Tooltip key={id} closeDelay={0} content={name}>
+                            <img
+                              className="h-4 w-4"
+                              alt={`${name} icon`}
+                              src={getPublicUrl(
+                                StorageBuckets.HABIT_ICONS,
+                                iconPath
+                              )}
+                            />
+                          </Tooltip>
+                        );
+                      })}
+                    </CrossPlatformHorizontalScroll>
+                  );
+                }}
+              >
+                <>
+                  {!!Object.keys(habits).length && (
+                    <SelectItem
+                      key="toggle-all"
+                      className="mb-0.5"
+                      textValue="Toggle all"
+                    >
+                      <Checkbox
+                        color="secondary"
+                        isSelected={areAllHabitsSelected}
+                        isIndeterminate={
+                          !areAllHabitsSelected && filters.habitIds.size > 1
+                        }
+                      />
+                      <span>
+                        {areAllHabitsSelected ? 'Unselect' : 'Select'} all
+                      </span>
+                    </SelectItem>
+                  )}
+                  {Object.entries(habitsByTraitName).map(
+                    ([traitName, habits], index, array) => {
+                      if (!habits?.length) {
                         return null;
                       }
 
-                      const { iconPath, id, name } = habits[key];
-
                       return (
-                        <Tooltip key={id} closeDelay={0} content={name}>
-                          <img
-                            className="h-4 w-4"
-                            alt={`${name} icon`}
-                            src={getPublicUrl(
-                              StorageBuckets.HABIT_ICONS,
-                              iconPath
-                            )}
-                          />
-                        </Tooltip>
+                        <SelectSection
+                          key={traitName}
+                          title={traitName}
+                          showDivider={index < array.length - 1}
+                          classNames={{
+                            heading:
+                              'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
+                          }}
+                        >
+                          {habits.map((habit) => {
+                            return (
+                              <SelectItem key={habit.id} textValue={habit.name}>
+                                <div className="flex items-center gap-2">
+                                  <img
+                                    alt={habit.name}
+                                    role="habit-icon"
+                                    className="h-4 w-4"
+                                    src={getPublicUrl(
+                                      StorageBuckets.HABIT_ICONS,
+                                      habit.iconPath
+                                    )}
+                                  />
+                                  <span className="truncate">{habit.name}</span>
+                                </div>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectSection>
                       );
-                    })}
-                  </CrossPlatformHorizontalScroll>
-                );
-              }}
-            >
-              <>
-                {!!Object.keys(habits).length && (
-                  <SelectItem
-                    key="toggle-all"
-                    className="mb-0.5"
-                    textValue="Toggle all"
-                  >
-                    <Checkbox
-                      color="secondary"
-                      isSelected={areAllHabitsSelected}
-                      isIndeterminate={
-                        !areAllHabitsSelected && filters.habitIds.size > 1
-                      }
-                    />
-                    <span>
-                      {areAllHabitsSelected ? 'Unselect' : 'Select'} all
-                    </span>
-                  </SelectItem>
-                )}
-                {Object.entries(habitsByTraitName).map(
-                  ([traitName, habits], index, array) => {
-                    if (!habits?.length) {
-                      return null;
                     }
-
-                    return (
-                      <SelectSection
-                        key={traitName}
-                        title={traitName}
-                        showDivider={index < array.length - 1}
-                        classNames={{
-                          heading:
-                            'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-                        }}
-                      >
-                        {habits.map((habit) => {
-                          return (
-                            <SelectItem key={habit.id} textValue={habit.name}>
-                              <div className="flex items-center gap-2">
-                                <img
-                                  alt={habit.name}
-                                  role="habit-icon"
-                                  className="h-4 w-4"
-                                  src={getPublicUrl(
-                                    StorageBuckets.HABIT_ICONS,
-                                    habit.iconPath
-                                  )}
-                                />
-                                <span className="truncate">{habit.name}</span>
-                              </div>
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectSection>
-                    );
-                  }
-                )}
-              </>
-            </Select>
+                  )}
+                </>
+              </Select>
+            )}
             <Select
               size="sm"
               radius="sm"

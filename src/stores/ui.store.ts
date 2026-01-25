@@ -198,12 +198,6 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
   };
 };
 
-export const useCalendarRange = () => {
-  return useBoundStore((state) => {
-    return state.calendarRange;
-  });
-};
-
 export const useCalendarRangeChange = () => {
   return useBoundStore((state) => {
     return state.changeCalendarRange;

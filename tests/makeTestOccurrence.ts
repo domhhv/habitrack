@@ -7,8 +7,9 @@ const makeTestOccurrence = (override: Partial<Occurrence> = {}): Occurrence => {
     hasSpecificTime: true,
     id: crypto.randomUUID(),
     note: null,
+    occurredAt: new Date().toISOString(),
     photoPaths: [],
-    timestamp: new Date().getTime(),
+    timeZone: 'Europe/Madrid',
     updatedAt: null,
     userId: crypto.randomUUID(),
     habit: {

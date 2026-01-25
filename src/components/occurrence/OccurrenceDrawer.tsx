@@ -55,7 +55,7 @@ const OccurrenceDrawer = () => {
 
     const filteredOccurrences = occurrences.filter((o) => {
       const occurrenceDate = toCalendarDate(
-        parseAbsolute(new Date(o.timestamp).toISOString(), timeZone)
+        parseAbsolute(o.occurredAt, timeZone)
       );
 
       return (
@@ -108,13 +108,11 @@ const OccurrenceDrawer = () => {
   };
 
   const existingOccurrenceDateTime = React.useMemo(() => {
-    if (!occurrenceToEdit?.timestamp) {
+    if (!occurrenceToEdit?.occurredAt) {
       return null;
     }
 
-    return parseAbsoluteToLocal(
-      new Date(occurrenceToEdit.timestamp).toISOString()
-    );
+    return parseAbsoluteToLocal(occurrenceToEdit.occurredAt);
   }, [occurrenceToEdit]);
 
   const formatDate = (
@@ -153,7 +151,7 @@ const OccurrenceDrawer = () => {
     }
 
     if (occurrencesData.habitOccurrences?.length) {
-      const [{ habit, timestamp }] = occurrencesData.habitOccurrences;
+      const [{ habit, occurredAt }] = occurrencesData.habitOccurrences;
 
       return (
         <div className="flex items-center gap-2">
@@ -165,18 +163,18 @@ const OccurrenceDrawer = () => {
             occurrences={occurrencesData.habitOccurrences}
           />
           <p>
-            {habit.name} | {dateFormatter.format(new Date(timestamp))}
+            {habit.name} | {dateFormatter.format(new Date(occurredAt))}
           </p>
         </div>
       );
     }
 
     if (occurrencesData.dayOccurrences?.length) {
-      const [{ timestamp }] = occurrencesData.dayOccurrences;
+      const [{ occurredAt }] = occurrencesData.dayOccurrences;
 
       return (
         <div className="flex items-center gap-2">
-          <p>Habits Log | {dateFormatter.format(new Date(timestamp))}</p>
+          <p>Habits Log | {dateFormatter.format(new Date(occurredAt))}</p>
         </div>
       );
     }

@@ -1,7 +1,10 @@
 -- Utility functions for the application
 
 -- Function to track the longest streak for a habit
-CREATE OR REPLACE FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid") -- noqa
+CREATE OR REPLACE FUNCTION "public"."get_longest_streak"( -- noqa
+    "p_habit_id" "uuid",
+    "p_timezone" "text" DEFAULT 'UTC'
+)
 RETURNS "public"."streak_info"
     LANGUAGE "plpgsql"
     AS $$
@@ -9,7 +12,7 @@ DECLARE
     result streak_info;
 BEGIN
     WITH daily_occurrences AS (
-        SELECT DISTINCT DATE(to_timestamp(timestamp/1000)) as occurrence_date
+        SELECT DISTINCT DATE(occurred_at AT TIME ZONE p_timezone) as occurrence_date
         FROM occurrences
         WHERE habit_id = p_habit_id
         ORDER BY occurrence_date

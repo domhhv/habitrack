@@ -18,6 +18,7 @@ import {
   fromDate,
   isSameDay,
   ZonedDateTime,
+  parseAbsolute,
   getLocalTimeZone,
   type CalendarDate,
   toCalendarDateTime,
@@ -98,20 +99,14 @@ const OccurrenceForm = ({
     if (dayToLog) {
       const timeToSet = hasSpecificTime ? getTimeValues() : ALL_DAY_TIME;
 
-      return toZoned(
-        toCalendarDateTime(dayToLog).set(timeToSet),
-        timeZone
-      ).toDate();
+      return toZoned(toCalendarDateTime(dayToLog).set(timeToSet), timeZone);
     }
 
     if (hasSpecificTime) {
       const base = existingOccurrenceDateTime ?? baseNow;
       const { hour, minute } = getTimeValues();
 
-      return toZoned(
-        toCalendarDateTime(base).set({ hour, minute }),
-        timeZone
-      ).toDate();
+      return toZoned(toCalendarDateTime(base).set({ hour, minute }), timeZone);
     }
 
     const baseDateTime = existingOccurrenceDateTime ?? baseNow;
@@ -119,7 +114,7 @@ const OccurrenceForm = ({
     return toZoned(
       toCalendarDateTime(baseDateTime).set(ALL_DAY_TIME),
       timeZone
-    ).toDate();
+    );
   }, [dayToLog, existingOccurrenceDateTime, hasSpecificTime, time, timeZone]);
 
   const habitsByTraitName = React.useMemo(() => {
@@ -202,7 +197,11 @@ const OccurrenceForm = ({
     if (occurrenceToEdit) {
       const hasTimeChanged =
         time instanceof ZonedDateTime &&
-        +time.toDate() !== +new Date(occurrenceToEdit.timestamp);
+        time.toString() !==
+          parseAbsolute(
+            occurrenceToEdit.occurredAt,
+            occurrenceToEdit.timeZone
+          ).toString();
       const hasNoteChanged = note !== (occurrenceToEdit.note?.content || '');
       const hasHabitChanged =
         selectedHabitId !== occurrenceToEdit.habitId.toString();
@@ -274,7 +273,7 @@ const OccurrenceForm = ({
       return null;
     }
 
-    const timestamp = +computeOccurrenceDateTime();
+    const occurredAt = computeOccurrenceDateTime().toAbsoluteString();
 
     setIsSaving(true);
 
@@ -296,8 +295,9 @@ const OccurrenceForm = ({
         await updateOccurrence(occurrenceToEdit.id, {
           habitId: selectedHabitId,
           hasSpecificTime,
+          occurredAt,
           photoPaths: photoPaths.length ? photoPaths : null,
-          timestamp,
+          timeZone,
           userId: user?.id as string,
         });
 
@@ -350,8 +350,9 @@ const OccurrenceForm = ({
       const newOccurrence = await addOccurrence({
         habitId: selectedHabitId,
         hasSpecificTime,
+        occurredAt,
         photoPaths,
-        timestamp,
+        timeZone,
         userId: user?.id as string,
       });
 
@@ -569,7 +570,13 @@ const OccurrenceForm = ({
           {occurrenceToEdit ? 'Update' : 'Add'}
         </Button>
       ) : (
-        <Button as={Link} to="/habits" {...submitButtonSharedProps} fullWidth>
+        <Button
+          as={Link}
+          to="/habits"
+          {...submitButtonSharedProps}
+          fullWidth
+          onPress={closeOccurrenceDrawer}
+        >
           Go to Habits
         </Button>
       )}

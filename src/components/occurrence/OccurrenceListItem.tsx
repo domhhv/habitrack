@@ -47,7 +47,7 @@ const OccurrenceListItem = ({
             <>
               {occurrence.hasSpecificTime && (
                 <span className="font-semibold">
-                  {timeFormatter.format(new Date(occurrence.timestamp))}:{' '}
+                  {timeFormatter.format(new Date(occurrence.occurredAt))}:{' '}
                 </span>
               )}
               <span
@@ -75,7 +75,7 @@ const OccurrenceListItem = ({
                 />
                 {occurrence.hasSpecificTime && (
                   <span className="font-semibold">
-                    {timeFormatter.format(new Date(occurrence.timestamp))}
+                    {timeFormatter.format(new Date(occurrence.occurredAt))}
                   </span>
                 )}
               </div>

@@ -1,4 +1,3 @@
-import type { CalendarDateTime } from '@internationalized/date';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 import type {
@@ -24,7 +23,6 @@ type HabitWithTrait = OccurrenceHabit & {
 
 export type Occurrence = BaseOccurrence & {
   habit: HabitWithTrait;
-  occurredAt?: CalendarDateTime;
 } & {
   note: Pick<Note, 'id' | 'content'> | null;
 };

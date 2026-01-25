@@ -111,8 +111,11 @@ yarn db:diff -f <migration_name>
 # Review the generated migration in supabase/migrations/
 # Ensure it only contains intended changes (remove any unrelated drops/alters)
 
-# Start db (applies pending migrations automatically)
+# Start db
 yarn db:start
+
+# Apply the migrations
+yarn db:migration:up
 
 # Regenerate TypeScript types
 yarn db:gen-types

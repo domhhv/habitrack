@@ -69,7 +69,10 @@ const OccurrenceList = ({
           <ul>
             {occurrencesWithTime
               .toSorted((a, b) => {
-                return a.timestamp - b.timestamp;
+                return (
+                  Number(new Date(a.occurredAt)) -
+                  Number(new Date(b.occurredAt))
+                );
               })
               .map((o) => {
                 return (

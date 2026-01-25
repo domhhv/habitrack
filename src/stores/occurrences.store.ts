@@ -1,8 +1,4 @@
-import {
-  fromDate,
-  getLocalTimeZone,
-  toCalendarDateTime,
-} from '@internationalized/date';
+import { toZoned, getLocalTimeZone } from '@internationalized/date';
 import keyBy from 'lodash.keyby';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -74,23 +70,12 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         }
 
         const occurrences = await listOccurrences([
-          +rangeStart.toDate(getLocalTimeZone()),
-          +rangeEnd.toDate(getLocalTimeZone()),
+          toZoned(rangeStart, getLocalTimeZone()),
+          toZoned(rangeEnd, getLocalTimeZone()),
         ]);
 
-        const occurrencesWithCalendarDateTime = occurrences.map(
-          (occurrence) => {
-            return {
-              ...occurrence,
-              occurredAt: toCalendarDateTime(
-                fromDate(new Date(occurrence.timestamp), getLocalTimeZone())
-              ),
-            };
-          }
-        );
-
         set((state) => {
-          state.occurrences = keyBy(occurrencesWithCalendarDateTime, 'id');
+          state.occurrences = keyBy(occurrences, 'id');
         });
       },
 
