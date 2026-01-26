@@ -4,7 +4,6 @@ import {
   toZoned,
   parseAbsolute,
   getWeeksInMonth,
-  getLocalTimeZone,
 } from '@internationalized/date';
 import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -184,7 +183,7 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
 
                       const startDate = toZoned(
                         calendarDate,
-                        getLocalTimeZone()
+                        state.timeZone
                       ).set({
                         hour: 0,
                         millisecond: 0,
@@ -192,15 +191,14 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                         second: 0,
                       });
 
-                      const endDate = toZoned(
-                        calendarDate,
-                        getLocalTimeZone()
-                      ).set({
-                        hour: 23,
-                        millisecond: 999,
-                        minute: 59,
-                        second: 59,
-                      });
+                      const endDate = toZoned(calendarDate, state.timeZone).set(
+                        {
+                          hour: 23,
+                          millisecond: 999,
+                          minute: 59,
+                          second: 59,
+                        }
+                      );
 
                       return (
                         <MonthCalendarCell

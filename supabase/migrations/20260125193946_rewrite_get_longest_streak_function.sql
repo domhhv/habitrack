@@ -48,3 +48,9 @@ BEGIN
     RETURN result;
 END;
 $$;
+
+ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") OWNER TO "postgres";
+
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "service_role";

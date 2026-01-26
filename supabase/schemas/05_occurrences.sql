@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "public"."occurrences" (
     "updated_at" timestamp with time zone,
     "user_id" "uuid" NOT NULL,
     "occurred_at" timestamptz NOT NULL,
-    "timezone" text NOT NULL,
+    "time_zone" text NOT NULL,
     "photo_paths" "text" [],
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "habit_id" "uuid" NOT NULL,

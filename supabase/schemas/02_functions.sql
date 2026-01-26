@@ -51,7 +51,7 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") OWNER TO "postgres";
 
 -- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
@@ -66,9 +66,9 @@ $$;
 ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
 
 -- Grant permissions on functions
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid") TO "service_role";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "service_role";
 
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "authenticated";

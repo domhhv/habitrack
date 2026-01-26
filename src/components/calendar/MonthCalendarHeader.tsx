@@ -419,7 +419,7 @@ const MonthCalendarHeader = ({
               },
             }}
           >
-            {!!habits.length && (
+            {!!Object.keys(habits).length && (
               <Select
                 size="sm"
                 radius="sm"
