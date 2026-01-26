@@ -5,12 +5,10 @@ import {
   toZoned,
   isToday,
   isSameDay,
-  parseAbsolute,
   ZonedDateTime,
-  toCalendarDate,
+  toLocalTimeZone,
   getLocalTimeZone,
   type CalendarDate,
-  parseAbsoluteToLocal,
   type CalendarDateTime,
 } from '@internationalized/date';
 import React from 'react';
@@ -54,9 +52,7 @@ const OccurrenceDrawer = () => {
     }
 
     const filteredOccurrences = occurrences.filter((o) => {
-      const occurrenceDate = toCalendarDate(
-        parseAbsolute(o.occurredAt, timeZone)
-      );
+      const occurrenceDate = toLocalTimeZone(o.occurredAt);
 
       return (
         isSameDay(occurrenceDate, dayToDisplay || today(timeZone)) &&
@@ -112,7 +108,7 @@ const OccurrenceDrawer = () => {
       return null;
     }
 
-    return parseAbsoluteToLocal(occurrenceToEdit.occurredAt);
+    return toLocalTimeZone(occurrenceToEdit.occurredAt);
   }, [occurrenceToEdit]);
 
   const formatDate = (
@@ -163,7 +159,7 @@ const OccurrenceDrawer = () => {
             occurrences={occurrencesData.habitOccurrences}
           />
           <p>
-            {habit.name} | {dateFormatter.format(new Date(occurredAt))}
+            {habit.name} | {dateFormatter.format(occurredAt.toDate())}
           </p>
         </div>
       );
@@ -174,7 +170,7 @@ const OccurrenceDrawer = () => {
 
       return (
         <div className="flex items-center gap-2">
-          <p>Habits Log | {dateFormatter.format(new Date(occurredAt))}</p>
+          <p>Habits Log | {dateFormatter.format(occurredAt.toDate())}</p>
         </div>
       );
     }

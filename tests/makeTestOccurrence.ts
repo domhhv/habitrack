@@ -1,13 +1,15 @@
+import { now } from '@internationalized/date';
+
 import { type Occurrence } from '@models';
 
 const makeTestOccurrence = (override: Partial<Occurrence> = {}): Occurrence => {
   return {
-    createdAt: new Date().toISOString(),
+    createdAt: now('Europe/Madrid'),
     habitId: crypto.randomUUID(),
     hasSpecificTime: true,
     id: crypto.randomUUID(),
     note: null,
-    occurredAt: new Date().toISOString(),
+    occurredAt: now('Europe/Madrid'),
     photoPaths: [],
     timeZone: 'Europe/Madrid',
     updatedAt: null,

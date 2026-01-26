@@ -1,3 +1,4 @@
+import type { ZonedDateTime } from '@internationalized/date';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 import type {
@@ -21,10 +22,19 @@ type HabitWithTrait = OccurrenceHabit & {
   trait: Pick<Trait, 'id' | 'name' | 'color'>;
 };
 
-export type Occurrence = BaseOccurrence & {
+export type RawOccurrence = BaseOccurrence & {
   habit: HabitWithTrait;
 } & {
   note: Pick<Note, 'id' | 'content'> | null;
+};
+
+export type Occurrence = Omit<
+  RawOccurrence,
+  'occurredAt' | 'createdAt' | 'updatedAt'
+> & {
+  createdAt: ZonedDateTime;
+  occurredAt: ZonedDateTime;
+  updatedAt: ZonedDateTime | null;
 };
 
 export type OccurrencesInsert = CamelCasedPropertiesDeep<

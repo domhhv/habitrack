@@ -1,10 +1,15 @@
-import { toZoned, getLocalTimeZone } from '@internationalized/date';
+import {
+  toZoned,
+  parseAbsolute,
+  getLocalTimeZone,
+} from '@internationalized/date';
 import keyBy from 'lodash.keyby';
 import { useShallow } from 'zustand/react/shallow';
 
 import type {
   Note,
   Occurrence,
+  RawOccurrence,
   OccurrencesInsert,
   OccurrencesUpdate,
 } from '@models';
@@ -20,7 +25,7 @@ import { useBoundStore, type SliceCreator } from './bound.store';
 export type OccurrencesSlice = {
   occurrences: Record<Occurrence['id'], Occurrence>;
   occurrencesActions: {
-    addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
+    addOccurrence: (occurrence: OccurrencesInsert) => Promise<RawOccurrence>;
     clearOccurrences: () => void;
     fetchOccurrences: () => Promise<void>;
     removeOccurrence: (occurrence: Occurrence) => Promise<void>;
@@ -32,6 +37,15 @@ export type OccurrencesSlice = {
       id: Occurrence['id'],
       body: OccurrencesUpdate
     ) => Promise<void>;
+  };
+};
+
+const toClientOccurrence = (occurrence: RawOccurrence) => {
+  return {
+    ...occurrence,
+    createdAt: parseAbsolute(occurrence.createdAt, occurrence.timeZone),
+    occurredAt: parseAbsolute(occurrence.occurredAt, occurrence.timeZone),
+    updatedAt: parseAbsolute(occurrence.createdAt, occurrence.timeZone),
   };
 };
 
@@ -47,7 +61,8 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         const nextOccurrence = await createOccurrence(occurrence);
 
         set((state) => {
-          state.occurrences[nextOccurrence.id] = nextOccurrence;
+          state.occurrences[nextOccurrence.id] =
+            toClientOccurrence(nextOccurrence);
         });
 
         return nextOccurrence;
@@ -74,16 +89,19 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
           toZoned(rangeEnd, getLocalTimeZone()),
         ]);
 
+        const occurrencesWithZonedDateTime =
+          occurrences.map(toClientOccurrence);
+
         set((state) => {
-          state.occurrences = keyBy(occurrences, 'id');
+          state.occurrences = keyBy(occurrencesWithZonedDateTime, 'id');
         });
       },
 
-      removeOccurrence: async (occurrence: Occurrence) => {
-        await destroyOccurrence(occurrence);
+      removeOccurrence: async ({ id, photoPaths }: Occurrence) => {
+        await destroyOccurrence({ id, photoPaths });
 
         set((state) => {
-          delete state.occurrences[occurrence.id];
+          delete state.occurrences[id];
         });
       },
 
@@ -109,7 +127,7 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         const updatedOccurrence = await patchOccurrence(id, body);
 
         set((state) => {
-          state.occurrences[id] = updatedOccurrence;
+          state.occurrences[id] = toClientOccurrence(updatedOccurrence);
         });
       },
     },

@@ -1,9 +1,5 @@
 import { cn, Badge, Tooltip } from '@heroui/react';
-import {
-  parseAbsolute,
-  toCalendarDate,
-  getLocalTimeZone,
-} from '@internationalized/date';
+import { toCalendarDate } from '@internationalized/date';
 import { NoteIcon, CameraIcon } from '@phosphor-icons/react';
 import React from 'react';
 
@@ -38,15 +34,12 @@ const OccurrenceChip = ({
   const { iconPath, name: habitName, trait } = habit || {};
   const { color: traitColor } = trait || {};
   const { screenWidth } = useScreenWidth();
-  const timeZone = getLocalTimeZone();
   const [isFocused, setIsFocused] = React.useState(false);
 
   const handleClick = () => {
     openOccurrenceDrawer({
+      dayToDisplay: toCalendarDate(occurrence.occurredAt),
       habitIdToDisplay: habitId,
-      dayToDisplay: toCalendarDate(
-        parseAbsolute(occurrence.occurredAt, timeZone)
-      ),
     });
   };
 
