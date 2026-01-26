@@ -45,7 +45,9 @@ const toClientOccurrence = (occurrence: RawOccurrence) => {
     ...occurrence,
     createdAt: parseAbsolute(occurrence.createdAt, occurrence.timeZone),
     occurredAt: parseAbsolute(occurrence.occurredAt, occurrence.timeZone),
-    updatedAt: parseAbsolute(occurrence.createdAt, occurrence.timeZone),
+    updatedAt: occurrence.updatedAt
+      ? parseAbsolute(occurrence.updatedAt, occurrence.timeZone)
+      : null,
   };
 };
 
