@@ -1,4 +1,3 @@
--- noqa
 CREATE OR REPLACE FUNCTION "public"."get_longest_streak"( -- noqa
     "p_habit_id" "uuid",
     "p_time_zone" "text" DEFAULT 'UTC'

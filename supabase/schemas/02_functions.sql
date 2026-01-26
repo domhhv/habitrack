@@ -3,7 +3,7 @@
 -- Function to track the longest streak for a habit
 CREATE OR REPLACE FUNCTION "public"."get_longest_streak"( -- noqa
     "p_habit_id" "uuid",
-    "p_timezone" "text" DEFAULT 'UTC'
+    "p_time_zone" "text" DEFAULT 'UTC'::text
 )
 RETURNS "public"."streak_info"
     LANGUAGE "plpgsql"
@@ -12,7 +12,7 @@ DECLARE
     result streak_info;
 BEGIN
     WITH daily_occurrences AS (
-        SELECT DISTINCT DATE(occurred_at AT TIME ZONE p_timezone) as occurrence_date
+        SELECT DISTINCT DATE(occurred_at AT TIME ZONE p_time_zone) as occurrence_date
         FROM occurrences
         WHERE habit_id = p_habit_id
         ORDER BY occurrence_date
@@ -51,7 +51,7 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_time_zone" "text") OWNER TO "postgres";
 
 -- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
@@ -66,9 +66,9 @@ $$;
 ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
 
 -- Grant permissions on functions
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_time_zone" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_time_zone" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_time_zone" "text") TO "service_role";
 
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "authenticated";

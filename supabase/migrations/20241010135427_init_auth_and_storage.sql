@@ -1,20 +1,3 @@
-INSERT INTO "storage"."buckets" ("id", "name", "public")
-VALUES ('habit_icons', 'habit_icons', true); -- noqa: CV10
-
-CREATE POLICY "Anyone can upload a habit icon"
-ON "storage"."objects"
-AS PERMISSIVE
-FOR INSERT
-TO "public"
-WITH CHECK (("bucket_id" = 'habit_icons'::TEXT)); -- noqa: CV10
-
-CREATE POLICY "Habit icon images are publicly accessible"
-ON "storage"."objects"
-AS PERMISSIVE
-FOR SELECT
-TO "public"
-USING (("bucket_id" = 'habit_icons'::TEXT)); -- noqa: CV10
-
 CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger" -- noqa
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO "public"
