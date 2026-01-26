@@ -1,10 +1,10 @@
 import { cn, Button, Tooltip, ScrollShadow } from '@heroui/react';
 import {
   isToday,
-  fromDate,
   endOfWeek,
   startOfWeek,
   CalendarDate,
+  parseAbsolute,
   createCalendar,
   toCalendarDate,
   toCalendarDateTime,
@@ -158,7 +158,7 @@ const WeekCalendar = () => {
   const groupOccurrences = React.useCallback(
     (day: CalendarDate, hour: number) => {
       const relatedOccurrences = occurrences.filter((o) => {
-        const occurrenceDate = fromDate(new Date(o.timestamp), state.timeZone);
+        const occurrenceDate = parseAbsolute(o.occurredAt, o.timeZone);
         const matchesDay =
           occurrenceDate.year === day.year &&
           occurrenceDate.month === day.month &&
@@ -177,7 +177,7 @@ const WeekCalendar = () => {
         })
       );
     },
-    [occurrences, state.timeZone]
+    [occurrences]
   );
 
   return (

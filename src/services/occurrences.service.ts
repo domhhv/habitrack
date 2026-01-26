@@ -1,3 +1,4 @@
+import { getLocalTimeZone, type ZonedDateTime } from '@internationalized/date';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
@@ -32,17 +33,17 @@ export const createOccurrence = async (
 };
 
 export const listOccurrences = async ([rangeStart, rangeEnd]: [
-  number,
-  number,
+  ZonedDateTime,
+  ZonedDateTime,
 ]): Promise<Occurrence[]> => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .select(
       '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
     )
-    .order('timestamp')
-    .gt('timestamp', rangeStart)
-    .lt('timestamp', rangeEnd);
+    .order('occurred_at')
+    .gt('occurred_at', rangeStart.toAbsoluteString())
+    .lt('occurred_at', rangeEnd.toAbsoluteString());
 
   if (error) {
     throw new Error(error.message);
@@ -95,11 +96,11 @@ export const getLatestHabitOccurrenceTimestamp = async (
 ) => {
   const { data, error } = await supabaseClient
     .from('occurrences')
-    .select('timestamp')
+    .select('occurred_at')
     .eq('habit_id', habitId)
-    .lt('timestamp', Date.now())
+    .lt('occurred_at', new Date().toISOString())
     .limit(1)
-    .order('timestamp', { ascending: false });
+    .order('occurred_at', { ascending: false });
 
   if (error) {
     throw new Error(error.message);
@@ -109,9 +110,9 @@ export const getLatestHabitOccurrenceTimestamp = async (
     return 0;
   }
 
-  const [{ timestamp }] = data;
+  const [{ occurred_at }] = data;
 
-  return timestamp;
+  return Number(new Date(occurred_at));
 };
 
 export const getLongestHabitStreak = async (
@@ -119,6 +120,7 @@ export const getLongestHabitStreak = async (
 ): Promise<Streak> => {
   const { data, error } = await supabaseClient.rpc('get_longest_streak', {
     p_habit_id: habitId,
+    p_time_zone: getLocalTimeZone(), // TODO: replace with preferred timezone from to be created user settings table
   });
 
   if (error) {

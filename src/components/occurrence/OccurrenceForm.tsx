@@ -17,7 +17,9 @@ import {
   toZoned,
   fromDate,
   isSameDay,
+  toTimeZone,
   ZonedDateTime,
+  parseAbsolute,
   getLocalTimeZone,
   type CalendarDate,
   toCalendarDateTime,
@@ -84,43 +86,37 @@ const OccurrenceForm = ({
     React.useState<CalendarDateTime | null>(null);
   const { isDesktop, isMobile } = useScreenWidth();
 
-  const computeOccurrenceDateTime = React.useCallback(() => {
-    const baseNow = now(timeZone);
+  const computeOccurrenceDateTime = React.useCallback(
+    (tz = timeZone) => {
+      const baseNow = now(tz);
 
-    const getTimeValues = () => {
-      if (time) {
-        return { hour: time.hour, minute: time.minute };
+      const getTimeValues = () => {
+        if (time) {
+          return { hour: time.hour, minute: time.minute };
+        }
+
+        return { hour: baseNow.hour, minute: baseNow.minute };
+      };
+
+      if (dayToLog) {
+        const timeToSet = hasSpecificTime ? getTimeValues() : ALL_DAY_TIME;
+
+        return toZoned(toCalendarDateTime(dayToLog).set(timeToSet), tz);
       }
 
-      return { hour: baseNow.hour, minute: baseNow.minute };
-    };
+      if (hasSpecificTime) {
+        const base = existingOccurrenceDateTime ?? baseNow;
+        const { hour, minute } = getTimeValues();
 
-    if (dayToLog) {
-      const timeToSet = hasSpecificTime ? getTimeValues() : ALL_DAY_TIME;
+        return toTimeZone(base.set({ hour, minute }), tz);
+      }
 
-      return toZoned(
-        toCalendarDateTime(dayToLog).set(timeToSet),
-        timeZone
-      ).toDate();
-    }
+      const baseDateTime = existingOccurrenceDateTime ?? baseNow;
 
-    if (hasSpecificTime) {
-      const base = existingOccurrenceDateTime ?? baseNow;
-      const { hour, minute } = getTimeValues();
-
-      return toZoned(
-        toCalendarDateTime(base).set({ hour, minute }),
-        timeZone
-      ).toDate();
-    }
-
-    const baseDateTime = existingOccurrenceDateTime ?? baseNow;
-
-    return toZoned(
-      toCalendarDateTime(baseDateTime).set(ALL_DAY_TIME),
-      timeZone
-    ).toDate();
-  }, [dayToLog, existingOccurrenceDateTime, hasSpecificTime, time, timeZone]);
+      return toZoned(toCalendarDateTime(baseDateTime).set(ALL_DAY_TIME), tz);
+    },
+    [dayToLog, existingOccurrenceDateTime, hasSpecificTime, time, timeZone]
+  );
 
   const habitsByTraitName = React.useMemo(() => {
     return groupBy(Object.values(habits), (habit) => {
@@ -202,7 +198,11 @@ const OccurrenceForm = ({
     if (occurrenceToEdit) {
       const hasTimeChanged =
         time instanceof ZonedDateTime &&
-        +time.toDate() !== +new Date(occurrenceToEdit.timestamp);
+        time.toAbsoluteString() !==
+          parseAbsolute(
+            occurrenceToEdit.occurredAt,
+            occurrenceToEdit.timeZone
+          ).toAbsoluteString();
       const hasNoteChanged = note !== (occurrenceToEdit.note?.content || '');
       const hasHabitChanged =
         selectedHabitId !== occurrenceToEdit.habitId.toString();
@@ -274,7 +274,10 @@ const OccurrenceForm = ({
       return null;
     }
 
-    const timestamp = +computeOccurrenceDateTime();
+    const effectiveTimeZone = occurrenceToEdit?.timeZone ?? timeZone;
+
+    const occurredAt =
+      computeOccurrenceDateTime(effectiveTimeZone).toAbsoluteString();
 
     setIsSaving(true);
 
@@ -296,8 +299,8 @@ const OccurrenceForm = ({
         await updateOccurrence(occurrenceToEdit.id, {
           habitId: selectedHabitId,
           hasSpecificTime,
+          occurredAt,
           photoPaths: photoPaths.length ? photoPaths : null,
-          timestamp,
           userId: user?.id as string,
         });
 
@@ -350,8 +353,9 @@ const OccurrenceForm = ({
       const newOccurrence = await addOccurrence({
         habitId: selectedHabitId,
         hasSpecificTime,
+        occurredAt,
         photoPaths,
-        timestamp,
+        timeZone,
         userId: user?.id as string,
       });
 
@@ -569,7 +573,13 @@ const OccurrenceForm = ({
           {occurrenceToEdit ? 'Update' : 'Add'}
         </Button>
       ) : (
-        <Button as={Link} to="/habits" {...submitButtonSharedProps} fullWidth>
+        <Button
+          as={Link}
+          to="/habits"
+          {...submitButtonSharedProps}
+          fullWidth
+          onPress={closeOccurrenceDrawer}
+        >
           Go to Habits
         </Button>
       )}

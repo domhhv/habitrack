@@ -45,7 +45,7 @@ const OccurrenceChip = ({
     openOccurrenceDrawer({
       habitIdToDisplay: habitId,
       dayToDisplay: toCalendarDate(
-        parseAbsolute(new Date(occurrence.timestamp).toISOString(), timeZone)
+        parseAbsolute(occurrence.occurredAt, timeZone)
       ),
     });
   };

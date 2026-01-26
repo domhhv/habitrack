@@ -1,6 +1,10 @@
 import { cn, Button, Tooltip } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
-import { getWeeksInMonth, toCalendarDateTime } from '@internationalized/date';
+import {
+  toZoned,
+  parseAbsolute,
+  getWeeksInMonth,
+} from '@internationalized/date';
 import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
@@ -177,23 +181,24 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                         return null;
                       }
 
-                      const startDate = toCalendarDateTime(calendarDate)
-                        .set({
-                          hour: 0,
-                          millisecond: 0,
-                          minute: 0,
-                          second: 0,
-                        })
-                        .toDate(state.timeZone);
+                      const startDate = toZoned(
+                        calendarDate,
+                        state.timeZone
+                      ).set({
+                        hour: 0,
+                        millisecond: 0,
+                        minute: 0,
+                        second: 0,
+                      });
 
-                      const endDate = toCalendarDateTime(calendarDate)
-                        .set({
+                      const endDate = toZoned(calendarDate, state.timeZone).set(
+                        {
                           hour: 23,
                           millisecond: 999,
                           minute: 59,
                           second: 59,
-                        })
-                        .toDate(state.timeZone);
+                        }
+                      );
 
                       return (
                         <MonthCalendarCell
@@ -201,12 +206,19 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                           date={calendarDate}
                           key={calendarDate.toString()}
                           position={getCellPosition(weekIndex, dayIndex)}
-                          occurrences={occurrences.filter(({ timestamp }) => {
-                            return (
-                              timestamp >= Number(startDate) &&
-                              timestamp <= Number(endDate)
-                            );
-                          })}
+                          occurrences={occurrences.filter(
+                            ({ occurredAt, timeZone }) => {
+                              const occurrenceDate = parseAbsolute(
+                                occurredAt,
+                                timeZone
+                              );
+
+                              return (
+                                occurrenceDate.compare(startDate) >= 0 &&
+                                occurrenceDate.compare(endDate) <= 0
+                              );
+                            }
+                          )}
                         />
                       );
                     })}
