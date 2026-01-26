@@ -4,7 +4,6 @@ import {
   endOfWeek,
   startOfWeek,
   CalendarDate,
-  parseAbsolute,
   createCalendar,
   toCalendarDate,
   toCalendarDateTime,
@@ -157,19 +156,21 @@ const WeekCalendar = () => {
 
   const groupOccurrences = React.useCallback(
     (day: CalendarDate, hour: number) => {
-      const relatedOccurrences = occurrences.filter((o) => {
-        const occurrenceDate = parseAbsolute(o.occurredAt, o.timeZone);
-        const matchesDay =
-          occurrenceDate.year === day.year &&
-          occurrenceDate.month === day.month &&
-          occurrenceDate.day === day.day;
+      const relatedOccurrences = occurrences.filter(
+        ({ hasSpecificTime, occurredAt }) => {
+          const occurrenceDate = occurredAt;
+          const matchesDay =
+            occurrenceDate.year === day.year &&
+            occurrenceDate.month === day.month &&
+            occurrenceDate.day === day.day;
 
-        if (!o.hasSpecificTime) {
-          return matchesDay && hour === 0;
+          if (!hasSpecificTime) {
+            return matchesDay && hour === 0;
+          }
+
+          return matchesDay && occurrenceDate.hour === hour;
         }
-
-        return matchesDay && occurrenceDate.hour === hour;
-      });
+      );
 
       return Object.entries(
         groupBy(relatedOccurrences, (o) => {

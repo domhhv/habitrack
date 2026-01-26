@@ -19,7 +19,6 @@ import {
   isSameDay,
   toTimeZone,
   ZonedDateTime,
-  parseAbsolute,
   getLocalTimeZone,
   type CalendarDate,
   toCalendarDateTime,
@@ -198,11 +197,7 @@ const OccurrenceForm = ({
     if (occurrenceToEdit) {
       const hasTimeChanged =
         time instanceof ZonedDateTime &&
-        time.toAbsoluteString() !==
-          parseAbsolute(
-            occurrenceToEdit.occurredAt,
-            occurrenceToEdit.timeZone
-          ).toAbsoluteString();
+        !!time.compare(occurrenceToEdit.occurredAt);
       const hasNoteChanged = note !== (occurrenceToEdit.note?.content || '');
       const hasHabitChanged =
         selectedHabitId !== occurrenceToEdit.habitId.toString();

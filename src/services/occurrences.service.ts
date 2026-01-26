@@ -5,7 +5,7 @@ import decamelizeKeys from 'decamelize-keys';
 import type {
   Habit,
   Streak,
-  Occurrence,
+  RawOccurrence,
   OccurrencesInsert,
   OccurrencesUpdate,
 } from '@models';
@@ -14,9 +14,7 @@ import { supabaseClient } from '@utils';
 
 import { deleteFile } from './storage.service';
 
-export const createOccurrence = async (
-  occurrence: OccurrencesInsert
-): Promise<Occurrence> => {
+export const createOccurrence = async (occurrence: OccurrencesInsert) => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .insert(decamelizeKeys(occurrence))
@@ -35,7 +33,7 @@ export const createOccurrence = async (
 export const listOccurrences = async ([rangeStart, rangeEnd]: [
   ZonedDateTime,
   ZonedDateTime,
-]): Promise<Occurrence[]> => {
+]): Promise<RawOccurrence[]> => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .select(
@@ -53,9 +51,9 @@ export const listOccurrences = async ([rangeStart, rangeEnd]: [
 };
 
 export const patchOccurrence = async (
-  id: Occurrence['id'],
+  id: RawOccurrence['id'],
   occurrence: OccurrencesUpdate
-): Promise<Occurrence> => {
+): Promise<RawOccurrence> => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .update(decamelizeKeys(occurrence))
@@ -72,7 +70,10 @@ export const patchOccurrence = async (
   return camelcaseKeys(data, { deep: true });
 };
 
-export const destroyOccurrence = async ({ id, photoPaths }: Occurrence) => {
+export const destroyOccurrence = async ({
+  id,
+  photoPaths,
+}: Pick<RawOccurrence, 'id' | 'photoPaths'>) => {
   const { error } = await supabaseClient
     .from('occurrences')
     .delete()

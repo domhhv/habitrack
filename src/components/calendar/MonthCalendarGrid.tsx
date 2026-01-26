@@ -1,10 +1,6 @@
 import { cn, Button, Tooltip } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
-import {
-  toZoned,
-  parseAbsolute,
-  getWeeksInMonth,
-} from '@internationalized/date';
+import { toZoned, getWeeksInMonth } from '@internationalized/date';
 import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
@@ -206,19 +202,12 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                           date={calendarDate}
                           key={calendarDate.toString()}
                           position={getCellPosition(weekIndex, dayIndex)}
-                          occurrences={occurrences.filter(
-                            ({ occurredAt, timeZone }) => {
-                              const occurrenceDate = parseAbsolute(
-                                occurredAt,
-                                timeZone
-                              );
-
-                              return (
-                                occurrenceDate.compare(startDate) >= 0 &&
-                                occurrenceDate.compare(endDate) <= 0
-                              );
-                            }
-                          )}
+                          occurrences={occurrences.filter(({ occurredAt }) => {
+                            return (
+                              occurredAt.compare(startDate) >= 0 &&
+                              occurredAt.compare(endDate) <= 0
+                            );
+                          })}
                         />
                       );
                     })}
