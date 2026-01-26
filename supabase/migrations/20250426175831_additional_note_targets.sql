@@ -14,7 +14,6 @@ WHERE "day" IS NOT NULL;
 ALTER TABLE "notes" DROP COLUMN "day";
 
 ALTER TABLE "notes"
-DROP CONSTRAINT IF EXISTS "at_least_one_not_null",
 ADD CONSTRAINT "note_has_one_target"
 CHECK (
     ("occurrence_id" IS NOT NULL)::int

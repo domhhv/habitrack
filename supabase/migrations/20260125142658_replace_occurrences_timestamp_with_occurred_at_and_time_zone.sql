@@ -1,6 +1,6 @@
 ALTER TABLE "public"."occurrences"
 ADD COLUMN "occurred_at" timestamptz DEFAULT now(),
-ADD COLUMN "time_zone" text; -- noqa: disable=convention.quoted_literals
+ADD COLUMN "time_zone" text DEFAULT 'UTC'; -- noqa: disable=convention.quoted_literals
 
 UPDATE "public"."occurrences"
 SET

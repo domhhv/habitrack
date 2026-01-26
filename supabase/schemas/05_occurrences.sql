@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS "public"."occurrences" (
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone,
     "user_id" "uuid" NOT NULL,
-    "occurred_at" timestamptz NOT NULL,
-    "time_zone" text NOT NULL,
+    "occurred_at" timestamptz NOT NULL DEFAULT "now"(),
+    "time_zone" text NOT NULL DEFAULT 'UTC', -- noqa: disable=convention.quoted_literals
     "photo_paths" "text" [],
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "habit_id" "uuid" NOT NULL,
