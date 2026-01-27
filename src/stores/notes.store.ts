@@ -53,13 +53,11 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
         await destroyNote(id);
 
         set((state) => {
+          const noteToDelete = state.notes[id];
           delete state.notes[id];
 
-          if (
-            'occurrenceId' in state.notes[id] &&
-            state.notes[id].occurrenceId
-          ) {
-            delete state.notesByOccurrenceId[state.notes[id].occurrenceId];
+          if ('occurrenceId' in noteToDelete && noteToDelete?.occurrenceId) {
+            delete state.notesByOccurrenceId[noteToDelete.occurrenceId];
           }
         });
       },

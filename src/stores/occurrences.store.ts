@@ -63,7 +63,9 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
 
         set((state) => {
           state.occurrences.push(clientOccurrence);
-          const dateKey = occurrence.occurredAt.split('T')[0];
+          const dateKey = toCalendarDate(
+            clientOccurrence.occurredAt
+          ).toString();
 
           if (state.occurrencesByDate[dateKey]) {
             state.occurrencesByDate[dateKey][nextOccurrence.id] =
@@ -144,15 +146,26 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
 
       updateOccurrence: async ({ id, occurredAt }, body) => {
         const updatedOccurrence = await patchOccurrence(id, body);
+        const updatedClientOccurrence = toClientOccurrence(updatedOccurrence);
 
         set((state) => {
           state.occurrences = state.occurrences.map((occurrence) => {
-            return occurrence.id === id
-              ? toClientOccurrence(updatedOccurrence)
-              : occurrence;
+            return occurrence.id === id ? updatedClientOccurrence : occurrence;
           });
-          state.occurrencesByDate[toCalendarDate(occurredAt).toString()][id] =
-            toClientOccurrence(updatedOccurrence);
+          const prevDateKey = toCalendarDate(occurredAt).toString();
+          const nextDateKey = toCalendarDate(
+            updatedClientOccurrence.occurredAt
+          ).toString();
+
+          if (state.occurrencesByDate[prevDateKey]) {
+            delete state.occurrencesByDate[prevDateKey][id];
+          }
+
+          if (!state.occurrencesByDate[nextDateKey]) {
+            state.occurrencesByDate[nextDateKey] = {};
+          }
+
+          state.occurrencesByDate[nextDateKey][id] = updatedClientOccurrence;
         });
       },
     },
