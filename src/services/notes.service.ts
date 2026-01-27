@@ -2,6 +2,7 @@ import type { CalendarDate } from '@internationalized/date';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
+import type { Tables } from '@db-types';
 import type { Note, NotesUpdate, NotesInsert, NoteWithHabit } from '@models';
 import { supabaseClient } from '@utils';
 
@@ -19,22 +20,46 @@ export const createNote = async (note: NotesInsert): Promise<Note> => {
   return camelcaseKeys(data);
 };
 
-export const listPeriodNotes = async ([rangeStart, rangeEnd]: [
+export const listNotes = async ([rangeStart, rangeEnd]: [
   CalendarDate,
   CalendarDate,
 ]): Promise<Note[]> => {
-  const { data, error } = await supabaseClient
+  const startDateString = rangeStart.toString();
+  const endDateString = rangeEnd.toString();
+
+  const periodNotesPromise = supabaseClient
     .from('notes')
     .select()
     .in('period_kind', ['day', 'week', 'month'])
-    .gte('period_date', rangeStart.toString())
-    .lte('period_date', rangeEnd.toString());
+    .gte('period_date', startDateString)
+    .lte('period_date', endDateString);
 
-  if (error) {
-    throw new Error(error.message);
+  const occurrenceNotesPromise = supabaseClient
+    .from('notes')
+    .select('*, occurrence:occurrences!inner(occurred_at)')
+    .gte('occurrences.occurred_at', startDateString)
+    .lte('occurrences.occurred_at', endDateString);
+
+  const [periodResult, occurrenceResult] = await Promise.all([
+    periodNotesPromise,
+    occurrenceNotesPromise,
+  ]);
+
+  if (periodResult.error) {
+    throw new Error(periodResult.error.message);
   }
 
-  return camelcaseKeys(data);
+  if (occurrenceResult.error) {
+    throw new Error(occurrenceResult.error.message);
+  }
+
+  const notesMap = new Map<string, Tables<'notes'>>();
+
+  for (const note of [...periodResult.data, ...occurrenceResult.data]) {
+    notesMap.set(note.id, note);
+  }
+
+  return camelcaseKeys([...notesMap.values()], { deep: true });
 };
 
 export const updateNote = async (

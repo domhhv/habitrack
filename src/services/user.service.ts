@@ -74,5 +74,8 @@ export const getSession = async () => {
     return null;
   }
 
-  return camelcaseKeys(session.user, { deep: true });
+  return camelcaseKeys(
+    { ...session.user, fetchedAt: new Date().toISOString() },
+    { deep: true }
+  );
 };

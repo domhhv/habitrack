@@ -7,7 +7,7 @@ import { useScreenWidth, useKeyboardShortcut } from '@hooks';
 import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
-import { useOccurrenceDrawerActions } from '@stores';
+import { useNotesByOccurrenceId, useOccurrenceDrawerActions } from '@stores';
 
 export type OccurrenceChipProps = {
   colorOverride?: string;
@@ -28,6 +28,7 @@ const OccurrenceChip = ({
   isHabitNameShown = false,
   occurrences,
 }: OccurrenceChipProps) => {
+  const notes = useNotesByOccurrenceId();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const [occurrence] = occurrences;
   const { habit, habitId } = occurrence;
@@ -110,7 +111,7 @@ const OccurrenceChip = ({
 
   if (
     occurrences.some((o) => {
-      return o.note;
+      return !!notes[o.id];
     })
   ) {
     chip = (

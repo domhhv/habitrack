@@ -1,10 +1,17 @@
-import type { User, UserAttributes } from '@supabase/supabase-js';
+import type {
+  UserAttributes,
+  User as SupabaseUser,
+} from '@supabase/supabase-js';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 import { useShallow } from 'zustand/react/shallow';
 
 import { updateUser } from '@services';
 
 import { useBoundStore, type SliceCreator } from './bound.store';
+
+type User = SupabaseUser & {
+  fetchedAt: string;
+};
 
 export type UserSlice = {
   user: null | CamelCasedPropertiesDeep<User>;
@@ -65,13 +72,18 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
           userAttributes.data = userMetadata;
         }
 
-        const updatedUser = await updateUser(userAttributes);
+        const updatedSupabaseUser = await updateUser(userAttributes);
+
+        const newUser = {
+          ...updatedSupabaseUser,
+          fetchedAt: new Date().toISOString(),
+        };
 
         set((state) => {
-          state.user = { ...state.user, ...updatedUser };
+          state.user = newUser;
         });
 
-        return updatedUser;
+        return newUser;
       },
     },
   };

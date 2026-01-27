@@ -43,6 +43,7 @@ import {
   useHabits,
   useNoteActions,
   useOccurrenceActions,
+  useNotesByOccurrenceId,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
 } from '@stores';
@@ -68,10 +69,10 @@ const OccurrenceForm = ({
   const { dayToLog, isOpen, occurrenceToEdit } = useOccurrenceDrawerState();
   const { user } = useUser();
   const habits = useHabits();
+  const notes = useNotesByOccurrenceId();
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote, deleteNote, updateNote } = useNoteActions();
-  const { addOccurrence, setOccurrenceNote, updateOccurrence } =
-    useOccurrenceActions();
+  const { addOccurrence, updateOccurrence } = useOccurrenceActions();
   const [note, handleNoteChange, clearNote] = useTextField();
   const [repeat, setRepeat] = React.useState(1);
   const [selectedHabitId, setSelectedHabitId] = React.useState('');
@@ -84,6 +85,10 @@ const OccurrenceForm = ({
   const [lastOccurredAt, setLastOccurredAt] =
     React.useState<CalendarDateTime | null>(null);
   const { isDesktop, isMobile } = useScreenWidth();
+
+  const occurrenceNote = React.useMemo(() => {
+    return notes[occurrenceToEdit?.id || ''];
+  }, [notes, occurrenceToEdit]);
 
   const computeOccurrenceDateTime = React.useCallback(
     (tz = timeZone) => {
@@ -160,7 +165,7 @@ const OccurrenceForm = ({
 
     if (isOpen && occurrenceToEdit) {
       setSelectedHabitId(occurrenceToEdit.habitId.toString());
-      handleNoteChange(occurrenceToEdit.note?.content || '');
+      handleNoteChange(occurrenceNote?.content || '');
       setTime(existingOccurrenceDateTime);
       setHasSpecificTime(occurrenceToEdit.hasSpecificTime);
 
@@ -176,6 +181,7 @@ const OccurrenceForm = ({
     }
   }, [
     dayToLog,
+    occurrenceNote?.content,
     occurrenceToEdit,
     existingOccurrenceDateTime,
     isOpen,
@@ -198,7 +204,7 @@ const OccurrenceForm = ({
       const hasTimeChanged =
         time instanceof ZonedDateTime &&
         !!time.compare(occurrenceToEdit.occurredAt);
-      const hasNoteChanged = note !== (occurrenceToEdit.note?.content || '');
+      const hasNoteChanged = note !== (occurrenceNote?.content || '');
       const hasHabitChanged =
         selectedHabitId !== occurrenceToEdit.habitId.toString();
       const hasSpecificTimeChanged =
@@ -220,6 +226,7 @@ const OccurrenceForm = ({
   }, [
     dayToLog,
     occurrenceToEdit,
+    occurrenceNote?.content,
     uploadedFiles.length,
     note,
     selectedHabitId,
@@ -300,29 +307,20 @@ const OccurrenceForm = ({
         });
 
         if (note) {
-          let newNote;
-
-          if (occurrenceToEdit.note) {
-            newNote = await updateNote(occurrenceToEdit.note.id, {
+          if (occurrenceNote) {
+            await updateNote(occurrenceNote.id, {
               content: note,
               occurrenceId: occurrenceToEdit.id,
             });
           } else {
-            newNote = await addNote({
+            await addNote({
               content: note,
               occurrenceId: occurrenceToEdit.id,
               userId: user.id,
             });
           }
-
-          setOccurrenceNote(occurrenceToEdit, {
-            content: newNote.content,
-            id: newNote.id,
-          });
-        } else if (occurrenceToEdit.note) {
-          await deleteNote(occurrenceToEdit.note.id);
-
-          setOccurrenceNote(occurrenceToEdit, null);
+        } else if (occurrenceNote) {
+          await deleteNote(occurrenceNote.id);
         }
       };
 
@@ -355,15 +353,10 @@ const OccurrenceForm = ({
       });
 
       if (note) {
-        const newNote = await addNote({
+        await addNote({
           content: note,
           occurrenceId: newOccurrence.id,
           userId: user.id,
-        });
-
-        setOccurrenceNote(newOccurrence, {
-          content: newNote.content,
-          id: newNote.id,
         });
       }
     });

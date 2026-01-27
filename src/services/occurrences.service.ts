@@ -18,9 +18,7 @@ export const createOccurrence = async (occurrence: OccurrencesInsert) => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .insert(decamelizeKeys(occurrence))
-    .select(
-      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
-    )
+    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
     .single();
 
   if (error) {
@@ -36,9 +34,7 @@ export const listOccurrences = async ([rangeStart, rangeEnd]: [
 ]): Promise<RawOccurrence[]> => {
   const { data, error } = await supabaseClient
     .from('occurrences')
-    .select(
-      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
-    )
+    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
     .order('occurred_at')
     .gt('occurred_at', rangeStart.toAbsoluteString())
     .lt('occurred_at', rangeEnd.toAbsoluteString());
@@ -58,9 +54,7 @@ export const patchOccurrence = async (
     .from('occurrences')
     .update(decamelizeKeys(occurrence))
     .eq('id', id)
-    .select(
-      '*, habit:habits(name, icon_path, trait:traits(id, name, color)), note:notes(id, content)'
-    )
+    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
     .single();
 
   if (error) {

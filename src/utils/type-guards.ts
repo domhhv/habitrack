@@ -4,6 +4,7 @@ import type {
   NoteOfPeriod,
   UploadResult,
   SuccessfulUpload,
+  NoteOfOccurrence,
 } from '@models';
 
 export const isFulfilled = <T>(
@@ -24,6 +25,10 @@ export const isNoteOfPeriod = (input: Note): input is NoteOfPeriod => {
   }
 
   return 'periodKind' in input && 'periodDate' in input;
+};
+
+export const isNoteOfOccurrence = (input: Note): input is NoteOfOccurrence => {
+  return 'occurrenceId' in input && input.occurrenceId !== null;
 };
 
 export const isFailedUpload = (

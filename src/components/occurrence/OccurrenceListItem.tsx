@@ -5,6 +5,7 @@ import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
 import type { Occurrence } from '@models';
+import { useNotesByOccurrenceId } from '@stores';
 
 import OccurrenceChip from './OccurrenceChip';
 
@@ -23,18 +24,23 @@ const OccurrenceListItem = ({
   onEdit,
   onRemove,
 }: OccurrenceListItemProps) => {
+  const notes = useNotesByOccurrenceId();
   const timeFormatter = useDateFormatter({
     hour: 'numeric',
     minute: 'numeric',
     timeZone: getLocalTimeZone(),
   });
 
+  const occurrenceNote = React.useMemo(() => {
+    return notes[occurrence.id];
+  }, [notes, occurrence]);
+
   return (
     <li
       key={occurrence.id}
       className={cn(
         'border-neutral-500 py-2 not-last:border-b',
-        hasChip && occurrence.note && 'pb-1'
+        hasChip && occurrenceNote && 'pb-1'
       )}
     >
       <div className="flex items-start justify-between gap-4">
@@ -53,12 +59,12 @@ const OccurrenceListItem = ({
               <span
                 className={cn(
                   'italic',
-                  !occurrence.note &&
+                  !occurrenceNote &&
                     occurrence.hasSpecificTime &&
                     'text-gray-400'
                 )}
               >
-                {occurrence.note?.content || '(no note)'}
+                {occurrenceNote?.content || '(no note)'}
               </span>
             </>
           )}
@@ -79,9 +85,9 @@ const OccurrenceListItem = ({
                   </span>
                 )}
               </div>
-              {occurrence.note && (
+              {occurrenceNote && (
                 <div className="text-sm whitespace-pre-wrap">
-                  <span className="italic">{occurrence.note.content}</span>
+                  <span className="italic">{occurrenceNote.content}</span>
                 </div>
               )}
             </>

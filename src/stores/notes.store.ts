@@ -2,19 +2,15 @@ import { toCalendarDate } from '@internationalized/date';
 import keyBy from 'lodash.keyby';
 import { useShallow } from 'zustand/react/shallow';
 
-import type { Note, NotesInsert, NotesUpdate } from '@models';
-import {
-  createNote,
-  updateNote,
-  destroyNote,
-  listPeriodNotes,
-} from '@services';
-import { isNoteOfPeriod } from '@utils';
+import type { Note, Occurrence, NotesInsert, NotesUpdate } from '@models';
+import { listNotes, createNote, updateNote, destroyNote } from '@services';
+import { isNoteOfPeriod, isNoteOfOccurrence } from '@utils';
 
 import { useBoundStore, type SliceCreator } from './bound.store';
 
 export type NotesSlice = {
   notes: Record<Note['id'], Note>;
+  notesByOccurrenceId: Record<Occurrence['id'], Note>;
   noteActions: {
     addNote: (note: NotesInsert) => Promise<Note>;
     clearNotes: () => void;
@@ -30,6 +26,7 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
 ) => {
   return {
     notes: {},
+    notesByOccurrenceId: {},
 
     noteActions: {
       addNote: async (note: NotesInsert) => {
@@ -37,6 +34,10 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
 
         set((state) => {
           state.notes[newNote.id] = newNote;
+
+          if ('occurrenceId' in newNote && newNote.occurrenceId) {
+            state.notesByOccurrenceId[newNote.occurrenceId] = newNote;
+          }
         });
 
         return newNote;
@@ -52,7 +53,12 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
         await destroyNote(id);
 
         set((state) => {
+          const noteToDelete = state.notes[id];
           delete state.notes[id];
+
+          if ('occurrenceId' in noteToDelete && noteToDelete?.occurrenceId) {
+            delete state.notesByOccurrenceId[noteToDelete.occurrenceId];
+          }
         });
       },
 
@@ -66,13 +72,17 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
           return;
         }
 
-        const notes = await listPeriodNotes([
+        const notes = await listNotes([
           toCalendarDate(rangeStart),
           toCalendarDate(rangeEnd),
         ]);
 
         set((state) => {
           state.notes = keyBy(notes, 'id');
+          state.notesByOccurrenceId = keyBy(
+            notes.filter(isNoteOfOccurrence),
+            'occurrenceId'
+          );
         });
       },
 
@@ -81,6 +91,10 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
 
         set((state) => {
           state.notes[id] = updatedNote;
+
+          if ('occurrenceId' in updatedNote && updatedNote.occurrenceId) {
+            state.notesByOccurrenceId[updatedNote.occurrenceId] = updatedNote;
+          }
         });
 
         return updatedNote;
@@ -93,6 +107,14 @@ export const useNotes = () => {
   return useBoundStore(
     useShallow((state) => {
       return Object.values(state.notes);
+    })
+  );
+};
+
+export const useNotesByOccurrenceId = () => {
+  return useBoundStore(
+    useShallow((state) => {
+      return state.notesByOccurrenceId;
     })
   );
 };
