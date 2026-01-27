@@ -15,13 +15,7 @@ import type { CalendarState } from 'react-stately';
 
 import { useFirstDayOfWeek } from '@hooks';
 import type { OccurrenceFilters } from '@models';
-import {
-  useUser,
-  useHabits,
-  useTraits,
-  useOccurrences,
-  useCalendarRangeChange,
-} from '@stores';
+import { useUser, useHabits, useTraits, useCalendarRangeChange } from '@stores';
 
 import MonthCalendarGrid from './MonthCalendarGrid';
 import MonthCalendarHeader from './MonthCalendarHeader';
@@ -33,7 +27,6 @@ type MonthCalendarProps = {
 const MonthCalendar = ({ state }: MonthCalendarProps) => {
   const { user } = useUser();
   const changeCalendarRange = useCalendarRangeChange();
-  const occurrences = useOccurrences();
   const habits = useHabits();
   const traits = useTraits();
   const params = useParams();
@@ -127,15 +120,7 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
         filters={filters}
         onFilterChange={setFilters}
       />
-      <MonthCalendarGrid
-        state={state}
-        occurrences={occurrences.filter((occurrence) => {
-          return (
-            filters.habitIds.has(occurrence.habitId.toString()) &&
-            filters.traitIds.has(occurrence.habit?.trait?.id.toString() || '')
-          );
-        })}
-      />
+      <MonthCalendarGrid state={state} filters={filters} />
     </>
   );
 };

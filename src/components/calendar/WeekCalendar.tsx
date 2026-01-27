@@ -156,7 +156,8 @@ const WeekCalendar = () => {
 
   const groupOccurrences = React.useCallback(
     (day: CalendarDate, hour: number) => {
-      const relatedOccurrences = occurrences.filter(
+      const dayOccurrences = occurrences[day.toString()] || {};
+      const relatedOccurrences = Object.values(dayOccurrences).filter(
         ({ hasSpecificTime, occurredAt }) => {
           const occurrenceDate = occurredAt;
           const matchesDay =

@@ -47,11 +47,13 @@ const OccurrenceDrawer = () => {
     year: 'numeric',
   });
   const occurrencesData = React.useMemo(() => {
-    if (!dayToDisplay && !habitIdToDisplay) {
+    if (!dayToDisplay) {
       return null;
     }
 
-    const filteredOccurrences = occurrences.filter((o) => {
+    const dayOccurrences = occurrences[dayToDisplay.toString()] || {};
+
+    const filteredOccurrences = Object.values(dayOccurrences).filter((o) => {
       const occurrenceDate = toLocalTimeZone(o.occurredAt);
 
       return (

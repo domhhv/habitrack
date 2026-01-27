@@ -291,7 +291,7 @@ const OccurrenceForm = ({
           uploadedPhotoPaths
         );
 
-        await updateOccurrence(occurrenceToEdit.id, {
+        await updateOccurrence(occurrenceToEdit, {
           habitId: selectedHabitId,
           hasSpecificTime,
           occurredAt,
@@ -315,14 +315,14 @@ const OccurrenceForm = ({
             });
           }
 
-          setOccurrenceNote(occurrenceToEdit.id, {
+          setOccurrenceNote(occurrenceToEdit, {
             content: newNote.content,
             id: newNote.id,
           });
         } else if (occurrenceToEdit.note) {
           await deleteNote(occurrenceToEdit.note.id);
 
-          setOccurrenceNote(occurrenceToEdit.id, null);
+          setOccurrenceNote(occurrenceToEdit, null);
         }
       };
 
@@ -361,7 +361,7 @@ const OccurrenceForm = ({
           userId: user.id,
         });
 
-        setOccurrenceNote(newOccurrence.id, {
+        setOccurrenceNote(newOccurrence, {
           content: newNote.content,
           id: newNote.id,
         });
@@ -556,7 +556,7 @@ const OccurrenceForm = ({
             return;
           }
 
-          void updateOccurrence(occurrenceToEdit.id, {
+          void updateOccurrence(occurrenceToEdit, {
             photoPaths: occurrenceToEdit.photoPaths.filter((p) => {
               return p !== path;
             }),
