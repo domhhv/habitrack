@@ -10,19 +10,20 @@ import { Link } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
-import type { Occurrence } from '@models';
-import { useWeekNotes, useNoteDrawerActions } from '@stores';
+import type { OccurrenceFilters } from '@models';
+import { useWeekNotes, useOccurrences, useNoteDrawerActions } from '@stores';
 import { getISOWeek } from '@utils';
 
 import type { CellPosition } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
 
 type CalendarGridProps = {
-  occurrences: Occurrence[];
+  filters: OccurrenceFilters;
   state: CalendarState;
 };
 
-const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
+const MonthCalendarGrid = ({ filters, state }: CalendarGridProps) => {
+  const occurrences = useOccurrences();
   const { firstDayOfWeek } = useFirstDayOfWeek();
   const { gridProps, weekDays } = useCalendarGrid(
     {
@@ -196,18 +197,27 @@ const MonthCalendarGrid = ({ occurrences, state }: CalendarGridProps) => {
                         }
                       );
 
+                      const dayOccurrences =
+                        occurrences[calendarDate.toString()] || {};
+
                       return (
                         <MonthCalendarCell
                           state={state}
                           date={calendarDate}
                           key={calendarDate.toString()}
                           position={getCellPosition(weekIndex, dayIndex)}
-                          occurrences={occurrences.filter(({ occurredAt }) => {
-                            return (
-                              occurredAt.compare(startDate) >= 0 &&
-                              occurredAt.compare(endDate) <= 0
-                            );
-                          })}
+                          occurrences={Object.values(dayOccurrences).filter(
+                            (o) => {
+                              return (
+                                o.occurredAt.compare(startDate) >= 0 &&
+                                o.occurredAt.compare(endDate) <= 0 &&
+                                filters.habitIds.has(o.habitId.toString()) &&
+                                filters.traitIds.has(
+                                  o.habit.trait.id.toString() || ''
+                                )
+                              );
+                            }
+                          )}
                         />
                       );
                     })}

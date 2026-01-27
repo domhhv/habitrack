@@ -1,9 +1,9 @@
 import {
   toZoned,
   parseAbsolute,
+  toCalendarDate,
   getLocalTimeZone,
 } from '@internationalized/date';
-import keyBy from 'lodash.keyby';
 import { useShallow } from 'zustand/react/shallow';
 
 import type {
@@ -23,18 +23,18 @@ import {
 import { useBoundStore, type SliceCreator } from './bound.store';
 
 export type OccurrencesSlice = {
-  occurrences: Record<Occurrence['id'], Occurrence>;
+  occurrences: Record<string, Record<Occurrence['id'], Occurrence>>;
   occurrencesActions: {
-    addOccurrence: (occurrence: OccurrencesInsert) => Promise<RawOccurrence>;
+    addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
     clearOccurrences: () => void;
     fetchOccurrences: () => Promise<void>;
     removeOccurrence: (occurrence: Occurrence) => Promise<void>;
     setOccurrenceNote: (
-      occurrenceId: Occurrence['id'],
+      occurrence: Occurrence,
       note: Pick<Note, 'id' | 'content'> | null
     ) => void;
     updateOccurrence: (
-      id: Occurrence['id'],
+      occurrence: Occurrence,
       body: OccurrencesUpdate
     ) => Promise<void>;
   };
@@ -59,15 +59,24 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
     occurrences: {},
 
     occurrencesActions: {
-      addOccurrence: async (occurrence: OccurrencesInsert) => {
+      addOccurrence: async (occurrence) => {
         const nextOccurrence = await createOccurrence(occurrence);
 
+        const clientOccurrence = toClientOccurrence(nextOccurrence);
+
         set((state) => {
-          state.occurrences[nextOccurrence.id] =
-            toClientOccurrence(nextOccurrence);
+          const dateKey = occurrence.occurredAt.split('T')[0];
+
+          if (state.occurrences[dateKey]) {
+            state.occurrences[dateKey][nextOccurrence.id] = clientOccurrence;
+          } else {
+            state.occurrences[dateKey] = {
+              [nextOccurrence.id]: clientOccurrence,
+            };
+          }
         });
 
-        return nextOccurrence;
+        return clientOccurrence;
       },
 
       clearOccurrences: () => {
@@ -91,28 +100,49 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
           toZoned(rangeEnd, getLocalTimeZone()),
         ]);
 
-        const occurrencesWithZonedDateTime =
-          occurrences.map(toClientOccurrence);
+        const occurrencesByDate: Record<
+          string,
+          Record<Occurrence['id'], Occurrence>
+        > = {};
+
+        let currentDate = toCalendarDate(rangeStart);
+        const endDate = toCalendarDate(rangeEnd);
+
+        while (currentDate.compare(endDate) <= 0) {
+          occurrencesByDate[currentDate.toString()] = {};
+          currentDate = currentDate.add({ days: 1 });
+        }
+
+        occurrences.forEach((occurrence) => {
+          const occurredAt = parseAbsolute(
+            occurrence.occurredAt,
+            occurrence.timeZone
+          );
+          const dateKey = toCalendarDate(occurredAt).toString();
+
+          if (occurrencesByDate[dateKey]) {
+            occurrencesByDate[dateKey][occurrence.id] =
+              toClientOccurrence(occurrence);
+          }
+        });
 
         set((state) => {
-          state.occurrences = keyBy(occurrencesWithZonedDateTime, 'id');
+          state.occurrences = occurrencesByDate;
         });
       },
 
-      removeOccurrence: async ({ id, photoPaths }: Occurrence) => {
+      removeOccurrence: async ({ id, occurredAt, photoPaths }) => {
         await destroyOccurrence({ id, photoPaths });
 
         set((state) => {
-          delete state.occurrences[id];
+          delete state.occurrences[toCalendarDate(occurredAt).toString()]?.[id];
         });
       },
 
-      setOccurrenceNote: (
-        occurrenceId: Occurrence['id'],
-        note: Pick<Note, 'id' | 'content'> | null
-      ) => {
+      setOccurrenceNote: ({ id, occurredAt }, note) => {
         set((state) => {
-          const occurrence = state.occurrences[occurrenceId];
+          const occurrence =
+            state.occurrences[toCalendarDate(occurredAt).toString()]?.[id];
 
           if (!occurrence) {
             return;
@@ -122,14 +152,12 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         });
       },
 
-      updateOccurrence: async (
-        id: Occurrence['id'],
-        body: OccurrencesUpdate
-      ) => {
+      updateOccurrence: async ({ id, occurredAt }, body) => {
         const updatedOccurrence = await patchOccurrence(id, body);
 
         set((state) => {
-          state.occurrences[id] = toClientOccurrence(updatedOccurrence);
+          state.occurrences[toCalendarDate(occurredAt).toString()][id] =
+            toClientOccurrence(updatedOccurrence);
         });
       },
     },
@@ -139,7 +167,7 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
 export const useOccurrences = () => {
   return useBoundStore(
     useShallow((state) => {
-      return Object.values(state.occurrences);
+      return state.occurrences;
     })
   );
 };
