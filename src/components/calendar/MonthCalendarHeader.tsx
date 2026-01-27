@@ -1,56 +1,19 @@
-import {
-  useDisclosure,
-  type Selection,
-  type SelectedItems,
-} from '@heroui/react';
-import {
-  cn,
-  Button,
-  Select,
-  Tooltip,
-  Checkbox,
-  SelectItem,
-  SelectSection,
-} from '@heroui/react';
-import { today, isSameMonth, getLocalTimeZone } from '@internationalized/date';
-import {
-  NotePencilIcon,
-  ArrowFatLeftIcon,
-  FunnelSimpleIcon,
-  ArrowFatRightIcon,
-  CalendarCheckIcon,
-  ArrowsClockwiseIcon,
-} from '@phosphor-icons/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import capitalize from 'lodash.capitalize';
-import groupBy from 'lodash.groupby';
+import { AnimatePresence } from 'framer-motion';
 import React from 'react';
-import { useDateFormatter } from 'react-aria';
-import { Link, useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
-import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
 import { useScreenWidth } from '@hooks';
-import type { Habit, Trait, OccurrenceFilters } from '@models';
-import { StorageBuckets } from '@models';
-import { getPublicUrl } from '@services';
-import {
-  useUser,
-  useHabits,
-  useTraits,
-  useNoteDrawerActions,
-  useOccurrenceDrawerActions,
-} from '@stores';
+import type { OccurrenceFilters } from '@models';
+import { useUser, useHabits, useTraits } from '@stores';
+
+import MonthCalendarFilters from './MonthCalendarFilters';
+import MonthCalendarNavigation from './MonthCalendarNavigation';
 
 export type MonthCalendarHeaderProps = {
   filters: OccurrenceFilters;
   state: CalendarState;
   onFilterChange: (filters: OccurrenceFilters) => void;
 };
-
-const YEARS = Array.from({ length: 31 }, (_, i) => {
-  return 2000 + i;
-});
 
 const MonthCalendarHeader = ({
   filters,
@@ -60,61 +23,9 @@ const MonthCalendarHeader = ({
   const habits = useHabits();
   const traits = useTraits();
   const { user } = useUser();
-  const { isDesktop, isMobile, screenWidth } = useScreenWidth();
-  const [monthSelectValue, setMonthSelectValue] = React.useState<Selection>(
-    new Set([])
-  );
-  const [yearSelectValue, setYearSelectValue] = React.useState<Selection>(
-    new Set([])
-  );
+  const { isDesktop } = useScreenWidth();
   const [isFilteringShownOnMobile, setIsFilteringShownOnMobile] =
     React.useState(false);
-  const formatter = useDateFormatter({
-    month: 'long',
-    timeZone: state.timeZone,
-  });
-  const months = React.useMemo(() => {
-    return [
-      ...Array(
-        state.focusedDate.calendar.getMonthsInYear(state.focusedDate)
-      ).keys(),
-    ].map((i) => {
-      const date = state.focusedDate.set({ month: i + 1 });
-
-      return formatter.format(date.toDate(state.timeZone));
-    });
-  }, [formatter, state.focusedDate, state.timeZone]);
-  const { nextMonth, prevMonth } = React.useMemo(() => {
-    return {
-      nextMonth: state.focusedDate.add({ months: 1 }).set({ day: 1 }),
-      prevMonth: state.focusedDate.subtract({ months: 1 }).set({ day: 1 }),
-    };
-  }, [state.focusedDate]);
-  const { isOpen: isMonthSelectOpen, onOpenChange: onMonthSelectOpenChange } =
-    useDisclosure();
-  const { isOpen: isYearSelectOpen, onOpenChange: onYearSelectOpenChange } =
-    useDisclosure();
-  const {
-    isOpen: isHabitsFilterSelectOpen,
-    onOpenChange: onHabitsFilterSelectOpenChange,
-  } = useDisclosure();
-  const {
-    isOpen: isTraitsFilterSelectOpen,
-    onOpenChange: onTraitsFilterSelectOpenChange,
-  } = useDisclosure();
-  const navigate = useNavigate();
-  const { openNoteDrawer } = useNoteDrawerActions();
-  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
-
-  React.useEffect(() => {
-    const newMonth = String(state.focusedDate.month);
-    setMonthSelectValue(new Set([newMonth]));
-  }, [state.focusedDate.month]);
-
-  React.useEffect(() => {
-    const newYear = String(state.focusedDate.year);
-    setYearSelectValue(new Set([newYear]));
-  }, [state.focusedDate.year]);
 
   const shouldRenderFilters = React.useMemo(() => {
     if (!isDesktop && !isFilteringShownOnMobile) {
@@ -128,453 +39,31 @@ const MonthCalendarHeader = ({
     return Boolean(user);
   }, [habits, isFilteringShownOnMobile, isDesktop, traits, user]);
 
-  const areAllHabitsSelected = React.useMemo(() => {
-    if (filters.habitIds.size === 1 && filters.habitIds.has('')) {
+  const isFilterToggleVisible = React.useMemo(() => {
+    if (Object.keys(habits).length <= 1 && Object.keys(traits).length <= 1) {
       return false;
     }
 
-    return filters.habitIds.size === Object.keys(habits).length;
-  }, [filters.habitIds, habits]);
-
-  const areAllTraitsSelected = React.useMemo(() => {
-    if (filters.traitIds.size === 1 && filters.traitIds.has('')) {
-      return false;
-    }
-
-    return filters.traitIds.size === Object.keys(traits).length;
-  }, [filters.traitIds, traits]);
-
-  const habitsByTraitName = React.useMemo(() => {
-    return groupBy(Object.values(habits), (habit) => {
-      return habit.trait?.name || 'Unknown';
-    });
-  }, [habits]);
-
-  const navigateToMonth = (year: number, month: number) => {
-    navigate(`/calendar/month/${year}/${month}/1`);
-  };
-
-  const handleHabitsFilterChange: React.ChangeEventHandler<
-    HTMLSelectElement
-  > = (event) => {
-    if (event.target.value.includes('toggle-all')) {
-      if (areAllHabitsSelected) {
-        onFilterChange({
-          ...filters,
-          habitIds: new Set(['']),
-        });
-
-        return;
-      }
-
-      const allHabitIds = Object.keys(habits).filter((id) => {
-        return id !== '';
-      });
-
-      onFilterChange({
-        ...filters,
-        habitIds: new Set(allHabitIds),
-      });
-
-      return;
-    }
-
-    onFilterChange({
-      ...filters,
-      habitIds: new Set(event.target.value.split(',')),
-    });
-  };
-
-  const handleTraitsFilterChange: React.ChangeEventHandler<
-    HTMLSelectElement
-  > = (event) => {
-    if (event.target.value.includes('toggle-all')) {
-      if (areAllTraitsSelected) {
-        onFilterChange({
-          ...filters,
-          traitIds: new Set(['']),
-        });
-
-        return;
-      }
-
-      const allTraitIds = Object.keys(traits).filter((id) => {
-        return id !== '';
-      });
-
-      onFilterChange({
-        ...filters,
-        traitIds: new Set(allTraitIds),
-      });
-
-      return;
-    }
-
-    onFilterChange({
-      ...filters,
-      traitIds: new Set(event.target.value.split(',')),
-    });
-  };
+    return Boolean(user);
+  }, [habits, traits, user]);
 
   return (
     <div className="flex flex-col items-stretch justify-between gap-2 px-0 pt-2 md:pt-0 lg:flex-row lg:gap-0 lg:px-0">
-      <div className="flex flex-col items-stretch justify-end gap-2 max-[445px]:gap-4 min-[446px]:flex-row lg:justify-between lg:gap-2">
-        <div className="flex w-full gap-2">
-          <Button
-            size="sm"
-            variant="flat"
-            color="secondary"
-            className="h-6 w-1/2 md:hidden"
-            onPress={() => {
-              openOccurrenceDrawer({
-                dayToLog: today(getLocalTimeZone()),
-              });
-            }}
-          >
-            <CalendarCheckIcon size={16} weight="bold" />
-            Log
-          </Button>
-          <Button
-            size="sm"
-            variant="flat"
-            color="secondary"
-            className="h-6 w-1/2 md:hidden"
-            onPress={() => {
-              openNoteDrawer(today(getLocalTimeZone()), 'day');
-            }}
-          >
-            <NotePencilIcon size={16} weight="bold" />
-            Note
-          </Button>
-        </div>
-        <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
-          {!isDesktop && (
-            <Button
-              size="sm"
-              isIconOnly
-              radius="sm"
-              variant="light"
-              color="secondary"
-              aria-label="Toggle filters"
-              className={cn(isMobile && 'min-w-fit p-0')}
-              onPress={() => {
-                setIsFilteringShownOnMobile((prev) => {
-                  return !prev;
-                });
-              }}
-            >
-              <FunnelSimpleIcon size={20} />
-            </Button>
-          )}
-          <Select
-            size="sm"
-            radius="sm"
-            color="secondary"
-            variant="bordered"
-            isOpen={isMonthSelectOpen}
-            selectedKeys={monthSelectValue}
-            onOpenChange={onMonthSelectOpenChange}
-            scrollShadowProps={{
-              visibility: 'bottom',
-            }}
-            classNames={{
-              base: 'w-[75px] md:w-[125px]',
-              popoverContent: 'w-[100px] md:w-[125px]',
-            }}
-            onSelectionChange={(value) => {
-              const [newMonth] = Array.from(value);
-
-              if (typeof newMonth === 'string') {
-                navigateToMonth(state.focusedDate.year, Number(newMonth));
-              }
-            }}
-          >
-            <SelectSection
-              title="Month"
-              classNames={{
-                heading:
-                  'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-              }}
-            >
-              {months.map((month, index) => {
-                return (
-                  <SelectItem key={String(index + 1)}>
-                    {capitalize(isMobile ? month.substring(0, 3) : month)}
-                  </SelectItem>
-                );
-              })}
-            </SelectSection>
-          </Select>
-          <Select
-            size="sm"
-            radius="sm"
-            color="secondary"
-            variant="bordered"
-            isOpen={isYearSelectOpen}
-            selectedKeys={yearSelectValue}
-            onOpenChange={onYearSelectOpenChange}
-            classNames={{
-              base: 'w-[100px]',
-            }}
-            scrollShadowProps={{
-              visibility: 'bottom',
-            }}
-            onSelectionChange={(value) => {
-              const [newYear] = Array.from(value);
-
-              if (typeof newYear === 'string') {
-                navigateToMonth(Number(newYear), state.focusedDate.month);
-              }
-            }}
-          >
-            <SelectSection
-              title="Year"
-              classNames={{
-                heading:
-                  'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-              }}
-            >
-              {YEARS.map((year) => {
-                return (
-                  <SelectItem key={year.toString()}>
-                    {year.toString()}
-                  </SelectItem>
-                );
-              })}
-            </SelectSection>
-          </Select>
-        </div>
-        <div className="flex gap-1 lg:gap-2">
-          <Button
-            as={Link}
-            size="sm"
-            isIconOnly
-            radius="sm"
-            variant="light"
-            color="secondary"
-            role="navigate-back"
-            to={`/calendar/month/${prevMonth.year}/${prevMonth.month}/${prevMonth.day}`}
-          >
-            <ArrowFatLeftIcon size={20} />
-          </Button>
-          {!isSameMonth(state.focusedDate, today(state.timeZone)) && (
-            <Button
-              as={Link}
-              size="sm"
-              radius="sm"
-              variant="light"
-              color="secondary"
-              className={cn(isMobile && 'min-w-fit p-0')}
-              startContent={<ArrowsClockwiseIcon size={20} />}
-              to={`/calendar/month/${today(state.timeZone).year}/${today(state.timeZone).month}/${today(state.timeZone).day}`}
-            >
-              {(!isMobile || screenWidth < 446) && 'Today'}
-            </Button>
-          )}
-          <Button
-            as={Link}
-            size="sm"
-            isIconOnly
-            radius="sm"
-            variant="light"
-            color="secondary"
-            role="navigate-forward"
-            to={`/calendar/month/${nextMonth.year}/${nextMonth.month}/${nextMonth.day}`}
-          >
-            <ArrowFatRightIcon size={20} />
-          </Button>
-        </div>
-      </div>
+      <MonthCalendarNavigation
+        state={state}
+        isFilterToggleVisible={isFilterToggleVisible}
+        onToggleFilters={() => {
+          setIsFilteringShownOnMobile((prev) => {
+            return !prev;
+          });
+        }}
+      />
       <AnimatePresence mode="wait">
         {shouldRenderFilters && (
-          <motion.div
-            initial={{
-              height: 0,
-              opacity: 0,
-            }}
-            className="flex flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between"
-            exit={{
-              height: 0,
-              opacity: 0,
-              transition: {
-                height: {
-                  duration: 0.4,
-                },
-                opacity: {
-                  duration: 0.25,
-                },
-              },
-            }}
-            animate={{
-              height: 'auto',
-              opacity: 1,
-              transition: {
-                height: {
-                  duration: 0.4,
-                },
-                opacity: {
-                  delay: 0.15,
-                  duration: 0.25,
-                },
-              },
-            }}
-          >
-            {!!Object.keys(habits).length && (
-              <Select
-                size="sm"
-                radius="sm"
-                color="secondary"
-                variant="bordered"
-                selectionMode="multiple"
-                className="w-full md:w-50"
-                selectedKeys={filters.habitIds}
-                isOpen={isHabitsFilterSelectOpen}
-                onChange={handleHabitsFilterChange}
-                onOpenChange={onHabitsFilterSelectOpenChange}
-                scrollShadowProps={{
-                  visibility: 'bottom',
-                }}
-                renderValue={(selectedHabits: SelectedItems<Habit>) => {
-                  return (
-                    <CrossPlatformHorizontalScroll className="flex space-x-2">
-                      {selectedHabits.map(({ key }) => {
-                        if (typeof key !== 'string' || !habits[key]) {
-                          return null;
-                        }
-
-                        const { iconPath, id, name } = habits[key];
-
-                        return (
-                          <Tooltip key={id} closeDelay={0} content={name}>
-                            <img
-                              className="h-4 w-4"
-                              alt={`${name} icon`}
-                              src={getPublicUrl(
-                                StorageBuckets.HABIT_ICONS,
-                                iconPath
-                              )}
-                            />
-                          </Tooltip>
-                        );
-                      })}
-                    </CrossPlatformHorizontalScroll>
-                  );
-                }}
-              >
-                <>
-                  {!!Object.keys(habits).length && (
-                    <SelectItem
-                      key="toggle-all"
-                      className="mb-0.5"
-                      textValue="Toggle all"
-                    >
-                      <Checkbox
-                        color="secondary"
-                        isSelected={areAllHabitsSelected}
-                        isIndeterminate={
-                          !areAllHabitsSelected && filters.habitIds.size > 1
-                        }
-                      />
-                      <span>
-                        {areAllHabitsSelected ? 'Unselect' : 'Select'} all
-                      </span>
-                    </SelectItem>
-                  )}
-                  {Object.entries(habitsByTraitName).map(
-                    ([traitName, habits], index, array) => {
-                      if (!habits?.length) {
-                        return null;
-                      }
-
-                      return (
-                        <SelectSection
-                          key={traitName}
-                          title={traitName}
-                          showDivider={index < array.length - 1}
-                          classNames={{
-                            heading:
-                              'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-                          }}
-                        >
-                          {habits.map((habit) => {
-                            return (
-                              <SelectItem key={habit.id} textValue={habit.name}>
-                                <div className="flex items-center gap-2">
-                                  <img
-                                    alt={habit.name}
-                                    role="habit-icon"
-                                    className="h-4 w-4"
-                                    src={getPublicUrl(
-                                      StorageBuckets.HABIT_ICONS,
-                                      habit.iconPath
-                                    )}
-                                  />
-                                  <span className="truncate">{habit.name}</span>
-                                </div>
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectSection>
-                      );
-                    }
-                  )}
-                </>
-              </Select>
-            )}
-            <Select
-              size="sm"
-              radius="sm"
-              color="secondary"
-              variant="bordered"
-              selectionMode="multiple"
-              selectedKeys={filters.traitIds}
-              isOpen={isTraitsFilterSelectOpen}
-              onChange={handleTraitsFilterChange}
-              onOpenChange={onTraitsFilterSelectOpenChange}
-              className="w-full min-[450px]:w-1/2 md:w-[250px]"
-              renderValue={(selectedTraits: SelectedItems<Trait>) => {
-                return (
-                  <CrossPlatformHorizontalScroll className="flex space-x-2">
-                    {selectedTraits.map(({ key }) => {
-                      if (typeof key !== 'string' || !traits[key]) {
-                        return null;
-                      }
-
-                      const { color, id, name } = traits[key];
-
-                      return <TraitChip key={id} trait={{ color, name }} />;
-                    })}
-                  </CrossPlatformHorizontalScroll>
-                );
-              }}
-            >
-              <>
-                {!!Object.keys(traits).length && (
-                  <SelectItem
-                    key="toggle-all"
-                    className="mb-0.5"
-                    textValue="Toggle all"
-                  >
-                    <Checkbox
-                      color="secondary"
-                      isSelected={areAllTraitsSelected}
-                      isIndeterminate={
-                        !areAllTraitsSelected && filters.traitIds.size > 1
-                      }
-                    />
-                    <span>
-                      {areAllTraitsSelected ? 'Unselect' : 'Select'} all
-                    </span>
-                  </SelectItem>
-                )}
-                <SelectSection title="Filter by traits">
-                  {Object.values(traits).map((trait) => {
-                    return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
-                  })}
-                </SelectSection>
-              </>
-            </Select>
-          </motion.div>
+          <MonthCalendarFilters
+            filters={filters}
+            onFilterChange={onFilterChange}
+          />
         )}
       </AnimatePresence>
     </div>
