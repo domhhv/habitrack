@@ -32,7 +32,12 @@ const useSession = () => {
           'USER_UPDATED',
         ].includes(event)
       ) {
-        setUser(camelcaseKeys(session.user, { deep: true }));
+        setUser(
+          camelcaseKeys(
+            { ...session.user, fetchedAt: new Date().toISOString() },
+            { deep: true }
+          )
+        );
       }
 
       if (event === 'SIGNED_OUT') {

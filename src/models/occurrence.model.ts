@@ -7,7 +7,6 @@ import type {
   TablesUpdate,
   CompositeTypes,
 } from '@db-types';
-import type { Note } from '@models';
 
 import { type Habit } from './habit.model';
 import { type Trait } from './trait.model';
@@ -24,8 +23,6 @@ type HabitWithTrait = OccurrenceHabit & {
 
 export type RawOccurrence = BaseOccurrence & {
   habit: HabitWithTrait;
-} & {
-  note: Pick<Note, 'id' | 'content'> | null;
 };
 
 export type Occurrence = Omit<
