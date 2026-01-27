@@ -13,6 +13,7 @@ import {
   CaretLeftIcon,
   NoteBlankIcon,
   CaretRightIcon,
+  CalendarBlankIcon,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
@@ -30,6 +31,7 @@ import {
   useOccurrences,
   useNoteDrawerActions,
   useCalendarRangeChange,
+  useOccurrenceDrawerActions,
 } from '@stores';
 import { getISOWeek, getISOWeekYear } from '@utils';
 
@@ -39,6 +41,7 @@ const WeekCalendar = () => {
   const dayNotes = useDayNotes();
   const { isDesktop } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
+  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const occurrences = useOccurrences();
   const [fetchedWeekYear, setFetchedWeekYear] = React.useState('');
   const { locale } = useLocale();
@@ -187,7 +190,7 @@ const WeekCalendar = () => {
       orientation="horizontal"
       className="relative w-full overflow-y-scroll"
     >
-      <div className="flex items-center justify-center gap-4">
+      <div className="sticky left-0 flex items-center justify-center gap-4">
         <Button
           as={Link}
           isIconOnly
@@ -218,7 +221,7 @@ const WeekCalendar = () => {
       </div>
       <div
         {...gridProps}
-        className="flex min-w-lg justify-around px-8 py-2 lg:px-16 lg:py-4"
+        className="flex min-w-lg justify-around px-8 py-4 lg:px-16"
       >
         {state
           .getDatesInWeek(firstDayOfWeek === 'sun' ? 0 : 1)
@@ -230,7 +233,10 @@ const WeekCalendar = () => {
             const isNoteAdded = hasNote(day);
 
             return (
-              <div key={dayIndex} className="group flex flex-1 flex-col gap-4">
+              <div
+                key={dayIndex}
+                className="group flex min-w-32 flex-1 flex-col gap-4"
+              >
                 <div
                   className={cn(
                     'space-y-2 text-center text-stone-600 dark:text-stone-300',
@@ -240,33 +246,55 @@ const WeekCalendar = () => {
                 >
                   <div className="flex items-center justify-center gap-2">
                     <h3>{capitalize(weekDays[dayIndex])}</h3>
-                    <Tooltip
-                      closeDelay={0}
-                      content={isNoteAdded ? 'Edit note' : 'Add note'}
-                    >
-                      <Button
-                        radius="sm"
-                        variant="light"
-                        color={isNoteAdded ? 'primary' : 'secondary'}
-                        aria-label={isNoteAdded ? 'Edit note' : 'Add note'}
-                        onPress={() => {
-                          openNoteDrawer(day, 'day');
-                        }}
-                        className={cn(
-                          'h-5 w-5 min-w-fit px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                          isNoteAdded && 'opacity-100'
-                        )}
+                    <div className="flex items-center justify-center gap-0.5 md:gap-2">
+                      <Tooltip
+                        closeDelay={0}
+                        content={isNoteAdded ? 'Edit note' : 'Add note'}
                       >
-                        {isNoteAdded ? (
-                          <NoteIcon weight="bold" size={isDesktop ? 18 : 14} />
-                        ) : (
-                          <NoteBlankIcon
+                        <Button
+                          radius="sm"
+                          variant="light"
+                          color={isNoteAdded ? 'primary' : 'secondary'}
+                          aria-label={isNoteAdded ? 'Edit note' : 'Add note'}
+                          onPress={() => {
+                            openNoteDrawer(day, 'day');
+                          }}
+                          className={cn(
+                            'h-5 w-5 min-w-fit px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                            isNoteAdded && 'opacity-100'
+                          )}
+                        >
+                          {isNoteAdded ? (
+                            <NoteIcon
+                              weight="bold"
+                              size={isDesktop ? 18 : 14}
+                            />
+                          ) : (
+                            <NoteBlankIcon
+                              weight="bold"
+                              size={isDesktop ? 18 : 14}
+                            />
+                          )}
+                        </Button>
+                      </Tooltip>
+                      <Tooltip closeDelay={0} content="Log occurrence">
+                        <Button
+                          radius="sm"
+                          variant="light"
+                          color="secondary"
+                          aria-label="Log occurrence"
+                          className="h-5 w-5 min-w-fit px-0 lg:h-6 lg:w-6"
+                          onPress={() => {
+                            openOccurrenceDrawer({ dayToLog: day });
+                          }}
+                        >
+                          <CalendarBlankIcon
                             weight="bold"
                             size={isDesktop ? 18 : 14}
                           />
-                        )}
-                      </Button>
-                    </Tooltip>
+                        </Button>
+                      </Tooltip>
+                    </div>
                   </div>
                   <h6>{day.day}</h6>
                 </div>
