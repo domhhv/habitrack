@@ -21,12 +21,11 @@ import { getISOWeek } from '@utils';
 import type { CellPosition } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
 
-type CalendarGridProps = {
-  // filters: OccurrenceFilters;
+type MonthCalendarGridProps = {
   state: CalendarState;
 };
 
-const MonthCalendarGrid = ({ state }: CalendarGridProps) => {
+const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
   const filters = useCalendarFilters();
   const occurrences = useOccurrences();
   const { firstDayOfWeek } = useFirstDayOfWeek();
@@ -105,8 +104,11 @@ const MonthCalendarGrid = ({ state }: CalendarGridProps) => {
             const monday = daysOfWeek.find((d) => {
               return d.toDate(state.timeZone).getDay() === 1;
             });
+            const thursday = daysOfWeek.find((d) => {
+              return d.toDate(state.timeZone).getDay() === 4;
+            });
 
-            if (!monday) {
+            if (!monday || !thursday) {
               return null;
             }
 
@@ -130,7 +132,7 @@ const MonthCalendarGrid = ({ state }: CalendarGridProps) => {
                       as={Link}
                       variant="ghost"
                       radius={isDesktop ? 'md' : 'sm'}
-                      to={`/calendar/week/${firstDayOfWeek.year}/${firstDayOfWeek.month}/${firstDayOfWeek.day}`}
+                      to={`/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`}
                       className={cn(
                         'mt-0.5 w-6 min-w-fit basis-6.75 p-0 lg:w-7 lg:basis-7.75',
                         weekIndex === 0 && 'top-0.5'

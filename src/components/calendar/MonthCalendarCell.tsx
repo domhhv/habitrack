@@ -31,7 +31,7 @@ export type CellPosition =
   | 'bottom-right'
   | '';
 
-type CalendarCellProps = {
+type MonthCalendarCellProps = {
   date: CalendarDate;
   occurrences: Occurrence[];
   position: CellPosition;
@@ -43,7 +43,7 @@ const MonthCalendarCell = ({
   occurrences,
   position,
   state,
-}: CalendarCellProps) => {
+}: MonthCalendarCellProps) => {
   const dayNotes = useDayNotes();
   const { user } = useUser();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();

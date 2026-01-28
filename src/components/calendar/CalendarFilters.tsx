@@ -23,7 +23,7 @@ import {
   useCalendarFiltersChange,
 } from '@stores';
 
-const MonthCalendarFilters = () => {
+const CalendarFilters = () => {
   const habits = useHabits();
   const traits = useTraits();
   const filters = useCalendarFilters();
@@ -131,7 +131,7 @@ const MonthCalendarFilters = () => {
             height: 0,
             opacity: 0,
           }}
-          className="flex flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between"
+          className="flex max-w-full flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between"
           exit={{
             height: 0,
             opacity: 0,
@@ -318,4 +318,4 @@ const MonthCalendarFilters = () => {
   );
 };
 
-export default MonthCalendarFilters;
+export default CalendarFilters;

@@ -16,9 +16,9 @@ import type { CalendarState } from 'react-stately';
 import { useFirstDayOfWeek } from '@hooks';
 import { useCalendarRangeChange } from '@stores';
 
-import MonthCalendarFilters from './MonthCalendarFilters';
+import CalendarFilters from './CalendarFilters';
+import CalendarNavigation from './CalendarNavigation';
 import MonthCalendarGrid from './MonthCalendarGrid';
-import MonthCalendarNavigation from './MonthCalendarNavigation';
 
 type MonthCalendarProps = {
   state: CalendarState;
@@ -75,8 +75,8 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
   return (
     <>
       <div className="flex flex-col items-stretch justify-between gap-2 px-0 pt-2 md:pt-0 lg:flex-row lg:gap-0 lg:px-0">
-        <MonthCalendarNavigation state={state} />
-        <MonthCalendarFilters />
+        <CalendarNavigation focusedDate={state.focusedDate} />
+        <CalendarFilters />
       </div>
       <MonthCalendarGrid state={state} />
     </>
