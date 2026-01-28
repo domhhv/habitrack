@@ -26,7 +26,6 @@ import { useCalendarState } from 'react-stately';
 import { OccurrenceChip } from '@components';
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
-  useUser,
   useDayNotes,
   useOccurrences,
   useNoteDrawerActions,
@@ -36,14 +35,12 @@ import {
 import { getISOWeek, getISOWeekYear } from '@utils';
 
 const WeekCalendar = () => {
-  const { user } = useUser();
   const changeCalendarRange = useCalendarRangeChange();
   const dayNotes = useDayNotes();
   const { isDesktop } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const occurrences = useOccurrences();
-  const [fetchedWeekYear, setFetchedWeekYear] = React.useState('');
   const { locale } = useLocale();
   const params = useParams();
   const navigate = useNavigate();
@@ -68,6 +65,20 @@ const WeekCalendar = () => {
   );
 
   React.useEffect(() => {
+    const focusedDateTime = toCalendarDateTime(state.focusedDate);
+
+    const rangeStart = startOfWeek(focusedDateTime, locale, firstDayOfWeek);
+    const rangeEnd = endOfWeek(focusedDateTime, locale, firstDayOfWeek).set({
+      hour: 23,
+      millisecond: 999,
+      minute: 59,
+      second: 59,
+    });
+
+    changeCalendarRange([rangeStart, rangeEnd]);
+  }, [state.focusedDate, firstDayOfWeek, changeCalendarRange, locale]);
+
+  React.useEffect(() => {
     const currentWeek = state.visibleRange.start;
 
     const {
@@ -85,32 +96,7 @@ const WeekCalendar = () => {
     if (state.focusedDate.toString() !== paramsDate.toString()) {
       state.setFocusedDate(toCalendarDate(paramsDate));
     }
-
-    if (!user || fetchedWeekYear === state.focusedDate.toString()) {
-      return;
-    }
-
-    setFetchedWeekYear(state.focusedDate.toString());
-
-    const paramsDateTime = toCalendarDateTime(paramsDate);
-    const rangeStart = startOfWeek(paramsDateTime, locale, firstDayOfWeek);
-    const rangeEnd = endOfWeek(paramsDateTime, locale, firstDayOfWeek).set({
-      hour: 23,
-      millisecond: 999,
-      minute: 59,
-      second: 59,
-    });
-
-    changeCalendarRange([rangeStart, rangeEnd]);
-  }, [
-    user,
-    changeCalendarRange,
-    firstDayOfWeek,
-    fetchedWeekYear,
-    state,
-    params,
-    locale,
-  ]);
+  }, [state, params]);
 
   const hasNote = React.useCallback(
     (date: CalendarDate) => {

@@ -37,7 +37,19 @@ export const createTraitsSlice: SliceCreator<keyof TraitsSlice> = (set) => {
         const traits = await listTraits();
 
         set((state) => {
+          const prevTraitIds = state.calendarFilters.traitIds;
+          const nextTraitIds = traits.map((trait) => {
+            return trait.id;
+          });
+
           state.traits = keyBy(traits, 'id');
+
+          state.calendarFilters.traitIds =
+            prevTraitIds.length === 0
+              ? nextTraitIds
+              : prevTraitIds.filter((id) => {
+                  return nextTraitIds.includes(id);
+                });
         });
       },
     },

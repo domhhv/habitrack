@@ -28,13 +28,21 @@ export type ConfirmationOptions = {
   title?: string;
 };
 
+export type CalendarFilters = {
+  habitIds: string[];
+  isShownOnMobile: boolean;
+  traitIds: string[];
+};
+
 type ConfirmationState = ConfirmationOptions & {
   isOpen: boolean;
 };
 
 export type UiSlice = {
+  calendarFilters: CalendarFilters;
   calendarRange: [CalendarDateTime, CalendarDateTime];
   confirmation: ConfirmationState;
+  changeCalendarFilters: (filters: CalendarFilters) => void;
   changeCalendarRange: (range: [CalendarDateTime, CalendarDateTime]) => void;
   confirmationActions: {
     approveConfirmation: () => void;
@@ -86,10 +94,20 @@ const initialConfirmationState = {
 export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
   return {
     confirmation: initialConfirmationState,
+    changeCalendarFilters: (filters) => {
+      set((state) => {
+        state.calendarFilters = filters;
+      });
+    },
     changeCalendarRange: (range) => {
       set((state) => {
         state.calendarRange = range;
       });
+    },
+    calendarFilters: {
+      habitIds: [],
+      isShownOnMobile: false,
+      traitIds: [],
     },
     calendarRange: [
       toCalendarDateTime(now(getLocalTimeZone())),
@@ -196,6 +214,18 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
       },
     },
   };
+};
+
+export const useCalendarFilters = () => {
+  return useBoundStore((state) => {
+    return state.calendarFilters;
+  });
+};
+
+export const useCalendarFiltersChange = () => {
+  return useBoundStore((state) => {
+    return state.changeCalendarFilters;
+  });
 };
 
 export const useCalendarRangeChange = () => {
