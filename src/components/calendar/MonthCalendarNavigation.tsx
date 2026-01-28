@@ -16,23 +16,26 @@ import { Link, useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { useScreenWidth } from '@hooks';
-import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
+import {
+  useUser,
+  useCalendarFilters,
+  useNoteDrawerActions,
+  useCalendarFiltersChange,
+  useOccurrenceDrawerActions,
+} from '@stores';
 
 export type MonthCalendarNavigationProps = {
-  isFilterToggleVisible: boolean;
   state: CalendarState;
-  onToggleFilters: () => void;
 };
 
 const YEARS = Array.from({ length: 31 }, (_, i) => {
   return 2000 + i;
 });
 
-const MonthCalendarNavigation = ({
-  isFilterToggleVisible,
-  onToggleFilters,
-  state,
-}: MonthCalendarNavigationProps) => {
+const MonthCalendarNavigation = ({ state }: MonthCalendarNavigationProps) => {
+  const filters = useCalendarFilters();
+  const changeCalendarFilters = useCalendarFiltersChange();
+  const { user } = useUser();
   const { isDesktop, isMobile, screenWidth } = useScreenWidth();
   const [monthSelectValue, setMonthSelectValue] = React.useState<Selection>(
     new Set([])
@@ -83,6 +86,13 @@ const MonthCalendarNavigation = ({
     navigate(`/calendar/month/${year}/${month}/1`);
   };
 
+  const toggleFiltersVisibility = () => {
+    changeCalendarFilters({
+      ...filters,
+      isShownOnMobile: !filters.isShownOnMobile,
+    });
+  };
+
   return (
     <div className="flex flex-col items-stretch justify-end gap-2 max-[445px]:gap-4 min-[446px]:flex-row lg:justify-between lg:gap-2">
       <div className="flex w-full gap-2">
@@ -114,15 +124,15 @@ const MonthCalendarNavigation = ({
         </Button>
       </div>
       <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
-        {!isDesktop && isFilterToggleVisible && (
+        {!isDesktop && !!user && (
           <Button
             size="sm"
             isIconOnly
             radius="sm"
             variant="light"
             color="secondary"
-            onPress={onToggleFilters}
             aria-label="Toggle filters"
+            onPress={toggleFiltersVisibility}
             className={cn(isMobile && 'min-w-fit p-0')}
           >
             <FunnelSimpleIcon size={20} />

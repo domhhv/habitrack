@@ -38,6 +38,12 @@ export const createTraitsSlice: SliceCreator<keyof TraitsSlice> = (set) => {
 
         set((state) => {
           state.traits = keyBy(traits, 'id');
+          state.calendarFilters = {
+            ...state.calendarFilters,
+            traitIds: traits.map((trait) => {
+              return trait.id;
+            }),
+          };
         });
       },
     },

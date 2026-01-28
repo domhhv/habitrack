@@ -14,50 +14,43 @@ import { useParams } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { useFirstDayOfWeek } from '@hooks';
-import type { OccurrenceFilters } from '@models';
-import { useUser, useHabits, useTraits, useCalendarRangeChange } from '@stores';
+import { useCalendarRangeChange } from '@stores';
 
+import MonthCalendarFilters from './MonthCalendarFilters';
 import MonthCalendarGrid from './MonthCalendarGrid';
-import MonthCalendarHeader from './MonthCalendarHeader';
+import MonthCalendarNavigation from './MonthCalendarNavigation';
 
 type MonthCalendarProps = {
   state: CalendarState;
 };
 
 const MonthCalendar = ({ state }: MonthCalendarProps) => {
-  const { user } = useUser();
   const changeCalendarRange = useCalendarRangeChange();
-  const habits = useHabits();
-  const traits = useTraits();
   const params = useParams();
   const { locale } = useLocale();
-  const [filters, setFilters] = React.useState<OccurrenceFilters>({
-    habitIds: new Set(),
-    traitIds: new Set(),
-  });
   const { firstDayOfWeek } = useFirstDayOfWeek();
-  const [fetchedMonthYear, setFetchedMonthYear] = React.useState<string>('');
-
-  const derivedFilters = React.useMemo(() => {
-    return {
-      habitIds: new Set(
-        Object.values(habits).map((habit) => {
-          return habit.id.toString();
-        })
-      ),
-      traitIds: new Set(
-        Object.values(traits).map((trait) => {
-          return trait.id.toString();
-        })
-      ),
-    };
-  }, [habits, traits]);
 
   React.useEffect(() => {
-    if (!filters.habitIds.size || !filters.traitIds.size) {
-      setFilters(derivedFilters);
-    }
-  }, [derivedFilters, filters.habitIds.size, filters.traitIds.size]);
+    const focusedDateTime = toCalendarDateTime(state.focusedDate);
+
+    const rangeStart = startOfWeek(
+      startOfMonth(focusedDateTime),
+      locale,
+      firstDayOfWeek
+    );
+    const rangeEnd = endOfWeek(
+      endOfMonth(focusedDateTime),
+      locale,
+      firstDayOfWeek
+    ).set({
+      hour: 23,
+      millisecond: 999,
+      minute: 59,
+      second: 59,
+    });
+
+    changeCalendarRange([rangeStart, rangeEnd]);
+  }, [state.focusedDate, firstDayOfWeek, changeCalendarRange, locale]);
 
   React.useEffect(() => {
     const currentMonth = startOfMonth(today(state.timeZone));
@@ -77,50 +70,15 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
     if (state.focusedDate.toString() !== paramsDate.toString()) {
       state.setFocusedDate(toCalendarDate(paramsDate));
     }
-
-    if (!user || fetchedMonthYear === paramsDate.toString()) {
-      return;
-    }
-
-    setFetchedMonthYear(paramsDate.toString());
-
-    const paramsDateTime = toCalendarDateTime(paramsDate);
-
-    const rangeStart = startOfWeek(
-      startOfMonth(paramsDateTime),
-      locale,
-      firstDayOfWeek
-    );
-    const rangeEnd = endOfWeek(
-      endOfMonth(paramsDateTime),
-      locale,
-      firstDayOfWeek
-    ).set({
-      hour: 23,
-      millisecond: 999,
-      minute: 59,
-      second: 59,
-    });
-
-    changeCalendarRange([rangeStart, rangeEnd]);
-  }, [
-    user,
-    changeCalendarRange,
-    params,
-    state,
-    locale,
-    fetchedMonthYear,
-    firstDayOfWeek,
-  ]);
+  }, [params, state]);
 
   return (
     <>
-      <MonthCalendarHeader
-        state={state}
-        filters={filters}
-        onFilterChange={setFilters}
-      />
-      <MonthCalendarGrid state={state} filters={filters} />
+      <div className="flex flex-col items-stretch justify-between gap-2 px-0 pt-2 md:pt-0 lg:flex-row lg:gap-0 lg:px-0">
+        <MonthCalendarNavigation state={state} />
+        <MonthCalendarFilters />
+      </div>
+      <MonthCalendarGrid state={state} />
     </>
   );
 };

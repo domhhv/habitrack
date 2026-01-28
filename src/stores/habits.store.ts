@@ -47,6 +47,12 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
 
         set((state) => {
           state.habits = keyBy(habits, 'id');
+          state.calendarFilters = {
+            ...state.calendarFilters,
+            habitIds: habits.map((habit) => {
+              return habit.id;
+            }),
+          };
         });
       },
 
