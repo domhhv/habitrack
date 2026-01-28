@@ -241,7 +241,6 @@ const MonthCalendarFilters = () => {
                             <div className="flex items-center gap-2">
                               <img
                                 alt={habit.name}
-                                role="habit-icon"
                                 className="h-4 w-4"
                                 src={getPublicUrl(
                                   StorageBuckets.HABIT_ICONS,

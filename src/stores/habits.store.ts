@@ -46,13 +46,18 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
         const habits = await listHabits();
 
         set((state) => {
+          const prevHabitIds = state.calendarFilters.habitIds;
+          const nextHabitIds = habits.map((habit) => {
+            return habit.id;
+          });
+
           state.habits = keyBy(habits, 'id');
-          state.calendarFilters = {
-            ...state.calendarFilters,
-            habitIds: habits.map((habit) => {
-              return habit.id;
-            }),
-          };
+          state.calendarFilters.habitIds =
+            prevHabitIds.length === 0
+              ? nextHabitIds
+              : prevHabitIds.filter((id) => {
+                  return nextHabitIds.includes(id);
+                });
         });
       },
 
