@@ -1,4 +1,4 @@
-import type { CalendarDate } from '@internationalized/date';
+import type { CalendarDateTime } from '@internationalized/date';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
@@ -21,8 +21,8 @@ export const createNote = async (note: NotesInsert): Promise<Note> => {
 };
 
 export const listNotes = async ([rangeStart, rangeEnd]: [
-  CalendarDate,
-  CalendarDate,
+  CalendarDateTime,
+  CalendarDateTime,
 ]): Promise<Note[]> => {
   const startDateString = rangeStart.toString();
   const endDateString = rangeEnd.toString();

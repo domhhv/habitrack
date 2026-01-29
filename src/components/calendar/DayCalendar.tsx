@@ -2,6 +2,8 @@ import { cn, Button, Tooltip, Calendar, ScrollShadow } from '@heroui/react';
 import {
   today,
   isToday,
+  endOfWeek,
+  startOfWeek,
   CalendarDate,
   toCalendarDate,
   getLocalTimeZone,
@@ -12,12 +14,13 @@ import {
   NoteBlankIcon,
   NotePencilIcon,
   CalendarBlankIcon,
+  ArrowSquareLeftIcon,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import groupBy from 'lodash.groupby';
 import React from 'react';
-import { useDateFormatter } from 'react-aria';
-import { useParams, useNavigate } from 'react-router';
+import { useLocale, useDateFormatter } from 'react-aria';
+import { Link, useParams, useNavigate } from 'react-router';
 
 import { OccurrenceChip } from '@components';
 import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
@@ -30,7 +33,7 @@ import {
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
 } from '@stores';
-import { isDstTransitionDay, findDstTransitionHour } from '@utils';
+import { getISOWeek, isDstTransitionDay, findDstTransitionHour } from '@utils';
 
 import CalendarNavigationButtons from './CalendarNavigationButtons';
 
@@ -45,6 +48,7 @@ const DayCalendar = () => {
   const params = useParams();
   const navigate = useNavigate();
   const { firstDayOfWeek } = useFirstDayOfWeek();
+  const { locale } = useLocale();
   const timeZone = getLocalTimeZone();
 
   const formatter = useDateFormatter({
@@ -148,6 +152,24 @@ const DayCalendar = () => {
     return formatter.format(focusedDate.toDate(timeZone));
   }, [formatter, focusedDate, timeZone]);
 
+  const weekInfo = React.useMemo(() => {
+    const weekStart = startOfWeek(focusedDate, locale, firstDayOfWeek);
+    const weekEnd = endOfWeek(focusedDate, locale, firstDayOfWeek);
+    const thursday = weekStart.add({
+      days: firstDayOfWeek === 'sun' ? 4 : 3,
+    });
+    const weekNumber = getISOWeek(thursday.toDate(timeZone));
+
+    const formatDay = (date: CalendarDate) => {
+      return `${date.toDate(timeZone).toLocaleDateString(locale, { month: 'short' })} ${date.day}`;
+    };
+
+    return {
+      label: `W${weekNumber}: ${formatDay(weekStart)} – ${formatDay(weekEnd)}`,
+      path: `/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`,
+    };
+  }, [focusedDate, locale, firstDayOfWeek, timeZone]);
+
   const handleCalendarChange = (value: CalendarDate) => {
     navigate(`/calendar/day/${value.year}/${value.month}/${value.day}`);
   };
@@ -240,6 +262,23 @@ const DayCalendar = () => {
           <CalendarNavigationButtons focusedDate={focusedDate} />
         </div>
         <div className="flex items-center justify-center gap-2 px-8 py-2">
+          <Tooltip closeDelay={0} content={weekInfo.label}>
+            <Button
+              as={Link}
+              size="sm"
+              radius="sm"
+              variant="light"
+              color="secondary"
+              to={weekInfo.path}
+              className="min-w-fit gap-1 px-2"
+              aria-label={`Go to week view: ${weekInfo.label}`}
+              startContent={
+                <ArrowSquareLeftIcon weight="bold" size={isDesktop ? 18 : 14} />
+              }
+            >
+              <span className="hidden sm:inline">{weekInfo.label}</span>
+            </Button>
+          </Tooltip>
           <h2
             className={cn(
               'text-center text-lg text-stone-600 dark:text-stone-300',

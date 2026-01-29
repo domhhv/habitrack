@@ -1,4 +1,4 @@
-import { toCalendarDate } from '@internationalized/date';
+import { toCalendarDateTime } from '@internationalized/date';
 import keyBy from 'lodash.keyby';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -73,8 +73,8 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
         }
 
         const notes = await listNotes([
-          toCalendarDate(rangeStart),
-          toCalendarDate(rangeEnd),
+          toCalendarDateTime(rangeStart),
+          toCalendarDateTime(rangeEnd),
         ]);
 
         set((state) => {
