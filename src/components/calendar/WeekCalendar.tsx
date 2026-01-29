@@ -14,13 +14,19 @@ import {
   NoteIcon,
   NoteBlankIcon,
   CalendarBlankIcon,
+  ArrowSquareLeftIcon,
   ArrowSquareRightIcon,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
-import { useLocale, useCalendar, useCalendarGrid } from 'react-aria';
+import {
+  useLocale,
+  useCalendar,
+  useCalendarGrid,
+  useDateFormatter,
+} from 'react-aria';
 import { Link, useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
@@ -139,13 +145,63 @@ const WeekCalendar = () => {
     [occurrences]
   );
 
+  const timeZone = getLocalTimeZone();
+  const monthFormatter = useDateFormatter({ month: 'long' });
+  const dayFormatter = useDateFormatter({ day: 'numeric', month: 'short' });
+
+  const monthInfo = React.useMemo(() => {
+    const weekStart = startOfWeek(state.focusedDate, locale, firstDayOfWeek);
+    const thursday = weekStart.add({
+      days: firstDayOfWeek === 'sun' ? 4 : 3,
+    });
+
+    const monthStart = new CalendarDate(thursday.year, thursday.month, 1);
+    const lastDay = new Date(thursday.year, thursday.month, 0).getDate();
+    const monthEnd = new CalendarDate(thursday.year, thursday.month, lastDay);
+
+    const monthName = monthFormatter.format(thursday.toDate(timeZone));
+    const rangeStart = dayFormatter.format(monthStart.toDate(timeZone));
+    const rangeEnd = dayFormatter.format(monthEnd.toDate(timeZone));
+
+    return {
+      label: `${monthName}: ${rangeStart} – ${rangeEnd}`,
+      path: `/calendar/month/${thursday.year}/${thursday.month}/1`,
+    };
+  }, [
+    state.focusedDate,
+    locale,
+    firstDayOfWeek,
+    timeZone,
+    monthFormatter,
+    dayFormatter,
+  ]);
+
   return (
     <ScrollShadow
       orientation="horizontal"
       className="relative w-full overflow-y-scroll"
     >
       <div className="sticky left-0 flex flex-col items-center justify-center gap-4 md:flex-row">
-        <CalendarNavigation focusedDate={state.focusedDate} />
+        <div className="flex items-center justify-center gap-2">
+          <Tooltip closeDelay={0} content={monthInfo.label}>
+            <Button
+              as={Link}
+              size="sm"
+              radius="sm"
+              variant="light"
+              color="secondary"
+              to={monthInfo.path}
+              className="min-w-fit gap-1 px-2"
+              aria-label={`Go to month view: ${monthInfo.label}`}
+              startContent={
+                <ArrowSquareLeftIcon weight="bold" size={isDesktop ? 18 : 14} />
+              }
+            >
+              <span className="hidden sm:inline">{monthInfo.label}</span>
+            </Button>
+          </Tooltip>
+          <CalendarNavigation focusedDate={state.focusedDate} />
+        </div>
         <div className="w-10/12 md:w-auto">
           <CalendarFilters />
         </div>
