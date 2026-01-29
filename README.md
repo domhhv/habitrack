@@ -24,13 +24,13 @@
 
 [![RelativeCI](https://badges.relative-ci.com/badges/ZMp2Jc2sGq2jCm6ArH0A?branch=main&style=flat)](https://app.relative-ci.com/projects/ZMp2Jc2sGq2jCm6ArH0A)
 
-![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/domhhv/textual?utm_source=oss&utm_medium=github&utm_campaign=domhhv%2Ftextual&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/domhhv/habitrack?utm_source=oss&utm_medium=github&utm_campaign=domhhv%2Fhabitrack&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 </div>
 
 </div>
 
-Habitrack is a simple and intuitive web app designed for logging habits and visualizing them on a calendar view.
+Habitrack is a simple and intuitive web app designed for logging habits and v isualizing them on a calendar view.
 
 This app showcases the use of the following tools and technologies:
 
