@@ -21,6 +21,7 @@ import {
   NotesPage,
   HabitsPage,
   AccountPage,
+  DayCalendarPage,
   WeekCalendarPage,
   MonthCalendarPage,
 } from '@pages';
@@ -86,6 +87,10 @@ const App = () => {
             <Route
               element={<MonthCalendarPage />}
               path="/calendar/month/:year?/:month?/:day?"
+            />
+            <Route
+              element={<DayCalendarPage />}
+              path="/calendar/day/:year?/:month?/:day?"
             />
             <Route
               element={<WeekCalendarPage />}

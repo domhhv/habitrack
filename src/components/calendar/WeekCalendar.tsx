@@ -14,17 +14,18 @@ import {
   NoteIcon,
   NoteBlankIcon,
   CalendarBlankIcon,
+  ArrowSquareRightIcon,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useLocale, useCalendar, useCalendarGrid } from 'react-aria';
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
-import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
+import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useDayNotes,
   useOccurrences,
@@ -36,24 +37,6 @@ import { isDstTransitionDay, findDstTransitionHour } from '@utils';
 
 import CalendarFilters from './CalendarFilters';
 import CalendarNavigation from './CalendarNavigation';
-
-const useCurrentTime = () => {
-  const [now, setNow] = React.useState(() => {
-    return new Date();
-  });
-
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 60_000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
-  return now;
-};
 
 const WeekCalendar = () => {
   const now = useCurrentTime();
@@ -241,6 +224,22 @@ const WeekCalendar = () => {
                           }}
                         >
                           <CalendarBlankIcon
+                            weight="bold"
+                            size={isDesktop ? 18 : 14}
+                          />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip closeDelay={0} content="Open day">
+                        <Button
+                          as={Link}
+                          radius="sm"
+                          variant="light"
+                          color="secondary"
+                          aria-label="Open day"
+                          className="h-5 w-5 min-w-fit px-0 lg:h-6 lg:w-6"
+                          to={`/calendar/day/${day.year}/${day.month}/${day.day}`}
+                        >
+                          <ArrowSquareRightIcon
                             weight="bold"
                             size={isDesktop ? 18 : 14}
                           />
