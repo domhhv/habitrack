@@ -7,11 +7,13 @@ import {
   SquareHalfIcon,
   CalendarPlusIcon,
   CalendarBlankIcon,
+  ArrowSquareRightIcon,
 } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useCalendarCell } from 'react-aria';
+import { Link } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
@@ -126,6 +128,22 @@ const MonthCalendarCell = ({
           )}
           {isDesktop && (
             <div className="flex items-center gap-1">
+              <Tooltip closeDelay={0} content="Open day">
+                <Button
+                  as={Link}
+                  radius="sm"
+                  variant="light"
+                  color="secondary"
+                  aria-label="Open day"
+                  to={`/calendar/day/${date.year}/${date.month}/${date.day}`}
+                  className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+                >
+                  <ArrowSquareRightIcon
+                    weight="bold"
+                    size={isDesktop ? 18 : 14}
+                  />
+                </Button>
+              </Tooltip>
               <Tooltip closeDelay={0} content="Show habit log">
                 <Button
                   radius="sm"
