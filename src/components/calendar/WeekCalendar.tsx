@@ -32,6 +32,7 @@ import {
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
 } from '@stores';
+import { isDstTransitionDay, findDstTransitionHour } from '@utils';
 
 import CalendarFilters from './CalendarFilters';
 import CalendarNavigation from './CalendarNavigation';
@@ -159,6 +160,10 @@ const WeekCalendar = () => {
             }
 
             const isNoteAdded = hasNote(day);
+            const dstType = isDstTransitionDay(day, getLocalTimeZone());
+            const dstHour = dstType
+              ? findDstTransitionHour(day, getLocalTimeZone())
+              : null;
 
             return (
               <div
@@ -234,17 +239,45 @@ const WeekCalendar = () => {
                   )}
                 >
                   {[...Array(24).keys()].map((hour) => {
+                    const isSkippedHour =
+                      dstType === 'spring' && hour === dstHour;
+                    const isDuplicatedHour =
+                      dstType === 'fall' &&
+                      dstHour !== null &&
+                      hour === dstHour - 1;
+
                     return (
                       <div
                         key={`${dayIndex}-${hour}`}
-                        className="group/minutes-cell relative flex gap-4"
+                        className={cn(
+                          'group/minutes-cell relative flex gap-4',
+                          isSkippedHour && 'opacity-40'
+                        )}
                       >
                         {dayIndex === 0 && (
                           <p className="absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:text-base dark:text-stone-200">
                             {hour !== 0 && hour}
                           </p>
                         )}
-                        <div className="flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500">
+                        <div
+                          className={cn(
+                            'flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500',
+                            isSkippedHour &&
+                              'bg-stone-200/50 dark:bg-stone-700/50',
+                            isDuplicatedHour &&
+                              'border-l-warning-400 dark:border-l-warning-500 border-l-3'
+                          )}
+                        >
+                          {isSkippedHour && (
+                            <p className="text-xs text-stone-400 italic dark:text-stone-500">
+                              DST skip
+                            </p>
+                          )}
+                          {isDuplicatedHour && (
+                            <p className="text-warning-500 dark:text-warning-400 text-xs italic">
+                              DST repeat
+                            </p>
+                          )}
                           {groupOccurrences(day, hour).map(
                             ([habitId, habitOccurrences]) => {
                               if (!habitOccurrences) {

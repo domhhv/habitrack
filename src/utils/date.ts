@@ -1,6 +1,8 @@
 import {
   now,
+  Time,
   today,
+  toZoned,
   fromDate,
   CalendarDate,
   getLocalTimeZone,
@@ -166,4 +168,46 @@ export const getWeeksOfYear = (year: number, firstDayOfWeek: 'sun' | 'mon') => {
   }
 
   return weeks;
+};
+
+export const isDstTransitionDay = (
+  date: CalendarDate,
+  timeZone: string
+): 'spring' | 'fall' | null => {
+  const startOfDay = toZoned(date, timeZone);
+  const endOfDay = toZoned(date.add({ days: 1 }), timeZone);
+
+  const hoursInDay =
+    (endOfDay.toDate().getTime() - startOfDay.toDate().getTime()) /
+    (1000 * 60 * 60);
+
+  if (hoursInDay === 23) {
+    return 'spring';
+  }
+
+  if (hoursInDay === 25) {
+    return 'fall';
+  }
+
+  return null;
+};
+
+export const findDstTransitionHour = (
+  date: CalendarDate,
+  timeZone: string
+): number | null => {
+  for (let hour = 0; hour < 24; hour++) {
+    const dt = toCalendarDateTime(date, new Time(hour, 0, 0));
+    const before = toZoned(
+      toCalendarDateTime(date, new Time(hour === 0 ? 0 : hour - 1, 0, 0)),
+      timeZone
+    );
+    const current = toZoned(dt, timeZone);
+
+    if (before.offset !== current.offset) {
+      return hour;
+    }
+  }
+
+  return null;
 };
