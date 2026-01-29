@@ -1,10 +1,11 @@
-import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
 import {
   now,
   today,
   fromDate,
+  CalendarDate,
   getLocalTimeZone,
   toCalendarDateTime,
+  type CalendarDateTime,
 } from '@internationalized/date';
 
 const alignToISOWeekThursday = (value: Date) => {
@@ -103,4 +104,66 @@ export const isThisWeek = (date: CalendarDate | CalendarDateTime) => {
     getISOWeek(d) === getISOWeek(nowDate) &&
     getISOWeekYear(d) === getISOWeekYear(nowDate)
   );
+};
+
+const SHORT_MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+const formatShortDate = (date: CalendarDate) => {
+  return `${SHORT_MONTH_NAMES[date.month - 1]} ${date.day}`;
+};
+
+export const getWeeksOfYear = (year: number, firstDayOfWeek: 'sun' | 'mon') => {
+  const targetDay = firstDayOfWeek === 'mon' ? 1 : 0;
+
+  let current = new CalendarDate(year, 1, 1);
+  const currentDayOfWeek = current.toDate(getLocalTimeZone()).getDay();
+
+  const daysToSubtract = (currentDayOfWeek - targetDay + 7) % 7;
+
+  current = current.subtract({ days: daysToSubtract });
+
+  const weeks = [];
+  const yearEnd = new CalendarDate(year, 12, 31);
+
+  while (current.compare(yearEnd) <= 0) {
+    const weekStart = current;
+    const anchorDate = weekStart.add({
+      days: firstDayOfWeek === 'mon' ? 3 : 4,
+    });
+    const weekEnd = weekStart.add({ days: 6 });
+    const weekNumber = getISOWeek(anchorDate.toDate(getLocalTimeZone()));
+    const weekKey = weekStart.toString();
+
+    weeks.push({
+      anchorDate,
+      endDate: weekEnd,
+      key: weekKey,
+      label: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)} ${anchorDate.year}`,
+      startDate: weekStart,
+      textValue: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)} ${anchorDate.year}`,
+      weekNumber,
+      year: anchorDate.year,
+    });
+
+    current = current.add({ days: 7 });
+  }
+
+  if (weeks.at(-1)?.weekNumber === 1) {
+    weeks.pop();
+  }
+
+  return weeks;
 };

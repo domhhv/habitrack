@@ -1,18 +1,18 @@
 import { cn, Button, Tooltip, ScrollShadow } from '@heroui/react';
 import {
+  today,
   isToday,
   endOfWeek,
   startOfWeek,
   CalendarDate,
   createCalendar,
   toCalendarDate,
+  getLocalTimeZone,
   toCalendarDateTime,
 } from '@internationalized/date';
 import {
   NoteIcon,
-  CaretLeftIcon,
   NoteBlankIcon,
-  CaretRightIcon,
   CalendarBlankIcon,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
@@ -20,7 +20,7 @@ import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useLocale, useCalendar, useCalendarGrid } from 'react-aria';
-import { Link, useParams, useNavigate } from 'react-router';
+import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
@@ -32,7 +32,9 @@ import {
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
 } from '@stores';
-import { getISOWeek, getISOWeekYear } from '@utils';
+
+import CalendarFilters from './CalendarFilters';
+import CalendarNavigation from './CalendarNavigation';
 
 const WeekCalendar = () => {
   const changeCalendarRange = useCalendarRangeChange();
@@ -43,17 +45,12 @@ const WeekCalendar = () => {
   const occurrences = useOccurrences();
   const { locale } = useLocale();
   const params = useParams();
-  const navigate = useNavigate();
-  const { firstDayOfWeek, firstDayOfWeekIndex } = useFirstDayOfWeek();
+  const { firstDayOfWeek } = useFirstDayOfWeek();
   const state = useCalendarState({
     createCalendar,
     firstDayOfWeek,
     locale,
     visibleDuration: { weeks: 1 },
-    defaultValue:
-      params.day && params.month && params.year
-        ? new CalendarDate(+params.year, +params.month, +params.day)
-        : undefined,
   });
   useCalendar({ firstDayOfWeek }, state);
   const { gridProps, weekDays } = useCalendarGrid(
@@ -79,7 +76,11 @@ const WeekCalendar = () => {
   }, [state.focusedDate, firstDayOfWeek, changeCalendarRange, locale]);
 
   React.useEffect(() => {
-    const currentWeek = state.visibleRange.start;
+    const currentWeek = startOfWeek(
+      today(getLocalTimeZone()),
+      locale,
+      firstDayOfWeek
+    ).add({ days: firstDayOfWeek === 'sun' ? 4 : 3 });
 
     const {
       day = currentWeek.day,
@@ -96,7 +97,7 @@ const WeekCalendar = () => {
     if (state.focusedDate.toString() !== paramsDate.toString()) {
       state.setFocusedDate(toCalendarDate(paramsDate));
     }
-  }, [state, params]);
+  }, [state, params, locale, firstDayOfWeek]);
 
   const hasNote = React.useCallback(
     (date: CalendarDate) => {
@@ -106,42 +107,6 @@ const WeekCalendar = () => {
     },
     [dayNotes]
   );
-
-  const [previousWeekPath, nextWeekPath] = React.useMemo(() => {
-    const previousWeek = state.visibleRange.start
-      .add({ days: firstDayOfWeekIndex, weeks: -1 })
-      .toString()
-      .split('-')
-      .map(Number)
-      .join('/');
-
-    const nextWeek = state.visibleRange.start
-      .add({ days: firstDayOfWeekIndex, weeks: 1 })
-      .toString()
-      .split('-')
-      .map(Number)
-      .join('/');
-
-    return [`/calendar/week/${previousWeek}`, `/calendar/week/${nextWeek}`];
-  }, [state.visibleRange.start, firstDayOfWeekIndex]);
-
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        navigate(previousWeekPath);
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        navigate(nextWeekPath);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [previousWeekPath, nextWeekPath, navigate]);
 
   const groupOccurrences = React.useCallback(
     (day: CalendarDate, hour: number) => {
@@ -176,34 +141,11 @@ const WeekCalendar = () => {
       orientation="horizontal"
       className="relative w-full overflow-y-scroll"
     >
-      <div className="sticky left-0 flex items-center justify-center gap-4">
-        <Button
-          as={Link}
-          isIconOnly
-          variant="light"
-          to={previousWeekPath}
-          aria-label="Previous week"
-          className="h-8 w-8 min-w-0 rounded-lg"
-        >
-          <CaretLeftIcon />
-        </Button>
-        <h1 className="text-xl font-bold">
-          Week{' '}
-          {getISOWeek(
-            state.visibleRange.start.add({ days: 1 }).toDate(state.timeZone)
-          )}{' '}
-          of {getISOWeekYear(state.visibleRange.start.toDate(state.timeZone))}
-        </h1>
-        <Button
-          as={Link}
-          isIconOnly
-          variant="light"
-          to={nextWeekPath}
-          aria-label="Next week"
-          className="h-8 w-8 min-w-0 rounded-lg"
-        >
-          <CaretRightIcon />
-        </Button>
+      <div className="sticky left-0 flex flex-col items-center justify-center gap-4 md:flex-row">
+        <CalendarNavigation focusedDate={state.focusedDate} />
+        <div className="w-10/12 md:w-auto">
+          <CalendarFilters />
+        </div>
       </div>
       <div
         {...gridProps}
