@@ -37,7 +37,26 @@ import { isDstTransitionDay, findDstTransitionHour } from '@utils';
 import CalendarFilters from './CalendarFilters';
 import CalendarNavigation from './CalendarNavigation';
 
+const useCurrentTime = () => {
+  const [now, setNow] = React.useState(() => {
+    return new Date();
+  });
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 60_000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  return now;
+};
+
 const WeekCalendar = () => {
+  const now = useCurrentTime();
   const changeCalendarRange = useCalendarRangeChange();
   const dayNotes = useDayNotes();
   const { isDesktop } = useScreenWidth();
@@ -278,6 +297,15 @@ const WeekCalendar = () => {
                               DST repeat
                             </p>
                           )}
+                          {isToday(day, state.timeZone) &&
+                            now.getHours() === hour && (
+                              <div
+                                className="bg-primary absolute right-0 left-0 z-10 h-0.5"
+                                style={{
+                                  top: `${(now.getMinutes() / 60) * 100}%`,
+                                }}
+                              />
+                            )}
                           {groupOccurrences(day, hour).map(
                             ([habitId, habitOccurrences]) => {
                               if (!habitOccurrences) {
