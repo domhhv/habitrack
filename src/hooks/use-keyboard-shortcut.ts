@@ -27,9 +27,13 @@ const useKeyboardShortcut = (
       if (ignoreInputs) {
         const target = event.target as HTMLElement;
         const tagName = target.tagName.toLowerCase();
-        const isEditable = target.isContentEditable;
+        const role = target.getAttribute('role');
 
-        if (tagName === 'input' || tagName === 'textarea' || isEditable) {
+        if (
+          ['input', 'textarea', 'select'].includes(tagName) ||
+          role === 'option' ||
+          target.isContentEditable
+        ) {
           return;
         }
       }

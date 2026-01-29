@@ -26,11 +26,15 @@ import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useUser,
   useCalendarFilters,
+  useNoteDrawerState,
   useNoteDrawerActions,
   useCalendarFiltersChange,
+  useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
 } from '@stores';
 import { getWeeksOfYear } from '@utils';
+
+import useKeyboardShortcut from '../../hooks/use-keyboard-shortcut';
 
 export type MonthCalendarNavigationProps = {
   focusedDate: CalendarState['focusedDate'];
@@ -44,6 +48,8 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   const timeZone = getLocalTimeZone();
   const filters = useCalendarFilters();
   const changeCalendarFilters = useCalendarFiltersChange();
+  const occurrenceDrawerState = useOccurrenceDrawerState();
+  const noteDrawerState = useNoteDrawerState();
   const location = useLocation();
   const { locale } = useLocale();
   const { user } = useUser();
@@ -115,23 +121,21 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
     ];
   }, [focusedDate, calendarMode]);
 
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        navigate(previousRangePath);
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        navigate(nextRangePath);
-      }
-    };
+  useKeyboardShortcut(
+    'ArrowLeft',
+    () => {
+      navigate(previousRangePath);
+    },
+    { enabled: !occurrenceDrawerState.isOpen && !noteDrawerState.isOpen }
+  );
 
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [previousRangePath, nextRangePath, navigate]);
+  useKeyboardShortcut(
+    'ArrowRight',
+    () => {
+      navigate(nextRangePath);
+    },
+    { enabled: !occurrenceDrawerState.isOpen && !noteDrawerState.isOpen }
+  );
 
   React.useEffect(() => {
     const newMonth = String(focusedDate.month);
@@ -144,15 +148,15 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   }, [focusedDate.year]);
 
   React.useEffect(() => {
-    const week = weeks.find((w) => {
+    const weekIndex = weeks.findIndex((w) => {
       return (
         focusedDate.compare(w.startDate) >= 0 &&
         focusedDate.compare(w.endDate) <= 0
       );
     });
 
-    if (week) {
-      setWeekSelectValue(new Set([String(week.key)]));
+    if (weekIndex >= 0) {
+      setWeekSelectValue(new Set([String(weekIndex)]));
     }
   }, [focusedDate, weeks]);
 
@@ -276,11 +280,12 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
           isOpen={isYearSelectOpen}
           selectedKeys={yearSelectValue}
           onOpenChange={onYearSelectOpenChange}
-          classNames={{
-            base: 'w-[80px]',
-          }}
           scrollShadowProps={{
             visibility: 'bottom',
+          }}
+          classNames={{
+            base: 'w-[80px]',
+            popoverContent: 'w-[100px]',
           }}
           onSelectionChange={(value) => {
             const [newYear] = Array.from(value);
@@ -311,7 +316,6 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
             color="secondary"
             variant="bordered"
             isVirtualized={false}
-            maxListboxHeight={1024}
             isOpen={isWeekSelectOpen}
             selectedKeys={weekSelectValue}
             onOpenChange={onWeekSelectOpenChange}
@@ -322,11 +326,17 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
               base: 'w-[150px] md:w-[250px]',
               popoverContent: 'w-[250px]',
             }}
+            renderValue={([selectedValue]) => {
+              return (
+                selectedValue.textValue?.split(' ').slice(0, -1).join(' ') ||
+                'Select week'
+              );
+            }}
             onSelectionChange={(value) => {
               const [selectedIndex] = Array.from(value);
 
               if (typeof selectedIndex === 'string') {
-                const week = weeks[Number(selectedIndex) - 1];
+                const week = weeks[Number(selectedIndex)];
 
                 if (week) {
                   const { startDate } = week;
@@ -344,11 +354,9 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
                   'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
               }}
             >
-              {weeks.map((week) => {
+              {weeks.map((week, index) => {
                 return (
-                  <SelectItem key={String(week.weekNumber)}>
-                    {week.label}
-                  </SelectItem>
+                  <SelectItem key={String(index)}>{week.label}</SelectItem>
                 );
               })}
             </SelectSection>

@@ -140,21 +140,22 @@ export const getWeeksOfYear = (year: number, firstDayOfWeek: 'sun' | 'mon') => {
 
   while (current.compare(yearEnd) <= 0) {
     const weekStart = current;
-    const weekThursday = weekStart.add({
+    const anchorDate = weekStart.add({
       days: firstDayOfWeek === 'mon' ? 3 : 4,
     });
-    const weekEnd = current.add({ days: 6 });
-    const thursday = current.add({ days: firstDayOfWeek === 'mon' ? 3 : 4 });
-    const weekNumber = getISOWeek(thursday.toDate(getLocalTimeZone()));
+    const weekEnd = weekStart.add({ days: 6 });
+    const weekNumber = getISOWeek(anchorDate.toDate(getLocalTimeZone()));
+    const weekKey = weekStart.toString();
 
     weeks.push({
+      anchorDate,
       endDate: weekEnd,
-      key: weekNumber,
-      label: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)}`,
-      startDate: weekThursday,
-      textValue: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)}`,
+      key: weekKey,
+      label: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)} ${anchorDate.year}`,
+      startDate: weekStart,
+      textValue: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)} ${anchorDate.year}`,
       weekNumber,
-      year: weekThursday.year,
+      year: anchorDate.year,
     });
 
     current = current.add({ days: 7 });
