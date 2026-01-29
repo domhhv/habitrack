@@ -1,40 +1,28 @@
 import { useDisclosure, type Selection } from '@heroui/react';
 import { cn, Button, Select, SelectItem, SelectSection } from '@heroui/react';
-import {
-  today,
-  endOfWeek,
-  isSameMonth,
-  startOfWeek,
-  startOfMonth,
-  getLocalTimeZone,
-} from '@internationalized/date';
+import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NotePencilIcon,
-  ArrowFatLeftIcon,
   FunnelSimpleIcon,
-  ArrowFatRightIcon,
   CalendarCheckIcon,
-  ArrowsClockwiseIcon,
 } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
-import { useLocale, useDateFormatter } from 'react-aria';
-import { Link, useNavigate, useLocation } from 'react-router';
+import { useDateFormatter } from 'react-aria';
+import { useLocation, useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useUser,
   useCalendarFilters,
-  useNoteDrawerState,
   useNoteDrawerActions,
   useCalendarFiltersChange,
-  useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
 } from '@stores';
 import { getWeeksOfYear } from '@utils';
 
-import useKeyboardShortcut from '../../hooks/use-keyboard-shortcut';
+import CalendarNavigationButtons from './CalendarNavigationButtons';
 
 export type MonthCalendarNavigationProps = {
   focusedDate: CalendarState['focusedDate'];
@@ -48,12 +36,10 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   const timeZone = getLocalTimeZone();
   const filters = useCalendarFilters();
   const changeCalendarFilters = useCalendarFiltersChange();
-  const occurrenceDrawerState = useOccurrenceDrawerState();
-  const noteDrawerState = useNoteDrawerState();
   const location = useLocation();
-  const { locale } = useLocale();
+
   const { user } = useUser();
-  const { isDesktop, isMobile, screenWidth } = useScreenWidth();
+  const { isDesktop, isMobile } = useScreenWidth();
   const [monthSelectValue, setMonthSelectValue] = React.useState<Selection>(
     new Set([])
   );
@@ -95,48 +81,6 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
     return pathSegments[1] || 'month';
   }, [location.pathname]);
 
-  const [previousRangePath, nextRangePath] = React.useMemo(() => {
-    const toSet = {
-      months: calendarMode === 'month' ? 1 : 0,
-      weeks: calendarMode === 'week' ? 1 : 0,
-    };
-
-    const previousRange = focusedDate
-      .subtract(toSet)
-      .toString()
-      .split('-')
-      .map(Number)
-      .join('/');
-
-    const nextRange = focusedDate
-      .add(toSet)
-      .toString()
-      .split('-')
-      .map(Number)
-      .join('/');
-
-    return [
-      `/calendar/${calendarMode}/${previousRange}`,
-      `/calendar/${calendarMode}/${nextRange}`,
-    ];
-  }, [focusedDate, calendarMode]);
-
-  useKeyboardShortcut(
-    'ArrowLeft',
-    () => {
-      navigate(previousRangePath);
-    },
-    { enabled: !occurrenceDrawerState.isOpen && !noteDrawerState.isOpen }
-  );
-
-  useKeyboardShortcut(
-    'ArrowRight',
-    () => {
-      navigate(nextRangePath);
-    },
-    { enabled: !occurrenceDrawerState.isOpen && !noteDrawerState.isOpen }
-  );
-
   React.useEffect(() => {
     const newMonth = String(focusedDate.month);
     setMonthSelectValue(new Set([newMonth]));
@@ -170,37 +114,6 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
       isShownOnMobile: !filters.isShownOnMobile,
     });
   };
-
-  const isSameRange = React.useMemo(() => {
-    const todayDate = today(timeZone);
-
-    if (calendarMode === 'month') {
-      return isSameMonth(focusedDate, today(timeZone));
-    }
-
-    const weekStart = startOfWeek(focusedDate, locale, firstDayOfWeek);
-    const weekEnd = endOfWeek(focusedDate, locale, firstDayOfWeek);
-
-    return todayDate.compare(weekStart) >= 0 && todayDate.compare(weekEnd) <= 0;
-  }, [calendarMode, focusedDate, firstDayOfWeek, timeZone, locale]);
-
-  const todayRangePath = React.useMemo(() => {
-    const todayDate = today(timeZone);
-
-    if (calendarMode === 'month') {
-      return `/calendar/month/${todayDate.year}/${todayDate.month}/${
-        startOfMonth(todayDate).day
-      }`;
-    }
-
-    const weekStart = startOfWeek(todayDate, locale, firstDayOfWeek).add({
-      days: firstDayOfWeek === 'sun' ? 4 : 3,
-    });
-
-    return `/calendar/week/${weekStart.year}/${weekStart.month}/${
-      weekStart.day
-    }`;
-  }, [calendarMode, timeZone, locale, firstDayOfWeek]);
 
   return (
     <div className="flex flex-col items-stretch justify-end gap-2 max-[445px]:gap-4 min-[446px]:flex-row lg:justify-between lg:gap-2">
@@ -383,44 +296,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
             <FunnelSimpleIcon size={20} />
           </Button>
         )}
-        <Button
-          as={Link}
-          size="sm"
-          isIconOnly
-          radius="sm"
-          variant="light"
-          color="secondary"
-          role="navigate-back"
-          to={previousRangePath}
-        >
-          <ArrowFatLeftIcon size={20} />
-        </Button>
-        {!isSameRange && (
-          <Button
-            as={Link}
-            size="sm"
-            radius="sm"
-            variant="light"
-            color="secondary"
-            to={todayRangePath}
-            className={cn(isMobile && 'min-w-fit p-0')}
-            startContent={<ArrowsClockwiseIcon size={20} />}
-          >
-            {(!isMobile || screenWidth < 446) && 'Today'}
-          </Button>
-        )}
-        <Button
-          as={Link}
-          size="sm"
-          isIconOnly
-          radius="sm"
-          variant="light"
-          color="secondary"
-          to={nextRangePath}
-          role="navigate-forward"
-        >
-          <ArrowFatRightIcon size={20} />
-        </Button>
+        <CalendarNavigationButtons focusedDate={focusedDate} />
       </div>
     </div>
   );
