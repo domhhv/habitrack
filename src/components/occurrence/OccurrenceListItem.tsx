@@ -1,13 +1,112 @@
-import { cn, Button, Spinner } from '@heroui/react';
+import { cn, Chip, Button, Spinner } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
-import type { Occurrence } from '@models';
-import { useNotesByOccurrenceId } from '@stores';
+import type {
+  Occurrence,
+  MetricValue,
+  HabitMetric,
+  MetricConfig,
+  RangeMetricConfig,
+  ScaleMetricConfig,
+  NumberMetricConfig,
+  BooleanMetricConfig,
+  DurationMetricConfig,
+} from '@models';
+import {
+  useHabitMetrics,
+  useMetricsActions,
+  useNotesByOccurrenceId,
+  useOccurrenceMetricValues,
+} from '@stores';
 
 import OccurrenceChip from './OccurrenceChip';
+
+const formatMetricValue = (metric: HabitMetric, value: MetricValue): string => {
+  const config = metric.config as MetricConfig;
+
+  switch (metric.type) {
+    case 'number': {
+      const numConfig = config as NumberMetricConfig;
+      const v = (value as { numericValue: number }).numericValue;
+
+      return numConfig.unit ? `${v} ${numConfig.unit}` : String(v);
+    }
+
+    case 'percentage': {
+      const v = (value as { numericValue: number }).numericValue;
+
+      return `${v}%`;
+    }
+
+    case 'duration': {
+      const durConfig = config as DurationMetricConfig;
+      const ms = (value as { durationMs: number }).durationMs;
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+
+      if (durConfig.format === 'minutes') {
+        return `${Math.floor(ms / 60000)} min`;
+      }
+
+      if (durConfig.format === 'seconds') {
+        return `${totalSec} sec`;
+      }
+
+      if (durConfig.format === 'hh:mm:ss') {
+        return `${h}h ${m}m ${s}s`;
+      }
+
+      return `${h}h ${m}m`;
+    }
+
+    case 'scale': {
+      const scaleConfig = config as ScaleMetricConfig;
+      const v = (value as { numericValue: number }).numericValue;
+      const label = scaleConfig.labels?.[String(v)];
+
+      return label ? `${v} (${label})` : String(v);
+    }
+
+    case 'range': {
+      const rangeConfig = config as RangeMetricConfig;
+      const { rangeFrom, rangeTo } = value as {
+        rangeFrom: number;
+        rangeTo: number;
+      };
+      const unit = rangeConfig.unit ? ` ${rangeConfig.unit}` : '';
+
+      return `${rangeFrom}–${rangeTo}${unit}`;
+    }
+
+    case 'choice': {
+      if ('selectedOptions' in value) {
+        return (value as { selectedOptions: string[] }).selectedOptions.join(
+          ', '
+        );
+      }
+
+      return (value as { selectedOption: string }).selectedOption;
+    }
+
+    case 'boolean': {
+      const boolConfig = config as BooleanMetricConfig;
+      const v = (value as { booleanValue: boolean }).booleanValue;
+
+      return v ? boolConfig.trueLabel || 'Yes' : boolConfig.falseLabel || 'No';
+    }
+
+    case 'text':
+      return (value as { textValue: string }).textValue;
+
+    default:
+      return JSON.stringify(value);
+  }
+};
 
 type OccurrenceListItemProps = {
   hasChip: boolean;
@@ -30,6 +129,33 @@ const OccurrenceListItem = ({
     minute: 'numeric',
     timeZone: getLocalTimeZone(),
   });
+  const metrics = useHabitMetrics(occurrence.habitId);
+  const metricValues = useOccurrenceMetricValues(occurrence.id);
+  const { fetchHabitMetrics, fetchMetricValues } = useMetricsActions();
+
+  React.useEffect(() => {
+    fetchHabitMetrics(occurrence.habitId);
+    fetchMetricValues(occurrence.id);
+  }, [occurrence.habitId, occurrence.id, fetchHabitMetrics, fetchMetricValues]);
+
+  const metricChips = React.useMemo(() => {
+    if (metrics.length === 0 || Object.keys(metricValues).length === 0) {
+      return [];
+    }
+
+    return metrics
+      .filter((m) => {
+        return metricValues[m.id];
+      })
+      .map((m) => {
+        const val = metricValues[m.id].value as MetricValue;
+
+        return {
+          id: m.id,
+          label: `${m.name}: ${formatMetricValue(m, val)}`,
+        };
+      });
+  }, [metrics, metricValues]);
 
   const occurrenceNote = React.useMemo(() => {
     return notes[occurrence.id];
@@ -91,6 +217,17 @@ const OccurrenceListItem = ({
                 </div>
               )}
             </>
+          )}
+          {metricChips.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-1">
+              {metricChips.map((chip) => {
+                return (
+                  <Chip size="sm" key={chip.id} variant="flat" color="default">
+                    {chip.label}
+                  </Chip>
+                );
+              })}
+            </div>
           )}
         </div>
         <div className="flex items-center">

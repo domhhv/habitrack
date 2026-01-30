@@ -13,9 +13,16 @@ import {
 } from '@heroui/react';
 import React from 'react';
 
+import { MetricDefinitionForm, type LocalMetricDefinition } from '@components';
 import { useTextField } from '@hooks';
 import type { Habit } from '@models';
-import { useUser, useTraits, useHabitActions } from '@stores';
+import {
+  useUser,
+  useTraits,
+  useHabitActions,
+  useHabitMetrics,
+  useMetricsActions,
+} from '@stores';
 import { handleAsyncAction } from '@utils';
 
 type EditHabitDialogProps = {
@@ -29,17 +36,32 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   const [description, handleDescriptionChange] = useTextField();
   const [traitId, setTraitId] = React.useState('');
   const [isUpdating, setIsUpdating] = React.useState(false);
+  const [metricDefinitions, setMetricDefinitions] = React.useState<
+    LocalMetricDefinition[]
+  >([]);
+  const [initialMetricIds, setInitialMetricIds] = React.useState<Set<string>>(
+    new Set()
+  );
+
   const { updateHabit } = useHabitActions();
+  const {
+    addHabitMetric,
+    fetchHabitMetrics,
+    removeHabitMetric,
+    updateHabitMetric,
+  } = useMetricsActions();
+  const existingMetrics = useHabitMetrics(habit?.id);
   const traits = useTraits();
   const { user } = useUser();
 
   React.useEffect(() => {
     if (habit) {
       onOpen();
+      void fetchHabitMetrics(habit.id);
     } else {
       onClose?.();
     }
-  }, [habit, onOpen, onClose]);
+  }, [habit, onOpen, onClose, fetchHabitMetrics]);
 
   React.useEffect(() => {
     if (habit) {
@@ -48,6 +70,29 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
       setTraitId(habit.traitId.toString());
     }
   }, [habit, handleNameChange, handleDescriptionChange]);
+
+  React.useEffect(() => {
+    if (existingMetrics.length > 0) {
+      const localMetrics: LocalMetricDefinition[] = existingMetrics.map((m) => {
+        return {
+          config: m.config as LocalMetricDefinition['config'],
+          id: m.id,
+          isRequired: m.isRequired,
+          name: m.name,
+          sortOrder: m.sortOrder,
+          type: m.type,
+        };
+      });
+      setMetricDefinitions(localMetrics);
+      setInitialMetricIds(
+        new Set(
+          existingMetrics.map((m) => {
+            return m.id;
+          })
+        )
+      );
+    }
+  }, [existingMetrics]);
 
   if (!habit) {
     return null;
@@ -63,22 +108,67 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
       return null;
     }
 
-    void handleAsyncAction(
-      updateHabit(habit.id, {
+    const submit = async () => {
+      await updateHabit(habit.id, {
         description,
         name,
         traitId,
-      }),
-      'update_habit',
-      setIsUpdating
-    ).then(handleClose);
+      });
+
+      const currentIds = new Set(
+        metricDefinitions
+          .filter((m) => {
+            return !m.id.startsWith('local-');
+          })
+          .map((m) => {
+            return m.id;
+          })
+      );
+
+      const deletedIds = [...initialMetricIds].filter((id) => {
+        return !currentIds.has(id);
+      });
+      await Promise.all(
+        deletedIds.map((id) => {
+          return removeHabitMetric(id, habit.id);
+        })
+      );
+
+      await Promise.all(
+        metricDefinitions.map((metric) => {
+          if (metric.id.startsWith('local-')) {
+            return addHabitMetric({
+              config: metric.config,
+              habitId: habit.id,
+              isRequired: metric.isRequired,
+              name: metric.name,
+              sortOrder: metric.sortOrder,
+              type: metric.type,
+              userId: user.id,
+            });
+          }
+
+          return updateHabitMetric(metric.id, {
+            config: metric.config,
+            isRequired: metric.isRequired,
+            name: metric.name,
+            sortOrder: metric.sortOrder,
+            type: metric.type,
+          });
+        })
+      );
+    };
+
+    void handleAsyncAction(submit(), 'update_habit', setIsUpdating).then(
+      handleClose
+    );
   };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      role="edit-habit-modal"
+      scrollBehavior="inside"
       data-visible={isOpen.toString()}
     >
       <ModalContent>
@@ -121,6 +211,11 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
               );
             })}
           </Select>
+
+          <MetricDefinitionForm
+            metrics={metricDefinitions}
+            onChange={setMetricDefinitions}
+          />
         </ModalBody>
         <ModalFooter>
           <Button

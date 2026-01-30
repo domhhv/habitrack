@@ -17,3 +17,17 @@ CREATE TYPE "public"."streak_info" AS (
 );
 
 ALTER TYPE "public"."streak_info" OWNER TO "postgres";
+
+-- Type for habit metric kind
+CREATE TYPE "public"."metric_type" AS ENUM (
+    'number',
+    'duration',
+    'percentage',
+    'scale',
+    'range',
+    'choice',
+    'boolean',
+    'text'
+);
+
+ALTER TYPE "public"."metric_type" OWNER TO "postgres";

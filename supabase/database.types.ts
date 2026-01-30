@@ -926,6 +926,7 @@ export type Database = {
       }
     }
     Enums: {
+      metric_type: "number" | "duration" | "percentage" | "scale" | "range" | "choice" | "boolean" | "text"
       note_period_kind: "day" | "week" | "month"
     }
     Functions: {
@@ -952,6 +953,53 @@ export type Database = {
           }
     }
     Tables: {
+      habit_metrics: {
+        Insert: {
+          config?: Json
+          created_at?: string
+          habit_id: string
+          id?: string
+          is_required?: boolean
+          name: string
+          sort_order?: number
+          type: Database["public"]["Enums"]["metric_type"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Relationships: [
+          {
+            columns: ["habit_id"]
+            foreignKeyName: "habit_metrics_habit_id_fkey"
+            isOneToOne: false
+            referencedColumns: ["id"]
+            referencedRelation: "habits"
+          },
+        ]
+        Row: {
+          config: Json
+          created_at: string
+          habit_id: string
+          id: string
+          is_required: boolean
+          name: string
+          sort_order: number
+          type: Database["public"]["Enums"]["metric_type"]
+          updated_at: string | null
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          habit_id?: string
+          id?: string
+          is_required?: boolean
+          name?: string
+          sort_order?: number
+          type?: Database["public"]["Enums"]["metric_type"]
+          updated_at?: string | null
+          user_id?: string
+        }
+      }
       habits: {
         Insert: {
           created_at?: string
@@ -1032,6 +1080,51 @@ export type Database = {
           period_kind?: Database["public"]["Enums"]["note_period_kind"] | null
           updated_at?: string | null
           user_id?: string
+        }
+      }
+      occurrence_metric_values: {
+        Insert: {
+          created_at?: string
+          habit_metric_id: string
+          id?: string
+          occurrence_id: string
+          updated_at?: string | null
+          user_id: string
+          value: Json
+        }
+        Relationships: [
+          {
+            columns: ["occurrence_id"]
+            foreignKeyName: "occurrence_metric_values_occurrence_id_fkey"
+            isOneToOne: false
+            referencedColumns: ["id"]
+            referencedRelation: "occurrences"
+          },
+          {
+            columns: ["habit_metric_id"]
+            foreignKeyName: "occurrence_metric_values_habit_metric_id_fkey"
+            isOneToOne: false
+            referencedColumns: ["id"]
+            referencedRelation: "habit_metrics"
+          },
+        ]
+        Row: {
+          created_at: string
+          habit_metric_id: string
+          id: string
+          occurrence_id: string
+          updated_at: string | null
+          user_id: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          habit_metric_id?: string
+          id?: string
+          occurrence_id?: string
+          updated_at?: string | null
+          user_id?: string
+          value?: Json
         }
       }
       occurrences: {

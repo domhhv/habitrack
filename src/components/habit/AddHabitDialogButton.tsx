@@ -14,19 +14,33 @@ import {
 import { PlusIcon, CloudArrowUpIcon } from '@phosphor-icons/react';
 import React from 'react';
 
-import { AddTraitModal, VisuallyHiddenInput } from '@components';
+import {
+  AddTraitModal,
+  VisuallyHiddenInput,
+  MetricDefinitionForm,
+  type LocalMetricDefinition,
+} from '@components';
 import { useTextField, useFileField } from '@hooks';
 import { uploadHabitIcon } from '@services';
-import { useUser, useTraits, useHabitActions } from '@stores';
+import {
+  useUser,
+  useTraits,
+  useHabitActions,
+  useMetricsActions,
+} from '@stores';
 import { handleAsyncAction } from '@utils';
 
 const AddHabitDialogButton = () => {
   const [traitId, setTraitId] = React.useState('');
   const [isAdding, setIsAdding] = React.useState(false);
+  const [metricDefinitions, setMetricDefinitions] = React.useState<
+    LocalMetricDefinition[]
+  >([]);
 
   const traits = useTraits();
   const { user } = useUser();
   const { addHabit } = useHabitActions();
+  const { addHabitMetric } = useMetricsActions();
   const [icon, handleIconChange, clearIcon] = useFileField();
   const [name, handleNameChange, clearName] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
@@ -48,6 +62,7 @@ const AddHabitDialogButton = () => {
     clearDescription();
     clearIcon();
     setTraitId('');
+    setMetricDefinitions([]);
   }, [clearName, clearDescription, clearIcon]);
 
   React.useEffect(() => {
@@ -64,13 +79,29 @@ const AddHabitDialogButton = () => {
     const add = async () => {
       const iconPath = icon ? await uploadHabitIcon(user.id, icon) : '';
 
-      return addHabit({
+      const habit = await addHabit({
         description,
         iconPath,
         name,
         traitId,
         userId: user.id,
       });
+
+      if (metricDefinitions.length > 0) {
+        await Promise.all(
+          metricDefinitions.map((metric) => {
+            return addHabitMetric({
+              config: metric.config,
+              habitId: habit.id,
+              isRequired: metric.isRequired,
+              name: metric.name,
+              sortOrder: metric.sortOrder,
+              type: metric.type,
+              userId: user.id,
+            });
+          })
+        );
+      }
     };
 
     void handleAsyncAction(add(), 'add_habit', setIsAdding)
@@ -94,6 +125,7 @@ const AddHabitDialogButton = () => {
 
       <Modal
         role="add-habit-dialog"
+        scrollBehavior="inside"
         isOpen={isAddDialogOpen}
         onClose={closeAddDialog}
       >
@@ -140,6 +172,7 @@ const AddHabitDialogButton = () => {
               size="sm"
               variant="ghost"
               color="secondary"
+              className="min-h-8"
               onPress={openTraitModal}
               startContent={<PlusIcon />}
             >
@@ -150,12 +183,18 @@ const AddHabitDialogButton = () => {
               size="sm"
               as="label"
               color="secondary"
+              className="min-h-8"
               startContent={<CloudArrowUpIcon />}
             >
               Upload habit icon
               <VisuallyHiddenInput onChange={handleIconChange} />
             </Button>
             {icon && <p>{icon.name}</p>}
+
+            <MetricDefinitionForm
+              metrics={metricDefinitions}
+              onChange={setMetricDefinitions}
+            />
           </ModalBody>
           <ModalFooter>
             <Button
