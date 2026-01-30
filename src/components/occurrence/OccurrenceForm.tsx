@@ -30,8 +30,9 @@ import pluralize from 'pluralize';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
 
-import { SignedImageViewer } from '@components';
+import { SignedImageViewer, MetricValuesSection } from '@components';
 import { useTextField, useScreenWidth } from '@hooks';
+import type { MetricValue, OccurrenceMetricValueInsert } from '@models';
 import { StorageBuckets } from '@models';
 import {
   getPublicUrl,
@@ -42,6 +43,7 @@ import {
   useUser,
   useHabits,
   useNoteActions,
+  useMetricsActions,
   useOccurrenceActions,
   useNotesByOccurrenceId,
   useOccurrenceDrawerState,
@@ -85,6 +87,10 @@ const OccurrenceForm = ({
   const [lastOccurredAt, setLastOccurredAt] =
     React.useState<CalendarDateTime | null>(null);
   const { isDesktop, isMobile } = useScreenWidth();
+  const { saveMetricValues } = useMetricsActions();
+  const [metricValues, setMetricValues] = React.useState<
+    Record<string, MetricValue | undefined>
+  >({});
 
   const occurrenceNote = React.useMemo(() => {
     return notes[occurrenceToEdit?.id || ''];
@@ -210,11 +216,14 @@ const OccurrenceForm = ({
       const hasSpecificTimeChanged =
         hasSpecificTime !== occurrenceToEdit.hasSpecificTime;
 
+      const hasMetricValuesChanged = Object.keys(metricValues).length > 0;
+
       const hasOccurrenceChanged =
         hasNoteChanged ||
         hasHabitChanged ||
         hasTimeChanged ||
         hasSpecificTimeChanged ||
+        hasMetricValuesChanged ||
         uploadedFiles.length > 0;
 
       setIsSubmitButtonDisabled(
@@ -234,6 +243,7 @@ const OccurrenceForm = ({
     hasSpecificTime,
     isSaving,
     habits,
+    metricValues,
   ]);
 
   React.useEffect(() => {
@@ -322,6 +332,12 @@ const OccurrenceForm = ({
         } else if (occurrenceNote) {
           await deleteNote(occurrenceNote.id);
         }
+
+        const metricInserts = buildMetricInserts(occurrenceToEdit.id, user.id);
+
+        if (metricInserts.length > 0) {
+          await saveMetricValues(metricInserts);
+        }
       };
 
       void handleAsyncAction(
@@ -359,6 +375,12 @@ const OccurrenceForm = ({
           userId: user.id,
         });
       }
+
+      const metricInserts = buildMetricInserts(newOccurrence.id, user.id);
+
+      if (metricInserts.length > 0) {
+        await saveMetricValues(metricInserts);
+      }
     });
 
     void handleAsyncAction(
@@ -368,11 +390,30 @@ const OccurrenceForm = ({
     ).then(handleClose);
   };
 
+  const buildMetricInserts = (
+    occurrenceId: string,
+    userId: string
+  ): OccurrenceMetricValueInsert[] => {
+    return Object.entries(metricValues)
+      .filter(([, val]) => {
+        return val !== undefined;
+      })
+      .map(([metricId, val]) => {
+        return {
+          habitMetricId: metricId,
+          occurrenceId,
+          userId,
+          value: val as MetricValue,
+        };
+      });
+  };
+
   const handleClose = async () => {
     setSelectedHabitId('');
     clearNote();
     setRepeat(1);
     setUploadedFiles([]);
+    setMetricValues({});
     setHasSpecificTime(true);
     closeOccurrenceDrawer();
   };
@@ -381,6 +422,7 @@ const OccurrenceForm = ({
     e
   ) => {
     setSelectedHabitId(e.target.value);
+    setMetricValues({});
   };
 
   const formatDistanceToNow = (date: CalendarDateTime) => {
@@ -469,6 +511,12 @@ const OccurrenceForm = ({
           );
         })}
       </Select>
+      <MetricValuesSection
+        values={metricValues}
+        onChange={setMetricValues}
+        occurrenceId={occurrenceToEdit?.id}
+        habitId={selectedHabitId || undefined}
+      />
       <Textarea
         value={note}
         variant="faded"

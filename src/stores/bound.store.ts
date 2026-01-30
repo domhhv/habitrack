@@ -7,6 +7,7 @@ import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 import { type HabitsSlice, createHabitsSlice } from './habits.store';
+import { type MetricsSlice, createMetricsSlice } from './metrics.store';
 import { type NotesSlice, createNotesSlice } from './notes.store';
 import {
   type OccurrencesSlice,
@@ -24,6 +25,7 @@ export type ImmerStateCreator<
 
 export type BoundStore = UserSlice &
   UiSlice &
+  MetricsSlice &
   NotesSlice &
   TraitsSlice &
   HabitsSlice &
@@ -43,6 +45,7 @@ export const useBoundStore = create<BoundStore>()(
           ...createNotesSlice(set, get, store),
           ...createTraitsSlice(set, get, store),
           ...createHabitsSlice(set, get, store),
+          ...createMetricsSlice(set, get, store),
           ...createOccurrencesSlice(set, get, store),
         };
       })
@@ -59,11 +62,17 @@ useBoundStore.subscribe(
     };
   },
   (newState, prevState) => {
-    const { habitActions, noteActions, occurrencesActions, traitActions } =
-      useBoundStore.getState();
+    const {
+      habitActions,
+      metricsActions,
+      noteActions,
+      occurrencesActions,
+      traitActions,
+    } = useBoundStore.getState();
 
     if (!newState.userId && prevState.userId) {
       habitActions.clearHabits();
+      metricsActions.clearMetrics();
       traitActions.clearTraits();
       occurrencesActions.clearOccurrences();
       noteActions.clearNotes();

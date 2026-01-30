@@ -24,6 +24,7 @@ vi.mock('@services', () => {
 
 vi.mock('@stores', () => {
   return {
+    useHabitMetrics: vi.fn().mockReturnValue({}),
     useHabits: vi.fn(),
     useTraits: vi.fn().mockReturnValue({}),
     useUser: vi.fn().mockReturnValue({}),
@@ -33,6 +34,9 @@ vi.mock('@stores', () => {
     useHabitActions: vi.fn().mockReturnValue({
       removeHabit: vi.fn(),
       updateHabit: vi.fn(),
+    }),
+    useMetricsActions: vi.fn().mockReturnValue({
+      fetchHabitMetrics: vi.fn(),
     }),
     useNoteActions: vi.fn().mockReturnValue({
       addNote: vi.fn(),

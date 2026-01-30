@@ -15,7 +15,7 @@ import { useBoundStore, type SliceCreator } from './bound.store';
 export type HabitsSlice = {
   habits: Record<Habit['id'], Habit>;
   habitActions: {
-    addHabit: (habit: HabitsInsert) => Promise<void>;
+    addHabit: (habit: HabitsInsert) => Promise<Habit>;
     clearHabits: () => void;
     fetchHabits: () => Promise<void>;
     removeHabit: (habit: Habit) => Promise<void>;
@@ -34,6 +34,8 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
         set((state) => {
           state.habits[newHabit.id] = newHabit;
         });
+
+        return newHabit;
       },
 
       clearHabits: () => {
