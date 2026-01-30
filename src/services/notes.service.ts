@@ -1,4 +1,4 @@
-import type { CalendarDateTime } from '@internationalized/date';
+import type { ZonedDateTime } from '@internationalized/date';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
@@ -21,11 +21,11 @@ export const createNote = async (note: NotesInsert): Promise<Note> => {
 };
 
 export const listNotes = async ([rangeStart, rangeEnd]: [
-  CalendarDateTime,
-  CalendarDateTime,
+  ZonedDateTime,
+  ZonedDateTime,
 ]): Promise<Note[]> => {
-  const startDateString = rangeStart.toString();
-  const endDateString = rangeEnd.toString();
+  const startDateString = rangeStart.toAbsoluteString();
+  const endDateString = rangeEnd.toAbsoluteString();
 
   const periodNotesPromise = supabaseClient
     .from('notes')
