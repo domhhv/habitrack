@@ -1,3 +1,4 @@
+import type { CalendarDateTime } from '@internationalized/date';
 import {
   toZoned,
   parseAbsolute,
@@ -24,6 +25,7 @@ import { useBoundStore, type SliceCreator } from './bound.store';
 export type OccurrencesSlice = {
   occurrences: Occurrence[];
   occurrencesByDate: Record<string, Record<Occurrence['id'], Occurrence>>;
+  occurrencesFetchedRange: [CalendarDateTime, CalendarDateTime] | null;
   occurrencesActions: {
     addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
     clearOccurrences: () => void;
@@ -54,6 +56,7 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
   return {
     occurrences: [],
     occurrencesByDate: {},
+    occurrencesFetchedRange: null,
 
     occurrencesActions: {
       addOccurrence: async (occurrence) => {
@@ -62,6 +65,7 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         const clientOccurrence = toClientOccurrence(nextOccurrence);
 
         set((state) => {
+          state.occurrencesFetchedRange = null;
           state.occurrences.push(clientOccurrence);
           const dateKey = toCalendarDate(
             clientOccurrence.occurredAt
@@ -84,16 +88,61 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         set((state) => {
           state.occurrences = [];
           state.occurrencesByDate = {};
+          state.occurrencesFetchedRange = null;
         });
       },
 
       fetchOccurrences: async () => {
         const {
           calendarRange: [rangeStart, rangeEnd],
+          occurrencesFetchedRange,
           user,
         } = getState();
 
         if (!user || rangeStart.compare(rangeEnd) === 0) {
+          return;
+        }
+
+        const isCached =
+          occurrencesFetchedRange &&
+          occurrencesFetchedRange[0].compare(rangeStart) <= 0 &&
+          occurrencesFetchedRange[1].compare(rangeEnd) >= 0;
+
+        if (isCached) {
+          const { occurrences: existingOccurrences } = getState();
+          const zonedStart = toZoned(rangeStart, getLocalTimeZone());
+          const zonedEnd = toZoned(rangeEnd, getLocalTimeZone());
+
+          const occurrencesByDate: Record<
+            string,
+            Record<Occurrence['id'], Occurrence>
+          > = {};
+
+          let currentDate = toCalendarDate(rangeStart);
+          const endDate = toCalendarDate(rangeEnd);
+
+          while (currentDate.compare(endDate) <= 0) {
+            occurrencesByDate[currentDate.toString()] = {};
+            currentDate = currentDate.add({ days: 1 });
+          }
+
+          existingOccurrences.forEach((occurrence) => {
+            if (
+              occurrence.occurredAt.compare(zonedStart) >= 0 &&
+              occurrence.occurredAt.compare(zonedEnd) <= 0
+            ) {
+              const dateKey = toCalendarDate(occurrence.occurredAt).toString();
+
+              if (occurrencesByDate[dateKey]) {
+                occurrencesByDate[dateKey][occurrence.id] = occurrence;
+              }
+            }
+          });
+
+          set((state) => {
+            state.occurrencesByDate = occurrencesByDate;
+          });
+
           return;
         }
 
@@ -128,6 +177,7 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         set((state) => {
           state.occurrences = clientOccurrences;
           state.occurrencesByDate = occurrencesByDate;
+          state.occurrencesFetchedRange = [rangeStart, rangeEnd];
         });
       },
 
@@ -135,6 +185,7 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         await destroyOccurrence({ id, photoPaths });
 
         set((state) => {
+          state.occurrencesFetchedRange = null;
           delete state.occurrencesByDate[
             toCalendarDate(occurredAt).toString()
           ]?.[id];
@@ -149,6 +200,7 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
         const updatedClientOccurrence = toClientOccurrence(updatedOccurrence);
 
         set((state) => {
+          state.occurrencesFetchedRange = null;
           state.occurrences = state.occurrences.map((occurrence) => {
             return occurrence.id === id ? updatedClientOccurrence : occurrence;
           });
