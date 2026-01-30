@@ -1,7 +1,8 @@
 import { Chip } from '@heroui/react';
 import { PlusIcon } from '@phosphor-icons/react';
 
-import { METRIC_PRESETS, type MetricPreset } from '@models';
+import { METRIC_PRESETS } from '@const';
+import { type MetricPreset } from '@models';
 
 type MetricPresetChipsProps = {
   onSelect: (preset: MetricPreset) => void;

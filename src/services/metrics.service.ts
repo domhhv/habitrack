@@ -13,8 +13,6 @@ import { supabaseClient } from '@utils';
 type SnakeRecord = Record<string, unknown>;
 type SnakeRecordArray = SnakeRecord[];
 
-// --- Habit Metric Definitions ---
-
 export const createHabitMetric = async (
   body: HabitMetricInsert
 ): Promise<HabitMetric> => {
@@ -77,8 +75,6 @@ export const destroyHabitMetric = async (id: string) => {
     throw new Error(error.message);
   }
 };
-
-// --- Occurrence Metric Values ---
 
 export const listMetricValues = async (
   occurrenceId: string

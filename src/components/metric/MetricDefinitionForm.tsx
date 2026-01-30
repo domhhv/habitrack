@@ -233,5 +233,4 @@ const MetricDefinitionForm = ({
   );
 };
 
-export { generateLocalId };
 export default MetricDefinitionForm;

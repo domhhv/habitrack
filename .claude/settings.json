@@ -1,5 +1,22 @@
 {
   "permissions": {
-    "allow": ["Bash(yarn db:status:*)"]
+    "allow": [
+      "Bash(yarn typecheck:*)",
+      "Bash(yarn eslint:check:*)",
+      "Bash(yarn eslint:fix:*)",
+      "Bash(yarn prettier:check:*)",
+      "Bash(yarn db:stop)",
+      "Bash(yarn db:start)",
+      "Bash(yarn db:status)",
+      "Bash(yarn db:reset)",
+      "Bash(yarn db:diff:*)",
+      "Bash(yarn db:migration:up)",
+      "Bash(yarn test:*)",
+      "Bash(yarn lint:sql:*)",
+      "Bash(yarn fix:sql:*)",
+      "mcp__chrome-devtools__evaluate_script",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__context7__query-docs"
+    ]
   }
 }
