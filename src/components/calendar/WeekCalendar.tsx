@@ -48,6 +48,8 @@ const WeekCalendar = () => {
   const now = useCurrentTime();
   const changeCalendarRange = useCalendarRangeChange();
   const dayNotes = useDayNotes();
+  const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
+    React.useState(false);
   const { isDesktop } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
@@ -71,6 +73,10 @@ const WeekCalendar = () => {
   );
 
   React.useEffect(() => {
+    if (!isFocusedDateInitialized) {
+      return;
+    }
+
     const focusedDateTime = toCalendarDateTime(state.focusedDate);
 
     const rangeStart = startOfWeek(focusedDateTime, locale, firstDayOfWeek);
@@ -82,7 +88,13 @@ const WeekCalendar = () => {
     });
 
     changeCalendarRange([rangeStart, rangeEnd]);
-  }, [state.focusedDate, firstDayOfWeek, changeCalendarRange, locale]);
+  }, [
+    state.focusedDate,
+    firstDayOfWeek,
+    changeCalendarRange,
+    locale,
+    isFocusedDateInitialized,
+  ]);
 
   React.useEffect(() => {
     const currentWeek = startOfWeek(
@@ -105,6 +117,7 @@ const WeekCalendar = () => {
 
     if (state.focusedDate.toString() !== paramsDate.toString()) {
       state.setFocusedDate(toCalendarDate(paramsDate));
+      setIsFocusedDateInitialized(true);
     }
   }, [state, params, locale, firstDayOfWeek]);
 

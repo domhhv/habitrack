@@ -50,14 +50,33 @@ const DayCalendar = () => {
   const { firstDayOfWeek } = useFirstDayOfWeek();
   const { locale } = useLocale();
   const timeZone = getLocalTimeZone();
+  const [focusedDate, setFocusedDate] = React.useState(() => {
+    return today(timeZone);
+  });
+  const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
+    React.useState(false);
 
   const formatter = useDateFormatter({
     dateStyle: 'full',
   });
 
-  const [focusedDate, setFocusedDate] = React.useState(() => {
-    return today(timeZone);
-  });
+  React.useEffect(() => {
+    if (!isFocusedDateInitialized) {
+      return;
+    }
+
+    const focusedDateTime = toCalendarDateTime(focusedDate);
+
+    const rangeStart = focusedDateTime;
+    const rangeEnd = focusedDateTime.set({
+      hour: 23,
+      millisecond: 999,
+      minute: 59,
+      second: 59,
+    });
+
+    changeCalendarRange([rangeStart, rangeEnd]);
+  }, [focusedDate, changeCalendarRange, isFocusedDateInitialized]);
 
   React.useEffect(() => {
     const currentDay = today(timeZone);
@@ -76,22 +95,9 @@ const DayCalendar = () => {
 
     if (focusedDate.toString() !== paramsDate.toString()) {
       setFocusedDate(toCalendarDate(paramsDate));
+      setIsFocusedDateInitialized(true);
     }
   }, [params, timeZone, focusedDate]);
-
-  React.useEffect(() => {
-    const focusedDateTime = toCalendarDateTime(focusedDate);
-
-    const rangeStart = focusedDateTime;
-    const rangeEnd = focusedDateTime.set({
-      hour: 23,
-      millisecond: 999,
-      minute: 59,
-      second: 59,
-    });
-
-    changeCalendarRange([rangeStart, rangeEnd]);
-  }, [focusedDate, changeCalendarRange]);
 
   const dayNote = React.useMemo(() => {
     return dayNotes.find((note) => {

@@ -29,8 +29,14 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
   const params = useParams();
   const { locale } = useLocale();
   const { firstDayOfWeek } = useFirstDayOfWeek();
+  const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
+    React.useState(false);
 
   React.useEffect(() => {
+    if (!isFocusedDateInitialized) {
+      return;
+    }
+
     const focusedDateTime = toCalendarDateTime(state.focusedDate);
 
     const rangeStart = startOfWeek(
@@ -50,7 +56,13 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
     });
 
     changeCalendarRange([rangeStart, rangeEnd]);
-  }, [state.focusedDate, firstDayOfWeek, changeCalendarRange, locale]);
+  }, [
+    state.focusedDate,
+    firstDayOfWeek,
+    changeCalendarRange,
+    locale,
+    isFocusedDateInitialized,
+  ]);
 
   React.useEffect(() => {
     const currentMonth = startOfMonth(today(state.timeZone));
@@ -69,6 +81,7 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
 
     if (state.focusedDate.toString() !== paramsDate.toString()) {
       state.setFocusedDate(toCalendarDate(paramsDate));
+      setIsFocusedDateInitialized(true);
     }
   }, [params, state]);
 
