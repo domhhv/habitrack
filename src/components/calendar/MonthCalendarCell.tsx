@@ -1,4 +1,11 @@
-import { cn, Button, Tooltip } from '@heroui/react';
+import {
+  cn,
+  Button,
+  Popover,
+  Tooltip,
+  PopoverContent,
+  PopoverTrigger,
+} from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { isToday } from '@internationalized/date';
 import {
@@ -13,7 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useCalendarCell } from 'react-aria';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
@@ -103,6 +110,9 @@ const MonthCalendarCell = ({
     isMobile && 'pl-1'
   );
 
+  const navigate = useNavigate();
+  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
   const openLoggingDrawer = () => {
     if (!user) {
       return;
@@ -113,99 +123,172 @@ const MonthCalendarCell = ({
     });
   };
 
+  const cellHeader = (
+    <div className={cellHeaderClassName}>
+      <p className={cn('font-bold', isMobile && 'text-sm')}>{formattedDate}</p>
+      <div className="flex items-center justify-between gap-2">
+        {isMobile && screenWidth > 360 && hasNote && (
+          <NoteIcon size={12} weight="bold" />
+        )}
+        {isDesktop && (
+          <div className="flex items-center gap-1">
+            <Tooltip closeDelay={0} content="Open day">
+              <Button
+                as={Link}
+                radius="sm"
+                variant="light"
+                color="secondary"
+                aria-label="Open day"
+                to={`/calendar/day/${date.year}/${date.month}/${date.day}`}
+                className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+              >
+                <ArrowSquareRightIcon size={18} weight="bold" />
+              </Button>
+            </Tooltip>
+            <Tooltip closeDelay={0} content="Show habit log">
+              <Button
+                radius="sm"
+                variant="light"
+                color="secondary"
+                isDisabled={!user}
+                aria-label="Show habit log"
+                className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+                onPress={() => {
+                  openOccurrenceDrawer({
+                    dayToDisplay: date,
+                  });
+                }}
+              >
+                <SquareHalfIcon size={18} weight="bold" />
+              </Button>
+            </Tooltip>
+            <Tooltip closeDelay={0} content="Log habit">
+              <Button
+                radius="sm"
+                variant="light"
+                color="secondary"
+                isDisabled={!user}
+                aria-label="Log habit"
+                onPress={openLoggingDrawer}
+                className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+              >
+                <CalendarPlusIcon size={18} weight="bold" />
+              </Button>
+            </Tooltip>
+            <Tooltip
+              closeDelay={0}
+              content={hasNote ? 'Edit note' : 'Add note'}
+            >
+              <Button
+                radius="sm"
+                variant="light"
+                isDisabled={!user}
+                color={hasNote ? 'primary' : 'secondary'}
+                aria-label={hasNote ? 'Edit note' : 'Add note'}
+                onPress={() => {
+                  openNoteDrawer(date, 'day');
+                }}
+                className={cn(
+                  'h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                  hasNote && 'opacity-100'
+                )}
+              >
+                {hasNote ? (
+                  <NoteIcon size={18} weight="bold" />
+                ) : (
+                  <NoteBlankIcon size={18} weight="bold" />
+                )}
+              </Button>
+            </Tooltip>
+          </div>
+        )}
+        {isTodayCell && !isMobile && (
+          <CalendarBlankIcon weight="fill" size={isMobile ? 18 : 20} />
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div ref={calendarCellRef} {...cellProps} className={cellRootClassName}>
-      <div
-        className={cellHeaderClassName}
-        onClick={isMobile ? openLoggingDrawer : undefined}
-      >
-        <p className={cn('font-bold', isMobile && 'text-sm')}>
-          {formattedDate}
-        </p>
-        <div className="flex items-center justify-between gap-2">
-          {isMobile && screenWidth > 360 && hasNote && (
-            <NoteIcon size={12} weight="bold" />
-          )}
-          {isDesktop && (
-            <div className="flex items-center gap-1">
-              <Tooltip closeDelay={0} content="Open day">
-                <Button
-                  as={Link}
-                  radius="sm"
-                  variant="light"
-                  color="secondary"
-                  aria-label="Open day"
-                  to={`/calendar/day/${date.year}/${date.month}/${date.day}`}
-                  className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
-                >
-                  <ArrowSquareRightIcon
-                    weight="bold"
-                    size={isDesktop ? 18 : 14}
-                  />
-                </Button>
-              </Tooltip>
-              <Tooltip closeDelay={0} content="Show habit log">
-                <Button
-                  radius="sm"
-                  variant="light"
-                  color="secondary"
-                  isDisabled={!user}
-                  aria-label="Show habit log"
-                  className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
-                  onPress={() => {
-                    openOccurrenceDrawer({
-                      dayToDisplay: date,
-                    });
-                  }}
-                >
-                  <SquareHalfIcon weight="bold" size={isDesktop ? 18 : 14} />
-                </Button>
-              </Tooltip>
-              <Tooltip closeDelay={0} content="Log habit">
-                <Button
-                  radius="sm"
-                  variant="light"
-                  color="secondary"
-                  isDisabled={!user}
-                  aria-label="Log habit"
-                  onPress={openLoggingDrawer}
-                  className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
-                >
-                  <CalendarPlusIcon weight="bold" size={isDesktop ? 18 : 14} />
-                </Button>
-              </Tooltip>
-              <Tooltip
-                closeDelay={0}
-                content={hasNote ? 'Edit note' : 'Add note'}
+      {!isDesktop && user ? (
+        <Popover
+          offset={4}
+          placement="bottom"
+          isOpen={isPopoverOpen}
+          onOpenChange={setIsPopoverOpen}
+        >
+          <PopoverTrigger>{cellHeader}</PopoverTrigger>
+          <PopoverContent>
+            <div className="flex flex-col gap-1 p-1">
+              <Button
+                size="sm"
+                variant="light"
+                color="secondary"
+                className="justify-start"
+                startContent={<ArrowSquareRightIcon size={16} weight="bold" />}
+                onPress={() => {
+                  setIsPopoverOpen(false);
+                  navigate(
+                    `/calendar/day/${date.year}/${date.month}/${date.day}`
+                  );
+                }}
               >
-                <Button
-                  radius="sm"
-                  variant="light"
-                  isDisabled={!user}
-                  color={hasNote ? 'primary' : 'secondary'}
-                  aria-label={hasNote ? 'Edit note' : 'Add note'}
-                  onPress={() => {
-                    openNoteDrawer(date, 'day');
-                  }}
-                  className={cn(
-                    'h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                    hasNote && 'opacity-100'
-                  )}
-                >
-                  {hasNote ? (
-                    <NoteIcon weight="bold" size={isDesktop ? 18 : 14} />
+                Open day
+              </Button>
+              <Button
+                size="sm"
+                variant="light"
+                color="secondary"
+                className="justify-start"
+                startContent={<SquareHalfIcon size={16} weight="bold" />}
+                onPress={() => {
+                  setIsPopoverOpen(false);
+                  openOccurrenceDrawer({
+                    dayToDisplay: date,
+                  });
+                }}
+              >
+                Show habit log
+              </Button>
+              <Button
+                size="sm"
+                variant="light"
+                color="secondary"
+                className="justify-start"
+                startContent={<CalendarPlusIcon size={16} weight="bold" />}
+                onPress={() => {
+                  setIsPopoverOpen(false);
+                  openLoggingDrawer();
+                }}
+              >
+                Log habit
+              </Button>
+              <Button
+                size="sm"
+                variant="light"
+                className="justify-start"
+                color={hasNote ? 'primary' : 'secondary'}
+                onPress={() => {
+                  setIsPopoverOpen(false);
+                  openNoteDrawer(date, 'day');
+                }}
+                startContent={
+                  hasNote ? (
+                    <NoteIcon size={16} weight="bold" />
                   ) : (
-                    <NoteBlankIcon weight="bold" size={isDesktop ? 18 : 14} />
-                  )}
-                </Button>
-              </Tooltip>
+                    <NoteBlankIcon size={16} weight="bold" />
+                  )
+                }
+              >
+                {hasNote ? 'Edit note' : 'Add note'}
+              </Button>
             </div>
-          )}
-          {isTodayCell && !isMobile && (
-            <CalendarBlankIcon weight="fill" size={isMobile ? 18 : 20} />
-          )}
-        </div>
-      </div>
+          </PopoverContent>
+        </Popover>
+      ) : (
+        cellHeader
+      )}
       <div className="flex flex-wrap justify-center gap-2 overflow-x-auto overflow-y-visible px-0 py-0.5 pb-2 md:justify-start md:px-2">
         <AnimatePresence mode="sync">
           {Object.entries(groupedOccurrences).map(
