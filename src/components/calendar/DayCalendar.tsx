@@ -21,14 +21,18 @@ import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
 import { Link, useParams, useNavigate } from 'react-router';
+import { useShallow } from 'zustand/react/shallow';
 
 import { OccurrenceChip } from '@components';
 import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
+import type { NumberMetricConfig, DurationMetricConfig } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import {
   useDayNotes,
+  useBoundStore,
   useOccurrences,
+  useMetricsActions,
   useNoteDrawerActions,
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
@@ -109,6 +113,18 @@ const DayCalendar = () => {
     return occurrences[focusedDate.toString()] || {};
   }, [occurrences, focusedDate]);
 
+  const { fetchHabitMetrics, fetchMetricValues } = useMetricsActions();
+  const habitMetricsMap = useBoundStore(
+    useShallow((state) => {
+      return state.habitMetrics;
+    })
+  );
+  const occurrenceMetricValuesMap = useBoundStore(
+    useShallow((state) => {
+      return state.occurrenceMetricValues;
+    })
+  );
+
   const occurrenceSummary = React.useMemo(() => {
     const allOccurrences = Object.values(dayOccurrences);
 
@@ -125,9 +141,118 @@ const DayCalendar = () => {
         iconPath: first.habit.iconPath,
         name: first.habit.name,
         traitColor: first.habit.trait.color,
+        occurrenceIds: habitOccurrences.map((o) => {
+          return o.id;
+        }),
       };
     });
   }, [dayOccurrences]);
+
+  React.useEffect(() => {
+    for (const { habitId } of occurrenceSummary) {
+      void fetchHabitMetrics(habitId);
+    }
+  }, [occurrenceSummary, fetchHabitMetrics]);
+
+  React.useEffect(() => {
+    const occurrenceIds = Object.keys(dayOccurrences);
+
+    for (const id of occurrenceIds) {
+      void fetchMetricValues(id);
+    }
+  }, [dayOccurrences, fetchMetricValues]);
+
+  const metricTotals = React.useMemo(() => {
+    const totals: Record<string, { formattedTotal: string; name: string }[]> =
+      {};
+
+    for (const { habitId, occurrenceIds } of occurrenceSummary) {
+      const metrics = habitMetricsMap[habitId];
+
+      if (!metrics) {
+        continue;
+      }
+
+      const summableMetrics = Object.values(metrics)
+        .filter((m) => {
+          return m.type === 'number' || m.type === 'duration';
+        })
+        .sort((a, b) => {
+          return a.sortOrder - b.sortOrder;
+        });
+
+      if (summableMetrics.length === 0) {
+        continue;
+      }
+
+      const sums: { formattedTotal: string; name: string }[] = [];
+
+      for (const metric of summableMetrics) {
+        let sum = 0;
+        let hasValues = false;
+
+        for (const occId of occurrenceIds) {
+          const values = occurrenceMetricValuesMap[occId];
+
+          if (!values?.[metric.id]) {
+            continue;
+          }
+
+          const value = values[metric.id].value as Record<string, unknown>;
+
+          if (metric.type === 'number') {
+            sum += (value as { numericValue: number }).numericValue;
+            hasValues = true;
+          } else if (metric.type === 'duration') {
+            sum += (value as { durationMs: number }).durationMs;
+            hasValues = true;
+          }
+        }
+
+        if (!hasValues) {
+          continue;
+        }
+
+        let formattedTotal: string;
+
+        if (metric.type === 'number') {
+          const config = metric.config as NumberMetricConfig;
+          const formatted =
+            config.decimalPlaces != null
+              ? sum.toFixed(config.decimalPlaces)
+              : String(sum);
+
+          formattedTotal = config.unit
+            ? `${formatted} ${config.unit}`
+            : formatted;
+        } else {
+          const config = metric.config as DurationMetricConfig;
+          const totalSec = Math.floor(sum / 1000);
+          const h = Math.floor(totalSec / 3600);
+          const m = Math.floor((totalSec % 3600) / 60);
+          const s = totalSec % 60;
+
+          if (config.format === 'minutes') {
+            formattedTotal = `${Math.floor(sum / 60000)} min`;
+          } else if (config.format === 'seconds') {
+            formattedTotal = `${totalSec} sec`;
+          } else if (config.format === 'hh:mm:ss') {
+            formattedTotal = `${h}h ${m}m ${s}s`;
+          } else {
+            formattedTotal = `${h}h ${m}m`;
+          }
+        }
+
+        sums.push({ formattedTotal, name: metric.name });
+      }
+
+      if (sums.length > 0) {
+        totals[habitId] = sums;
+      }
+    }
+
+    return totals;
+  }, [occurrenceSummary, habitMetricsMap, occurrenceMetricValuesMap]);
 
   const groupOccurrences = React.useCallback(
     (hour: number) => {
@@ -238,23 +363,43 @@ const DayCalendar = () => {
             <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
               Summary
             </h4>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {occurrenceSummary.map(
                 ({ count, habitId, iconPath, name, traitColor }) => {
+                  const totals = metricTotals[habitId];
+
                   return (
-                    <div
-                      key={habitId}
-                      className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300"
-                    >
-                      <img
-                        alt={name}
-                        className="h-4 w-4"
-                        style={{ borderColor: traitColor }}
-                        src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
-                      />
-                      <span>
-                        {name}: {count}
-                      </span>
+                    <div key={habitId}>
+                      <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
+                        <img
+                          alt={name}
+                          className="h-4 w-4"
+                          style={{ borderColor: traitColor }}
+                          src={getPublicUrl(
+                            StorageBuckets.HABIT_ICONS,
+                            iconPath
+                          )}
+                        />
+                        <span>
+                          {name}: {count}
+                        </span>
+                      </div>
+                      {totals && (
+                        <div className="mt-0.5 ml-6 space-y-0.5">
+                          {totals.map(
+                            ({ formattedTotal, name: metricName }) => {
+                              return (
+                                <p
+                                  key={metricName}
+                                  className="text-xs text-stone-400 dark:text-stone-500"
+                                >
+                                  {metricName}: {formattedTotal}
+                                </p>
+                              );
+                            }
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 }
