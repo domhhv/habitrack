@@ -25,22 +25,6 @@ export const createHabitMetric = async (
   return deepCamelcaseKeys<HabitMetric>(data);
 };
 
-export const listHabitMetrics = async (
-  habitId: string
-): Promise<HabitMetric[]> => {
-  const { data, error } = await supabaseClient
-    .from('habit_metrics')
-    .select()
-    .eq('habit_id', habitId)
-    .order('sort_order');
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return deepCamelcaseArray<HabitMetric>(data);
-};
-
 export const patchHabitMetric = async (
   id: string,
   body: HabitMetricUpdate
@@ -68,21 +52,6 @@ export const destroyHabitMetric = async (id: string) => {
   if (error) {
     throw new Error(error.message);
   }
-};
-
-export const listMetricValues = async (
-  occurrenceId: string
-): Promise<OccurrenceMetricValue[]> => {
-  const { data, error } = await supabaseClient
-    .from('occurrence_metric_values')
-    .select()
-    .eq('occurrence_id', occurrenceId);
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return deepCamelcaseArray<OccurrenceMetricValue>(data);
 };
 
 export const upsertMetricValues = async (

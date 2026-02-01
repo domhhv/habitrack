@@ -21,7 +21,6 @@ import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
 import { Link, useParams, useNavigate } from 'react-router';
-import { useShallow } from 'zustand/react/shallow';
 
 import { OccurrenceChip } from '@components';
 import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
@@ -30,9 +29,7 @@ import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import {
   useDayNotes,
-  useBoundStore,
   useOccurrences,
-  useMetricsActions,
   useNoteDrawerActions,
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
@@ -113,18 +110,6 @@ const DayCalendar = () => {
     return occurrences[focusedDate.toString()] || {};
   }, [occurrences, focusedDate]);
 
-  const { fetchHabitMetrics, fetchMetricValues } = useMetricsActions();
-  const habitMetricsMap = useBoundStore(
-    useShallow((state) => {
-      return state.habitMetrics;
-    })
-  );
-  const occurrenceMetricValuesMap = useBoundStore(
-    useShallow((state) => {
-      return state.occurrenceMetricValues;
-    })
-  );
-
   const occurrenceSummary = React.useMemo(() => {
     const allOccurrences = Object.values(dayOccurrences);
 
@@ -140,40 +125,24 @@ const DayCalendar = () => {
         habitId,
         iconPath: first.habit.iconPath,
         name: first.habit.name,
+        occurrences: habitOccurrences,
         traitColor: first.habit.trait.color,
-        occurrenceIds: habitOccurrences.map((o) => {
-          return o.id;
-        }),
       };
     });
   }, [dayOccurrences]);
-
-  React.useEffect(() => {
-    for (const { habitId } of occurrenceSummary) {
-      void fetchHabitMetrics(habitId);
-    }
-  }, [occurrenceSummary, fetchHabitMetrics]);
-
-  React.useEffect(() => {
-    const occurrenceIds = Object.keys(dayOccurrences);
-
-    for (const id of occurrenceIds) {
-      void fetchMetricValues(id);
-    }
-  }, [dayOccurrences, fetchMetricValues]);
 
   const metricTotals = React.useMemo(() => {
     const totals: Record<string, { formattedTotal: string; name: string }[]> =
       {};
 
-    for (const { habitId, occurrenceIds } of occurrenceSummary) {
-      const metrics = habitMetricsMap[habitId];
+    for (const {
+      habitId,
+      occurrences: habitOccurrences,
+    } of occurrenceSummary) {
+      const [first] = habitOccurrences;
+      const metricDefinitions = first.habit.metricDefinitions;
 
-      if (!metrics) {
-        continue;
-      }
-
-      const summableMetrics = Object.values(metrics)
+      const summableMetrics = metricDefinitions
         .filter((m) => {
           return m.type === 'number' || m.type === 'duration';
         })
@@ -191,14 +160,16 @@ const DayCalendar = () => {
         let sum = 0;
         let hasValues = false;
 
-        for (const occId of occurrenceIds) {
-          const values = occurrenceMetricValuesMap[occId];
+        for (const occ of habitOccurrences) {
+          const mv = occ.metricValues.find((v) => {
+            return v.habitMetricId === metric.id;
+          });
 
-          if (!values?.[metric.id]) {
+          if (!mv) {
             continue;
           }
 
-          const value = values[metric.id].value as Record<string, unknown>;
+          const value = mv.value as Record<string, unknown>;
 
           if (metric.type === 'number') {
             sum += (value as { numericValue: number }).numericValue;
@@ -252,7 +223,7 @@ const DayCalendar = () => {
     }
 
     return totals;
-  }, [occurrenceSummary, habitMetricsMap, occurrenceMetricValuesMap]);
+  }, [occurrenceSummary]);
 
   const groupOccurrences = React.useCallback(
     (hour: number) => {
