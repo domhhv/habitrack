@@ -20,7 +20,6 @@ import {
   useUser,
   useTraits,
   useHabitActions,
-  useHabitMetrics,
   useMetricsActions,
 } from '@stores';
 import { handleAsyncAction } from '@utils';
@@ -44,55 +43,47 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   );
 
   const { updateHabit } = useHabitActions();
-  const {
-    addHabitMetric,
-    fetchHabitMetrics,
-    removeHabitMetric,
-    updateHabitMetric,
-  } = useMetricsActions();
-  const existingMetrics = useHabitMetrics(habit?.id);
+  const { addHabitMetric, removeHabitMetric, updateHabitMetric } =
+    useMetricsActions();
   const traits = useTraits();
   const { user } = useUser();
 
   React.useEffect(() => {
     if (habit) {
       onOpen();
-      void fetchHabitMetrics(habit.id);
     } else {
       onClose?.();
     }
-  }, [habit, onOpen, onClose, fetchHabitMetrics]);
+  }, [habit, onOpen, onClose]);
 
   React.useEffect(() => {
     if (habit) {
       handleNameChange(habit.name);
       handleDescriptionChange(habit.description || '');
       setTraitId(habit.traitId.toString());
-    }
-  }, [habit, handleNameChange, handleDescriptionChange]);
 
-  React.useEffect(() => {
-    if (existingMetrics.length > 0) {
-      const localMetrics: LocalMetricDefinition[] = existingMetrics.map((m) => {
-        return {
-          config: m.config as LocalMetricDefinition['config'],
-          id: m.id,
-          isRequired: m.isRequired,
-          name: m.name,
-          sortOrder: m.sortOrder,
-          type: m.type,
-        };
-      });
+      const localMetrics: LocalMetricDefinition[] = habit.metricDefinitions.map(
+        (m) => {
+          return {
+            config: m.config as LocalMetricDefinition['config'],
+            id: m.id,
+            isRequired: m.isRequired,
+            name: m.name,
+            sortOrder: m.sortOrder,
+            type: m.type,
+          };
+        }
+      );
       setMetricDefinitions(localMetrics);
       setInitialMetricIds(
         new Set(
-          existingMetrics.map((m) => {
+          habit.metricDefinitions.map((m) => {
             return m.id;
           })
         )
       );
     }
-  }, [existingMetrics]);
+  }, [habit, handleNameChange, handleDescriptionChange]);
 
   if (!habit) {
     return null;

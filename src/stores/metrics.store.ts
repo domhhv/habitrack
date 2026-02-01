@@ -1,5 +1,4 @@
 import keyBy from 'lodash.keyby';
-import { useShallow } from 'zustand/react/shallow';
 
 import type {
   HabitMetric,
@@ -139,32 +138,6 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (
       },
     },
   };
-};
-
-export const useHabitMetrics = (habitId: string | undefined) => {
-  return useBoundStore(
-    useShallow((state) => {
-      if (!habitId || !state.habitMetrics[habitId]) {
-        return [];
-      }
-
-      return Object.values(state.habitMetrics[habitId]).sort((a, b) => {
-        return a.sortOrder - b.sortOrder;
-      });
-    })
-  );
-};
-
-export const useOccurrenceMetricValues = (occurrenceId: string | undefined) => {
-  return useBoundStore(
-    useShallow((state) => {
-      if (!occurrenceId || !state.occurrenceMetricValues[occurrenceId]) {
-        return {};
-      }
-
-      return state.occurrenceMetricValues[occurrenceId];
-    })
-  );
 };
 
 export const useMetricsActions = () => {
