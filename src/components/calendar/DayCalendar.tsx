@@ -65,7 +65,7 @@ const DayCalendar = () => {
   });
 
   React.useEffect(() => {
-    if (!isFocusedDateInitialized) {
+    if (!isFocusedDateInitialized && focusedDate.day !== 1) {
       return;
     }
 

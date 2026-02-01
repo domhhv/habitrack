@@ -6,6 +6,7 @@ const makeTestHabit = (override: Partial<Habit> = {}): Habit => {
     description: 'Test Description',
     iconPath: 'https://i.ibb.co/vvgw7bx/habitrack-logo.png',
     id: crypto.randomUUID(),
+    metricDefinitions: [],
     name: 'Test Habit',
     traitId: crypto.randomUUID(),
     updatedAt: null,

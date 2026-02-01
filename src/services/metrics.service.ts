@@ -1,4 +1,3 @@
-import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
 import type {
@@ -8,10 +7,7 @@ import type {
   OccurrenceMetricValue,
   OccurrenceMetricValueInsert,
 } from '@models';
-import { supabaseClient } from '@utils';
-
-type SnakeRecord = Record<string, unknown>;
-type SnakeRecordArray = SnakeRecord[];
+import { supabaseClient, deepCamelcaseKeys, deepCamelcaseArray } from '@utils';
 
 export const createHabitMetric = async (
   body: HabitMetricInsert
@@ -26,7 +22,7 @@ export const createHabitMetric = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data as SnakeRecord, { deep: true }) as HabitMetric;
+  return deepCamelcaseKeys<HabitMetric>(data);
 };
 
 export const listHabitMetrics = async (
@@ -42,9 +38,7 @@ export const listHabitMetrics = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data as SnakeRecordArray, {
-    deep: true,
-  }) as HabitMetric[];
+  return deepCamelcaseArray<HabitMetric>(data);
 };
 
 export const patchHabitMetric = async (
@@ -62,7 +56,7 @@ export const patchHabitMetric = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data as SnakeRecord, { deep: true }) as HabitMetric;
+  return deepCamelcaseKeys<HabitMetric>(data);
 };
 
 export const destroyHabitMetric = async (id: string) => {
@@ -88,9 +82,7 @@ export const listMetricValues = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data as SnakeRecordArray, {
-    deep: true,
-  }) as OccurrenceMetricValue[];
+  return deepCamelcaseArray<OccurrenceMetricValue>(data);
 };
 
 export const upsertMetricValues = async (
@@ -116,9 +108,7 @@ export const upsertMetricValues = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data as SnakeRecordArray, {
-    deep: true,
-  }) as OccurrenceMetricValue[];
+  return deepCamelcaseArray<OccurrenceMetricValue>(data);
 };
 
 export const destroyMetricValuesForOccurrence = async (

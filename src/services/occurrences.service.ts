@@ -10,7 +10,7 @@ import type {
   OccurrencesUpdate,
 } from '@models';
 import { StorageBuckets } from '@models';
-import { supabaseClient } from '@utils';
+import { supabaseClient, deepCamelcaseKeys, deepCamelcaseArray } from '@utils';
 
 import { deleteFile } from './storage.service';
 
@@ -18,14 +18,21 @@ export const createOccurrence = async (occurrence: OccurrencesInsert) => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .insert(decamelizeKeys(occurrence))
-    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
+    .select(
+      `
+      *,
+      habit:habits(name, icon_path, trait:traits(id, name, color),
+      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)),
+      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id))
+    `
+    )
     .single();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return deepCamelcaseKeys<RawOccurrence>(data);
 };
 
 export const listOccurrences = async ([rangeStart, rangeEnd]: [
@@ -34,7 +41,14 @@ export const listOccurrences = async ([rangeStart, rangeEnd]: [
 ]): Promise<RawOccurrence[]> => {
   const { data, error } = await supabaseClient
     .from('occurrences')
-    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
+    .select(
+      `
+      *,
+      habit:habits(name, icon_path, trait:traits(id, name, color),
+      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)),
+      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id)
+    `
+    )
     .order('occurred_at')
     .gt('occurred_at', rangeStart.toAbsoluteString())
     .lt('occurred_at', rangeEnd.toAbsoluteString());
@@ -43,7 +57,7 @@ export const listOccurrences = async ([rangeStart, rangeEnd]: [
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return deepCamelcaseArray<RawOccurrence>(data);
 };
 
 export const patchOccurrence = async (
@@ -54,14 +68,21 @@ export const patchOccurrence = async (
     .from('occurrences')
     .update(decamelizeKeys(occurrence))
     .eq('id', id)
-    .select('*, habit:habits(name, icon_path, trait:traits(id, name, color))')
+    .select(
+      `
+      *,
+      habit:habits(name, icon_path, trait:traits(id, name, color),
+      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)),
+      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id)
+    `
+    )
     .single();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return deepCamelcaseKeys<RawOccurrence>(data);
 };
 
 export const destroyOccurrence = async ({
