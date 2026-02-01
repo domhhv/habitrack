@@ -92,6 +92,18 @@ const OccurrenceForm = ({
     Record<string, MetricValue | undefined>
   >({});
 
+  const metricDefinitions = React.useMemo(() => {
+    if (occurrenceToEdit) {
+      return occurrenceToEdit.habit.metricDefinitions;
+    }
+
+    if (selectedHabitId && habits[selectedHabitId]) {
+      return habits[selectedHabitId].metricDefinitions;
+    }
+
+    return [];
+  }, [occurrenceToEdit, selectedHabitId, habits]);
+
   const occurrenceNote = React.useMemo(() => {
     return notes[occurrenceToEdit?.id || ''];
   }, [notes, occurrenceToEdit]);
@@ -174,6 +186,14 @@ const OccurrenceForm = ({
       handleNoteChange(occurrenceNote?.content || '');
       setTime(existingOccurrenceDateTime);
       setHasSpecificTime(occurrenceToEdit.hasSpecificTime);
+
+      const initialMetricValues: Record<string, MetricValue | undefined> = {};
+
+      for (const mv of occurrenceToEdit.metricValues) {
+        initialMetricValues[mv.habitMetricId] = mv.value as MetricValue;
+      }
+
+      setMetricValues(initialMetricValues);
 
       return;
     }
@@ -514,8 +534,7 @@ const OccurrenceForm = ({
       <MetricValuesSection
         values={metricValues}
         onChange={setMetricValues}
-        occurrenceId={occurrenceToEdit?.id}
-        habitId={selectedHabitId || undefined}
+        metricDefinitions={metricDefinitions}
       />
       <Textarea
         value={note}
