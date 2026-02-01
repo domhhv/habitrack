@@ -15,12 +15,7 @@ import type {
   BooleanMetricConfig,
   DurationMetricConfig,
 } from '@models';
-import {
-  useHabitMetrics,
-  useMetricsActions,
-  useNotesByOccurrenceId,
-  useOccurrenceMetricValues,
-} from '@stores';
+import { useNotesByOccurrenceId } from '@stores';
 
 import OccurrenceChip from './OccurrenceChip';
 
@@ -129,33 +124,31 @@ const OccurrenceListItem = ({
     minute: 'numeric',
     timeZone: getLocalTimeZone(),
   });
-  const metrics = useHabitMetrics(occurrence.habitId);
-  const metricValues = useOccurrenceMetricValues(occurrence.id);
-  const { fetchHabitMetrics, fetchMetricValues } = useMetricsActions();
-
-  React.useEffect(() => {
-    fetchHabitMetrics(occurrence.habitId);
-    fetchMetricValues(occurrence.id);
-  }, [occurrence.habitId, occurrence.id, fetchHabitMetrics, fetchMetricValues]);
-
   const metricChips = React.useMemo(() => {
-    if (metrics.length === 0 || Object.keys(metricValues).length === 0) {
+    const definitions = occurrence.habit.metricDefinitions;
+    const values = occurrence.metricValues;
+
+    if (definitions.length === 0 || values.length === 0) {
       return [];
     }
 
-    return metrics
-      .filter((m) => {
-        return metricValues[m.id];
+    const valuesByMetricId = new Map(
+      values.map((v) => {
+        return [v.habitMetricId, v.value as MetricValue];
       })
-      .map((m) => {
-        const val = metricValues[m.id].value as MetricValue;
+    );
 
+    return definitions
+      .filter((d) => {
+        return valuesByMetricId.has(d.id);
+      })
+      .map((d) => {
         return {
-          id: m.id,
-          label: `${m.name}: ${formatMetricValue(m, val)}`,
+          id: d.id,
+          label: `${d.name}: ${formatMetricValue(d as HabitMetric, valuesByMetricId.get(d.id)!)}`,
         };
       });
-  }, [metrics, metricValues]);
+  }, [occurrence.habit.metricDefinitions, occurrence.metricValues]);
 
   const occurrenceNote = React.useMemo(() => {
     return notes[occurrence.id];

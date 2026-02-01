@@ -33,7 +33,7 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
     React.useState(false);
 
   React.useEffect(() => {
-    if (!isFocusedDateInitialized) {
+    if (!isFocusedDateInitialized && state.focusedDate.day !== 1) {
       return;
     }
 

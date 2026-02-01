@@ -1,4 +1,3 @@
-import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
 import {
@@ -8,33 +7,45 @@ import {
   type HabitsUpdate,
 } from '@models';
 import { uploadFile } from '@services';
-import { supabaseClient } from '@utils';
+import { supabaseClient, deepCamelcaseKeys, deepCamelcaseArray } from '@utils';
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
   const { data, error } = await supabaseClient
     .from('habits')
     .insert(decamelizeKeys(body))
-    .select('*, trait:traits(name, color)')
+    .select(
+      `
+      *,
+      trait:traits(name, color),
+      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)
+    `
+    )
     .single();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return deepCamelcaseKeys<Habit>(data);
 };
 
 export const listHabits = async () => {
   const { data, error } = await supabaseClient
     .from('habits')
-    .select('*, trait:traits(id, name, color)')
+    .select(
+      `
+      *,
+      trait:traits(name, color),
+      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)
+    `
+    )
     .order('name');
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return deepCamelcaseArray<Habit>(data);
 };
 
 export const patchHabit = async (
@@ -45,14 +56,20 @@ export const patchHabit = async (
     .from('habits')
     .update(decamelizeKeys(habit))
     .eq('id', id)
-    .select('*, trait:traits(id, name, color)')
+    .select(
+      `
+      *,
+      trait:traits(name, color),
+      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)
+    `
+    )
     .single();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return deepCamelcaseKeys<Habit>(data);
 };
 
 export const destroyHabit = async (id: Habit['id']) => {

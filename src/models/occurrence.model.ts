@@ -9,20 +9,24 @@ import type {
 } from '@db-types';
 
 import { type Habit } from './habit.model';
+import type { OccurrenceMetricValue } from './metric.model';
 import { type Trait } from './trait.model';
 
 export type Streak = CamelCasedPropertiesDeep<CompositeTypes<'streak_info'>>;
 
 type BaseOccurrence = CamelCasedPropertiesDeep<Tables<'occurrences'>>;
 
-type OccurrenceHabit = Pick<Habit, 'name' | 'iconPath'>;
-
-type HabitWithTrait = OccurrenceHabit & {
+type OccurrenceHabit = Pick<
+  Habit,
+  'name' | 'iconPath' | 'metricDefinitions'
+> & {
   trait: Pick<Trait, 'id' | 'name' | 'color'>;
 };
 
 export type RawOccurrence = BaseOccurrence & {
-  habit: HabitWithTrait;
+  habit: OccurrenceHabit;
+} & {
+  metricValues: Omit<OccurrenceMetricValue, 'userId' | 'occurrenceId'>[];
 };
 
 export type Occurrence = Omit<
@@ -41,8 +45,3 @@ export type OccurrencesInsert = CamelCasedPropertiesDeep<
 export type OccurrencesUpdate = CamelCasedPropertiesDeep<
   TablesUpdate<'occurrences'>
 >;
-
-export type OccurrenceFilters = {
-  habitIds: Set<string>;
-  traitIds: Set<string>;
-};

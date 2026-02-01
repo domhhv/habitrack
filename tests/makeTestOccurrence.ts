@@ -8,6 +8,7 @@ const makeTestOccurrence = (override: Partial<Occurrence> = {}): Occurrence => {
     habitId: crypto.randomUUID(),
     hasSpecificTime: true,
     id: crypto.randomUUID(),
+    metricValues: [],
     occurredAt: now('Europe/Madrid'),
     photoPaths: [],
     timeZone: 'Europe/Madrid',
@@ -17,6 +18,7 @@ const makeTestOccurrence = (override: Partial<Occurrence> = {}): Occurrence => {
       iconPath: 'default.png',
       name: 'Test Habit Name',
       ...(override.habit || {}),
+      metricDefinitions: [],
       trait: {
         color: '#000000',
         id: override.habit?.trait?.id || crypto.randomUUID(),
