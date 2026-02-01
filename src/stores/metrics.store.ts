@@ -1,4 +1,4 @@
-import keyBy from 'lodash.keyby';
+import { toCalendarDate } from '@internationalized/date';
 
 import type {
   HabitMetric,
@@ -8,8 +8,6 @@ import type {
   OccurrenceMetricValueInsert,
 } from '@models';
 import {
-  listHabitMetrics,
-  listMetricValues,
   patchHabitMetric,
   createHabitMetric,
   destroyHabitMetric,
@@ -19,13 +17,8 @@ import {
 import { useBoundStore, type SliceCreator } from './bound.store';
 
 export type MetricsSlice = {
-  habitMetrics: Record<string, Record<string, HabitMetric>>;
-  occurrenceMetricValues: Record<string, Record<string, OccurrenceMetricValue>>;
   metricsActions: {
     addHabitMetric: (metric: HabitMetricInsert) => Promise<HabitMetric>;
-    clearMetrics: () => void;
-    fetchHabitMetrics: (habitId: string) => Promise<void>;
-    fetchMetricValues: (occurrenceId: string) => Promise<void>;
     removeHabitMetric: (id: string, habitId: string) => Promise<void>;
     saveMetricValues: (
       values: OccurrenceMetricValueInsert[]
@@ -34,75 +27,78 @@ export type MetricsSlice = {
   };
 };
 
-export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (
-  set,
-  getState
-) => {
+export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
   return {
-    habitMetrics: {},
-    occurrenceMetricValues: {},
-
     metricsActions: {
       addHabitMetric: async (metric: HabitMetricInsert) => {
         const newMetric = await createHabitMetric(metric);
 
         set((state) => {
-          const habitId = newMetric.habitId;
+          state.habits[newMetric.habitId].metricDefinitions.push(newMetric);
 
-          if (!state.habitMetrics[habitId]) {
-            state.habitMetrics[habitId] = {};
+          const habitOccurrences = state.occurrences.filter((occ) => {
+            return occ.habitId === newMetric.habitId;
+          });
+
+          for (const occurrence of habitOccurrences) {
+            occurrence.habit.metricDefinitions.push(newMetric);
+            const occurrenceInDateMap =
+              state.occurrencesByDate[
+                toCalendarDate(occurrence.occurredAt).toString()
+              ];
+
+            if (occurrenceInDateMap && occurrenceInDateMap[occurrence.id]) {
+              occurrenceInDateMap[occurrence.id].habit.metricDefinitions.push(
+                newMetric
+              );
+            }
           }
-
-          state.habitMetrics[habitId][newMetric.id] = newMetric;
         });
 
         return newMetric;
-      },
-
-      clearMetrics: () => {
-        set((state) => {
-          state.habitMetrics = {};
-          state.occurrenceMetricValues = {};
-        });
-      },
-
-      fetchHabitMetrics: async (habitId: string) => {
-        const { habitMetrics } = getState();
-
-        if (habitMetrics[habitId]) {
-          return;
-        }
-
-        const metrics = await listHabitMetrics(habitId);
-
-        set((state) => {
-          state.habitMetrics[habitId] = keyBy(metrics, 'id');
-        });
-      },
-
-      fetchMetricValues: async (occurrenceId: string) => {
-        const { occurrenceMetricValues } = getState();
-
-        if (occurrenceMetricValues[occurrenceId]) {
-          return;
-        }
-
-        const values = await listMetricValues(occurrenceId);
-
-        set((state) => {
-          state.occurrenceMetricValues[occurrenceId] = keyBy(
-            values,
-            'habitMetricId'
-          );
-        });
       },
 
       removeHabitMetric: async (id: string, habitId: string) => {
         await destroyHabitMetric(id);
 
         set((state) => {
-          if (state.habitMetrics[habitId]) {
-            delete state.habitMetrics[habitId][id];
+          const habit = state.habits[habitId];
+
+          habit.metricDefinitions = habit.metricDefinitions.filter((m) => {
+            return m.id !== id;
+          });
+
+          const habitOccurrences = state.occurrences.filter((occ) => {
+            return occ.habitId === habitId;
+          });
+
+          for (const occurrence of habitOccurrences) {
+            occurrence.metricValues = occurrence.metricValues.filter((mv) => {
+              return mv.habitMetricId !== id;
+            });
+            occurrence.habit.metricDefinitions =
+              occurrence.habit.metricDefinitions.filter((m) => {
+                return m.id !== id;
+              });
+
+            const occurrenceInDateMap =
+              state.occurrencesByDate[
+                toCalendarDate(occurrence.occurredAt).toString()
+              ];
+
+            if (occurrenceInDateMap && occurrenceInDateMap[occurrence.id]) {
+              occurrenceInDateMap[occurrence.id].metricValues =
+                occurrenceInDateMap[occurrence.id].metricValues.filter((mv) => {
+                  return mv.habitMetricId !== id;
+                });
+
+              occurrenceInDateMap[occurrence.id].habit.metricDefinitions =
+                occurrenceInDateMap[
+                  occurrence.id
+                ].habit.metricDefinitions.filter((m) => {
+                  return m.id !== id;
+                });
+            }
           }
         });
       },
@@ -114,11 +110,25 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (
           for (const value of savedValues) {
             const occId = value.occurrenceId;
 
-            if (!state.occurrenceMetricValues[occId]) {
-              state.occurrenceMetricValues[occId] = {};
+            const occurrence = state.occurrences.find((occ) => {
+              return occ.id === occId;
+            });
+
+            if (!occurrence) {
+              continue;
             }
 
-            state.occurrenceMetricValues[occId][value.habitMetricId] = value;
+            const occurrenceInDateMap =
+              state.occurrencesByDate[
+                toCalendarDate(occurrence.occurredAt).toString()
+              ];
+
+            if (!occurrenceInDateMap || !occurrenceInDateMap[occId]) {
+              continue;
+            }
+
+            occurrence.metricValues = savedValues;
+            occurrenceInDateMap[occId].metricValues = savedValues;
           }
         });
 
@@ -129,11 +139,15 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (
         const updated = await patchHabitMetric(id, metric);
 
         set((state) => {
-          const habitId = updated.habitId;
+          state.habits[updated.habitId].metricDefinitions = state.habits[
+            updated.habitId
+          ].metricDefinitions.map((m) => {
+            if (m.id === id) {
+              return updated;
+            }
 
-          if (state.habitMetrics[habitId]) {
-            state.habitMetrics[habitId][id] = updated;
-          }
+            return m;
+          });
         });
       },
     },
