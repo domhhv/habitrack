@@ -8,7 +8,6 @@ import {
   Textarea,
   TimeInput,
   SelectItem,
-  NumberInput,
   SelectSection,
 } from '@heroui/react';
 import {
@@ -76,7 +75,6 @@ const OccurrenceForm = ({
   const { addNote, deleteNote, updateNote } = useNoteActions();
   const { addOccurrence, updateOccurrence } = useOccurrenceActions();
   const [note, handleNoteChange, clearNote] = useTextField();
-  const [repeat, setRepeat] = React.useState(1);
   const [selectedHabitId, setSelectedHabitId] = React.useState('');
   const [time, setTime] = React.useState<TimeInputValue | null>(null);
   const [hasSpecificTime, setHasSpecificTime] = React.useState(true);
@@ -378,7 +376,7 @@ const OccurrenceForm = ({
         )
       : null;
 
-    const addPromises = Array.from({ length: repeat || 1 }).map(async () => {
+    const addPromise = async () => {
       const newOccurrence = await addOccurrence({
         habitId: selectedHabitId,
         hasSpecificTime,
@@ -401,13 +399,11 @@ const OccurrenceForm = ({
       if (metricInserts.length > 0) {
         await saveMetricValues(metricInserts);
       }
-    });
+    };
 
-    void handleAsyncAction(
-      Promise.all(addPromises),
-      'add_occurrence',
-      setIsSaving
-    ).then(handleClose);
+    void handleAsyncAction(addPromise(), 'add_occurrence', setIsSaving).then(
+      handleClose
+    );
   };
 
   const buildMetricInserts = (
@@ -431,7 +427,6 @@ const OccurrenceForm = ({
   const handleClose = async () => {
     setSelectedHabitId('');
     clearNote();
-    setRepeat(1);
     setUploadedFiles([]);
     setMetricValues({});
     setHasSpecificTime(true);
@@ -552,24 +547,6 @@ const OccurrenceForm = ({
             : undefined
         }
       />
-      {!occurrenceToEdit && (
-        <NumberInput
-          minValue={1}
-          value={repeat}
-          label="Repeat"
-          variant="faded"
-          onValueChange={setRepeat}
-          classNames={
-            !isDesktop
-              ? {
-                  input: 'text-base',
-                  inputWrapper: 'py-2 px-4 h-16',
-                  label: 'text-small',
-                }
-              : undefined
-          }
-        />
-      )}
       <div className="w-full space-y-2">
         <div className={cn('flex gap-2', !hasSpecificTime && 'py-2')}>
           <Switch
