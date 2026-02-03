@@ -33,6 +33,7 @@ import {
   useNoteActions,
   useNoteDrawerState,
   useNoteDrawerActions,
+  useConfirmationActions,
 } from '@stores';
 import { getISOWeek, handleAsyncAction } from '@utils';
 
@@ -54,6 +55,7 @@ const NoteDrawer = () => {
   const hasKeyboard = useHasKeyboard();
   const { isOpen, periodDate, periodKind } = useNoteDrawerState();
   const { closeNoteDrawer } = useNoteDrawerActions();
+  const { askConfirmation } = useConfirmationActions();
   const dayFormatter = useDateFormatter({
     day: 'numeric',
     month: 'short',
@@ -90,11 +92,34 @@ const NoteDrawer = () => {
     }
   }, [existingNote, changeContent, isOpen, clearContent]);
 
+  const hasUnsavedChanges = !!content && existingNote?.content !== content;
+
+  const confirmUnsavedChanges = React.useCallback(async () => {
+    if (!hasUnsavedChanges) {
+      return true;
+    }
+
+    return askConfirmation({
+      cancelText: 'Keep editing',
+      color: 'warning',
+      confirmText: 'Discard',
+      title: 'Unsaved changes',
+      description:
+        'You have unsaved changes. Are you sure you want to discard them?',
+    });
+  }, [hasUnsavedChanges, askConfirmation]);
+
   const closeDrawer = () => {
     setIsRemoving(false);
     setIsSaving(false);
     closeNoteDrawer();
     clearContent();
+  };
+
+  const closeDrawerWithConfirmation = async () => {
+    if (await confirmUnsavedChanges()) {
+      closeDrawer();
+    }
   };
 
   const submitNote = async (e?: FormEvent<HTMLFormElement>) => {
@@ -202,10 +227,12 @@ const NoteDrawer = () => {
     });
   };
 
-  const changeOpen = (isOpen: boolean) => {
+  const changeOpen = async (isOpen: boolean) => {
     if (!isOpen) {
-      closeNoteDrawer();
-      setIsPeriodPickerShown(false);
+      if (await confirmUnsavedChanges()) {
+        closeDrawer();
+        setIsPeriodPickerShown(false);
+      }
     }
   };
 
@@ -238,6 +265,7 @@ const NoteDrawer = () => {
             <NotePeriodPicker
               endRange={getEndRangeDate()}
               isShown={isPeriodPickerShown}
+              onBeforeChange={confirmUnsavedChanges}
             />
             <Textarea
               autoFocus
@@ -267,7 +295,7 @@ const NoteDrawer = () => {
                 }
 
                 if (event.key === 'Escape') {
-                  closeNoteDrawer();
+                  void closeDrawerWithConfirmation();
                 }
 
                 return null;
