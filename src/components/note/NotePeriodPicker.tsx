@@ -21,14 +21,31 @@ import { useNoteDrawerState, useNoteDrawerActions } from '@stores';
 type NotePeriodPickerProps = {
   endRange: CalendarDate;
   isShown: boolean;
+  onBeforeChange?: () => Promise<boolean> | boolean;
 };
 
-const NotePeriodPicker = ({ endRange, isShown }: NotePeriodPickerProps) => {
+const NotePeriodPicker = ({
+  endRange,
+  isShown,
+  onBeforeChange,
+}: NotePeriodPickerProps) => {
   const { firstDayOfWeek } = useFirstDayOfWeek();
   const { locale } = useLocale();
   const { screenWidth } = useScreenWidth();
   const { periodDate, periodKind } = useNoteDrawerState();
   const { setPeriodDate, setPeriodKind } = useNoteDrawerActions();
+
+  const handleChange = async (changeFn: () => void) => {
+    if (onBeforeChange) {
+      const canProceed = await onBeforeChange();
+
+      if (!canProceed) {
+        return;
+      }
+    }
+
+    changeFn();
+  };
 
   return (
     <AnimatePresence mode="wait">
@@ -119,30 +136,32 @@ const NotePeriodPicker = ({ endRange, isShown }: NotePeriodPickerProps) => {
             onChange={(value) => {
               const nextValue = Array.isArray(value) ? value[0] : value;
 
-              switch (nextValue) {
-                case 1:
-                  setPeriodDate(periodDate);
-                  setPeriodKind('day');
-                  break;
+              void handleChange(() => {
+                switch (nextValue) {
+                  case 1:
+                    setPeriodDate(periodDate);
+                    setPeriodKind('day');
+                    break;
 
-                case 2: {
-                  const weekStart = startOfWeek(
-                    periodDate,
-                    locale,
-                    firstDayOfWeek
-                  );
-                  setPeriodDate(weekStart);
-                  setPeriodKind('week');
-                  break;
-                }
+                  case 2: {
+                    const weekStart = startOfWeek(
+                      periodDate,
+                      locale,
+                      firstDayOfWeek
+                    );
+                    setPeriodDate(weekStart);
+                    setPeriodKind('week');
+                    break;
+                  }
 
-                case 3: {
-                  const monthStart = startOfMonth(periodDate);
-                  setPeriodDate(monthStart);
-                  setPeriodKind('month');
-                  break;
+                  case 3: {
+                    const monthStart = startOfMonth(periodDate);
+                    setPeriodDate(monthStart);
+                    setPeriodKind('month');
+                    break;
+                  }
                 }
-              }
+              });
             }}
           />
           <div className="flex gap-1">
@@ -152,16 +171,18 @@ const NotePeriodPicker = ({ endRange, isShown }: NotePeriodPickerProps) => {
               variant="flat"
               className="h-full w-5! min-w-auto"
               onPress={() => {
-                switch (periodKind) {
-                  case 'day':
-                    return setPeriodDate(periodDate.subtract({ days: 1 }));
+                void handleChange(() => {
+                  switch (periodKind) {
+                    case 'day':
+                      return setPeriodDate(periodDate.subtract({ days: 1 }));
 
-                  case 'week':
-                    return setPeriodDate(periodDate.subtract({ weeks: 1 }));
+                    case 'week':
+                      return setPeriodDate(periodDate.subtract({ weeks: 1 }));
 
-                  case 'month':
-                    return setPeriodDate(periodDate.subtract({ months: 1 }));
-                }
+                    case 'month':
+                      return setPeriodDate(periodDate.subtract({ months: 1 }));
+                  }
+                });
               }}
             >
               <CaretLeftIcon />
@@ -186,16 +207,18 @@ const NotePeriodPicker = ({ endRange, isShown }: NotePeriodPickerProps) => {
               variant="flat"
               className="h-full w-5! min-w-auto"
               onPress={() => {
-                switch (periodKind) {
-                  case 'day':
-                    return setPeriodDate(periodDate.add({ days: 1 }));
+                void handleChange(() => {
+                  switch (periodKind) {
+                    case 'day':
+                      return setPeriodDate(periodDate.add({ days: 1 }));
 
-                  case 'week':
-                    return setPeriodDate(periodDate.add({ weeks: 1 }));
+                    case 'week':
+                      return setPeriodDate(periodDate.add({ weeks: 1 }));
 
-                  case 'month':
-                    return setPeriodDate(periodDate.add({ months: 1 }));
-                }
+                    case 'month':
+                      return setPeriodDate(periodDate.add({ months: 1 }));
+                  }
+                });
               }}
             >
               <CaretRightIcon />
