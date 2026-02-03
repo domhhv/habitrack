@@ -11,6 +11,7 @@ import {
   patchHabitMetric,
   createHabitMetric,
   destroyHabitMetric,
+  destroyMetricValue,
   upsertMetricValues,
 } from '@services';
 
@@ -20,6 +21,10 @@ export type MetricsSlice = {
   metricsActions: {
     addHabitMetric: (metric: HabitMetricInsert) => Promise<HabitMetric>;
     removeHabitMetric: (id: string, habitId: string) => Promise<void>;
+    removeMetricValue: (
+      occurrenceId: string,
+      habitMetricId: string
+    ) => Promise<void>;
     saveMetricValues: (
       values: OccurrenceMetricValueInsert[]
     ) => Promise<OccurrenceMetricValue[]>;
@@ -99,6 +104,39 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
                   return m.id !== id;
                 });
             }
+          }
+        });
+      },
+
+      removeMetricValue: async (
+        occurrenceId: string,
+        habitMetricId: string
+      ) => {
+        await destroyMetricValue(occurrenceId, habitMetricId);
+
+        set((state) => {
+          const occurrence = state.occurrences.find((occ) => {
+            return occ.id === occurrenceId;
+          });
+
+          if (!occurrence) {
+            return;
+          }
+
+          occurrence.metricValues = occurrence.metricValues.filter((mv) => {
+            return mv.habitMetricId !== habitMetricId;
+          });
+
+          const occurrenceInDateMap =
+            state.occurrencesByDate[
+              toCalendarDate(occurrence.occurredAt).toString()
+            ];
+
+          if (occurrenceInDateMap && occurrenceInDateMap[occurrenceId]) {
+            occurrenceInDateMap[occurrenceId].metricValues =
+              occurrenceInDateMap[occurrenceId].metricValues.filter((mv) => {
+                return mv.habitMetricId !== habitMetricId;
+              });
           }
         });
       },

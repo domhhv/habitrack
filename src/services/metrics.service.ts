@@ -80,13 +80,15 @@ export const upsertMetricValues = async (
   return deepCamelcaseArray<OccurrenceMetricValue>(data);
 };
 
-export const destroyMetricValuesForOccurrence = async (
-  occurrenceId: string
+export const destroyMetricValue = async (
+  occurrenceId: string,
+  habitMetricId: string
 ) => {
   const { error } = await supabaseClient
     .from('occurrence_metric_values')
     .delete()
-    .eq('occurrence_id', occurrenceId);
+    .eq('occurrence_id', occurrenceId)
+    .eq('habit_metric_id', habitMetricId);
 
   if (error) {
     throw new Error(error.message);

@@ -1,4 +1,4 @@
-import { cn, Chip, Button, Spinner } from '@heroui/react';
+import { cn, Chip, Button, Spinner, addToast } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
@@ -15,7 +15,12 @@ import type {
   BooleanMetricConfig,
   DurationMetricConfig,
 } from '@models';
-import { useNotesByOccurrenceId } from '@stores';
+import {
+  useMetricsActions,
+  useConfirmationActions,
+  useNotesByOccurrenceId,
+} from '@stores';
+import { getErrorMessage } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
 
@@ -119,11 +124,44 @@ const OccurrenceListItem = ({
   onRemove,
 }: OccurrenceListItemProps) => {
   const notes = useNotesByOccurrenceId();
+  const { removeMetricValue } = useMetricsActions();
+  const { askConfirmation } = useConfirmationActions();
+  const [removingMetricId, setRemovingMetricId] = React.useState<string | null>(
+    null
+  );
   const timeFormatter = useDateFormatter({
     hour: 'numeric',
     minute: 'numeric',
     timeZone: getLocalTimeZone(),
   });
+
+  const handleRemoveMetricValue = async (habitMetricId: string) => {
+    const confirmed = await askConfirmation({
+      color: 'danger',
+      confirmText: 'Delete',
+      description: 'Are you sure you want to delete this metric value?',
+      title: 'Delete metric value',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    setRemovingMetricId(habitMetricId);
+
+    try {
+      await removeMetricValue(occurrence.id, habitMetricId);
+    } catch (error) {
+      addToast({
+        color: 'danger',
+        description: `Error details: ${getErrorMessage(error)}`,
+        title: `Failed to remove metric value`,
+      });
+    } finally {
+      setRemovingMetricId(null);
+    }
+  };
+
   const metricChips = React.useMemo(() => {
     const definitions = occurrence.habit.metricDefinitions;
     const values = occurrence.metricValues;
@@ -214,8 +252,38 @@ const OccurrenceListItem = ({
           {metricChips.length > 0 && (
             <div className="flex flex-wrap gap-1 pt-1">
               {metricChips.map((chip) => {
+                const isRemoving = removingMetricId === chip.id;
+
                 return (
-                  <Chip size="sm" key={chip.id} variant="flat" color="default">
+                  <Chip
+                    size="sm"
+                    key={chip.id}
+                    variant="flat"
+                    color="default"
+                    endContent={
+                      isRemoving ? (
+                        <Spinner
+                          size="sm"
+                          color="danger"
+                          className="ml-1 size-3 [&>div]:size-3"
+                        />
+                      ) : (
+                        <Button
+                          size="sm"
+                          isIconOnly
+                          color="danger"
+                          variant="light"
+                          aria-label="delete-metric-value"
+                          className="ml-0.5 h-4 w-4 min-w-0"
+                          onPress={() => {
+                            return handleRemoveMetricValue(chip.id);
+                          }}
+                        >
+                          <TrashSimpleIcon size={10} />
+                        </Button>
+                      )
+                    }
+                  >
                     {chip.label}
                   </Chip>
                 );
