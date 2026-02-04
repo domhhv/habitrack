@@ -24,8 +24,9 @@ import {
 import { handleAsyncAction } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
-import OccurrenceForm from './OccurrenceForm';
+import OccurrenceCreateFormContainer from './OccurrenceCreateFormContainer';
 import OccurrenceList from './OccurrenceList';
+import OccurrenceUpdateFormContainer from './OccurrenceUpdateFormContainer';
 
 const OccurrenceDrawer = () => {
   const timeZone = getLocalTimeZone();
@@ -206,7 +207,8 @@ const OccurrenceDrawer = () => {
               }
             />
           )}
-          {(dayToLog || occurrenceToEdit) && <OccurrenceForm />}
+          {dayToLog && <OccurrenceCreateFormContainer />}
+          {occurrenceToEdit && <OccurrenceUpdateFormContainer />}
         </DrawerBody>
       </DrawerContent>
     </Drawer>

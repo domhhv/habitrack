@@ -51,13 +51,13 @@ export type OccurrenceFormValues = {
 };
 
 type OccurrenceFormViewProps = {
-  dayToLog: CalendarDate | null;
+  dayToLog?: CalendarDate;
   habits: Record<string, Habit>;
   isSaving: boolean;
-  occurrenceNote: { content: string; id: string } | undefined;
-  occurrenceToEdit: Occurrence | null;
+  occurrenceNote?: { content: string; id: string };
+  occurrenceToEdit?: Occurrence;
   onClose: () => void;
-  onPhotoDelete: (path: string) => void;
+  onPhotoDelete?: (path: string) => void;
   onSubmit: (values: OccurrenceFormValues) => void;
 };
 
@@ -488,11 +488,13 @@ const OccurrenceFormView = ({
         onFilesChange={setUploadedFiles}
         photoPaths={occurrenceToEdit?.photoPaths || null}
       />
-      <SignedImageViewer
-        onDelete={onPhotoDelete}
-        bucket={StorageBuckets.OCCURRENCE_PHOTOS}
-        paths={occurrenceToEdit?.photoPaths || null}
-      />
+      {onPhotoDelete && (
+        <SignedImageViewer
+          onDelete={onPhotoDelete}
+          bucket={StorageBuckets.OCCURRENCE_PHOTOS}
+          paths={occurrenceToEdit?.photoPaths || null}
+        />
+      )}
       {hasHabits ? (
         <Button {...submitButtonSharedProps} fullWidth onPress={handleSubmit}>
           {occurrenceToEdit ? 'Update' : 'Add'}
