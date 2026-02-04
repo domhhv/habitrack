@@ -7,6 +7,7 @@ import {
   NotePencilIcon,
   CalendarDotsIcon,
   CalendarCheckIcon,
+  ArrowSquareOutIcon,
 } from '@phosphor-icons/react';
 import { Link, useLocation } from 'react-router';
 
@@ -34,6 +35,9 @@ const Header = () => {
 
   useKeyboardShortcut('n', dispatchNoteDrawerOpen);
   useKeyboardShortcut('l', dispatchOccurrenceDrawerOpen);
+  useKeyboardShortcut('r', () => {
+    window.open('https://habitrack.featurebase.app/roadmap', '_blank');
+  });
 
   return (
     <header className="bg-background-100 dark:dark:bg-background-900 border-b border-b-slate-300 dark:border-b-slate-800">
@@ -109,6 +113,21 @@ const Header = () => {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            as={Link}
+            size="sm"
+            variant="solid"
+            color="secondary"
+            className="hidden md:inline-flex"
+            onPress={dispatchOccurrenceDrawerOpen}
+            to="https://habitrack.featurebase.app/roadmap"
+          >
+            <ArrowSquareOutIcon size={16} weight="bold" />
+            Roadmap
+            <Kbd className="bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0 lg:block">
+              R
+            </Kbd>
+          </Button>
           <Button
             size="sm"
             variant="solid"
