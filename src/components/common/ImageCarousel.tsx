@@ -5,10 +5,11 @@ import {
   CaretRightIcon,
   ArrowSquareOutIcon,
 } from '@phosphor-icons/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 import type { SignedUrls } from '@models';
+
+import SwipeableContainer from './SwipeableContainer';
 
 type ImageCarouselProps = {
   height?: string;
@@ -27,20 +28,9 @@ const ImageCarousel = ({
 }: ImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const prevDirectionRef = useRef(direction);
-
-  const handleAnimationStart = () => {
-    setIsAnimating(true);
-  };
-
-  const handleAnimationComplete = () => {
-    setIsAnimating(false);
-    prevDirectionRef.current = direction;
-  };
 
   const handleNext = () => {
-    if (isAnimating || imageUrls.length <= 1) {
+    if (imageUrls.length <= 1) {
       return;
     }
 
@@ -51,7 +41,7 @@ const ImageCarousel = ({
   };
 
   const handlePrev = () => {
-    if (isAnimating || imageUrls.length <= 1) {
+    if (imageUrls.length <= 1) {
       return;
     }
 
@@ -62,33 +52,11 @@ const ImageCarousel = ({
   };
 
   const handleDelete = (index: number) => {
-    if (isAnimating || !onDelete) {
+    if (!onDelete) {
       return;
     }
 
     onDelete(index);
-  };
-
-  const slideVariants = {
-    enter: (direction: number) => {
-      return {
-        opacity: 0,
-        x: direction > 0 ? 500 : -500,
-        zIndex: 0,
-      };
-    },
-    exit: (direction: number) => {
-      return {
-        opacity: 0,
-        x: direction > 0 ? -500 : 500,
-        zIndex: 0,
-      };
-    },
-    center: {
-      opacity: 1,
-      x: 0,
-      zIndex: 1,
-    },
   };
 
   if (imageUrls.length === 0) {
@@ -105,49 +73,37 @@ const ImageCarousel = ({
 
   return (
     <div className={`relative overflow-hidden ${width} ${height} bg-gray-100`}>
-      <AnimatePresence mode="sync" initial={false} custom={direction}>
-        <motion.div
-          exit="exit"
-          initial="enter"
-          animate="center"
-          key={currentIndex}
-          custom={direction}
-          variants={slideVariants}
-          className="absolute h-full w-full"
-          onAnimationStart={handleAnimationStart}
-          onAnimationComplete={handleAnimationComplete}
-          transition={{
-            opacity: { duration: 0.15 },
-            x: { damping: 30, duration: 0.25, stiffness: 500, type: 'spring' },
-          }}
-        >
-          {!!currentImageUrl.error && (
-            <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-red-500/50">
-              <p className="text-white">Error loading image</p>
-            </div>
-          )}
-          {!!imageUrls[currentIndex].signedUrl && (
-            <img
-              alt={`Slide ${currentIndex}`}
-              src={imageUrls[currentIndex].signedUrl}
-              className="h-full w-full rounded-lg object-cover"
-            />
-          )}
-        </motion.div>
-      </AnimatePresence>
+      <SwipeableContainer
+        direction={direction}
+        onSwipeLeft={handleNext}
+        onSwipeRight={handlePrev}
+        className="absolute inset-0"
+        swipeKey={String(currentIndex)}
+      >
+        {!!currentImageUrl.error && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-red-500/50">
+            <p className="text-white">Error loading image</p>
+          </div>
+        )}
+        {!!currentImageUrl.signedUrl && (
+          <img
+            draggable={false}
+            alt={`Slide ${currentIndex}`}
+            src={currentImageUrl.signedUrl}
+            className="h-full w-full rounded-lg object-cover select-none"
+          />
+        )}
+      </SwipeableContainer>
 
       <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-between p-4">
         <Button
           size="sm"
           isIconOnly
-          variant="flat"
+          radius="full"
+          variant="shadow"
           onPress={handlePrev}
-          isDisabled={isAnimating || imageUrls.length <= 1}
-          className="pointer-events-auto rounded-full bg-white/80 text-gray-800 shadow-lg transition-all hover:bg-white/90"
-          style={{
-            border: '2px solid rgba(255, 255, 255, 0.8)',
-            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
-          }}
+          className="pointer-events-auto"
+          isDisabled={imageUrls.length <= 1}
         >
           <CaretLeftIcon size={20} weight="bold" />
         </Button>
@@ -155,14 +111,11 @@ const ImageCarousel = ({
         <Button
           size="sm"
           isIconOnly
-          variant="flat"
+          radius="full"
+          variant="shadow"
           onPress={handleNext}
-          isDisabled={isAnimating || imageUrls.length <= 1}
-          className="pointer-events-auto rounded-full bg-white/80 text-gray-800 shadow-lg transition-all hover:bg-white/90"
-          style={{
-            border: '2px solid rgba(255, 255, 255, 0.8)',
-            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
-          }}
+          className="pointer-events-auto"
+          isDisabled={imageUrls.length <= 1}
         >
           <CaretRightIcon size={20} weight="bold" />
         </Button>
@@ -173,15 +126,11 @@ const ImageCarousel = ({
           <Button
             size="sm"
             isIconOnly
-            variant="flat"
-            isDisabled={isAnimating}
-            className="bg-secondary-500 hover:bg-secondary-600 rounded-full text-white shadow-lg transition-all"
+            radius="full"
+            variant="shadow"
+            color="secondary"
             onPress={() => {
-              return window.open(currentImageUrl.signedUrl, '_blank');
-            }}
-            style={{
-              border: '2px solid rgba(255, 255, 255, 0.8)',
-              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
+              window.open(currentImageUrl.signedUrl, '_blank');
             }}
           >
             <ArrowSquareOutIcon size={18} weight="bold" />
@@ -194,16 +143,12 @@ const ImageCarousel = ({
           <Button
             size="sm"
             isIconOnly
-            variant="flat"
-            isDisabled={isAnimating}
+            radius="full"
+            color="danger"
+            variant="shadow"
             isLoading={imagePathBeingDeleted === currentImageUrl.path}
             onPress={() => {
-              return handleDelete(currentIndex);
-            }}
-            className="rounded-full bg-red-500 text-white shadow-lg transition-all hover:bg-red-600"
-            style={{
-              border: '2px solid rgba(255, 255, 255, 0.8)',
-              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
+              handleDelete(currentIndex);
             }}
           >
             <TrashIcon size={18} weight="bold" />
@@ -217,12 +162,7 @@ const ImageCarousel = ({
             return (
               <button
                 key={index}
-                disabled={isAnimating}
                 onClick={() => {
-                  if (isAnimating) {
-                    return;
-                  }
-
                   setDirection(index > currentIndex ? 1 : -1);
                   setCurrentIndex(index);
                 }}
