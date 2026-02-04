@@ -58,29 +58,36 @@ This app showcases the use of the following tools and technologies:
 ## Roadmap
 
 - [x] **Dark Mode**: Switch between light and dark themes.
-- [ ] **Weekly View (in progress)**: View your habits on a weekly calendar.
-- [ ] **Daily View**: Dive into your habits on a daily calendar.
+- [x] **Weekly View (in progress)**: View your habits on a weekly calendar.
+- [x] **Daily View**: Dive into your habits on a daily calendar.
 - [ ] **Export**: Export your habits and entries.
-- [ ] **Environments**: Associate habits with environments where they occur.
 - [ ] **Categories**: Group habits into categories.
-- [ ] **Sharing**: Share your calendar with trusted people.
+- [ ] **Environments**: Associate habits with environments where they occur.
+- [ ] **Habit Presets**: Use predefined habit templates for quick setup.
+- [ ] **Log Presets**: Create and use log entry presets for faster logging.
 - [ ] **Statistics**: Track your progress with insightful statistics.
-- [ ] **Notifications**: Get reminders to log your habits.
-- [ ] **Local Storage**: Save your habits and entries locally.
+- [ ] **Enriched Habit Streaks**: Extended options to visualize and track habit streaks (basic one-off streaks are displayed under /habits).
+- [ ] **Sharing**: Share your calendar with trusted people.
+- [ ] **Group Calendars**: Form or break habits together with friends or under a supervision of a coach.
+- [ ] **Group Challenges**: Participate in habit challenges within groups.
+- [ ] **Notifications**: Get reminders to log your habits via PWA notifications and later via email.
+- [ ] **Offline Support**: Use the app without an internet connection.
 
 ### Tech Debt
 
 - [x] **Migrate to Vitest**: Replace Jest with Vitest.
 - [x] **Migrate to ESLint v9**: Update to ESLint v9 and use flat config.
+- [ ] **Migrate to HeroUI 3**: Update to [HeroUI v3](https://v3.heroui.com/) (currently in beta) once it reaches stable release.
 
 ## Local development
 
 ### Prerequisites
 
 - [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en/) (22)
+- [Node.js](https://nodejs.org/en/) (22.22.0)
 - [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (v2)
 - [Docker](https://docs.docker.com/get-started/get-docker/)
+- Yarn is used as a package manager and is automatically available via Corepack (bundled with Node.js)
 
 ### Initial Setup
 
@@ -160,26 +167,39 @@ This command starts the development server and opens the app in your default bro
 
 There are a few ways to create and run migrations in the project.
 
-- Diffing the database schema to automatically generate a new migration file:
+- **[Recommended] Change or create [declarative database schema](https://supabase.com/docs/guides/local-development/declarative-database-schemas) SQL files under `supabase/schema` directory as needed**
 
-_Do the necessary changes in the local Supabase studio and then run the following to automatically generate a new migration file:_
+This project uses declarative database schema management, so the preferred way to make changes to the database schema is to modify the SQL files under `supabase/schema` directory.
+
+If you need to modify an existing table, add a new table/type/function, or make any other schema changes, do so by editing or adding SQL files in the `supabase/schema` directory, then run:
 
 ```bash
 yarn db:diff -f <your-migration-name>
 ```
 
-- Creating a new migration file manually:
+- **Diffing the Supabase Studio database schema changes to automatically generate a new migration file**
 
-_To create a new migration file manually, run the following command:_
+Do the necessary changes in the local Supabase studio and then run the following to automatically generate a new migration file:
+
+```bash
+yarn db:diff -f <your-migration-name>
+```
+
+- **Creating a new migration file manually**
+
+To create a new migration file manually, run the following command:
 
 ```bash
 yarn db:migration:new <your-migration-name>
 ```
 
+---
+
 Either way, the new migration file will be created in the `supabase/migrations` directory. Write/change the SQL queries in the migration file to reflect the changes you want to make to the database schema. Then, apply the migration by running:
 
 ```bash
-yarn db:migration:up
+yarn db:migration:up # or
+yarn db:reset # to reset the local DB and apply all migrations
 ```
 
 After applying the migration, you also need to regenerate Supabase types by running:
@@ -189,6 +209,8 @@ yarn db:gen-types
 ```
 
 Once the migration ends up in the `main` branch, it will be automatically applied to the production database.
+
+> Important step: After applying any new migrations, always remember to regenerate Supabase types by running `yarn db:gen-types` to keep the types in sync with the database schema.
 
 ### Testing
 
@@ -200,7 +222,7 @@ To run the tests, use the following command:
 yarn test
 ```
 
-Other test related commands include:
+Other test-related commands include:
 
 ```bash
 yarn test:coverage # Run all tests and generate coverage report
@@ -266,7 +288,10 @@ When you open a pull request, the following checks are run:
 - **ESLint**: Run ESLint checks for JS/TS lint issues.
 - **SQLFluff**: Run SQLFluff checks for SQL lint issues.
 - **Prettier**: Run Prettier checks for formatting issues.
+- **Unit tests**: Run unit tests with Vitest (currently not required to pass as tests are incomplete).
+- **RelativeCI**: Visual regression tests powered by RelativeCI.
 - **Deploy preview**: Build and deploy the app to Vercel for preview.
+- **Coderabbit PR Review**: Automated code review powered by CodeRabbit.
 
 All checks but the last one must pass before merging a pull request.
 
