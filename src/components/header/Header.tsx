@@ -35,7 +35,7 @@ const Header = () => {
 
   useKeyboardShortcut('n', dispatchNoteDrawerOpen);
   useKeyboardShortcut('l', dispatchOccurrenceDrawerOpen);
-  useKeyboardShortcut('r', () => {
+  useKeyboardShortcut('m', () => {
     window.open('https://habitrack.featurebase.app/roadmap', '_blank');
   });
 
@@ -117,15 +117,16 @@ const Header = () => {
             as={Link}
             size="sm"
             variant="solid"
+            target="_blank"
             color="secondary"
+            rel="noopener noreferrer"
             className="hidden md:inline-flex"
-            onPress={dispatchOccurrenceDrawerOpen}
             to="https://habitrack.featurebase.app/roadmap"
           >
             <ArrowSquareOutIcon size={16} weight="bold" />
             Roadmap
             <Kbd className="bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0 lg:block">
-              R
+              M
             </Kbd>
           </Button>
           <Button
