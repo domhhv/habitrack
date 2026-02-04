@@ -7252,6 +7252,7 @@ __metadata:
     react-dom: "npm:^19.2.3"
     react-router: "npm:^7.13.0"
     react-stately: "npm:^3.43.0"
+    react-swipeable: "npm:^7.0.2"
     rollup-plugin-visualizer: "npm:^6.0.5"
     rollup-plugin-webpack-stats: "npm:^2.1.9"
     tailwindcss: "npm:^4.1.18"
@@ -9261,6 +9262,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
   checksum: 10c0/198ec9dea31e93f46cf82cd31c079ecf9c2b62dc8ef55515226dd8caabbfe5487defe2af57e036153b6e729cf97b1b4fdb64c9323b4cd71e5bc652ec4b520763
+  languageName: node
+  linkType: hard
+
+"react-swipeable@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "react-swipeable@npm:7.0.2"
+  peerDependencies:
+    react: ^16.8.3 || ^17 || ^18 || ^19.0.0 || ^19.0.0-rc
+  checksum: 10c0/cca3ec9e6321f73d187a8ac4beece2ad8cce1f4efa0215de93e2635492e7c514ccbc30311bb0e88bafb79d302916550603cdcd44ac81054a8c0f6679b18eb04d
   languageName: node
   linkType: hard
 
