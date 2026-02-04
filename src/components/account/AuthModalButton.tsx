@@ -1,5 +1,6 @@
 import {
   Tab,
+  Kbd,
   Tabs,
   Modal,
   Button,
@@ -16,7 +17,7 @@ import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router';
 
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useKeyboardShortcut } from '@hooks';
 import { signIn, signUp, signOut, sendPasswordResetEmail } from '@services';
 import { useUser } from '@stores';
 import { getErrorMessage } from '@utils';
@@ -64,8 +65,9 @@ const AuthModalButton = () => {
 
   const successfulMessages: Record<AuthMode, string> = {
     login: 'Welcome back!',
-    register: 'Account created!',
     'reset-password': 'Password reset email sent!',
+    register:
+      'Account created! Please check your email to confirm your account before logging in.',
   };
 
   const errorMessages: Record<AuthMode, string> = {
@@ -119,6 +121,12 @@ const AuthModalButton = () => {
     },
   };
 
+  useKeyboardShortcut('i', () => {
+    if (!user?.id) {
+      onOpen();
+    }
+  });
+
   return (
     <>
       {user?.id ? (
@@ -157,6 +165,9 @@ const AuthModalButton = () => {
           onPress={onOpen}
           data-testid="auth-button"
         >
+          <Kbd className="bg-primary-300 dark:bg-primary-700 hidden px-1 py-0 lg:block">
+            I
+          </Kbd>
           Log In
         </Button>
       )}

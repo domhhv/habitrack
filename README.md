@@ -58,11 +58,13 @@ This app showcases the use of the following tools and technologies:
 ## Roadmap
 
 - [x] **Dark Mode**: Switch between light and dark themes.
-- [x] **Weekly View (in progress)**: View your habits on a weekly calendar.
+- [x] **Weekly View**: View your habits on a weekly calendar.
 - [x] **Daily View**: Dive into your habits on a daily calendar.
 - [ ] **Export**: Export your habits and entries.
 - [ ] **Categories**: Group habits into categories.
 - [ ] **Environments**: Associate habits with environments where they occur.
+- [ ] **Habit Stocks**: Maintain a stock count for habits that require consumable resources.
+- [ ] **Habit Spending**: Track spending related to habits.
 - [ ] **Habit Presets**: Use predefined habit templates for quick setup.
 - [ ] **Log Presets**: Create and use log entry presets for faster logging.
 - [ ] **Statistics**: Track your progress with insightful statistics.
@@ -72,6 +74,8 @@ This app showcases the use of the following tools and technologies:
 - [ ] **Group Challenges**: Participate in habit challenges within groups.
 - [ ] **Notifications**: Get reminders to log your habits via PWA notifications and later via email.
 - [ ] **Offline Support**: Use the app without an internet connection.
+
+There's also a public roadmap on Featurebase where you can upvote and suggest new features: [Habitrack Public Roadmap](https://habitrack.featurebase.app/roadmap).
 
 ### Tech Debt
 
