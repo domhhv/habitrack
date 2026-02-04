@@ -26,6 +26,7 @@ import {
 } from '@internationalized/date';
 import { ArrowsClockwiseIcon } from '@phosphor-icons/react';
 import groupBy from 'lodash.groupby';
+import isEqual from 'lodash.isequal';
 import pluralize from 'pluralize';
 import React, { type ChangeEventHandler } from 'react';
 import { Link } from 'react-router';
@@ -239,7 +240,7 @@ const OccurrenceFormView = ({
           const existingValue = existingMetricValues[metricId];
           const newValue = metricValues[metricId];
 
-          if (existingValue !== newValue) {
+          if (!isEqual(existingValue, newValue)) {
             return true;
           }
         }

@@ -1,4 +1,4 @@
-import { cn, Chip, Button, Spinner, addToast } from '@heroui/react';
+import { cn, Chip, Button, Spinner } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
@@ -20,7 +20,7 @@ import {
   useConfirmationActions,
   useNotesByOccurrenceId,
 } from '@stores';
-import { getErrorMessage } from '@utils';
+import { handleAsyncAction } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
 
@@ -136,29 +136,22 @@ const OccurrenceListItem = ({
   });
 
   const handleRemoveMetricValue = async (habitMetricId: string) => {
-    const confirmed = await askConfirmation({
-      color: 'danger',
-      confirmText: 'Delete',
-      description: 'Are you sure you want to delete this metric value?',
-      title: 'Delete metric value',
-    });
-
-    if (!confirmed) {
-      return;
-    }
-
-    setRemovingMetricId(habitMetricId);
-
-    try {
-      await removeMetricValue(occurrence.id, habitMetricId);
-    } catch (error) {
-      addToast({
+    if (
+      await askConfirmation({
         color: 'danger',
-        description: `Error details: ${getErrorMessage(error)}`,
-        title: `Failed to remove metric value`,
+        confirmText: 'Delete',
+        description: 'Are you sure you want to delete this metric value?',
+        title: 'Delete metric value',
+      })
+    ) {
+      setRemovingMetricId(habitMetricId);
+
+      handleAsyncAction(
+        removeMetricValue(occurrence.id, habitMetricId),
+        'remove_metric-value'
+      ).finally(() => {
+        setRemovingMetricId(null);
       });
-    } finally {
-      setRemovingMetricId(null);
     }
   };
 

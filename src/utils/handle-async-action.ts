@@ -10,6 +10,8 @@ type EntityNoun =
   | 'occurrence'
   | 'trait'
   | 'account'
+  | 'photo'
+  | 'metric-value'
   | 'icon';
 
 type ActionType = `${ActionVerb}_${EntityNoun}`;
@@ -36,9 +38,11 @@ const tenses: Record<string, Record<string, string>> = {
 const getMessages = (actionType: ActionType) => {
   const [verb, noun] = actionType.split('_');
 
+  const nouns = noun.split('-').join(' ');
+
   return {
-    error: `Something went wrong while ${tenses.continuous[verb]} your ${noun}`,
-    success: `${capitalize(noun)} ${tenses.past[verb]}`,
+    error: `Something went wrong while ${tenses.continuous[verb]} your ${nouns}`,
+    success: `${capitalize(nouns)} ${tenses.past[verb]}`,
   };
 };
 
