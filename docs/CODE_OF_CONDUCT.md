@@ -37,4 +37,4 @@ This Code of Conduct applies to all project spaces, including GitHub issues, pul
 
 ## Attribution
 
-This Code of Conduct is adapted from standard open source community guidelines. For more information, see the [Contributor Covenant](https://www.contributor-covenant.org/).
+This Code of Conduct is adapted from standard open-source community guidelines. For more information, see the [Contributor Covenant](https://www.contributor-covenant.org/).

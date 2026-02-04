@@ -167,11 +167,11 @@ This command starts the development server and opens the app in your default bro
 
 There are a few ways to create and run migrations in the project.
 
-- **[Recommended] Change or create [declarative database schema](https://supabase.com/docs/guides/local-development/declarative-database-schemas) SQL files under `supabase/schema` directory as needed**
+- **[Recommended] Change or create [declarative database schema](https://supabase.com/docs/guides/local-development/declarative-database-schemas) SQL files under `supabase/schemas` directory as needed**
 
-This project uses declarative database schema management, so the preferred way to make changes to the database schema is to modify the SQL files under `supabase/schema` directory.
+This project uses declarative database schema management, so the preferred way to make changes to the database schema is to modify the SQL files under `supabase/schemas` directory.
 
-If you need to modify an existing table, add a new table/type/function, or make any other schema changes, do so by editing or adding SQL files in the `supabase/schema` directory, then run:
+If you need to modify an existing table, add a new table/type/function, or make any other schema changes, do so by editing or adding SQL files in the `supabase/schemas` directory, then run:
 
 ```bash
 yarn db:diff -f <your-migration-name>
