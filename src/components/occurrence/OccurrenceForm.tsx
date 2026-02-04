@@ -1,43 +1,9 @@
-import type { ButtonProps, TimeInputValue } from '@heroui/react';
-import {
-  cn,
-  Form,
-  Button,
-  Select,
-  Switch,
-  Textarea,
-  TimeInput,
-  SelectItem,
-  SelectSection,
-} from '@heroui/react';
-import {
-  now,
-  today,
-  toZoned,
-  fromDate,
-  isSameDay,
-  toTimeZone,
-  ZonedDateTime,
-  getLocalTimeZone,
-  type CalendarDate,
-  toCalendarDateTime,
-  type CalendarDateTime,
-} from '@internationalized/date';
-import { ArrowsClockwiseIcon } from '@phosphor-icons/react';
-import groupBy from 'lodash.groupby';
-import pluralize from 'pluralize';
-import React, { type ChangeEventHandler } from 'react';
-import { Link } from 'react-router';
+import { getLocalTimeZone } from '@internationalized/date';
+import React from 'react';
 
-import { SignedImageViewer, MetricValuesSection } from '@components';
-import { useTextField, useScreenWidth } from '@hooks';
 import type { MetricValue, OccurrenceMetricValueInsert } from '@models';
 import { StorageBuckets } from '@models';
-import {
-  getPublicUrl,
-  uploadImages,
-  getLatestHabitOccurrenceTimestamp,
-} from '@services';
+import { uploadImages } from '@services';
 import {
   useUser,
   useHabits,
@@ -50,21 +16,11 @@ import {
 } from '@stores';
 import { handleAsyncAction } from '@utils';
 
-import OccurrencePhotosUploader from './OccurrencePhotosUploader';
+import OccurrenceFormView, {
+  type OccurrenceFormValues,
+} from './OccurrenceFormView';
 
-const ALL_DAY_TIME = { hour: 12, minute: 0 };
-
-type OccurrenceFormProps = {
-  existingOccurrenceDateTime: ZonedDateTime | null;
-  formatDate: (
-    date: CalendarDate | CalendarDateTime | ZonedDateTime | null
-  ) => string;
-};
-
-const OccurrenceForm = ({
-  existingOccurrenceDateTime,
-  formatDate,
-}: OccurrenceFormProps) => {
+const OccurrenceForm = () => {
   const timeZone = getLocalTimeZone();
   const { closeOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { dayToLog, isOpen, occurrenceToEdit } = useOccurrenceDrawerState();
@@ -74,240 +30,44 @@ const OccurrenceForm = ({
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote, deleteNote, updateNote } = useNoteActions();
   const { addOccurrence, updateOccurrence } = useOccurrenceActions();
-  const [note, handleNoteChange, clearNote] = useTextField();
-  const [selectedHabitId, setSelectedHabitId] = React.useState('');
-  const [time, setTime] = React.useState<TimeInputValue | null>(null);
-  const [hasSpecificTime, setHasSpecificTime] = React.useState(true);
-  const [isDateTimeInFuture, setIsDateTimeInFuture] = React.useState(false);
-  const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
-    React.useState(false);
-  const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
-  const [lastOccurredAt, setLastOccurredAt] =
-    React.useState<CalendarDateTime | null>(null);
-  const { isDesktop, isMobile } = useScreenWidth();
   const { saveMetricValues } = useMetricsActions();
-  const [metricValues, setMetricValues] = React.useState<
-    Record<string, MetricValue | undefined>
-  >({});
-
-  const metricDefinitions = React.useMemo(() => {
-    if (occurrenceToEdit) {
-      return occurrenceToEdit.habit.metricDefinitions;
-    }
-
-    if (selectedHabitId && habits[selectedHabitId]) {
-      return habits[selectedHabitId].metricDefinitions;
-    }
-
-    return [];
-  }, [occurrenceToEdit, selectedHabitId, habits]);
 
   const occurrenceNote = React.useMemo(() => {
     return notes[occurrenceToEdit?.id || ''];
   }, [notes, occurrenceToEdit]);
 
-  const computeOccurrenceDateTime = React.useCallback(
-    (tz = timeZone) => {
-      const baseNow = now(tz);
-
-      const getTimeValues = () => {
-        if (time) {
-          return { hour: time.hour, minute: time.minute };
-        }
-
-        return { hour: baseNow.hour, minute: baseNow.minute };
-      };
-
-      if (dayToLog) {
-        const timeToSet = hasSpecificTime ? getTimeValues() : ALL_DAY_TIME;
-
-        return toZoned(toCalendarDateTime(dayToLog).set(timeToSet), tz);
-      }
-
-      if (hasSpecificTime) {
-        const base = existingOccurrenceDateTime ?? baseNow;
-        const { hour, minute } = getTimeValues();
-
-        return toTimeZone(base.set({ hour, minute }), tz);
-      }
-
-      const baseDateTime = existingOccurrenceDateTime ?? baseNow;
-
-      return toZoned(toCalendarDateTime(baseDateTime).set(ALL_DAY_TIME), tz);
-    },
-    [dayToLog, existingOccurrenceDateTime, hasSpecificTime, time, timeZone]
-  );
-
-  const habitsByTraitName = React.useMemo(() => {
-    return groupBy(Object.values(habits), (habit) => {
-      return habit.trait?.name || 'Unknown';
-    });
-  }, [habits]);
-
-  const hasHabits = Object.keys(habits).length > 0;
-
-  React.useEffect(() => {
-    if (occurrenceToEdit) {
-      return;
-    }
-
-    if (
-      !selectedHabitId ||
-      !dayToLog ||
-      !isSameDay(dayToLog, today(timeZone))
-    ) {
-      setLastOccurredAt(null);
-
-      return;
-    }
-
-    getLatestHabitOccurrenceTimestamp(selectedHabitId)
-      .then((timestamp) => {
-        setLastOccurredAt(
-          timestamp
-            ? toCalendarDateTime(fromDate(new Date(timestamp), timeZone))
-            : null
-        );
+  const buildMetricInserts = (
+    metricValues: Record<string, MetricValue | undefined>,
+    occurrenceId: string,
+    userId: string
+  ): OccurrenceMetricValueInsert[] => {
+    return Object.entries(metricValues)
+      .filter(([, val]) => {
+        return val !== undefined;
       })
-      .catch(() => {
-        setLastOccurredAt(null);
+      .map(([metricId, val]) => {
+        return {
+          habitMetricId: metricId,
+          occurrenceId,
+          userId,
+          value: val as MetricValue,
+        };
       });
-  }, [occurrenceToEdit, selectedHabitId, dayToLog, timeZone]);
+  };
 
-  React.useEffect(() => {
-    if (!dayToLog && !occurrenceToEdit) {
+  const handleSubmit = async (values: OccurrenceFormValues) => {
+    if (!user || !(dayToLog || occurrenceToEdit)) {
       return;
     }
 
-    if (isOpen && occurrenceToEdit) {
-      setSelectedHabitId(occurrenceToEdit.habitId.toString());
-      handleNoteChange(occurrenceNote?.content || '');
-      setTime(existingOccurrenceDateTime);
-      setHasSpecificTime(occurrenceToEdit.hasSpecificTime);
-
-      const initialMetricValues: Record<string, MetricValue | undefined> = {};
-
-      for (const mv of occurrenceToEdit.metricValues) {
-        initialMetricValues[mv.habitMetricId] = mv.value as MetricValue;
-      }
-
-      setMetricValues(initialMetricValues);
-
-      return;
-    }
-
-    if (isOpen && dayToLog) {
-      const { hour, minute } = now(timeZone);
-
-      setTime(
-        toZoned(toCalendarDateTime(dayToLog).set({ hour, minute }), timeZone)
-      );
-    }
-  }, [
-    dayToLog,
-    occurrenceNote?.content,
-    occurrenceToEdit,
-    existingOccurrenceDateTime,
-    isOpen,
-    handleNoteChange,
-    timeZone,
-  ]);
-
-  React.useEffect(() => {
-    if (!Object.keys(habits).length) {
-      return;
-    }
-
-    if (dayToLog) {
-      setIsSubmitButtonDisabled(!selectedHabitId);
-
-      return;
-    }
-
-    if (occurrenceToEdit) {
-      const hasTimeChanged =
-        time instanceof ZonedDateTime &&
-        !!time.compare(occurrenceToEdit.occurredAt);
-      const hasNoteChanged = note !== (occurrenceNote?.content || '');
-      const hasHabitChanged =
-        selectedHabitId !== occurrenceToEdit.habitId.toString();
-      const hasSpecificTimeChanged =
-        hasSpecificTime !== occurrenceToEdit.hasSpecificTime;
-
-      const hasMetricValuesChanged = Object.keys(metricValues).length > 0;
-
-      const hasOccurrenceChanged =
-        hasNoteChanged ||
-        hasHabitChanged ||
-        hasTimeChanged ||
-        hasSpecificTimeChanged ||
-        hasMetricValuesChanged ||
-        uploadedFiles.length > 0;
-
-      setIsSubmitButtonDisabled(
-        isSaving || !selectedHabitId || !hasOccurrenceChanged
-      );
-
-      return;
-    }
-  }, [
-    dayToLog,
-    occurrenceToEdit,
-    occurrenceNote?.content,
-    uploadedFiles.length,
-    note,
-    selectedHabitId,
-    time,
-    hasSpecificTime,
-    isSaving,
-    habits,
-    metricValues,
-  ]);
-
-  React.useEffect(() => {
-    if (!time) {
-      return;
-    }
-
-    if (dayToLog) {
-      const userEnteredDateTime = toCalendarDateTime(dayToLog).set({
-        hour: time.hour,
-        minute: time.minute,
-      });
-
-      setIsDateTimeInFuture(
-        toZoned(userEnteredDateTime, timeZone).compare(now(timeZone)) > 0
-      );
-
-      return;
-    }
-
-    if (existingOccurrenceDateTime) {
-      setIsDateTimeInFuture(
-        existingOccurrenceDateTime
-          .set({
-            hour: time.hour,
-            minute: time.minute,
-          })
-          .compare(now(timeZone)) > 0
-      );
-    }
-  }, [dayToLog, existingOccurrenceDateTime, time, timeZone]);
-
-  const handleSubmit = async () => {
-    if (
-      !user ||
-      !(dayToLog || occurrenceToEdit) ||
-      !hasHabits ||
-      !selectedHabitId
-    ) {
-      return null;
-    }
-
-    const effectiveTimeZone = occurrenceToEdit?.timeZone ?? timeZone;
-
-    const occurredAt =
-      computeOccurrenceDateTime(effectiveTimeZone).toAbsoluteString();
+    const {
+      hasSpecificTime,
+      metricValues,
+      note,
+      occurredAt,
+      selectedHabitId,
+      uploadedFiles,
+    } = values;
 
     setIsSaving(true);
 
@@ -331,7 +91,7 @@ const OccurrenceForm = ({
           hasSpecificTime,
           occurredAt,
           photoPaths: photoPaths.length ? photoPaths : null,
-          userId: user?.id as string,
+          userId: user.id,
         });
 
         if (note) {
@@ -351,7 +111,11 @@ const OccurrenceForm = ({
           await deleteNote(occurrenceNote.id);
         }
 
-        const metricInserts = buildMetricInserts(occurrenceToEdit.id, user.id);
+        const metricInserts = buildMetricInserts(
+          metricValues,
+          occurrenceToEdit.id,
+          user.id
+        );
 
         if (metricInserts.length > 0) {
           await saveMetricValues(metricInserts);
@@ -362,7 +126,7 @@ const OccurrenceForm = ({
         updatePromise(),
         'update_occurrence',
         setIsSaving
-      ).then(handleClose);
+      ).then(closeOccurrenceDrawer);
 
       return;
     }
@@ -383,7 +147,7 @@ const OccurrenceForm = ({
         occurredAt,
         photoPaths,
         timeZone,
-        userId: user?.id as string,
+        userId: user.id,
       });
 
       if (note) {
@@ -394,7 +158,11 @@ const OccurrenceForm = ({
         });
       }
 
-      const metricInserts = buildMetricInserts(newOccurrence.id, user.id);
+      const metricInserts = buildMetricInserts(
+        metricValues,
+        newOccurrence.id,
+        user.id
+      );
 
       if (metricInserts.length > 0) {
         await saveMetricValues(metricInserts);
@@ -402,220 +170,37 @@ const OccurrenceForm = ({
     };
 
     void handleAsyncAction(addPromise(), 'add_occurrence', setIsSaving).then(
-      handleClose
+      closeOccurrenceDrawer
     );
   };
 
-  const buildMetricInserts = (
-    occurrenceId: string,
-    userId: string
-  ): OccurrenceMetricValueInsert[] => {
-    return Object.entries(metricValues)
-      .filter(([, val]) => {
-        return val !== undefined;
-      })
-      .map(([metricId, val]) => {
-        return {
-          habitMetricId: metricId,
-          occurrenceId,
-          userId,
-          value: val as MetricValue,
-        };
-      });
-  };
-
-  const handleClose = async () => {
-    setSelectedHabitId('');
-    clearNote();
-    setUploadedFiles([]);
-    setMetricValues({});
-    setHasSpecificTime(true);
-    closeOccurrenceDrawer();
-  };
-
-  const handleHabitSelectionChange: ChangeEventHandler<HTMLSelectElement> = (
-    e
-  ) => {
-    setSelectedHabitId(e.target.value);
-    setMetricValues({});
-  };
-
-  const formatDistanceToNow = (date: CalendarDateTime) => {
-    const dateZ = toZoned(date, timeZone);
-
-    const nowZ = now(timeZone);
-    const diffMs = nowZ.toDate().getTime() - dateZ.toDate().getTime();
-
-    if (['today', 'yesterday'].includes(formatDate(date))) {
-      const hoursDifference = Math.floor(diffMs / (1000 * 60 * 60));
-
-      if (hoursDifference < 1) {
-        return 'less than an hour';
-      }
-
-      return `${hoursDifference} ${pluralize('hour', hoursDifference)}`;
+  const handlePhotoDelete = (path: string) => {
+    if (!occurrenceToEdit?.photoPaths) {
+      return;
     }
 
-    const daysDifference = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    return `${pluralize('day', daysDifference, true)}`;
+    void updateOccurrence(occurrenceToEdit, {
+      photoPaths: occurrenceToEdit.photoPaths.filter((p) => {
+        return p !== path;
+      }),
+    });
   };
 
-  const submitButtonSharedProps: ButtonProps = {
-    color: 'primary',
-    isDisabled: isSubmitButtonDisabled,
-    isLoading: isSaving,
-  };
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    <Form>
-      <Select
-        size="sm"
-        variant="faded"
-        maxListboxHeight={400}
-        data-testid="habit-select"
-        disableSelectorIconRotation
-        selectedKeys={[selectedHabitId]}
-        onChange={handleHabitSelectionChange}
-        selectorIcon={<ArrowsClockwiseIcon />}
-        scrollShadowProps={{
-          visibility: 'bottom',
-        }}
-        label={
-          hasHabits ? 'Habits' : 'No habits yet. Create a habit to get started.'
-        }
-        description={
-          lastOccurredAt
-            ? `Last logged ${formatDistanceToNow(lastOccurredAt)} ago`
-            : 'Choose your habit'
-        }
-      >
-        {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
-          if (!habits?.length) {
-            return null;
-          }
-
-          return (
-            <SelectSection
-              showDivider
-              key={traitName}
-              title={traitName}
-              classNames={{
-                heading:
-                  'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-              }}
-            >
-              {habits.map((habit) => {
-                return (
-                  <SelectItem key={habit.id} textValue={habit.name}>
-                    <div className="flex items-center gap-2">
-                      <img
-                        alt={habit.name}
-                        className="h-4 w-4"
-                        src={getPublicUrl(
-                          StorageBuckets.HABIT_ICONS,
-                          habit.iconPath
-                        )}
-                      />
-                      <span>{habit.name}</span>
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </SelectSection>
-          );
-        })}
-      </Select>
-      <MetricValuesSection
-        values={metricValues}
-        onChange={setMetricValues}
-        metricDefinitions={metricDefinitions}
-      />
-      <Textarea
-        value={note}
-        variant="faded"
-        placeholder="Note"
-        onChange={handleNoteChange}
-        onKeyDown={() => {
-          return null;
-        }}
-        classNames={
-          !isDesktop
-            ? {
-                input: 'text-base',
-              }
-            : undefined
-        }
-      />
-      <div className="w-full space-y-2">
-        <div className={cn('flex gap-2', !hasSpecificTime && 'py-2')}>
-          <Switch
-            size="sm"
-            className="basis-full"
-            isSelected={hasSpecificTime}
-            onValueChange={setHasSpecificTime}
-          >
-            Specify time
-          </Switch>
-          {hasSpecificTime && (
-            <TimeInput
-              value={time}
-              variant="faded"
-              onChange={setTime}
-              size={isMobile ? 'sm' : 'md'}
-              classNames={
-                !isDesktop
-                  ? {
-                      input: 'text-base',
-                      inputWrapper: 'h-10',
-                    }
-                  : undefined
-              }
-            />
-          )}
-        </div>
-        {isDateTimeInFuture && hasSpecificTime && (
-          <p className="text-sm text-gray-600">
-            You are logging a habit for the future. Are you a time traveler?
-          </p>
-        )}
-      </div>
-      <OccurrencePhotosUploader
-        files={uploadedFiles}
-        onFilesChange={setUploadedFiles}
-        photoPaths={occurrenceToEdit?.photoPaths || null}
-      />
-      <SignedImageViewer
-        bucket={StorageBuckets.OCCURRENCE_PHOTOS}
-        paths={occurrenceToEdit?.photoPaths || null}
-        onDelete={(path) => {
-          if (!occurrenceToEdit?.photoPaths) {
-            return;
-          }
-
-          void updateOccurrence(occurrenceToEdit, {
-            photoPaths: occurrenceToEdit.photoPaths.filter((p) => {
-              return p !== path;
-            }),
-          });
-        }}
-      />
-      {hasHabits ? (
-        <Button {...submitButtonSharedProps} fullWidth onPress={handleSubmit}>
-          {occurrenceToEdit ? 'Update' : 'Add'}
-        </Button>
-      ) : (
-        <Button
-          as={Link}
-          to="/habits"
-          {...submitButtonSharedProps}
-          fullWidth
-          onPress={closeOccurrenceDrawer}
-        >
-          Go to Habits
-        </Button>
-      )}
-    </Form>
+    <OccurrenceFormView
+      habits={habits}
+      isSaving={isSaving}
+      onSubmit={handleSubmit}
+      dayToLog={dayToLog ?? null}
+      onClose={closeOccurrenceDrawer}
+      occurrenceNote={occurrenceNote}
+      onPhotoDelete={handlePhotoDelete}
+      occurrenceToEdit={occurrenceToEdit ?? null}
+    />
   );
 };
 

@@ -1,15 +1,13 @@
 import { Drawer, DrawerBody, DrawerHeader, DrawerContent } from '@heroui/react';
+import type { ZonedDateTime } from '@internationalized/date';
 import {
   now,
   today,
   toZoned,
   isToday,
   isSameDay,
-  ZonedDateTime,
   toLocalTimeZone,
   getLocalTimeZone,
-  type CalendarDate,
-  type CalendarDateTime,
 } from '@internationalized/date';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
@@ -105,33 +103,16 @@ const OccurrenceDrawer = () => {
     }
   };
 
-  const existingOccurrenceDateTime = React.useMemo(() => {
-    if (!occurrenceToEdit?.occurredAt) {
-      return null;
-    }
-
-    return toLocalTimeZone(occurrenceToEdit.occurredAt);
-  }, [occurrenceToEdit]);
-
-  const formatDate = (
-    date: CalendarDate | CalendarDateTime | ZonedDateTime | null
-  ) => {
-    const asZoned =
-      date == null
-        ? null
-        : date instanceof ZonedDateTime
-          ? date
-          : toZoned(date, timeZone);
-
-    if (!asZoned || isToday(asZoned, timeZone)) {
+  const formatDate = (date: ZonedDateTime = now(timeZone)) => {
+    if (isToday(date, timeZone)) {
       return 'today';
     }
 
-    if (isSameDay(asZoned, now(timeZone).subtract({ days: 1 }))) {
+    if (isSameDay(date, now(timeZone).subtract({ days: 1 }))) {
       return 'yesterday';
     }
 
-    return dateFormatter.format(asZoned.toDate());
+    return dateFormatter.format(date.toDate());
   };
 
   const getMainTitle = () => {
@@ -139,7 +120,10 @@ const OccurrenceDrawer = () => {
       return (
         <>
           {occurrenceToEdit ? 'Edit' : 'Add'} habit entry for{' '}
-          {formatDate(dayToLog || existingOccurrenceDateTime)}
+          {formatDate(
+            (dayToLog && toZoned(dayToLog, timeZone)) ||
+              occurrenceToEdit?.occurredAt
+          )}
         </>
       );
     }
@@ -222,12 +206,7 @@ const OccurrenceDrawer = () => {
               }
             />
           )}
-          {(dayToLog || occurrenceToEdit) && (
-            <OccurrenceForm
-              formatDate={formatDate}
-              existingOccurrenceDateTime={existingOccurrenceDateTime}
-            />
-          )}
+          {(dayToLog || occurrenceToEdit) && <OccurrenceForm />}
         </DrawerBody>
       </DrawerContent>
     </Drawer>

@@ -60,7 +60,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
     if (habit) {
       handleNameChange(habit.name);
       handleDescriptionChange(habit.description || '');
-      setTraitId(habit.traitId.toString());
+      setTraitId(habit.traitId);
 
       const localMetrics: LocalMetricDefinition[] = habit.metricDefinitions.map(
         (m) => {

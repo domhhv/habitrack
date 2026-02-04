@@ -4881,6 +4881,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash.isequal@npm:^4":
+  version: 4.5.8
+  resolution: "@types/lodash.isequal@npm:4.5.8"
+  dependencies:
+    "@types/lodash": "npm:*"
+  checksum: 10c0/6db28cacf165d55421fbf2970ccfb1682a7b82b743bb7aba4398fa8ab98f1711fca2fe4afa1aa2b7b4afb3eff76c8aca13b22206f5efeb038d99e41300589bca
+  languageName: node
+  linkType: hard
+
 "@types/lodash.keyby@npm:^4.6.9":
   version: 4.6.9
   resolution: "@types/lodash.keyby@npm:4.6.9"
@@ -7210,6 +7219,7 @@ __metadata:
     "@testing-library/react": "npm:^16.3.2"
     "@types/lodash.capitalize": "npm:^4.2.9"
     "@types/lodash.groupby": "npm:^4.6.9"
+    "@types/lodash.isequal": "npm:^4"
     "@types/lodash.keyby": "npm:^4.6.9"
     "@types/node": "npm:^22.19.7"
     "@types/pluralize": "npm:^0.0.33"
@@ -7240,6 +7250,7 @@ __metadata:
     lint-staged: "npm:^16.2.7"
     lodash.capitalize: "npm:^4.2.1"
     lodash.groupby: "npm:^4.6.0"
+    lodash.isequal: "npm:^4.5.0"
     lodash.keyby: "npm:^4.6.0"
     pluralize: "npm:^8.0.0"
     prettier: "npm:^3.8.1"
@@ -8261,6 +8272,13 @@ __metadata:
   version: 4.6.0
   resolution: "lodash.groupby@npm:4.6.0"
   checksum: 10c0/3d136cad438ad6c3a078984ef60e057a3498b1312aa3621b00246ecb99e8f2c4d447e2815460db7a0b661a4fe4e2eeee96c84cb661a824bad04b6cf1f7bc6e9b
+  languageName: node
+  linkType: hard
+
+"lodash.isequal@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.isequal@npm:4.5.0"
+  checksum: 10c0/dfdb2356db19631a4b445d5f37868a095e2402292d59539a987f134a8778c62a2810c2452d11ae9e6dcac71fc9de40a6fedcb20e2952a15b431ad8b29e50e28f
   languageName: node
   linkType: hard
 
