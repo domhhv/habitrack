@@ -8,6 +8,9 @@ import { getErrorMessage } from '@utils';
 
 import { ImageCarousel } from './index';
 
+const SIGNED_URL_EXPIRY_SECONDS = 60 * 5;
+const SIGNED_URL_REFRESH_INTERVAL_MS = (SIGNED_URL_EXPIRY_SECONDS - 60) * 1000;
+
 type SignedImageViewerProps = {
   bucket: StorageBuckets;
   paths: string[] | null;
@@ -24,15 +27,18 @@ const SignedImageViewer = ({
   const [signedImageUrls, setSignedImageUrls] = React.useState<SignedUrls>([]);
 
   React.useEffect(() => {
+    if (!paths?.length) {
+      setSignedImageUrls([]);
+
+      return;
+    }
+
     const loadSignedUrls = async () => {
-      if (!paths?.length) {
-        setSignedImageUrls([]);
-
-        return;
-      }
-
       try {
-        const signedUrls = await createSignedUrls(paths);
+        const signedUrls = await createSignedUrls(
+          paths,
+          SIGNED_URL_EXPIRY_SECONDS
+        );
 
         setSignedImageUrls(signedUrls);
       } catch (error) {
@@ -46,6 +52,14 @@ const SignedImageViewer = ({
     };
 
     void loadSignedUrls();
+
+    const intervalId = setInterval(() => {
+      void loadSignedUrls();
+    }, SIGNED_URL_REFRESH_INTERVAL_MS);
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [paths]);
 
   const deleteImage = async (index: number) => {
