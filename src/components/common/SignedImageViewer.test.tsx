@@ -1,6 +1,6 @@
-import { render, waitFor, fireEvent } from '@testing-library/react';
+import { act, render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { it, vi, expect, describe, beforeEach } from 'vitest';
+import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
 
 import { StorageBuckets } from '@models';
 
@@ -61,11 +61,16 @@ vi.mock('./ImageCarousel', () => {
 
 describe(SignedImageViewer.name, () => {
   beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.clearAllMocks();
     mockCreateSignedUrls.mockResolvedValue([
       { path: 'test-path-1.jpg', signedUrl: 'https://example.com/photo1.jpg' },
     ]);
     mockDeleteFile.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should prompt for confirmation before deleting image', async () => {
@@ -80,7 +85,10 @@ describe(SignedImageViewer.name, () => {
     );
 
     await waitFor(() => {
-      expect(mockCreateSignedUrls).toHaveBeenCalledWith(['test-path-1.jpg']);
+      expect(mockCreateSignedUrls).toHaveBeenCalledWith(
+        ['test-path-1.jpg'],
+        300
+      );
     });
 
     const deleteButton = getByText('Delete Image');
@@ -105,7 +113,10 @@ describe(SignedImageViewer.name, () => {
     );
 
     await waitFor(() => {
-      expect(mockCreateSignedUrls).toHaveBeenCalledWith(['test-path-1.jpg']);
+      expect(mockCreateSignedUrls).toHaveBeenCalledWith(
+        ['test-path-1.jpg'],
+        300
+      );
     });
 
     const deleteButton = getByText('Delete Image');
@@ -135,7 +146,10 @@ describe(SignedImageViewer.name, () => {
     );
 
     await waitFor(() => {
-      expect(mockCreateSignedUrls).toHaveBeenCalledWith(['test-path-1.jpg']);
+      expect(mockCreateSignedUrls).toHaveBeenCalledWith(
+        ['test-path-1.jpg'],
+        300
+      );
     });
 
     const deleteButton = getByText('Delete Image');
@@ -147,5 +161,47 @@ describe(SignedImageViewer.name, () => {
 
     expect(mockDeleteFile).not.toHaveBeenCalled();
     expect(mockOnDelete).not.toHaveBeenCalled();
+  });
+
+  it('should refresh signed URLs before they expire', async () => {
+    render(
+      <SignedImageViewer
+        onDelete={mockOnDelete}
+        paths={['test-path-1.jpg']}
+        bucket={StorageBuckets.OCCURRENCE_PHOTOS}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockCreateSignedUrls).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(240_000);
+    });
+
+    expect(mockCreateSignedUrls).toHaveBeenCalledTimes(2);
+  });
+
+  it('should clear refresh interval on unmount', async () => {
+    const { unmount } = render(
+      <SignedImageViewer
+        onDelete={mockOnDelete}
+        paths={['test-path-1.jpg']}
+        bucket={StorageBuckets.OCCURRENCE_PHOTOS}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockCreateSignedUrls).toHaveBeenCalledTimes(1);
+    });
+
+    unmount();
+
+    await act(async () => {
+      vi.advanceTimersByTime(240_000);
+    });
+
+    expect(mockCreateSignedUrls).toHaveBeenCalledTimes(1);
   });
 });
