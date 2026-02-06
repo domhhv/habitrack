@@ -33,6 +33,7 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
 
         set((state) => {
           state.habits[newHabit.id] = newHabit;
+          state.calendarFilters.habitIds.push(newHabit.id);
         });
 
         return newHabit;
@@ -72,6 +73,10 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
 
         set((state) => {
           delete state.habits[id];
+          state.calendarFilters.habitIds =
+            state.calendarFilters.habitIds.filter((habitId) => {
+              return habitId !== id;
+            });
         });
       },
 
