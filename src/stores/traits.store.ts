@@ -24,6 +24,7 @@ export const createTraitsSlice: SliceCreator<keyof TraitsSlice> = (set) => {
 
         set((state) => {
           state.traits[newTrait.id] = newTrait;
+          state.calendarFilters.traitIds.push(newTrait.id);
         });
       },
 
