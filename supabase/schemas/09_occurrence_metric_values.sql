@@ -61,7 +61,7 @@ CREATE POLICY "Enable delete for users based on user_id" ON "public"."occurrence
 FOR DELETE USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."occurrence_metric_values"
-FOR INSERT TO "authenticated" WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
+FOR INSERT TO "authenticated" WITH CHECK (true);
 
 CREATE POLICY "Enable read access for users based on user_id" ON "public"."occurrence_metric_values"
 FOR SELECT USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));

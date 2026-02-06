@@ -21,7 +21,9 @@ ADD CONSTRAINT "occurrences_pkey" PRIMARY KEY ("id");
 
 -- Foreign keys
 ALTER TABLE ONLY "public"."occurrences"
-ADD CONSTRAINT "occurrences_habit_id_fkey" FOREIGN KEY ("habit_id") REFERENCES "public"."habits" ("id");
+ADD CONSTRAINT "occurrences_habit_id_fkey" FOREIGN KEY ("habit_id") REFERENCES "public"."habits" (
+    "id"
+) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE ONLY "public"."occurrences"
 ADD CONSTRAINT "public_occurrences_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users" (
