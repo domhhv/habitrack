@@ -1,4 +1,5 @@
 import {
+  Chip,
   Input,
   Button,
   Select,
@@ -62,7 +63,24 @@ const MetricDefinitionForm = ({
     return (
       <div className="flex items-center justify-between">
         <div>
-          <h3>{metric.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3>{metric.name}</h3>
+            {!metric.isPersisted && metric.isToBeAdded && (
+              <Chip size="sm" color="success">
+                New
+              </Chip>
+            )}
+            {metric.isToBeUpdated && (
+              <Chip size="sm" color="secondary">
+                To be updated
+              </Chip>
+            )}
+            {metric.isToBeRemoved && (
+              <Chip size="sm" color="danger">
+                To be removed
+              </Chip>
+            )}
+          </div>
           <p>{metric.type}</p>
         </div>
         <div className="space-x-2">

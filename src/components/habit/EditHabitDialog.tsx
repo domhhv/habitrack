@@ -38,9 +38,6 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   const [metricDefinitions, setMetricDefinitions] = React.useState<
     FormMetricDefinitions[]
   >([]);
-  const [initialMetricIds, setInitialMetricIds] = React.useState<Set<string>>(
-    new Set()
-  );
 
   const { updateHabit } = useHabitActions();
   const { addHabitMetric, removeHabitMetric, updateHabitMetric } =
@@ -66,6 +63,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
         return {
           config: m.config as FormMetricDefinitions['config'],
           id: m.id,
+          isPersisted: true,
           isRequired: m.isRequired,
           name: m.name,
           sortOrder: m.sortOrder,
@@ -73,13 +71,6 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
         };
       });
       setMetricDefinitions(localMetrics);
-      setInitialMetricIds(
-        new Set(
-          habit.metricDefinitions.map((m) => {
-            return m.id;
-          })
-        )
-      );
     }
   }, [habit, handleNameChange, handleDescriptionChange]);
 
@@ -104,28 +95,21 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
         traitId,
       });
 
-      const currentIds = new Set(
-        metricDefinitions
-          .filter((m) => {
-            return !m.id.startsWith('form-');
-          })
-          .map((m) => {
-            return m.id;
-          })
-      );
-
-      const deletedIds = [...initialMetricIds].filter((id) => {
-        return !currentIds.has(id);
+      const metricsToRemove = metricDefinitions.filter((md) => {
+        return md.isToBeRemoved;
       });
-      await Promise.all(
-        deletedIds.map((id) => {
-          return removeHabitMetric(id, habit.id);
-        })
-      );
+
+      if (metricsToRemove.length) {
+        await Promise.all(
+          metricsToRemove.map(({ id }) => {
+            return removeHabitMetric(id, habit.id);
+          })
+        );
+      }
 
       await Promise.all(
         metricDefinitions.map((metric) => {
-          if (metric.id.startsWith('form-')) {
+          if (metric.isToBeAdded) {
             return addHabitMetric({
               config: metric.config,
               habitId: habit.id,
@@ -137,13 +121,15 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             });
           }
 
-          return updateHabitMetric(metric.id, {
-            config: metric.config,
-            isRequired: metric.isRequired,
-            name: metric.name,
-            sortOrder: metric.sortOrder,
-            type: metric.type,
-          });
+          if (metric.isToBeUpdated) {
+            return updateHabitMetric(metric.id, {
+              config: metric.config,
+              isRequired: metric.isRequired,
+              name: metric.name,
+              sortOrder: metric.sortOrder,
+              type: metric.type,
+            });
+          }
         })
       );
     };
@@ -244,6 +230,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
                         return {
                           ...prevMd,
                           ...metricUpdates,
+                          isToBeUpdated: md.isPersisted,
                         };
                       }
 
