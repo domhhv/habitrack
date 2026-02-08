@@ -18,9 +18,9 @@ import {
   AddTraitModal,
   VisuallyHiddenInput,
   MetricDefinitionForm,
-  type LocalMetricDefinition,
 } from '@components';
 import { useTextField, useFileField } from '@hooks';
+import type { FormMetricDefinitions } from '@models';
 import { uploadHabitIcon } from '@services';
 import {
   useUser,
@@ -34,7 +34,7 @@ const AddHabitDialogButton = () => {
   const [traitId, setTraitId] = React.useState('');
   const [isAdding, setIsAdding] = React.useState(false);
   const [metricDefinitions, setMetricDefinitions] = React.useState<
-    LocalMetricDefinition[]
+    FormMetricDefinitions[]
   >([]);
 
   const traits = useTraits();
@@ -109,6 +109,23 @@ const AddHabitDialogButton = () => {
       .then(clearFields);
   };
 
+  const addMetric = () => {
+    setMetricDefinitions((prev) => {
+      return [
+        ...prev,
+        {
+          config: {},
+          id: `form-${Date.now()}`,
+          isBeingEdited: true,
+          isRequired: false,
+          name: 'Unnamed metric',
+          sortOrder: prev.length,
+          type: 'number',
+        },
+      ];
+    });
+  };
+
   return (
     <>
       <AddTraitModal isOpen={isTraitModalOpen} onClose={closeTraitModal} />
@@ -124,6 +141,7 @@ const AddHabitDialogButton = () => {
       </Button>
 
       <Modal
+        size="lg"
         role="add-habit-dialog"
         scrollBehavior="inside"
         isOpen={isAddDialogOpen}
@@ -171,7 +189,6 @@ const AddHabitDialogButton = () => {
             <Button
               size="sm"
               variant="ghost"
-              color="secondary"
               className="min-h-8"
               onPress={openTraitModal}
               startContent={<PlusIcon />}
@@ -182,7 +199,6 @@ const AddHabitDialogButton = () => {
               fullWidth
               size="sm"
               as="label"
-              color="secondary"
               className="min-h-8"
               startContent={<CloudArrowUpIcon />}
             >
@@ -191,10 +207,38 @@ const AddHabitDialogButton = () => {
             </Button>
             {icon && <p>{icon.name}</p>}
 
-            <MetricDefinitionForm
-              metrics={metricDefinitions}
-              onChange={setMetricDefinitions}
-            />
+            {metricDefinitions.map((md) => {
+              return (
+                <MetricDefinitionForm
+                  key={md.id}
+                  metric={md}
+                  onRemove={() => {
+                    setMetricDefinitions((prev) => {
+                      return prev.filter((prevMd) => {
+                        return prevMd.id !== md.id;
+                      });
+                    });
+                  }}
+                  onChange={(metricUpdates) => {
+                    setMetricDefinitions((prev) => {
+                      return prev.map((prevMd) => {
+                        if (prevMd.id === md.id) {
+                          return {
+                            ...prevMd,
+                            ...metricUpdates,
+                          };
+                        }
+
+                        return prevMd;
+                      });
+                    });
+                  }}
+                />
+              );
+            })}
+            <Button onPress={addMetric} isDisabled={isAdding}>
+              Add metric
+            </Button>
           </ModalBody>
           <ModalFooter>
             <Button

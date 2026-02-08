@@ -13,9 +13,9 @@ import {
 } from '@heroui/react';
 import React from 'react';
 
-import { MetricDefinitionForm, type LocalMetricDefinition } from '@components';
+import { MetricDefinitionForm } from '@components';
 import { useTextField } from '@hooks';
-import type { Habit } from '@models';
+import type { Habit, FormMetricDefinitions } from '@models';
 import {
   useUser,
   useTraits,
@@ -36,11 +36,8 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   const [traitId, setTraitId] = React.useState('');
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [metricDefinitions, setMetricDefinitions] = React.useState<
-    LocalMetricDefinition[]
+    FormMetricDefinitions[]
   >([]);
-  const [initialMetricIds, setInitialMetricIds] = React.useState<Set<string>>(
-    new Set()
-  );
 
   const { updateHabit } = useHabitActions();
   const { addHabitMetric, removeHabitMetric, updateHabitMetric } =
@@ -62,26 +59,18 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
       handleDescriptionChange(habit.description || '');
       setTraitId(habit.traitId);
 
-      const localMetrics: LocalMetricDefinition[] = habit.metricDefinitions.map(
-        (m) => {
-          return {
-            config: m.config as LocalMetricDefinition['config'],
-            id: m.id,
-            isRequired: m.isRequired,
-            name: m.name,
-            sortOrder: m.sortOrder,
-            type: m.type,
-          };
-        }
-      );
+      const localMetrics = habit.metricDefinitions.map((m) => {
+        return {
+          config: m.config as FormMetricDefinitions['config'],
+          id: m.id,
+          isPersisted: true,
+          isRequired: m.isRequired,
+          name: m.name,
+          sortOrder: m.sortOrder,
+          type: m.type,
+        };
+      });
       setMetricDefinitions(localMetrics);
-      setInitialMetricIds(
-        new Set(
-          habit.metricDefinitions.map((m) => {
-            return m.id;
-          })
-        )
-      );
     }
   }, [habit, handleNameChange, handleDescriptionChange]);
 
@@ -106,28 +95,21 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
         traitId,
       });
 
-      const currentIds = new Set(
-        metricDefinitions
-          .filter((m) => {
-            return !m.id.startsWith('local-');
-          })
-          .map((m) => {
-            return m.id;
-          })
-      );
-
-      const deletedIds = [...initialMetricIds].filter((id) => {
-        return !currentIds.has(id);
+      const metricsToRemove = metricDefinitions.filter((md) => {
+        return md.isToBeRemoved;
       });
-      await Promise.all(
-        deletedIds.map((id) => {
-          return removeHabitMetric(id, habit.id);
-        })
-      );
+
+      if (metricsToRemove.length) {
+        await Promise.all(
+          metricsToRemove.map(({ id }) => {
+            return removeHabitMetric(id, habit.id);
+          })
+        );
+      }
 
       await Promise.all(
         metricDefinitions.map((metric) => {
-          if (metric.id.startsWith('local-')) {
+          if (metric.isToBeAdded) {
             return addHabitMetric({
               config: metric.config,
               habitId: habit.id,
@@ -139,13 +121,15 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             });
           }
 
-          return updateHabitMetric(metric.id, {
-            config: metric.config,
-            isRequired: metric.isRequired,
-            name: metric.name,
-            sortOrder: metric.sortOrder,
-            type: metric.type,
-          });
+          if (metric.isToBeUpdated) {
+            return updateHabitMetric(metric.id, {
+              config: metric.config,
+              isRequired: metric.isRequired,
+              name: metric.name,
+              sortOrder: metric.sortOrder,
+              type: metric.type,
+            });
+          }
         })
       );
     };
@@ -153,6 +137,23 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
     void handleAsyncAction(submit(), 'update_habit', setIsUpdating).then(
       handleClose
     );
+  };
+
+  const addMetric = () => {
+    setMetricDefinitions((prev) => {
+      return [
+        ...prev,
+        {
+          config: {},
+          id: `form-${Date.now()}`,
+          isBeingEdited: true,
+          isRequired: false,
+          name: 'Unnamed metric',
+          sortOrder: prev.length,
+          type: 'number',
+        },
+      ];
+    });
   };
 
   return (
@@ -203,10 +204,50 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             })}
           </Select>
 
-          <MetricDefinitionForm
-            metrics={metricDefinitions}
-            onChange={setMetricDefinitions}
-          />
+          {metricDefinitions.map((md) => {
+            return (
+              <MetricDefinitionForm
+                key={md.id}
+                metric={md}
+                onRemove={() => {
+                  setMetricDefinitions((prev) => {
+                    return prev.map((prevMd) => {
+                      if (prevMd.id === md.id) {
+                        return {
+                          ...prevMd,
+                          isToBeRemoved: true,
+                        };
+                      }
+
+                      return prevMd;
+                    });
+                  });
+                }}
+                onChange={(metricUpdates) => {
+                  setMetricDefinitions((prev) => {
+                    return prev.map((prevMd) => {
+                      if (prevMd.id === md.id) {
+                        return {
+                          ...prevMd,
+                          ...metricUpdates,
+                          isToBeUpdated: md.isPersisted,
+                        };
+                      }
+
+                      return prevMd;
+                    });
+                  });
+                }}
+              />
+            );
+          })}
+          <Button
+            className="min-h-8"
+            onPress={addMetric}
+            isDisabled={isUpdating}
+          >
+            Add metric
+          </Button>
         </ModalBody>
         <ModalFooter>
           <Button

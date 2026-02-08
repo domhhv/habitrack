@@ -13,7 +13,7 @@ export type NumberMetricConfig = {
 };
 
 export type DurationMetricConfig = {
-  format?: 'hh:mm' | 'hh:mm:ss' | 'minutes' | 'seconds';
+  format?: 'hh:mm' | 'hh:mm:ss' | 'mm:ss' | 'hours' | 'minutes' | 'seconds';
 };
 
 export type PercentageMetricConfig = Record<string, never>;
@@ -74,6 +74,20 @@ export type MetricValue =
   | TextMetricValue;
 
 export type HabitMetric = CamelCasedPropertiesDeep<Tables<'habit_metrics'>>;
+
+export type FormMetricDefinitions = Omit<
+  HabitMetric,
+  'id' | 'createdAt' | 'updatedAt' | 'config' | 'habitId' | 'userId'
+> & {
+  config: MetricConfig;
+  id: string;
+  isBeingEdited?: boolean;
+  isPersisted?: boolean;
+  isToBeAdded?: boolean;
+  isToBeRemoved?: boolean;
+  isToBeUpdated?: boolean;
+};
+
 export type HabitMetricInsert = CamelCasedPropertiesDeep<
   TablesInsert<'habit_metrics'>
 >;
