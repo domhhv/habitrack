@@ -219,9 +219,11 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
                                 o.occurredAt.compare(startDate) >= 0 &&
                                 o.occurredAt.compare(endDate) <= 0 &&
                                 filters.habitIds.includes(o.habitId) &&
-                                filters.traitIds.includes(
-                                  o.habit.trait.id || ''
-                                )
+                                (o.habit.trait
+                                  ? filters.traitIds.includes(
+                                      o.habit.trait?.id || ''
+                                    )
+                                  : true)
                               );
                             }
                           )}

@@ -20,7 +20,7 @@ type OccurrenceHabit = Pick<
   Habit,
   'name' | 'iconPath' | 'metricDefinitions'
 > & {
-  trait: Pick<Trait, 'id' | 'name' | 'color'>;
+  trait: Pick<Trait, 'id' | 'name' | 'color'> | null;
 };
 
 export type RawOccurrence = BaseOccurrence & {

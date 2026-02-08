@@ -57,7 +57,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
     if (habit) {
       handleNameChange(habit.name);
       handleDescriptionChange(habit.description || '');
-      setTraitId(habit.traitId);
+      setTraitId(habit.traitId || '');
 
       const localMetrics = habit.metricDefinitions.map((m) => {
         return {
@@ -92,7 +92,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
       await updateHabit(habit.id, {
         description,
         name,
-        traitId,
+        traitId: traitId || null,
       });
 
       const metricsToRemove = metricDefinitions.filter((md) => {
@@ -167,6 +167,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
         <ModalHeader>Edit habit</ModalHeader>
         <ModalBody>
           <Input
+            size="sm"
             value={name}
             label="Name"
             variant="faded"
@@ -175,6 +176,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             placeholder="Edit habit name"
           />
           <Textarea
+            size="sm"
             variant="faded"
             value={description}
             isDisabled={isUpdating}
@@ -184,10 +186,14 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
           />
           <Select
             required
+            size="sm"
+            isClearable
             label="Trait"
             variant="faded"
             selectedKeys={[traitId]}
-            data-testid="habit-select"
+            onClear={() => {
+              setTraitId('');
+            }}
           >
             {Object.values(traits).map((trait) => {
               return (
@@ -242,6 +248,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
             );
           })}
           <Button
+            size="sm"
             className="min-h-8"
             onPress={addMetric}
             isDisabled={isUpdating}

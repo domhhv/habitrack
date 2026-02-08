@@ -18,7 +18,7 @@ const TraitChip = ({ trait }: TraitChipProps) => {
             backgroundColor: trait?.color || 'black',
           }}
         />
-        <p role="habit-trait-chip-name">{trait?.name || 'Unknown trait'}</p>
+        <p role="habit-trait-chip-name">{trait?.name || 'No trait'}</p>
       </div>
     </Chip>
   );

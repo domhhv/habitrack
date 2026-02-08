@@ -127,7 +127,7 @@ const DayCalendar = () => {
         iconPath: first.habit.iconPath,
         name: first.habit.name,
         occurrences: habitOccurrences,
-        traitColor: first.habit.trait.color,
+        traitColor: first.habit.trait?.color || 'black',
       };
     });
   }, [dayOccurrences]);
