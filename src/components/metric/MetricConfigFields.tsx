@@ -80,7 +80,14 @@ const DurationConfigFields = ({
   config: DurationMetricConfig;
   onChange: (config: DurationMetricConfig) => void;
 }) => {
-  const formats = ['hh:mm:ss', 'hh:mm', 'minutes', 'seconds'] as const;
+  const formats = [
+    'hh:mm:ss',
+    'hh:mm',
+    'mm:ss',
+    'hours',
+    'minutes',
+    'seconds',
+  ] as const;
 
   return (
     <div className="flex flex-wrap gap-2">

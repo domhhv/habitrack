@@ -3,27 +3,23 @@ import {
   Button,
   Select,
   Switch,
-  Divider,
-  Accordion,
   SelectItem,
-  AccordionItem,
+  Autocomplete,
+  AutocompleteItem,
+  AutocompleteSection,
 } from '@heroui/react';
-import { PlusIcon, TrashIcon } from '@phosphor-icons/react';
+import {
+  TrashIcon,
+  StackPlusIcon,
+  TrashSimpleIcon,
+  PencilSimpleIcon,
+} from '@phosphor-icons/react';
 import React from 'react';
 
-import type { MetricType, MetricConfig, MetricPreset } from '@models';
+import { METRIC_PRESETS } from '@const';
+import type { MetricType, MetricConfig, FormMetricDefinitions } from '@models';
 
 import MetricConfigFields from './MetricConfigFields';
-import MetricPresetChips from './MetricPresetChips';
-
-export type LocalMetricDefinition = {
-  config: MetricConfig;
-  id: string;
-  isRequired: boolean;
-  name: string;
-  sortOrder: number;
-  type: MetricType;
-};
 
 const METRIC_TYPE_LABELS: Record<MetricType, string> = {
   boolean: 'Yes/No',
@@ -47,188 +43,190 @@ const DEFAULT_CONFIGS: Record<MetricType, MetricConfig> = {
   text: {},
 };
 
-let nextLocalId = 0;
-
-const generateLocalId = () => {
-  nextLocalId += 1;
-
-  return `local-${nextLocalId}-${Date.now()}`;
-};
+const ALL_PRESETS = METRIC_PRESETS.flatMap((m) => {
+  return m.presets;
+});
 
 type MetricDefinitionFormProps = {
-  metrics: LocalMetricDefinition[];
-  onChange: (metrics: LocalMetricDefinition[]) => void;
+  metric: FormMetricDefinitions;
+  onChange: (metric: Partial<FormMetricDefinitions>) => void;
+  onRemove: () => void;
 };
 
 const MetricDefinitionForm = ({
-  metrics,
+  metric,
   onChange,
+  onRemove,
 }: MetricDefinitionFormProps) => {
-  const handleAddCustom = () => {
-    const newMetric: LocalMetricDefinition = {
-      config: {},
-      id: generateLocalId(),
-      isRequired: false,
-      name: '',
-      sortOrder: metrics.length,
-      type: 'number',
-    };
-
-    onChange([...metrics, newMetric]);
-  };
-
-  const handleAddPreset = (preset: MetricPreset) => {
-    const newMetric: LocalMetricDefinition = {
-      config: preset.config,
-      id: generateLocalId(),
-      isRequired: false,
-      name: preset.name,
-      sortOrder: metrics.length,
-      type: preset.type,
-    };
-
-    onChange([...metrics, newMetric]);
-  };
-
-  const handleRemove = (id: string) => {
-    onChange(
-      metrics
-        .filter((m) => {
-          return m.id !== id;
-        })
-        .map((m, i) => {
-          return { ...m, sortOrder: i };
-        })
+  if (!metric.isBeingEdited) {
+    return (
+      <div className="flex items-center justify-between">
+        <div>
+          <h3>{metric.name}</h3>
+          <p>{metric.type}</p>
+        </div>
+        <div className="space-x-2">
+          <Button
+            isIconOnly
+            onPress={() => {
+              onChange({ isBeingEdited: true });
+            }}
+          >
+            <PencilSimpleIcon />
+          </Button>
+          <Button isIconOnly onPress={onRemove}>
+            <TrashSimpleIcon />
+          </Button>
+        </div>
+      </div>
     );
-  };
-
-  const handleUpdate = (
-    id: string,
-    updates: Partial<LocalMetricDefinition>
-  ) => {
-    onChange(
-      metrics.map((m) => {
-        return m.id === id ? { ...m, ...updates } : m;
-      })
-    );
-  };
-
-  const handleTypeChange = (id: string, newType: MetricType) => {
-    handleUpdate(id, {
-      config: DEFAULT_CONFIGS[newType],
-      type: newType,
-    });
-  };
+  }
 
   return (
-    <div className="flex flex-col gap-3">
-      <Divider />
-      <p className="text-sm font-medium">Metrics</p>
-      <p className="text-default-400 text-xs">
-        Add metrics to track measurements for this habit.
-      </p>
+    <div className="space-y-2">
+      <div className="space-y-0.5">
+        <p className="text-sm font-medium">
+          {metric.isPersisted ? 'Edit metric' : 'New metric'}
+        </p>
+        <p className="text-default-400 dark:text-default-600 text-xs">
+          Add a metric to track measurements for this habit.
+        </p>
+      </div>
 
-      <MetricPresetChips onSelect={handleAddPreset} />
+      <div className="flex flex-col gap-3 pb-2">
+        <Autocomplete
+          size="sm"
+          variant="faded"
+          value={metric.name}
+          label="Choose from presets (optional)"
+          placeholder="Search for units, e.g. kilometers, kcal..."
+          onClear={() => {
+            onChange({
+              config: {},
+              isRequired: false,
+              type: 'number',
+            });
+          }}
+          onSelectionChange={(key) => {
+            const preset = ALL_PRESETS.find((p) => {
+              return p.name === key;
+            });
 
-      {metrics.length > 0 && (
-        <Accordion variant="shadow" selectionMode="multiple">
-          {metrics.map((metric) => {
+            if (!preset) {
+              return;
+            }
+
+            onChange({ ...preset, name: preset.name.split(' (')[0] });
+          }}
+        >
+          {METRIC_PRESETS.map(({ group, presets }) => {
             return (
-              <AccordionItem
-                key={metric.id}
-                title={
-                  <span className="text-sm">
-                    {metric.name || 'Unnamed metric'}
-                  </span>
-                }
-                subtitle={
-                  <span className="text-default-400 text-xs">
-                    {METRIC_TYPE_LABELS[metric.type]}
-                  </span>
-                }
-              >
-                <div className="flex flex-col gap-3 pb-2">
-                  <Input
-                    size="sm"
-                    variant="faded"
-                    label="Metric name"
-                    value={metric.name}
-                    placeholder="e.g., Distance, Weight"
-                    onChange={(e) => {
-                      handleUpdate(metric.id, { name: e.target.value });
-                    }}
-                  />
-                  <Select
-                    size="sm"
-                    label="Type"
-                    variant="faded"
-                    selectedKeys={[metric.type]}
-                    data-testid="metric-type-select"
-                  >
-                    {(
-                      Object.entries(METRIC_TYPE_LABELS) as [
-                        MetricType,
-                        string,
-                      ][]
-                    ).map(([value, label]) => {
-                      return (
-                        <SelectItem
-                          key={value}
-                          textValue={label}
-                          onPress={() => {
-                            handleTypeChange(metric.id, value);
-                          }}
-                        >
-                          {label}
-                        </SelectItem>
-                      );
-                    })}
-                  </Select>
-
-                  <MetricConfigFields
-                    type={metric.type}
-                    config={metric.config}
-                    onChange={(config) => {
-                      handleUpdate(metric.id, { config });
-                    }}
-                  />
-
-                  <Switch
-                    size="sm"
-                    isSelected={metric.isRequired}
-                    onValueChange={(val) => {
-                      handleUpdate(metric.id, { isRequired: val });
-                    }}
-                  >
-                    <span className="text-xs">Required</span>
-                  </Switch>
-
-                  <Button
-                    size="sm"
-                    color="danger"
-                    variant="light"
-                    startContent={<TrashIcon size={14} />}
-                    onPress={() => {
-                      handleRemove(metric.id);
-                    }}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              </AccordionItem>
+              <AutocompleteSection key={group} title={group}>
+                {presets.map((preset) => {
+                  return (
+                    <AutocompleteItem key={preset.name}>
+                      {preset.name}
+                    </AutocompleteItem>
+                  );
+                })}
+              </AutocompleteSection>
             );
           })}
-        </Accordion>
-      )}
+        </Autocomplete>
+        <Input
+          size="sm"
+          variant="faded"
+          label="Metric name"
+          value={metric.name}
+          onValueChange={(name) => {
+            onChange({
+              name,
+            });
+          }}
+        />
+        <Select
+          size="sm"
+          variant="faded"
+          label="Metric type"
+          selectedKeys={[metric.type]}
+        >
+          {(Object.entries(METRIC_TYPE_LABELS) as [MetricType, string][]).map(
+            ([value, label]) => {
+              return (
+                <SelectItem
+                  key={value}
+                  textValue={label}
+                  onPress={() => {
+                    onChange({
+                      config: DEFAULT_CONFIGS[value],
+                      type: value,
+                    });
+                  }}
+                >
+                  {label}
+                </SelectItem>
+              );
+            }
+          )}
+        </Select>
 
-      <Button
-        size="sm"
-        variant="flat"
-        onPress={handleAddCustom}
-        startContent={<PlusIcon size={14} />}
-      >
-        Add custom metric
-      </Button>
+        <MetricConfigFields
+          type={metric.type}
+          config={metric.config}
+          onChange={(config) => {
+            if ('format' in config) {
+              const durationPreset = METRIC_PRESETS.find((mp) => {
+                return mp.group === 'Duration';
+              })?.presets.find((p) => {
+                return (
+                  'format' in p.config && p.config.format === config.format
+                );
+              });
+
+              if (durationPreset) {
+                return onChange({
+                  config,
+                  name: durationPreset.name,
+                });
+              }
+            }
+
+            onChange({ config });
+          }}
+        />
+
+        <Switch
+          size="sm"
+          isSelected={metric.isRequired}
+          onValueChange={(val) => {
+            onChange({ isRequired: val });
+          }}
+        >
+          <span className="text-xs">Required</span>
+        </Switch>
+
+        <Button
+          size="sm"
+          color="danger"
+          variant="light"
+          onPress={onRemove}
+          startContent={<TrashIcon size={14} />}
+        >
+          {metric.isToBeAdded ? 'Remove' : 'Discard'}
+        </Button>
+
+        <Button
+          size="sm"
+          variant="flat"
+          color="success"
+          startContent={<StackPlusIcon size={14} />}
+          onPress={() => {
+            onChange({ isBeingEdited: false, isToBeAdded: true });
+          }}
+        >
+          Done
+        </Button>
+      </div>
     </div>
   );
 };
