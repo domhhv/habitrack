@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS "public"."habits" (
     "description" "text",
     "icon_path" "text",
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "trait_id" "uuid" NOT NULL
+    "trait_id" "uuid"
 );
 
 ALTER TABLE "public"."habits" OWNER TO "postgres";

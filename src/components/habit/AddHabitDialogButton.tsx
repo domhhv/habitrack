@@ -152,6 +152,7 @@ const AddHabitDialogButton = () => {
           <ModalBody>
             <Input
               required
+              size="sm"
               value={name}
               label="Name"
               variant="faded"
@@ -159,6 +160,7 @@ const AddHabitDialogButton = () => {
               placeholder="Enter habit name"
             />
             <Textarea
+              size="sm"
               variant="faded"
               value={description}
               label="Description"
@@ -167,10 +169,14 @@ const AddHabitDialogButton = () => {
             />
             <Select
               required
+              size="sm"
+              isClearable
               variant="faded"
               label="Choose a trait"
               selectedKeys={[traitId]}
-              data-testid="habit-select"
+              onClear={() => {
+                setTraitId('');
+              }}
             >
               {Object.values(traits).map((trait) => {
                 return (
@@ -236,7 +242,12 @@ const AddHabitDialogButton = () => {
                 />
               );
             })}
-            <Button onPress={addMetric} isDisabled={isAdding}>
+            <Button
+              size="sm"
+              className="min-h-8"
+              onPress={addMetric}
+              isDisabled={isAdding}
+            >
               Add metric
             </Button>
           </ModalBody>
@@ -247,7 +258,7 @@ const AddHabitDialogButton = () => {
               color="primary"
               onPress={handleAdd}
               isLoading={isAdding}
-              isDisabled={!user?.id || !name || !traitId}
+              isDisabled={!user?.id || !name}
             >
               Submit
             </Button>

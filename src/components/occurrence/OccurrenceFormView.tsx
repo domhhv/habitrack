@@ -376,7 +376,6 @@ const OccurrenceFormView = ({
         size="sm"
         variant="faded"
         maxListboxHeight={400}
-        data-testid="habit-select"
         disableSelectorIconRotation
         selectedKeys={[selectedHabitId]}
         onChange={handleHabitSelectionChange}

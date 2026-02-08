@@ -926,31 +926,28 @@ export type Database = {
       }
     }
     Enums: {
-      metric_type: "number" | "duration" | "percentage" | "scale" | "range" | "choice" | "boolean" | "text"
       note_period_kind: "day" | "week" | "month"
+      metric_type:
+        | "number"
+        | "duration"
+        | "percentage"
+        | "scale"
+        | "range"
+        | "choice"
+        | "boolean"
+        | "text"
     }
     Functions: {
-      get_longest_streak:
-        | {
-            Args: { p_habit_id: string }
-            Returns: Database["public"]["CompositeTypes"]["streak_info"]
-            SetofOptions: {
-              from: "*"
-              isOneToOne: true
-              isSetofReturn: false
-              to: "streak_info"
-            }
-          }
-        | {
-            Args: { p_habit_id: string; p_time_zone?: string }
-            Returns: Database["public"]["CompositeTypes"]["streak_info"]
-            SetofOptions: {
-              from: "*"
-              isOneToOne: true
-              isSetofReturn: false
-              to: "streak_info"
-            }
-          }
+      get_longest_streak: {
+        Args: { p_habit_id: string; p_time_zone?: string }
+        Returns: Database["public"]["CompositeTypes"]["streak_info"]
+        SetofOptions: {
+          from: "*"
+          isOneToOne: true
+          isSetofReturn: false
+          to: "streak_info"
+        }
+      }
     }
     Tables: {
       habit_metrics: {
@@ -1007,7 +1004,7 @@ export type Database = {
           icon_path?: string | null
           id?: string
           name: string
-          trait_id: string
+          trait_id?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -1026,7 +1023,7 @@ export type Database = {
           icon_path: string | null
           id: string
           name: string
-          trait_id: string
+          trait_id: string | null
           updated_at: string | null
           user_id: string
         }
@@ -1036,7 +1033,7 @@ export type Database = {
           icon_path?: string | null
           id?: string
           name?: string
-          trait_id?: string
+          trait_id?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -1094,18 +1091,18 @@ export type Database = {
         }
         Relationships: [
           {
-            columns: ["occurrence_id"]
-            foreignKeyName: "occurrence_metric_values_occurrence_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "occurrences"
-          },
-          {
             columns: ["habit_metric_id"]
             foreignKeyName: "occurrence_metric_values_habit_metric_id_fkey"
             isOneToOne: false
             referencedColumns: ["id"]
             referencedRelation: "habit_metrics"
+          },
+          {
+            columns: ["occurrence_id"]
+            foreignKeyName: "occurrence_metric_values_occurrence_id_fkey"
+            isOneToOne: false
+            referencedColumns: ["id"]
+            referencedRelation: "occurrences"
           },
         ]
         Row: {
@@ -1133,9 +1130,9 @@ export type Database = {
           habit_id: string
           has_specific_time?: boolean
           id?: string
-          occurred_at: string
+          occurred_at?: string
           photo_paths?: string[] | null
-          time_zone: string
+          time_zone?: string
           updated_at?: string | null
           user_id: string
         }
@@ -1217,25 +1214,10 @@ export type Database = {
       extension: { Args: { name: string }; Returns: string }
       filename: { Args: { name: string }; Returns: string }
       foldername: { Args: { name: string }; Returns: string[] }
-      get_level: { Args: { name: string }; Returns: number }
-      get_prefix: { Args: { name: string }; Returns: string }
-      get_prefixes: { Args: { name: string }; Returns: string[] }
       operation: { Args: never; Returns: string }
-      add_prefixes: {
-        Args: { _bucket_id: string; _name: string }
-        Returns: undefined
-      }
       can_insert_object: {
         Args: { bucketid: string; metadata: Json; name: string; owner: string }
         Returns: undefined
-      }
-      delete_leaf_prefixes: {
-        Args: { bucket_ids: string[]; names: string[] }
-        Returns: undefined
-      }
-      delete_prefix: {
-        Args: { _bucket_id: string; _name: string }
-        Returns: boolean
       }
       get_size_by_bucket: {
         Args: never
@@ -1275,10 +1257,6 @@ export type Database = {
           updated_at: string
         }[]
       }
-      lock_top_prefixes: {
-        Args: { bucket_ids: string[]; names: string[] }
-        Returns: undefined
-      }
       search:
         | {
             Args: {
@@ -1311,85 +1289,6 @@ export type Database = {
             Returns: {
               created_at: string
               id: string
-              last_accessed_at: string
-              metadata: Json
-              name: string
-              updated_at: string
-            }[]
-          }
-      search_legacy_v1: {
-        Args: {
-          bucketname: string
-          levels?: number
-          limits?: number
-          offsets?: number
-          prefix: string
-          search?: string
-          sortcolumn?: string
-          sortorder?: string
-        }
-        Returns: {
-          created_at: string
-          id: string
-          last_accessed_at: string
-          metadata: Json
-          name: string
-          updated_at: string
-        }[]
-      }
-      search_v1_optimised: {
-        Args: {
-          bucketname: string
-          levels?: number
-          limits?: number
-          offsets?: number
-          prefix: string
-          search?: string
-          sortcolumn?: string
-          sortorder?: string
-        }
-        Returns: {
-          created_at: string
-          id: string
-          last_accessed_at: string
-          metadata: Json
-          name: string
-          updated_at: string
-        }[]
-      }
-      search_v2:
-        | {
-            Args: {
-              bucket_name: string
-              levels?: number
-              limits?: number
-              prefix: string
-              start_after?: string
-            }
-            Returns: {
-              created_at: string
-              id: string
-              key: string
-              metadata: Json
-              name: string
-              updated_at: string
-            }[]
-          }
-        | {
-            Args: {
-              bucket_name: string
-              levels?: number
-              limits?: number
-              prefix: string
-              sort_column?: string
-              sort_column_after?: string
-              sort_order?: string
-              start_after?: string
-            }
-            Returns: {
-              created_at: string
-              id: string
-              key: string
               last_accessed_at: string
               metadata: Json
               name: string
@@ -1613,7 +1512,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_accessed_at?: string | null
-          level?: number | null
           metadata?: Json | null
           name?: string | null
           owner?: string | null
@@ -1637,7 +1535,6 @@ export type Database = {
           created_at: string | null
           id: string
           last_accessed_at: string | null
-          level: number | null
           metadata: Json | null
           name: string | null
           owner: string | null
@@ -1652,7 +1549,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_accessed_at?: string | null
-          level?: number | null
           metadata?: Json | null
           name?: string | null
           owner?: string | null
@@ -1661,38 +1557,6 @@ export type Database = {
           updated_at?: string | null
           user_metadata?: Json | null
           version?: string | null
-        }
-      }
-      prefixes: {
-        Insert: {
-          bucket_id: string
-          created_at?: string | null
-          level?: number
-          name: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            columns: ["bucket_id"]
-            foreignKeyName: "prefixes_bucketId_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "buckets"
-          },
-        ]
-        Row: {
-          bucket_id: string
-          created_at: string | null
-          level: number
-          name: string
-          updated_at: string | null
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string | null
-          level?: number
-          name?: string
-          updated_at?: string | null
         }
       }
       s3_multipart_uploads: {
@@ -1985,6 +1849,16 @@ export const Constants = {
   public: {
     Enums: {
       note_period_kind: ["day", "week", "month"],
+      metric_type: [
+        "number",
+        "duration",
+        "percentage",
+        "scale",
+        "range",
+        "choice",
+        "boolean",
+        "text",
+      ],
     },
   },
   storage: {
