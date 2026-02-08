@@ -122,6 +122,7 @@ const MetricDefinitionForm = ({
             onChange({
               config: {},
               isRequired: false,
+              name: '',
               type: 'number',
             });
           }}
@@ -239,7 +240,12 @@ const MetricDefinitionForm = ({
           color="success"
           startContent={<StackPlusIcon size={14} />}
           onPress={() => {
-            onChange({ isBeingEdited: false, isToBeAdded: true });
+            onChange({
+              isBeingEdited: false,
+              ...(metric.isPersisted
+                ? { isToBeUpdated: true }
+                : { isToBeAdded: true }),
+            });
           }}
         >
           Done
