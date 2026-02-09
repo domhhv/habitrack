@@ -82,7 +82,7 @@ const App = () => {
         <NoteDrawer />
         <OccurrenceDrawer />
         <ConfirmationDialog />
-        <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 flex-col items-start">
+        <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 flex-col items-start max-md:pb-11.25">
           <Routes>
             <Route
               element={<MonthCalendarPage />}

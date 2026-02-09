@@ -1,11 +1,7 @@
 import { useDisclosure, type Selection } from '@heroui/react';
 import { cn, Button, Select, SelectItem, SelectSection } from '@heroui/react';
-import { today, getLocalTimeZone } from '@internationalized/date';
-import {
-  NotePencilIcon,
-  FunnelSimpleIcon,
-  CalendarCheckIcon,
-} from '@phosphor-icons/react';
+import { getLocalTimeZone } from '@internationalized/date';
+import { FunnelSimpleIcon } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
@@ -13,13 +9,7 @@ import { useLocation, useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
-import {
-  useUser,
-  useCalendarFilters,
-  useNoteDrawerActions,
-  useCalendarFiltersChange,
-  useOccurrenceDrawerActions,
-} from '@stores';
+import { useUser, useCalendarFilters, useCalendarFiltersChange } from '@stores';
 import { getWeeksOfYear } from '@utils';
 
 import CalendarNavigationButtons from './CalendarNavigationButtons';
@@ -65,8 +55,6 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   const { isOpen: isWeekSelectOpen, onOpenChange: onWeekSelectOpenChange } =
     useDisclosure();
   const navigate = useNavigate();
-  const { openNoteDrawer } = useNoteDrawerActions();
-  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { firstDayOfWeek } = useFirstDayOfWeek();
   const [weekSelectValue, setWeekSelectValue] = React.useState<Selection>(
     new Set([])
@@ -117,34 +105,6 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
 
   return (
     <div className="flex flex-col items-stretch justify-end gap-2 max-[445px]:gap-4 min-[446px]:flex-row lg:justify-between lg:gap-2">
-      <div className="flex w-full gap-2">
-        <Button
-          size="sm"
-          variant="flat"
-          color="secondary"
-          className="h-6 w-1/2 md:hidden"
-          onPress={() => {
-            openOccurrenceDrawer({
-              dayToLog: today(timeZone),
-            });
-          }}
-        >
-          <CalendarCheckIcon size={16} weight="bold" />
-          Log
-        </Button>
-        <Button
-          size="sm"
-          variant="flat"
-          color="secondary"
-          className="h-6 w-1/2 md:hidden"
-          onPress={() => {
-            openNoteDrawer(today(timeZone), 'day');
-          }}
-        >
-          <NotePencilIcon size={16} weight="bold" />
-          Note
-        </Button>
-      </div>
       <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
         <Select
           size="sm"

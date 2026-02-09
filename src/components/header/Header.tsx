@@ -12,7 +12,7 @@ import {
 import { Link, useLocation } from 'react-router';
 
 import { AuthModalButton } from '@components';
-import { useScreenWidth, useKeyboardShortcut } from '@hooks';
+import { useScreenWidth, useHasKeyboard, useKeyboardShortcut } from '@hooks';
 import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
 
 import ThemeToggle from './ThemeToggle';
@@ -22,6 +22,7 @@ const Header = () => {
   const { pathname } = useLocation();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
+  const hasKeyboard = useHasKeyboard();
 
   const dispatchNoteDrawerOpen = () => {
     openNoteDrawer(today(getLocalTimeZone()), 'day');
@@ -112,50 +113,72 @@ const Header = () => {
             </Tooltip>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            as={Link}
-            size="sm"
-            variant="solid"
-            target="_blank"
-            color="secondary"
-            rel="noopener noreferrer"
-            className="hidden md:inline-flex"
-            to="https://habitrack.featurebase.app/roadmap"
-          >
-            <ArrowSquareOutIcon size={16} weight="bold" />
-            Roadmap
-            <Kbd className="bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0 lg:block">
-              M
-            </Kbd>
-          </Button>
-          <Button
-            size="sm"
-            variant="solid"
-            color="secondary"
-            className="hidden md:inline-flex"
-            onPress={dispatchOccurrenceDrawerOpen}
-          >
-            <CalendarCheckIcon size={16} weight="bold" />
-            Log
-            <Kbd className="bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0 lg:block">
-              L
-            </Kbd>
-          </Button>
-          <Button
-            size="sm"
-            variant="solid"
-            color="secondary"
-            onPress={dispatchNoteDrawerOpen}
-            className="hidden md:inline-flex"
-          >
-            <NotePencilIcon size={16} weight="bold" />
-            Note
-            <Kbd className="bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0 lg:block">
-              N
-            </Kbd>
-          </Button>
-          <AuthModalButton />
+        <div className="flex gap-4">
+          <div className="bg-background-100/90 dark:bg-background-900 fixed right-0 bottom-0 left-0 z-50 flex w-full gap-4 border-t border-t-slate-300 p-2 px-4 md:right-4 md:bottom-4 md:left-auto md:w-auto md:border-0 md:bg-transparent md:p-0 xl:static xl:right-auto xl:bottom-auto xl:flex-row-reverse xl:border-0 xl:bg-transparent xl:p-0 dark:border-t-slate-800 dark:md:bg-transparent dark:xl:bg-transparent">
+            <Button
+              size="sm"
+              variant="solid"
+              color="secondary"
+              onPress={dispatchNoteDrawerOpen}
+              radius={screenWidth < 768 ? 'full' : 'sm'}
+              className="flex-1 max-md:h-6 max-md:gap-1 md:flex-none"
+            >
+              <NotePencilIcon
+                weight="bold"
+                size={screenWidth < 768 ? 12 : 16}
+              />
+              Note
+              <Kbd
+                className={cn(
+                  'bg-secondary-300 dark:bg-secondary-700 text-tiny px-1 py-0 md:text-sm',
+                  !hasKeyboard && 'hidden lg:block'
+                )}
+              >
+                N
+              </Kbd>
+            </Button>
+            <Button
+              size="sm"
+              variant="solid"
+              color="primary"
+              onPress={dispatchOccurrenceDrawerOpen}
+              radius={screenWidth < 768 ? 'full' : 'sm'}
+              className="flex-1 max-md:h-6 max-md:gap-1 md:flex-none"
+            >
+              <CalendarCheckIcon
+                weight="bold"
+                size={screenWidth < 768 ? 12 : 16}
+              />
+              Log
+              <Kbd
+                className={cn(
+                  'bg-primary-400 dark:bg-primary-700 text-tiny px-1 py-0 md:text-sm',
+                  !hasKeyboard && 'hidden lg:block'
+                )}
+              >
+                L
+              </Kbd>
+            </Button>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              as={Link}
+              size="sm"
+              variant="solid"
+              target="_blank"
+              color="secondary"
+              rel="noopener noreferrer"
+              className="hidden xl:inline-flex"
+              to="https://habitrack.featurebase.app/roadmap"
+            >
+              <ArrowSquareOutIcon size={16} weight="bold" />
+              Roadmap
+              <Kbd className="bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0 lg:block">
+                M
+              </Kbd>
+            </Button>
+            <AuthModalButton />
+          </div>
         </div>
       </div>
     </header>
