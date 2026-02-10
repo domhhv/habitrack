@@ -6,11 +6,13 @@ import {
   TableRow,
   TableBody,
   TableCell,
+  Pagination,
   TableColumn,
   TableHeader,
 } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
+import pluralize from 'pluralize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
@@ -34,6 +36,9 @@ import HabitTotalEntries from './HabitTotalEntries';
 
 const HabitsTable = () => {
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
+  const [page, setPage] = React.useState(1);
+  const rowsPerPage = 10;
+
   const dateFormatter = useDateFormatter({
     day: 'numeric',
     month: 'short',
@@ -98,14 +103,35 @@ const HabitsTable = () => {
     void handleAsyncAction(remove(), 'remove_habit');
   };
 
+  const habitsList = Object.values(habits);
+
+  const pages = Math.ceil(habitsList.length / rowsPerPage);
+
+  const paginatedHabits = React.useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    return habitsList.slice(start, end);
+  }, [page, habitsList]);
+
   return (
     <div className="w-full space-y-4 px-8 pt-4 pb-2 lg:px-16">
-      <div className="flex w-full items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-300">
-          Your habits
-        </h1>
+      <div className="space-y-1">
+        <div className="flex w-full items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-300">
+            Your habits
+          </h1>
 
-        <AddHabitDialogButton />
+          <AddHabitDialogButton />
+        </div>
+
+        {habitsList.length ? (
+          <p className="text- text-sm">
+            You&apos;re tracking {pluralize('habit', habitsList.length, true)}
+          </p>
+        ) : (
+          <p>Add a habit to start tracking</p>
+        )}
       </div>
 
       <Table
@@ -117,6 +143,21 @@ const HabitsTable = () => {
             'overflow-scroll scrollbar-hide w-full [&>div]:bg-white [&>div]:dark:bg-background-800 h-[calc(100vh-148px)] min-h-[400px]'
           ),
         }}
+        bottomContent={
+          pages > 1 ? (
+            <div className="flex w-full justify-center">
+              <Pagination
+                isCompact
+                showShadow
+                page={page}
+                showControls
+                total={pages}
+                color="primary"
+                onChange={setPage}
+              />
+            </div>
+          ) : null
+        }
       >
         <TableHeader columns={habitColumns}>
           {(column) => {
@@ -132,7 +173,7 @@ const HabitsTable = () => {
           }}
         </TableHeader>
         <TableBody aria-label="Habits data" emptyContent="No habits yet">
-          {Object.values(habits).map((habit) => {
+          {paginatedHabits.map((habit) => {
             return (
               <TableRow
                 key={habit.id}
