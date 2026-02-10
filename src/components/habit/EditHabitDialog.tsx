@@ -109,7 +109,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
 
       const metricsToAdd = metricDefinitions
         .filter((md) => {
-          return md.isToBeAdded;
+          return md.isToBeAdded && !md.isToBeRemoved;
         })
         .map((metric) => {
           return {
@@ -124,7 +124,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
         });
 
       const metricsToUpdate = metricDefinitions.filter((md) => {
-        return md.isToBeUpdated;
+        return md.isToBeUpdated && !md.isToBeRemoved;
       });
 
       if (metricsToAdd.length > 0) {
