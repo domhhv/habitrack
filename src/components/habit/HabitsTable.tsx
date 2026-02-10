@@ -136,9 +136,10 @@ const HabitsTable = () => {
             return (
               <TableRow
                 key={habit.id}
+                className="hover:bg-content2"
                 aria-labelledby={`habit-name-${habit.id}`}
               >
-                <TableCell className="w-10">
+                <TableCell className="w-10 rounded-l-md">
                   <HabitIcon habit={habit} />
                 </TableCell>
                 <TableCell>
@@ -169,7 +170,7 @@ const HabitsTable = () => {
                 >
                   <HabitTotalEntries id={habit.id} />
                 </TableCell>
-                <TableCell aria-label="Actions">
+                <TableCell aria-label="Actions" className="rounded-r-md">
                   <div
                     role="group"
                     className="flex justify-end gap-2"
