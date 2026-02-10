@@ -40,7 +40,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   >([]);
 
   const { updateHabit } = useHabitActions();
-  const { addHabitMetrics, removeHabitMetric, updateHabitMetric } =
+  const { addHabitMetrics, removeHabitMetrics, updateHabitMetric } =
     useMetricsActions();
   const traits = useTraits();
   const { user } = useUser();
@@ -95,16 +95,16 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
         traitId: traitId || null,
       });
 
-      const metricsToRemove = metricDefinitions.filter((md) => {
-        return md.isToBeRemoved;
-      });
+      const metricsToRemove = metricDefinitions
+        .filter((md) => {
+          return md.isToBeRemoved;
+        })
+        .map((md) => {
+          return md.id;
+        });
 
-      if (metricsToRemove.length) {
-        await Promise.all(
-          metricsToRemove.map(({ id }) => {
-            return removeHabitMetric(id, habit.id);
-          })
-        );
+      if (metricsToRemove.length > 0) {
+        await removeHabitMetrics(metricsToRemove, habit.id);
       }
 
       const metricsToAdd = metricDefinitions
