@@ -1,4 +1,5 @@
 import { Chip, Slider, Switch, Textarea, NumberInput } from '@heroui/react';
+import React from 'react';
 
 import type {
   MetricType,
@@ -270,6 +271,18 @@ const RangeValueInput = ({
 
   const defaultValue = getDefaultValue();
 
+  React.useEffect(() => {
+    if (
+      value === undefined &&
+      (defaultValue.rangeFrom !== 0 || defaultValue.rangeTo !== 0)
+    ) {
+      onChange({
+        rangeFrom: defaultValue.rangeFrom,
+        rangeTo: defaultValue.rangeTo,
+      });
+    }
+  }, [defaultValue.rangeFrom, defaultValue.rangeTo, onChange, value]);
+
   return (
     <div>
       <p className="mb-2 text-sm">{name}</p>
@@ -277,9 +290,9 @@ const RangeValueInput = ({
         <NumberInput
           size="sm"
           variant="faded"
+          aria-label="From"
           minValue={config.min}
           maxValue={config.max}
-          labelPlacement="outside"
           description={config.unit && `${config.unit} from`}
           value={value?.rangeFrom ?? defaultValue.rangeFrom}
           onValueChange={(v) => {
@@ -292,9 +305,9 @@ const RangeValueInput = ({
         <NumberInput
           size="sm"
           variant="faded"
+          aria-label="To"
           minValue={config.min}
           maxValue={config.max}
-          labelPlacement="outside"
           value={value?.rangeTo ?? defaultValue.rangeTo}
           description={config.unit && `${config.unit} to`}
           onValueChange={(v) => {
