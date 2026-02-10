@@ -6,6 +6,7 @@ type MetricValuesState = Record<string, MetricValue | undefined>;
 
 type MetricValuesSectionProps = {
   metricDefinitions: Habit['metricDefinitions'];
+  previousValues?: MetricValuesState;
   values: MetricValuesState;
   onChange: (values: MetricValuesState) => void;
 };
@@ -13,6 +14,7 @@ type MetricValuesSectionProps = {
 const MetricValuesSection = ({
   metricDefinitions,
   onChange,
+  previousValues,
   values,
 }: MetricValuesSectionProps) => {
   if (metricDefinitions.length === 0) {
@@ -30,6 +32,7 @@ const MetricValuesSection = ({
             type={metric.type}
             value={values[metric.id]}
             config={metric.config as MetricConfig}
+            previousValue={previousValues?.[metric.id]}
             onChange={(val) => {
               onChange({ ...values, [metric.id]: val });
             }}

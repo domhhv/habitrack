@@ -164,16 +164,33 @@ const RangeConfigFields = ({
   onChange: (config: RangeMetricConfig) => void;
 }) => {
   return (
-    <Input
-      size="sm"
-      label="Unit"
-      variant="faded"
-      value={config.unit || ''}
-      placeholder="e.g., pages, reps"
-      onChange={(e) => {
-        onChange({ ...config, unit: e.target.value || undefined });
-      }}
-    />
+    <div className="flex flex-col gap-2">
+      <Input
+        size="sm"
+        label="Unit"
+        variant="faded"
+        value={config.unit || ''}
+        placeholder="e.g., pages, reps"
+        onChange={(e) => {
+          onChange({ ...config, unit: e.target.value || undefined });
+        }}
+      />
+      <Switch
+        size="sm"
+        isSelected={config.continueFromLast || false}
+        onValueChange={(val) => {
+          onChange({ ...config, continueFromLast: val });
+        }}
+      >
+        <span className="text-xs">Continue from last value</span>
+      </Switch>
+      {config.continueFromLast && (
+        <p className="text-foreground-500 text-xs">
+          When logging, range values will start from where you left off in the
+          previous entry
+        </p>
+      )}
+    </div>
   );
 };
 

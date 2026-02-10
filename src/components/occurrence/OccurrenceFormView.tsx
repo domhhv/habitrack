@@ -12,17 +12,15 @@ import {
 } from '@heroui/react';
 import {
   now,
-  today,
   toZoned,
   isToday,
-  fromDate,
   isSameDay,
   toTimeZone,
   ZonedDateTime,
+  parseAbsolute,
   getLocalTimeZone,
   type CalendarDate,
   toCalendarDateTime,
-  type CalendarDateTime,
 } from '@internationalized/date';
 import { ArrowsClockwiseIcon } from '@phosphor-icons/react';
 import groupBy from 'lodash.groupby';
@@ -35,7 +33,7 @@ import { SignedImageViewer, MetricValuesSection } from '@components';
 import { useTextField, useScreenWidth } from '@hooks';
 import type { Habit, Occurrence, MetricValue } from '@models';
 import { StorageBuckets } from '@models';
-import { getPublicUrl, getLatestHabitOccurrenceTimestamp } from '@services';
+import { getPublicUrl, getLatestHabitOccurrence } from '@services';
 
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 
@@ -81,7 +79,10 @@ const OccurrenceFormView = ({
     React.useState(false);
   const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
   const [lastOccurredAt, setLastOccurredAt] =
-    React.useState<CalendarDateTime | null>(null);
+    React.useState<ZonedDateTime | null>(null);
+  const [previousMetricValues, setPreviousMetricValues] = React.useState<
+    Record<string, MetricValue | undefined>
+  >({});
   const { isDesktop, isMobile } = useScreenWidth();
   const [metricValues, setMetricValues] = React.useState<
     Record<string, MetricValue | undefined>
@@ -144,26 +145,47 @@ const OccurrenceFormView = ({
       return;
     }
 
-    if (
-      !selectedHabitId ||
-      !dayToLog ||
-      !isSameDay(dayToLog, today(timeZone))
-    ) {
+    if (!selectedHabitId || !dayToLog) {
       setLastOccurredAt(null);
+      setPreviousMetricValues({});
 
       return;
     }
 
-    getLatestHabitOccurrenceTimestamp(selectedHabitId)
-      .then((timestamp) => {
-        setLastOccurredAt(
-          timestamp
-            ? toCalendarDateTime(fromDate(new Date(timestamp), timeZone))
-            : null
+    getLatestHabitOccurrence(selectedHabitId)
+      .then((occurrence) => {
+        if (!occurrence) {
+          setLastOccurredAt(null);
+          setPreviousMetricValues({});
+
+          return;
+        }
+
+        const lastOccurrenceZdt = parseAbsolute(
+          occurrence.occurredAt,
+          timeZone
         );
+
+        if (dayToLog.compare(lastOccurrenceZdt) < 0) {
+          setLastOccurredAt(null);
+          setPreviousMetricValues({});
+
+          return;
+        }
+
+        setLastOccurredAt(parseAbsolute(occurrence.occurredAt, timeZone));
+
+        const prevMetrics: Record<string, MetricValue | undefined> = {};
+
+        for (const mv of occurrence.metricValues) {
+          prevMetrics[mv.habitMetricId] = mv.value as MetricValue;
+        }
+
+        setPreviousMetricValues(prevMetrics);
       })
       .catch(() => {
         setLastOccurredAt(null);
+        setPreviousMetricValues({});
       });
   }, [occurrenceToEdit, selectedHabitId, dayToLog, timeZone]);
 
@@ -341,15 +363,12 @@ const OccurrenceFormView = ({
     setMetricValues({});
   };
 
-  const formatDistanceToNow = (date: CalendarDateTime) => {
-    const dateZ = toZoned(date, timeZone);
+  const formatDistanceToNow = (date: ZonedDateTime) => {
+    const diffMs = now(timeZone).toDate().getTime() - date.toDate().getTime();
 
-    const nowZ = now(timeZone);
-    const diffMs = nowZ.toDate().getTime() - dateZ.toDate().getTime();
+    const isYesterday = isSameDay(date, now(timeZone).subtract({ days: 1 }));
 
-    const isYesterday = isSameDay(dateZ, now(timeZone).subtract({ days: 1 }));
-
-    if (isYesterday || isToday(dateZ, timeZone)) {
+    if (isYesterday || isToday(date, timeZone)) {
       const hoursDifference = Math.floor(diffMs / (1000 * 60 * 60));
 
       if (hoursDifference < 1) {
@@ -432,6 +451,7 @@ const OccurrenceFormView = ({
         values={metricValues}
         onChange={setMetricValues}
         metricDefinitions={metricDefinitions}
+        previousValues={previousMetricValues}
       />
       <Textarea
         value={note}

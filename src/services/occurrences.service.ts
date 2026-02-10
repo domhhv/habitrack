@@ -131,6 +131,33 @@ export const getLatestHabitOccurrenceTimestamp = async (
   return Number(new Date(occurred_at));
 };
 
+export const getLatestHabitOccurrence = async (habitId: Habit['id']) => {
+  const { data, error } = await supabaseClient
+    .from('occurrences')
+    .select(
+      `
+      *,
+      habit:habits(name, icon_path, trait:traits(id, name, color),
+      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)),
+      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id)
+    `
+    )
+    .eq('habit_id', habitId)
+    .lt('occurred_at', new Date().toISOString())
+    .limit(1)
+    .order('occurred_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.length) {
+    return null;
+  }
+
+  return deepCamelcaseKeys<RawOccurrence>(data[0]);
+};
+
 export const getLongestHabitStreak = async (
   habitId: Habit['id']
 ): Promise<Streak> => {

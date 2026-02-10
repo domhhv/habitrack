@@ -23,6 +23,7 @@ import type {
 type MetricValueInputProps = {
   config: MetricConfig;
   name: string;
+  previousValue?: MetricValue;
   type: MetricType;
   value: MetricValue | undefined;
   onChange: (value: MetricValue | undefined) => void;
@@ -237,45 +238,70 @@ const RangeValueInput = ({
   config,
   name,
   onChange,
+  previousValue,
   value,
 }: {
   config: RangeMetricConfig;
   name: string;
+  previousValue?: RangeMetricValue;
   value: RangeMetricValue | undefined;
   onChange: (value: RangeMetricValue | undefined) => void;
 }) => {
-  const label = config.unit ? `${name} (${config.unit})` : name;
+  const getDefaultValue = () => {
+    if (value !== undefined) {
+      return value;
+    }
+
+    if (
+      config.continueFromLast &&
+      previousValue &&
+      'rangeTo' in previousValue
+    ) {
+      const nextValue = previousValue.rangeTo + 1;
+
+      return { rangeFrom: nextValue, rangeTo: nextValue };
+    }
+
+    return { rangeFrom: 0, rangeTo: 0 };
+  };
+
+  const defaultValue = getDefaultValue();
 
   return (
-    <div className="flex gap-2">
-      <NumberInput
-        size="sm"
-        variant="faded"
-        minValue={config.min}
-        maxValue={config.max}
-        label={`${label} from`}
-        value={value?.rangeFrom ?? 0}
-        onValueChange={(v) => {
-          onChange({
-            rangeFrom: isNaN(v) ? 0 : v,
-            rangeTo: value?.rangeTo ?? 0,
-          });
-        }}
-      />
-      <NumberInput
-        size="sm"
-        variant="faded"
-        label={`${label} to`}
-        minValue={config.min}
-        maxValue={config.max}
-        value={value?.rangeTo ?? 0}
-        onValueChange={(v) => {
-          onChange({
-            rangeFrom: value?.rangeFrom ?? 0,
-            rangeTo: isNaN(v) ? 0 : v,
-          });
-        }}
-      />
+    <div>
+      <p className="mb-2 text-sm">{name}</p>
+      <div className="flex gap-2">
+        <NumberInput
+          size="sm"
+          variant="faded"
+          minValue={config.min}
+          maxValue={config.max}
+          labelPlacement="outside"
+          description={config.unit && `${config.unit} from`}
+          value={value?.rangeFrom ?? defaultValue.rangeFrom}
+          onValueChange={(v) => {
+            onChange({
+              rangeFrom: isNaN(v) ? 0 : v,
+              rangeTo: value?.rangeTo ?? defaultValue.rangeTo,
+            });
+          }}
+        />
+        <NumberInput
+          size="sm"
+          variant="faded"
+          minValue={config.min}
+          maxValue={config.max}
+          labelPlacement="outside"
+          value={value?.rangeTo ?? defaultValue.rangeTo}
+          description={config.unit && `${config.unit} to`}
+          onValueChange={(v) => {
+            onChange({
+              rangeFrom: value?.rangeFrom ?? defaultValue.rangeFrom,
+              rangeTo: isNaN(v) ? 0 : v,
+            });
+          }}
+        />
+      </div>
     </div>
   );
 };
@@ -401,6 +427,7 @@ const MetricValueInput = ({
   config,
   name,
   onChange,
+  previousValue,
   type,
   value,
 }: MetricValueInputProps) => {
@@ -451,6 +478,7 @@ const MetricValueInput = ({
           onChange={onChange}
           config={config as RangeMetricConfig}
           value={value as RangeMetricValue | undefined}
+          previousValue={previousValue as RangeMetricValue | undefined}
         />
       );
 

@@ -26,6 +26,7 @@ export type ScaleMetricConfig = {
 };
 
 export type RangeMetricConfig = {
+  continueFromLast?: boolean;
   max?: number;
   min?: number;
   unit?: string;
