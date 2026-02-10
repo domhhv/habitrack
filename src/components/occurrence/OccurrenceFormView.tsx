@@ -173,7 +173,7 @@ const OccurrenceFormView = ({
           return;
         }
 
-        setLastOccurredAt(parseAbsolute(occurrence.occurredAt, timeZone));
+        setLastOccurredAt(lastOccurrenceZdt);
 
         const prevMetrics: Record<string, MetricValue | undefined> = {};
 

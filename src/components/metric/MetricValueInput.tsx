@@ -257,7 +257,10 @@ const RangeValueInput = ({
       previousValue &&
       'rangeTo' in previousValue
     ) {
-      const nextValue = previousValue.rangeTo + 1;
+      const nextValue =
+        config.max != null
+          ? Math.min(previousValue.rangeTo + 1, config.max)
+          : previousValue.rangeTo + 1;
 
       return { rangeFrom: nextValue, rangeTo: nextValue };
     }
