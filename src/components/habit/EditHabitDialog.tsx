@@ -40,7 +40,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   >([]);
 
   const { updateHabit } = useHabitActions();
-  const { addHabitMetric, removeHabitMetric, updateHabitMetric } =
+  const { addHabitMetrics, removeHabitMetric, updateHabitMetric } =
     useMetricsActions();
   const traits = useTraits();
   const { user } = useUser();
@@ -107,21 +107,33 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
         );
       }
 
-      await Promise.all(
-        metricDefinitions.map((metric) => {
-          if (metric.isToBeAdded) {
-            return addHabitMetric({
-              config: metric.config,
-              habitId: habit.id,
-              isRequired: metric.isRequired,
-              name: metric.name,
-              sortOrder: metric.sortOrder,
-              type: metric.type,
-              userId: user.id,
-            });
-          }
+      const metricsToAdd = metricDefinitions
+        .filter((md) => {
+          return md.isToBeAdded;
+        })
+        .map((metric) => {
+          return {
+            config: metric.config,
+            habitId: habit.id,
+            isRequired: metric.isRequired,
+            name: metric.name,
+            sortOrder: metric.sortOrder,
+            type: metric.type,
+            userId: user.id,
+          };
+        });
 
-          if (metric.isToBeUpdated) {
+      const metricsToUpdate = metricDefinitions.filter((md) => {
+        return md.isToBeUpdated;
+      });
+
+      if (metricsToAdd.length > 0) {
+        await addHabitMetrics(metricsToAdd);
+      }
+
+      if (metricsToUpdate.length > 0) {
+        await Promise.all(
+          metricsToUpdate.map((metric) => {
             return updateHabitMetric(metric.id, {
               config: metric.config,
               isRequired: metric.isRequired,
@@ -129,9 +141,9 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
               sortOrder: metric.sortOrder,
               type: metric.type,
             });
-          }
-        })
-      );
+          })
+        );
+      }
     };
 
     void handleAsyncAction(submit(), 'update_habit', setIsUpdating).then(
