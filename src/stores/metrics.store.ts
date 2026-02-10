@@ -9,7 +9,7 @@ import type {
 } from '@models';
 import {
   patchHabitMetric,
-  createHabitMetric,
+  createHabitMetrics,
   destroyHabitMetric,
   destroyMetricValue,
   upsertMetricValues,
@@ -19,7 +19,7 @@ import { useBoundStore, type SliceCreator } from './bound.store';
 
 export type MetricsSlice = {
   metricsActions: {
-    addHabitMetric: (metric: HabitMetricInsert) => Promise<HabitMetric>;
+    addHabitMetrics: (metrics: HabitMetricInsert[]) => Promise<HabitMetric[]>;
     removeHabitMetric: (id: string, habitId: string) => Promise<void>;
     removeMetricValue: (
       occurrenceId: string,
@@ -35,32 +35,38 @@ export type MetricsSlice = {
 export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
   return {
     metricsActions: {
-      addHabitMetric: async (metric: HabitMetricInsert) => {
-        const newMetric = await createHabitMetric(metric);
+      addHabitMetrics: async (metrics: HabitMetricInsert[]) => {
+        if (metrics.length === 0) {
+          return [];
+        }
+
+        const newMetrics = await createHabitMetrics(metrics);
 
         set((state) => {
-          state.habits[newMetric.habitId].metricDefinitions.push(newMetric);
+          for (const newMetric of newMetrics) {
+            state.habits[newMetric.habitId].metricDefinitions.push(newMetric);
 
-          const habitOccurrences = state.occurrences.filter((occ) => {
-            return occ.habitId === newMetric.habitId;
-          });
+            const habitOccurrences = state.occurrences.filter((occ) => {
+              return occ.habitId === newMetric.habitId;
+            });
 
-          for (const occurrence of habitOccurrences) {
-            occurrence.habit.metricDefinitions.push(newMetric);
-            const occurrenceInDateMap =
-              state.occurrencesByDate[
-                toCalendarDate(occurrence.occurredAt).toString()
-              ];
+            for (const occurrence of habitOccurrences) {
+              occurrence.habit.metricDefinitions.push(newMetric);
+              const occurrenceInDateMap =
+                state.occurrencesByDate[
+                  toCalendarDate(occurrence.occurredAt).toString()
+                ];
 
-            if (occurrenceInDateMap && occurrenceInDateMap[occurrence.id]) {
-              occurrenceInDateMap[occurrence.id].habit.metricDefinitions.push(
-                newMetric
-              );
+              if (occurrenceInDateMap && occurrenceInDateMap[occurrence.id]) {
+                occurrenceInDateMap[occurrence.id].habit.metricDefinitions.push(
+                  newMetric
+                );
+              }
             }
           }
         });
 
-        return newMetric;
+        return newMetrics;
       },
 
       removeHabitMetric: async (id: string, habitId: string) => {

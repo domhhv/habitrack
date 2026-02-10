@@ -9,20 +9,23 @@ import type {
 } from '@models';
 import { supabaseClient, deepCamelcaseKeys, deepCamelcaseArray } from '@utils';
 
-export const createHabitMetric = async (
-  body: HabitMetricInsert
-): Promise<HabitMetric> => {
+export const createHabitMetrics = async (
+  metrics: HabitMetricInsert[]
+): Promise<HabitMetric[]> => {
+  if (metrics.length === 0) {
+    return [];
+  }
+
   const { data, error } = await supabaseClient
     .from('habit_metrics')
-    .insert(decamelizeKeys(body))
-    .select()
-    .single();
+    .insert(decamelizeKeys(metrics))
+    .select();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return deepCamelcaseKeys<HabitMetric>(data);
+  return deepCamelcaseArray<HabitMetric>(data);
 };
 
 export const patchHabitMetric = async (

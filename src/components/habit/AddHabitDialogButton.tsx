@@ -40,7 +40,7 @@ const AddHabitDialogButton = () => {
   const traits = useTraits();
   const { user } = useUser();
   const { addHabit } = useHabitActions();
-  const { addHabitMetric } = useMetricsActions();
+  const { addHabitMetrics } = useMetricsActions();
   const [icon, handleIconChange, clearIcon] = useFileField();
   const [name, handleNameChange, clearName] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
@@ -83,14 +83,14 @@ const AddHabitDialogButton = () => {
         description,
         iconPath,
         name,
-        traitId,
+        traitId: traitId || null,
         userId: user.id,
       });
 
       if (metricDefinitions.length > 0) {
-        await Promise.all(
+        await addHabitMetrics(
           metricDefinitions.map((metric) => {
-            return addHabitMetric({
+            return {
               config: metric.config,
               habitId: habit.id,
               isRequired: metric.isRequired,
@@ -98,7 +98,7 @@ const AddHabitDialogButton = () => {
               sortOrder: metric.sortOrder,
               type: metric.type,
               userId: user.id,
-            });
+            };
           })
         );
       }
