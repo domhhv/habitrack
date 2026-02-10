@@ -10,9 +10,9 @@ import type {
 import {
   patchHabitMetric,
   createHabitMetrics,
-  destroyHabitMetric,
-  destroyMetricValue,
   upsertMetricValues,
+  destroyMetricValue,
+  destroyHabitMetrics,
 } from '@services';
 
 import { useBoundStore, type SliceCreator } from './bound.store';
@@ -20,7 +20,7 @@ import { useBoundStore, type SliceCreator } from './bound.store';
 export type MetricsSlice = {
   metricsActions: {
     addHabitMetrics: (metrics: HabitMetricInsert[]) => Promise<HabitMetric[]>;
-    removeHabitMetric: (id: string, habitId: string) => Promise<void>;
+    removeHabitMetrics: (ids: string[], habitId: string) => Promise<void>;
     removeMetricValue: (
       occurrenceId: string,
       habitMetricId: string
@@ -69,14 +69,18 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
         return newMetrics;
       },
 
-      removeHabitMetric: async (id: string, habitId: string) => {
-        await destroyHabitMetric(id);
+      removeHabitMetrics: async (ids: string[], habitId: string) => {
+        if (ids.length === 0) {
+          return;
+        }
+
+        await destroyHabitMetrics(ids);
 
         set((state) => {
           const habit = state.habits[habitId];
 
           habit.metricDefinitions = habit.metricDefinitions.filter((m) => {
-            return m.id !== id;
+            return !ids.includes(m.id);
           });
 
           const habitOccurrences = state.occurrences.filter((occ) => {
@@ -85,11 +89,11 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
 
           for (const occurrence of habitOccurrences) {
             occurrence.metricValues = occurrence.metricValues.filter((mv) => {
-              return mv.habitMetricId !== id;
+              return !ids.includes(mv.habitMetricId);
             });
             occurrence.habit.metricDefinitions =
               occurrence.habit.metricDefinitions.filter((m) => {
-                return m.id !== id;
+                return !ids.includes(m.id);
               });
 
             const occurrenceInDateMap =
@@ -100,14 +104,14 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
             if (occurrenceInDateMap && occurrenceInDateMap[occurrence.id]) {
               occurrenceInDateMap[occurrence.id].metricValues =
                 occurrenceInDateMap[occurrence.id].metricValues.filter((mv) => {
-                  return mv.habitMetricId !== id;
+                  return !ids.includes(mv.habitMetricId);
                 });
 
               occurrenceInDateMap[occurrence.id].habit.metricDefinitions =
                 occurrenceInDateMap[
                   occurrence.id
                 ].habit.metricDefinitions.filter((m) => {
-                  return m.id !== id;
+                  return !ids.includes(m.id);
                 });
             }
           }
