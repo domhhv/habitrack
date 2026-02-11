@@ -14,6 +14,7 @@ import { useBoundStore, type SliceCreator } from './bound.store';
 
 export type HabitsSlice = {
   habits: Record<Habit['id'], Habit>;
+  isFetchingHabits: boolean;
   habitActions: {
     addHabit: (habit: HabitsInsert) => Promise<Habit>;
     clearHabits: () => void;
@@ -26,6 +27,7 @@ export type HabitsSlice = {
 export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
   return {
     habits: {},
+    isFetchingHabits: true,
 
     habitActions: {
       addHabit: async (habit: HabitsInsert) => {
@@ -49,6 +51,7 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
         const habits = await listHabits();
 
         set((state) => {
+          state.isFetchingHabits = false;
           const prevHabitIds = state.calendarFilters.habitIds;
           const nextHabitIds = habits.map((habit) => {
             return habit.id;
@@ -94,6 +97,12 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
 export const useHabits = () => {
   return useBoundStore((state) => {
     return state.habits;
+  });
+};
+
+export const useIsFetchingHabits = () => {
+  return useBoundStore((state) => {
+    return state.isFetchingHabits;
   });
 };
 
