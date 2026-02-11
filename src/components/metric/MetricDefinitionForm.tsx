@@ -61,7 +61,7 @@ const MetricDefinitionForm = ({
 }: MetricDefinitionFormProps) => {
   if (!metric.isBeingEdited) {
     return (
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-16">
         <div>
           <div className="flex items-center gap-2">
             <h3>{metric.name}</h3>

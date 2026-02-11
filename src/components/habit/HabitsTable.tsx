@@ -15,6 +15,7 @@ import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import pluralize from 'pluralize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
+import { Link } from 'react-router';
 
 import { TraitChip, EditHabitDialog, AddHabitDialogButton } from '@components';
 import type { Habit } from '@models';
@@ -184,9 +185,13 @@ const HabitsTable = () => {
                   <HabitIcon habit={habit} />
                 </TableCell>
                 <TableCell>
-                  <h6 className="font-semibold" id={`habit-name-${habit.id}`}>
+                  <Link
+                    className="font-semibold"
+                    to={`/habits/${habit.id}`}
+                    id={`habit-name-${habit.id}`}
+                  >
                     {habit.name}
-                  </h6>
+                  </Link>
                   {habit.description && (
                     <p className="text-left text-xs">
                       <i>{habit.description}</i>

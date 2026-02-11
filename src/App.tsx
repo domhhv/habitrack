@@ -23,6 +23,7 @@ import {
   AccountPage,
   DayCalendarPage,
   WeekCalendarPage,
+  HabitDetailsPage,
   MonthCalendarPage,
 } from '@pages';
 import { getErrorMessage } from '@utils';
@@ -97,6 +98,7 @@ const App = () => {
               path="/calendar/week/:year?/:month?/:day?"
             />
             <Route path="/habits" element={<HabitsPage />} />
+            <Route path="/habits/:habitId" element={<HabitDetailsPage />} />
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route
