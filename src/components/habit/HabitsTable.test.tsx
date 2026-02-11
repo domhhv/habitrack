@@ -1,5 +1,6 @@
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { BrowserRouter } from 'react-router';
 import { it, vi, expect, describe } from 'vitest';
 
 import { useHabits, useTraits } from '@stores';
@@ -82,7 +83,11 @@ describe(HabitsTable.name, () => {
         };
       }
     );
-    const { getAllByRole, getByText } = render(<HabitsTable />);
+    const { getAllByRole, getByText } = render(
+      <BrowserRouter>
+        <HabitsTable />
+      </BrowserRouter>
+    );
     await waitFor(() => {
       expect(getByText('Habit name #1'));
       expect(getByText('Habit name #2'));
@@ -137,7 +142,9 @@ describe(HabitsTable.name, () => {
       }
     );
     const { getAllByRole, getByRole, getByTestId, queryByRole } = render(
-      <HabitsTable />
+      <BrowserRouter>
+        <HabitsTable />
+      </BrowserRouter>
     );
 
     const editButtons = getAllByRole('edit-habit-button');
