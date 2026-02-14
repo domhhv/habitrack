@@ -18,6 +18,18 @@ CREATE TYPE "public"."streak_info" AS (
 
 ALTER TYPE "public"."streak_info" OWNER TO "postgres";
 
+-- Type for batched habit statistics
+CREATE TYPE "public"."habit_stats" AS (
+    "habit_id" "uuid",
+    "last_entry_at" timestamptz,
+    "longest_streak_length" integer,
+    "longest_streak_start" "date",
+    "longest_streak_end" "date",
+    "total_entries" bigint
+);
+
+ALTER TYPE "public"."habit_stats" OWNER TO "postgres";
+
 -- Type for habit metric kind
 CREATE TYPE "public"."metric_type" AS ENUM (
     'number',

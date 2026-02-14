@@ -12,11 +12,11 @@ const options: Intl.DateTimeFormatOptions = {
 const dateTimeFormat = new Intl.DateTimeFormat('en', options);
 
 type HabitLongestStreakProps = {
-  streak: Streak | undefined;
+  streak: Streak;
 };
 
 const HabitLongestStreak = ({ streak }: HabitLongestStreakProps) => {
-  if (!streak?.streakLength || !streak.streakStart || !streak.streakEnd) {
+  if (!streak.streakLength || !streak.streakStart || !streak.streakEnd) {
     return <span className="text-gray-400">None</span>;
   }
 

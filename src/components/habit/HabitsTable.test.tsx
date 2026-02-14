@@ -10,9 +10,7 @@ import HabitsTable from './HabitsTable';
 
 vi.mock('@services', () => {
   return {
-    getHabitTotalEntries: vi.fn().mockResolvedValue(0),
-    getLatestHabitOccurrenceTimestamp: vi.fn().mockResolvedValue(0),
-    getLongestHabitStreak: vi.fn().mockResolvedValue(0),
+    getHabitsStats: vi.fn().mockResolvedValue([]),
     getPublicUrl: vi.fn(),
     listHabits: vi.fn().mockReturnValue(() => {
       return [];
@@ -67,22 +65,18 @@ vi.mock('@hooks', () => {
 
 describe(HabitsTable.name, () => {
   it('should display habits', async () => {
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      () => {
-        return {
-          '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa': makeTestHabit({
-            description: 'Habit description #1',
-            id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
-            name: 'Habit name #1',
-          }),
-          '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab': makeTestHabit({
-            description: 'Habit description #2',
-            id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
-            name: 'Habit name #2',
-          }),
-        };
-      }
-    );
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa': makeTestHabit({
+        description: 'Habit description #1',
+        id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
+        name: 'Habit name #1',
+      }),
+      '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab': makeTestHabit({
+        description: 'Habit description #2',
+        id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
+        name: 'Habit name #2',
+      }),
+    });
     const { getAllByRole, getByText } = render(
       <BrowserRouter>
         <HabitsTable />
@@ -123,24 +117,20 @@ describe(HabitsTable.name, () => {
         name: 'Trait name #1',
       }),
     });
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      () => {
-        return {
-          '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa': makeTestHabit({
-            description: 'Habit description #1',
-            id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
-            name: 'Habit name #1',
-            traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
-          }),
-          '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab': makeTestHabit({
-            description: 'Habit description #2',
-            id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
-            name: 'Habit name #2',
-            traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
-          }),
-        };
-      }
-    );
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa': makeTestHabit({
+        description: 'Habit description #1',
+        id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
+        name: 'Habit name #1',
+        traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
+      }),
+      '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab': makeTestHabit({
+        description: 'Habit description #2',
+        id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
+        name: 'Habit name #2',
+        traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
+      }),
+    });
     const { getAllByRole, getByRole, getByTestId, queryByRole } = render(
       <BrowserRouter>
         <HabitsTable />

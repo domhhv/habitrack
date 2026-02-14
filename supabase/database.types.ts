@@ -919,6 +919,14 @@ export type Database = {
   }
   public: {
     CompositeTypes: {
+      habit_stats: {
+        habit_id: string | null
+        last_entry_at: string | null
+        longest_streak_end: string | null
+        longest_streak_length: number | null
+        longest_streak_start: string | null
+        total_entries: number | null
+      }
       streak_info: {
         streak_end: string | null
         streak_length: number | null
@@ -938,6 +946,16 @@ export type Database = {
         | "text"
     }
     Functions: {
+      get_habits_stats: {
+        Args: { p_habit_ids: string[]; p_time_zone?: string }
+        Returns: Database["public"]["CompositeTypes"]["habit_stats"][]
+        SetofOptions: {
+          from: "*"
+          isOneToOne: false
+          isSetofReturn: true
+          to: "habit_stats"
+        }
+      }
       get_longest_streak: {
         Args: { p_habit_id: string; p_time_zone?: string }
         Returns: Database["public"]["CompositeTypes"]["streak_info"]

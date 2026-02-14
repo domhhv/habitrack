@@ -107,30 +107,6 @@ export const destroyOccurrence = async ({
   }
 };
 
-export const getLatestHabitOccurrenceTimestamp = async (
-  habitId: Habit['id']
-) => {
-  const { data, error } = await supabaseClient
-    .from('occurrences')
-    .select('occurred_at')
-    .eq('habit_id', habitId)
-    .lt('occurred_at', new Date().toISOString())
-    .limit(1)
-    .order('occurred_at', { ascending: false });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  if (!data?.length) {
-    return 0;
-  }
-
-  const [{ occurred_at }] = data;
-
-  return Number(new Date(occurred_at));
-};
-
 export const getLatestHabitOccurrence = async (habitId: Habit['id']) => {
   const { data, error } = await supabaseClient
     .from('occurrences')
@@ -173,18 +149,15 @@ export const getLongestHabitStreak = async (
   return camelcaseKeys(data, { deep: true });
 };
 
-export const getHabitTotalEntries = async (habitId: Habit['id']) => {
-  const { count, error } = await supabaseClient
-    .from('occurrences')
-    .select('*', {
-      count: 'exact',
-      head: true,
-    })
-    .eq('habit_id', habitId);
+export const getHabitsStats = async (habitIds: Habit['id'][]) => {
+  const { data, error } = await supabaseClient.rpc('get_habits_stats', {
+    p_habit_ids: habitIds,
+    p_time_zone: getLocalTimeZone(),
+  });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return count;
+  return camelcaseKeys(data);
 };

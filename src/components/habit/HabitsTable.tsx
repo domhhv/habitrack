@@ -18,15 +18,9 @@ import { useDateFormatter } from 'react-aria';
 import { Link } from 'react-router';
 
 import { TraitChip, EditHabitDialog, AddHabitDialogButton } from '@components';
-import type { Habit, Streak } from '@models';
+import type { Habit, HabitStats } from '@models';
 import { StorageBuckets } from '@models';
-import {
-  listFiles,
-  deleteFile,
-  getHabitTotalEntries,
-  getLongestHabitStreak,
-  getLatestHabitOccurrenceTimestamp,
-} from '@services';
+import { listFiles, deleteFile, getHabitsStats } from '@services';
 import {
   useUser,
   useHabits,
@@ -41,19 +35,14 @@ import HabitLastEntry from './HabitLastEntry';
 import HabitLongestStreak from './HabitLongestStreak';
 import HabitTotalEntries from './HabitTotalEntries';
 
+const ROWS_PER_PAGE = 10;
+
 const HabitsTable = () => {
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [page, setPage] = React.useState(1);
-  const [lastEntries, setLastEntries] = React.useState<
-    Record<Habit['id'], number>
+  const [habitsStats, setHabitsStats] = React.useState<
+    Record<Habit['id'], HabitStats>
   >({});
-  const [longestStreaks, setLongestStreaks] = React.useState<
-    Record<Habit['id'], Streak>
-  >({});
-  const [totalEntries, setTotalEntries] = React.useState<
-    Record<Habit['id'], number | null>
-  >({});
-  const rowsPerPage = 10;
 
   const dateFormatter = useDateFormatter({
     day: 'numeric',
@@ -67,50 +56,35 @@ const HabitsTable = () => {
   const { removeHabit } = useHabitActions();
   const { askConfirmation } = useConfirmationActions();
 
-  const habitIdsKey = Object.keys(habits).join(',');
-
   React.useEffect(() => {
-    const habitIds = habitIdsKey.split(',').filter(Boolean);
+    const habitIds = Object.keys(habits);
 
     if (habitIds.length === 0) {
-      setLastEntries({});
-      setLongestStreaks({});
-      setTotalEntries({});
+      setHabitsStats({});
 
       return;
     }
 
-    setLastEntries({});
-    setLongestStreaks({});
-    setTotalEntries({});
+    setHabitsStats({});
 
-    for (const id of habitIds) {
-      // TODO: replace `.catch(console.error)` with to be chosen error tracking SDK
-      getLatestHabitOccurrenceTimestamp(id)
-        .then((timestamp) => {
-          setLastEntries((prev) => {
-            return { ...prev, [id]: timestamp };
-          });
-        })
-        .catch(console.error);
+    // TODO: replace `.catch(console.error)` with to be chosen error tracking SDK
+    getHabitsStats(habitIds)
+      .then((stats) => {
+        setHabitsStats(
+          stats.reduce((statsMap, stat) => {
+            if (!stat.habitId) {
+              return statsMap;
+            }
 
-      getLongestHabitStreak(id)
-        .then((streak) => {
-          setLongestStreaks((prev) => {
-            return { ...prev, [id]: streak };
-          });
-        })
-        .catch(console.error);
-
-      getHabitTotalEntries(id)
-        .then((count) => {
-          setTotalEntries((prev) => {
-            return { ...prev, [id]: count };
-          });
-        })
-        .catch(console.error);
-    }
-  }, [habitIdsKey]);
+            return {
+              ...statsMap,
+              [stat.habitId]: stat,
+            };
+          }, {})
+        );
+      })
+      .catch(console.error);
+  }, [habits]);
 
   const handleEditStart = (habit: Habit) => {
     setHabitToEdit(habit);
@@ -166,11 +140,11 @@ const HabitsTable = () => {
 
   const habitsList = Object.values(habits);
 
-  const pages = Math.ceil(habitsList.length / rowsPerPage);
+  const pages = Math.ceil(habitsList.length / ROWS_PER_PAGE);
 
   const paginatedHabits = React.useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+    const start = (page - 1) * ROWS_PER_PAGE;
+    const end = start + ROWS_PER_PAGE;
 
     return habitsList.slice(start, end);
   }, [page, habitsList]);
@@ -235,6 +209,8 @@ const HabitsTable = () => {
         </TableHeader>
         <TableBody aria-label="Habits data" emptyContent="No habits yet">
           {paginatedHabits.map((habit) => {
+            const habitStats = habitsStats[habit.id] || {};
+
             return (
               <TableRow
                 key={habit.id}
@@ -265,16 +241,24 @@ const HabitsTable = () => {
                   {dateFormatter.format(new Date(habit.createdAt))}
                 </TableCell>
                 <TableCell>
-                  <HabitLastEntry timestamp={lastEntries[habit.id]} />
+                  <HabitLastEntry
+                    timestamp={Number(new Date(habitStats.lastEntryAt || 0))}
+                  />
                 </TableCell>
                 <TableCell>
-                  <HabitLongestStreak streak={longestStreaks[habit.id]} />
+                  <HabitLongestStreak
+                    streak={{
+                      streakEnd: habitStats.longestStreakEnd,
+                      streakLength: habitStats.longestStreakLength,
+                      streakStart: habitStats.longestStreakStart,
+                    }}
+                  />
                 </TableCell>
                 <TableCell
                   align="center"
                   aria-label={`Total entries for ${habit.name}`}
                 >
-                  <HabitTotalEntries count={totalEntries[habit.id]} />
+                  <HabitTotalEntries count={habitStats.totalEntries} />
                 </TableCell>
                 <TableCell aria-label="Actions" className="rounded-r-md">
                   <div
