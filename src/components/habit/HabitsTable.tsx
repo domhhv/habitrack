@@ -73,27 +73,42 @@ const HabitsTable = () => {
     const habitIds = habitIdsKey.split(',').filter(Boolean);
 
     if (habitIds.length === 0) {
+      setLastEntries({});
+      setLongestStreaks({});
+      setTotalEntries({});
+
       return;
     }
 
+    setLastEntries({});
+    setLongestStreaks({});
+    setTotalEntries({});
+
     for (const id of habitIds) {
-      getLatestHabitOccurrenceTimestamp(id).then((timestamp) => {
-        setLastEntries((prev) => {
-          return { ...prev, [id]: timestamp };
-        });
-      });
+      // TODO: replace `.catch(console.error)` with to be chosen error tracking SDK
+      getLatestHabitOccurrenceTimestamp(id)
+        .then((timestamp) => {
+          setLastEntries((prev) => {
+            return { ...prev, [id]: timestamp };
+          });
+        })
+        .catch(console.error);
 
-      getLongestHabitStreak(id).then((streak) => {
-        setLongestStreaks((prev) => {
-          return { ...prev, [id]: streak };
-        });
-      });
+      getLongestHabitStreak(id)
+        .then((streak) => {
+          setLongestStreaks((prev) => {
+            return { ...prev, [id]: streak };
+          });
+        })
+        .catch(console.error);
 
-      getHabitTotalEntries(id).then((count) => {
-        setTotalEntries((prev) => {
-          return { ...prev, [id]: count };
-        });
-      });
+      getHabitTotalEntries(id)
+        .then((count) => {
+          setTotalEntries((prev) => {
+            return { ...prev, [id]: count };
+          });
+        })
+        .catch(console.error);
     }
   }, [habitIdsKey]);
 

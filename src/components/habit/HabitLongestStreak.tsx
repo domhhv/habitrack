@@ -16,13 +16,13 @@ type HabitLongestStreakProps = {
 };
 
 const HabitLongestStreak = ({ streak }: HabitLongestStreakProps) => {
-  if (!streak?.streakLength) {
+  if (!streak?.streakLength || !streak.streakStart || !streak.streakEnd) {
     return <span className="text-gray-400">None</span>;
   }
 
   const range = dateTimeFormat.formatRange(
-    new Date(streak.streakStart || 0),
-    new Date(streak.streakEnd || 0)
+    new Date(streak.streakStart),
+    new Date(streak.streakEnd)
   );
 
   return (
