@@ -14,8 +14,6 @@ import pluralize from 'pluralize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
-import type { Habit } from '@models';
-import { getLatestHabitOccurrenceTimestamp } from '@services';
 import {
   isThisWeek,
   differenceInDays,
@@ -26,11 +24,13 @@ import {
   getCalendarDateTimeFromTimestamp,
 } from '@utils';
 
-const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
+type HabitLastEntryProps = {
+  timestamp: number | undefined;
+};
+
+const HabitLastEntry = ({ timestamp }: HabitLastEntryProps) => {
   const [selectedDistanceFormat, setSelectedDistanceFormat] =
     React.useState<Selection>(new Set(['default']));
-  const [latestOccurrenceTimestamp, setLatestOccurrenceTimestamp] =
-    React.useState<number | null>(null);
   const localTimeZone = React.useMemo(() => {
     return getLocalTimeZone();
   }, []);
@@ -55,10 +55,6 @@ const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
     timeZone: localTimeZone,
     weekday: 'long',
   });
-
-  React.useEffect(() => {
-    getLatestHabitOccurrenceTimestamp(id).then(setLatestOccurrenceTimestamp);
-  }, [id]);
 
   const selectedValue = React.useMemo(() => {
     return Array.from(selectedDistanceFormat).join(', ').replace(/_/g, '');
@@ -136,7 +132,7 @@ const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
     [selectedValue, dayFormatter, fullMonthFormatter, localTimeZone]
   );
 
-  if (!latestOccurrenceTimestamp) {
+  if (!timestamp) {
     return <span className="text-gray-400">None</span>;
   }
 
@@ -147,11 +143,9 @@ const HabitLastEntry = ({ id }: { id: Habit['id'] }) => {
         offset={12}
         closeDelay={0}
         color="primary"
-        content={fullDateTimeFormatter.format(
-          new Date(latestOccurrenceTimestamp)
-        )}
+        content={fullDateTimeFormatter.format(new Date(timestamp))}
       >
-        <span>{capitalize(formatRelativeDate(latestOccurrenceTimestamp))}</span>
+        <span>{capitalize(formatRelativeDate(timestamp))}</span>
       </Tooltip>
       <Dropdown>
         <DropdownTrigger>

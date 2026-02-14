@@ -18,9 +18,15 @@ import { useDateFormatter } from 'react-aria';
 import { Link } from 'react-router';
 
 import { TraitChip, EditHabitDialog, AddHabitDialogButton } from '@components';
-import type { Habit } from '@models';
+import type { Habit, Streak } from '@models';
 import { StorageBuckets } from '@models';
-import { listFiles, deleteFile } from '@services';
+import {
+  listFiles,
+  deleteFile,
+  getHabitTotalEntries,
+  getLongestHabitStreak,
+  getLatestHabitOccurrenceTimestamp,
+} from '@services';
 import {
   useUser,
   useHabits,
@@ -38,6 +44,15 @@ import HabitTotalEntries from './HabitTotalEntries';
 const HabitsTable = () => {
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [page, setPage] = React.useState(1);
+  const [lastEntries, setLastEntries] = React.useState<
+    Record<Habit['id'], number>
+  >({});
+  const [longestStreaks, setLongestStreaks] = React.useState<
+    Record<Habit['id'], Streak>
+  >({});
+  const [totalEntries, setTotalEntries] = React.useState<
+    Record<Habit['id'], number | null>
+  >({});
   const rowsPerPage = 10;
 
   const dateFormatter = useDateFormatter({
@@ -51,6 +66,51 @@ const HabitsTable = () => {
   const habits = useHabits();
   const { removeHabit } = useHabitActions();
   const { askConfirmation } = useConfirmationActions();
+
+  const habitIdsKey = Object.keys(habits).join(',');
+
+  React.useEffect(() => {
+    const habitIds = habitIdsKey.split(',').filter(Boolean);
+
+    if (habitIds.length === 0) {
+      setLastEntries({});
+      setLongestStreaks({});
+      setTotalEntries({});
+
+      return;
+    }
+
+    setLastEntries({});
+    setLongestStreaks({});
+    setTotalEntries({});
+
+    for (const id of habitIds) {
+      // TODO: replace `.catch(console.error)` with to be chosen error tracking SDK
+      getLatestHabitOccurrenceTimestamp(id)
+        .then((timestamp) => {
+          setLastEntries((prev) => {
+            return { ...prev, [id]: timestamp };
+          });
+        })
+        .catch(console.error);
+
+      getLongestHabitStreak(id)
+        .then((streak) => {
+          setLongestStreaks((prev) => {
+            return { ...prev, [id]: streak };
+          });
+        })
+        .catch(console.error);
+
+      getHabitTotalEntries(id)
+        .then((count) => {
+          setTotalEntries((prev) => {
+            return { ...prev, [id]: count };
+          });
+        })
+        .catch(console.error);
+    }
+  }, [habitIdsKey]);
 
   const handleEditStart = (habit: Habit) => {
     setHabitToEdit(habit);
@@ -205,16 +265,16 @@ const HabitsTable = () => {
                   {dateFormatter.format(new Date(habit.createdAt))}
                 </TableCell>
                 <TableCell>
-                  <HabitLastEntry id={habit.id} />
+                  <HabitLastEntry timestamp={lastEntries[habit.id]} />
                 </TableCell>
                 <TableCell>
-                  <HabitLongestStreak id={habit.id} />
+                  <HabitLongestStreak streak={longestStreaks[habit.id]} />
                 </TableCell>
                 <TableCell
                   align="center"
                   aria-label={`Total entries for ${habit.name}`}
                 >
-                  <HabitTotalEntries id={habit.id} />
+                  <HabitTotalEntries count={totalEntries[habit.id]} />
                 </TableCell>
                 <TableCell aria-label="Actions" className="rounded-r-md">
                   <div
