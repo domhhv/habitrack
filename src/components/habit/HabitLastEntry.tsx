@@ -25,7 +25,7 @@ import {
 } from '@utils';
 
 type HabitLastEntryProps = {
-  timestamp: number | undefined;
+  timestamp: number;
 };
 
 const HabitLastEntry = ({ timestamp }: HabitLastEntryProps) => {

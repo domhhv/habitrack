@@ -10,9 +10,7 @@ import HabitsTable from './HabitsTable';
 
 vi.mock('@services', () => {
   return {
-    getHabitTotalEntries: vi.fn().mockResolvedValue(0),
-    getLatestHabitOccurrenceTimestamp: vi.fn().mockResolvedValue(0),
-    getLongestHabitStreak: vi.fn().mockResolvedValue(0),
+    getHabitsStats: vi.fn().mockResolvedValue([]),
     getPublicUrl: vi.fn(),
     listHabits: vi.fn().mockReturnValue(() => {
       return [];

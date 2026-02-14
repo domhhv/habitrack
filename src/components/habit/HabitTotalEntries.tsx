@@ -1,5 +1,5 @@
 type HabitTotalEntriesProps = {
-  count: number | null | undefined;
+  count: number | null;
 };
 
 const HabitTotalEntries = ({ count }: HabitTotalEntriesProps) => {

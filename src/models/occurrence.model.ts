@@ -14,6 +14,10 @@ import { type Trait } from './trait.model';
 
 export type Streak = CamelCasedPropertiesDeep<CompositeTypes<'streak_info'>>;
 
+export type HabitStats = CamelCasedPropertiesDeep<
+  CompositeTypes<'habit_stats'>
+>;
+
 type BaseOccurrence = CamelCasedPropertiesDeep<Tables<'occurrences'>>;
 
 type OccurrenceHabit = Pick<
