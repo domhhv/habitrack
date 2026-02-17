@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => {
               return 'heroui';
             }
 
-            if (id.includes('motion')) {
+            if (id.includes('framer-motion') || id.includes('motion-dom')) {
               return 'framer-motion';
             }
 
@@ -87,9 +87,6 @@ export default defineConfig(({ mode }) => {
       SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
       ROLLBAR_CLIENT_ACCESS_TOKEN: JSON.stringify(
         env.ROLLBAR_CLIENT_ACCESS_TOKEN
-      ),
-      ROLLBAR_SERVER_ACCESS_TOKEN: JSON.stringify(
-        env.ROLLBAR_SERVER_ACCESS_TOKEN
       ),
     },
     plugins: [
