@@ -61,7 +61,7 @@ export default [
       perfectionist,
       react: fixupPluginRules(react),
       'react-hooks': fixupPluginRules(reactHooks),
-      'switch-case': switchCase,
+      'switch-case': fixupPluginRules(switchCase),
       'unused-imports': unusedImports,
     },
 
