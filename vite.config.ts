@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   const ROLLBAR_CONFIG = {
-    accessToken: env.ROLLBAR_CLIENT_ACCESS_TOKEN,
+    accessToken: env.ROLLBAR_SERVER_ACCESS_TOKEN,
     baseUrl: env.VERCEL_URL ? `https://${env.VERCEL_URL}` : env.BASE_URL,
     ignoreUploadErrors: true,
     silent: true,
@@ -46,12 +46,8 @@ export default defineConfig(({ mode }) => {
               return 'phosphor-icons';
             }
 
-            if (id.includes('heroui')) {
-              return 'heroui';
-            }
-
-            if (id.includes('motion')) {
-              return 'framer-motion';
+            if (id.includes('@internationalized')) {
+              return 'internationalized';
             }
 
             if (id.includes('@react-aria')) {
@@ -62,11 +58,25 @@ export default defineConfig(({ mode }) => {
               return 'react-stately';
             }
 
+            if (id.includes('react-router')) {
+              return 'react-router';
+            }
+
+            if (id.includes('heroui/theme')) {
+              return 'heroui-theme';
+            }
+
+            if (id.includes('heroui')) {
+              return 'heroui';
+            }
+
+            if (id.includes('motion')) {
+              return 'framer-motion';
+            }
+
             if (id.includes('node_modules')) {
               return 'vendor';
             }
-
-            return 'index';
           },
         },
       },
@@ -77,6 +87,9 @@ export default defineConfig(({ mode }) => {
       SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
       ROLLBAR_CLIENT_ACCESS_TOKEN: JSON.stringify(
         env.ROLLBAR_CLIENT_ACCESS_TOKEN
+      ),
+      ROLLBAR_SERVER_ACCESS_TOKEN: JSON.stringify(
+        env.ROLLBAR_SERVER_ACCESS_TOKEN
       ),
     },
     plugins: [
