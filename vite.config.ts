@@ -6,15 +6,25 @@ import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import webpackStatsPlugin from 'rollup-plugin-webpack-stats';
 import { loadEnv, defineConfig, type UserConfig } from 'vite';
+import viteRollbar from 'vite-plugin-rollbar-sourcemap';
 
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
 
   const env = loadEnv(mode, process.cwd(), '');
 
+  const ROLLBAR_CONFIG = {
+    accessToken: env.ROLLBAR_CLIENT_ACCESS_TOKEN,
+    baseUrl: env.VERCEL_URL ? `https://${env.VERCEL_URL}` : env.BASE_URL,
+    ignoreUploadErrors: true,
+    silent: true,
+    version: '1.0.0',
+  };
+
   return {
     clearScreen: false,
     build: {
+      sourcemap: true,
       rollupOptions: {
         onwarn(warning, warn) {
           if (warning.message.includes('Module "os" has been externalized')) {
@@ -62,12 +72,17 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
+      ROLLBAR_CLIENT_ENV: JSON.stringify(env.ROLLBAR_CLIENT_ENV),
       SUPABASE_ANON_KEY: JSON.stringify(env.SUPABASE_ANON_KEY),
       SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
+      ROLLBAR_CLIENT_ACCESS_TOKEN: JSON.stringify(
+        env.ROLLBAR_CLIENT_ACCESS_TOKEN
+      ),
     },
     plugins: [
-      tailwindcss(),
       react(),
+      tailwindcss(),
+      viteRollbar(ROLLBAR_CONFIG),
       ...(isProduction
         ? [
             webpackStatsPlugin(),

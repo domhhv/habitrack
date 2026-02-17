@@ -1,3 +1,5 @@
+import type { Configuration as RollbarConfiguration } from 'rollbar';
+
 import type { MetricPreset } from '@models';
 import { StorageBuckets } from '@models';
 
@@ -28,12 +30,25 @@ export enum ThemeModes {
   DARK = 'dark',
 }
 
-export type MetricPresetGroup = {
-  group: string;
-  presets: MetricPreset[];
+export const ROLLBAR_CONFIG: RollbarConfiguration = {
+  accessToken: ROLLBAR_CLIENT_ACCESS_TOKEN,
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+  environment: ROLLBAR_CLIENT_ENV,
+  payload: {
+    client: {
+      javascript: {
+        code_version: '1.0.0',
+        source_map_enabled: true,
+      },
+    },
+  },
 };
 
-export const METRIC_PRESETS: MetricPresetGroup[] = [
+export const METRIC_PRESETS: Array<{
+  group: string;
+  presets: MetricPreset[];
+}> = [
   {
     group: 'Duration',
     presets: [

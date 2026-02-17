@@ -1,3 +1,4 @@
+import { useRollbar } from '@rollbar/react';
 import camelcaseKeys from 'camelcase-keys';
 import React from 'react';
 
@@ -9,6 +10,7 @@ const useSession = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error>();
   const { setUser } = useUserActions();
+  const rollbar = useRollbar();
 
   React.useEffect(() => {
     getSession()
@@ -32,23 +34,42 @@ const useSession = () => {
           'USER_UPDATED',
         ].includes(event)
       ) {
-        setUser(
-          camelcaseKeys(
-            { ...session.user, fetchedAt: new Date().toISOString() },
-            { deep: true }
-          )
-        );
+        const { email, id, ...camelizedUser } = camelcaseKeys(session.user, {
+          deep: true,
+        });
+        const fetchedAt = new Date().toISOString();
+
+        setUser({
+          ...camelizedUser,
+          email,
+          fetchedAt,
+          id,
+        });
+
+        rollbar.configure({
+          payload: {
+            person: {
+              email,
+              id,
+            },
+          },
+        });
       }
 
       if (event === 'SIGNED_OUT') {
         setUser(null);
+        rollbar.configure({
+          payload: {
+            person: undefined,
+          },
+        });
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser]);
+  }, [setUser, rollbar]);
 
   return { error, isLoading };
 };

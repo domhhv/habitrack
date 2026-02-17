@@ -12,6 +12,7 @@ import {
 } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
+import { useRollbar } from '@rollbar/react';
 import pluralize from 'pluralize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
@@ -38,12 +39,12 @@ import HabitTotalEntries from './HabitTotalEntries';
 const ROWS_PER_PAGE = 10;
 
 const HabitsTable = () => {
+  const rollbar = useRollbar();
   const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [page, setPage] = React.useState(1);
   const [habitsStats, setHabitsStats] = React.useState<
     Record<Habit['id'], HabitStats>
   >({});
-
   const dateFormatter = useDateFormatter({
     day: 'numeric',
     month: 'short',
@@ -67,7 +68,6 @@ const HabitsTable = () => {
 
     setHabitsStats({});
 
-    // TODO: replace `.catch(console.error)` with to be chosen error tracking SDK
     getHabitsStats(habitIds)
       .then((stats) => {
         setHabitsStats(
@@ -83,8 +83,10 @@ const HabitsTable = () => {
           }, {})
         );
       })
-      .catch(console.error);
-  }, [habits]);
+      .catch((error) => {
+        rollbar.error(error);
+      });
+  }, [habits, rollbar]);
 
   const handleEditStart = (habit: Habit) => {
     setHabitToEdit(habit);
