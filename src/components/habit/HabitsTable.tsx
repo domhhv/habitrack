@@ -83,7 +83,9 @@ const HabitsTable = () => {
           }, {})
         );
       })
-      .catch(rollbar.error);
+      .catch((error) => {
+        rollbar.error(error);
+      });
   }, [habits, rollbar]);
 
   const handleEditStart = (habit: Habit) => {

@@ -1,3 +1,4 @@
+import { Provider as RollbarProvider } from '@rollbar/react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router';
@@ -7,6 +8,15 @@ import { useHabits, useTraits } from '@stores';
 import { makeTestHabit, makeTestTrait } from '@tests';
 
 import HabitsTable from './HabitsTable';
+
+vi.mock(import('@rollbar/react'), async (importOriginal) => {
+  const actual = await importOriginal();
+
+  return {
+    ...actual,
+    error: vi.fn(),
+  };
+});
 
 vi.mock('@services', () => {
   return {
@@ -79,7 +89,9 @@ describe(HabitsTable.name, () => {
     });
     const { getAllByRole, getByText } = render(
       <BrowserRouter>
-        <HabitsTable />
+        <RollbarProvider config={{}}>
+          <HabitsTable />
+        </RollbarProvider>
       </BrowserRouter>
     );
     await waitFor(() => {
@@ -133,7 +145,9 @@ describe(HabitsTable.name, () => {
     });
     const { getAllByRole, getByRole, getByTestId, queryByRole } = render(
       <BrowserRouter>
-        <HabitsTable />
+        <RollbarProvider config={{}}>
+          <HabitsTable />
+        </RollbarProvider>
       </BrowserRouter>
     );
 

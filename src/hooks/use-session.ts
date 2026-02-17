@@ -34,23 +34,23 @@ const useSession = () => {
           'USER_UPDATED',
         ].includes(event)
       ) {
-        const { id, ...camelizedUser } = camelcaseKeys(session.user, {
+        const { email, id, ...camelizedUser } = camelcaseKeys(session.user, {
           deep: true,
         });
+        const fetchedAt = new Date().toISOString();
 
-        setUser(
-          camelcaseKeys({
-            ...camelizedUser,
-            fetchedAt: new Date().toISOString(),
-            id,
-          })
-        );
+        setUser({
+          ...camelizedUser,
+          email,
+          fetchedAt,
+          id,
+        });
 
         rollbar.configure({
           payload: {
             person: {
+              email,
               id,
-              ...camelizedUser,
             },
           },
         });

@@ -7,29 +7,15 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { I18nProvider } from 'react-aria';
 import { useNavigate } from 'react-router';
-import type { Configuration as RollbarConfiguration } from 'rollbar';
 
-import ErrorFallbackPage from './pages/ErrorFallbackPage';
+import { ROLLBAR_CONFIG } from '@const';
+import { ErrorFallbackPage } from '@pages';
 
 const Providers = ({ children }: PropsWithChildren) => {
   const navigate = useNavigate();
-  const rollbarConfig: RollbarConfiguration = {
-    accessToken: ROLLBAR_CLIENT_ACCESS_TOKEN,
-    captureUncaught: true,
-    captureUnhandledRejections: true,
-    environment: ROLLBAR_CLIENT_ENV,
-    payload: {
-      client: {
-        javascript: {
-          code_version: '1.0.0',
-          source_map_enabled: true,
-        },
-      },
-    },
-  };
 
   return (
-    <RollbarProvider config={rollbarConfig}>
+    <RollbarProvider config={ROLLBAR_CONFIG}>
       <RollbarErrorBoundary fallbackUI={ErrorFallbackPage}>
         <HeroUIProvider navigate={navigate}>
           <I18nProvider>{children}</I18nProvider>
