@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
 
   const ROLLBAR_CONFIG = {
     accessToken: env.ROLLBAR_CLIENT_ACCESS_TOKEN,
-    baseUrl: env.VERCEL_URL || env.BASE_URL,
+    baseUrl: env.VERCEL_URL ? `https://${env.VERCEL_URL}` : env.BASE_URL,
     ignoreUploadErrors: true,
     silent: true,
     version: '1.0.0',
