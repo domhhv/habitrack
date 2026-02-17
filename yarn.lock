@@ -7370,6 +7370,7 @@ __metadata:
     type-fest: "npm:^5.4.1"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.3.1"
+    vite-plugin-rollbar-sourcemap: "npm:^0.0.11"
     vitest: "npm:^4.0.18"
     zustand: "npm:^5.0.10"
   languageName: unknown
@@ -10613,6 +10614,15 @@ __metadata:
   version: 0.20201231.0
   resolution: "uzip@npm:0.20201231.0"
   checksum: 10c0/44b261b20ac7e4d71e7099d7a7c4885626044be61cd246e76cf548fa444a4a37c301d1a683679168bc29c91d2ec81d62b8c1c75217a26b37f6ce35223866c2d2
+  languageName: node
+  linkType: hard
+
+"vite-plugin-rollbar-sourcemap@npm:^0.0.11":
+  version: 0.0.11
+  resolution: "vite-plugin-rollbar-sourcemap@npm:0.0.11"
+  peerDependencies:
+    vite: ^7.0.0
+  checksum: 10c0/a678e690516ed5660a71de839ca1f83fe658fa76213d3d10db62b4a412557dccbe34f4a7121170a1f6c6604fe31d9820b523bf9a27f76ab533ff4f7b515b24c4
   languageName: node
   linkType: hard
 
