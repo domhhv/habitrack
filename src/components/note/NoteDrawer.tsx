@@ -4,7 +4,6 @@ import {
   Form,
   Drawer,
   Button,
-  Textarea,
   DrawerBody,
   DrawerHeader,
   DrawerFooter,
@@ -20,6 +19,7 @@ import type { FormEvent } from 'react';
 import React from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
 
+import { AutoResizableTextarea } from '@components';
 import {
   useTextField,
   useScreenWidth,
@@ -267,13 +267,15 @@ const NoteDrawer = () => {
               isShown={isPeriodPickerShown}
               onBeforeChange={confirmUnsavedChanges}
             />
-            <Textarea
+            <AutoResizableTextarea
               autoFocus
               isRequired
+              minRows={3}
+              maxRows={12}
               name="content"
+              initialRows={5}
               value={content}
               variant="faded"
-              disableAutosize
               label="Your note"
               labelPlacement="outside"
               onChange={changeContent}
@@ -281,14 +283,11 @@ const NoteDrawer = () => {
               description={getTextareaDescription()}
               defaultValue={existingNote?.content || ''}
               placeholder={`Start typing your note about this ${periodKind}...`}
-              errorMessage={`Empty notes are not allowed. ${existingNote ? 'If you want to empty an existing note, please remove it instead.' : ''}`}
               classNames={{
+                input: !isDesktop ? 'text-base' : undefined,
                 label: 'after:hidden',
-                input: cn(
-                  'resize-y min-h-25 field-sizing-content max-h-96',
-                  !isDesktop && 'text-base'
-                ),
               }}
+              errorMessage={`Empty notes are not allowed. ${existingNote ? 'If you want to empty an existing note, please remove it instead.' : ''}`}
               onKeyDown={(event) => {
                 if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
                   void submitNote();

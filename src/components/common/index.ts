@@ -1,3 +1,4 @@
+export { default as AutoResizableTextarea } from './AutoResizableTextarea';
 export { default as ConfirmationDialog } from './ConfirmationDialog';
 export { default as CrossPlatformHorizontalScroll } from './CrossPlatformHorizontalScroll';
 export { default as ImageCarousel } from './ImageCarousel';
