@@ -60,7 +60,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
     new Set([])
   );
   const weeks = React.useMemo(() => {
-    return getWeeksOfYear(focusedDate.year, firstDayOfWeek);
+    return getWeeksOfYear(focusedDate.year, firstDayOfWeek || 'mon');
   }, [focusedDate.year, firstDayOfWeek]);
 
   const calendarMode = React.useMemo(() => {

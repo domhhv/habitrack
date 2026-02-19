@@ -1,4 +1,3 @@
-import { GregorianCalendar } from '@internationalized/date';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
 import { useLocale, useCalendar } from 'react-aria';
@@ -6,16 +5,7 @@ import { useCalendarState } from 'react-stately';
 
 import { MonthCalendar } from '@components';
 import { useFirstDayOfWeek } from '@hooks';
-
-const createCalendar = (identifier: string) => {
-  switch (identifier) {
-    case 'gregory':
-      return new GregorianCalendar();
-
-    default:
-      throw new Error(`Unsupported calendar ${identifier}`);
-  }
-};
+import { createCalendar } from '@utils';
 
 const MonthCalendarPage = () => {
   const { locale } = useLocale();
