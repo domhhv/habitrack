@@ -934,7 +934,9 @@ export type Database = {
       }
     }
     Enums: {
+      days_of_week: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun"
       note_period_kind: "day" | "week" | "month"
+      user_plans: "free" | "pro"
       metric_type:
         | "number"
         | "duration"
@@ -1184,6 +1186,36 @@ export type Database = {
           time_zone?: string
           updated_at?: string | null
           user_id?: string
+        }
+      }
+      profiles: {
+        Relationships: []
+        Insert: {
+          created_at?: string
+          email: string
+          first_day_of_week?: Database["public"]["Enums"]["days_of_week"]
+          id: string
+          name?: string | null
+          plan?: Database["public"]["Enums"]["user_plans"]
+          updated_at?: string | null
+        }
+        Row: {
+          created_at: string
+          email: string
+          first_day_of_week: Database["public"]["Enums"]["days_of_week"]
+          id: string
+          name: string | null
+          plan: Database["public"]["Enums"]["user_plans"]
+          updated_at: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_day_of_week?: Database["public"]["Enums"]["days_of_week"]
+          id?: string
+          name?: string | null
+          plan?: Database["public"]["Enums"]["user_plans"]
+          updated_at?: string | null
         }
       }
       traits: {
@@ -1866,7 +1898,9 @@ export const Constants = {
   },
   public: {
     Enums: {
+      days_of_week: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       note_period_kind: ["day", "week", "month"],
+      user_plans: ["free", "pro"],
       metric_type: [
         "number",
         "duration",

@@ -1,5 +1,19 @@
 -- Utility functions for the application
 
+-- Function to create a profile when a new user is created in the auth system --
+CREATE OR REPLACE FUNCTION "public"."create_profile"() RETURNS "trigger" -- noqa
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO "public"
+    AS $$
+BEGIN
+    INSERT INTO "public"."profiles" (id, email, name, first_day_of_week)
+    VALUES (new.id, new.email, new.raw_user_meta_data->>'name', COALESCE((new.raw_user_meta_data->>'first_day_of_week')::days_of_week, 'mon'));
+    RETURN new;
+END;
+$$;
+
+ALTER FUNCTION "public"."create_profile"() OWNER TO "postgres";
+
 -- Function to track the longest streak for a habit
 CREATE OR REPLACE FUNCTION "public"."get_longest_streak"( -- noqa
     "p_habit_id" "uuid",
@@ -160,3 +174,7 @@ GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" "uuid"[], "p_tim
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."create_profile"() TO "anon";
+GRANT ALL ON FUNCTION "public"."create_profile"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."create_profile"() TO "service_role";

@@ -260,8 +260,8 @@ const NoteDrawer = () => {
             />
           </Button>
         </DrawerHeader>
-        <Form onSubmit={submitNote}>
-          <DrawerBody className="w-full space-y-4">
+        <Form onSubmit={submitNote} className="max-h-[calc(100%-64px)]">
+          <DrawerBody className="w-full space-y-4 py-0.5">
             <NotePeriodPicker
               endRange={getEndRangeDate()}
               isShown={isPeriodPickerShown}
@@ -270,11 +270,13 @@ const NoteDrawer = () => {
             <Textarea
               autoFocus
               isRequired
+              minRows={5}
               name="content"
               value={content}
               variant="faded"
               disableAutosize
               label="Your note"
+              maxRows={Infinity}
               labelPlacement="outside"
               onChange={changeContent}
               disabled={isSaving || isRemoving}
@@ -283,9 +285,10 @@ const NoteDrawer = () => {
               placeholder={`Start typing your note about this ${periodKind}...`}
               errorMessage={`Empty notes are not allowed. ${existingNote ? 'If you want to empty an existing note, please remove it instead.' : ''}`}
               classNames={{
+                base: 'max-h-full',
                 label: 'after:hidden',
                 input: cn(
-                  'resize-y min-h-25 field-sizing-content max-h-96',
+                  'resize-y min-h-10 field-sizing-content max-h-full',
                   !isDesktop && 'text-base'
                 ),
               }}
@@ -302,7 +305,7 @@ const NoteDrawer = () => {
               }}
             />
           </DrawerBody>
-          <DrawerFooter className="self-end">
+          <DrawerFooter className="self-end pt-0">
             {!!existingNote && (
               <Button
                 color="danger"
