@@ -25,10 +25,10 @@ import {
   useScreenWidth,
   useHasKeyboard,
   useModifierKeys,
-  useFirstDayOfWeek,
 } from '@hooks';
 import {
   useUser,
+  useProfile,
   usePeriodNotes,
   useNoteActions,
   useNoteDrawerState,
@@ -40,7 +40,7 @@ import { getISOWeek, handleAsyncAction } from '@utils';
 import NotePeriodPicker from './NotePeriodPicker';
 
 const NoteDrawer = () => {
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const profile = useProfile();
   const timeZone = getLocalTimeZone();
   const notes = usePeriodNotes();
   const { addNote, deleteNote, updateNote } = useNoteActions();
@@ -73,10 +73,10 @@ const NoteDrawer = () => {
   });
 
   const alignPeriodDate = React.useCallback(() => {
-    return periodKind === 'week' && firstDayOfWeek === 'sun'
+    return periodKind === 'week' && profile?.firstDayOfWeek === 'sun'
       ? periodDate.add({ days: 1 }).toString()
       : periodDate.toString();
-  }, [periodKind, periodDate, firstDayOfWeek]);
+  }, [periodKind, periodDate, profile?.firstDayOfWeek]);
 
   const existingNote = React.useMemo(() => {
     return notes.find((n) => {
@@ -189,7 +189,7 @@ const NoteDrawer = () => {
         return periodDate;
 
       case 'week':
-        return endOfWeek(periodDate, locale, firstDayOfWeek);
+        return endOfWeek(periodDate, locale, profile?.firstDayOfWeek);
 
       case 'month':
         return endOfMonth(periodDate);

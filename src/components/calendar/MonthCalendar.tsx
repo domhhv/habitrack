@@ -13,8 +13,7 @@ import { useLocale } from 'react-aria';
 import { useParams } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
-import { useFirstDayOfWeek } from '@hooks';
-import { useCalendarRangeChange } from '@stores';
+import { useProfile, useCalendarRangeChange } from '@stores';
 
 import CalendarFilters from './CalendarFilters';
 import CalendarNavigation from './CalendarNavigation';
@@ -28,7 +27,7 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
   const changeCalendarRange = useCalendarRangeChange();
   const params = useParams();
   const { locale } = useLocale();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const profile = useProfile();
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
 
@@ -42,12 +41,12 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
     const rangeStart = startOfWeek(
       startOfMonth(focusedDateTime),
       locale,
-      firstDayOfWeek
+      profile?.firstDayOfWeek
     );
     const rangeEnd = endOfWeek(
       endOfMonth(focusedDateTime),
       locale,
-      firstDayOfWeek
+      profile?.firstDayOfWeek
     ).set({
       hour: 23,
       millisecond: 999,
@@ -58,7 +57,7 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
     changeCalendarRange([rangeStart, rangeEnd]);
   }, [
     state.focusedDate,
-    firstDayOfWeek,
+    profile?.firstDayOfWeek,
     changeCalendarRange,
     locale,
     isFocusedDateInitialized,

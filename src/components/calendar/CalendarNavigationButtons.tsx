@@ -18,8 +18,12 @@ import { useLocale } from 'react-aria';
 import { Link, useNavigate, useLocation } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
-import { useScreenWidth, useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
-import { useNoteDrawerState, useOccurrenceDrawerState } from '@stores';
+import { useScreenWidth, useKeyboardShortcut } from '@hooks';
+import {
+  useProfile,
+  useNoteDrawerState,
+  useOccurrenceDrawerState,
+} from '@stores';
 
 type CalendarNavigationButtonsProps = {
   focusedDate: CalendarState['focusedDate'];
@@ -33,7 +37,7 @@ const CalendarNavigationButtons = ({
   const { locale } = useLocale();
   const { isMobile, screenWidth } = useScreenWidth();
   const navigate = useNavigate();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const profile = useProfile();
   const occurrenceDrawerState = useOccurrenceDrawerState();
   const noteDrawerState = useNoteDrawerState();
 
@@ -97,11 +101,19 @@ const CalendarNavigationButtons = ({
       return isSameMonth(focusedDate, today(timeZone));
     }
 
-    const weekStart = startOfWeek(focusedDate, locale, firstDayOfWeek);
-    const weekEnd = endOfWeek(focusedDate, locale, firstDayOfWeek);
+    const weekStart = startOfWeek(
+      focusedDate,
+      locale,
+      profile?.firstDayOfWeek || 'mon'
+    );
+    const weekEnd = endOfWeek(
+      focusedDate,
+      locale,
+      profile?.firstDayOfWeek || 'mon'
+    );
 
     return todayDate.compare(weekStart) >= 0 && todayDate.compare(weekEnd) <= 0;
-  }, [calendarMode, focusedDate, firstDayOfWeek, timeZone, locale]);
+  }, [calendarMode, focusedDate, profile?.firstDayOfWeek, timeZone, locale]);
 
   const todayRangePath = React.useMemo(() => {
     const todayDate = today(timeZone);
@@ -116,14 +128,18 @@ const CalendarNavigationButtons = ({
       }`;
     }
 
-    const weekStart = startOfWeek(todayDate, locale, firstDayOfWeek).add({
-      days: firstDayOfWeek === 'sun' ? 4 : 3,
+    const weekStart = startOfWeek(
+      todayDate,
+      locale,
+      profile?.firstDayOfWeek
+    ).add({
+      days: profile?.firstDayOfWeek === 'sun' ? 4 : 3,
     });
 
     return `/calendar/week/${weekStart.year}/${weekStart.month}/${
       weekStart.day
     }`;
-  }, [calendarMode, timeZone, locale, firstDayOfWeek]);
+  }, [calendarMode, timeZone, locale, profile?.firstDayOfWeek]);
 
   return (
     <>

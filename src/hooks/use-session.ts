@@ -1,15 +1,15 @@
 import { useRollbar } from '@rollbar/react';
-import camelcaseKeys from 'camelcase-keys';
 import React from 'react';
 
 import { getSession } from '@services';
-import { useUserActions } from '@stores';
+import { useUser, useUserActions } from '@stores';
 import { supabaseClient } from '@utils';
 
 const useSession = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error>();
-  const { setUser } = useUserActions();
+  const { user } = useUser();
+  const { fetchProfile, setUser } = useUserActions();
   const rollbar = useRollbar();
 
   React.useEffect(() => {
@@ -22,54 +22,46 @@ const useSession = () => {
   }, [setUser]);
 
   React.useEffect(() => {
+    rollbar.configure({
+      payload: {
+        person: user
+          ? {
+              email: user.email,
+              id: user.id,
+            }
+          : undefined,
+      },
+    });
+  }, [rollbar, user]);
+
+  React.useEffect(() => {
     const {
       data: { subscription },
     } = supabaseClient.auth.onAuthStateChange((event, session) => {
       if (
         session &&
-        [
-          'INITIAL_SESSION',
-          'TOKEN_REFRESHED',
-          'SIGNED_IN',
-          'USER_UPDATED',
-        ].includes(event)
+        ['TOKEN_REFRESHED', 'SIGNED_IN', 'USER_UPDATED'].includes(event)
       ) {
-        const { email, id, ...camelizedUser } = camelcaseKeys(session.user, {
-          deep: true,
-        });
+        const { email, id } = session.user;
         const fetchedAt = new Date().toISOString();
 
+        void fetchProfile(id);
         setUser({
-          ...camelizedUser,
           email,
           fetchedAt,
           id,
-        });
-
-        rollbar.configure({
-          payload: {
-            person: {
-              email,
-              id,
-            },
-          },
         });
       }
 
       if (event === 'SIGNED_OUT') {
         setUser(null);
-        rollbar.configure({
-          payload: {
-            person: undefined,
-          },
-        });
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser, rollbar]);
+  }, [setUser, fetchProfile]);
 
   return { error, isLoading };
 };

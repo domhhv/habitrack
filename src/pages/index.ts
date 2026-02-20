@@ -5,5 +5,4 @@ export { default as HabitDetailsPage } from './HabitDetailsPage';
 export { default as HabitsPage } from './HabitsPage';
 export { default as MonthCalendarPage } from './MonthCalendarPage';
 export { default as NotesPage } from './NotesPage';
-export { default as TestErrorPage } from './TestErrorPage';
 export { default as WeekCalendarPage } from './WeekCalendarPage';

@@ -5,7 +5,6 @@ import {
   NotesPage,
   HabitsPage,
   AccountPage,
-  TestErrorPage,
   DayCalendarPage,
   HabitDetailsPage,
   WeekCalendarPage,
@@ -31,7 +30,6 @@ const AppRoutes = () => {
       <Route path="/habits/:habitId" element={<HabitDetailsPage />} />
       <Route path="/notes" element={<NotesPage />} />
       <Route path="/account" element={<AccountPage />} />
-      <Route path="/test-error-page" element={<TestErrorPage />} />
       <Route path="*" element={<Navigate replace to="/calendar/month" />} />
     </Routes>
   );

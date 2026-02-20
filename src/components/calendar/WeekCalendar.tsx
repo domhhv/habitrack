@@ -31,8 +31,9 @@ import { Link, useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
-import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
+import { useCurrentTime, useScreenWidth } from '@hooks';
 import {
+  useProfile,
   useDayNotes,
   useOccurrences,
   useNoteDrawerActions,
@@ -56,17 +57,17 @@ const WeekCalendar = () => {
   const occurrences = useOccurrences();
   const { locale } = useLocale();
   const params = useParams();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const profile = useProfile();
   const state = useCalendarState({
     createCalendar,
-    firstDayOfWeek,
+    firstDayOfWeek: profile?.firstDayOfWeek,
     locale,
     visibleDuration: { weeks: 1 },
   });
-  useCalendar({ firstDayOfWeek }, state);
+  useCalendar({ firstDayOfWeek: profile?.firstDayOfWeek }, state);
   const { gridProps, weekDays } = useCalendarGrid(
     {
-      firstDayOfWeek,
+      firstDayOfWeek: profile?.firstDayOfWeek,
       weekdayStyle: isDesktop ? 'long' : 'short',
     },
     state
@@ -79,8 +80,16 @@ const WeekCalendar = () => {
 
     const focusedDateTime = toCalendarDateTime(state.focusedDate);
 
-    const rangeStart = startOfWeek(focusedDateTime, locale, firstDayOfWeek);
-    const rangeEnd = endOfWeek(focusedDateTime, locale, firstDayOfWeek).set({
+    const rangeStart = startOfWeek(
+      focusedDateTime,
+      locale,
+      profile?.firstDayOfWeek
+    );
+    const rangeEnd = endOfWeek(
+      focusedDateTime,
+      locale,
+      profile?.firstDayOfWeek
+    ).set({
       hour: 23,
       millisecond: 999,
       minute: 59,
@@ -90,7 +99,7 @@ const WeekCalendar = () => {
     changeCalendarRange([rangeStart, rangeEnd]);
   }, [
     state.focusedDate,
-    firstDayOfWeek,
+    profile?.firstDayOfWeek,
     changeCalendarRange,
     locale,
     isFocusedDateInitialized,
@@ -100,8 +109,8 @@ const WeekCalendar = () => {
     const currentWeek = startOfWeek(
       today(getLocalTimeZone()),
       locale,
-      firstDayOfWeek
-    ).add({ days: firstDayOfWeek === 'sun' ? 4 : 3 });
+      profile?.firstDayOfWeek
+    ).add({ days: profile?.firstDayOfWeek === 'sun' ? 4 : 3 });
 
     const {
       day = currentWeek.day,
@@ -119,7 +128,7 @@ const WeekCalendar = () => {
       state.setFocusedDate(toCalendarDate(paramsDate));
       setIsFocusedDateInitialized(true);
     }
-  }, [state, params, locale, firstDayOfWeek]);
+  }, [state, params, locale, profile?.firstDayOfWeek]);
 
   const hasNote = React.useCallback(
     (date: CalendarDate) => {
@@ -163,9 +172,13 @@ const WeekCalendar = () => {
   const dayFormatter = useDateFormatter({ day: 'numeric', month: 'short' });
 
   const monthInfo = React.useMemo(() => {
-    const weekStart = startOfWeek(state.focusedDate, locale, firstDayOfWeek);
+    const weekStart = startOfWeek(
+      state.focusedDate,
+      locale,
+      profile?.firstDayOfWeek
+    );
     const thursday = weekStart.add({
-      days: firstDayOfWeek === 'sun' ? 4 : 3,
+      days: profile?.firstDayOfWeek === 'sun' ? 4 : 3,
     });
 
     const monthStart = new CalendarDate(thursday.year, thursday.month, 1);
@@ -183,7 +196,7 @@ const WeekCalendar = () => {
   }, [
     state.focusedDate,
     locale,
-    firstDayOfWeek,
+    profile?.firstDayOfWeek,
     timeZone,
     monthFormatter,
     dayFormatter,
@@ -224,7 +237,7 @@ const WeekCalendar = () => {
         className="flex min-w-lg justify-around px-8 py-4 lg:px-16"
       >
         {state
-          .getDatesInWeek(firstDayOfWeek === 'sun' ? 0 : 1)
+          .getDatesInWeek(profile?.firstDayOfWeek === 'sun' ? 0 : 1)
           .map((day, dayIndex) => {
             if (!day) {
               return null;

@@ -23,11 +23,12 @@ import { useLocale, useDateFormatter } from 'react-aria';
 import { Link, useParams, useNavigate } from 'react-router';
 
 import { OccurrenceChip, SwipeableContainer } from '@components';
-import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
+import { useCurrentTime, useScreenWidth } from '@hooks';
 import type { NumberMetricConfig, DurationMetricConfig } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import {
+  useProfile,
   useDayNotes,
   useOccurrences,
   useNoteDrawerActions,
@@ -48,7 +49,7 @@ const DayCalendar = () => {
   const occurrences = useOccurrences();
   const params = useParams();
   const navigate = useNavigate();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const profile = useProfile();
   const { locale } = useLocale();
   const timeZone = getLocalTimeZone();
   const [focusedDate, setFocusedDate] = React.useState(() => {
@@ -256,10 +257,10 @@ const DayCalendar = () => {
   }, [formatter, focusedDate, timeZone]);
 
   const weekInfo = React.useMemo(() => {
-    const weekStart = startOfWeek(focusedDate, locale, firstDayOfWeek);
-    const weekEnd = endOfWeek(focusedDate, locale, firstDayOfWeek);
+    const weekStart = startOfWeek(focusedDate, locale, profile?.firstDayOfWeek);
+    const weekEnd = endOfWeek(focusedDate, locale, profile?.firstDayOfWeek);
     const thursday = weekStart.add({
-      days: firstDayOfWeek === 'sun' ? 4 : 3,
+      days: profile?.firstDayOfWeek === 'sun' ? 4 : 3,
     });
     const weekNumber = getISOWeek(thursday.toDate(timeZone));
 
@@ -271,7 +272,7 @@ const DayCalendar = () => {
       label: `W${weekNumber}: ${formatDay(weekStart)} – ${formatDay(weekEnd)}`,
       path: `/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`,
     };
-  }, [focusedDate, locale, firstDayOfWeek, timeZone]);
+  }, [focusedDate, locale, profile?.firstDayOfWeek, timeZone]);
 
   const handleCalendarChange = (value: CalendarDate) => {
     navigate(`/calendar/day/${value.year}/${value.month}/${value.day}`);
@@ -294,8 +295,8 @@ const DayCalendar = () => {
       <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-1 pl-8 md:flex">
         <Calendar
           value={focusedDate}
-          firstDayOfWeek={firstDayOfWeek}
           onChange={handleCalendarChange}
+          firstDayOfWeek={profile?.firstDayOfWeek}
           classNames={{
             base: 'w-full shadow-none bg-transparent',
             content: 'w-full',

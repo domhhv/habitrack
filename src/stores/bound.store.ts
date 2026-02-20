@@ -62,14 +62,20 @@ useBoundStore.subscribe(
     };
   },
   (newState, prevState) => {
-    const { habitActions, noteActions, occurrencesActions, traitActions } =
-      useBoundStore.getState();
+    const {
+      habitActions,
+      noteActions,
+      occurrencesActions,
+      traitActions,
+      userActions,
+    } = useBoundStore.getState();
 
     if (!newState.userId && prevState.userId) {
       habitActions.clearHabits();
       traitActions.clearTraits();
       occurrencesActions.clearOccurrences();
       noteActions.clearNotes();
+      userActions.clearProfile();
 
       return;
     }
