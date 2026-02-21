@@ -1,7 +1,5 @@
 import {
-  cn,
   Tab,
-  Kbd,
   Tabs,
   Modal,
   Button,
@@ -18,12 +16,8 @@ import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router';
 
-import {
-  useScreenWidth,
-  useHasKeyboard,
-  useFirstDayOfWeek,
-  useKeyboardShortcut,
-} from '@hooks';
+import { Kbd } from '@components';
+import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import type { DaysOfWeek } from '@models';
 import { signIn, signUp, signOut, sendPasswordResetEmail } from '@services';
 import { useUser } from '@stores';
@@ -40,7 +34,6 @@ const AuthModalButton = () => {
   const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
   const firstDayOfWeek = useFirstDayOfWeek();
-  const hasKeyboard = useHasKeyboard();
 
   const handleClose = () => {
     setMode('login');
@@ -135,12 +128,6 @@ const AuthModalButton = () => {
     },
   };
 
-  useKeyboardShortcut('i', () => {
-    if (!user?.id) {
-      onOpen();
-    }
-  });
-
   return (
     <>
       {user?.id ? (
@@ -180,10 +167,15 @@ const AuthModalButton = () => {
           data-testid="auth-button"
         >
           <Kbd
-            className={cn(
-              'bg-primary-400 dark:bg-primary-700 text-tiny hidden px-1 py-0 md:text-sm',
-              hasKeyboard && 'block'
-            )}
+            color="primary"
+            shortcutParams={[
+              'i',
+              () => {
+                if (!user?.id) {
+                  onOpen();
+                }
+              },
+            ]}
           >
             I
           </Kbd>

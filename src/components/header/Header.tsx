@@ -1,4 +1,4 @@
-import { cn, Kbd, Button, Tooltip } from '@heroui/react';
+import { cn, Button, Tooltip } from '@heroui/react';
 import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
@@ -11,8 +11,8 @@ import {
 } from '@phosphor-icons/react';
 import { Link, useLocation } from 'react-router';
 
-import { AuthModalButton } from '@components';
-import { useScreenWidth, useHasKeyboard, useKeyboardShortcut } from '@hooks';
+import { Kbd, AuthModalButton } from '@components';
+import { useScreenWidth } from '@hooks';
 import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
 
 import ThemeToggle from './ThemeToggle';
@@ -22,7 +22,6 @@ const Header = () => {
   const { pathname } = useLocation();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
-  const hasKeyboard = useHasKeyboard();
 
   const dispatchNoteDrawerOpen = () => {
     openNoteDrawer(today(getLocalTimeZone()), 'day');
@@ -33,12 +32,6 @@ const Header = () => {
       dayToLog: today(getLocalTimeZone()),
     });
   };
-
-  useKeyboardShortcut('n', dispatchNoteDrawerOpen);
-  useKeyboardShortcut('l', dispatchOccurrenceDrawerOpen);
-  useKeyboardShortcut('m', () => {
-    window.open('https://habitrack.featurebase.app/roadmap', '_blank');
-  });
 
   return (
     <header className="bg-background-100 dark:dark:bg-background-900 border-b border-b-slate-300 dark:border-b-slate-800">
@@ -129,10 +122,8 @@ const Header = () => {
               />
               Note
               <Kbd
-                className={cn(
-                  'bg-secondary-300 dark:bg-secondary-700 text-tiny hidden px-1 py-0 md:text-sm',
-                  hasKeyboard && 'block'
-                )}
+                color="secondary"
+                shortcutParams={['n', dispatchNoteDrawerOpen]}
               >
                 N
               </Kbd>
@@ -151,10 +142,8 @@ const Header = () => {
               />
               Log
               <Kbd
-                className={cn(
-                  'bg-primary-400 dark:bg-primary-700 text-tiny hidden px-1 py-0 md:text-sm',
-                  hasKeyboard && 'block'
-                )}
+                color="primary"
+                shortcutParams={['l', dispatchOccurrenceDrawerOpen]}
               >
                 L
               </Kbd>
@@ -174,10 +163,16 @@ const Header = () => {
               <ArrowSquareOutIcon size={16} weight="bold" />
               Roadmap
               <Kbd
-                className={cn(
-                  'bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0',
-                  hasKeyboard && 'block'
-                )}
+                color="secondary"
+                shortcutParams={[
+                  'm',
+                  () => {
+                    window.open(
+                      'https://habitrack.featurebase.app/roadmap',
+                      '_blank'
+                    );
+                  },
+                ]}
               >
                 M
               </Kbd>
