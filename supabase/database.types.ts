@@ -8,9 +8,8 @@ export type Json =
 
 export type Database = {
   auth: {
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    CompositeTypes: Record<never, never>
+    Views: Record<never, never>
     Enums: {
       aal_level: "aal1" | "aal2" | "aal3"
       code_challenge_method: "s256" | "plain"
@@ -913,11 +912,9 @@ export type Database = {
         }
       }
     }
-    Views: {
-      [_ in never]: never
-    }
   }
   public: {
+    Views: Record<never, never>
     CompositeTypes: {
       habit_stats: {
         habit_id: string | null
@@ -1249,14 +1246,10 @@ export type Database = {
         }
       }
     }
-    Views: {
-      [_ in never]: never
-    }
   }
   storage: {
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    CompositeTypes: Record<never, never>
+    Views: Record<never, never>
     Enums: {
       buckettype: "STANDARD" | "ANALYTICS" | "VECTOR"
     }
@@ -1751,9 +1744,6 @@ export type Database = {
           updated_at?: string
         }
       }
-    }
-    Views: {
-      [_ in never]: never
     }
   }
 }

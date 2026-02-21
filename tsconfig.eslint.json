@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "types": ["@types/node"],
+    "noEmit": true,
+    "allowJs": true
+  },
+  "extends": "./tsconfig.json",
+  "include": [
+    "scripts/*.js",
+    "eslint.config.js",
+    "lint-staged.config.js",
+    "relativeci.config.js"
+  ]
+}

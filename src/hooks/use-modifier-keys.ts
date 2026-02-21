@@ -1,10 +1,29 @@
+/// <reference types="user-agent-data-types" />
 import React from 'react';
 
 const useModifierKeys = () => {
   const [isMac, setIsMac] = React.useState(false);
 
   React.useEffect(() => {
-    setIsMac(/mac/i.test(navigator.platform));
+    const fallbackDetectMac = () => {
+      setIsMac(/mac/i.test(navigator.userAgent));
+    };
+
+    const detectMac = async () => {
+      if (navigator.userAgentData) {
+        try {
+          const { platform } =
+            await navigator.userAgentData.getHighEntropyValues(['platform']);
+          setIsMac(/mac/i.test(platform || ''));
+        } catch {
+          fallbackDetectMac();
+        }
+      } else {
+        fallbackDetectMac();
+      }
+    };
+
+    void detectMac();
   }, []);
 
   return {

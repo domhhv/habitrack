@@ -1,5 +1,5 @@
 import { cn, Input, Button } from '@heroui/react';
-import React from 'react';
+import { type SubmitEventHandler } from 'react';
 
 import { useTextField } from '@hooks';
 
@@ -28,7 +28,7 @@ const AuthForm = ({
   const [name, handleNameChange, clearName] = useTextField();
   const [password, handlePasswordChange, clearPassword] = useTextField();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit: SubmitEventHandler = async (event) => {
     event.preventDefault();
     onSubmit(email, password, name);
   };
