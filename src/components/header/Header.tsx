@@ -169,7 +169,8 @@ const Header = () => {
                   () => {
                     window.open(
                       'https://habitrack.featurebase.app/roadmap',
-                      '_blank'
+                      '_blank',
+                      'noopener,noreferrer'
                     );
                   },
                 ]}
