@@ -1,14 +1,14 @@
-import type { ButtonProps } from '@heroui/react';
+import type { Selection, ButtonProps } from '@heroui/react';
 import {
   cn,
   Form,
   Button,
-  Select,
   Switch,
+  Listbox,
   Textarea,
   TimeInput,
-  SelectItem,
-  SelectSection,
+  ListboxItem,
+  ListboxSection,
 } from '@heroui/react';
 import {
   now,
@@ -22,11 +22,10 @@ import {
   type CalendarDate,
   toCalendarDateTime,
 } from '@internationalized/date';
-import { ArrowsClockwiseIcon } from '@phosphor-icons/react';
 import groupBy from 'lodash.groupby';
 import isEqual from 'lodash.isequal';
 import pluralize from 'pluralize';
-import React, { type ChangeEventHandler } from 'react';
+import React from 'react';
 import { Link } from 'react-router';
 
 import { SignedImageViewer, MetricValuesSection } from '@components';
@@ -35,6 +34,7 @@ import type { Habit, Occurrence, MetricValue } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl, getLatestHabitOccurrence } from '@services';
 
+import OccurrenceChip from './OccurrenceChip';
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 
 const ALL_DAY_TIME = { hour: 12, minute: 0 };
@@ -242,7 +242,6 @@ const OccurrenceFormView = ({
         time instanceof ZonedDateTime &&
         !!time.compare(occurrenceToEdit.occurredAt);
       const hasNoteChanged = note !== (occurrenceNote?.content || '');
-      const hasHabitChanged = selectedHabitId !== occurrenceToEdit.habitId;
       const hasSpecificTimeChanged =
         hasSpecificTime !== occurrenceToEdit.hasSpecificTime;
 
@@ -272,7 +271,6 @@ const OccurrenceFormView = ({
 
       const hasOccurrenceChanged =
         hasNoteChanged ||
-        hasHabitChanged ||
         hasTimeChanged ||
         hasSpecificTimeChanged ||
         hasMetricValuesChanged ||
@@ -356,11 +354,13 @@ const OccurrenceFormView = ({
     onClose();
   };
 
-  const handleHabitSelectionChange: ChangeEventHandler<HTMLSelectElement> = (
-    e
-  ) => {
-    setSelectedHabitId(e.target.value);
-    setMetricValues({});
+  const handleHabitSelectionChange = (keys: Selection) => {
+    const id = [...keys][0] as string;
+
+    if (id) {
+      setSelectedHabitId(id);
+      setMetricValues({});
+    }
   };
 
   const formatDistanceToNow = (date: ZonedDateTime) => {
@@ -391,62 +391,73 @@ const OccurrenceFormView = ({
 
   return (
     <Form>
-      <Select
-        size="sm"
-        variant="faded"
-        maxListboxHeight={400}
-        disableSelectorIconRotation
-        selectedKeys={[selectedHabitId]}
-        onChange={handleHabitSelectionChange}
-        selectorIcon={<ArrowsClockwiseIcon />}
-        scrollShadowProps={{
-          visibility: 'bottom',
-        }}
-        label={
-          hasHabits ? 'Habits' : 'No habits yet. Create a habit to get started.'
-        }
-        description={
-          lastOccurredAt
-            ? `Last logged ${formatDistanceToNow(lastOccurredAt)} ago`
-            : 'Choose your habit'
-        }
-      >
-        {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
-          if (!habits?.length) {
-            return null;
-          }
-
-          return (
-            <SelectSection
-              showDivider
-              key={traitName}
-              title={traitName}
-              classNames={{
-                heading:
-                  'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-              }}
+      {occurrenceToEdit ? (
+        <OccurrenceChip
+          isHabitNameShown
+          hasMargin={false}
+          hasCounter={false}
+          hasTooltip={false}
+          isClickable={false}
+          occurrences={[occurrenceToEdit]}
+        />
+      ) : hasHabits ? (
+        <>
+          <div className="rounded-medium order-medium border-default-200 hover:border-default-400 focus-within:border-default-400 max-h-100 w-full overflow-y-auto border-2 px-3 py-2">
+            <Listbox
+              aria-label="Habits"
+              disallowEmptySelection
+              selectionMode="single"
+              onSelectionChange={handleHabitSelectionChange}
+              selectedKeys={new Set(selectedHabitId ? [selectedHabitId] : [])}
             >
-              {habits.map((habit) => {
+              {Object.entries(habitsByTraitName).map(([traitName, habits]) => {
+                if (!habits?.length) {
+                  return null;
+                }
+
                 return (
-                  <SelectItem key={habit.id} textValue={habit.name}>
-                    <div className="flex items-center gap-2">
-                      <img
-                        alt={habit.name}
-                        className="h-4 w-4"
-                        src={getPublicUrl(
-                          StorageBuckets.HABIT_ICONS,
-                          habit.iconPath
-                        )}
-                      />
-                      <span>{habit.name}</span>
-                    </div>
-                  </SelectItem>
+                  <ListboxSection
+                    showDivider
+                    key={traitName}
+                    title={traitName}
+                    classNames={{
+                      heading:
+                        'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
+                    }}
+                  >
+                    {habits.map((habit) => {
+                      return (
+                        <ListboxItem key={habit.id} textValue={habit.name}>
+                          <div className="flex items-center gap-2">
+                            <img
+                              alt={habit.name}
+                              className="h-4 w-4"
+                              src={getPublicUrl(
+                                StorageBuckets.HABIT_ICONS,
+                                habit.iconPath
+                              )}
+                            />
+                            <span>{habit.name}</span>
+                          </div>
+                        </ListboxItem>
+                      );
+                    })}
+                  </ListboxSection>
                 );
               })}
-            </SelectSection>
-          );
-        })}
-      </Select>
+            </Listbox>
+          </div>
+          <p className="text-tiny text-foreground-400">
+            {lastOccurredAt
+              ? `Last logged ${formatDistanceToNow(lastOccurredAt)} ago`
+              : 'Choose your habit'}
+          </p>
+        </>
+      ) : (
+        <p className="text-foreground-500 text-sm">
+          No habits yet. Create a habit to get started.
+        </p>
+      )}
       <MetricValuesSection
         values={metricValues}
         onChange={setMetricValues}
