@@ -16,9 +16,13 @@ describe(AuthForm.name, () => {
         onSubmit={onSubmit}
         onCancel={onCancel}
         isDisabled={disabled}
-        onModeChange={() => {}}
-        goBackToLogin={() => {}}
         submitButtonLabel={submitButtonLabel}
+        onModeChange={() => {
+          return;
+        }}
+        goBackToLogin={() => {
+          return;
+        }}
       />
     );
 
@@ -48,9 +52,13 @@ describe(AuthForm.name, () => {
         onSubmit={onSubmit}
         onCancel={onCancel}
         isDisabled={disabled}
-        onModeChange={() => {}}
-        goBackToLogin={() => {}}
         submitButtonLabel={submitButtonLabel}
+        onModeChange={() => {
+          return;
+        }}
+        goBackToLogin={() => {
+          return;
+        }}
       />
     );
 

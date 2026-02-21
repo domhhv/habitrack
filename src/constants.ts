@@ -48,10 +48,10 @@ export const ROLLBAR_CONFIG: RollbarConfiguration = {
   },
 };
 
-export const METRIC_PRESETS: Array<{
+export const METRIC_PRESETS: {
   group: string;
   presets: MetricPreset[];
-}> = [
+}[] = [
   {
     group: 'Duration',
     presets: [

@@ -26,6 +26,7 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
   set,
   getState
 ) => {
+  /* eslint-disable @typescript-eslint/no-dynamic-delete */
   return {
     notes: {},
     notesByOccurrenceId: {},

@@ -24,7 +24,14 @@ import { handleAsyncAction } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
 
-const formatMetricValue = (metric: HabitMetric, value: MetricValue): string => {
+const formatMetricValue = (
+  metric: HabitMetric,
+  value: MetricValue | undefined
+): string => {
+  if (value === undefined) {
+    return '';
+  }
+
   const config = metric.config as MetricConfig;
 
   switch (metric.type) {
@@ -176,7 +183,7 @@ const OccurrenceListItem = ({
       .map((d) => {
         return {
           id: d.id,
-          label: `${d.name}: ${formatMetricValue(d as HabitMetric, valuesByMetricId.get(d.id)!)}`,
+          label: `${d.name}: ${formatMetricValue(d as HabitMetric, valuesByMetricId.get(d.id))}`,
         };
       });
   }, [occurrence.habit.metricDefinitions, occurrence.metricValues]);

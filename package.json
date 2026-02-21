@@ -122,6 +122,7 @@
     "rollup-plugin-webpack-stats": "^2.1.11",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
+    "user-agent-data-types": "^0.4.2",
     "vite": "^7.3.1",
     "vite-plugin-rollbar-sourcemap": "^0.0.11",
     "vitest": "^4.0.18"

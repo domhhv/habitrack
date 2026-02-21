@@ -16,8 +16,7 @@ import {
   getLocalTimeZone,
 } from '@internationalized/date';
 import { CaretDownIcon } from '@phosphor-icons/react';
-import type { FormEvent } from 'react';
-import React from 'react';
+import React, { type SyntheticEvent } from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
 
 import {
@@ -122,7 +121,7 @@ const NoteDrawer = () => {
     }
   };
 
-  const submitNote = async (e?: FormEvent<HTMLFormElement>) => {
+  const submitNote = async (e?: SyntheticEvent<HTMLFormElement>) => {
     e?.preventDefault();
 
     if (!user || !periodDate || !content || existingNote?.content === content) {

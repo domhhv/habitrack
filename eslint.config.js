@@ -29,7 +29,8 @@ export default [
   ...fixupConfigRules(
     compat.extends(
       'eslint:recommended',
-      'plugin:@typescript-eslint/recommended',
+      'plugin:@typescript-eslint/strict',
+      'plugin:@typescript-eslint/stylistic',
       'plugin:react/recommended',
       'plugin:react-hooks/recommended',
       'plugin:switch-case/recommended',
@@ -47,6 +48,8 @@ export default [
       },
 
       parserOptions: {
+        project: ['./tsconfig.json', './tsconfig.eslint.json'],
+        tsconfigRootDir: import.meta.dirname,
         ecmaFeatures: {
           jsx: true,
         },
@@ -66,7 +69,9 @@ export default [
     },
 
     rules: {
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
       '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-deprecated': 'error',
       'arrow-body-style': ['error', 'always'],
       curly: 'error',
       'import/no-duplicates': 'error',
