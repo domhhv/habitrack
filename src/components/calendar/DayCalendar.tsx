@@ -23,7 +23,11 @@ import { useLocale, useDateFormatter } from 'react-aria';
 import { Link, useParams, useNavigate } from 'react-router';
 
 import { OccurrenceChip, SwipeableContainer } from '@components';
-import { useCurrentTime, useScreenWidth } from '@hooks';
+import {
+  useCurrentTime,
+  useScreenWidth,
+  useDefaultFirstDayOfWeek,
+} from '@hooks';
 import type { NumberMetricConfig, DurationMetricConfig } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
@@ -58,6 +62,7 @@ const DayCalendar = () => {
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
   const [swipeDirection, setSwipeDirection] = React.useState(0);
+  const defaultFirstDayOfWeek = useDefaultFirstDayOfWeek();
 
   const formatter = useDateFormatter({
     dateStyle: 'full',
@@ -260,7 +265,8 @@ const DayCalendar = () => {
     const weekStart = startOfWeek(focusedDate, locale, profile?.firstDayOfWeek);
     const weekEnd = endOfWeek(focusedDate, locale, profile?.firstDayOfWeek);
     const thursday = weekStart.add({
-      days: profile?.firstDayOfWeek === 'sun' ? 4 : 3,
+      days:
+        (profile?.firstDayOfWeek || defaultFirstDayOfWeek) === 'sun' ? 4 : 3,
     });
     const weekNumber = getISOWeek(thursday.toDate(timeZone));
 
@@ -272,7 +278,13 @@ const DayCalendar = () => {
       label: `W${weekNumber}: ${formatDay(weekStart)} – ${formatDay(weekEnd)}`,
       path: `/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`,
     };
-  }, [focusedDate, locale, profile?.firstDayOfWeek, timeZone]);
+  }, [
+    focusedDate,
+    locale,
+    profile?.firstDayOfWeek,
+    timeZone,
+    defaultFirstDayOfWeek,
+  ]);
 
   const handleCalendarChange = (value: CalendarDate) => {
     navigate(`/calendar/day/${value.year}/${value.month}/${value.day}`);

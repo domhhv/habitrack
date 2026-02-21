@@ -18,7 +18,11 @@ import { useLocale } from 'react-aria';
 import { Link, useNavigate, useLocation } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
-import { useScreenWidth, useKeyboardShortcut } from '@hooks';
+import {
+  useScreenWidth,
+  useKeyboardShortcut,
+  useDefaultFirstDayOfWeek,
+} from '@hooks';
 import {
   useProfile,
   useNoteDrawerState,
@@ -40,6 +44,7 @@ const CalendarNavigationButtons = ({
   const profile = useProfile();
   const occurrenceDrawerState = useOccurrenceDrawerState();
   const noteDrawerState = useNoteDrawerState();
+  const defaultFirstDayOfWeek = useDefaultFirstDayOfWeek();
 
   const calendarMode = React.useMemo(() => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -101,16 +106,8 @@ const CalendarNavigationButtons = ({
       return isSameMonth(focusedDate, today(timeZone));
     }
 
-    const weekStart = startOfWeek(
-      focusedDate,
-      locale,
-      profile?.firstDayOfWeek || 'mon'
-    );
-    const weekEnd = endOfWeek(
-      focusedDate,
-      locale,
-      profile?.firstDayOfWeek || 'mon'
-    );
+    const weekStart = startOfWeek(focusedDate, locale, profile?.firstDayOfWeek);
+    const weekEnd = endOfWeek(focusedDate, locale, profile?.firstDayOfWeek);
 
     return todayDate.compare(weekStart) >= 0 && todayDate.compare(weekEnd) <= 0;
   }, [calendarMode, focusedDate, profile?.firstDayOfWeek, timeZone, locale]);
@@ -128,18 +125,25 @@ const CalendarNavigationButtons = ({
       }`;
     }
 
+    const firstDayOfWeek = profile?.firstDayOfWeek || defaultFirstDayOfWeek;
     const weekStart = startOfWeek(
       todayDate,
       locale,
       profile?.firstDayOfWeek
     ).add({
-      days: profile?.firstDayOfWeek === 'sun' ? 4 : 3,
+      days: firstDayOfWeek === 'sun' ? 4 : 3,
     });
 
     return `/calendar/week/${weekStart.year}/${weekStart.month}/${
       weekStart.day
     }`;
-  }, [calendarMode, timeZone, locale, profile?.firstDayOfWeek]);
+  }, [
+    calendarMode,
+    timeZone,
+    locale,
+    profile?.firstDayOfWeek,
+    defaultFirstDayOfWeek,
+  ]);
 
   return (
     <>

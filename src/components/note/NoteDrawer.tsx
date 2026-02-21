@@ -25,6 +25,7 @@ import {
   useScreenWidth,
   useHasKeyboard,
   useModifierKeys,
+  useDefaultFirstDayOfWeek,
 } from '@hooks';
 import {
   useUser,
@@ -71,12 +72,14 @@ const NoteDrawer = () => {
     month: 'long',
     timeZone,
   });
+  const defaultFirstDayOfWeek = useDefaultFirstDayOfWeek();
 
   const alignPeriodDate = React.useCallback(() => {
-    return periodKind === 'week' && profile?.firstDayOfWeek === 'sun'
+    return periodKind === 'week' &&
+      (profile?.firstDayOfWeek || defaultFirstDayOfWeek) === 'sun'
       ? periodDate.add({ days: 1 }).toString()
       : periodDate.toString();
-  }, [periodKind, periodDate, profile?.firstDayOfWeek]);
+  }, [periodKind, periodDate, profile?.firstDayOfWeek, defaultFirstDayOfWeek]);
 
   const existingNote = React.useMemo(() => {
     return notes.find((n) => {

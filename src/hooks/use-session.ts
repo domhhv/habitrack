@@ -45,7 +45,9 @@ const useSession = () => {
         const { email, id } = session.user;
         const fetchedAt = new Date().toISOString();
 
-        void fetchProfile(id);
+        fetchProfile(id).catch((err) => {
+          rollbar.error('Failed to fetch profile', err);
+        });
         setUser({
           email,
           fetchedAt,

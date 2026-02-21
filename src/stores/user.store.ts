@@ -73,14 +73,11 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
         });
       },
       updateUser: async (opts) => {
-        console.log('updateUser');
         const { user } = getState();
 
         if (!user) {
           return;
         }
-
-        console.log('updateUser opts: ', opts);
 
         const userAttributes: UserAttributes = {};
 

@@ -129,7 +129,10 @@ const formatShortDate = (date: CalendarDate) => {
   return `${SHORT_MONTH_NAMES[date.month - 1]} ${date.day}`;
 };
 
-export const getWeeksOfYear = (year: number, firstDayOfWeek: DaysOfWeek) => {
+export const getWeeksOfYear = (
+  year: number,
+  firstDayOfWeek: DaysOfWeek = 'mon'
+) => {
   const targetDay = firstDayOfWeek === 'mon' ? 1 : 0;
 
   let current = new CalendarDate(year, 1, 1);
