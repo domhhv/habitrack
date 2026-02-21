@@ -7,10 +7,14 @@ const useModifierKeys = () => {
   React.useEffect(() => {
     const detectMac = async () => {
       if (navigator.userAgentData) {
-        const { platform } = await navigator.userAgentData.getHighEntropyValues(
-          ['platform']
-        );
-        setIsMac(/mac/i.test(platform || 'macOS'));
+        try {
+          const { platform } = await navigator.userAgentData.getHighEntropyValues(
+            ['platform']
+          );
+          setIsMac(/mac/i.test(platform || ''));
+        } catch {
+          setIsMac(/mac/i.test(navigator.userAgent));
+        }
       } else {
         setIsMac(/mac/i.test(navigator.userAgent));
       }
