@@ -40,7 +40,6 @@ import { getISOWeek, handleAsyncAction } from '@utils';
 import NotePeriodPicker from './NotePeriodPicker';
 
 const NoteDrawer = () => {
-  const { firstDayOfWeek } = useFirstDayOfWeek();
   const timeZone = getLocalTimeZone();
   const notes = usePeriodNotes();
   const { addNote, deleteNote, updateNote } = useNoteActions();
@@ -71,6 +70,7 @@ const NoteDrawer = () => {
     month: 'long',
     timeZone,
   });
+  const firstDayOfWeek = useFirstDayOfWeek();
 
   const alignPeriodDate = React.useCallback(() => {
     return periodKind === 'week' && firstDayOfWeek === 'sun'

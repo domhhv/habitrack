@@ -934,7 +934,7 @@ export type Database = {
       }
     }
     Enums: {
-      days_of_week: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun"
+      days_of_week: "sun" | "mon"
       note_period_kind: "day" | "week" | "month"
       user_plans: "free" | "pro"
       metric_type:
@@ -1898,7 +1898,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      days_of_week: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      days_of_week: ["sun", "mon"],
       note_period_kind: ["day", "week", "month"],
       user_plans: ["free", "pro"],
       metric_type: [

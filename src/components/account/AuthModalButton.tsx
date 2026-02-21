@@ -17,7 +17,8 @@ import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router';
 
-import { useScreenWidth, useKeyboardShortcut } from '@hooks';
+import { useScreenWidth, useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
+import type { DaysOfWeek } from '@models';
 import { signIn, signUp, signOut, sendPasswordResetEmail } from '@services';
 import { useUser } from '@stores';
 import { getErrorMessage } from '@utils';
@@ -32,6 +33,7 @@ const AuthModalButton = () => {
   const { isOpen, onClose, onOpen, onOpenChange } = useDisclosure();
   const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
+  const firstDayOfWeek = useFirstDayOfWeek();
 
   const handleClose = () => {
     setMode('login');
@@ -44,7 +46,12 @@ const AuthModalButton = () => {
 
   const actions: Record<
     AuthMode,
-    (email: string, password: string, name: string) => Promise<void>
+    (
+      email: string,
+      password: string,
+      name: string,
+      firstDayOfWeek: DaysOfWeek
+    ) => Promise<void>
   > = {
     login: signIn,
     register: signUp,
@@ -86,7 +93,7 @@ const AuthModalButton = () => {
     try {
       setAuthenticating(true);
 
-      await actions[mode](email, password, name);
+      await actions[mode](email, password, name, firstDayOfWeek);
 
       setAuthenticating(false);
 

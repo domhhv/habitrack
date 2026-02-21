@@ -1,18 +1,25 @@
 import { type UserAttributes } from '@supabase/supabase-js';
 import camelcaseKeys from 'camelcase-keys';
+import decamelizeKeys from 'decamelize-keys';
 
+import type { DaysOfWeek } from '@models';
 import { supabaseClient } from '@utils';
 
-export const signUp = async (email: string, password: string, name: string) => {
+export const signUp = async (
+  email: string,
+  password: string,
+  name: string,
+  firstDayOfWeek: DaysOfWeek
+) => {
   const { error } = await supabaseClient.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${window.location.origin}/account?emailConfirmed=true`,
-      data: {
-        firstDayOfWeek: 0,
+      data: decamelizeKeys({
+        firstDayOfWeek,
         name,
-      },
+      }),
     },
   });
 

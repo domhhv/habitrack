@@ -1,7 +1,10 @@
 import type { Configuration as RollbarConfiguration } from 'rollbar';
 
+import { Constants } from '@db-types';
 import type { MetricPreset } from '@models';
 import { StorageBuckets } from '@models';
+
+export const DAYS_OF_WEEK = Constants['public']['Enums']['days_of_week'];
 
 export const MAX_FILE_SIZE_MB = {
   [StorageBuckets.HABIT_ICONS]: 0.1,

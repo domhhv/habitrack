@@ -28,7 +28,7 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
   const changeCalendarRange = useCalendarRangeChange();
   const params = useParams();
   const { locale } = useLocale();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const firstDayOfWeek = useFirstDayOfWeek();
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
 

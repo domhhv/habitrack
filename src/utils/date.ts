@@ -10,6 +10,8 @@ import {
   type CalendarDateTime,
 } from '@internationalized/date';
 
+import type { DaysOfWeek } from '@models';
+
 const alignToISOWeekThursday = (value: Date) => {
   const date = new Date(value.getTime());
   date.setHours(0, 0, 0, 0);
@@ -127,7 +129,10 @@ const formatShortDate = (date: CalendarDate) => {
   return `${SHORT_MONTH_NAMES[date.month - 1]} ${date.day}`;
 };
 
-export const getWeeksOfYear = (year: number, firstDayOfWeek: 'sun' | 'mon') => {
+export const getWeeksOfYear = (
+  year: number,
+  firstDayOfWeek: DaysOfWeek = 'mon'
+) => {
   const targetDay = firstDayOfWeek === 'mon' ? 1 : 0;
 
   let current = new CalendarDate(year, 1, 1);

@@ -8,8 +8,8 @@ import { useFirstDayOfWeek } from '@hooks';
 import { createCalendar } from '@utils';
 
 const MonthCalendarPage = () => {
+  const firstDayOfWeek = useFirstDayOfWeek();
   const { locale } = useLocale();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
   const calendarState = useCalendarState({
     createCalendar,
     firstDayOfWeek,

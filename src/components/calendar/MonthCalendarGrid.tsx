@@ -28,7 +28,7 @@ type MonthCalendarGridProps = {
 const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
   const filters = useCalendarFilters();
   const occurrences = useOccurrences();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const firstDayOfWeek = useFirstDayOfWeek();
   const { gridProps, weekDays } = useCalendarGrid(
     {
       firstDayOfWeek,

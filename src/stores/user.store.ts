@@ -1,28 +1,28 @@
-import type {
-  UserAttributes,
-  User as SupabaseUser,
-} from '@supabase/supabase-js';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 import { useShallow } from 'zustand/react/shallow';
 
-import { updateUser } from '@services';
+import type { Profile, ProfilesUpdate } from '@models';
+import { getProfile, updateUser, patchProfile } from '@services';
 
 import { useBoundStore, type SliceCreator } from './bound.store';
 
-type User = SupabaseUser & {
+type User = Pick<SupabaseUser, 'id' | 'email'> & {
   fetchedAt: string;
 };
 
 export type UserSlice = {
+  profile: Profile | null;
   user: null | CamelCasedPropertiesDeep<User>;
-  actions: {
+  userActions: {
+    clearProfile: () => void;
+    fetchProfile: (userId: string) => Promise<void>;
     setUser: (user: null | CamelCasedPropertiesDeep<User>) => void;
-    updateUser: (opts: {
-      email?: string;
-      firstDayOfWeek?: string;
-      name?: string;
-      password?: string;
-    }) => Promise<CamelCasedPropertiesDeep<User> | void>;
+    updateProfile: (
+      userId: string,
+      profile: Pick<ProfilesUpdate, 'email' | 'name' | 'firstDayOfWeek'>
+    ) => Promise<void>;
+    updateUser: (opts: { email?: string; password?: string }) => Promise<void>;
   };
 };
 
@@ -31,59 +31,50 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
   getState
 ) => {
   return {
+    profile: null,
     user: null,
-    actions: {
+    userActions: {
+      clearProfile: () => {
+        set((state) => {
+          state.profile = null;
+        });
+      },
+      fetchProfile: async (userId) => {
+        if (getState().profile?.id === userId) {
+          return;
+        }
+
+        const profile = await getProfile(userId);
+
+        set((state) => {
+          state.profile = profile;
+        });
+      },
       setUser: (user) => {
+        if (getState().user?.id === user?.id) {
+          return;
+        }
+
         set((state) => {
           state.user = user;
         });
       },
-      updateUser: async (opts) => {
-        const { user } = getState();
-
-        if (!user) {
-          return;
-        }
-
-        const userAttributes: UserAttributes = {};
-
-        if (opts.email !== user.email) {
-          userAttributes.email = opts.email;
-        }
-
-        if (opts.password) {
-          userAttributes.password = opts.password;
-        }
-
-        const userMetadata: Record<string, string | number> = {};
-
-        if (
-          opts.firstDayOfWeek &&
-          opts.firstDayOfWeek !== user.userMetadata.firstDayOfWeek?.toString()
-        ) {
-          userMetadata.firstDayOfWeek = Number(opts.firstDayOfWeek);
-        }
-
-        if (opts.name && opts.name !== user.userMetadata.name) {
-          userMetadata.name = opts.name;
-        }
-
-        if (Object.keys(userMetadata).length > 0) {
-          userAttributes.data = userMetadata;
-        }
-
-        const updatedSupabaseUser = await updateUser(userAttributes);
-
-        const newUser = {
-          ...updatedSupabaseUser,
-          fetchedAt: new Date().toISOString(),
-        };
+      updateProfile: async (userId, profile) => {
+        const newProfile = await patchProfile(userId, profile);
 
         set((state) => {
-          state.user = newUser;
+          state.profile = newProfile;
         });
+      },
+      updateUser: async (opts) => {
+        const updatedSupabaseUser = await updateUser(opts);
 
-        return newUser;
+        set((state) => {
+          state.user = {
+            ...updatedSupabaseUser,
+            fetchedAt: new Date().toISOString(),
+          };
+        });
       },
     },
   };
@@ -99,8 +90,16 @@ export const useUser = () => {
   );
 };
 
+export const useProfile = () => {
+  return useBoundStore(
+    useShallow((state) => {
+      return state.profile;
+    })
+  );
+};
+
 export const useUserActions = () => {
   return useBoundStore((state) => {
-    return state.actions;
+    return state.userActions;
   });
 };

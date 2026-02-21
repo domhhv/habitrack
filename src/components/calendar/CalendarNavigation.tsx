@@ -55,12 +55,12 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   const { isOpen: isWeekSelectOpen, onOpenChange: onWeekSelectOpenChange } =
     useDisclosure();
   const navigate = useNavigate();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const firstDayOfWeek = useFirstDayOfWeek();
   const [weekSelectValue, setWeekSelectValue] = React.useState<Selection>(
     new Set([])
   );
   const weeks = React.useMemo(() => {
-    return getWeeksOfYear(focusedDate.year, firstDayOfWeek || 'mon');
+    return getWeeksOfYear(focusedDate.year, firstDayOfWeek);
   }, [focusedDate.year, firstDayOfWeek]);
 
   const calendarMode = React.useMemo(() => {

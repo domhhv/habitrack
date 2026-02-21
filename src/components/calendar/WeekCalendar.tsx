@@ -56,7 +56,7 @@ const WeekCalendar = () => {
   const occurrences = useOccurrences();
   const { locale } = useLocale();
   const params = useParams();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const firstDayOfWeek = useFirstDayOfWeek();
   const state = useCalendarState({
     createCalendar,
     firstDayOfWeek,

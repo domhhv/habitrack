@@ -1,34 +1,37 @@
 import { cn, Alert, Input, Button, Select, SelectItem } from '@heroui/react';
-import React, { type FormEventHandler } from 'react';
+import type { UserAttributes } from '@supabase/supabase-js';
+import type { SubmitEventHandler } from 'react';
+import React from 'react';
 
 import { PasswordInput } from '@components';
 import { useTextField, useAuthSearchParams } from '@hooks';
-import { useUser, useUserActions } from '@stores';
+import type { DaysOfWeek, ProfilesUpdate } from '@models';
+import { useProfile, useUserActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 const AccountPage = () => {
   useAuthSearchParams();
 
-  const { user } = useUser();
-  const { updateUser } = useUserActions();
+  const profile = useProfile();
+  const { updateProfile, updateUser } = useUserActions();
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [email, handleEmailChange] = useTextField();
-  const [password, handlePasswordChange] = useTextField();
+  const [password, handlePasswordChange, clearPassword] = useTextField();
   const [name, handleNameChange] = useTextField();
-  const [firstDayOfWeek, setFirstDayOfWeek] = React.useState('0');
+  const [firstDayOfWeek, setFirstDayOfWeek] = React.useState<DaysOfWeek>('mon');
 
   React.useEffect(() => {
-    handleEmailChange(user?.email || '');
-    handleNameChange(user?.userMetadata.name || '');
-    setFirstDayOfWeek(user?.userMetadata.firstDayOfWeek?.toString() || '0');
-  }, [user, handleEmailChange, handleNameChange]);
+    handleEmailChange(profile?.email || '');
+    handleNameChange(profile?.name || '');
+    setFirstDayOfWeek(profile?.firstDayOfWeek || 'mon');
+  }, [profile, handleEmailChange, handleNameChange]);
 
   const title = <title>My Account | Habitrack</title>;
 
   const containerClassName =
     'w-full mt-8 flex flex-col items-center justify-center';
 
-  if (!user) {
+  if (!profile) {
     return (
       <div className={cn(containerClassName, 'items-start pt-16')}>
         {title}
@@ -41,18 +44,47 @@ const AccountPage = () => {
     );
   }
 
-  const handleSubmit: FormEventHandler = (e) => {
+  const handleSubmit: SubmitEventHandler = (e) => {
     e.preventDefault();
 
-    void handleAsyncAction(
-      updateUser({
-        email,
-        firstDayOfWeek,
-        name,
-        password,
-      }),
-      'update_account',
-      setIsUpdating
+    const updateUserData = async () => {
+      const promises = [];
+      const userAttributes: UserAttributes = {};
+      const profileUpdatePayload: Pick<
+        ProfilesUpdate,
+        'email' | 'name' | 'firstDayOfWeek'
+      > = {};
+
+      if (password) {
+        userAttributes.password = password;
+      }
+
+      if (email !== profile.email) {
+        userAttributes.email = email;
+        profileUpdatePayload.email = email;
+      }
+
+      if (firstDayOfWeek !== profile.firstDayOfWeek) {
+        profileUpdatePayload.firstDayOfWeek = firstDayOfWeek;
+      }
+
+      if (name !== profile.name) {
+        profileUpdatePayload.name = name;
+      }
+
+      if (Object.keys(profileUpdatePayload).length) {
+        promises.push(updateProfile(profile.id, profileUpdatePayload));
+      }
+
+      if (Object.keys(userAttributes).length) {
+        promises.push(updateUser(userAttributes));
+      }
+
+      await Promise.all(promises);
+    };
+
+    handleAsyncAction(updateUserData(), 'update_account', setIsUpdating).then(
+      clearPassword
     );
   };
 
@@ -100,14 +132,12 @@ const AccountPage = () => {
               onSelectionChange={(value) => {
                 const [newDay] = Array.from(value);
 
-                if (typeof newDay === 'string') {
-                  setFirstDayOfWeek(newDay);
-                }
+                setFirstDayOfWeek(newDay as DaysOfWeek);
               }}
             >
               {[
-                { key: '0', label: 'Sunday' },
-                { key: '1', label: 'Monday' },
+                { key: 'sun', label: 'Sunday' },
+                { key: 'mon', label: 'Monday' },
               ].map((day) => {
                 return <SelectItem key={day.key}>{day.label}</SelectItem>;
               })}
@@ -118,10 +148,9 @@ const AccountPage = () => {
               color="primary"
               isLoading={isUpdating}
               isDisabled={
-                firstDayOfWeek ===
-                  (user?.userMetadata.firstDayOfWeek?.toString() ?? '0') &&
-                name === user?.userMetadata.name &&
-                email === user?.email &&
+                firstDayOfWeek === profile.firstDayOfWeek &&
+                name === profile.name &&
+                email === profile.email &&
                 !password
               }
             >

@@ -1,25 +1,27 @@
-import { useUser } from '@stores';
+import { getLocalTimeZone } from '@internationalized/date';
+import { useLocale } from 'react-aria';
+import { useCalendarState } from 'react-stately';
 
-const firstDaysOfWeek = ['sun', 'mon'] as const;
+import { DAYS_OF_WEEK } from '@const';
+import { useProfile } from '@stores';
+import { createCalendar } from '@utils';
 
-// TODO: remove and use the corresponding value from to be integrated profile store
 const useFirstDayOfWeek = () => {
-  const { user } = useUser();
-  const userFirstDayOfWeek = user?.userMetadata.firstDayOfWeek;
-  const firstDayOfWeekIndex =
-    typeof userFirstDayOfWeek === 'number' &&
-    userFirstDayOfWeek >= 0 &&
-    userFirstDayOfWeek < 2
-      ? userFirstDayOfWeek
-      : null;
+  const profile = useProfile();
+  const { locale } = useLocale();
+  const calendarState = useCalendarState({
+    createCalendar,
+    locale,
+  });
 
-  const firstDayOfWeek = firstDayOfWeekIndex
-    ? firstDaysOfWeek[firstDayOfWeekIndex]
-    : undefined;
+  if (profile) {
+    return profile.firstDayOfWeek;
+  }
 
-  return {
-    firstDayOfWeek,
-  };
+  const [firstDate] = calendarState.getDatesInWeek(0);
+  const dayIndex = firstDate?.toDate(getLocalTimeZone()).getDay() ?? 1;
+
+  return DAYS_OF_WEEK[dayIndex] ?? DAYS_OF_WEEK[1];
 };
 
 export default useFirstDayOfWeek;

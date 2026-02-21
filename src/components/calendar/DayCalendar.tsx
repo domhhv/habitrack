@@ -48,7 +48,6 @@ const DayCalendar = () => {
   const occurrences = useOccurrences();
   const params = useParams();
   const navigate = useNavigate();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
   const { locale } = useLocale();
   const timeZone = getLocalTimeZone();
   const [focusedDate, setFocusedDate] = React.useState(() => {
@@ -57,6 +56,7 @@ const DayCalendar = () => {
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
   const [swipeDirection, setSwipeDirection] = React.useState(0);
+  const firstDayOfWeek = useFirstDayOfWeek();
 
   const formatter = useDateFormatter({
     dateStyle: 'full',
@@ -294,8 +294,8 @@ const DayCalendar = () => {
       <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-1 pl-8 md:flex">
         <Calendar
           value={focusedDate}
-          firstDayOfWeek={firstDayOfWeek}
           onChange={handleCalendarChange}
+          firstDayOfWeek={firstDayOfWeek}
           classNames={{
             base: 'w-full shadow-none bg-transparent',
             content: 'w-full',

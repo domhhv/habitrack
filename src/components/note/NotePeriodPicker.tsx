@@ -29,7 +29,7 @@ const NotePeriodPicker = ({
   isShown,
   onBeforeChange,
 }: NotePeriodPickerProps) => {
-  const { firstDayOfWeek } = useFirstDayOfWeek();
+  const firstDayOfWeek = useFirstDayOfWeek();
   const { locale } = useLocale();
   const { screenWidth } = useScreenWidth();
   const { periodDate, periodKind } = useNoteDrawerState();

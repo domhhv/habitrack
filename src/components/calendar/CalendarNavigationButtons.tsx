@@ -33,9 +33,9 @@ const CalendarNavigationButtons = ({
   const { locale } = useLocale();
   const { isMobile, screenWidth } = useScreenWidth();
   const navigate = useNavigate();
-  const { firstDayOfWeek } = useFirstDayOfWeek();
   const occurrenceDrawerState = useOccurrenceDrawerState();
   const noteDrawerState = useNoteDrawerState();
+  const firstDayOfWeek = useFirstDayOfWeek();
 
   const calendarMode = React.useMemo(() => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
