@@ -30,6 +30,7 @@ const useModifierKeys = () => {
   return {
     alt: isMac ? '⌥' : 'Alt',
     ctrl: isMac ? '⌃' : 'Ctrl',
+    enter: '⏎',
     mod: isMac ? '⌘' : 'Ctrl',
     shift: '⇧',
   };

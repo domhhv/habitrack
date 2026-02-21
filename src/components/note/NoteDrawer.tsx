@@ -49,7 +49,7 @@ const NoteDrawer = () => {
   const [isPeriodPickerShown, setIsPeriodPickerShown] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isRemoving, setIsRemoving] = React.useState(false);
-  const { mod } = useModifierKeys();
+  const { enter, mod } = useModifierKeys();
   const hasKeyboard = useHasKeyboard();
   const { isOpen, periodDate, periodKind } = useNoteDrawerState();
   const { closeNoteDrawer } = useNoteDrawerActions();
@@ -304,7 +304,7 @@ const NoteDrawer = () => {
               }}
             />
           </DrawerBody>
-          <DrawerFooter className="self-end pt-0">
+          <DrawerFooter className="w-full self-end pt-0 sm:w-auto">
             {!!existingNote && (
               <Button
                 color="danger"
@@ -319,6 +319,7 @@ const NoteDrawer = () => {
               type="submit"
               color="primary"
               isLoading={isSaving}
+              fullWidth={isMobile && !existingNote}
               isDisabled={
                 !user ||
                 isRemoving ||
@@ -326,17 +327,14 @@ const NoteDrawer = () => {
                 existingNote?.content === content
               }
             >
-              {hasKeyboard && (
-                <>
-                  <Kbd className="[&_span]:text-default-500 dark:[&_span]:text-default-700">
-                    {mod}
-                  </Kbd>
-                  <Kbd
-                    keys={['enter']}
-                    className="[&_abbr]:text-default-500 dark:[&_abbr]:text-default-700"
-                  />
-                </>
-              )}
+              <Kbd
+                className={cn(
+                  'bg-primary-400 dark:bg-primary-700 text-tiny hidden px-1.5 py-0.5 md:text-sm',
+                  hasKeyboard && 'block'
+                )}
+              >
+                {mod} {enter}
+              </Kbd>
               {existingNote ? 'Save' : 'Add'}
             </Button>
           </DrawerFooter>

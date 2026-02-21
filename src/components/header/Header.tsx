@@ -130,8 +130,8 @@ const Header = () => {
               Note
               <Kbd
                 className={cn(
-                  'bg-secondary-300 dark:bg-secondary-700 text-tiny px-1 py-0 md:text-sm',
-                  !hasKeyboard && 'hidden lg:block'
+                  'bg-secondary-300 dark:bg-secondary-700 text-tiny hidden px-1 py-0 md:text-sm',
+                  hasKeyboard && 'block'
                 )}
               >
                 N
@@ -152,8 +152,8 @@ const Header = () => {
               Log
               <Kbd
                 className={cn(
-                  'bg-primary-400 dark:bg-primary-700 text-tiny px-1 py-0 md:text-sm',
-                  !hasKeyboard && 'hidden lg:block'
+                  'bg-primary-400 dark:bg-primary-700 text-tiny hidden px-1 py-0 md:text-sm',
+                  hasKeyboard && 'block'
                 )}
               >
                 L
@@ -173,7 +173,12 @@ const Header = () => {
             >
               <ArrowSquareOutIcon size={16} weight="bold" />
               Roadmap
-              <Kbd className="bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0 lg:block">
+              <Kbd
+                className={cn(
+                  'bg-secondary-300 dark:bg-secondary-700 hidden px-1 py-0',
+                  hasKeyboard && 'block'
+                )}
+              >
                 M
               </Kbd>
             </Button>
