@@ -21,7 +21,7 @@ const useFirstDayOfWeek = () => {
   const [firstDate] = calendarState.getDatesInWeek(0);
   const dayIndex = firstDate?.toDate(getLocalTimeZone()).getDay() ?? 1;
 
-  return DAYS_OF_WEEK[dayIndex];
+  return DAYS_OF_WEEK[dayIndex] ?? DAYS_OF_WEEK[1];
 };
 
 export default useFirstDayOfWeek;
