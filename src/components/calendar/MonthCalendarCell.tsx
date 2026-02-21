@@ -54,7 +54,7 @@ const MonthCalendarCell = ({
   state,
 }: MonthCalendarCellProps) => {
   const dayNotes = useDayNotes();
-  const { user } = useUser();
+  const user = useUser();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { isDesktop, isMobile, screenWidth } = useScreenWidth();

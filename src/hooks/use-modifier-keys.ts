@@ -9,21 +9,22 @@ const useModifierKeys = () => {
       setIsMac(/mac/i.test(navigator.userAgent));
     };
 
-    const detectMac = async () => {
-      if (navigator.userAgentData) {
-        try {
-          const { platform } =
-            await navigator.userAgentData.getHighEntropyValues(['platform']);
-          setIsMac(/mac/i.test(platform || ''));
-        } catch {
-          fallbackDetectMac();
-        }
-      } else {
-        fallbackDetectMac();
-      }
-    };
+    if (navigator.userAgentData) {
+      navigator.userAgentData
+        .getHighEntropyValues(['platform'])
+        .then(({ platform }) => {
+          if (platform !== undefined) {
+            return setIsMac(/mac/i.test(platform));
+          }
 
-    void detectMac();
+          return fallbackDetectMac();
+        })
+        .catch(fallbackDetectMac);
+
+      return;
+    }
+
+    fallbackDetectMac();
   }, []);
 
   return {

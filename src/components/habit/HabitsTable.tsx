@@ -52,7 +52,7 @@ const HabitsTable = () => {
     year: 'numeric',
   });
 
-  const { user } = useUser();
+  const user = useUser();
   const habits = useHabits();
   const { removeHabit } = useHabitActions();
   const { askConfirmation } = useConfirmationActions();

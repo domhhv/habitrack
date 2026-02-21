@@ -131,11 +131,9 @@ export const useNotes = () => {
 };
 
 export const useNotesByOccurrenceId = () => {
-  return useBoundStore(
-    useShallow((state) => {
-      return state.notesByOccurrenceId;
-    })
-  );
+  return useBoundStore((state) => {
+    return state.notesByOccurrenceId;
+  });
 };
 
 export const usePeriodNotes = () => {

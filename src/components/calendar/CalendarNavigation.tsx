@@ -28,7 +28,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   const changeCalendarFilters = useCalendarFiltersChange();
   const location = useLocation();
 
-  const { user } = useUser();
+  const user = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
   const [monthSelectValue, setMonthSelectValue] = React.useState<Selection>(
     new Set([])

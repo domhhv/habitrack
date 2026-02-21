@@ -8,7 +8,7 @@ import { supabaseClient } from '@utils';
 const useSession = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error>();
-  const { user } = useUser();
+  const user = useUser();
   const { fetchProfile, setUser } = useUserActions();
   const rollbar = useRollbar();
 

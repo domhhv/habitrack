@@ -5,7 +5,6 @@ import {
   toCalendarDate,
   getLocalTimeZone,
 } from '@internationalized/date';
-import { useShallow } from 'zustand/react/shallow';
 
 import type {
   Occurrence,
@@ -226,11 +225,9 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
 };
 
 export const useOccurrences = () => {
-  return useBoundStore(
-    useShallow((state) => {
-      return state.occurrencesByDate;
-    })
-  );
+  return useBoundStore((state) => {
+    return state.occurrencesByDate;
+  });
 };
 
 export const useOccurrenceActions = () => {

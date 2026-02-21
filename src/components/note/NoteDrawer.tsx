@@ -43,7 +43,7 @@ const NoteDrawer = () => {
   const notes = usePeriodNotes();
   const { addNote, deleteNote, updateNote } = useNoteActions();
   const { locale } = useLocale();
-  const { user } = useUser();
+  const user = useUser();
   const [content, changeContent, clearContent] = useTextField();
   const { isDesktop, isMobile } = useScreenWidth();
   const [isPeriodPickerShown, setIsPeriodPickerShown] = React.useState(false);

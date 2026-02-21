@@ -38,7 +38,7 @@ const AddHabitDialogButton = () => {
   >([]);
 
   const traits = useTraits();
-  const { user } = useUser();
+  const user = useUser();
   const { addHabit } = useHabitActions();
   const { addHabitMetrics } = useMetricsActions();
   const [icon, handleIconChange, clearIcon] = useFileField();

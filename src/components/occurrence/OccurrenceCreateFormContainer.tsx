@@ -23,7 +23,7 @@ const OccurrenceCreateFormContainer = () => {
   const timeZone = getLocalTimeZone();
   const { closeOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { dayToLog } = useOccurrenceDrawerState();
-  const { user } = useUser();
+  const user = useUser();
   const habits = useHabits();
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote } = useNoteActions();

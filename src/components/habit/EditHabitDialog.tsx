@@ -43,7 +43,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
   const { addHabitMetrics, removeHabitMetrics, updateHabitMetric } =
     useMetricsActions();
   const traits = useTraits();
-  const { user } = useUser();
+  const user = useUser();
 
   React.useEffect(() => {
     if (habit) {

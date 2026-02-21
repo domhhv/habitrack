@@ -27,7 +27,7 @@ const CalendarFilters = () => {
   const habits = useHabits();
   const traits = useTraits();
   const filters = useCalendarFilters();
-  const { user } = useUser();
+  const user = useUser();
   const { isDesktop } = useScreenWidth();
   const changeCalendarFilters = useCalendarFiltersChange();
   const {
