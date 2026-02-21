@@ -1,6 +1,5 @@
 import {
   cn,
-  Kbd,
   Form,
   Drawer,
   Button,
@@ -19,10 +18,10 @@ import { CaretDownIcon } from '@phosphor-icons/react';
 import React, { type SyntheticEvent } from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
 
+import { Kbd } from '@components';
 import {
   useTextField,
   useScreenWidth,
-  useHasKeyboard,
   useModifierKeys,
   useFirstDayOfWeek,
 } from '@hooks';
@@ -50,7 +49,6 @@ const NoteDrawer = () => {
   const [isSaving, setIsSaving] = React.useState(false);
   const [isRemoving, setIsRemoving] = React.useState(false);
   const { enter, mod } = useModifierKeys();
-  const hasKeyboard = useHasKeyboard();
   const { isOpen, periodDate, periodKind } = useNoteDrawerState();
   const { closeNoteDrawer } = useNoteDrawerActions();
   const { askConfirmation } = useConfirmationActions();
@@ -327,12 +325,7 @@ const NoteDrawer = () => {
                 existingNote?.content === content
               }
             >
-              <Kbd
-                className={cn(
-                  'bg-primary-400 dark:bg-primary-700 text-tiny hidden px-1.5 py-0.5 md:text-sm',
-                  hasKeyboard && 'block'
-                )}
-              >
+              <Kbd size="md" color="primary">
                 {mod} {enter}
               </Kbd>
               {existingNote ? 'Save' : 'Add'}

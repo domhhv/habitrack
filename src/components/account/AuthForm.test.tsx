@@ -2,6 +2,8 @@ import { act, render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { it, vi, expect, describe } from 'vitest';
 
+import { noop } from '@utils';
+
 import AuthForm from './AuthForm';
 
 describe(AuthForm.name, () => {
@@ -15,14 +17,10 @@ describe(AuthForm.name, () => {
         mode="login"
         onSubmit={onSubmit}
         onCancel={onCancel}
+        onModeChange={noop}
+        goBackToLogin={noop}
         isDisabled={disabled}
         submitButtonLabel={submitButtonLabel}
-        onModeChange={() => {
-          return;
-        }}
-        goBackToLogin={() => {
-          return;
-        }}
       />
     );
 
@@ -51,14 +49,10 @@ describe(AuthForm.name, () => {
         mode="login"
         onSubmit={onSubmit}
         onCancel={onCancel}
+        onModeChange={noop}
+        goBackToLogin={noop}
         isDisabled={disabled}
         submitButtonLabel={submitButtonLabel}
-        onModeChange={() => {
-          return;
-        }}
-        goBackToLogin={() => {
-          return;
-        }}
       />
     );
 
