@@ -5,18 +5,21 @@ const useModifierKeys = () => {
   const [isMac, setIsMac] = React.useState(false);
 
   React.useEffect(() => {
+    const fallbackDetectMac = () => {
+      setIsMac(/mac/i.test(navigator.userAgent));
+    };
+
     const detectMac = async () => {
       if (navigator.userAgentData) {
         try {
-          const { platform } = await navigator.userAgentData.getHighEntropyValues(
-            ['platform']
-          );
+          const { platform } =
+            await navigator.userAgentData.getHighEntropyValues(['platform']);
           setIsMac(/mac/i.test(platform || ''));
         } catch {
-          setIsMac(/mac/i.test(navigator.userAgent));
+          fallbackDetectMac();
         }
       } else {
-        setIsMac(/mac/i.test(navigator.userAgent));
+        fallbackDetectMac();
       }
     };
 
