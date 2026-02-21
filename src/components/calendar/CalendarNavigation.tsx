@@ -8,13 +8,8 @@ import { useDateFormatter } from 'react-aria';
 import { useLocation, useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
-import { useScreenWidth, useDefaultFirstDayOfWeek } from '@hooks';
-import {
-  useUser,
-  useProfile,
-  useCalendarFilters,
-  useCalendarFiltersChange,
-} from '@stores';
+import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
+import { useUser, useCalendarFilters, useCalendarFiltersChange } from '@stores';
 import { getWeeksOfYear } from '@utils';
 
 import CalendarNavigationButtons from './CalendarNavigationButtons';
@@ -60,17 +55,13 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   const { isOpen: isWeekSelectOpen, onOpenChange: onWeekSelectOpenChange } =
     useDisclosure();
   const navigate = useNavigate();
-  const defaultFirstDayOfWeek = useDefaultFirstDayOfWeek();
-  const profile = useProfile();
+  const firstDayOfWeek = useFirstDayOfWeek();
   const [weekSelectValue, setWeekSelectValue] = React.useState<Selection>(
     new Set([])
   );
   const weeks = React.useMemo(() => {
-    return getWeeksOfYear(
-      focusedDate.year,
-      profile?.firstDayOfWeek || defaultFirstDayOfWeek
-    );
-  }, [focusedDate.year, profile?.firstDayOfWeek, defaultFirstDayOfWeek]);
+    return getWeeksOfYear(focusedDate.year, firstDayOfWeek);
+  }, [focusedDate.year, firstDayOfWeek]);
 
   const calendarMode = React.useMemo(() => {
     const pathSegments = location.pathname.split('/').filter(Boolean);

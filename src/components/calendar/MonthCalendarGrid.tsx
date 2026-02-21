@@ -9,9 +9,8 @@ import { useLocale, useCalendarGrid } from 'react-aria';
 import { Link } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
-  useProfile,
   useWeekNotes,
   useOccurrences,
   useCalendarFilters,
@@ -29,10 +28,10 @@ type MonthCalendarGridProps = {
 const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
   const filters = useCalendarFilters();
   const occurrences = useOccurrences();
-  const profile = useProfile();
+  const firstDayOfWeek = useFirstDayOfWeek();
   const { gridProps, weekDays } = useCalendarGrid(
     {
-      firstDayOfWeek: profile?.firstDayOfWeek,
+      firstDayOfWeek,
       weekdayStyle: 'short',
     },
     state
@@ -42,7 +41,7 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
   const weeksInMonthCount = getWeeksInMonth(
     state.visibleRange.start,
     locale,
-    profile?.firstDayOfWeek
+    firstDayOfWeek
   );
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const weekNotes = useWeekNotes();

@@ -23,16 +23,11 @@ import { useLocale, useDateFormatter } from 'react-aria';
 import { Link, useParams, useNavigate } from 'react-router';
 
 import { OccurrenceChip, SwipeableContainer } from '@components';
-import {
-  useCurrentTime,
-  useScreenWidth,
-  useDefaultFirstDayOfWeek,
-} from '@hooks';
+import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import type { NumberMetricConfig, DurationMetricConfig } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import {
-  useProfile,
   useDayNotes,
   useOccurrences,
   useNoteDrawerActions,
@@ -53,7 +48,6 @@ const DayCalendar = () => {
   const occurrences = useOccurrences();
   const params = useParams();
   const navigate = useNavigate();
-  const profile = useProfile();
   const { locale } = useLocale();
   const timeZone = getLocalTimeZone();
   const [focusedDate, setFocusedDate] = React.useState(() => {
@@ -62,7 +56,7 @@ const DayCalendar = () => {
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
   const [swipeDirection, setSwipeDirection] = React.useState(0);
-  const defaultFirstDayOfWeek = useDefaultFirstDayOfWeek();
+  const firstDayOfWeek = useFirstDayOfWeek();
 
   const formatter = useDateFormatter({
     dateStyle: 'full',
@@ -262,11 +256,10 @@ const DayCalendar = () => {
   }, [formatter, focusedDate, timeZone]);
 
   const weekInfo = React.useMemo(() => {
-    const weekStart = startOfWeek(focusedDate, locale, profile?.firstDayOfWeek);
-    const weekEnd = endOfWeek(focusedDate, locale, profile?.firstDayOfWeek);
+    const weekStart = startOfWeek(focusedDate, locale, firstDayOfWeek);
+    const weekEnd = endOfWeek(focusedDate, locale, firstDayOfWeek);
     const thursday = weekStart.add({
-      days:
-        (profile?.firstDayOfWeek || defaultFirstDayOfWeek) === 'sun' ? 4 : 3,
+      days: firstDayOfWeek === 'sun' ? 4 : 3,
     });
     const weekNumber = getISOWeek(thursday.toDate(timeZone));
 
@@ -278,13 +271,7 @@ const DayCalendar = () => {
       label: `W${weekNumber}: ${formatDay(weekStart)} – ${formatDay(weekEnd)}`,
       path: `/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`,
     };
-  }, [
-    focusedDate,
-    locale,
-    profile?.firstDayOfWeek,
-    timeZone,
-    defaultFirstDayOfWeek,
-  ]);
+  }, [focusedDate, locale, firstDayOfWeek, timeZone]);
 
   const handleCalendarChange = (value: CalendarDate) => {
     navigate(`/calendar/day/${value.year}/${value.month}/${value.day}`);
@@ -308,7 +295,7 @@ const DayCalendar = () => {
         <Calendar
           value={focusedDate}
           onChange={handleCalendarChange}
-          firstDayOfWeek={profile?.firstDayOfWeek}
+          firstDayOfWeek={firstDayOfWeek}
           classNames={{
             base: 'w-full shadow-none bg-transparent',
             content: 'w-full',

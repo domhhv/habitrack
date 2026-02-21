@@ -1,7 +1,4 @@
-import type {
-  UserAttributes,
-  User as SupabaseUser,
-} from '@supabase/supabase-js';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -25,10 +22,7 @@ export type UserSlice = {
       userId: string,
       profile: Pick<ProfilesUpdate, 'email' | 'name' | 'firstDayOfWeek'>
     ) => Promise<void>;
-    updateUser: (opts: {
-      email?: string;
-      password?: string;
-    }) => Promise<CamelCasedPropertiesDeep<User> | void>;
+    updateUser: (opts: { email?: string; password?: string }) => Promise<void>;
   };
 };
 
@@ -73,38 +67,14 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
         });
       },
       updateUser: async (opts) => {
-        const { user } = getState();
-
-        if (!user) {
-          return;
-        }
-
-        const userAttributes: UserAttributes = {};
-
-        if (opts.email !== user.email) {
-          userAttributes.email = opts.email;
-        }
-
-        if (opts.password) {
-          userAttributes.password = opts.password;
-        }
-
-        if (!Object.keys(userAttributes).length) {
-          return;
-        }
-
-        const updatedSupabaseUser = await updateUser(userAttributes);
-
-        const newUser = {
-          ...updatedSupabaseUser,
-          fetchedAt: new Date().toISOString(),
-        };
+        const updatedSupabaseUser = await updateUser(opts);
 
         set((state) => {
-          state.user = newUser;
+          state.user = {
+            ...updatedSupabaseUser,
+            fetchedAt: new Date().toISOString(),
+          };
         });
-
-        return newUser;
       },
     },
   };

@@ -50,6 +50,6 @@ CREATE TYPE "public"."user_plans" AS ENUM ('free', 'pro');
 ALTER TYPE "public"."user_plans" OWNER TO "postgres";
 
 -- Type for days of the week --
-CREATE TYPE "public"."days_of_week" AS ENUM ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun');
+CREATE TYPE "public"."days_of_week" AS ENUM ('sun', 'mon');
 
 ALTER TYPE "public"."days_of_week" OWNER TO "postgres";

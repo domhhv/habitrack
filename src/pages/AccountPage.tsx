@@ -1,4 +1,5 @@
 import { cn, Alert, Input, Button, Select, SelectItem } from '@heroui/react';
+import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
 import React from 'react';
 
@@ -47,10 +48,21 @@ const AccountPage = () => {
     e.preventDefault();
 
     const updateUserData = async () => {
+      const promises = [];
+      const userAttributes: UserAttributes = {};
       const profileUpdatePayload: Pick<
         ProfilesUpdate,
         'email' | 'name' | 'firstDayOfWeek'
       > = {};
+
+      if (password) {
+        userAttributes.password = password;
+      }
+
+      if (email !== profile.email) {
+        userAttributes.email = email;
+        profileUpdatePayload.email = email;
+      }
 
       if (firstDayOfWeek !== profile.firstDayOfWeek) {
         profileUpdatePayload.firstDayOfWeek = firstDayOfWeek;
@@ -60,24 +72,15 @@ const AccountPage = () => {
         profileUpdatePayload.name = name;
       }
 
-      if (email !== profile.email) {
-        profileUpdatePayload.email = email;
+      if (Object.keys(profileUpdatePayload).length) {
+        promises.push(updateProfile(profile.id, profileUpdatePayload));
       }
 
-      if (!Object.keys(profileUpdatePayload).length) {
-        return updateUser({
-          email,
-          password,
-        });
+      if (Object.keys(userAttributes).length) {
+        promises.push(updateUser(userAttributes));
       }
 
-      await Promise.all([
-        updateProfile(profile.id, profileUpdatePayload),
-        updateUser({
-          email,
-          password,
-        }),
-      ]);
+      await Promise.all(promises);
     };
 
     handleAsyncAction(updateUserData(), 'update_account', setIsUpdating).then(

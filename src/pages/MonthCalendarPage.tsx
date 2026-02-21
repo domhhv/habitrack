@@ -4,15 +4,15 @@ import { useLocale, useCalendar } from 'react-aria';
 import { useCalendarState } from 'react-stately';
 
 import { MonthCalendar } from '@components';
-import { useProfile } from '@stores';
+import { useFirstDayOfWeek } from '@hooks';
 import { createCalendar } from '@utils';
 
 const MonthCalendarPage = () => {
+  const firstDayOfWeek = useFirstDayOfWeek();
   const { locale } = useLocale();
-  const profile = useProfile();
   const calendarState = useCalendarState({
     createCalendar,
-    firstDayOfWeek: profile?.firstDayOfWeek,
+    firstDayOfWeek,
     locale,
   });
   const { calendarProps, title } = useCalendar({}, calendarState);
