@@ -13,7 +13,7 @@ type HabitIconCellProps = {
 
 const HabitIcon = ({ habit }: HabitIconCellProps) => {
   const { updateHabit } = useHabitActions();
-  const { user } = useUser();
+  const user = useUser();
   const [isUploading, setIsUploading] = React.useState(false);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async ({

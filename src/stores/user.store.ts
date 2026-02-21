@@ -1,6 +1,5 @@
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
-import { useShallow } from 'zustand/react/shallow';
 
 import type { Profile, ProfilesUpdate } from '@models';
 import { getProfile, updateUser, patchProfile } from '@services';
@@ -81,21 +80,15 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
 };
 
 export const useUser = () => {
-  return useBoundStore(
-    useShallow((state) => {
-      return {
-        user: state.user,
-      };
-    })
-  );
+  return useBoundStore((state) => {
+    return state.user;
+  });
 };
 
 export const useProfile = () => {
-  return useBoundStore(
-    useShallow((state) => {
-      return state.profile;
-    })
-  );
+  return useBoundStore((state) => {
+    return state.profile;
+  });
 };
 
 export const useUserActions = () => {

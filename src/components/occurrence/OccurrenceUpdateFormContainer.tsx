@@ -22,7 +22,7 @@ import OccurrenceFormView, {
 const OccurrenceUpdateFormContainer = () => {
   const { closeOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { occurrenceToEdit } = useOccurrenceDrawerState();
-  const { user } = useUser();
+  const user = useUser();
   const habits = useHabits();
   const notes = useNotesByOccurrenceId();
   const [isSaving, setIsSaving] = React.useState(false);

@@ -1,4 +1,5 @@
 import {
+  cn,
   Tab,
   Kbd,
   Tabs,
@@ -17,7 +18,12 @@ import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { Link } from 'react-router';
 
-import { useScreenWidth, useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
+import {
+  useScreenWidth,
+  useHasKeyboard,
+  useFirstDayOfWeek,
+  useKeyboardShortcut,
+} from '@hooks';
 import type { DaysOfWeek } from '@models';
 import { signIn, signUp, signOut, sendPasswordResetEmail } from '@services';
 import { useUser } from '@stores';
@@ -28,12 +34,13 @@ import AuthForm from './AuthForm';
 type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
-  const { user } = useUser();
+  const user = useUser();
   const { screenWidth } = useScreenWidth();
   const { isOpen, onClose, onOpen, onOpenChange } = useDisclosure();
   const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
   const firstDayOfWeek = useFirstDayOfWeek();
+  const hasKeyboard = useHasKeyboard();
 
   const handleClose = () => {
     setMode('login');
@@ -172,7 +179,12 @@ const AuthModalButton = () => {
           onPress={onOpen}
           data-testid="auth-button"
         >
-          <Kbd className="bg-primary-300 dark:bg-primary-700 hidden px-1 py-0 lg:block">
+          <Kbd
+            className={cn(
+              'bg-primary-400 dark:bg-primary-700 text-tiny px-1 py-0 md:text-sm',
+              !hasKeyboard && 'hidden lg:block'
+            )}
+          >
             I
           </Kbd>
           Log In

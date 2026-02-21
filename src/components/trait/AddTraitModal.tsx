@@ -26,7 +26,7 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
   const [color, setTraitColor] = React.useState('#94a3b8');
   const [isAdding, setIsAdding] = React.useState(false);
 
-  const { user } = useUser();
+  const user = useUser();
   const { addTrait } = useTraitActions();
   const [label, handleLabelChange, clearLabel] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
