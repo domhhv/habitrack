@@ -8,14 +8,14 @@ import React from 'react';
 import { I18nProvider } from 'react-aria';
 import { useNavigate } from 'react-router';
 
-import { ROLLBAR_CONFIG } from '@const';
 import { ErrorFallbackPage } from '@pages';
+import { rollbar } from '@utils';
 
 const Providers = ({ children }: PropsWithChildren) => {
   const navigate = useNavigate();
 
   return (
-    <RollbarProvider config={ROLLBAR_CONFIG}>
+    <RollbarProvider instance={rollbar}>
       <RollbarErrorBoundary fallbackUI={ErrorFallbackPage}>
         <HeroUIProvider navigate={navigate}>
           <I18nProvider>{children}</I18nProvider>

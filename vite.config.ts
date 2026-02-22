@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
     baseUrl: env.VERCEL_URL ? `https://${env.VERCEL_URL}` : env.BASE_URL,
     ignoreUploadErrors: true,
     silent: true,
-    version: '1.0.0',
+    version: env.VERCEL_GIT_COMMIT_SHA || '0.1.0',
   };
 
   return {
@@ -85,6 +85,7 @@ export default defineConfig(({ mode }) => {
       ROLLBAR_CLIENT_ENV: JSON.stringify(env.ROLLBAR_CLIENT_ENV),
       SUPABASE_ANON_KEY: JSON.stringify(env.SUPABASE_ANON_KEY),
       SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
+      VERCEL_GIT_COMMIT_SHA: JSON.stringify(env.VERCEL_GIT_COMMIT_SHA),
       ROLLBAR_CLIENT_ACCESS_TOKEN: JSON.stringify(
         env.ROLLBAR_CLIENT_ACCESS_TOKEN
       ),

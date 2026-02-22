@@ -2,6 +2,7 @@ import { addToast } from '@heroui/react';
 import capitalize from 'lodash.capitalize';
 
 import getErrorMessage from './get-error-message';
+import rollbar from './rollbar';
 
 type ActionVerb = 'add' | 'update' | 'remove' | 'fetch' | 'upload' | 'log';
 type EntityNoun =
@@ -16,7 +17,7 @@ type EntityNoun =
 
 type ActionType = `${ActionVerb}_${EntityNoun}`;
 
-const tenses: Record<string, Record<string, string>> = {
+const tenses: Record<'continuous' | 'past', Record<string, string>> = {
   continuous: {
     add: 'adding',
     fetch: 'fetching',
@@ -46,7 +47,7 @@ const getMessages = (actionType: ActionType) => {
   };
 };
 
-const handleAsyncAction = <T>(
+const handleAsyncAction = async <T>(
   action: Promise<T>,
   actionType: ActionType,
   setState?: (isLoading: boolean) => void
@@ -55,29 +56,30 @@ const handleAsyncAction = <T>(
 
   const messages = getMessages(actionType);
 
-  return action
-    .then((result) => {
-      addToast({
-        color: 'success',
-        title: messages.success,
-      });
+  try {
+    const result = await action;
 
-      return result;
-    })
-    .catch((error) => {
-      console.error(error);
-
-      addToast({
-        color: 'danger',
-        description: `Error details: ${getErrorMessage(error)}`,
-        title: messages.error,
-      });
-
-      return Promise.reject();
-    })
-    .finally(() => {
-      setState?.(false);
+    addToast({
+      color: 'success',
+      title: messages.success,
     });
+
+    return result;
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+    rollbar.error(errorMessage);
+    console.error(error);
+
+    addToast({
+      color: 'danger',
+      description: `Error details: ${errorMessage}`,
+      title: messages.error,
+    });
+
+    return await Promise.reject();
+  } finally {
+    setState?.(false);
+  }
 };
 
 export default handleAsyncAction;
