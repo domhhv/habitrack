@@ -67,7 +67,7 @@ const handleAsyncAction = async <T>(
     return result;
   } catch (error) {
     const errorMessage = getErrorMessage(error);
-    rollbar.error(errorMessage);
+    rollbar.error(error instanceof Error ? error : new Error(errorMessage));
     console.error(error);
 
     addToast({
