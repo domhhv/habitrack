@@ -1,10 +1,8 @@
-import type { Configuration as RollbarConfiguration } from 'rollbar';
-
 import { Constants } from '@db-types';
 import type { MetricPreset } from '@models';
 import { StorageBuckets } from '@models';
 
-export const DAYS_OF_WEEK = Constants['public']['Enums']['days_of_week'];
+export const DAYS_OF_WEEK = Constants.public.Enums.days_of_week;
 
 export const MAX_FILE_SIZE_MB = {
   [StorageBuckets.HABIT_ICONS]: 0.1,
@@ -32,21 +30,6 @@ export enum ThemeModes {
   SYSTEM = 'system',
   DARK = 'dark',
 }
-
-export const ROLLBAR_CONFIG: RollbarConfiguration = {
-  accessToken: ROLLBAR_CLIENT_ACCESS_TOKEN,
-  captureUncaught: true,
-  captureUnhandledRejections: true,
-  environment: ROLLBAR_CLIENT_ENV,
-  payload: {
-    client: {
-      javascript: {
-        code_version: '1.0.0',
-        source_map_enabled: true,
-      },
-    },
-  },
-};
 
 export const METRIC_PRESETS: {
   group: string;
