@@ -76,7 +76,7 @@ const handleAsyncAction = async <T>(
       title: messages.error,
     });
 
-    return await Promise.reject();
+    throw error;
   } finally {
     setState?.(false);
   }
