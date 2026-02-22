@@ -1,4 +1,11 @@
-import { Chip, Slider, Switch, Textarea, NumberInput } from '@heroui/react';
+import {
+  Chip,
+  Input,
+  Slider,
+  Switch,
+  Textarea,
+  NumberInput,
+} from '@heroui/react';
 import React from 'react';
 
 import type {
@@ -423,20 +430,26 @@ const TextValueInput = ({
   value: TextMetricValue | undefined;
   onChange: (value: TextMetricValue | undefined) => void;
 }) => {
-  return (
-    <Textarea
-      size="sm"
-      label={name}
-      variant="faded"
-      maxLength={config.maxLength}
-      value={value?.textValue ?? ''}
-      placeholder={config.placeholder || ''}
-      onChange={(e) => {
-        const text = e.target.value;
-        onChange(text ? { textValue: text } : undefined);
-      }}
-    />
-  );
+  const sharedProps = {
+    label: name,
+    maxLength: config.maxLength,
+    placeholder: config.placeholder || '',
+    size: 'sm' as const,
+    value: value?.textValue ?? '',
+    variant: 'faded' as const,
+    onChange: (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+      const text = e.target.value;
+      onChange(text ? { textValue: text } : undefined);
+    },
+  };
+
+  if (config.multiline) {
+    return <Textarea {...sharedProps} />;
+  }
+
+  return <Input {...sharedProps} />;
 };
 
 const MetricValueInput = ({
