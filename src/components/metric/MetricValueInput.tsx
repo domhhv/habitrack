@@ -437,11 +437,8 @@ const TextValueInput = ({
     size: 'sm' as const,
     value: value?.textValue ?? '',
     variant: 'faded' as const,
-    onChange: (
-      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-      const text = e.target.value;
-      onChange(text ? { textValue: text } : undefined);
+    onValueChange: (textValue: string) => {
+      onChange({ textValue });
     },
   };
 
