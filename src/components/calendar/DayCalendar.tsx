@@ -189,107 +189,6 @@ const DayCalendar = () => {
 
   return (
     <div className="flex w-full flex-1 gap-0 md:gap-6">
-      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-1 pl-8 md:flex">
-        <Calendar
-          value={focusedDate}
-          onChange={handleCalendarChange}
-          firstDayOfWeek={firstDayOfWeek}
-          classNames={{
-            base: 'w-full shadow-none bg-transparent',
-            content: 'w-full',
-          }}
-        />
-        <div className="flex items-center justify-center gap-2">
-          <CalendarNavigationButtons focusedDate={focusedDate} />
-        </div>
-        {dayNote && (
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <NoteIcon size={16} weight="bold" className="text-primary-500" />
-              <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-                Note
-              </h4>
-              <Button
-                size="sm"
-                isIconOnly
-                variant="light"
-                color="primary"
-                className="h-5 w-5 min-w-fit"
-                onPress={() => {
-                  openNoteDrawer(focusedDate, 'day');
-                }}
-              >
-                <NotePencilIcon size={14} weight="bold" />
-              </Button>
-            </div>
-            <p className="line-clamp-4 text-sm text-stone-500 dark:text-stone-400">
-              {dayNote.content}
-            </p>
-          </div>
-        )}
-        {!dayNote && (
-          <Button
-            size="sm"
-            variant="flat"
-            color="secondary"
-            startContent={<NotePencilIcon size={14} weight="bold" />}
-            onPress={() => {
-              openNoteDrawer(focusedDate, 'day');
-            }}
-          >
-            Add note
-          </Button>
-        )}
-        {occurrenceSummary.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-              Summary
-            </h4>
-            <div className="space-y-1.5">
-              {occurrenceSummary.map(
-                ({ count, habitId, iconPath, name, traitColor }) => {
-                  const totals = metricTotals[habitId];
-
-                  return (
-                    <div key={habitId}>
-                      <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
-                        <img
-                          alt={name}
-                          className="h-4 w-4"
-                          style={{ borderColor: traitColor }}
-                          src={getPublicUrl(
-                            StorageBuckets.HABIT_ICONS,
-                            iconPath
-                          )}
-                        />
-                        <span>
-                          {name}: {count}
-                        </span>
-                      </div>
-                      {totals && (
-                        <div className="mt-0.5 ml-6 space-y-0.5">
-                          {totals.map(
-                            ({ formattedTotal, name: metricName }) => {
-                              return (
-                                <p
-                                  key={metricName}
-                                  className="text-xs text-stone-400 dark:text-stone-500"
-                                >
-                                  {metricName}: {formattedTotal}
-                                </p>
-                              );
-                            }
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-              )}
-            </div>
-          </div>
-        )}
-      </aside>
       <ScrollShadow className="relative flex-1 overflow-y-scroll">
         <SwipeableContainer
           direction={swipeDirection}
@@ -437,6 +336,107 @@ const DayCalendar = () => {
           </div>
         </SwipeableContainer>
       </ScrollShadow>
+      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-8 pl-1 md:flex">
+        <Calendar
+          value={focusedDate}
+          onChange={handleCalendarChange}
+          firstDayOfWeek={firstDayOfWeek}
+          classNames={{
+            base: 'w-full shadow-none bg-transparent',
+            content: 'w-full',
+          }}
+        />
+        <div className="flex items-center justify-center gap-2">
+          <CalendarNavigationButtons focusedDate={focusedDate} />
+        </div>
+        {dayNote && (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <NoteIcon size={16} weight="bold" className="text-primary-500" />
+              <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+                Note
+              </h4>
+              <Button
+                size="sm"
+                isIconOnly
+                variant="light"
+                color="primary"
+                className="h-5 w-5 min-w-fit"
+                onPress={() => {
+                  openNoteDrawer(focusedDate, 'day');
+                }}
+              >
+                <NotePencilIcon size={14} weight="bold" />
+              </Button>
+            </div>
+            <p className="line-clamp-4 text-sm text-stone-500 dark:text-stone-400">
+              {dayNote.content}
+            </p>
+          </div>
+        )}
+        {!dayNote && (
+          <Button
+            size="sm"
+            variant="flat"
+            color="secondary"
+            startContent={<NotePencilIcon size={14} weight="bold" />}
+            onPress={() => {
+              openNoteDrawer(focusedDate, 'day');
+            }}
+          >
+            Add note
+          </Button>
+        )}
+        {occurrenceSummary.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+              Summary
+            </h4>
+            <div className="space-y-1.5">
+              {occurrenceSummary.map(
+                ({ count, habitId, iconPath, name, traitColor }) => {
+                  const totals = metricTotals[habitId];
+
+                  return (
+                    <div key={habitId}>
+                      <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
+                        <img
+                          alt={name}
+                          className="h-4 w-4"
+                          style={{ borderColor: traitColor }}
+                          src={getPublicUrl(
+                            StorageBuckets.HABIT_ICONS,
+                            iconPath
+                          )}
+                        />
+                        <span>
+                          {name}: {count}
+                        </span>
+                      </div>
+                      {totals && (
+                        <div className="mt-0.5 ml-6 space-y-0.5">
+                          {totals.map(
+                            ({ formattedTotal, name: metricName }) => {
+                              return (
+                                <p
+                                  key={metricName}
+                                  className="text-xs text-stone-400 dark:text-stone-500"
+                                >
+                                  {metricName}: {formattedTotal}
+                                </p>
+                              );
+                            }
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          </div>
+        )}
+      </aside>
     </div>
   );
 };

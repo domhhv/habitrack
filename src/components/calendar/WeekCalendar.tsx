@@ -32,6 +32,8 @@ import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
 import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
+import { StorageBuckets } from '@models';
+import { getPublicUrl } from '@services';
 import {
   useDayNotes,
   useOccurrences,
@@ -39,7 +41,12 @@ import {
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
 } from '@stores';
-import { isDstTransitionDay, findDstTransitionHour } from '@utils';
+import {
+  buildMetricTotals,
+  isDstTransitionDay,
+  findDstTransitionHour,
+  buildOccurrenceSummary,
+} from '@utils';
 
 import CalendarFilters from './CalendarFilters';
 import CalendarNavigation from './CalendarNavigation';
@@ -50,7 +57,7 @@ const WeekCalendar = () => {
   const dayNotes = useDayNotes();
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
-  const { isDesktop } = useScreenWidth();
+  const { isDesktop, screenWidth } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const occurrences = useOccurrences();
@@ -64,10 +71,11 @@ const WeekCalendar = () => {
     visibleDuration: { weeks: 1 },
   });
   useCalendar({ firstDayOfWeek }, state);
+  console.log({ screenWidth });
   const { gridProps, weekDays } = useCalendarGrid(
     {
       firstDayOfWeek,
-      weekdayStyle: isDesktop ? 'long' : 'short',
+      weekdayStyle: screenWidth > 1536 ? 'long' : 'short',
     },
     state
   );
@@ -158,6 +166,25 @@ const WeekCalendar = () => {
     [occurrences]
   );
 
+  const occurrenceSummary = React.useMemo(() => {
+    const weekOccurrencesById: Record<
+      string,
+      (typeof occurrences)[string][string]
+    > = {};
+
+    for (const dayOccurrences of Object.values(occurrences)) {
+      for (const [id, occurrence] of Object.entries(dayOccurrences)) {
+        weekOccurrencesById[id] = occurrence;
+      }
+    }
+
+    return buildOccurrenceSummary(weekOccurrencesById);
+  }, [occurrences]);
+
+  const metricTotals = React.useMemo(() => {
+    return buildMetricTotals(occurrenceSummary);
+  }, [occurrenceSummary]);
+
   const timeZone = getLocalTimeZone();
   const monthFormatter = useDateFormatter({ month: 'long' });
   const dayFormatter = useDateFormatter({ day: 'numeric', month: 'short' });
@@ -190,221 +217,277 @@ const WeekCalendar = () => {
   ]);
 
   return (
-    <ScrollShadow
-      orientation="horizontal"
-      className="relative w-full overflow-y-scroll"
-    >
-      <div className="sticky left-0 flex flex-col items-center justify-center gap-4 md:flex-row">
-        <div className="flex items-center justify-center gap-2">
-          <Tooltip closeDelay={0} content={monthInfo.label}>
-            <Button
-              as={Link}
-              size="sm"
-              radius="sm"
-              variant="light"
-              color="secondary"
-              to={monthInfo.path}
-              className="min-w-fit gap-1 px-2"
-              aria-label={`Go to month view: ${monthInfo.label}`}
-              startContent={
-                <ArrowSquareLeftIcon weight="bold" size={isDesktop ? 18 : 14} />
-              }
-            >
-              <span className="hidden sm:inline">{monthInfo.label}</span>
-            </Button>
-          </Tooltip>
-          <CalendarNavigation focusedDate={state.focusedDate} />
-        </div>
-        <div className="w-10/12 md:w-auto">
-          <CalendarFilters />
-        </div>
-      </div>
-      <div
-        {...gridProps}
-        className="flex min-w-lg justify-around px-8 py-4 lg:px-16"
+    <div className="flex w-full flex-1 gap-0 md:gap-6">
+      <ScrollShadow
+        orientation="horizontal"
+        className="relative w-full overflow-y-scroll"
       >
-        {state
-          .getDatesInWeek(firstDayOfWeek === 'sun' ? 0 : 1)
-          .map((day, dayIndex) => {
-            if (!day) {
-              return null;
-            }
-
-            const isNoteAdded = hasNote(day);
-            const dstType = isDstTransitionDay(day, getLocalTimeZone());
-            const dstHour = dstType
-              ? findDstTransitionHour(day, getLocalTimeZone())
-              : null;
-
-            return (
-              <div
-                key={dayIndex}
-                className="group flex min-w-32 flex-1 flex-col gap-4"
+        <div className="sticky left-0 flex flex-col items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-2">
+            <Tooltip closeDelay={0} content={monthInfo.label}>
+              <Button
+                as={Link}
+                size="sm"
+                radius="sm"
+                variant="light"
+                color="secondary"
+                to={monthInfo.path}
+                className="min-w-fit gap-1 px-2"
+                aria-label={`Go to month view: ${monthInfo.label}`}
+                startContent={
+                  <ArrowSquareLeftIcon
+                    weight="bold"
+                    size={isDesktop ? 18 : 14}
+                  />
+                }
               >
-                <div
-                  className={cn(
-                    'space-y-2 text-center text-stone-600 dark:text-stone-300',
-                    isToday(day, state.timeZone) &&
-                      'text-primary-600 dark:text-primary-400 font-bold'
-                  )}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <h3>{capitalize(weekDays[dayIndex])}</h3>
-                    <div className="flex items-center justify-center gap-0.5 md:gap-2">
-                      <Tooltip
-                        closeDelay={0}
-                        content={isNoteAdded ? 'Edit note' : 'Add note'}
-                      >
-                        <Button
-                          radius="sm"
-                          variant="light"
-                          color={isNoteAdded ? 'primary' : 'secondary'}
-                          aria-label={isNoteAdded ? 'Edit note' : 'Add note'}
-                          onPress={() => {
-                            openNoteDrawer(day, 'day');
-                          }}
-                          className={cn(
-                            'h-5 w-5 min-w-fit px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                            isNoteAdded && 'opacity-100'
-                          )}
-                        >
-                          {isNoteAdded ? (
-                            <NoteIcon
-                              weight="bold"
-                              size={isDesktop ? 18 : 14}
-                            />
-                          ) : (
-                            <NoteBlankIcon
-                              weight="bold"
-                              size={isDesktop ? 18 : 14}
-                            />
-                          )}
-                        </Button>
-                      </Tooltip>
-                      <Tooltip closeDelay={0} content="Log occurrence">
-                        <Button
-                          radius="sm"
-                          variant="light"
-                          color="secondary"
-                          aria-label="Log occurrence"
-                          className="h-5 w-5 min-w-fit px-0 lg:h-6 lg:w-6"
-                          onPress={() => {
-                            openOccurrenceDrawer({ dayToLog: day });
-                          }}
-                        >
-                          <CalendarBlankIcon
-                            weight="bold"
-                            size={isDesktop ? 18 : 14}
-                          />
-                        </Button>
-                      </Tooltip>
-                      <Tooltip closeDelay={0} content="Open day">
-                        <Button
-                          as={Link}
-                          radius="sm"
-                          variant="light"
-                          color="secondary"
-                          aria-label="Open day"
-                          className="h-5 w-5 min-w-fit px-0 lg:h-6 lg:w-6"
-                          to={`/calendar/day/${day.year}/${day.month}/${day.day}`}
-                        >
-                          <ArrowSquareRightIcon
-                            weight="bold"
-                            size={isDesktop ? 18 : 14}
-                          />
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  </div>
-                  <h6>{day.day}</h6>
-                </div>
-                <div
-                  className={cn(
-                    'flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600',
-                    isToday(day, state.timeZone) &&
-                      'to-background-100 dark:to-background-500 bg-linear-to-b from-transparent from-0% to-[4px]'
-                  )}
-                >
-                  {[...Array(24).keys()].map((hour) => {
-                    const isSkippedHour =
-                      dstType === 'spring' && hour === dstHour;
-                    const isDuplicatedHour =
-                      dstType === 'fall' &&
-                      dstHour !== null &&
-                      hour === dstHour - 1;
+                <span className="hidden sm:inline">{monthInfo.label}</span>
+              </Button>
+            </Tooltip>
+            <CalendarNavigation focusedDate={state.focusedDate} />
+          </div>
+          <div className="w-10/12 md:w-auto">
+            <CalendarFilters />
+          </div>
+        </div>
+        <div
+          {...gridProps}
+          className="flex min-w-lg justify-around px-8 py-4 lg:px-16 xl:pr-2"
+        >
+          {state
+            .getDatesInWeek(firstDayOfWeek === 'sun' ? 0 : 1)
+            .map((day, dayIndex) => {
+              if (!day) {
+                return null;
+              }
 
-                    return (
-                      <div
-                        key={`${dayIndex}-${hour}`}
-                        className={cn(
-                          'group/minutes-cell relative flex gap-4',
-                          isSkippedHour && 'opacity-40'
-                        )}
-                      >
-                        {dayIndex === 0 && (
-                          <p className="absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:text-base dark:text-stone-200">
-                            {hour !== 0 && hour}
-                          </p>
-                        )}
-                        <div
-                          className={cn(
-                            'flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500',
-                            isSkippedHour &&
-                              'bg-stone-200/50 dark:bg-stone-700/50',
-                            isDuplicatedHour &&
-                              'border-l-warning-400 dark:border-l-warning-500 border-l-3'
-                          )}
+              const isNoteAdded = hasNote(day);
+              const dstType = isDstTransitionDay(day, getLocalTimeZone());
+              const dstHour = dstType
+                ? findDstTransitionHour(day, getLocalTimeZone())
+                : null;
+
+              return (
+                <div
+                  key={dayIndex}
+                  className="group flex min-w-32 flex-1 flex-col gap-4"
+                >
+                  <div
+                    className={cn(
+                      'space-y-2 text-center text-stone-600 dark:text-stone-300',
+                      isToday(day, state.timeZone) &&
+                        'text-primary-600 dark:text-primary-400 font-bold'
+                    )}
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <h3>{capitalize(weekDays[dayIndex])}</h3>
+                      <div className="flex items-center justify-center gap-0.5">
+                        <Tooltip
+                          closeDelay={0}
+                          content={isNoteAdded ? 'Edit note' : 'Add note'}
                         >
-                          {isSkippedHour && (
-                            <p className="text-xs text-stone-400 italic dark:text-stone-500">
-                              DST skip
-                            </p>
-                          )}
-                          {isDuplicatedHour && (
-                            <p className="text-warning-500 dark:text-warning-400 text-xs italic">
-                              DST repeat
-                            </p>
-                          )}
-                          {isToday(day, state.timeZone) &&
-                            now.getHours() === hour && (
-                              <div
-                                className="bg-primary absolute right-0 left-0 z-10 h-0.5"
-                                style={{
-                                  top: `${(now.getMinutes() / 60) * 100}%`,
-                                }}
+                          <Button
+                            radius="sm"
+                            variant="light"
+                            color={isNoteAdded ? 'primary' : 'secondary'}
+                            aria-label={isNoteAdded ? 'Edit note' : 'Add note'}
+                            onPress={() => {
+                              openNoteDrawer(day, 'day');
+                            }}
+                            className={cn(
+                              'h-5 w-5 min-w-fit px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                              isNoteAdded && 'opacity-100'
+                            )}
+                          >
+                            {isNoteAdded ? (
+                              <NoteIcon
+                                weight="bold"
+                                size={isDesktop ? 18 : 14}
+                              />
+                            ) : (
+                              <NoteBlankIcon
+                                weight="bold"
+                                size={isDesktop ? 18 : 14}
                               />
                             )}
-                          {groupOccurrences(day, hour).map(
-                            ([habitId, habitOccurrences]) => {
-                              if (!habitOccurrences) {
-                                return null;
-                              }
+                          </Button>
+                        </Tooltip>
+                        <Tooltip closeDelay={0} content="Log occurrence">
+                          <Button
+                            radius="sm"
+                            variant="light"
+                            color="secondary"
+                            aria-label="Log occurrence"
+                            className="h-5 w-5 min-w-fit px-0 lg:h-6 lg:w-6"
+                            onPress={() => {
+                              openOccurrenceDrawer({ dayToLog: day });
+                            }}
+                          >
+                            <CalendarBlankIcon
+                              weight="bold"
+                              size={isDesktop ? 18 : 14}
+                            />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip closeDelay={0} content="Open day">
+                          <Button
+                            as={Link}
+                            radius="sm"
+                            variant="light"
+                            color="secondary"
+                            aria-label="Open day"
+                            className="h-5 w-5 min-w-fit px-0 lg:h-6 lg:w-6"
+                            to={`/calendar/day/${day.year}/${day.month}/${day.day}`}
+                          >
+                            <ArrowSquareRightIcon
+                              weight="bold"
+                              size={isDesktop ? 18 : 14}
+                            />
+                          </Button>
+                        </Tooltip>
+                      </div>
+                    </div>
+                    <h6>{day.day}</h6>
+                  </div>
+                  <div
+                    className={cn(
+                      'flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600',
+                      isToday(day, state.timeZone) &&
+                        'to-background-100 dark:to-background-500 bg-linear-to-b from-transparent from-0% to-[4px]'
+                    )}
+                  >
+                    {[...Array(24).keys()].map((hour) => {
+                      const isSkippedHour =
+                        dstType === 'spring' && hour === dstHour;
+                      const isDuplicatedHour =
+                        dstType === 'fall' &&
+                        dstHour !== null &&
+                        hour === dstHour - 1;
 
+                      return (
+                        <div
+                          key={`${dayIndex}-${hour}`}
+                          className={cn(
+                            'group/minutes-cell relative flex gap-4',
+                            isSkippedHour && 'opacity-40'
+                          )}
+                        >
+                          {dayIndex === 0 && (
+                            <p className="absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:text-base dark:text-stone-200">
+                              {hour !== 0 && hour}
+                            </p>
+                          )}
+                          <div
+                            className={cn(
+                              'flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500',
+                              isSkippedHour &&
+                                'bg-stone-200/50 dark:bg-stone-700/50',
+                              isDuplicatedHour &&
+                                'border-l-warning-400 dark:border-l-warning-500 border-l-3'
+                            )}
+                          >
+                            {isSkippedHour && (
+                              <p className="text-xs text-stone-400 italic dark:text-stone-500">
+                                DST skip
+                              </p>
+                            )}
+                            {isDuplicatedHour && (
+                              <p className="text-warning-500 dark:text-warning-400 text-xs italic">
+                                DST repeat
+                              </p>
+                            )}
+                            {isToday(day, state.timeZone) &&
+                              now.getHours() === hour && (
+                                <div
+                                  className="bg-primary absolute right-0 left-0 z-10 h-0.5"
+                                  style={{
+                                    top: `${(now.getMinutes() / 60) * 100}%`,
+                                  }}
+                                />
+                              )}
+                            {groupOccurrences(day, hour).map(
+                              ([habitId, habitOccurrences]) => {
+                                if (!habitOccurrences) {
+                                  return null;
+                                }
+
+                                return (
+                                  <motion.div
+                                    key={habitId}
+                                    exit={{ scale: 0 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                  >
+                                    <OccurrenceChip
+                                      occurrences={habitOccurrences}
+                                    />
+                                  </motion.div>
+                                );
+                              }
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </ScrollShadow>
+      {occurrenceSummary.length > 0 && (
+        <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-2 pl-1 xl:flex">
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+              Weekly Summary
+            </h4>
+            <div className="space-y-1.5">
+              {occurrenceSummary.map(
+                ({ count, habitId, iconPath, name, traitColor }) => {
+                  const totals = metricTotals[habitId];
+
+                  return (
+                    <div key={habitId}>
+                      <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
+                        <img
+                          alt={name}
+                          className="h-4 w-4"
+                          style={{ borderColor: traitColor }}
+                          src={getPublicUrl(
+                            StorageBuckets.HABIT_ICONS,
+                            iconPath
+                          )}
+                        />
+                        <span>
+                          {name}: {count}
+                        </span>
+                      </div>
+                      {totals && (
+                        <div className="mt-0.5 ml-6 space-y-0.5">
+                          {totals.map(
+                            ({ formattedTotal, name: metricName }) => {
                               return (
-                                <motion.div
-                                  key={habitId}
-                                  exit={{ scale: 0 }}
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ duration: 0.5 }}
+                                <p
+                                  key={metricName}
+                                  className="text-xs text-stone-400 dark:text-stone-500"
                                 >
-                                  <OccurrenceChip
-                                    occurrences={habitOccurrences}
-                                  />
-                                </motion.div>
+                                  {metricName}: {formattedTotal}
+                                </p>
                               );
                             }
                           )}
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-      </div>
-    </ScrollShadow>
+                      )}
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          </div>
+        </aside>
+      )}
+    </div>
   );
 };
 

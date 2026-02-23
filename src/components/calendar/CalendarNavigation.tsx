@@ -15,6 +15,7 @@ import { getWeeksOfYear } from '@utils';
 import CalendarNavigationButtons from './CalendarNavigationButtons';
 
 export type MonthCalendarNavigationProps = {
+  className?: string;
   focusedDate: CalendarState['focusedDate'];
 };
 
@@ -22,7 +23,10 @@ const YEARS = Array.from({ length: 31 }, (_, i) => {
   return 2000 + i;
 });
 
-const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
+const CalendarNavigation = ({
+  className,
+  focusedDate,
+}: MonthCalendarNavigationProps) => {
   const timeZone = getLocalTimeZone();
   const filters = useCalendarFilters();
   const changeCalendarFilters = useCalendarFiltersChange();
@@ -104,7 +108,12 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   };
 
   return (
-    <div className="flex flex-col items-stretch justify-end gap-2 max-[445px]:gap-4 min-[446px]:flex-row lg:justify-between lg:gap-2">
+    <div
+      className={cn(
+        'flex flex-col items-stretch justify-end gap-2 max-[445px]:gap-4 min-[446px]:flex-row lg:justify-between lg:gap-2',
+        className
+      )}
+    >
       <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
         <Select
           size="sm"
