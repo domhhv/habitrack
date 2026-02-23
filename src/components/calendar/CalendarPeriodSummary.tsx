@@ -1,0 +1,121 @@
+import { Button } from '@heroui/react';
+import type { CalendarDate } from '@internationalized/date';
+import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
+import React from 'react';
+
+import type {
+  NoteOfPeriod,
+  NotePeriodKind,
+  OccurrenceSummaryItem,
+} from '@models';
+import { StorageBuckets } from '@models';
+import { getPublicUrl } from '@services';
+import { useNoteDrawerActions } from '@stores';
+
+type CalendarPeriodSummaryProps = {
+  date: CalendarDate | null;
+  kind: NonNullable<NotePeriodKind>;
+  metricTotals: Record<string, { formattedTotal: string; name: string }[]>;
+  note: NoteOfPeriod | undefined;
+  occurrenceSummary: OccurrenceSummaryItem[];
+};
+
+const CalendarPeriodSummary = ({
+  date,
+  kind,
+  metricTotals,
+  note,
+  occurrenceSummary,
+}: CalendarPeriodSummaryProps) => {
+  const { openNoteDrawer } = useNoteDrawerActions();
+
+  return (
+    <>
+      {note && date && (
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <NoteIcon size={16} weight="bold" className="text-primary-500" />
+            <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+              Note
+            </h4>
+            <Button
+              size="sm"
+              isIconOnly
+              variant="light"
+              color="primary"
+              className="h-5 w-5 min-w-fit"
+              aria-label="Edit weekly note"
+              onPress={() => {
+                openNoteDrawer(date, kind);
+              }}
+            >
+              <NotePencilIcon size={14} weight="bold" />
+            </Button>
+          </div>
+          <p className="line-clamp-4 text-sm text-stone-500 dark:text-stone-400">
+            {note.content}
+          </p>
+        </div>
+      )}
+      {!note && date && (
+        <Button
+          size="sm"
+          variant="flat"
+          color="secondary"
+          startContent={<NotePencilIcon size={14} weight="bold" />}
+          onPress={() => {
+            openNoteDrawer(date, kind);
+          }}
+        >
+          Add note
+        </Button>
+      )}
+      {occurrenceSummary.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+            Summary
+          </h4>
+          <div className="space-y-1.5">
+            {occurrenceSummary.map(
+              ({ count, habitId, iconPath, name, traitColor }) => {
+                const totals = metricTotals[habitId];
+
+                return (
+                  <div key={habitId}>
+                    <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
+                      <img
+                        alt={name}
+                        className="h-4 w-4"
+                        style={{ borderColor: traitColor }}
+                        src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
+                      />
+                      <span>
+                        {name}: {count}
+                      </span>
+                    </div>
+                    {totals && (
+                      <div className="mt-0.5 ml-6 space-y-0.5">
+                        {totals.map(({ formattedTotal, name: metricName }) => {
+                          return (
+                            <p
+                              key={metricName}
+                              className="text-xs text-stone-400 dark:text-stone-500"
+                            >
+                              {metricName}: {formattedTotal}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default CalendarPeriodSummary;
