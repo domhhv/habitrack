@@ -13,6 +13,7 @@ import {
 import {
   NoteIcon,
   NoteBlankIcon,
+  NotePencilIcon,
   CalendarBlankIcon,
   ArrowSquareLeftIcon,
   ArrowSquareRightIcon,
@@ -36,6 +37,7 @@ import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import {
   useDayNotes,
+  useWeekNotes,
   useOccurrences,
   useNoteDrawerActions,
   useCalendarRangeChange,
@@ -55,6 +57,7 @@ const WeekCalendar = () => {
   const now = useCurrentTime();
   const changeCalendarRange = useCalendarRangeChange();
   const dayNotes = useDayNotes();
+  const weekNotes = useWeekNotes();
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
   const { isDesktop, screenWidth } = useScreenWidth();
@@ -71,7 +74,23 @@ const WeekCalendar = () => {
     visibleDuration: { weeks: 1 },
   });
   useCalendar({ firstDayOfWeek }, state);
-  console.log({ screenWidth });
+
+  const monday = React.useMemo(() => {
+    const [monday] = state.getDatesInWeek(firstDayOfWeek === 'sun' ? 0 : 1);
+
+    return monday;
+  }, [state, firstDayOfWeek]);
+
+  const weekNote = React.useMemo(() => {
+    if (!monday) {
+      return;
+    }
+
+    return weekNotes.find((note) => {
+      return note.periodDate === monday.toString();
+    });
+  }, [weekNotes, monday]);
+
   const { gridProps, weekDays } = useCalendarGrid(
     {
       firstDayOfWeek,
@@ -373,7 +392,7 @@ const WeekCalendar = () => {
                           )}
                         >
                           {dayIndex === 0 && (
-                            <p className="absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:text-base dark:text-stone-200">
+                            <p className="absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:pl-2 md:text-base dark:text-stone-200">
                               {hour !== 0 && hour}
                             </p>
                           )}
@@ -436,8 +455,46 @@ const WeekCalendar = () => {
             })}
         </div>
       </ScrollShadow>
-      {occurrenceSummary.length > 0 && (
-        <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-2 pl-1 xl:flex">
+      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-8 xl:flex">
+        {weekNote && monday && (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <NoteIcon size={16} weight="bold" className="text-primary-500" />
+              <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+                Note
+              </h4>
+              <Button
+                size="sm"
+                isIconOnly
+                variant="light"
+                color="primary"
+                className="h-5 w-5 min-w-fit"
+                onPress={() => {
+                  openNoteDrawer(monday, 'week');
+                }}
+              >
+                <NotePencilIcon size={14} weight="bold" />
+              </Button>
+            </div>
+            <p className="line-clamp-4 text-sm text-stone-500 dark:text-stone-400">
+              {weekNote.content}
+            </p>
+          </div>
+        )}
+        {!weekNote && monday && (
+          <Button
+            size="sm"
+            variant="flat"
+            color="secondary"
+            startContent={<NotePencilIcon size={14} weight="bold" />}
+            onPress={() => {
+              openNoteDrawer(monday, 'week');
+            }}
+          >
+            Add note
+          </Button>
+        )}
+        {occurrenceSummary.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
               Weekly Summary
@@ -485,8 +542,8 @@ const WeekCalendar = () => {
               )}
             </div>
           </div>
-        </aside>
-      )}
+        )}
+      </aside>
     </div>
   );
 };
