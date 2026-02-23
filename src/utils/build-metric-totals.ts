@@ -80,6 +80,11 @@ const buildMetricTotals = (
           formattedTotal = `${Math.floor(sum / 60000)} min`;
         } else if (config.format === 'seconds') {
           formattedTotal = `${totalSec} sec`;
+        } else if (config.format === 'hours') {
+          formattedTotal = `${(sum / 3600000).toFixed(1)} hr`;
+        } else if (config.format === 'mm:ss') {
+          const totalMinutes = Math.floor(totalSec / 60);
+          formattedTotal = `${totalMinutes}m ${s}s`;
         } else if (config.format === 'hh:mm:ss') {
           formattedTotal = `${h}h ${m}m ${s}s`;
         } else {
