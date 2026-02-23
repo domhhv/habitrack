@@ -1,3 +1,5 @@
+export { default as buildMetricTotals } from './build-metric-totals';
+export { default as buildOccurrenceSummary } from './build-occurrence-summary';
 export * from './camelcase';
 export { default as createCalendar } from './create-calendar';
 export * from './date';
