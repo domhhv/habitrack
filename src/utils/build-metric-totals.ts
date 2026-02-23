@@ -4,12 +4,8 @@ import type {
   OccurrenceSummaryItem,
 } from '@models';
 
-type MetricTotal = { formattedTotal: string; name: string };
-
-const buildMetricTotals = (
-  summary: OccurrenceSummaryItem[]
-): Record<string, MetricTotal[]> => {
-  const totals: Record<string, MetricTotal[]> = {};
+const buildMetricTotals = (summary: OccurrenceSummaryItem[]) => {
+  const totals: Record<string, { formattedTotal: string; name: string }[]> = {};
 
   for (const { habitId, occurrences: habitOccurrences } of summary) {
     const [first] = habitOccurrences;
@@ -27,7 +23,7 @@ const buildMetricTotals = (
       continue;
     }
 
-    const sums: MetricTotal[] = [];
+    const sums: { formattedTotal: string; name: string }[] = [];
 
     for (const metric of summableMetrics) {
       let sum = 0;
