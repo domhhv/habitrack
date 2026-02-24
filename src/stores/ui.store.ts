@@ -77,6 +77,7 @@ export type UiSlice = {
         'dayToLog' | 'dayToDisplay' | 'occurrenceToEdit'
       >
     ) => void;
+    setDayToDisplay: (date: CalendarDate) => void;
   };
 };
 
@@ -210,6 +211,11 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
           state.occurrenceDrawer.occurrenceToEdit = undefined;
           state.occurrenceDrawer.habitIdToDisplay = undefined;
           Object.assign(state.occurrenceDrawer, opts);
+        });
+      },
+      setDayToDisplay: (date) => {
+        set((state) => {
+          state.occurrenceDrawer.dayToDisplay = date;
         });
       },
     },
