@@ -207,7 +207,8 @@ const OccurrenceDrawer = () => {
       <DrawerContent>
         <DrawerHeader className="flex-col">
           {canNavigateDays ? (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
+              <div>{getMainTitle()}</div>
               <Button
                 size="sm"
                 isIconOnly
@@ -217,9 +218,8 @@ const OccurrenceDrawer = () => {
                   navigateDay(-1);
                 }}
               >
-                <CaretLeftIcon size={18} />
+                <CaretLeftIcon size={16} />
               </Button>
-              <div>{getMainTitle()}</div>
               <Button
                 size="sm"
                 isIconOnly
@@ -229,7 +229,7 @@ const OccurrenceDrawer = () => {
                   navigateDay(1);
                 }}
               >
-                <CaretRightIcon size={18} />
+                <CaretRightIcon size={16} />
               </Button>
             </div>
           ) : (
