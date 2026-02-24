@@ -1,6 +1,7 @@
 import {
   Button,
   Drawer,
+  Tooltip,
   DrawerBody,
   DrawerHeader,
   DrawerContent,
@@ -209,28 +210,42 @@ const OccurrenceDrawer = () => {
           {canNavigateDays ? (
             <div className="flex items-center gap-2">
               <div>{getMainTitle()}</div>
-              <Button
-                size="sm"
-                isIconOnly
-                radius="sm"
-                variant="light"
-                onPress={() => {
-                  navigateDay(-1);
-                }}
-              >
-                <CaretLeftIcon size={16} />
-              </Button>
-              <Button
-                size="sm"
-                isIconOnly
-                radius="sm"
-                variant="light"
-                onPress={() => {
-                  navigateDay(1);
-                }}
-              >
-                <CaretRightIcon size={16} />
-              </Button>
+              <Tooltip content="Previous day">
+                <Button
+                  size="sm"
+                  isIconOnly
+                  radius="sm"
+                  variant="light"
+                  aria-label="Previous day"
+                  onPress={() => {
+                    navigateDay(-1);
+                  }}
+                >
+                  <CaretLeftIcon
+                    size={16}
+                    focusable="false"
+                    aria-hidden="true"
+                  />
+                </Button>
+              </Tooltip>
+              <Tooltip content="Next day">
+                <Button
+                  size="sm"
+                  isIconOnly
+                  radius="sm"
+                  variant="light"
+                  aria-label="Next day"
+                  onPress={() => {
+                    navigateDay(1);
+                  }}
+                >
+                  <CaretRightIcon
+                    size={16}
+                    focusable="false"
+                    aria-hidden="true"
+                  />
+                </Button>
+              </Tooltip>
             </div>
           ) : (
             getMainTitle()
