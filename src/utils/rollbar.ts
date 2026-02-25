@@ -9,11 +9,13 @@ export default new Rollbar({
     client: {
       javascript: {
         code_version: VERCEL_GIT_COMMIT_SHA || '0.1.0',
+        guess_uncaught_frames: true,
         source_map_enabled: true,
       },
     },
   },
   replay: {
     enabled: true,
+    inlineImages: true,
   },
 });
