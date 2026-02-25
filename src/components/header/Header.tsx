@@ -46,7 +46,7 @@ const Header = () => {
       height="3rem"
       maxWidth="full"
       isBlurred={false}
-      className="bg-background-100 dark:dark:bg-background-900 [&>header]:static [&>header]:lg:px-16"
+      className="bg-background-100 dark:bg-background-900 [&>header]:static [&>header]:lg:px-16"
     >
       <NavbarContent justify="start" className="flex items-center gap-2">
         <NavbarItem>
