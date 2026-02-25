@@ -17,7 +17,9 @@
       "Bash(yarn lint:sql:*)",
       "Bash(yarn fix:sql:*)",
       "mcp__chrome-devtools__evaluate_script",
+      "mcp__chrome-devtools__take_screenshot",
       "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__resize_page",
       "mcp__context7__query-docs"
     ]
   }
