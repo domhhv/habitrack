@@ -48,8 +48,8 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_timezone" TEXT) OWNER TO "postgres";
+ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) OWNER TO "postgres";
 
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_timezone" TEXT) TO "anon";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_timezone" TEXT) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_timezone" TEXT) TO "service_role";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "service_role";
