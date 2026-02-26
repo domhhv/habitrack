@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS "public"."occurrence_metric_values" (
     "user_id" UUID NOT NULL,
     "occurrence_id" UUID NOT NULL,
     "habit_metric_id" UUID NOT NULL,
-    "value" "jsonb" NOT NULL
+    "value" JSONB NOT NULL
 );
 
 ALTER TABLE "public"."occurrence_metric_values" OWNER TO "postgres";

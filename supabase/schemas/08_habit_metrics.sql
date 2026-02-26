@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS "public"."habit_metrics" (
     "habit_id" UUID NOT NULL,
     "name" TEXT NOT NULL CHECK ("name" <> ''), -- noqa: CV10
     "type" "public"."metric_type" NOT NULL,
-    "config" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL, -- noqa: CV10
+    "config" JSONB DEFAULT '{}'::JSONB NOT NULL, -- noqa: CV10
     "sort_order" INTEGER DEFAULT 0 NOT NULL,
     "is_required" BOOLEAN DEFAULT false NOT NULL
 );
