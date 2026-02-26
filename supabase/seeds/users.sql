@@ -57,7 +57,7 @@ INSERT INTO
         GEN_RANDOM_UUID() AS "id",
         "id" AS "user_id",
         "id" AS "provider_id",
-        FORMAT('{"sub":"%s","email":"%s"}', "id"::text, "email")::jsonb AS "identity_data",
+        FORMAT('{"sub":"%s","email":"%s"}', "id"::TEXT, "email")::JSONB AS "identity_data",
         'email' AS "provider",
         NOW() AS "last_sign_in_at",
         NOW() AS "created_at",

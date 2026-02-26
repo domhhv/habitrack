@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION "public"."get_longest_streak"( -- noqa
-    "p_habit_id" "uuid",
-    "p_time_zone" "text" DEFAULT 'UTC'
+    "p_habit_id" UUID,
+    "p_time_zone" TEXT DEFAULT 'UTC'
 )
 RETURNS "public"."streak_info"
     LANGUAGE "plpgsql"
@@ -17,7 +17,7 @@ BEGIN
     streaks AS (
         SELECT
             occurrence_date,
-            occurrence_date - (ROW_NUMBER() OVER (ORDER BY occurrence_date))::integer AS streak_group
+            occurrence_date - (ROW_NUMBER() OVER (ORDER BY occurrence_date))::INTEGER AS streak_group
         FROM daily_occurrences
     ),
     streak_lengths AS (
@@ -48,8 +48,8 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) OWNER TO "postgres";
 
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_timezone" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "service_role";

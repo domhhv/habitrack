@@ -2,15 +2,15 @@
 
 -- Table definition
 CREATE TABLE IF NOT EXISTS "public"."occurrences" (
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone,
-    "user_id" "uuid" NOT NULL,
-    "occurred_at" timestamptz NOT NULL DEFAULT "now"(),
-    "time_zone" text NOT NULL DEFAULT 'UTC', -- noqa: disable=convention.quoted_literals
-    "photo_paths" "text" [],
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "habit_id" "uuid" NOT NULL,
-    "has_specific_time" boolean DEFAULT true NOT NULL
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT "now"() NOT NULL,
+    "updated_at" TIMESTAMP WITH TIME ZONE,
+    "user_id" UUID NOT NULL,
+    "occurred_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT "now"(),
+    "time_zone" TEXT NOT NULL DEFAULT 'UTC', -- noqa: disable=convention.quoted_literals
+    "photo_paths" TEXT [],
+    "id" UUID DEFAULT "gen_random_uuid"() NOT NULL,
+    "habit_id" UUID NOT NULL,
+    "has_specific_time" BOOLEAN DEFAULT true NOT NULL
 );
 
 ALTER TABLE "public"."occurrences" OWNER TO "postgres";

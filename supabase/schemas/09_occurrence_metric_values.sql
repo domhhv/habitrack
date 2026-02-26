@@ -2,13 +2,13 @@
 
 -- Table definition
 CREATE TABLE IF NOT EXISTS "public"."occurrence_metric_values" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone,
-    "user_id" "uuid" NOT NULL,
-    "occurrence_id" "uuid" NOT NULL,
-    "habit_metric_id" "uuid" NOT NULL,
-    "value" "jsonb" NOT NULL
+    "id" UUID DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT "now"() NOT NULL,
+    "updated_at" TIMESTAMP WITH TIME ZONE,
+    "user_id" UUID NOT NULL,
+    "occurrence_id" UUID NOT NULL,
+    "habit_metric_id" UUID NOT NULL,
+    "value" JSONB NOT NULL
 );
 
 ALTER TABLE "public"."occurrence_metric_values" OWNER TO "postgres";

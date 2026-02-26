@@ -95,7 +95,7 @@ BEGIN
     streaks AS (
         SELECT
             occurrence_date,
-            occurrence_date - (ROW_NUMBER() OVER (ORDER BY occurrence_date))::integer AS streak_group
+            occurrence_date - (ROW_NUMBER() OVER (ORDER BY occurrence_date))::INTEGER AS streak_group
         FROM daily_occurrences
     ),
     streak_lengths AS (

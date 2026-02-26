@@ -3,28 +3,28 @@ CREATE TYPE "public"."metric_type" AS ENUM (
 );
 
 CREATE TABLE "public"."habit_metrics" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "updated_at" timestamp with time zone,
-    "user_id" uuid NOT NULL,
-    "habit_id" uuid NOT NULL,
-    "name" text NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    "updated_at" TIMESTAMP WITH TIME ZONE,
+    "user_id" UUID NOT NULL,
+    "habit_id" UUID NOT NULL,
+    "name" TEXT NOT NULL,
     "type" "public"."metric_type" NOT NULL,
-    "config" jsonb NOT NULL DEFAULT '{}'::"jsonb", -- noqa: CV10
-    "sort_order" integer NOT NULL DEFAULT 0,
-    "is_required" boolean NOT NULL DEFAULT false
+    "config" JSONB NOT NULL DEFAULT '{}'::JSONB, -- noqa: CV10
+    "sort_order" INTEGER NOT NULL DEFAULT 0,
+    "is_required" BOOLEAN NOT NULL DEFAULT false
 );
 
 ALTER TABLE "public"."habit_metrics" ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE "public"."occurrence_metric_values" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "updated_at" timestamp with time zone,
-    "user_id" uuid NOT NULL,
-    "occurrence_id" uuid NOT NULL,
-    "habit_metric_id" uuid NOT NULL,
-    "value" jsonb NOT NULL
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    "updated_at" TIMESTAMP WITH TIME ZONE,
+    "user_id" UUID NOT NULL,
+    "occurrence_id" UUID NOT NULL,
+    "habit_metric_id" UUID NOT NULL,
+    "value" JSONB NOT NULL
 );
 
 ALTER TABLE "public"."occurrence_metric_values" ENABLE ROW LEVEL SECURITY;
