@@ -2,25 +2,25 @@
 
 -- Table definition
 CREATE TABLE IF NOT EXISTS "public"."notes" (
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone,
-    "user_id" "uuid" NOT NULL,
-    "content" "text" NOT NULL CHECK ("content" <> ''), -- noqa: CV10
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "occurrence_id" "uuid" UNIQUE,
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT "now"() NOT NULL,
+    "updated_at" TIMESTAMP WITH TIME ZONE,
+    "user_id" UUID NOT NULL,
+    "content" TEXT NOT NULL CHECK ("content" <> ''), -- noqa: CV10
+    "id" UUID DEFAULT "gen_random_uuid"() NOT NULL,
+    "occurrence_id" UUID UNIQUE,
     "period_kind" "public"."note_period_kind",
-    "period_date" "date",
+    "period_date" DATE,
     CONSTRAINT "month_alignment" CHECK (
         (
             ("period_kind" <> 'month'::"public"."note_period_kind") -- noqa: CV10
-            OR ("date_trunc"('month'::"text", ("period_date")::timestamp with time zone) = "period_date") -- noqa: CV10
+            OR ("date_trunc"('month'::TEXT, ("period_date")::TIMESTAMP WITH TIME ZONE) = "period_date") -- noqa: CV10
         )
     ),
     CONSTRAINT "note_has_one_target" CHECK (
         (
             (
-                (("occurrence_id" IS NOT NULL))::integer
-                + ((("period_kind" IS NOT NULL) AND ("period_date" IS NOT NULL)))::integer
+                (("occurrence_id" IS NOT NULL))::INTEGER
+                + ((("period_kind" IS NOT NULL) AND ("period_date" IS NOT NULL)))::INTEGER
             )
             = 1
         )
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS "public"."notes" (
     CONSTRAINT "week_alignment" CHECK (
         (
             ("period_kind" <> 'week'::"public"."note_period_kind") -- noqa: CV10
-            OR ("date_trunc"('week'::"text", ("period_date")::timestamp with time zone) = "period_date") -- noqa: CV10
+            OR ("date_trunc"('week'::TEXT, ("period_date")::TIMESTAMP WITH TIME ZONE) = "period_date") -- noqa: CV10
         )
     )
 );

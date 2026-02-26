@@ -1,10 +1,10 @@
 CREATE TYPE "public"."habit_stats" AS (
     "habit_id" uuid,
     "last_entry_at" timestamp with time zone,
-    "longest_streak_length" integer,
+    "longest_streak_length" INTEGER,
     "longest_streak_start" date,
     "longest_streak_end" date,
-    "total_entries" bigint
+    "total_entries" BIGINT
 );
 
 SET check_function_bodies = "off";
@@ -50,7 +50,7 @@ BEGIN
             doo.occurrence_date,
             doo.occurrence_date - (ROW_NUMBER() OVER (
                 PARTITION BY doo.habit_id ORDER BY doo.occurrence_date
-            ))::integer AS streak_group
+            ))::INTEGER AS streak_group
         FROM daily_occurrences doo
     ),
     streak_lengths AS (
@@ -75,7 +75,7 @@ BEGIN
     SELECT
         h.habit_id,
         le.last_entry_at,
-        COALESCE(ls.streak_length, 0)::integer AS longest_streak_length,
+        COALESCE(ls.streak_length, 0)::INTEGER AS longest_streak_length,
         ls.streak_start AS longest_streak_start,
         ls.streak_end AS longest_streak_end,
         COALESCE(ec.total_entries, 0) AS total_entries
@@ -86,6 +86,6 @@ BEGIN
 END;
 $function$;
 
-GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" "uuid" [], "p_time_zone" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" "uuid" [], "p_time_zone" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" "uuid" [], "p_time_zone" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" UUID [], "p_time_zone" TEXT) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" UUID [], "p_time_zone" TEXT) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" UUID [], "p_time_zone" TEXT) TO "service_role";

@@ -1,12 +1,12 @@
 -- Table definition
 CREATE TABLE IF NOT EXISTS "public"."traits" (
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone,
-    "name" "text" NOT NULL CHECK ("name" <> ''), -- noqa: CV10
-    "description" "text",
-    "user_id" "uuid",
-    "color" "text" NOT NULL CHECK ("color" <> ''), -- noqa: CV10
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT "now"() NOT NULL,
+    "updated_at" TIMESTAMP WITH TIME ZONE,
+    "name" TEXT NOT NULL CHECK ("name" <> ''), -- noqa: CV10
+    "description" TEXT,
+    "user_id" UUID,
+    "color" TEXT NOT NULL CHECK ("color" <> ''), -- noqa: CV10
+    "id" UUID DEFAULT "gen_random_uuid"() NOT NULL
 );
 
 ALTER TABLE "public"."traits" OWNER TO "postgres";

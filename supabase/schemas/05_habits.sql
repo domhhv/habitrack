@@ -2,14 +2,14 @@
 
 -- Table definition
 CREATE TABLE IF NOT EXISTS "public"."habits" (
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone,
-    "user_id" "uuid" NOT NULL,
-    "name" "text" NOT NULL CHECK ("name" <> ''), -- noqa: CV10
-    "description" "text",
-    "icon_path" "text",
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "trait_id" "uuid"
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT "now"() NOT NULL,
+    "updated_at" TIMESTAMP WITH TIME ZONE,
+    "user_id" UUID NOT NULL,
+    "name" TEXT NOT NULL CHECK ("name" <> ''), -- noqa: CV10
+    "description" TEXT,
+    "icon_path" TEXT,
+    "id" UUID DEFAULT "gen_random_uuid"() NOT NULL,
+    "trait_id" UUID
 );
 
 ALTER TABLE "public"."habits" OWNER TO "postgres";

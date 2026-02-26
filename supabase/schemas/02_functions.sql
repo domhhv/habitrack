@@ -16,8 +16,8 @@ ALTER FUNCTION "public"."create_profile"() OWNER TO "postgres";
 
 -- Function to track the longest streak for a habit
 CREATE OR REPLACE FUNCTION "public"."get_longest_streak"( -- noqa
-    "p_habit_id" "uuid",
-    "p_time_zone" "text" DEFAULT 'UTC'::text
+    "p_habit_id" UUID,
+    "p_time_zone" TEXT DEFAULT 'UTC'::text
 )
 RETURNS "public"."streak_info"
     LANGUAGE "plpgsql"
@@ -34,7 +34,7 @@ BEGIN
     streaks AS (
         SELECT
             occurrence_date,
-            occurrence_date - (ROW_NUMBER() OVER (ORDER BY occurrence_date))::integer AS streak_group
+            occurrence_date - (ROW_NUMBER() OVER (ORDER BY occurrence_date))::INTEGER AS streak_group
         FROM daily_occurrences
     ),
     streak_lengths AS (
@@ -65,12 +65,12 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_time_zone" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) OWNER TO "postgres";
 
 -- Function to get batched statistics for multiple habits
 CREATE OR REPLACE FUNCTION "public"."get_habits_stats"( -- noqa
-    "p_habit_ids" "uuid"[],
-    "p_time_zone" "text" DEFAULT 'UTC'::text
+    "p_habit_ids" UUID[],
+    "p_time_zone" TEXT DEFAULT 'UTC'::text
 )
 RETURNS SETOF "public"."habit_stats"
     LANGUAGE "plpgsql"
@@ -112,7 +112,7 @@ BEGIN
             doo.occurrence_date,
             doo.occurrence_date - (ROW_NUMBER() OVER (
                 PARTITION BY doo.habit_id ORDER BY doo.occurrence_date
-            ))::integer AS streak_group
+            ))::INTEGER AS streak_group
         FROM daily_occurrences doo
     ),
     streak_lengths AS (
@@ -137,7 +137,7 @@ BEGIN
     SELECT
         h.habit_id,
         le.last_entry_at,
-        COALESCE(ls.streak_length, 0)::integer AS longest_streak_length,
+        COALESCE(ls.streak_length, 0)::INTEGER AS longest_streak_length,
         ls.streak_start AS longest_streak_start,
         ls.streak_end AS longest_streak_end,
         COALESCE(ec.total_entries, 0) AS total_entries
@@ -148,7 +148,7 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION "public"."get_habits_stats"("p_habit_ids" "uuid"[], "p_time_zone" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_habits_stats"("p_habit_ids" UUID[], "p_time_zone" TEXT) OWNER TO "postgres";
 
 -- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
@@ -163,13 +163,13 @@ $$;
 ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
 
 -- Grant permissions on functions
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_time_zone" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_time_zone" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" "uuid", "p_time_zone" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" "uuid"[], "p_time_zone" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" "uuid"[], "p_time_zone" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" "uuid"[], "p_time_zone" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" UUID[], "p_time_zone" TEXT) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" UUID[], "p_time_zone" TEXT) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_habits_stats"("p_habit_ids" UUID[], "p_time_zone" TEXT) TO "service_role";
 
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "authenticated";

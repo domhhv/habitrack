@@ -4,8 +4,8 @@ CREATE TABLE "public"."profiles" (
     "name" TEXT,
     "plan" "public"."user_plans" NOT NULL DEFAULT 'free', -- noqa: disable=convention.quoted_literals
     "first_day_of_week" "public"."days_of_week" NOT NULL DEFAULT 'mon',
-    "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
-    "updated_at" TIMESTAMPTZ
+    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    "updated_at" TIMESTAMP WITH TIME ZONE
 );
 
 CREATE OR REPLACE TRIGGER "set_updated_at" BEFORE UPDATE ON "public"."profiles"

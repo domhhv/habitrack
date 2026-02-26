@@ -1,6 +1,6 @@
 import { Input, Button } from '@heroui/react';
 import { XIcon, CheckIcon, PencilSimpleIcon } from '@phosphor-icons/react';
-import { useState } from 'react';
+import React from 'react';
 
 import { TraitChip } from '@components';
 import type { Habit } from '@models';
@@ -13,8 +13,8 @@ type HabitDetailsProps = {
 };
 
 const HabitDetails = ({ habit }: HabitDetailsProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(habit.name);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [name, setName] = React.useState(habit.name);
   const { updateHabit } = useHabitActions();
 
   const handleSave = async () => {

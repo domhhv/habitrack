@@ -2,16 +2,16 @@
 
 -- Table definition
 CREATE TABLE IF NOT EXISTS "public"."habit_metrics" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone,
-    "user_id" "uuid" NOT NULL,
-    "habit_id" "uuid" NOT NULL,
-    "name" "text" NOT NULL CHECK ("name" <> ''), -- noqa: CV10
+    "id" UUID DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT "now"() NOT NULL,
+    "updated_at" TIMESTAMP WITH TIME ZONE,
+    "user_id" UUID NOT NULL,
+    "habit_id" UUID NOT NULL,
+    "name" TEXT NOT NULL CHECK ("name" <> ''), -- noqa: CV10
     "type" "public"."metric_type" NOT NULL,
     "config" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL, -- noqa: CV10
-    "sort_order" integer DEFAULT 0 NOT NULL,
-    "is_required" boolean DEFAULT false NOT NULL
+    "sort_order" INTEGER DEFAULT 0 NOT NULL,
+    "is_required" BOOLEAN DEFAULT false NOT NULL
 );
 
 ALTER TABLE "public"."habit_metrics" OWNER TO "postgres";
