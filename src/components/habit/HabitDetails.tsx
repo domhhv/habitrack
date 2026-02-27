@@ -1,4 +1,4 @@
-import { cn, Input, Button } from '@heroui/react';
+import { cn, Input, Button, Textarea } from '@heroui/react';
 import { XIcon, CheckIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 
@@ -17,36 +17,49 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
   const [name, setName] = React.useState(habit.name);
   const [isEditingDescription, setIsEditingDescription] = React.useState(false);
   const [description, setDescription] = React.useState(habit.description || '');
+  const [isEditingMotivation, setIsEditingMotivation] = React.useState(false);
+  const [motivation, setMotivation] = React.useState(habit.motivation || '');
   const { updateHabit } = useHabitActions();
 
-  const handleNameSave = async () => {
-    const trimmed = name.trim();
+  const saveHabit = async () => {
+    const trimmedName = name.trim();
+    const trimmedDescription = description.trim();
+    const trimmedMotivation = motivation.trim();
 
-    if (trimmed && trimmed !== habit.name) {
-      await updateHabit(habit.id, { name: trimmed });
+    if (trimmedName && trimmedName !== habit.name) {
+      await updateHabit(habit.id, { name: trimmedName });
+    }
+
+    if (trimmedDescription !== (habit.description || '')) {
+      await updateHabit(habit.id, { description: trimmedDescription || null });
+    }
+
+    if (trimmedMotivation !== (habit.motivation || '')) {
+      await updateHabit(habit.id, { motivation: trimmedMotivation || null });
     }
 
     setIsEditingName(false);
+    setIsEditingDescription(false);
+    setIsEditingMotivation(false);
   };
 
-  const handleNameCancel = () => {
+  const cancelEditing = () => {
     setName(habit.name);
+    setDescription(habit.description || '');
+    setMotivation(habit.motivation || '');
     setIsEditingName(false);
+    setIsEditingDescription(false);
+    setIsEditingMotivation(false);
   };
 
-  const handleDescriptionSave = async () => {
-    const trimmed = description.trim();
-
-    if (trimmed !== (habit.description || '')) {
-      await updateHabit(habit.id, { description: trimmed || null });
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      saveHabit();
     }
 
-    setIsEditingDescription(false);
-  };
-
-  const handleDescriptionCancel = () => {
-    setDescription(habit.description || '');
-    setIsEditingDescription(false);
+    if (e.key === 'Escape') {
+      cancelEditing();
+    }
   };
 
   return (
@@ -71,19 +84,10 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 value={name}
                 maxLength={50}
                 onValueChange={setName}
+                onKeyDown={handleKeyDown}
                 classNames={{
                   innerWrapper: 'py-2',
-                  input: 'text-2xl font-bold',
                   inputWrapper: 'h-auto',
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleNameSave();
-                  }
-
-                  if (e.key === 'Escape') {
-                    handleNameCancel();
-                  }
                 }}
                 endContent={
                   <div className="flex items-center gap-1">
@@ -94,7 +98,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                       size="sm"
                       isIconOnly
                       variant="light"
-                      onPress={handleNameSave}
+                      onPress={saveHabit}
                       isDisabled={!name.trim()}
                     >
                       <CheckIcon className="size-4" />
@@ -103,7 +107,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                       size="sm"
                       isIconOnly
                       variant="light"
-                      onPress={handleNameCancel}
+                      onPress={cancelEditing}
                     >
                       <XIcon className="size-4" />
                     </Button>
@@ -117,11 +121,16 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                   size="sm"
                   isIconOnly
                   variant="light"
-                  className="opacity-0 transition-opacity group-hover:opacity-100"
                   onPress={() => {
                     setName(habit.name);
                     setIsEditingName(true);
                   }}
+                  className={cn(
+                    'opacity-0 transition-opacity',
+                    !isEditingDescription &&
+                      !isEditingMotivation &&
+                      'group-hover:opacity-100'
+                  )}
                 >
                   <PencilSimpleIcon className="size-4" />
                 </Button>
@@ -135,16 +144,12 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
               size="sm"
               maxLength={100}
               value={description}
+              onKeyDown={handleKeyDown}
               placeholder="No description"
               onValueChange={setDescription}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleDescriptionSave();
-                }
-
-                if (e.key === 'Escape') {
-                  handleDescriptionCancel();
-                }
+              classNames={{
+                innerWrapper: 'py-2',
+                inputWrapper: 'h-auto',
               }}
               endContent={
                 <div className="flex items-center gap-1">
@@ -155,7 +160,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                     size="sm"
                     isIconOnly
                     variant="light"
-                    onPress={handleDescriptionSave}
+                    onPress={saveHabit}
                   >
                     <CheckIcon className="size-4" />
                   </Button>
@@ -163,7 +168,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                     size="sm"
                     isIconOnly
                     variant="light"
-                    onPress={handleDescriptionCancel}
+                    onPress={cancelEditing}
                   >
                     <XIcon className="size-4" />
                   </Button>
@@ -181,11 +186,16 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 size="sm"
                 isIconOnly
                 variant="light"
-                className="opacity-0 transition-opacity group-hover:opacity-100"
                 onPress={() => {
                   setDescription(habit.description || '');
                   setIsEditingDescription(true);
                 }}
+                className={cn(
+                  'opacity-0 transition-opacity',
+                  !isEditingDescription &&
+                    !isEditingMotivation &&
+                    'group-hover:opacity-100'
+                )}
               >
                 <PencilSimpleIcon className="size-4" />
               </Button>
@@ -193,6 +203,64 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           )}
         </div>
       </div>
+      {isEditingMotivation ? (
+        <Textarea
+          maxLength={2000}
+          label="Motivation"
+          value={motivation}
+          onValueChange={setMotivation}
+          placeholder="Why do you want to track this habit? If you know the reasons for establishing a good habit or breaking a bad one, this is a good place to outline your goals."
+          endContent={
+            <div className="flex items-center gap-1">
+              <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                {motivation.length}/200
+              </span>
+              <Button size="sm" isIconOnly variant="light" onPress={saveHabit}>
+                <CheckIcon className="size-4" />
+              </Button>
+              <Button
+                size="sm"
+                isIconOnly
+                variant="light"
+                onPress={cancelEditing}
+              >
+                <XIcon className="size-4" />
+              </Button>
+            </div>
+          }
+        />
+      ) : (
+        <div className="group">
+          <h2 className="mt-4 mb-1 text-sm font-medium">Motivation</h2>
+          <div className="flex gap-2">
+            <p
+              className={cn(
+                !habit.motivation && 'text-default-500 italic',
+                'whitespace-pre-wrap'
+              )}
+            >
+              {habit.motivation || 'No motivation set'}
+            </p>
+            <Button
+              size="sm"
+              isIconOnly
+              variant="light"
+              onPress={() => {
+                setMotivation(habit.motivation || '');
+                setIsEditingMotivation(true);
+              }}
+              className={cn(
+                'opacity-0 transition-opacity',
+                !isEditingDescription &&
+                  !isEditingMotivation &&
+                  'group-hover:opacity-100'
+              )}
+            >
+              <PencilSimpleIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
