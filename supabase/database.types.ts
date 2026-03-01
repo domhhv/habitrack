@@ -58,49 +58,151 @@ export type Database = {
           payload?: Json | null
         }
       }
+      custom_oauth_providers: {
+        Relationships: []
+        Insert: {
+          acceptable_client_ids?: string[]
+          attribute_mapping?: Json
+          authorization_params?: Json
+          authorization_url?: string | null
+          cached_discovery?: Json | null
+          client_id: string
+          client_secret: string
+          created_at?: string
+          discovery_cached_at?: string | null
+          discovery_url?: string | null
+          email_optional?: boolean
+          enabled?: boolean
+          id?: string
+          identifier: string
+          issuer?: string | null
+          jwks_uri?: string | null
+          name: string
+          pkce_enabled?: boolean
+          provider_type: string
+          scopes?: string[]
+          skip_nonce_check?: boolean
+          token_url?: string | null
+          updated_at?: string
+          userinfo_url?: string | null
+        }
+        Row: {
+          acceptable_client_ids: string[]
+          attribute_mapping: Json
+          authorization_params: Json
+          authorization_url: string | null
+          cached_discovery: Json | null
+          client_id: string
+          client_secret: string
+          created_at: string
+          discovery_cached_at: string | null
+          discovery_url: string | null
+          email_optional: boolean
+          enabled: boolean
+          id: string
+          identifier: string
+          issuer: string | null
+          jwks_uri: string | null
+          name: string
+          pkce_enabled: boolean
+          provider_type: string
+          scopes: string[]
+          skip_nonce_check: boolean
+          token_url: string | null
+          updated_at: string
+          userinfo_url: string | null
+        }
+        Update: {
+          acceptable_client_ids?: string[]
+          attribute_mapping?: Json
+          authorization_params?: Json
+          authorization_url?: string | null
+          cached_discovery?: Json | null
+          client_id?: string
+          client_secret?: string
+          created_at?: string
+          discovery_cached_at?: string | null
+          discovery_url?: string | null
+          email_optional?: boolean
+          enabled?: boolean
+          id?: string
+          identifier?: string
+          issuer?: string | null
+          jwks_uri?: string | null
+          name?: string
+          pkce_enabled?: boolean
+          provider_type?: string
+          scopes?: string[]
+          skip_nonce_check?: boolean
+          token_url?: string | null
+          updated_at?: string
+          userinfo_url?: string | null
+        }
+      }
       flow_state: {
         Relationships: []
         Insert: {
-          auth_code: string
+          auth_code?: string | null
           auth_code_issued_at?: string | null
           authentication_method: string
-          code_challenge: string
-          code_challenge_method: Database["auth"]["Enums"]["code_challenge_method"]
+          code_challenge?: string | null
           created_at?: string | null
+          email_optional?: boolean
           id: string
+          invite_token?: string | null
+          linking_target_id?: string | null
+          oauth_client_state_id?: string | null
           provider_access_token?: string | null
           provider_refresh_token?: string | null
           provider_type: string
+          referrer?: string | null
           updated_at?: string | null
           user_id?: string | null
+          code_challenge_method?:
+            | Database["auth"]["Enums"]["code_challenge_method"]
+            | null
         }
         Row: {
-          auth_code: string
+          auth_code: string | null
           auth_code_issued_at: string | null
           authentication_method: string
-          code_challenge: string
-          code_challenge_method: Database["auth"]["Enums"]["code_challenge_method"]
+          code_challenge: string | null
           created_at: string | null
+          email_optional: boolean
           id: string
+          invite_token: string | null
+          linking_target_id: string | null
+          oauth_client_state_id: string | null
           provider_access_token: string | null
           provider_refresh_token: string | null
           provider_type: string
+          referrer: string | null
           updated_at: string | null
           user_id: string | null
+          code_challenge_method:
+            | Database["auth"]["Enums"]["code_challenge_method"]
+            | null
         }
         Update: {
-          auth_code?: string
+          auth_code?: string | null
           auth_code_issued_at?: string | null
           authentication_method?: string
-          code_challenge?: string
-          code_challenge_method?: Database["auth"]["Enums"]["code_challenge_method"]
+          code_challenge?: string | null
           created_at?: string | null
+          email_optional?: boolean
           id?: string
+          invite_token?: string | null
+          linking_target_id?: string | null
+          oauth_client_state_id?: string | null
           provider_access_token?: string | null
           provider_refresh_token?: string | null
           provider_type?: string
+          referrer?: string | null
           updated_at?: string | null
           user_id?: string | null
+          code_challenge_method?:
+            | Database["auth"]["Enums"]["code_challenge_method"]
+            | null
         }
       }
       identities: {
@@ -413,6 +515,7 @@ export type Database = {
           logo_uri?: string | null
           redirect_uris: string
           registration_type: Database["auth"]["Enums"]["oauth_registration_type"]
+          token_endpoint_auth_method: string
           updated_at?: string
         }
         Row: {
@@ -427,6 +530,7 @@ export type Database = {
           logo_uri: string | null
           redirect_uris: string
           registration_type: Database["auth"]["Enums"]["oauth_registration_type"]
+          token_endpoint_auth_method: string
           updated_at: string
         }
         Update: {
@@ -441,6 +545,7 @@ export type Database = {
           logo_uri?: string | null
           redirect_uris?: string
           registration_type?: Database["auth"]["Enums"]["oauth_registration_type"]
+          token_endpoint_auth_method?: string
           updated_at?: string
         }
       }
@@ -1020,7 +1125,8 @@ export type Database = {
           description?: string | null
           icon_path?: string | null
           id?: string
-          name: string
+          motivation?: string | null
+          name?: string
           trait_id?: string | null
           updated_at?: string | null
           user_id: string
@@ -1039,6 +1145,7 @@ export type Database = {
           description: string | null
           icon_path: string | null
           id: string
+          motivation: string | null
           name: string
           trait_id: string | null
           updated_at: string | null
@@ -1049,6 +1156,7 @@ export type Database = {
           description?: string | null
           icon_path?: string | null
           id?: string
+          motivation?: string | null
           name?: string
           trait_id?: string | null
           updated_at?: string | null
@@ -1262,6 +1370,10 @@ export type Database = {
         Args: { bucketid: string; metadata: Json; name: string; owner: string }
         Returns: undefined
       }
+      get_common_prefix: {
+        Args: { p_delimiter: string; p_key: string; p_prefix: string }
+        Returns: string
+      }
       get_size_by_bucket: {
         Args: never
         Returns: {
@@ -1286,58 +1398,85 @@ export type Database = {
       }
       list_objects_with_delimiter: {
         Args: {
-          bucket_id: string
+          _bucket_id: string
           delimiter_param: string
           max_keys?: number
           next_token?: string
           prefix_param: string
+          sort_order?: string
           start_after?: string
         }
         Returns: {
+          created_at: string
           id: string
+          last_accessed_at: string
           metadata: Json
           name: string
           updated_at: string
         }[]
       }
-      search:
-        | {
-            Args: {
-              bucketname: string
-              levels?: number
-              limits?: number
-              offsets?: number
-              prefix: string
-            }
-            Returns: {
-              created_at: string
-              id: string
-              last_accessed_at: string
-              metadata: Json
-              name: string
-              updated_at: string
-            }[]
-          }
-        | {
-            Args: {
-              bucketname: string
-              levels?: number
-              limits?: number
-              offsets?: number
-              prefix: string
-              search?: string
-              sortcolumn?: string
-              sortorder?: string
-            }
-            Returns: {
-              created_at: string
-              id: string
-              last_accessed_at: string
-              metadata: Json
-              name: string
-              updated_at: string
-            }[]
-          }
+      search: {
+        Args: {
+          bucketname: string
+          levels?: number
+          limits?: number
+          offsets?: number
+          prefix: string
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          last_accessed_at: string
+          metadata: Json
+          name: string
+          updated_at: string
+        }[]
+      }
+      search_by_timestamp: {
+        Args: {
+          p_bucket_id: string
+          p_level: number
+          p_limit: number
+          p_prefix: string
+          p_sort_column: string
+          p_sort_column_after: string
+          p_sort_order: string
+          p_start_after: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          key: string
+          last_accessed_at: string
+          metadata: Json
+          name: string
+          updated_at: string
+        }[]
+      }
+      search_v2: {
+        Args: {
+          bucket_name: string
+          levels?: number
+          limits?: number
+          prefix: string
+          sort_column?: string
+          sort_column_after?: string
+          sort_order?: string
+          start_after?: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          key: string
+          last_accessed_at: string
+          metadata: Json
+          name: string
+          updated_at: string
+        }[]
+      }
     }
     Tables: {
       buckets: {

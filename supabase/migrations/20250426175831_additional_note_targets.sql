@@ -2,7 +2,7 @@ CREATE TYPE "note_period_kind" AS ENUM ('day', 'week', 'month');
 
 ALTER TABLE "notes"
 ADD COLUMN "period_kind" note_period_kind NULL,
-ADD COLUMN "period_date" date NULL;
+ADD COLUMN "period_date" DATE NULL;
 
 -- noqa: disable=convention.quoted_literals
 
@@ -16,8 +16,8 @@ ALTER TABLE "notes" DROP COLUMN "day";
 ALTER TABLE "notes"
 ADD CONSTRAINT "note_has_one_target"
 CHECK (
-    ("occurrence_id" IS NOT NULL)::int
-    + ("period_kind" IS NOT NULL AND "period_date" IS NOT NULL)::int
+    ("occurrence_id" IS NOT NULL)::INTEGER
+    + ("period_kind" IS NOT NULL AND "period_date" IS NOT NULL)::INTEGER
     = 1
 );
 

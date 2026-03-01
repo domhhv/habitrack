@@ -1,4 +1,11 @@
-import { Drawer, DrawerBody, DrawerHeader, DrawerContent } from '@heroui/react';
+import {
+  Button,
+  Drawer,
+  Tooltip,
+  DrawerBody,
+  DrawerHeader,
+  DrawerContent,
+} from '@heroui/react';
 import type { ZonedDateTime } from '@internationalized/date';
 import {
   now,
@@ -9,6 +16,7 @@ import {
   toLocalTimeZone,
   getLocalTimeZone,
 } from '@internationalized/date';
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
@@ -38,7 +46,8 @@ const OccurrenceDrawer = () => {
   const { isMobile } = useScreenWidth();
   const { dayToDisplay, dayToLog, habitIdToDisplay, isOpen, occurrenceToEdit } =
     useOccurrenceDrawerState();
-  const { closeOccurrenceDrawer } = useOccurrenceDrawerActions();
+  const { closeOccurrenceDrawer, setDayToDisplay } =
+    useOccurrenceDrawerActions();
   const dateFormatter = useDateFormatter({
     day: 'numeric',
     month: 'short',
@@ -116,6 +125,21 @@ const OccurrenceDrawer = () => {
     return dateFormatter.format(date.toDate());
   };
 
+  const canNavigateDays = !!dayToDisplay && !dayToLog && !occurrenceToEdit;
+
+  const navigateDay = (direction: -1 | 1) => {
+    if (!dayToDisplay) {
+      return;
+    }
+
+    const newDate =
+      direction === -1
+        ? dayToDisplay.subtract({ days: 1 })
+        : dayToDisplay.add({ days: 1 });
+
+    setDayToDisplay(newDate);
+  };
+
   const getMainTitle = () => {
     if (dayToLog || occurrenceToEdit) {
       return (
@@ -183,7 +207,49 @@ const OccurrenceDrawer = () => {
     >
       <DrawerContent>
         <DrawerHeader className="flex-col">
-          {getMainTitle()}
+          {canNavigateDays ? (
+            <div className="flex items-center gap-2">
+              <div>{getMainTitle()}</div>
+              <Tooltip content="Previous day">
+                <Button
+                  size="sm"
+                  isIconOnly
+                  radius="sm"
+                  variant="light"
+                  aria-label="Previous day"
+                  onPress={() => {
+                    navigateDay(-1);
+                  }}
+                >
+                  <CaretLeftIcon
+                    size={16}
+                    focusable="false"
+                    aria-hidden="true"
+                  />
+                </Button>
+              </Tooltip>
+              <Tooltip content="Next day">
+                <Button
+                  size="sm"
+                  isIconOnly
+                  radius="sm"
+                  variant="light"
+                  aria-label="Next day"
+                  onPress={() => {
+                    navigateDay(1);
+                  }}
+                >
+                  <CaretRightIcon
+                    size={16}
+                    focusable="false"
+                    aria-hidden="true"
+                  />
+                </Button>
+              </Tooltip>
+            </div>
+          ) : (
+            getMainTitle()
+          )}
           {occurrencesData?.hasOccurrencesWithAndWithoutTime && (
             <p className="text-default-400 dark:text-default-600 text-xs">
               Has occurrences with and without specific times

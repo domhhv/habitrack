@@ -309,18 +309,29 @@ const TextConfigFields = ({
   onChange: (config: TextMetricConfig) => void;
 }) => {
   return (
-    <Input
-      size="sm"
-      type="number"
-      variant="faded"
-      label="Max length"
-      placeholder="Optional"
-      value={config.maxLength?.toString() || ''}
-      onChange={(e) => {
-        const val = e.target.value;
-        onChange({ ...config, maxLength: val ? Number(val) : undefined });
-      }}
-    />
+    <div className="flex flex-col gap-2">
+      <Input
+        size="sm"
+        type="number"
+        variant="faded"
+        label="Max length"
+        placeholder="Optional"
+        value={config.maxLength?.toString() || ''}
+        onChange={(e) => {
+          const val = e.target.value;
+          onChange({ ...config, maxLength: val ? Number(val) : undefined });
+        }}
+      />
+      <Switch
+        size="sm"
+        isSelected={config.multiline || false}
+        onValueChange={(val) => {
+          onChange({ ...config, multiline: val });
+        }}
+      >
+        <span className="text-xs">Allow multiline</span>
+      </Switch>
+    </div>
   );
 };
 

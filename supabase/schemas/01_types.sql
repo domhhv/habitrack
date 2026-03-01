@@ -11,21 +11,21 @@ ALTER TYPE "public"."note_period_kind" OWNER TO "postgres";
 
 -- Type for streak information
 CREATE TYPE "public"."streak_info" AS (
-    "streak_length" integer,
-    "streak_start" "date",
-    "streak_end" "date"
+    "streak_length" INTEGER,
+    "streak_start" DATE,
+    "streak_end" DATE
 );
 
 ALTER TYPE "public"."streak_info" OWNER TO "postgres";
 
 -- Type for batched habit statistics
 CREATE TYPE "public"."habit_stats" AS (
-    "habit_id" "uuid",
-    "last_entry_at" timestamptz,
-    "longest_streak_length" integer,
-    "longest_streak_start" "date",
-    "longest_streak_end" "date",
-    "total_entries" bigint
+    "habit_id" UUID,
+    "last_entry_at" TIMESTAMP WITH TIME ZONE,
+    "longest_streak_length" INTEGER,
+    "longest_streak_start" DATE,
+    "longest_streak_end" DATE,
+    "total_entries" BIGINT
 );
 
 ALTER TYPE "public"."habit_stats" OWNER TO "postgres";

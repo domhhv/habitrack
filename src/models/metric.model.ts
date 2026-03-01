@@ -44,6 +44,7 @@ export type BooleanMetricConfig = {
 
 export type TextMetricConfig = {
   maxLength?: number;
+  multiline?: boolean;
   placeholder?: string;
 };
 

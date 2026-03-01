@@ -49,3 +49,12 @@ export type OccurrencesInsert = CamelCasedPropertiesDeep<
 export type OccurrencesUpdate = CamelCasedPropertiesDeep<
   TablesUpdate<'occurrences'>
 >;
+
+export type OccurrenceSummaryItem = {
+  count: number;
+  habitId: string;
+  iconPath: string | null;
+  name: string;
+  occurrences: Occurrence[];
+  traitColor: string;
+};

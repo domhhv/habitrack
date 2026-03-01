@@ -3,7 +3,6 @@ import {
   Modal,
   Button,
   Select,
-  Textarea,
   ModalBody,
   SelectItem,
   ModalFooter,
@@ -155,17 +154,29 @@ const AddHabitDialogButton = () => {
               size="sm"
               value={name}
               label="Name"
+              maxLength={50}
               variant="faded"
               onChange={handleNameChange}
               placeholder="Enter habit name"
+              endContent={
+                <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                  {name.length}/50
+                </span>
+              }
             />
-            <Textarea
+            <Input
               size="sm"
               variant="faded"
+              maxLength={100}
               value={description}
               label="Description"
               onChange={handleDescriptionChange}
               placeholder="Enter habit description (optional)"
+              endContent={
+                <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                  {description.length}/100
+                </span>
+              }
             />
             <Select
               required

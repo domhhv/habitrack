@@ -12,7 +12,6 @@ import {
 import {
   NoteIcon,
   NoteBlankIcon,
-  NotePencilIcon,
   CalendarBlankIcon,
   ArrowSquareLeftIcon,
 } from '@phosphor-icons/react';
@@ -24,9 +23,6 @@ import { Link, useParams, useNavigate } from 'react-router';
 
 import { OccurrenceChip, SwipeableContainer } from '@components';
 import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
-import type { NumberMetricConfig, DurationMetricConfig } from '@models';
-import { StorageBuckets } from '@models';
-import { getPublicUrl } from '@services';
 import {
   useDayNotes,
   useOccurrences,
@@ -34,9 +30,16 @@ import {
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
 } from '@stores';
-import { getISOWeek, isDstTransitionDay, findDstTransitionHour } from '@utils';
+import {
+  getISOWeek,
+  buildMetricTotals,
+  isDstTransitionDay,
+  findDstTransitionHour,
+  buildOccurrenceSummary,
+} from '@utils';
 
 import CalendarNavigationButtons from './CalendarNavigationButtons';
+import CalendarPeriodSummary from './CalendarPeriodSummary';
 
 const DayCalendar = () => {
   const now = useCurrentTime();
@@ -112,118 +115,11 @@ const DayCalendar = () => {
   }, [occurrences, focusedDate]);
 
   const occurrenceSummary = React.useMemo(() => {
-    const allOccurrences = Object.values(dayOccurrences);
-
-    const grouped = groupBy(allOccurrences, (o) => {
-      return o.habitId;
-    });
-
-    return Object.entries(grouped).map(([habitId, habitOccurrences]) => {
-      const [first] = habitOccurrences;
-
-      return {
-        count: habitOccurrences.length,
-        habitId,
-        iconPath: first.habit.iconPath,
-        name: first.habit.name,
-        occurrences: habitOccurrences,
-        traitColor: first.habit.trait?.color || 'black',
-      };
-    });
+    return buildOccurrenceSummary(dayOccurrences);
   }, [dayOccurrences]);
 
   const metricTotals = React.useMemo(() => {
-    const totals: Record<string, { formattedTotal: string; name: string }[]> =
-      {};
-
-    for (const {
-      habitId,
-      occurrences: habitOccurrences,
-    } of occurrenceSummary) {
-      const [first] = habitOccurrences;
-      const metricDefinitions = first.habit.metricDefinitions;
-
-      const summableMetrics = metricDefinitions
-        .filter((m) => {
-          return m.type === 'number' || m.type === 'duration';
-        })
-        .sort((a, b) => {
-          return a.sortOrder - b.sortOrder;
-        });
-
-      if (summableMetrics.length === 0) {
-        continue;
-      }
-
-      const sums: { formattedTotal: string; name: string }[] = [];
-
-      for (const metric of summableMetrics) {
-        let sum = 0;
-        let hasValues = false;
-
-        for (const occ of habitOccurrences) {
-          const mv = occ.metricValues.find((v) => {
-            return v.habitMetricId === metric.id;
-          });
-
-          if (!mv) {
-            continue;
-          }
-
-          const value = mv.value as Record<string, unknown>;
-
-          if (metric.type === 'number') {
-            sum += (value as { numericValue: number }).numericValue;
-            hasValues = true;
-          } else if (metric.type === 'duration') {
-            sum += (value as { durationMs: number }).durationMs;
-            hasValues = true;
-          }
-        }
-
-        if (!hasValues) {
-          continue;
-        }
-
-        let formattedTotal: string;
-
-        if (metric.type === 'number') {
-          const config = metric.config as NumberMetricConfig;
-          const formatted =
-            config.decimalPlaces != null
-              ? sum.toFixed(config.decimalPlaces)
-              : String(sum);
-
-          formattedTotal = config.unit
-            ? `${formatted} ${config.unit}`
-            : formatted;
-        } else {
-          const config = metric.config as DurationMetricConfig;
-          const totalSec = Math.floor(sum / 1000);
-          const h = Math.floor(totalSec / 3600);
-          const m = Math.floor((totalSec % 3600) / 60);
-          const s = totalSec % 60;
-
-          if (config.format === 'minutes') {
-            formattedTotal = `${Math.floor(sum / 60000)} min`;
-          } else if (config.format === 'seconds') {
-            formattedTotal = `${totalSec} sec`;
-          } else if (config.format === 'hh:mm:ss') {
-            formattedTotal = `${h}h ${m}m ${s}s`;
-          } else {
-            formattedTotal = `${h}h ${m}m`;
-          }
-        }
-
-        sums.push({ formattedTotal, name: metric.name });
-      }
-
-      if (sums.length > 0) {
-        totals[habitId] = sums;
-      }
-    }
-
-    return totals;
+    return buildMetricTotals(occurrenceSummary);
   }, [occurrenceSummary]);
 
   const groupOccurrences = React.useCallback(
@@ -291,107 +187,6 @@ const DayCalendar = () => {
 
   return (
     <div className="flex w-full flex-1 gap-0 md:gap-6">
-      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-1 pl-8 md:flex">
-        <Calendar
-          value={focusedDate}
-          onChange={handleCalendarChange}
-          firstDayOfWeek={firstDayOfWeek}
-          classNames={{
-            base: 'w-full shadow-none bg-transparent',
-            content: 'w-full',
-          }}
-        />
-        <div className="flex items-center justify-center gap-2">
-          <CalendarNavigationButtons focusedDate={focusedDate} />
-        </div>
-        {dayNote && (
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <NoteIcon size={16} weight="bold" className="text-primary-500" />
-              <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-                Note
-              </h4>
-              <Button
-                size="sm"
-                isIconOnly
-                variant="light"
-                color="primary"
-                className="h-5 w-5 min-w-fit"
-                onPress={() => {
-                  openNoteDrawer(focusedDate, 'day');
-                }}
-              >
-                <NotePencilIcon size={14} weight="bold" />
-              </Button>
-            </div>
-            <p className="line-clamp-4 text-sm text-stone-500 dark:text-stone-400">
-              {dayNote.content}
-            </p>
-          </div>
-        )}
-        {!dayNote && (
-          <Button
-            size="sm"
-            variant="flat"
-            color="secondary"
-            startContent={<NotePencilIcon size={14} weight="bold" />}
-            onPress={() => {
-              openNoteDrawer(focusedDate, 'day');
-            }}
-          >
-            Add note
-          </Button>
-        )}
-        {occurrenceSummary.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-              Summary
-            </h4>
-            <div className="space-y-1.5">
-              {occurrenceSummary.map(
-                ({ count, habitId, iconPath, name, traitColor }) => {
-                  const totals = metricTotals[habitId];
-
-                  return (
-                    <div key={habitId}>
-                      <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
-                        <img
-                          alt={name}
-                          className="h-4 w-4"
-                          style={{ borderColor: traitColor }}
-                          src={getPublicUrl(
-                            StorageBuckets.HABIT_ICONS,
-                            iconPath
-                          )}
-                        />
-                        <span>
-                          {name}: {count}
-                        </span>
-                      </div>
-                      {totals && (
-                        <div className="mt-0.5 ml-6 space-y-0.5">
-                          {totals.map(
-                            ({ formattedTotal, name: metricName }) => {
-                              return (
-                                <p
-                                  key={metricName}
-                                  className="text-xs text-stone-400 dark:text-stone-500"
-                                >
-                                  {metricName}: {formattedTotal}
-                                </p>
-                              );
-                            }
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-              )}
-            </div>
-          </div>
-        )}
-      </aside>
       <ScrollShadow className="relative flex-1 overflow-y-scroll">
         <SwipeableContainer
           direction={swipeDirection}
@@ -539,6 +334,27 @@ const DayCalendar = () => {
           </div>
         </SwipeableContainer>
       </ScrollShadow>
+      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-8 pl-1 md:flex">
+        <Calendar
+          value={focusedDate}
+          onChange={handleCalendarChange}
+          firstDayOfWeek={firstDayOfWeek}
+          classNames={{
+            base: 'w-full shadow-none bg-transparent',
+            content: 'w-full',
+          }}
+        />
+        <div className="flex items-center justify-center gap-2">
+          <CalendarNavigationButtons focusedDate={focusedDate} />
+        </div>
+        <CalendarPeriodSummary
+          kind="day"
+          note={dayNote}
+          date={focusedDate}
+          metricTotals={metricTotals}
+          occurrenceSummary={occurrenceSummary}
+        />
+      </aside>
     </div>
   );
 };

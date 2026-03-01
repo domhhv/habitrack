@@ -12,7 +12,7 @@ describe(useScreenWidth.name, () => {
   });
 
   it('should return the window availWidth', () => {
-    vi.spyOn(window.screen, 'availWidth', 'get').mockReturnValue(1000);
+    vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1000);
     const { result } = renderHook(() => {
       return useScreenWidth();
     });
