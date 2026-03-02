@@ -227,20 +227,6 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
               <MetricDefinitionForm
                 key={md.id}
                 metric={md}
-                onRemove={() => {
-                  setMetricDefinitions((prev) => {
-                    return prev.map((prevMd) => {
-                      if (prevMd.id === md.id) {
-                        return {
-                          ...prevMd,
-                          isToBeRemoved: true,
-                        };
-                      }
-
-                      return prevMd;
-                    });
-                  });
-                }}
                 onChange={(metricUpdates) => {
                   setMetricDefinitions((prev) => {
                     return prev.map((prevMd) => {
@@ -249,6 +235,26 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
                           ...prevMd,
                           ...metricUpdates,
                           isToBeUpdated: md.isPersisted,
+                        };
+                      }
+
+                      return prevMd;
+                    });
+                  });
+                }}
+                onRemove={() => {
+                  setMetricDefinitions((prev) => {
+                    if (!md.isPersisted) {
+                      return prev.filter((prevMd) => {
+                        return prevMd.id !== md.id;
+                      });
+                    }
+
+                    return prev.map((prevMd) => {
+                      if (prevMd.id === md.id) {
+                        return {
+                          ...prevMd,
+                          isToBeRemoved: true,
                         };
                       }
 
