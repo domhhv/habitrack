@@ -185,13 +185,15 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 aria-label="Select trait"
                 selectedKeys={new Set([habit.traitId || 'no-trait'])}
                 onAction={async (key) => {
-                  const traitId = key === 'no-trait' ? null : String(key);
-
                   setIsUpdatingTrait(true);
 
-                  await updateHabit(habit.id, { traitId });
-
-                  setIsUpdatingTrait(false);
+                  try {
+                    await updateHabit(habit.id, {
+                      traitId: key === 'no-trait' ? null : String(key),
+                    });
+                  } finally {
+                    setIsUpdatingTrait(false);
+                  }
                 }}
               >
                 {[
