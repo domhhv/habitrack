@@ -1,15 +1,21 @@
-import { Chip } from '@heroui/react';
+import { cn, Chip } from '@heroui/react';
 import React from 'react';
 
 import type { Trait } from '@models';
 
 type TraitChipProps = {
+  className?: string;
   trait: Pick<Trait, 'name' | 'color'> | null;
 };
 
-const TraitChip = ({ trait }: TraitChipProps) => {
+const TraitChip = ({ className, trait }: TraitChipProps) => {
   return (
-    <Chip size="sm" variant="faded" color="secondary" className="h-5 border">
+    <Chip
+      size="sm"
+      variant="faded"
+      color="secondary"
+      className={cn('h-5 border', className)}
+    >
       <div className="flex items-center gap-1 font-semibold">
         <span
           role="habit-trait-chip-color-indicator"
