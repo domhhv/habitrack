@@ -14,9 +14,9 @@ import React from 'react';
 
 import { TraitChip } from '@components';
 import type { Habit } from '@models';
-import { StorageBuckets } from '@models';
-import { getPublicUrl } from '@services';
 import { useTraits, useHabitActions } from '@stores';
+
+import HabitIcon from './HabitIcon';
 
 type HabitDetailsProps = {
   habit: Habit;
@@ -93,11 +93,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           style={{ borderColor: habit.trait?.color || '' }}
           className="border-content3 justify-self-start rounded-2xl border-3 p-4"
         >
-          <img
-            className="size-12"
-            alt={`${habit.name} icon`}
-            src={getPublicUrl(StorageBuckets.HABIT_ICONS, habit.iconPath)}
-          />
+          <HabitIcon habit={habit} />
         </div>
         <div className="space-y-2">
           <div className="flex items-center gap-3">
