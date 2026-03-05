@@ -162,7 +162,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 </Button>
               </div>
             )}
-            <Dropdown backdrop="opaque">
+            <Dropdown backdrop="opaque" isDisabled={isUpdatingTrait}>
               <DropdownTrigger>
                 <button type="button" className="h-5 cursor-pointer space-x-2">
                   <TraitChip
@@ -185,11 +185,18 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 aria-label="Select trait"
                 selectedKeys={new Set([habit.traitId || 'no-trait'])}
                 onAction={async (key) => {
+                  const nextTraitId = key === 'no-trait' ? null : String(key);
+                  const currentTraitId = habit.traitId ?? null;
+
+                  if (isUpdatingTrait || nextTraitId === currentTraitId) {
+                    return;
+                  }
+
                   setIsUpdatingTrait(true);
 
                   try {
                     await updateHabit(habit.id, {
-                      traitId: key === 'no-trait' ? null : String(key),
+                      traitId: nextTraitId,
                     });
                   } finally {
                     setIsUpdatingTrait(false);
