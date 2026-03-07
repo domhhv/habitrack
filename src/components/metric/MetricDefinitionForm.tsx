@@ -16,6 +16,7 @@ import {
   PencilSimpleIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
+import type { Key } from 'react-aria';
 
 import { METRIC_PRESETS } from '@const';
 import type { MetricType, MetricConfig, FormMetricDefinitions } from '@models';
@@ -126,7 +127,7 @@ const MetricDefinitionForm = ({
               type: 'number',
             });
           }}
-          onSelectionChange={(key) => {
+          onChange={(key: Key | null) => {
             const preset = ALL_PRESETS.find((p) => {
               return p.name === key;
             });
