@@ -22,36 +22,49 @@ export const createTraitsSlice: SliceCreator<keyof TraitsSlice> = (set) => {
       addTrait: async (trait: TraitsInsert) => {
         const newTrait = await createTrait(trait);
 
-        set((state) => {
-          state.traits[newTrait.id] = newTrait;
-          state.calendarFilters.traitIds.push(newTrait.id);
-        });
+        set(
+          (state) => {
+            state.traits[newTrait.id] = newTrait;
+            state.calendarFilters.traitIds.push(newTrait.id);
+          },
+          undefined,
+          'traitActions.addTrait'
+        );
       },
 
       clearTraits: () => {
-        set((state) => {
-          state.traits = {};
-        });
+        set(
+          (state) => {
+            state.traits = {};
+            state.calendarFilters.traitIds = [];
+          },
+          undefined,
+          'traitActions.clearTraits'
+        );
       },
 
       fetchTraits: async () => {
         const traits = await listTraits();
 
-        set((state) => {
-          const prevTraitIds = state.calendarFilters.traitIds;
-          const nextTraitIds = traits.map((trait) => {
-            return trait.id;
-          });
+        set(
+          (state) => {
+            const prevTraitIds = state.calendarFilters.traitIds;
+            const nextTraitIds = traits.map((trait) => {
+              return trait.id;
+            });
 
-          state.traits = keyBy(traits, 'id');
+            state.traits = keyBy(traits, 'id');
 
-          state.calendarFilters.traitIds =
-            prevTraitIds.length === 0
-              ? nextTraitIds
-              : prevTraitIds.filter((id) => {
-                  return nextTraitIds.includes(id);
-                });
-        });
+            state.calendarFilters.traitIds =
+              prevTraitIds.length === 0
+                ? nextTraitIds
+                : prevTraitIds.filter((id) => {
+                    return nextTraitIds.includes(id);
+                  });
+          },
+          undefined,
+          'traitActions.fetchTraits'
+        );
       },
     },
   };

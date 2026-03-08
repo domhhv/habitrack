@@ -42,29 +42,33 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
 
         const newMetrics = await createHabitMetrics(metrics);
 
-        set((state) => {
-          for (const newMetric of newMetrics) {
-            state.habits[newMetric.habitId].metricDefinitions.push(newMetric);
+        set(
+          (state) => {
+            for (const newMetric of newMetrics) {
+              state.habits[newMetric.habitId].metricDefinitions.push(newMetric);
 
-            const habitOccurrences = state.occurrences.filter((occ) => {
-              return occ.habitId === newMetric.habitId;
-            });
+              const habitOccurrences = state.occurrences.filter((occ) => {
+                return occ.habitId === newMetric.habitId;
+              });
 
-            for (const occurrence of habitOccurrences) {
-              occurrence.habit.metricDefinitions.push(newMetric);
-              const occurrenceInDateMap =
-                state.occurrencesByDate[
-                  toCalendarDate(occurrence.occurredAt).toString()
-                ];
+              for (const occurrence of habitOccurrences) {
+                occurrence.habit.metricDefinitions.push(newMetric);
+                const occurrenceInDateMap =
+                  state.occurrencesByDate[
+                    toCalendarDate(occurrence.occurredAt).toString()
+                  ];
 
-              if (occurrenceInDateMap && occurrenceInDateMap[occurrence.id]) {
-                occurrenceInDateMap[occurrence.id].habit.metricDefinitions.push(
-                  newMetric
-                );
+                if (occurrenceInDateMap && occurrenceInDateMap[occurrence.id]) {
+                  occurrenceInDateMap[
+                    occurrence.id
+                  ].habit.metricDefinitions.push(newMetric);
+                }
               }
             }
-          }
-        });
+          },
+          undefined,
+          'metricsActions.addHabitMetrics'
+        );
 
         return newMetrics;
       },
@@ -76,46 +80,52 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
 
         await destroyHabitMetrics(ids);
 
-        set((state) => {
-          const habit = state.habits[habitId];
+        set(
+          (state) => {
+            const habit = state.habits[habitId];
 
-          habit.metricDefinitions = habit.metricDefinitions.filter((m) => {
-            return !ids.includes(m.id);
-          });
-
-          const habitOccurrences = state.occurrences.filter((occ) => {
-            return occ.habitId === habitId;
-          });
-
-          for (const occurrence of habitOccurrences) {
-            occurrence.metricValues = occurrence.metricValues.filter((mv) => {
-              return !ids.includes(mv.habitMetricId);
+            habit.metricDefinitions = habit.metricDefinitions.filter((m) => {
+              return !ids.includes(m.id);
             });
-            occurrence.habit.metricDefinitions =
-              occurrence.habit.metricDefinitions.filter((m) => {
-                return !ids.includes(m.id);
+
+            const habitOccurrences = state.occurrences.filter((occ) => {
+              return occ.habitId === habitId;
+            });
+
+            for (const occurrence of habitOccurrences) {
+              occurrence.metricValues = occurrence.metricValues.filter((mv) => {
+                return !ids.includes(mv.habitMetricId);
               });
-
-            const occurrenceInDateMap =
-              state.occurrencesByDate[
-                toCalendarDate(occurrence.occurredAt).toString()
-              ];
-
-            if (occurrenceInDateMap && occurrenceInDateMap[occurrence.id]) {
-              occurrenceInDateMap[occurrence.id].metricValues =
-                occurrenceInDateMap[occurrence.id].metricValues.filter((mv) => {
-                  return !ids.includes(mv.habitMetricId);
-                });
-
-              occurrenceInDateMap[occurrence.id].habit.metricDefinitions =
-                occurrenceInDateMap[
-                  occurrence.id
-                ].habit.metricDefinitions.filter((m) => {
+              occurrence.habit.metricDefinitions =
+                occurrence.habit.metricDefinitions.filter((m) => {
                   return !ids.includes(m.id);
                 });
+
+              const occurrenceInDateMap =
+                state.occurrencesByDate[
+                  toCalendarDate(occurrence.occurredAt).toString()
+                ];
+
+              if (occurrenceInDateMap && occurrenceInDateMap[occurrence.id]) {
+                occurrenceInDateMap[occurrence.id].metricValues =
+                  occurrenceInDateMap[occurrence.id].metricValues.filter(
+                    (mv) => {
+                      return !ids.includes(mv.habitMetricId);
+                    }
+                  );
+
+                occurrenceInDateMap[occurrence.id].habit.metricDefinitions =
+                  occurrenceInDateMap[
+                    occurrence.id
+                  ].habit.metricDefinitions.filter((m) => {
+                    return !ids.includes(m.id);
+                  });
+              }
             }
-          }
-        });
+          },
+          undefined,
+          'metricsActions.removeHabitMetrics'
+        );
       },
 
       removeMetricValue: async (
@@ -124,79 +134,112 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
       ) => {
         await destroyMetricValue(occurrenceId, habitMetricId);
 
-        set((state) => {
-          const occurrence = state.occurrences.find((occ) => {
-            return occ.id === occurrenceId;
-          });
-
-          if (!occurrence) {
-            return;
-          }
-
-          occurrence.metricValues = occurrence.metricValues.filter((mv) => {
-            return mv.habitMetricId !== habitMetricId;
-          });
-
-          const occurrenceInDateMap =
-            state.occurrencesByDate[
-              toCalendarDate(occurrence.occurredAt).toString()
-            ];
-
-          if (occurrenceInDateMap && occurrenceInDateMap[occurrenceId]) {
-            occurrenceInDateMap[occurrenceId].metricValues =
-              occurrenceInDateMap[occurrenceId].metricValues.filter((mv) => {
-                return mv.habitMetricId !== habitMetricId;
-              });
-          }
-        });
-      },
-
-      saveMetricValues: async (values: OccurrenceMetricValueInsert[]) => {
-        const savedValues = await upsertMetricValues(values);
-
-        set((state) => {
-          for (const value of savedValues) {
-            const occId = value.occurrenceId;
-
+        set(
+          (state) => {
             const occurrence = state.occurrences.find((occ) => {
-              return occ.id === occId;
+              return occ.id === occurrenceId;
             });
 
             if (!occurrence) {
-              continue;
+              return;
             }
+
+            occurrence.metricValues = occurrence.metricValues.filter((mv) => {
+              return mv.habitMetricId !== habitMetricId;
+            });
 
             const occurrenceInDateMap =
               state.occurrencesByDate[
                 toCalendarDate(occurrence.occurredAt).toString()
               ];
 
-            if (!occurrenceInDateMap || !occurrenceInDateMap[occId]) {
-              continue;
+            if (occurrenceInDateMap && occurrenceInDateMap[occurrenceId]) {
+              occurrenceInDateMap[occurrenceId].metricValues =
+                occurrenceInDateMap[occurrenceId].metricValues.filter((mv) => {
+                  return mv.habitMetricId !== habitMetricId;
+                });
             }
+          },
+          undefined,
+          'metricsActions.removeMetricValue'
+        );
+      },
 
-            occurrence.metricValues = savedValues;
-            occurrenceInDateMap[occId].metricValues = savedValues;
-          }
-        });
+      saveMetricValues: async (values: OccurrenceMetricValueInsert[]) => {
+        const savedValues = await upsertMetricValues(values);
+
+        set(
+          (state) => {
+            for (const value of savedValues) {
+              const occId = value.occurrenceId;
+
+              const occurrence = state.occurrences.find((occ) => {
+                return occ.id === occId;
+              });
+
+              if (!occurrence) {
+                continue;
+              }
+
+              const occurrenceInDateMap =
+                state.occurrencesByDate[
+                  toCalendarDate(occurrence.occurredAt).toString()
+                ];
+
+              if (!occurrenceInDateMap || !occurrenceInDateMap[occId]) {
+                continue;
+              }
+
+              occurrence.metricValues = savedValues;
+              occurrenceInDateMap[occId].metricValues = savedValues;
+            }
+          },
+          undefined,
+          'metricsActions.saveMetricValues'
+        );
 
         return savedValues;
       },
 
       updateHabitMetric: async (id: string, metric: HabitMetricUpdate) => {
         const updated = await patchHabitMetric(id, metric);
+        set(
+          (state) => {
+            state.habits[updated.habitId].metricDefinitions = state.habits[
+              updated.habitId
+            ].metricDefinitions.map((m) => {
+              if (m.id === id) {
+                return updated;
+              }
 
-        set((state) => {
-          state.habits[updated.habitId].metricDefinitions = state.habits[
-            updated.habitId
-          ].metricDefinitions.map((m) => {
-            if (m.id === id) {
-              return updated;
+              return m;
+            });
+
+            for (const occurrence of state.occurrences) {
+              if (occurrence.habitId !== updated.habitId) {
+                continue;
+              }
+
+              occurrence.habit.metricDefinitions =
+                occurrence.habit.metricDefinitions.map((m) => {
+                  return m.id === id ? updated : m;
+                });
+              const occurrenceInDateMap =
+                state.occurrencesByDate[
+                  toCalendarDate(occurrence.occurredAt).toString()
+                ]?.[occurrence.id];
+
+              if (occurrenceInDateMap) {
+                occurrenceInDateMap.habit.metricDefinitions =
+                  occurrenceInDateMap.habit.metricDefinitions.map((m) => {
+                    return m.id === id ? updated : m;
+                  });
+              }
             }
-
-            return m;
-          });
-        });
+          },
+          undefined,
+          'metricsActions.updateHabitMetric'
+        );
       },
     },
   };

@@ -64,32 +64,40 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
 
         const clientOccurrence = toClientOccurrence(nextOccurrence);
 
-        set((state) => {
-          state.occurrencesFetchedRange = null;
-          state.occurrences.push(clientOccurrence);
-          const dateKey = toCalendarDate(
-            clientOccurrence.occurredAt
-          ).toString();
+        set(
+          (state) => {
+            state.occurrencesFetchedRange = null;
+            state.occurrences.push(clientOccurrence);
+            const dateKey = toCalendarDate(
+              clientOccurrence.occurredAt
+            ).toString();
 
-          if (state.occurrencesByDate[dateKey]) {
-            state.occurrencesByDate[dateKey][nextOccurrence.id] =
-              clientOccurrence;
-          } else {
-            state.occurrencesByDate[dateKey] = {
-              [nextOccurrence.id]: clientOccurrence,
-            };
-          }
-        });
+            if (state.occurrencesByDate[dateKey]) {
+              state.occurrencesByDate[dateKey][nextOccurrence.id] =
+                clientOccurrence;
+            } else {
+              state.occurrencesByDate[dateKey] = {
+                [nextOccurrence.id]: clientOccurrence,
+              };
+            }
+          },
+          undefined,
+          'occurrencesActions.addOccurrence'
+        );
 
         return clientOccurrence;
       },
 
       clearOccurrences: () => {
-        set((state) => {
-          state.occurrences = [];
-          state.occurrencesByDate = {};
-          state.occurrencesFetchedRange = null;
-        });
+        set(
+          (state) => {
+            state.occurrences = [];
+            state.occurrencesByDate = {};
+            state.occurrencesFetchedRange = null;
+          },
+          undefined,
+          'occurrencesActions.clearOccurrences'
+        );
       },
 
       fetchOccurrences: async () => {
@@ -139,9 +147,13 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
             }
           });
 
-          set((state) => {
-            state.occurrencesByDate = occurrencesByDate;
-          });
+          set(
+            (state) => {
+              state.occurrencesByDate = occurrencesByDate;
+            },
+            undefined,
+            'occurrencesActions.fetchOccurrences.cacheHit'
+          );
 
           return;
         }
@@ -174,51 +186,65 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
           }
         });
 
-        set((state) => {
-          state.occurrences = clientOccurrences;
-          state.occurrencesByDate = occurrencesByDate;
-          state.occurrencesFetchedRange = [rangeStart, rangeEnd];
-        });
+        set(
+          (state) => {
+            state.occurrences = clientOccurrences;
+            state.occurrencesByDate = occurrencesByDate;
+            state.occurrencesFetchedRange = [rangeStart, rangeEnd];
+          },
+          undefined,
+          'occurrencesActions.fetchOccurrences.cacheMiss'
+        );
       },
 
       removeOccurrence: async ({ id, occurredAt, photoPaths }) => {
         await destroyOccurrence({ id, photoPaths });
 
-        set((state) => {
-          state.occurrencesFetchedRange = null;
-          delete state.occurrencesByDate[
-            toCalendarDate(occurredAt).toString()
-          ]?.[id];
-          state.occurrences = state.occurrences.filter((occ) => {
-            return occ.id !== id;
-          });
-        });
+        set(
+          (state) => {
+            state.occurrencesFetchedRange = null;
+            delete state.occurrencesByDate[
+              toCalendarDate(occurredAt).toString()
+            ]?.[id];
+            state.occurrences = state.occurrences.filter((occ) => {
+              return occ.id !== id;
+            });
+          },
+          undefined,
+          'occurrencesActions.removeOccurrence'
+        );
       },
 
       updateOccurrence: async ({ id, occurredAt }, body) => {
         const updatedOccurrence = await patchOccurrence(id, body);
         const updatedClientOccurrence = toClientOccurrence(updatedOccurrence);
 
-        set((state) => {
-          state.occurrencesFetchedRange = null;
-          state.occurrences = state.occurrences.map((occurrence) => {
-            return occurrence.id === id ? updatedClientOccurrence : occurrence;
-          });
-          const prevDateKey = toCalendarDate(occurredAt).toString();
-          const nextDateKey = toCalendarDate(
-            updatedClientOccurrence.occurredAt
-          ).toString();
+        set(
+          (state) => {
+            state.occurrencesFetchedRange = null;
+            state.occurrences = state.occurrences.map((occurrence) => {
+              return occurrence.id === id
+                ? updatedClientOccurrence
+                : occurrence;
+            });
+            const prevDateKey = toCalendarDate(occurredAt).toString();
+            const nextDateKey = toCalendarDate(
+              updatedClientOccurrence.occurredAt
+            ).toString();
 
-          if (state.occurrencesByDate[prevDateKey]) {
-            delete state.occurrencesByDate[prevDateKey][id];
-          }
+            if (state.occurrencesByDate[prevDateKey]) {
+              delete state.occurrencesByDate[prevDateKey][id];
+            }
 
-          if (!state.occurrencesByDate[nextDateKey]) {
-            state.occurrencesByDate[nextDateKey] = {};
-          }
+            if (!state.occurrencesByDate[nextDateKey]) {
+              state.occurrencesByDate[nextDateKey] = {};
+            }
 
-          state.occurrencesByDate[nextDateKey][id] = updatedClientOccurrence;
-        });
+            state.occurrencesByDate[nextDateKey][id] = updatedClientOccurrence;
+          },
+          undefined,
+          'occurrencesActions.updateOccurrence'
+        );
       },
     },
   };
