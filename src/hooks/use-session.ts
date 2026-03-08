@@ -14,7 +14,11 @@ const useSession = () => {
 
   React.useEffect(() => {
     getSession()
-      .then(setUser)
+      .then((user) => {
+        setUser(user);
+
+        return user ? fetchProfile(user.id) : Promise.resolve();
+      })
       .catch(setError)
       .finally(() => {
         setIsLoading(false);
@@ -45,9 +49,12 @@ const useSession = () => {
         const { email, id } = session.user;
         const fetchedAt = new Date().toISOString();
 
-        fetchProfile(id).catch((err) => {
-          rollbar.error('Failed to fetch profile', err);
-        });
+        if (!isLoading) {
+          fetchProfile(id).catch((err) => {
+            rollbar.error('Failed to fetch profile', err);
+          });
+        }
+
         setUser({
           email,
           fetchedAt,
@@ -63,7 +70,7 @@ const useSession = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser, fetchProfile, rollbar]);
+  }, [setUser, fetchProfile, rollbar, isLoading]);
 
   return { error, isLoading };
 };
