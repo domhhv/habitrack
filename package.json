@@ -56,7 +56,7 @@
     "@heroui/react": "^2.8.10",
     "@internationalized/date": "^3.12.0",
     "@phosphor-icons/react": "^2.1.10",
-    "@redux-devtools/extension": "^3.3.0",
+    "@redux-devtools/extension": "^4.0.0",
     "@rollbar/react": "^1.0.0",
     "@supabase/supabase-js": "^2.98.0",
     "@vercel/analytics": "^1.6.1",
@@ -70,6 +70,7 @@
     "lodash.isequal": "^4.5.0",
     "lodash.keyby": "^4.6.0",
     "pluralize": "^8.0.0",
+    "prop-types": "^15.8.1",
     "react": "^19.2.4",
     "react-aria": "^3.47.0",
     "react-colorful": "^5.6.1",
@@ -97,6 +98,7 @@
     "@types/lodash.keyby": "^4.6.9",
     "@types/node": "^22.19.15",
     "@types/pluralize": "^0.0.33",
+    "@types/prop-types": "^15.7.15",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
@@ -128,7 +130,7 @@
     "vitest": "^4.0.18"
   },
   "engines": {
-    "node": "^22.22.0"
+    "node": "^22.22.1"
   },
-  "packageManager": "yarn@4.12.0"
+  "packageManager": "yarn@4.13.0"
 }
