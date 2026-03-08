@@ -56,6 +56,7 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
         set(
           (state) => {
             state.notes = {};
+            state.notesByOccurrenceId = {};
             state.notesFetchedRange = null;
           },
           undefined,

@@ -36,6 +36,7 @@ export const createTraitsSlice: SliceCreator<keyof TraitsSlice> = (set) => {
         set(
           (state) => {
             state.traits = {};
+            state.calendarFilters.traitIds = [];
           },
           undefined,
           'traitActions.clearTraits'

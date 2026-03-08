@@ -203,7 +203,6 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
 
       updateHabitMetric: async (id: string, metric: HabitMetricUpdate) => {
         const updated = await patchHabitMetric(id, metric);
-
         set(
           (state) => {
             state.habits[updated.habitId].metricDefinitions = state.habits[
@@ -215,6 +214,28 @@ export const createMetricsSlice: SliceCreator<keyof MetricsSlice> = (set) => {
 
               return m;
             });
+
+            for (const occurrence of state.occurrences) {
+              if (occurrence.habitId !== updated.habitId) {
+                continue;
+              }
+
+              occurrence.habit.metricDefinitions =
+                occurrence.habit.metricDefinitions.map((m) => {
+                  return m.id === id ? updated : m;
+                });
+              const occurrenceInDateMap =
+                state.occurrencesByDate[
+                  toCalendarDate(occurrence.occurredAt).toString()
+                ]?.[occurrence.id];
+
+              if (occurrenceInDateMap) {
+                occurrenceInDateMap.habit.metricDefinitions =
+                  occurrenceInDateMap.habit.metricDefinitions.map((m) => {
+                    return m.id === id ? updated : m;
+                  });
+              }
+            }
           },
           undefined,
           'metricsActions.updateHabitMetric'

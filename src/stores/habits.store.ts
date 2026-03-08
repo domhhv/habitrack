@@ -50,6 +50,7 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
         set(
           (state) => {
             state.habits = {};
+            state.calendarFilters.habitIds = [];
           },
           undefined,
           'habitActions.clearHabits'
