@@ -96,14 +96,22 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
   return {
     confirmation: initialConfirmationState,
     changeCalendarFilters: (filters) => {
-      set((state) => {
-        state.calendarFilters = filters;
-      });
+      set(
+        (state) => {
+          state.calendarFilters = filters;
+        },
+        undefined,
+        'uiActions.changeCalendarFilters'
+      );
     },
     changeCalendarRange: (range) => {
-      set((state) => {
-        state.calendarRange = range;
-      });
+      set(
+        (state) => {
+          state.calendarRange = range;
+        },
+        undefined,
+        'uiActions.changeCalendarRange'
+      );
     },
     calendarFilters: {
       habitIds: [],
@@ -121,9 +129,13 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
           resolveConfirm = null;
         }
 
-        set((state) => {
-          state.confirmation = initialConfirmationState;
-        });
+        set(
+          (state) => {
+            state.confirmation = initialConfirmationState;
+          },
+          undefined,
+          'uiActions.approveConfirmation'
+        );
       },
       askConfirmation: (
         options: ConfirmationOptions = {}
@@ -149,9 +161,13 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
           resolveConfirm = null;
         }
 
-        set((state) => {
-          state.confirmation = initialConfirmationState;
-        });
+        set(
+          (state) => {
+            state.confirmation = initialConfirmationState;
+          },
+          undefined,
+          'uiActions.rejectConfirmation'
+        );
       },
     },
     noteDrawer: {
@@ -161,31 +177,47 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
     },
     noteDrawerActions: {
       closeNoteDrawer: () => {
-        set((state) => {
-          state.noteDrawer.isOpen = false;
-          state.noteDrawer.periodDate = today(getLocalTimeZone());
-          state.noteDrawer.periodKind = 'day';
-        });
+        set(
+          (state) => {
+            state.noteDrawer.isOpen = false;
+            state.noteDrawer.periodDate = today(getLocalTimeZone());
+            state.noteDrawer.periodKind = 'day';
+          },
+          undefined,
+          'uiActions.closeNoteDrawer'
+        );
       },
       openNoteDrawer: (
         periodDate: CalendarDate,
         periodKind: NonNullable<NotePeriodKind>
       ) => {
-        set((state) => {
-          state.noteDrawer.isOpen = true;
-          state.noteDrawer.periodDate = periodDate;
-          state.noteDrawer.periodKind = periodKind;
-        });
+        set(
+          (state) => {
+            state.noteDrawer.isOpen = true;
+            state.noteDrawer.periodDate = periodDate;
+            state.noteDrawer.periodKind = periodKind;
+          },
+          undefined,
+          'uiActions.openNoteDrawer'
+        );
       },
       setPeriodDate: (date: CalendarDate) => {
-        set((state) => {
-          state.noteDrawer.periodDate = date;
-        });
+        set(
+          (state) => {
+            state.noteDrawer.periodDate = date;
+          },
+          undefined,
+          'uiActions.setPeriodDate'
+        );
       },
       setPeriodKind: (kind: NonNullable<NotePeriodKind>) => {
-        set((state) => {
-          state.noteDrawer.periodKind = kind;
-        });
+        set(
+          (state) => {
+            state.noteDrawer.periodKind = kind;
+          },
+          undefined,
+          'uiActions.setPeriodKind'
+        );
       },
     },
     occurrenceDrawer: {
@@ -194,29 +226,45 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
     },
     occurrenceDrawerActions: {
       closeOccurrenceDrawer: () => {
-        set((state) => {
-          state.occurrenceDrawer.isOpen = false;
-          setTimeout(() => {
-            set((state) => {
-              state.occurrenceDrawer.dayToLog = today(getLocalTimeZone());
-            });
-          }, 50);
-        });
+        set(
+          (state) => {
+            state.occurrenceDrawer.isOpen = false;
+            setTimeout(() => {
+              set(
+                (state) => {
+                  state.occurrenceDrawer.dayToLog = today(getLocalTimeZone());
+                },
+                undefined,
+                'uiActions.closeOccurrenceDrawer.setDayToLog'
+              );
+            }, 50);
+          },
+          undefined,
+          'uiActions.closeOccurrenceDrawer'
+        );
       },
       openOccurrenceDrawer: (opts) => {
-        set((state) => {
-          state.occurrenceDrawer.isOpen = true;
-          state.occurrenceDrawer.dayToDisplay = undefined;
-          state.occurrenceDrawer.dayToLog = undefined;
-          state.occurrenceDrawer.occurrenceToEdit = undefined;
-          state.occurrenceDrawer.habitIdToDisplay = undefined;
-          Object.assign(state.occurrenceDrawer, opts);
-        });
+        set(
+          (state) => {
+            state.occurrenceDrawer.isOpen = true;
+            state.occurrenceDrawer.dayToDisplay = undefined;
+            state.occurrenceDrawer.dayToLog = undefined;
+            state.occurrenceDrawer.occurrenceToEdit = undefined;
+            state.occurrenceDrawer.habitIdToDisplay = undefined;
+            Object.assign(state.occurrenceDrawer, opts);
+          },
+          undefined,
+          'uiActions.openOccurrenceDrawer'
+        );
       },
       setDayToDisplay: (date) => {
-        set((state) => {
-          state.occurrenceDrawer.dayToDisplay = date;
-        });
+        set(
+          (state) => {
+            state.occurrenceDrawer.dayToDisplay = date;
+          },
+          undefined,
+          'uiActions.setDayToDisplay'
+        );
       },
     },
   };

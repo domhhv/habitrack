@@ -36,37 +36,49 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
       addNote: async (note: NotesInsert) => {
         const newNote = await createNote(note);
 
-        set((state) => {
-          state.notesFetchedRange = null;
-          state.notes[newNote.id] = newNote;
+        set(
+          (state) => {
+            state.notesFetchedRange = null;
+            state.notes[newNote.id] = newNote;
 
-          if ('occurrenceId' in newNote && newNote.occurrenceId) {
-            state.notesByOccurrenceId[newNote.occurrenceId] = newNote;
-          }
-        });
+            if ('occurrenceId' in newNote && newNote.occurrenceId) {
+              state.notesByOccurrenceId[newNote.occurrenceId] = newNote;
+            }
+          },
+          undefined,
+          'noteActions.addNote'
+        );
 
         return newNote;
       },
 
       clearNotes: () => {
-        set((state) => {
-          state.notes = {};
-          state.notesFetchedRange = null;
-        });
+        set(
+          (state) => {
+            state.notes = {};
+            state.notesFetchedRange = null;
+          },
+          undefined,
+          'noteActions.clearNotes'
+        );
       },
 
       deleteNote: async (id: Note['id']) => {
         await destroyNote(id);
 
-        set((state) => {
-          state.notesFetchedRange = null;
-          const noteToDelete = state.notes[id];
-          delete state.notes[id];
+        set(
+          (state) => {
+            state.notesFetchedRange = null;
+            const noteToDelete = state.notes[id];
+            delete state.notes[id];
 
-          if ('occurrenceId' in noteToDelete && noteToDelete?.occurrenceId) {
-            delete state.notesByOccurrenceId[noteToDelete.occurrenceId];
-          }
-        });
+            if ('occurrenceId' in noteToDelete && noteToDelete?.occurrenceId) {
+              delete state.notesByOccurrenceId[noteToDelete.occurrenceId];
+            }
+          },
+          undefined,
+          'noteActions.deleteNote'
+        );
       },
 
       fetchNotes: async () => {
@@ -94,27 +106,35 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
           toZoned(rangeEnd, getLocalTimeZone()),
         ]);
 
-        set((state) => {
-          state.notes = keyBy(notes, 'id');
-          state.notesByOccurrenceId = keyBy(
-            notes.filter(isNoteOfOccurrence),
-            'occurrenceId'
-          );
-          state.notesFetchedRange = [rangeStart, rangeEnd];
-        });
+        set(
+          (state) => {
+            state.notes = keyBy(notes, 'id');
+            state.notesByOccurrenceId = keyBy(
+              notes.filter(isNoteOfOccurrence),
+              'occurrenceId'
+            );
+            state.notesFetchedRange = [rangeStart, rangeEnd];
+          },
+          undefined,
+          'noteActions.fetchNotes'
+        );
       },
 
       updateNote: async (id: Note['id'], note: NotesUpdate) => {
         const updatedNote = await updateNote(id, note);
 
-        set((state) => {
-          state.notesFetchedRange = null;
-          state.notes[id] = updatedNote;
+        set(
+          (state) => {
+            state.notesFetchedRange = null;
+            state.notes[id] = updatedNote;
 
-          if ('occurrenceId' in updatedNote && updatedNote.occurrenceId) {
-            state.notesByOccurrenceId[updatedNote.occurrenceId] = updatedNote;
-          }
-        });
+            if ('occurrenceId' in updatedNote && updatedNote.occurrenceId) {
+              state.notesByOccurrenceId[updatedNote.occurrenceId] = updatedNote;
+            }
+          },
+          undefined,
+          'noteActions.updateNote'
+        );
 
         return updatedNote;
       },

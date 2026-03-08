@@ -34,9 +34,13 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
     user: null,
     userActions: {
       clearProfile: () => {
-        set((state) => {
-          state.profile = null;
-        });
+        set(
+          (state) => {
+            state.profile = null;
+          },
+          undefined,
+          'userActions.clearProfile'
+        );
       },
       fetchProfile: async (userId) => {
         if (getState().profile?.id === userId) {
@@ -45,35 +49,51 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
 
         const profile = await getProfile(userId);
 
-        set((state) => {
-          state.profile = profile;
-        });
+        set(
+          (state) => {
+            state.profile = profile;
+          },
+          undefined,
+          'userActions.fetchProfile'
+        );
       },
       setUser: (user) => {
         if (getState().user?.id === user?.id) {
           return;
         }
 
-        set((state) => {
-          state.user = user;
-        });
+        set(
+          (state) => {
+            state.user = user;
+          },
+          undefined,
+          'userActions.setUser'
+        );
       },
       updateProfile: async (userId, profile) => {
         const newProfile = await patchProfile(userId, profile);
 
-        set((state) => {
-          state.profile = newProfile;
-        });
+        set(
+          (state) => {
+            state.profile = newProfile;
+          },
+          undefined,
+          'userActions.updateProfile'
+        );
       },
       updateUser: async (opts) => {
         const updatedSupabaseUser = await updateUser(opts);
 
-        set((state) => {
-          state.user = {
-            ...updatedSupabaseUser,
-            fetchedAt: new Date().toISOString(),
-          };
-        });
+        set(
+          (state) => {
+            state.user = {
+              ...updatedSupabaseUser,
+              fetchedAt: new Date().toISOString(),
+            };
+          },
+          undefined,
+          'userActions.updateUser'
+        );
       },
     },
   };

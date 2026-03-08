@@ -34,38 +34,50 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
       addHabit: async (habit: HabitsInsert) => {
         const newHabit = await createHabit(habit);
 
-        set((state) => {
-          state.habits[newHabit.id] = newHabit;
-          state.calendarFilters.habitIds.push(newHabit.id);
-        });
+        set(
+          (state) => {
+            state.habits[newHabit.id] = newHabit;
+            state.calendarFilters.habitIds.push(newHabit.id);
+          },
+          undefined,
+          'habitActions.addHabit'
+        );
 
         return newHabit;
       },
 
       clearHabits: () => {
-        set((state) => {
-          state.habits = {};
-        });
+        set(
+          (state) => {
+            state.habits = {};
+          },
+          undefined,
+          'habitActions.clearHabits'
+        );
       },
 
       fetchHabits: async () => {
         const habits = await listHabits();
 
-        set((state) => {
-          state.isFetchingHabits = false;
-          const prevHabitIds = state.calendarFilters.habitIds;
-          const nextHabitIds = habits.map((habit) => {
-            return habit.id;
-          });
+        set(
+          (state) => {
+            state.isFetchingHabits = false;
+            const prevHabitIds = state.calendarFilters.habitIds;
+            const nextHabitIds = habits.map((habit) => {
+              return habit.id;
+            });
 
-          state.habits = keyBy(habits, 'id');
-          state.calendarFilters.habitIds =
-            prevHabitIds.length === 0
-              ? nextHabitIds
-              : prevHabitIds.filter((id) => {
-                  return nextHabitIds.includes(id);
-                });
-        });
+            state.habits = keyBy(habits, 'id');
+            state.calendarFilters.habitIds =
+              prevHabitIds.length === 0
+                ? nextHabitIds
+                : prevHabitIds.filter((id) => {
+                    return nextHabitIds.includes(id);
+                  });
+          },
+          undefined,
+          'habitActions.fetchHabits'
+        );
       },
 
       removeHabit: async ({ iconPath, id }: Habit) => {
@@ -75,21 +87,29 @@ export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
           await deleteFile(StorageBuckets.HABIT_ICONS, iconPath);
         }
 
-        set((state) => {
-          delete state.habits[id];
-          state.calendarFilters.habitIds =
-            state.calendarFilters.habitIds.filter((habitId) => {
-              return habitId !== id;
-            });
-        });
+        set(
+          (state) => {
+            delete state.habits[id];
+            state.calendarFilters.habitIds =
+              state.calendarFilters.habitIds.filter((habitId) => {
+                return habitId !== id;
+              });
+          },
+          undefined,
+          'habitActions.removeHabit'
+        );
       },
 
       updateHabit: async (id: Habit['id'], habit: HabitsUpdate) => {
         const updatedHabit = await patchHabit(id, habit);
 
-        set((state) => {
-          state.habits[id] = updatedHabit;
-        });
+        set(
+          (state) => {
+            state.habits[id] = updatedHabit;
+          },
+          undefined,
+          'habitActions.updateHabit'
+        );
       },
     },
   };

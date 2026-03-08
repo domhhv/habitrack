@@ -21,7 +21,11 @@ export type ImmerStateCreator<
   T,
   Mps extends [StoreMutatorIdentifier, unknown][] = [],
   Mcs extends [StoreMutatorIdentifier, unknown][] = [],
-> = StateCreator<T, [...Mps, ['zustand/immer', never]], Mcs>;
+> = StateCreator<
+  T,
+  [...Mps, ['zustand/devtools', never], ['zustand/immer', never]],
+  Mcs
+>;
 
 export type BoundStore = UserSlice &
   UiSlice &
@@ -49,7 +53,8 @@ export const useBoundStore = create<BoundStore>()(
           ...createOccurrencesSlice(set, get, store),
         };
       })
-    )
+    ),
+    { enabled: true }
   )
 );
 
