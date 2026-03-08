@@ -88,7 +88,7 @@ There's also a public roadmap on Featurebase where you can upvote and suggest ne
 ### Prerequisites
 
 - [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en/) (22.22.0)
+- [Node.js](https://nodejs.org/en/) (22.22.1)
 - [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (v2)
 - [Docker](https://docs.docker.com/get-started/get-docker/)
 - Yarn is used as a package manager and is automatically available via Corepack (bundled with Node.js)

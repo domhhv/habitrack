@@ -16,6 +16,7 @@ import {
   PencilSimpleIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
+import type { Key } from 'react-aria';
 
 import { METRIC_PRESETS } from '@const';
 import type { MetricType, MetricConfig, FormMetricDefinitions } from '@models';
@@ -115,7 +116,7 @@ const MetricDefinitionForm = ({
         <Autocomplete
           size="sm"
           variant="faded"
-          value={metric.name}
+          inputValue={metric.name}
           label="Choose from presets (optional)"
           placeholder="Search for units, e.g. kilometers, kcal..."
           onClear={() => {
@@ -126,7 +127,7 @@ const MetricDefinitionForm = ({
               type: 'number',
             });
           }}
-          onSelectionChange={(key) => {
+          onChange={(key: Key | null) => {
             const preset = ALL_PRESETS.find((p) => {
               return p.name === key;
             });
@@ -135,7 +136,7 @@ const MetricDefinitionForm = ({
               return;
             }
 
-            onChange({ ...preset, name: preset.name.split(' (')[0] });
+            onChange({ ...preset, name: preset.name });
           }}
         >
           {METRIC_PRESETS.map(({ group, presets }) => {
