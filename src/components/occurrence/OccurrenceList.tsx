@@ -68,7 +68,8 @@ const OccurrenceList = ({
           )}
           <ul>
             {occurrencesWithTime
-              .toSorted((a, b) => {
+              .slice()
+              .sort((a, b) => {
                 return a.occurredAt.compare(b.occurredAt);
               })
               .map((o) => {

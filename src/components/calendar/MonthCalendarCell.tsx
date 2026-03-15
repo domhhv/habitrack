@@ -74,7 +74,7 @@ const MonthCalendarCell = ({
   }, [dayNotes, date]);
 
   const groupedOccurrences = groupBy(
-    occurrences.toSorted((l, r) => {
+    occurrences.slice().sort((l, r) => {
       const lName = l.habit.name.toLowerCase();
       const rName = r.habit.name.toLowerCase();
 
