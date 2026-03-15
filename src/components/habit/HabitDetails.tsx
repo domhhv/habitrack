@@ -80,6 +80,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           config: {},
           id: `form-${Date.now()}`,
           isBeingEdited: true,
+          isToBeAdded: true,
           isRequired: false,
           name: 'Unnamed metric',
           sortOrder: prev.length,
