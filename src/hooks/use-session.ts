@@ -23,7 +23,7 @@ const useSession = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [setUser]);
+  }, [setUser, fetchProfile]);
 
   React.useEffect(() => {
     rollbar.configure({

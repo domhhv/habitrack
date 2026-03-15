@@ -12,9 +12,15 @@ import {
 import { XIcon, CheckIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 
-import { TraitChip } from '@components';
-import type { Habit } from '@models';
-import { useTraits, useHabitActions } from '@stores';
+import { TraitChip, MetricDefinitionForm } from '@components';
+import type { Habit, FormMetricDefinitions } from '@models';
+import {
+  useUser,
+  useTraits,
+  useHabitActions,
+  useMetricsActions,
+} from '@stores';
+import { handleAsyncAction } from '@utils';
 
 import HabitIcon from './HabitIcon';
 
@@ -29,13 +35,124 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
   const [description, setDescription] = React.useState(habit.description || '');
   const [isEditingMotivation, setIsEditingMotivation] = React.useState(false);
   const [motivation, setMotivation] = React.useState(habit.motivation || '');
+  const [isEditingMetrics, setIsEditingMetrics] = React.useState(false);
+  const [metricDefinitions, setMetricDefinitions] = React.useState<
+    FormMetricDefinitions[]
+  >([]);
+  const [isSavingMetrics, setIsSavingMetrics] = React.useState(false);
   const [isUpdatingTrait, setIsUpdatingTrait] = React.useState(false);
   const traits = useTraits();
+  const user = useUser();
   const { updateHabit } = useHabitActions();
+  const { addHabitMetrics, removeHabitMetrics, updateHabitMetric } =
+    useMetricsActions();
 
   const isEditing = React.useMemo(() => {
     return isEditingName || isEditingDescription || isEditingMotivation;
   }, [isEditingName, isEditingDescription, isEditingMotivation]);
+
+  const startEditingMetrics = () => {
+    const localMetrics = habit.metricDefinitions.map((m) => {
+      return {
+        config: m.config as FormMetricDefinitions['config'],
+        id: m.id,
+        isPersisted: true,
+        isRequired: m.isRequired,
+        name: m.name,
+        sortOrder: m.sortOrder,
+        type: m.type,
+      };
+    });
+    setMetricDefinitions(localMetrics);
+    setIsEditingMetrics(true);
+  };
+
+  const cancelEditingMetrics = () => {
+    setMetricDefinitions([]);
+    setIsEditingMetrics(false);
+  };
+
+  const addMetric = () => {
+    setMetricDefinitions((prev) => {
+      return [
+        ...prev,
+        {
+          config: {},
+          id: `form-${Date.now()}`,
+          isBeingEdited: true,
+          isRequired: false,
+          isToBeAdded: true,
+          name: 'Unnamed metric',
+          sortOrder: prev.length,
+          type: 'number',
+        },
+      ];
+    });
+  };
+
+  const saveMetrics = async () => {
+    if (!user) {
+      return;
+    }
+
+    const submit = async () => {
+      const metricsToRemove = metricDefinitions
+        .filter((md) => {
+          return md.isToBeRemoved;
+        })
+        .map((md) => {
+          return md.id;
+        });
+
+      if (metricsToRemove.length > 0) {
+        await removeHabitMetrics(metricsToRemove, habit.id);
+      }
+
+      const metricsToAdd = metricDefinitions
+        .filter((md) => {
+          return md.isToBeAdded && !md.isToBeRemoved;
+        })
+        .map((metric) => {
+          return {
+            config: metric.config,
+            habitId: habit.id,
+            isRequired: metric.isRequired,
+            name: metric.name,
+            sortOrder: metric.sortOrder,
+            type: metric.type,
+            userId: user.id,
+          };
+        });
+
+      const metricsToUpdate = metricDefinitions.filter((md) => {
+        return md.isToBeUpdated && !md.isToBeRemoved;
+      });
+
+      if (metricsToAdd.length > 0) {
+        await addHabitMetrics(metricsToAdd);
+      }
+
+      if (metricsToUpdate.length > 0) {
+        await Promise.all(
+          metricsToUpdate.map((metric) => {
+            return updateHabitMetric(metric.id, {
+              config: metric.config,
+              isRequired: metric.isRequired,
+              name: metric.name,
+              sortOrder: metric.sortOrder,
+              type: metric.type,
+            });
+          })
+        );
+      }
+    };
+
+    void handleAsyncAction(submit(), 'update_habit', setIsSavingMetrics).then(
+      () => {
+        setIsEditingMetrics(false);
+      }
+    );
+  };
 
   const saveHabit = async () => {
     const trimmedName = name.trim();
@@ -353,6 +470,117 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           </div>
         </div>
       )}
+      <div className="group">
+        <div className="mb-1 flex items-center gap-2">
+          <h2 className="text-sm font-medium">Metrics</h2>
+          {!isEditingMetrics && (
+            <Button
+              size="sm"
+              isIconOnly
+              variant="light"
+              aria-label="Edit metrics"
+              onPress={startEditingMetrics}
+              className={cn(
+                'opacity-0 transition-opacity group-hover:opacity-100',
+                isEditing && 'invisible'
+              )}
+            >
+              <PencilSimpleIcon className="size-4" />
+            </Button>
+          )}
+        </div>
+        {isEditingMetrics ? (
+          <div className="flex flex-col gap-3">
+            {metricDefinitions.map((md) => {
+              return (
+                <MetricDefinitionForm
+                  key={md.id}
+                  metric={md}
+                  onChange={(metricUpdates) => {
+                    setMetricDefinitions((prev) => {
+                      return prev.map((prevMd) => {
+                        if (prevMd.id === md.id) {
+                          return {
+                            ...prevMd,
+                            ...metricUpdates,
+                            isToBeUpdated: md.isPersisted,
+                          };
+                        }
+
+                        return prevMd;
+                      });
+                    });
+                  }}
+                  onRemove={() => {
+                    setMetricDefinitions((prev) => {
+                      if (!md.isPersisted) {
+                        return prev.filter((prevMd) => {
+                          return prevMd.id !== md.id;
+                        });
+                      }
+
+                      return prev.map((prevMd) => {
+                        if (prevMd.id === md.id) {
+                          return {
+                            ...prevMd,
+                            isToBeRemoved: true,
+                          };
+                        }
+
+                        return prevMd;
+                      });
+                    });
+                  }}
+                />
+              );
+            })}
+            <Button
+              size="sm"
+              className="min-h-8"
+              onPress={addMetric}
+              isDisabled={isSavingMetrics}
+            >
+              Add metric
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                color="primary"
+                onPress={saveMetrics}
+                isDisabled={!user?.id}
+                isLoading={isSavingMetrics}
+              >
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="light"
+                isDisabled={isSavingMetrics}
+                onPress={cancelEditingMetrics}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            {habit.metricDefinitions.length > 0 ? (
+              <ul className="list-inside list-disc space-y-1">
+                {habit.metricDefinitions.map((md) => {
+                  return (
+                    <li key={md.id} className="text-sm">
+                      {md.name}{' '}
+                      <span className="text-default-500">({md.type})</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-default-500 italic">No metrics</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
