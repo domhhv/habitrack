@@ -13,6 +13,7 @@ import {
   type OccurrencesSlice,
   createOccurrencesSlice,
 } from './occurrences.store';
+import { type StocksSlice, createStocksSlice } from './stocks.store';
 import { type TraitsSlice, createTraitsSlice } from './traits.store';
 import { type UiSlice, createUiSlice } from './ui.store';
 import { type UserSlice, createUserSlice } from './user.store';
@@ -31,6 +32,7 @@ export type BoundStore = UserSlice &
   UiSlice &
   MetricsSlice &
   NotesSlice &
+  StocksSlice &
   TraitsSlice &
   HabitsSlice &
   OccurrencesSlice;
@@ -50,6 +52,7 @@ export const useBoundStore = create<BoundStore>()(
           ...createTraitsSlice(set, get, store),
           ...createHabitsSlice(set, get, store),
           ...createMetricsSlice(set, get, store),
+          ...createStocksSlice(set, get, store),
           ...createOccurrencesSlice(set, get, store),
         };
       })
@@ -71,6 +74,7 @@ useBoundStore.subscribe(
       habitActions,
       noteActions,
       occurrencesActions,
+      stockActions,
       traitActions,
       userActions,
     } = useBoundStore.getState();
@@ -80,6 +84,7 @@ useBoundStore.subscribe(
       traitActions.clearTraits();
       occurrencesActions.clearOccurrences();
       noteActions.clearNotes();
+      stockActions.clearStocks();
       userActions.clearProfile();
 
       return;

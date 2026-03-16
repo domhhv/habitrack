@@ -1119,6 +1119,107 @@ export type Database = {
           user_id?: string
         }
       }
+      habit_stock_metric_defaults: {
+        Insert: {
+          created_at?: string
+          habit_metric_id: string
+          habit_stock_id: string
+          id?: string
+          should_compound?: boolean
+          updated_at?: string | null
+          user_id: string
+          value: Json
+        }
+        Relationships: [
+          {
+            columns: ["habit_metric_id"]
+            foreignKeyName: "habit_stock_metric_defaults_habit_metric_id_fkey"
+            isOneToOne: false
+            referencedColumns: ["id"]
+            referencedRelation: "habit_metrics"
+          },
+          {
+            columns: ["habit_stock_id"]
+            foreignKeyName: "habit_stock_metric_defaults_habit_stock_id_fkey"
+            isOneToOne: false
+            referencedColumns: ["id"]
+            referencedRelation: "habit_stocks"
+          },
+        ]
+        Row: {
+          created_at: string
+          habit_metric_id: string
+          habit_stock_id: string
+          id: string
+          should_compound: boolean
+          updated_at: string | null
+          user_id: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          habit_metric_id?: string
+          habit_stock_id?: string
+          id?: string
+          should_compound?: boolean
+          updated_at?: string | null
+          user_id?: string
+          value?: Json
+        }
+      }
+      habit_stocks: {
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          currency?: string
+          habit_id: string
+          id?: string
+          is_depleted?: boolean
+          name: string
+          purchased_at?: string
+          remaining_items?: number | null
+          total_items?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Relationships: [
+          {
+            columns: ["habit_id"]
+            foreignKeyName: "habit_stocks_habit_id_fkey"
+            isOneToOne: false
+            referencedColumns: ["id"]
+            referencedRelation: "habits"
+          },
+        ]
+        Row: {
+          cost: number | null
+          created_at: string
+          currency: string
+          habit_id: string
+          id: string
+          is_depleted: boolean
+          name: string
+          purchased_at: string
+          remaining_items: number | null
+          total_items: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string
+          currency?: string
+          habit_id?: string
+          id?: string
+          is_depleted?: boolean
+          name?: string
+          purchased_at?: string
+          remaining_items?: number | null
+          total_items?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+      }
       habits: {
         Insert: {
           created_at?: string
@@ -1249,9 +1350,56 @@ export type Database = {
           value?: Json
         }
       }
-      occurrences: {
+      occurrence_stock_usages: {
         Insert: {
           created_at?: string
+          habit_stock_id: string
+          id?: string
+          occurrence_id: string
+          quantity?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Relationships: [
+          {
+            columns: ["habit_stock_id"]
+            foreignKeyName: "occurrence_stock_usages_habit_stock_id_fkey"
+            isOneToOne: false
+            referencedColumns: ["id"]
+            referencedRelation: "habit_stocks"
+          },
+          {
+            columns: ["occurrence_id"]
+            foreignKeyName: "occurrence_stock_usages_occurrence_id_fkey"
+            isOneToOne: false
+            referencedColumns: ["id"]
+            referencedRelation: "occurrences"
+          },
+        ]
+        Row: {
+          created_at: string
+          habit_stock_id: string
+          id: string
+          occurrence_id: string
+          quantity: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          habit_stock_id?: string
+          id?: string
+          occurrence_id?: string
+          quantity?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+      }
+      occurrences: {
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
           habit_id: string
           has_specific_time?: boolean
           id?: string
@@ -1271,7 +1419,9 @@ export type Database = {
           },
         ]
         Row: {
+          cost: number | null
           created_at: string
+          currency: string | null
           habit_id: string
           has_specific_time: boolean
           id: string
@@ -1282,7 +1432,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cost?: number | null
           created_at?: string
+          currency?: string | null
           habit_id?: string
           has_specific_time?: boolean
           id?: string
@@ -1297,6 +1449,7 @@ export type Database = {
         Relationships: []
         Insert: {
           created_at?: string
+          default_currency?: string
           email: string
           first_day_of_week?: Database["public"]["Enums"]["days_of_week"]
           id: string
@@ -1306,6 +1459,7 @@ export type Database = {
         }
         Row: {
           created_at: string
+          default_currency: string
           email: string
           first_day_of_week: Database["public"]["Enums"]["days_of_week"]
           id: string
@@ -1315,6 +1469,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          default_currency?: string
           email?: string
           first_day_of_week?: Database["public"]["Enums"]["days_of_week"]
           id?: string
@@ -2048,4 +2203,3 @@ export const Constants = {
     },
   },
 } as const
-

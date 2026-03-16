@@ -20,7 +20,9 @@
       "mcp__chrome-devtools__take_screenshot",
       "mcp__chrome-devtools__navigate_page",
       "mcp__chrome-devtools__resize_page",
-      "mcp__context7__query-docs"
+      "mcp__context7__query-docs",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__execute_sql"
     ]
   }
 }

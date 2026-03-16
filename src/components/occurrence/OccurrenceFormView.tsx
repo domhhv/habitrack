@@ -5,8 +5,10 @@ import {
   Button,
   Switch,
   Listbox,
+  Checkbox,
   Textarea,
   TimeInput,
+  NumberInput,
   ListboxItem,
   ListboxSection,
 } from '@heroui/react';
@@ -33,6 +35,7 @@ import { useTextField, useScreenWidth } from '@hooks';
 import type { Habit, Occurrence, MetricValue } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl, getLatestHabitOccurrence } from '@services';
+import { useHabitStocks, useStockActions } from '@stores';
 
 import OccurrenceChip from './OccurrenceChip';
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
@@ -45,6 +48,7 @@ export type OccurrenceFormValues = {
   note: string;
   occurredAt: string;
   selectedHabitId: string;
+  stockUsages: { habitStockId: string; quantity: number | null }[];
   uploadedFiles: File[];
 };
 
@@ -87,6 +91,29 @@ const OccurrenceFormView = ({
   const [metricValues, setMetricValues] = React.useState<
     Record<string, MetricValue | undefined>
   >({});
+  const [autoCompoundedMetricIds, setAutoCompoundedMetricIds] = React.useState<
+    Record<string, boolean>
+  >({});
+  const habitStocks = useHabitStocks(selectedHabitId || '');
+  const { fetchStocksByHabit } = useStockActions();
+  const [stockSelections, setStockSelections] = React.useState<
+    Record<string, number | null>
+  >({});
+  const [fetchedStocksByHabit, setFetchedStocksByHabit] = React.useState<
+    Record<string, boolean>
+  >({});
+
+  const activeStocks = React.useMemo(() => {
+    return habitStocks.filter((stock) => {
+      return !stock.isDepleted;
+    });
+  }, [habitStocks]);
+
+  const selectedStocks = React.useMemo(() => {
+    return activeStocks.filter((stock) => {
+      return Object.prototype.hasOwnProperty.call(stockSelections, stock.id);
+    });
+  }, [activeStocks, stockSelections]);
 
   const metricDefinitions = React.useMemo(() => {
     if (occurrenceToEdit) {
@@ -99,6 +126,116 @@ const OccurrenceFormView = ({
 
     return [];
   }, [occurrenceToEdit, selectedHabitId, habits]);
+
+  React.useEffect(() => {
+    if (!selectedHabitId || occurrenceToEdit) {
+      return;
+    }
+
+    if (fetchedStocksByHabit[selectedHabitId]) {
+      return;
+    }
+
+    void fetchStocksByHabit(selectedHabitId).then(() => {
+      setFetchedStocksByHabit((prev) => {
+        return { ...prev, [selectedHabitId]: true };
+      });
+    });
+  }, [
+    selectedHabitId,
+    occurrenceToEdit,
+    fetchedStocksByHabit,
+    fetchStocksByHabit,
+  ]);
+
+  React.useEffect(() => {
+    if (selectedStocks.length === 0) {
+      setAutoCompoundedMetricIds({});
+
+      return;
+    }
+
+    const compoundSums: Record<string, number> = {};
+    const compoundMetricIds = new Set<string>();
+
+    for (const stock of selectedStocks) {
+      for (const metricDefault of stock.metricDefaults) {
+        if (!metricDefault.shouldCompound) {
+          continue;
+        }
+
+        const metricDefinition = metricDefinitions.find((definition) => {
+          return definition.id === metricDefault.habitMetricId;
+        });
+
+        if (metricDefinition?.type !== 'number') {
+          continue;
+        }
+
+        const numericValue = metricDefault.value as MetricValue | undefined as
+          | { numericValue: number }
+          | undefined;
+
+        if (!numericValue || typeof numericValue.numericValue !== 'number') {
+          continue;
+        }
+
+        compoundMetricIds.add(metricDefault.habitMetricId);
+        compoundSums[metricDefault.habitMetricId] =
+          (compoundSums[metricDefault.habitMetricId] || 0) +
+          numericValue.numericValue;
+      }
+    }
+
+    setMetricValues((prev) => {
+      let hasChanges = false;
+      const next = { ...prev };
+
+      for (const stock of selectedStocks) {
+        for (const metricDefault of stock.metricDefaults) {
+          const metricId = metricDefault.habitMetricId;
+
+          if (metricDefault.shouldCompound && compoundMetricIds.has(metricId)) {
+            const shouldOverride =
+              prev[metricId] === undefined || autoCompoundedMetricIds[metricId];
+
+            if (shouldOverride) {
+              next[metricId] = {
+                numericValue: compoundSums[metricId] ?? 0,
+              } as MetricValue;
+              hasChanges = true;
+            }
+
+            continue;
+          }
+
+          if (next[metricId] === undefined) {
+            next[metricId] = metricDefault.value as MetricValue;
+            hasChanges = true;
+          }
+        }
+      }
+
+      return hasChanges ? next : prev;
+    });
+
+    setAutoCompoundedMetricIds((prev) => {
+      const next: Record<string, boolean> = { ...prev };
+
+      for (const metricId of Object.keys(next)) {
+        if (!compoundMetricIds.has(metricId)) {
+          /* eslint-disable @typescript-eslint/no-dynamic-delete */
+          delete next[metricId];
+        }
+      }
+
+      for (const metricId of compoundMetricIds) {
+        next[metricId] = true;
+      }
+
+      return next;
+    });
+  }, [selectedStocks, metricDefinitions, autoCompoundedMetricIds]);
 
   const computeOccurrenceDateTime = React.useCallback(
     (tz = timeZone) => {
@@ -199,6 +336,8 @@ const OccurrenceFormView = ({
       handleNoteChange(occurrenceNote?.content || '');
       setTime(occurrenceToEdit.occurredAt);
       setHasSpecificTime(occurrenceToEdit.hasSpecificTime);
+      setStockSelections({});
+      setAutoCompoundedMetricIds({});
 
       const initialMetricValues: Record<string, MetricValue | undefined> = {};
 
@@ -334,6 +473,14 @@ const OccurrenceFormView = ({
     const effectiveTimeZone = occurrenceToEdit?.timeZone ?? timeZone;
     const occurredAt =
       computeOccurrenceDateTime(effectiveTimeZone).toAbsoluteString();
+    const stockUsages = Object.entries(stockSelections).map(
+      ([habitStockId, quantity]) => {
+        return {
+          habitStockId,
+          quantity: quantity ?? null,
+        };
+      }
+    );
 
     onSubmit({
       hasSpecificTime,
@@ -341,6 +488,7 @@ const OccurrenceFormView = ({
       note,
       occurredAt,
       selectedHabitId,
+      stockUsages,
       uploadedFiles,
     });
   };
@@ -351,6 +499,8 @@ const OccurrenceFormView = ({
     setUploadedFiles([]);
     setMetricValues({});
     setHasSpecificTime(true);
+    setStockSelections({});
+    setAutoCompoundedMetricIds({});
     onClose();
   };
 
@@ -360,7 +510,36 @@ const OccurrenceFormView = ({
     if (id) {
       setSelectedHabitId(id);
       setMetricValues({});
+      setStockSelections({});
+      setAutoCompoundedMetricIds({});
     }
+  };
+
+  const handleStockSelectionChange = (
+    stockId: string,
+    isSelected: boolean,
+    defaultQuantity: number | null
+  ) => {
+    setStockSelections((prev) => {
+      const next = { ...prev };
+
+      if (isSelected) {
+        next[stockId] = prev[stockId] ?? defaultQuantity;
+      } else {
+        delete next[stockId];
+      }
+
+      return next;
+    });
+  };
+
+  const handleStockQuantityChange = (
+    stockId: string,
+    quantity: number | null
+  ) => {
+    setStockSelections((prev) => {
+      return { ...prev, [stockId]: quantity };
+    });
   };
 
   const formatDistanceToNow = (date: ZonedDateTime) => {
@@ -458,11 +637,83 @@ const OccurrenceFormView = ({
           No habits yet. Create a habit to get started.
         </p>
       )}
+      {!occurrenceToEdit && selectedHabitId && activeStocks.length > 0 && (
+        <div className="space-y-2">
+          <div>
+            <p className="text-foreground-500 text-tiny font-medium">
+              Stock usage
+            </p>
+            <p className="text-foreground-400 text-tiny">
+              Select a stock to auto-populate metric values.
+            </p>
+          </div>
+          <div className="space-y-2">
+            {activeStocks.map((stock) => {
+              const isSelected = Object.prototype.hasOwnProperty.call(
+                stockSelections,
+                stock.id
+              );
+              const isQuantifiable = stock.totalItems !== null;
+
+              return (
+                <div
+                  key={stock.id}
+                  className="flex items-center justify-between gap-2"
+                >
+                  <Checkbox
+                    size="sm"
+                    isSelected={isSelected}
+                    onValueChange={(nextSelected) => {
+                      return handleStockSelectionChange(
+                        stock.id,
+                        nextSelected,
+                        isQuantifiable ? 1 : null
+                      );
+                    }}
+                  >
+                    <span className="truncate">{stock.name}</span>
+                  </Checkbox>
+                  {isQuantifiable && (
+                    <NumberInput
+                      size="sm"
+                      minValue={1}
+                      className="w-24"
+                      isDisabled={!isSelected}
+                      aria-label={`${stock.name} quantity`}
+                      value={(stockSelections[stock.id] ?? 1) as number}
+                      onValueChange={(value) => {
+                        return handleStockQuantityChange(stock.id, value ?? 1);
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <MetricValuesSection
         values={metricValues}
-        onChange={setMetricValues}
         metricDefinitions={metricDefinitions}
         previousValues={previousMetricValues}
+        onChange={(nextValues) => {
+          setMetricValues(nextValues);
+
+          setAutoCompoundedMetricIds((prev) => {
+            const next = { ...prev };
+
+            for (const metricId of Object.keys(next)) {
+              const prevValue = metricValues[metricId];
+              const nextValue = nextValues[metricId];
+
+              if (!isEqual(prevValue, nextValue)) {
+                delete next[metricId];
+              }
+            }
+
+            return next;
+          });
+        }}
       />
       <Textarea
         value={note}

@@ -6,4 +6,5 @@ export * from './header';
 export * from './metric';
 export * from './note';
 export * from './occurrence';
+export * from './stock';
 export * from './trait';

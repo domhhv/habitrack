@@ -115,6 +115,21 @@ const formatMetricValue = (
   }
 };
 
+const formatCost = (cost: number | null, currency: string | null) => {
+  if (cost === null || !currency) {
+    return null;
+  }
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      currency,
+      style: 'currency',
+    }).format(cost);
+  } catch {
+    return `${cost} ${currency}`;
+  }
+};
+
 type OccurrenceListItemProps = {
   hasChip: boolean;
   isBeingRemoved: boolean;
@@ -191,6 +206,10 @@ const OccurrenceListItem = ({
   const occurrenceNote = React.useMemo(() => {
     return notes[occurrence.id];
   }, [notes, occurrence]);
+
+  const formattedCost = React.useMemo(() => {
+    return formatCost(occurrence.cost ?? null, occurrence.currency ?? null);
+  }, [occurrence.cost, occurrence.currency]);
 
   return (
     <li
@@ -288,6 +307,11 @@ const OccurrenceListItem = ({
                   </Chip>
                 );
               })}
+            </div>
+          )}
+          {formattedCost && (
+            <div className="text-foreground-400 text-tiny pt-1">
+              Spent {formattedCost}
             </div>
           )}
         </div>

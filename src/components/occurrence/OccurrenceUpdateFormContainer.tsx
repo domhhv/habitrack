@@ -64,6 +64,7 @@ const OccurrenceUpdateFormContainer = () => {
       note,
       occurredAt,
       selectedHabitId,
+      stockUsages: _stockUsages,
       uploadedFiles,
     } = values;
 
