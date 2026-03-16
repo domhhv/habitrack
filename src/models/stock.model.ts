@@ -21,6 +21,7 @@ export type HabitStockMetricDefaultInsert = CamelCasedPropertiesDeep<
 
 export type HabitStockWithDefaults = HabitStock & {
   metricDefaults: Omit<HabitStockMetricDefault, 'userId' | 'habitStockId'>[];
+  usageCount: number;
 };
 
 export type StockFormValues = {

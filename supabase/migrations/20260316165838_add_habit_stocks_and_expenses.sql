@@ -199,12 +199,13 @@ CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_delete"() -- noqa
 RETURNS TRIGGER
 LANGUAGE "plpgsql"
 SECURITY DEFINER
+SET "search_path" TO "public", "pg_temp"
 AS $function$
 BEGIN
     IF OLD.quantity IS NOT NULL THEN
         UPDATE "public"."habit_stocks"
         SET "remaining_items" = "remaining_items" + OLD.quantity,
-            "is_depleted" = false
+            "is_depleted" = (COALESCE("remaining_items", 0) + OLD.quantity) <= 0
         WHERE "id" = OLD.habit_stock_id
           AND "remaining_items" IS NOT NULL;
     END IF;
@@ -216,6 +217,7 @@ CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_insert"()
 RETURNS TRIGGER
 LANGUAGE "plpgsql"
 SECURITY DEFINER
+SET "search_path" TO "public", "pg_temp"
 AS $function$
 BEGIN
     IF NEW.quantity IS NOT NULL THEN
@@ -369,7 +371,7 @@ ON "public"."habit_stock_metric_defaults"
 AS PERMISSIVE
 FOR INSERT
 TO "authenticated"
-WITH CHECK (true);
+WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 CREATE POLICY "Enable read access for users based on user_id"
@@ -402,7 +404,7 @@ ON "public"."habit_stocks"
 AS PERMISSIVE
 FOR INSERT
 TO "authenticated"
-WITH CHECK (true);
+WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 CREATE POLICY "Enable read access for users based on user_id"
@@ -435,7 +437,7 @@ ON "public"."occurrence_stock_usages"
 AS PERMISSIVE
 FOR INSERT
 TO "authenticated"
-WITH CHECK (true);
+WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 CREATE POLICY "Enable read access for users based on user_id"

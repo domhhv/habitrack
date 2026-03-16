@@ -16,6 +16,7 @@ import type {
   DurationMetricConfig,
 } from '@models';
 import {
+  useStocks,
   useMetricsActions,
   useConfirmationActions,
   useNotesByOccurrenceId,
@@ -146,6 +147,7 @@ const OccurrenceListItem = ({
   onRemove,
 }: OccurrenceListItemProps) => {
   const notes = useNotesByOccurrenceId();
+  const stocks = useStocks();
   const { removeMetricValue } = useMetricsActions();
   const { askConfirmation } = useConfirmationActions();
   const [removingMetricId, setRemovingMetricId] = React.useState<string | null>(
@@ -210,6 +212,30 @@ const OccurrenceListItem = ({
   const formattedCost = React.useMemo(() => {
     return formatCost(occurrence.cost ?? null, occurrence.currency ?? null);
   }, [occurrence.cost, occurrence.currency]);
+
+  const depletedStockCosts = React.useMemo(() => {
+    return occurrence.stockUsages
+      .map((usage) => {
+        const stock = stocks[usage.habitStockId];
+
+        if (
+          !stock ||
+          !stock.isDepleted ||
+          stock.cost === null ||
+          stock.usageCount === 0
+        ) {
+          return null;
+        }
+
+        return {
+          avgCost: formatCost(stock.cost / stock.usageCount, stock.currency),
+          name: stock.name,
+        };
+      })
+      .filter((entry) => {
+        return entry !== null;
+      });
+  }, [occurrence.stockUsages, stocks]);
 
   return (
     <li
@@ -312,6 +338,17 @@ const OccurrenceListItem = ({
           {formattedCost && (
             <div className="text-foreground-400 text-tiny pt-1">
               Spent {formattedCost}
+            </div>
+          )}
+          {depletedStockCosts.length > 0 && (
+            <div className="text-foreground-400 text-tiny flex flex-wrap gap-x-3 gap-y-0.5 pt-0.5">
+              {depletedStockCosts.map((entry) => {
+                return (
+                  <span key={entry.name}>
+                    {entry.name}: avg {entry.avgCost}/occurrence
+                  </span>
+                );
+              })}
             </div>
           )}
         </div>

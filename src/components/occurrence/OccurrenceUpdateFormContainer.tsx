@@ -64,6 +64,7 @@ const OccurrenceUpdateFormContainer = () => {
       note,
       occurredAt,
       selectedHabitId,
+      // TODO: persist stock usage changes (create/update/delete records and adjust remaining_items)
       stockUsages: _stockUsages,
       uploadedFiles,
     } = values;

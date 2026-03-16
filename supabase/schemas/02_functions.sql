@@ -165,6 +165,7 @@ ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
 -- Function to decrement remaining_items on stock usage insert (quantifiable stocks only)
 CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_insert"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO "public", "pg_temp"
     AS $$
 BEGIN
     IF NEW.quantity IS NOT NULL THEN
@@ -183,12 +184,13 @@ ALTER FUNCTION "public"."update_stock_on_usage_insert"() OWNER TO "postgres";
 -- Function to restore remaining_items on stock usage delete
 CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_delete"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO "public", "pg_temp"
     AS $$
 BEGIN
     IF OLD.quantity IS NOT NULL THEN
         UPDATE "public"."habit_stocks"
         SET "remaining_items" = "remaining_items" + OLD.quantity,
-            "is_depleted" = false
+            "is_depleted" = (COALESCE("remaining_items", 0) + OLD.quantity) <= 0
         WHERE "id" = OLD.habit_stock_id
           AND "remaining_items" IS NOT NULL;
     END IF;

@@ -13,6 +13,7 @@ import {
   useHabits,
   useStocks,
   useNoteActions,
+  useStockActions,
   useMetricsActions,
   useOccurrenceActions,
   useOccurrenceDrawerState,
@@ -33,6 +34,7 @@ const OccurrenceCreateFormContainer = () => {
   const stocks = useStocks();
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote } = useNoteActions();
+  const { updateStock } = useStockActions();
   const { addOccurrence } = useOccurrenceActions();
   const { saveMetricValues } = useMetricsActions();
 
@@ -61,6 +63,7 @@ const OccurrenceCreateFormContainer = () => {
     }
 
     const {
+      depletedStockIds,
       hasSpecificTime,
       metricValues,
       note,
@@ -166,6 +169,14 @@ const OccurrenceCreateFormContainer = () => {
         await createOccurrenceStockUsages(
           stockUsageInserts.map((usage) => {
             return { ...usage, occurrenceId: newOccurrence.id };
+          })
+        );
+      }
+
+      if (depletedStockIds.length > 0) {
+        await Promise.all(
+          depletedStockIds.map((stockId) => {
+            return updateStock(stockId, { isDepleted: true });
           })
         );
       }

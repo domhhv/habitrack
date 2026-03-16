@@ -12,8 +12,22 @@ import { supabaseClient, deepCamelcaseKeys, deepCamelcaseArray } from '@utils';
 
 const STOCK_WITH_DEFAULTS_SELECT = `
   *,
-  metric_defaults:habit_stock_metric_defaults(id, habit_metric_id, value, should_compound, created_at, updated_at)
+  metric_defaults:habit_stock_metric_defaults(id, habit_metric_id, value, should_compound, created_at, updated_at),
+  usages:occurrence_stock_usages(count)
 `;
+
+const transformStock = (data: unknown): HabitStockWithDefaults => {
+  const { usages, ...stock } = deepCamelcaseKeys<
+    Omit<HabitStockWithDefaults, 'usageCount'> & {
+      usages: { count: number }[];
+    }
+  >(data);
+
+  return {
+    ...stock,
+    usageCount: usages?.[0]?.count ?? 0,
+  };
+};
 
 export const createStock = async (
   body: HabitStockInsert
@@ -28,7 +42,7 @@ export const createStock = async (
     throw new Error(error.message);
   }
 
-  return deepCamelcaseKeys<HabitStockWithDefaults>(data);
+  return transformStock(data);
 };
 
 export const listStocksByHabit = async (
@@ -44,7 +58,7 @@ export const listStocksByHabit = async (
     throw new Error(error.message);
   }
 
-  return deepCamelcaseArray<HabitStockWithDefaults>(data);
+  return (data as unknown[]).map(transformStock);
 };
 
 export const patchStock = async (
@@ -62,7 +76,7 @@ export const patchStock = async (
     throw new Error(error.message);
   }
 
-  return deepCamelcaseKeys<HabitStockWithDefaults>(data);
+  return transformStock(data);
 };
 
 export const destroyStock = async (id: HabitStock['id']) => {

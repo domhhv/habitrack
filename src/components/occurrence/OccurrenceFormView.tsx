@@ -43,6 +43,7 @@ import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 const ALL_DAY_TIME = { hour: 12, minute: 0 };
 
 export type OccurrenceFormValues = {
+  depletedStockIds: string[];
   hasSpecificTime: boolean;
   metricValues: Record<string, MetricValue | undefined>;
   note: string;
@@ -99,6 +100,9 @@ const OccurrenceFormView = ({
   const [stockSelections, setStockSelections] = React.useState<
     Record<string, number | null>
   >({});
+  const [depletedStockIds, setDepletedStockIds] = React.useState<Set<string>>(
+    new Set()
+  );
   const [fetchedStocksByHabit, setFetchedStocksByHabit] = React.useState<
     Record<string, boolean>
   >({});
@@ -150,7 +154,9 @@ const OccurrenceFormView = ({
 
   React.useEffect(() => {
     if (selectedStocks.length === 0) {
-      setAutoCompoundedMetricIds({});
+      setAutoCompoundedMetricIds((prev) => {
+        return Object.keys(prev).length === 0 ? prev : {};
+      });
 
       return;
     }
@@ -220,14 +226,18 @@ const OccurrenceFormView = ({
     });
 
     setAutoCompoundedMetricIds((prev) => {
-      const next: Record<string, boolean> = { ...prev };
+      const prevKeys = Object.keys(prev);
 
-      for (const metricId of Object.keys(next)) {
-        if (!compoundMetricIds.has(metricId)) {
-          /* eslint-disable @typescript-eslint/no-dynamic-delete */
-          delete next[metricId];
-        }
+      if (
+        prevKeys.length === compoundMetricIds.size &&
+        prevKeys.every((key) => {
+          return compoundMetricIds.has(key);
+        })
+      ) {
+        return prev;
       }
+
+      const next: Record<string, boolean> = {};
 
       for (const metricId of compoundMetricIds) {
         next[metricId] = true;
@@ -337,6 +347,7 @@ const OccurrenceFormView = ({
       setTime(occurrenceToEdit.occurredAt);
       setHasSpecificTime(occurrenceToEdit.hasSpecificTime);
       setStockSelections({});
+      setDepletedStockIds(new Set());
       setAutoCompoundedMetricIds({});
 
       const initialMetricValues: Record<string, MetricValue | undefined> = {};
@@ -470,6 +481,20 @@ const OccurrenceFormView = ({
       return;
     }
 
+    const hasExcessiveQuantity = selectedStocks.some((stock) => {
+      const quantity = stockSelections[stock.id];
+
+      return (
+        quantity !== null &&
+        stock.remainingItems !== null &&
+        quantity > stock.remainingItems
+      );
+    });
+
+    if (hasExcessiveQuantity) {
+      return;
+    }
+
     const effectiveTimeZone = occurrenceToEdit?.timeZone ?? timeZone;
     const occurredAt =
       computeOccurrenceDateTime(effectiveTimeZone).toAbsoluteString();
@@ -483,6 +508,7 @@ const OccurrenceFormView = ({
     );
 
     onSubmit({
+      depletedStockIds: [...depletedStockIds],
       hasSpecificTime,
       metricValues,
       note,
@@ -500,6 +526,7 @@ const OccurrenceFormView = ({
     setMetricValues({});
     setHasSpecificTime(true);
     setStockSelections({});
+    setDepletedStockIds(new Set());
     setAutoCompoundedMetricIds({});
     onClose();
   };
@@ -511,6 +538,7 @@ const OccurrenceFormView = ({
       setSelectedHabitId(id);
       setMetricValues({});
       setStockSelections({});
+      setDepletedStockIds(new Set());
       setAutoCompoundedMetricIds({});
     }
   };
@@ -526,19 +554,40 @@ const OccurrenceFormView = ({
       if (isSelected) {
         next[stockId] = prev[stockId] ?? defaultQuantity;
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete next[stockId];
       }
 
       return next;
     });
+
+    if (!isSelected) {
+      setDepletedStockIds((prev) => {
+        if (!prev.has(stockId)) {
+          return prev;
+        }
+
+        const next = new Set(prev);
+
+        next.delete(stockId);
+
+        return next;
+      });
+    }
   };
 
   const handleStockQuantityChange = (
     stockId: string,
-    quantity: number | null
+    quantity: number | null,
+    maxQuantity: number | null
   ) => {
+    const clamped =
+      quantity !== null && maxQuantity !== null
+        ? Math.min(quantity, maxQuantity)
+        : quantity;
+
     setStockSelections((prev) => {
-      return { ...prev, [stockId]: quantity };
+      return { ...prev, [stockId]: clamped };
     });
   };
 
@@ -656,35 +705,63 @@ const OccurrenceFormView = ({
               const isQuantifiable = stock.totalItems !== null;
 
               return (
-                <div
-                  key={stock.id}
-                  className="flex items-center justify-between gap-2"
-                >
-                  <Checkbox
-                    size="sm"
-                    isSelected={isSelected}
-                    onValueChange={(nextSelected) => {
-                      return handleStockSelectionChange(
-                        stock.id,
-                        nextSelected,
-                        isQuantifiable ? 1 : null
-                      );
-                    }}
-                  >
-                    <span className="truncate">{stock.name}</span>
-                  </Checkbox>
-                  {isQuantifiable && (
-                    <NumberInput
+                <div key={stock.id} className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <Checkbox
                       size="sm"
-                      minValue={1}
-                      className="w-24"
-                      isDisabled={!isSelected}
-                      aria-label={`${stock.name} quantity`}
-                      value={(stockSelections[stock.id] ?? 1) as number}
-                      onValueChange={(value) => {
-                        return handleStockQuantityChange(stock.id, value ?? 1);
+                      isSelected={isSelected}
+                      onValueChange={(nextSelected) => {
+                        return handleStockSelectionChange(
+                          stock.id,
+                          nextSelected,
+                          isQuantifiable ? 1 : null
+                        );
                       }}
-                    />
+                    >
+                      <span className="truncate">{stock.name}</span>
+                    </Checkbox>
+                    {isQuantifiable && (
+                      <NumberInput
+                        size="sm"
+                        minValue={1}
+                        className="w-24"
+                        isDisabled={!isSelected}
+                        aria-label={`${stock.name} quantity`}
+                        maxValue={stock.remainingItems ?? undefined}
+                        value={(stockSelections[stock.id] ?? 1) as number}
+                        onValueChange={(value) => {
+                          return handleStockQuantityChange(
+                            stock.id,
+                            value ?? 1,
+                            stock.remainingItems
+                          );
+                        }}
+                      />
+                    )}
+                  </div>
+                  {isSelected && !isQuantifiable && (
+                    <Checkbox
+                      size="sm"
+                      className="pl-7"
+                      isSelected={depletedStockIds.has(stock.id)}
+                      onValueChange={(checked) => {
+                        setDepletedStockIds((prev) => {
+                          const next = new Set(prev);
+
+                          if (checked) {
+                            next.add(stock.id);
+                          } else {
+                            next.delete(stock.id);
+                          }
+
+                          return next;
+                        });
+                      }}
+                    >
+                      <span className="text-foreground-400 text-tiny">
+                        Mark as depleted
+                      </span>
+                    </Checkbox>
                   )}
                 </div>
               );
@@ -707,6 +784,7 @@ const OccurrenceFormView = ({
               const nextValue = nextValues[metricId];
 
               if (!isEqual(prevValue, nextValue)) {
+                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete next[metricId];
               }
             }

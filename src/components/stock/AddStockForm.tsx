@@ -44,6 +44,10 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
       return;
     }
 
+    if (isQuantifiable && (!totalItems || totalItems <= 0)) {
+      return;
+    }
+
     const stockInsert = {
       cost: cost ?? null,
       currency,
@@ -152,7 +156,7 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
           color="primary"
           isLoading={isSaving}
           onPress={handleSubmit}
-          isDisabled={!name.trim()}
+          isDisabled={!name.trim() || (isQuantifiable && !totalItems)}
           startContent={!isSaving && <FloppyDiskIcon className="size-4" />}
         >
           Save

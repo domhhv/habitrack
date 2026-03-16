@@ -66,6 +66,11 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
       ? stock.cost / stock.totalItems
       : null;
 
+  const avgCostPerOccurrence =
+    stock.isDepleted && stock.cost !== null && stock.usageCount > 0
+      ? stock.cost / stock.usageCount
+      : null;
+
   const handleDelete = () => {
     void handleAsyncAction(removeStock(stock.id), 'remove_stock');
   };
@@ -184,6 +189,12 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
             {stock.totalItems === null && <span>Semi-quantifiable</span>}
             {costPerItem !== null && (
               <span>{formatCost(costPerItem, stock.currency)}/item</span>
+            )}
+            {avgCostPerOccurrence !== null && (
+              <span>
+                Avg {formatCost(avgCostPerOccurrence, stock.currency)}
+                /occurrence
+              </span>
             )}
           </div>
           {stock.metricDefaults.length > 0 && (

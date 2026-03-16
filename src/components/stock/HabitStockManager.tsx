@@ -19,6 +19,10 @@ const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
   const [hasFetched, setHasFetched] = React.useState(false);
 
   React.useEffect(() => {
+    setHasFetched(false);
+  }, [habit.id]);
+
+  React.useEffect(() => {
     if (!hasFetched) {
       void fetchStocksByHabit(habit.id).then(() => {
         setHasFetched(true);

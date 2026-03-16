@@ -53,7 +53,7 @@ CREATE POLICY "Enable delete for users based on user_id" ON "public"."habit_stoc
 FOR DELETE USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."habit_stocks"
-FOR INSERT TO "authenticated" WITH CHECK (true);
+FOR INSERT TO "authenticated" WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 CREATE POLICY "Enable read access for users based on user_id" ON "public"."habit_stocks"
 FOR SELECT USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));

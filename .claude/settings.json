@@ -22,7 +22,8 @@
       "mcp__chrome-devtools__resize_page",
       "mcp__context7__query-docs",
       "mcp__claude_ai_Supabase__list_projects",
-      "mcp__claude_ai_Supabase__execute_sql"
+      "mcp__claude_ai_Supabase__execute_sql",
+      "Bash(git stash:*)"
     ]
   }
 }
