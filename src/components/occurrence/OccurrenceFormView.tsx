@@ -95,6 +95,9 @@ const OccurrenceFormView = ({
   const [autoCompoundedMetricIds, setAutoCompoundedMetricIds] = React.useState<
     Record<string, boolean>
   >({});
+  const [stockFilledMetrics, setStockFilledMetrics] = React.useState<
+    Record<string, string[]>
+  >({});
   const allHabits = useHabits();
   const habitStocks = React.useMemo(() => {
     if (!selectedHabitId || !allHabits[selectedHabitId]) {
@@ -147,10 +150,65 @@ const OccurrenceFormView = ({
   }, [occurrenceToEdit, selectedHabitId, habits]);
 
   React.useEffect(() => {
+    const currentStockIds = new Set(
+      selectedStocks.map((stock) => {
+        return stock.id;
+      })
+    );
+
+    // Build a mapping of metricId -> stockIds for the current selection
+    const currentMetricSources: Record<string, string[]> = {};
+
+    for (const stock of selectedStocks) {
+      for (const metricDefault of stock.metricDefaults) {
+        const metricId = metricDefault.habitMetricId;
+
+        if (!currentMetricSources[metricId]) {
+          currentMetricSources[metricId] = [];
+        }
+
+        currentMetricSources[metricId].push(stock.id);
+      }
+    }
+
+    // Find orphaned metrics: previously auto-filled by stocks that are now all deselected
+    const orphanedMetricIds = new Set<string>();
+
+    for (const [metricId, sourceStockIds] of Object.entries(
+      stockFilledMetrics
+    )) {
+      const hasRemainingSource = sourceStockIds.some((stockId) => {
+        return currentStockIds.has(stockId);
+      });
+
+      if (!hasRemainingSource) {
+        orphanedMetricIds.add(metricId);
+      }
+    }
+
     if (selectedStocks.length === 0) {
       setAutoCompoundedMetricIds((prev) => {
         return Object.keys(prev).length === 0 ? prev : {};
       });
+
+      if (orphanedMetricIds.size > 0) {
+        setMetricValues((prev) => {
+          const next = { ...prev };
+          let hasChanges = false;
+
+          for (const metricId of orphanedMetricIds) {
+            if (metricId in next) {
+              // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+              delete next[metricId];
+              hasChanges = true;
+            }
+          }
+
+          return hasChanges ? next : prev;
+        });
+
+        setStockFilledMetrics({});
+      }
 
       return;
     }
@@ -192,6 +250,15 @@ const OccurrenceFormView = ({
     setMetricValues((prev) => {
       let hasChanges = false;
       const next = { ...prev };
+
+      // Remove orphaned metrics that the user hasn't manually edited
+      for (const metricId of orphanedMetricIds) {
+        if (metricId in next && !compoundMetricIds.has(metricId)) {
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+          delete next[metricId];
+          hasChanges = true;
+        }
+      }
 
       for (const stock of selectedStocks) {
         for (const metricDefault of stock.metricDefaults) {
@@ -241,11 +308,16 @@ const OccurrenceFormView = ({
 
       return next;
     });
+
+    setStockFilledMetrics((prev) => {
+      return isEqual(prev, currentMetricSources) ? prev : currentMetricSources;
+    });
   }, [
     selectedStocks,
     stockSelections,
     metricDefinitions,
     autoCompoundedMetricIds,
+    stockFilledMetrics,
   ]);
 
   const computeOccurrenceDateTime = React.useCallback(
@@ -349,6 +421,7 @@ const OccurrenceFormView = ({
       setHasSpecificTime(occurrenceToEdit.hasSpecificTime);
       setDepletedStockIds(new Set());
       setAutoCompoundedMetricIds({});
+      setStockFilledMetrics({});
 
       const initialStockSelections: Record<string, number | null> = {};
 
@@ -443,6 +516,7 @@ const OccurrenceFormView = ({
         hasSpecificTimeChanged ||
         hasMetricValuesChanged ||
         hasStockUsagesChanged ||
+        depletedStockIds.size > 0 ||
         uploadedFiles.length > 0;
 
       setIsSubmitButtonDisabled(
@@ -464,6 +538,7 @@ const OccurrenceFormView = ({
     habits,
     metricValues,
     stockSelections,
+    depletedStockIds.size,
   ]);
 
   React.useEffect(() => {
@@ -548,6 +623,7 @@ const OccurrenceFormView = ({
     setStockSelections({});
     setDepletedStockIds(new Set());
     setAutoCompoundedMetricIds({});
+    setStockFilledMetrics({});
     onClose();
   };
 
@@ -560,6 +636,7 @@ const OccurrenceFormView = ({
       setStockSelections({});
       setDepletedStockIds(new Set());
       setAutoCompoundedMetricIds({});
+      setStockFilledMetrics({});
     }
   };
 
@@ -796,6 +873,8 @@ const OccurrenceFormView = ({
         onChange={(nextValues) => {
           setMetricValues(nextValues);
 
+          const editedMetricIds: string[] = [];
+
           setAutoCompoundedMetricIds((prev) => {
             const next = { ...prev };
 
@@ -806,11 +885,39 @@ const OccurrenceFormView = ({
               if (!isEqual(prevValue, nextValue)) {
                 // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete next[metricId];
+                editedMetricIds.push(metricId);
               }
             }
 
             return next;
           });
+
+          // Also check non-compounded stock-filled metrics for user edits
+          for (const metricId of Object.keys(stockFilledMetrics)) {
+            if (editedMetricIds.includes(metricId)) {
+              continue;
+            }
+
+            const prevValue = metricValues[metricId];
+            const nextValue = nextValues[metricId];
+
+            if (!isEqual(prevValue, nextValue)) {
+              editedMetricIds.push(metricId);
+            }
+          }
+
+          if (editedMetricIds.length > 0) {
+            setStockFilledMetrics((prev) => {
+              const next = { ...prev };
+
+              for (const metricId of editedMetricIds) {
+                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+                delete next[metricId];
+              }
+
+              return next;
+            });
+          }
         }}
       />
       <Textarea

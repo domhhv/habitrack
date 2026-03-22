@@ -243,6 +243,7 @@ const OccurrenceListItem = ({
 
         return {
           avgCost: formatCost(stock.cost / stock.usageCount, stock.currency),
+          habitStockId: usage.habitStockId,
           name: stock.name,
         };
       })
@@ -358,7 +359,7 @@ const OccurrenceListItem = ({
             <div className="text-foreground-400 text-tiny flex flex-wrap gap-x-3 gap-y-0.5 pt-0.5">
               {depletedStockCosts.map((entry) => {
                 return (
-                  <span key={entry.name}>
+                  <span key={entry.habitStockId}>
                     {entry.name}: avg {entry.avgCost}/occurrence
                   </span>
                 );

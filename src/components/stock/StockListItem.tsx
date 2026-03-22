@@ -124,10 +124,15 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
       return;
     }
 
+    if (isQuantifiable && totalItems == null) {
+      return;
+    }
+
     const nextTotalItems = isQuantifiable ? (totalItems ?? null) : null;
-    const nextRemainingItems = isQuantifiable
-      ? (remainingItems ?? nextTotalItems)
-      : null;
+    const nextRemainingItems =
+      isQuantifiable && nextTotalItems !== null
+        ? Math.min(remainingItems ?? nextTotalItems, nextTotalItems)
+        : null;
 
     await handleAsyncAction(
       (async () => {
@@ -324,6 +329,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
                 value={remainingItems}
                 isDisabled={!totalItems}
                 onValueChange={setRemainingItems}
+                maxValue={totalItems ?? undefined}
               />
             </div>
           )}
