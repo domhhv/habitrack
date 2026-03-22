@@ -63,8 +63,8 @@ This app showcases the use of the following tools and technologies:
 - [ ] **Export**: Export your habits and entries.
 - [ ] **Categories**: Group habits into categories.
 - [ ] **Environments**: Associate habits with environments where they occur.
-- [ ] **Habit Stocks**: Maintain a stock count for habits that require consumable resources.
-- [ ] **Habit Spending**: Track spending related to habits.
+- [x] **Habit Stocks**: Maintain a stock count for habits that require consumable resources.
+- [x] **Habit Spending**: Track spending related to habits.
 - [ ] **Habit Presets**: Use predefined habit templates for quick setup.
 - [ ] **Log Presets**: Create and use log entry presets for faster logging.
 - [ ] **Statistics**: Track your progress with insightful statistics.
@@ -89,7 +89,6 @@ There's also a public roadmap on Featurebase where you can upvote and suggest ne
 
 - [Git](https://git-scm.com/)
 - [Node.js](https://nodejs.org/en/) (22.22.1)
-- [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (v2)
 - [Docker](https://docs.docker.com/get-started/get-docker/)
 - Yarn is used as a package manager and is automatically available via Corepack (bundled with Node.js)
 
@@ -119,7 +118,7 @@ Follow these steps to get the project up and running on your local machine.
 
 The project uses Supabase for database operations.
 
-The Supabase project configuration, seeds and migrations live under the `supabase` directory.
+The Supabase project configuration, seeds, and migrations live under the `supabase` directory.
 
 To set up a local Supabase instance, run the following commands (Docker required).
 
@@ -127,35 +126,38 @@ To set up a local Supabase instance, run the following commands (Docker required
 
    ```bash
    yarn db:start
-   # API URL: http://127.0.0.1:54321
-   # DB URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
-   # Studio URL: http://127.0.0.1:54323
-   # anon key: <your-anon-key>
-   # ...
    ```
 
    This command starts Supabase Docker containers based on `supabase/config.toml` and creates a local Postgres database and services.
 
-   It should output the API URL, DB URL, Studio URL, and an anonymous key, among other info. Use the Studio URL to access the local Supabase dashboard in the browser, and DB URL to connect to the local database directly.
+   It should output the Studio URL, Database URL, and Project URL, among other info. Use the Studio URL to access the local Supabase dashboard in the browser, and the Database URL to connect to the local database directly if needed.
 
-   API URL and anon key are needed in the next step to set up the local environment variables.
+2. **Retrieve API URL and anon key:**
 
-2. **Environment variables**
+   Run the following command to retrieve the API URL and anon key for the local Supabase instance:
+
+   ```bash
+   yarn db:status -o env
+   ```
+
+   This command outputs the environment variables needed to connect to the local Supabase instance, including `API_URL` and `ANON_KEY`.
+
+3. **Environment variables**
 
    Create a `.env.development` file in the root directory of the project and add the following environment variables:
 
-   ```
+   ```env
    SUPABASE_URL=<API URL>
-   SUPABASE_ANON_KEY=<anon key>
+   SUPABASE_ANON_KEY=<ANON_KEY>
    ```
 
-3. **Apply migrations and seed the database:**
+4. **Apply migrations and seed the database:**
 
    ```bash
    yarn db:reset
    ```
 
-   This command resets the local database to a clean state, applies migrations from `supabase/migrations` and seeds the db with essential initial data based on `supabase/seed.sql`.
+   This command resets the local database to a clean state, applies migrations from `supabase/migrations`, and seeds the db with essential initial data based on `supabase/seed.sql`.
 
 ### Run the app
 

@@ -12,7 +12,6 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 - [Git](https://git-scm.com/)
 - [Node.js](https://nodejs.org/en/) (22.22.1)
-- [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (v2)
 - [Docker](https://docs.docker.com/get-started/get-docker/)
 - Yarn is used as a package manager and is automatically available via Corepack (bundled with Node.js)
 
@@ -33,20 +32,22 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 3. Follow these steps from the readme to set up Supabase locally: [Local Database Setup](https://github.com/domhhv/habitrack?tab=readme-ov-file#local-database-setup)
 
-   _Alternatively, you can create your own Supabase project and connect to your remote Supabase instance by providing the `SUPABASE_URL` and `SUPABASE_ANON_KEY` in your environment variables._ 4. Set up environment variables
+   _Alternatively, you can create your own Supabase project and connect to your remote Supabase instance by providing the `SUPABASE_URL` and `SUPABASE_ANON_KEY` in your environment variables._
+
+4. Set up environment variables
 
    ```bash
    cp .env.example .env.development
    # Add your local or remote SUPABASE_URL and SUPABASE_ANON_KEY to .env.development
    ```
 
-4. Start the local Supabase instance (if using local)
+5. Start the local Supabase instance (if using local)
 
    ```bash
    yarn db:start
    ```
 
-5. Start development server
+6. Start development server
    ```bash
    yarn dev # automatically opens http://localhost:5173 in your default browser
    ```
