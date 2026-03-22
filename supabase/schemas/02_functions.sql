@@ -15,7 +15,7 @@ $$;
 ALTER FUNCTION "public"."create_profile"() OWNER TO "postgres";
 
 -- Function to track the longest streak for a habit
-CREATE OR REPLACE FUNCTION "public"."get_longest_streak"( -- noqa
+CREATE OR REPLACE FUNCTION "public"."get_longest_streak"(
     "p_habit_id" UUID,
     "p_time_zone" TEXT DEFAULT 'UTC'::text
 )
@@ -68,7 +68,7 @@ $$;
 ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) OWNER TO "postgres";
 
 -- Function to get batched statistics for multiple habits
-CREATE OR REPLACE FUNCTION "public"."get_habits_stats"( -- noqa
+CREATE OR REPLACE FUNCTION "public"."get_habits_stats"(
     "p_habit_ids" UUID[],
     "p_time_zone" TEXT DEFAULT 'UTC'::text
 )
@@ -162,6 +162,74 @@ $$;
 
 ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
 
+-- Function to decrement remaining_items on stock usage insert (quantifiable stocks only)
+CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_insert"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO "public", "pg_temp"
+    AS $$
+BEGIN
+    IF NEW.quantity IS NOT NULL THEN
+        UPDATE "public"."habit_stocks"
+        SET "remaining_items" = "remaining_items" - NEW.quantity,
+            "is_depleted" = ("remaining_items" - NEW.quantity) <= 0
+        WHERE "id" = NEW.habit_stock_id
+          AND "remaining_items" IS NOT NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+ALTER FUNCTION "public"."update_stock_on_usage_insert"() OWNER TO "postgres";
+
+-- Function to restore remaining_items on stock usage delete
+CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_delete"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO "public", "pg_temp"
+    AS $$
+BEGIN
+    IF OLD.quantity IS NOT NULL THEN
+        UPDATE "public"."habit_stocks"
+        SET "remaining_items" = "remaining_items" + OLD.quantity,
+            "is_depleted" = (COALESCE("remaining_items", 0) + OLD.quantity) <= 0
+        WHERE "id" = OLD.habit_stock_id
+          AND "remaining_items" IS NOT NULL;
+    END IF;
+    RETURN OLD;
+END;
+$$;
+
+ALTER FUNCTION "public"."update_stock_on_usage_delete"() OWNER TO "postgres";
+
+-- Function to handle remaining_items on stock usage update (restore old, apply new)
+CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_update"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO "public", "pg_temp"
+    AS $$
+BEGIN
+    -- Restore old quantity to the old stock
+    IF OLD.quantity IS NOT NULL THEN
+        UPDATE "public"."habit_stocks"
+        SET "remaining_items" = "remaining_items" + OLD.quantity,
+            "is_depleted" = (COALESCE("remaining_items", 0) + OLD.quantity) <= 0
+        WHERE "id" = OLD.habit_stock_id
+          AND "remaining_items" IS NOT NULL;
+    END IF;
+
+    -- Apply new quantity to the new stock
+    IF NEW.quantity IS NOT NULL THEN
+        UPDATE "public"."habit_stocks"
+        SET "remaining_items" = "remaining_items" - NEW.quantity,
+            "is_depleted" = ("remaining_items" - NEW.quantity) <= 0
+        WHERE "id" = NEW.habit_stock_id
+          AND "remaining_items" IS NOT NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+ALTER FUNCTION "public"."update_stock_on_usage_update"() OWNER TO "postgres";
+
 -- Grant permissions on functions
 GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "anon";
 GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "authenticated";
@@ -178,3 +246,15 @@ GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."create_profile"() TO "anon";
 GRANT ALL ON FUNCTION "public"."create_profile"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."create_profile"() TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."update_stock_on_usage_insert"() TO "anon";
+GRANT ALL ON FUNCTION "public"."update_stock_on_usage_insert"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_stock_on_usage_insert"() TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."update_stock_on_usage_delete"() TO "anon";
+GRANT ALL ON FUNCTION "public"."update_stock_on_usage_delete"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_stock_on_usage_delete"() TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."update_stock_on_usage_update"() TO "anon";
+GRANT ALL ON FUNCTION "public"."update_stock_on_usage_update"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_stock_on_usage_update"() TO "service_role";

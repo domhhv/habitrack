@@ -23,7 +23,8 @@ export const createOccurrence = async (occurrence: OccurrencesInsert) => {
       *,
       habit:habits(name, icon_path, trait:traits(id, name, color),
       metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)),
-      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id))
+      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id),
+      stock_usages:occurrence_stock_usages(id, habit_stock_id, quantity, created_at, updated_at))
     `
     )
     .single();
@@ -46,7 +47,8 @@ export const listOccurrences = async ([rangeStart, rangeEnd]: [
       *,
       habit:habits(name, icon_path, trait:traits(id, name, color),
       metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)),
-      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id)
+      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id),
+      stock_usages:occurrence_stock_usages(id, habit_stock_id, quantity, created_at, updated_at)
     `
     )
     .order('occurred_at')
@@ -73,7 +75,8 @@ export const patchOccurrence = async (
       *,
       habit:habits(name, icon_path, trait:traits(id, name, color),
       metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)),
-      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id)
+      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id),
+      stock_usages:occurrence_stock_usages(id, habit_stock_id, quantity, created_at, updated_at)
     `
     )
     .single();
@@ -115,7 +118,8 @@ export const getLatestHabitOccurrence = async (habitId: Habit['id']) => {
       *,
       habit:habits(name, icon_path, trait:traits(id, name, color),
       metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)),
-      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id)
+      metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id),
+      stock_usages:occurrence_stock_usages(id, habit_stock_id, quantity, created_at, updated_at)
     `
     )
     .eq('habit_id', habitId)

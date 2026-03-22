@@ -10,6 +10,7 @@ import type {
 
 import { type Habit } from './habit.model';
 import type { OccurrenceMetricValue } from './metric.model';
+import type { OccurrenceStockUsage } from './occurrence-stock-usage.model';
 import { type Trait } from './trait.model';
 
 export type Streak = CamelCasedPropertiesDeep<CompositeTypes<'streak_info'>>;
@@ -31,6 +32,7 @@ export type RawOccurrence = BaseOccurrence & {
   habit: OccurrenceHabit;
 } & {
   metricValues: Omit<OccurrenceMetricValue, 'userId' | 'occurrenceId'>[];
+  stockUsages: Omit<OccurrenceStockUsage, 'userId' | 'occurrenceId'>[];
 };
 
 export type Occurrence = Omit<
@@ -51,6 +53,7 @@ export type OccurrencesUpdate = CamelCasedPropertiesDeep<
 >;
 
 export type OccurrenceSummaryItem = {
+  costByCurrency: Record<string, number>;
   count: number;
   habitId: string;
   iconPath: string | null;

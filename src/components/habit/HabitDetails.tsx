@@ -12,7 +12,11 @@ import {
 import { XIcon, CheckIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 
-import { TraitChip, MetricDefinitionForm } from '@components';
+import {
+  TraitChip,
+  HabitStockManager,
+  MetricDefinitionForm,
+} from '@components';
 import type { Habit, FormMetricDefinitions } from '@models';
 import {
   useUser,
@@ -59,6 +63,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
         isPersisted: true,
         isRequired: m.isRequired,
         name: m.name,
+        presetName: '',
         sortOrder: m.sortOrder,
         type: m.type,
       };
@@ -83,6 +88,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           isRequired: false,
           isToBeAdded: true,
           name: 'Unnamed metric',
+          presetName: '',
           sortOrder: prev.length,
           type: 'number',
         },
@@ -581,6 +587,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           </div>
         )}
       </div>
+      <HabitStockManager habit={habit} />
     </div>
   );
 };

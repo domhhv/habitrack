@@ -14,7 +14,17 @@ const buildOccurrenceSummary = (
   return Object.entries(grouped).map(([habitId, habitOccurrences]) => {
     const [first] = habitOccurrences;
 
+    const costByCurrency: Record<string, number> = {};
+
+    for (const occurrence of habitOccurrences) {
+      if (occurrence.cost !== null && occurrence.currency) {
+        costByCurrency[occurrence.currency] =
+          (costByCurrency[occurrence.currency] ?? 0) + occurrence.cost;
+      }
+    }
+
     return {
+      costByCurrency,
       count: habitOccurrences.length,
       habitId,
       iconPath: first.habit.iconPath,

@@ -4,6 +4,7 @@ CREATE TABLE "public"."profiles" (
     "name" TEXT,
     "plan" "public"."user_plans" NOT NULL DEFAULT 'free', -- noqa: disable=convention.quoted_literals
     "first_day_of_week" "public"."days_of_week" NOT NULL DEFAULT 'mon',
+    "default_currency" TEXT NOT NULL DEFAULT 'EUR',
     "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     "updated_at" TIMESTAMP WITH TIME ZONE
 );

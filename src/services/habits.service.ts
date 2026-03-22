@@ -5,47 +5,71 @@ import {
   StorageBuckets,
   type HabitsInsert,
   type HabitsUpdate,
+  type HabitStockWithDefaults,
 } from '@models';
 import { uploadFile } from '@services';
-import { supabaseClient, deepCamelcaseKeys, deepCamelcaseArray } from '@utils';
+import { supabaseClient, deepCamelcaseKeys } from '@utils';
+
+const HABIT_SELECT = `
+  *,
+  trait:traits(name, color),
+  metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at),
+  stocks:habit_stocks(
+    *,
+    metric_defaults:habit_stock_metric_defaults(id, habit_metric_id, value, should_compound, created_at, updated_at),
+    usages:occurrence_stock_usages(count)
+  )
+`;
+
+type RawHabit = Omit<Habit, 'stocks'> & {
+  stocks: (Omit<HabitStockWithDefaults, 'usageCount'> & {
+    usages: { count: number }[];
+  })[];
+};
+
+const transformHabit = (data: unknown): Habit => {
+  const raw = deepCamelcaseKeys<RawHabit>(data);
+
+  return {
+    ...raw,
+    stocks: raw.stocks.map(({ usages, ...stock }) => {
+      return {
+        ...stock,
+        usageCount: usages?.[0]?.count ?? 0,
+      };
+    }),
+  };
+};
+
+const transformHabits = (data: unknown[]): Habit[] => {
+  return data.map(transformHabit);
+};
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
   const { data, error } = await supabaseClient
     .from('habits')
     .insert(decamelizeKeys(body))
-    .select(
-      `
-      *,
-      trait:traits(name, color),
-      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)
-    `
-    )
+    .select(HABIT_SELECT)
     .single();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return deepCamelcaseKeys<Habit>(data);
+  return transformHabit(data);
 };
 
 export const listHabits = async () => {
   const { data, error } = await supabaseClient
     .from('habits')
-    .select(
-      `
-      *,
-      trait:traits(name, color),
-      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)
-    `
-    )
+    .select(HABIT_SELECT)
     .order('name');
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return deepCamelcaseArray<Habit>(data);
+  return transformHabits(data);
 };
 
 export const patchHabit = async (
@@ -56,20 +80,28 @@ export const patchHabit = async (
     .from('habits')
     .update(decamelizeKeys(habit))
     .eq('id', id)
-    .select(
-      `
-      *,
-      trait:traits(name, color),
-      metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)
-    `
-    )
+    .select(HABIT_SELECT)
     .single();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return deepCamelcaseKeys<Habit>(data);
+  return transformHabit(data);
+};
+
+export const getHabit = async (id: Habit['id']): Promise<Habit> => {
+  const { data, error } = await supabaseClient
+    .from('habits')
+    .select(HABIT_SELECT)
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return transformHabit(data);
 };
 
 export const destroyHabit = async (id: Habit['id']) => {

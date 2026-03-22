@@ -4,13 +4,16 @@ import { type Occurrence } from '@models';
 
 const makeTestOccurrence = (override: Partial<Occurrence> = {}): Occurrence => {
   return {
+    cost: null,
     createdAt: now('Europe/Madrid'),
+    currency: null,
     habitId: crypto.randomUUID(),
     hasSpecificTime: true,
     id: crypto.randomUUID(),
     metricValues: [],
     occurredAt: now('Europe/Madrid'),
     photoPaths: [],
+    stockUsages: [],
     timeZone: 'Europe/Madrid',
     updatedAt: null,
     userId: crypto.randomUUID(),
