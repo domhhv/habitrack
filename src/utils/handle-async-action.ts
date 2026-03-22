@@ -9,6 +9,7 @@ type EntityNoun =
   | 'habit'
   | 'note'
   | 'occurrence'
+  | 'stock'
   | 'trait'
   | 'account'
   | 'photo'

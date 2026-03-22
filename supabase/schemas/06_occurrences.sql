@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS "public"."occurrences" (
     "photo_paths" TEXT [],
     "id" UUID DEFAULT "gen_random_uuid"() NOT NULL,
     "habit_id" UUID NOT NULL,
-    "has_specific_time" BOOLEAN DEFAULT true NOT NULL
+    "has_specific_time" BOOLEAN DEFAULT true NOT NULL,
+    "cost" NUMERIC(10, 2),
+    "currency" TEXT
 );
 
 ALTER TABLE "public"."occurrences" OWNER TO "postgres";

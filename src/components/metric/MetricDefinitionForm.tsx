@@ -116,7 +116,8 @@ const MetricDefinitionForm = ({
         <Autocomplete
           size="sm"
           variant="faded"
-          inputValue={metric.name}
+          maxListboxHeight={384}
+          value={metric.presetName}
           label="Choose from presets (optional)"
           placeholder="Search for units, e.g. kilometers, kcal..."
           onClear={() => {
@@ -136,7 +137,11 @@ const MetricDefinitionForm = ({
               return;
             }
 
-            onChange({ ...preset, name: preset.name });
+            onChange({
+              ...preset,
+              name: preset.name.split(' (')[0],
+              presetName: preset.name,
+            });
           }}
         >
           {METRIC_PRESETS.map(({ group, presets }) => {

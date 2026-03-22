@@ -10,7 +10,7 @@ import type {
 } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
-import { useNoteDrawerActions } from '@stores';
+import { useHabits, useNoteDrawerActions } from '@stores';
 
 type CalendarPeriodSummaryProps = {
   date: CalendarDate | null;
@@ -28,6 +28,57 @@ const CalendarPeriodSummary = ({
   occurrenceSummary,
 }: CalendarPeriodSummaryProps) => {
   const { openNoteDrawer } = useNoteDrawerActions();
+  const habits = useHabits();
+
+  const stockCostsByHabit = React.useMemo(() => {
+    const result: Record<
+      string,
+      { avgCost: number; currency: string; name: string; totalCost: number }[]
+    > = {};
+
+    for (const { count, habitId, occurrences } of occurrenceSummary) {
+      const habitStocks = habits[habitId]?.stocks ?? [];
+      const stocksById = new Map(
+        habitStocks.map((s) => {
+          return [s.id, s] as const;
+        })
+      );
+      const seen = new Set<string>();
+
+      for (const occurrence of occurrences) {
+        for (const usage of occurrence.stockUsages) {
+          if (seen.has(usage.habitStockId)) {
+            continue;
+          }
+
+          seen.add(usage.habitStockId);
+          const stock = stocksById.get(usage.habitStockId);
+
+          if (
+            !stock ||
+            !stock.isDepleted ||
+            stock.cost === null ||
+            stock.usageCount === 0
+          ) {
+            continue;
+          }
+
+          const avgCost = stock.cost / stock.usageCount;
+          const entries = result[habitId] ?? [];
+
+          entries.push({
+            avgCost,
+            currency: stock.currency,
+            name: stock.name,
+            totalCost: avgCost * count,
+          });
+          result[habitId] = entries;
+        }
+      }
+    }
+
+    return result;
+  }, [occurrenceSummary, habits]);
 
   return (
     <>
@@ -77,8 +128,21 @@ const CalendarPeriodSummary = ({
           </h4>
           <div className="space-y-1.5">
             {occurrenceSummary.map(
-              ({ count, habitId, iconPath, name, traitColor }) => {
+              ({
+                costByCurrency,
+                count,
+                habitId,
+                iconPath,
+                name,
+                traitColor,
+              }) => {
                 const totals = metricTotals[habitId];
+                const costEntries = Object.entries(costByCurrency);
+                const stockCosts = stockCostsByHabit[habitId];
+                const hasDetails =
+                  totals ||
+                  costEntries.length > 0 ||
+                  (stockCosts && stockCosts.length > 0);
 
                 return (
                   <div key={habitId}>
@@ -93,15 +157,45 @@ const CalendarPeriodSummary = ({
                         {name}: {count}
                       </span>
                     </div>
-                    {totals && (
+                    {hasDetails && (
                       <div className="mt-0.5 ml-6 space-y-0.5">
-                        {totals.map(({ formattedTotal, name: metricName }) => {
+                        {totals?.map(({ formattedTotal, name: metricName }) => {
                           return (
                             <p
                               key={metricName}
                               className="text-xs text-stone-400 dark:text-stone-500"
                             >
                               {metricName}: {formattedTotal}
+                            </p>
+                          );
+                        })}
+                        {costEntries.map(([currency, total]) => {
+                          return (
+                            <p
+                              key={currency}
+                              className="text-xs text-stone-400 dark:text-stone-500"
+                            >
+                              Cost:{' '}
+                              {new Intl.NumberFormat(undefined, {
+                                currency,
+                                style: 'currency',
+                              }).format(total)}
+                            </p>
+                          );
+                        })}
+                        {stockCosts?.map((entry) => {
+                          const formatter = new Intl.NumberFormat(undefined, {
+                            currency: entry.currency,
+                            style: 'currency',
+                          });
+
+                          return (
+                            <p
+                              key={entry.name}
+                              className="text-xs text-stone-400 dark:text-stone-500"
+                            >
+                              {entry.name}: {formatter.format(entry.totalCost)}{' '}
+                              (avg {formatter.format(entry.avgCost)}/occurrence)
                             </p>
                           );
                         })}

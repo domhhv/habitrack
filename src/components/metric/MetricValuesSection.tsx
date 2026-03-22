@@ -1,3 +1,5 @@
+import React from 'react';
+
 import type { Habit, MetricValue, MetricConfig } from '@models';
 
 import MetricValueInput from './MetricValueInput';
@@ -17,6 +19,15 @@ const MetricValuesSection = ({
   previousValues,
   values,
 }: MetricValuesSectionProps) => {
+  const handleChange = React.useCallback(
+    (metricId: string) => {
+      return (val: MetricValue | undefined) => {
+        onChange({ ...values, [metricId]: val });
+      };
+    },
+    [onChange, values]
+  );
+
   if (metricDefinitions.length === 0) {
     return null;
   }
@@ -31,11 +42,9 @@ const MetricValuesSection = ({
             name={metric.name}
             type={metric.type}
             value={values[metric.id]}
+            onChange={handleChange(metric.id)}
             config={metric.config as MetricConfig}
             previousValue={previousValues?.[metric.id]}
-            onChange={(val) => {
-              onChange({ ...values, [metric.id]: val });
-            }}
           />
         );
       })}

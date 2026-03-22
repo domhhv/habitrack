@@ -14,8 +14,10 @@ import type {
   NumberMetricConfig,
   BooleanMetricConfig,
   DurationMetricConfig,
+  HabitStockWithDefaults,
 } from '@models';
 import {
+  useHabits,
   useMetricsActions,
   useConfirmationActions,
   useNotesByOccurrenceId,
@@ -115,6 +117,21 @@ const formatMetricValue = (
   }
 };
 
+const formatCost = (cost: number | null, currency: string | null) => {
+  if (cost === null || !currency) {
+    return null;
+  }
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      currency,
+      style: 'currency',
+    }).format(cost);
+  } catch {
+    return `${cost} ${currency}`;
+  }
+};
+
 type OccurrenceListItemProps = {
   hasChip: boolean;
   isBeingRemoved: boolean;
@@ -131,6 +148,20 @@ const OccurrenceListItem = ({
   onRemove,
 }: OccurrenceListItemProps) => {
   const notes = useNotesByOccurrenceId();
+  const habits = useHabits();
+  const stocksById = React.useMemo(() => {
+    const habit = habits[occurrence.habitId];
+
+    if (!habit) {
+      return new Map<string, HabitStockWithDefaults>();
+    }
+
+    return new Map(
+      habit.stocks.map((s) => {
+        return [s.id, s] as const;
+      })
+    );
+  }, [habits, occurrence.habitId]);
   const { removeMetricValue } = useMetricsActions();
   const { askConfirmation } = useConfirmationActions();
   const [removingMetricId, setRemovingMetricId] = React.useState<string | null>(
@@ -191,6 +222,35 @@ const OccurrenceListItem = ({
   const occurrenceNote = React.useMemo(() => {
     return notes[occurrence.id];
   }, [notes, occurrence]);
+
+  const formattedCost = React.useMemo(() => {
+    return formatCost(occurrence.cost ?? null, occurrence.currency ?? null);
+  }, [occurrence.cost, occurrence.currency]);
+
+  const depletedStockCosts = React.useMemo(() => {
+    return occurrence.stockUsages
+      .map((usage) => {
+        const stock = stocksById.get(usage.habitStockId);
+
+        if (
+          !stock ||
+          !stock.isDepleted ||
+          stock.cost === null ||
+          stock.usageCount === 0
+        ) {
+          return null;
+        }
+
+        return {
+          avgCost: formatCost(stock.cost / stock.usageCount, stock.currency),
+          habitStockId: usage.habitStockId,
+          name: stock.name,
+        };
+      })
+      .filter((entry) => {
+        return entry !== null;
+      });
+  }, [occurrence.stockUsages, stocksById]);
 
   return (
     <li
@@ -286,6 +346,22 @@ const OccurrenceListItem = ({
                   >
                     {chip.label}
                   </Chip>
+                );
+              })}
+            </div>
+          )}
+          {formattedCost && (
+            <div className="text-foreground-400 text-tiny pt-1">
+              Spent {formattedCost}
+            </div>
+          )}
+          {depletedStockCosts.length > 0 && (
+            <div className="text-foreground-400 text-tiny flex flex-wrap gap-x-3 gap-y-0.5 pt-0.5">
+              {depletedStockCosts.map((entry) => {
+                return (
+                  <span key={entry.habitStockId}>
+                    {entry.name}: avg {entry.avgCost}/occurrence
+                  </span>
                 );
               })}
             </div>
