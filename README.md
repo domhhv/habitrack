@@ -146,7 +146,7 @@ To set up a local Supabase instance, run the following commands (Docker required
 
    Create a `.env.development` file in the root directory of the project and add the following environment variables:
 
-   ```
+   ```env
    SUPABASE_URL=<API URL>
    SUPABASE_ANON_KEY=<ANON_KEY>
    ```
