@@ -14,9 +14,10 @@ import type {
   NumberMetricConfig,
   BooleanMetricConfig,
   DurationMetricConfig,
+  HabitStockWithDefaults,
 } from '@models';
 import {
-  useStocks,
+  useHabits,
   useMetricsActions,
   useConfirmationActions,
   useNotesByOccurrenceId,
@@ -147,7 +148,20 @@ const OccurrenceListItem = ({
   onRemove,
 }: OccurrenceListItemProps) => {
   const notes = useNotesByOccurrenceId();
-  const stocks = useStocks();
+  const habits = useHabits();
+  const stocksById = React.useMemo(() => {
+    const habit = habits[occurrence.habitId];
+
+    if (!habit) {
+      return new Map<string, HabitStockWithDefaults>();
+    }
+
+    return new Map(
+      habit.stocks.map((s) => {
+        return [s.id, s] as const;
+      })
+    );
+  }, [habits, occurrence.habitId]);
   const { removeMetricValue } = useMetricsActions();
   const { askConfirmation } = useConfirmationActions();
   const [removingMetricId, setRemovingMetricId] = React.useState<string | null>(
@@ -216,7 +230,7 @@ const OccurrenceListItem = ({
   const depletedStockCosts = React.useMemo(() => {
     return occurrence.stockUsages
       .map((usage) => {
-        const stock = stocks[usage.habitStockId];
+        const stock = stocksById.get(usage.habitStockId);
 
         if (
           !stock ||
@@ -235,7 +249,7 @@ const OccurrenceListItem = ({
       .filter((entry) => {
         return entry !== null;
       });
-  }, [occurrence.stockUsages, stocks]);
+  }, [occurrence.stockUsages, stocksById]);
 
   return (
     <li

@@ -9,7 +9,7 @@ import {
 import React from 'react';
 
 import type { Habit, MetricValue, HabitStockWithDefaults } from '@models';
-import { useUser, useStockActions } from '@stores';
+import { useUser, useStockActions, useConfirmationActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 import StockMetricDefaults from './StockMetricDefaults';
@@ -37,6 +37,7 @@ const formatCost = (cost: number | null, currency: string) => {
 const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
   const { removeStock, updateStock, updateStockMetricDefaults } =
     useStockActions();
+  const { askConfirmation } = useConfirmationActions();
   const user = useUser();
   const [isEditing, setIsEditing] = React.useState(false);
   const [name, setName] = React.useState(stock.name);
@@ -71,13 +72,25 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
       ? stock.cost / stock.usageCount
       : null;
 
-  const handleDelete = () => {
-    void handleAsyncAction(removeStock(stock.id), 'remove_stock');
+  const handleDelete = async () => {
+    if (
+      await askConfirmation({
+        color: 'danger',
+        confirmText: 'Delete',
+        description: 'Are you sure you want to delete this stock?',
+        title: 'Delete stock',
+      })
+    ) {
+      void handleAsyncAction(
+        removeStock(stock.id, stock.habitId),
+        'remove_stock'
+      );
+    }
   };
 
   const handleToggleDepleted = () => {
     void handleAsyncAction(
-      updateStock(stock.id, { isDepleted: !stock.isDepleted }),
+      updateStock(stock.id, { isDepleted: !stock.isDepleted }, stock.habitId),
       'update_stock'
     );
   };
@@ -118,13 +131,17 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
 
     await handleAsyncAction(
       (async () => {
-        await updateStock(stock.id, {
-          cost: cost ?? null,
-          currency,
-          name: trimmedName,
-          remainingItems: nextRemainingItems,
-          totalItems: nextTotalItems,
-        });
+        await updateStock(
+          stock.id,
+          {
+            cost: cost ?? null,
+            currency,
+            name: trimmedName,
+            remainingItems: nextRemainingItems,
+            totalItems: nextTotalItems,
+          },
+          stock.habitId
+        );
 
         if (metricDefinitions.length > 0) {
           await updateStockMetricDefaults(

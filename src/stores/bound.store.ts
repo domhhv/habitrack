@@ -74,7 +74,6 @@ useBoundStore.subscribe(
       habitActions,
       noteActions,
       occurrencesActions,
-      stockActions,
       traitActions,
       userActions,
     } = useBoundStore.getState();
@@ -84,7 +83,6 @@ useBoundStore.subscribe(
       traitActions.clearTraits();
       occurrencesActions.clearOccurrences();
       noteActions.clearNotes();
-      stockActions.clearStocks();
       userActions.clearProfile();
 
       return;

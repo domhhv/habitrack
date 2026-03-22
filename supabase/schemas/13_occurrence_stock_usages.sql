@@ -63,6 +63,10 @@ CREATE OR REPLACE TRIGGER "on_stock_usage_delete"
 AFTER DELETE ON "public"."occurrence_stock_usages"
 FOR EACH ROW EXECUTE FUNCTION "public"."update_stock_on_usage_delete"();
 
+CREATE OR REPLACE TRIGGER "on_stock_usage_update"
+AFTER UPDATE ON "public"."occurrence_stock_usages"
+FOR EACH ROW EXECUTE FUNCTION "public"."update_stock_on_usage_update"();
+
 -- Row level security policies
 ALTER TABLE "public"."occurrence_stock_usages" ENABLE ROW LEVEL SECURITY;
 

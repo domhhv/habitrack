@@ -53,6 +53,7 @@ export type OccurrencesUpdate = CamelCasedPropertiesDeep<
 >;
 
 export type OccurrenceSummaryItem = {
+  costByCurrency: Record<string, number>;
   count: number;
   habitId: string;
   iconPath: string | null;

@@ -35,7 +35,7 @@ import { useTextField, useScreenWidth } from '@hooks';
 import type { Habit, Occurrence, MetricValue } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl, getLatestHabitOccurrence } from '@services';
-import { useHabitStocks, useStockActions } from '@stores';
+import { useHabits } from '@stores';
 
 import OccurrenceChip from './OccurrenceChip';
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
@@ -95,23 +95,38 @@ const OccurrenceFormView = ({
   const [autoCompoundedMetricIds, setAutoCompoundedMetricIds] = React.useState<
     Record<string, boolean>
   >({});
-  const habitStocks = useHabitStocks(selectedHabitId || '');
-  const { fetchStocksByHabit } = useStockActions();
+  const allHabits = useHabits();
+  const habitStocks = React.useMemo(() => {
+    if (!selectedHabitId || !allHabits[selectedHabitId]) {
+      return [];
+    }
+
+    return allHabits[selectedHabitId].stocks;
+  }, [selectedHabitId, allHabits]);
   const [stockSelections, setStockSelections] = React.useState<
     Record<string, number | null>
   >({});
   const [depletedStockIds, setDepletedStockIds] = React.useState<Set<string>>(
     new Set()
   );
-  const [fetchedStocksByHabit, setFetchedStocksByHabit] = React.useState<
-    Record<string, boolean>
-  >({});
+
+  const existingUsageStockIds = React.useMemo(() => {
+    if (!occurrenceToEdit) {
+      return new Set<string>();
+    }
+
+    return new Set(
+      occurrenceToEdit.stockUsages.map((usage) => {
+        return usage.habitStockId;
+      })
+    );
+  }, [occurrenceToEdit]);
 
   const activeStocks = React.useMemo(() => {
     return habitStocks.filter((stock) => {
-      return !stock.isDepleted;
+      return !stock.isDepleted || existingUsageStockIds.has(stock.id);
     });
-  }, [habitStocks]);
+  }, [habitStocks, existingUsageStockIds]);
 
   const selectedStocks = React.useMemo(() => {
     return activeStocks.filter((stock) => {
@@ -132,27 +147,6 @@ const OccurrenceFormView = ({
   }, [occurrenceToEdit, selectedHabitId, habits]);
 
   React.useEffect(() => {
-    if (!selectedHabitId || occurrenceToEdit) {
-      return;
-    }
-
-    if (fetchedStocksByHabit[selectedHabitId]) {
-      return;
-    }
-
-    void fetchStocksByHabit(selectedHabitId).then(() => {
-      setFetchedStocksByHabit((prev) => {
-        return { ...prev, [selectedHabitId]: true };
-      });
-    });
-  }, [
-    selectedHabitId,
-    occurrenceToEdit,
-    fetchedStocksByHabit,
-    fetchStocksByHabit,
-  ]);
-
-  React.useEffect(() => {
     if (selectedStocks.length === 0) {
       setAutoCompoundedMetricIds((prev) => {
         return Object.keys(prev).length === 0 ? prev : {};
@@ -165,6 +159,8 @@ const OccurrenceFormView = ({
     const compoundMetricIds = new Set<string>();
 
     for (const stock of selectedStocks) {
+      const quantity = stockSelections[stock.id] ?? 1;
+
       for (const metricDefault of stock.metricDefaults) {
         if (!metricDefault.shouldCompound) {
           continue;
@@ -189,7 +185,7 @@ const OccurrenceFormView = ({
         compoundMetricIds.add(metricDefault.habitMetricId);
         compoundSums[metricDefault.habitMetricId] =
           (compoundSums[metricDefault.habitMetricId] || 0) +
-          numericValue.numericValue;
+          numericValue.numericValue * quantity;
       }
     }
 
@@ -245,7 +241,12 @@ const OccurrenceFormView = ({
 
       return next;
     });
-  }, [selectedStocks, metricDefinitions, autoCompoundedMetricIds]);
+  }, [
+    selectedStocks,
+    stockSelections,
+    metricDefinitions,
+    autoCompoundedMetricIds,
+  ]);
 
   const computeOccurrenceDateTime = React.useCallback(
     (tz = timeZone) => {
@@ -346,9 +347,16 @@ const OccurrenceFormView = ({
       handleNoteChange(occurrenceNote?.content || '');
       setTime(occurrenceToEdit.occurredAt);
       setHasSpecificTime(occurrenceToEdit.hasSpecificTime);
-      setStockSelections({});
       setDepletedStockIds(new Set());
       setAutoCompoundedMetricIds({});
+
+      const initialStockSelections: Record<string, number | null> = {};
+
+      for (const usage of occurrenceToEdit.stockUsages) {
+        initialStockSelections[usage.habitStockId] = usage.quantity;
+      }
+
+      setStockSelections(initialStockSelections);
 
       const initialMetricValues: Record<string, MetricValue | undefined> = {};
 
@@ -419,11 +427,22 @@ const OccurrenceFormView = ({
         return false;
       })();
 
+      const hasStockUsagesChanged = (() => {
+        const existingUsages: Record<string, number | null> = {};
+
+        for (const usage of occurrenceToEdit.stockUsages) {
+          existingUsages[usage.habitStockId] = usage.quantity;
+        }
+
+        return !isEqual(existingUsages, stockSelections);
+      })();
+
       const hasOccurrenceChanged =
         hasNoteChanged ||
         hasTimeChanged ||
         hasSpecificTimeChanged ||
         hasMetricValuesChanged ||
+        hasStockUsagesChanged ||
         uploadedFiles.length > 0;
 
       setIsSubmitButtonDisabled(
@@ -444,6 +463,7 @@ const OccurrenceFormView = ({
     isSaving,
     habits,
     metricValues,
+    stockSelections,
   ]);
 
   React.useEffect(() => {
@@ -686,7 +706,7 @@ const OccurrenceFormView = ({
           No habits yet. Create a habit to get started.
         </p>
       )}
-      {!occurrenceToEdit && selectedHabitId && activeStocks.length > 0 && (
+      {selectedHabitId && activeStocks.length > 0 && (
         <div className="space-y-2">
           <div>
             <p className="text-foreground-500 text-tiny font-medium">

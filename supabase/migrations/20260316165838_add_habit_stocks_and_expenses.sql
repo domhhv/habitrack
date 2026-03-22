@@ -9,9 +9,7 @@ CREATE TABLE "public"."habit_stock_metric_defaults" (
     "should_compound" BOOLEAN NOT NULL DEFAULT false
 );
 
-
 ALTER TABLE "public"."habit_stock_metric_defaults" ENABLE ROW LEVEL SECURITY;
-
 
 CREATE TABLE "public"."habit_stocks" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
@@ -28,9 +26,7 @@ CREATE TABLE "public"."habit_stocks" (
     "purchased_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
-
 ALTER TABLE "public"."habit_stocks" ENABLE ROW LEVEL SECURITY;
-
 
 CREATE TABLE "public"."occurrence_stock_usages" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
@@ -41,7 +37,6 @@ CREATE TABLE "public"."occurrence_stock_usages" (
     "habit_stock_id" UUID NOT NULL,
     "quantity" INTEGER DEFAULT 1
 );
-
 
 ALTER TABLE "public"."occurrence_stock_usages" ENABLE ROW LEVEL SECURITY;
 
@@ -193,44 +188,6 @@ ALTER TABLE "public"."occurrence_stock_usages" ADD CONSTRAINT "occurrence_stock_
 
 ALTER TABLE "public"."occurrence_stock_usages" VALIDATE CONSTRAINT "occurrence_stock_usages_user_id_fkey";
 
-SET check_function_bodies = "off";
-
-CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_delete"() -- noqa
-RETURNS TRIGGER
-LANGUAGE "plpgsql"
-SECURITY DEFINER
-SET "search_path" TO "public", "pg_temp"
-AS $function$
-BEGIN
-    IF OLD.quantity IS NOT NULL THEN
-        UPDATE "public"."habit_stocks"
-        SET "remaining_items" = "remaining_items" + OLD.quantity,
-            "is_depleted" = (COALESCE("remaining_items", 0) + OLD.quantity) <= 0
-        WHERE "id" = OLD.habit_stock_id
-          AND "remaining_items" IS NOT NULL;
-    END IF;
-    RETURN OLD;
-END;
-$function$;
-
-CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_insert"()
-RETURNS TRIGGER
-LANGUAGE "plpgsql"
-SECURITY DEFINER
-SET "search_path" TO "public", "pg_temp"
-AS $function$
-BEGIN
-    IF NEW.quantity IS NOT NULL THEN
-        UPDATE "public"."habit_stocks"
-        SET "remaining_items" = "remaining_items" - NEW.quantity,
-            "is_depleted" = ("remaining_items" - NEW.quantity) <= 0
-        WHERE "id" = NEW.habit_stock_id
-          AND "remaining_items" IS NOT NULL;
-    END IF;
-    RETURN NEW;
-END;
-$function$;
-
 GRANT DELETE ON TABLE "public"."habit_stock_metric_defaults" TO "anon";
 
 GRANT INSERT ON TABLE "public"."habit_stock_metric_defaults" TO "anon";
@@ -357,14 +314,12 @@ GRANT TRUNCATE ON TABLE "public"."occurrence_stock_usages" TO "service_role";
 
 GRANT UPDATE ON TABLE "public"."occurrence_stock_usages" TO "service_role";
 
-
 CREATE POLICY "Enable delete for users based on user_id"
 ON "public"."habit_stock_metric_defaults"
 AS PERMISSIVE
 FOR DELETE
 TO "public"
 USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
-
 
 CREATE POLICY "Enable insert for authenticated users only"
 ON "public"."habit_stock_metric_defaults"
@@ -373,14 +328,12 @@ FOR INSERT
 TO "authenticated"
 WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
-
 CREATE POLICY "Enable read access for users based on user_id"
 ON "public"."habit_stock_metric_defaults"
 AS PERMISSIVE
 FOR SELECT
-TO public
-USING (((SELECT auth.uid() AS uid) = user_id));
-
+TO "public"
+USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 CREATE POLICY "Enable update for users based on user_id"
 ON "public"."habit_stock_metric_defaults"
@@ -390,14 +343,12 @@ TO "public"
 USING (((SELECT "auth"."uid"() AS "uid") = "user_id"))
 WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
-
 CREATE POLICY "Enable delete for users based on user_id"
 ON "public"."habit_stocks"
 AS PERMISSIVE
 FOR DELETE
 TO "public"
 USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
-
 
 CREATE POLICY "Enable insert for authenticated users only"
 ON "public"."habit_stocks"
@@ -406,14 +357,12 @@ FOR INSERT
 TO "authenticated"
 WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
-
 CREATE POLICY "Enable read access for users based on user_id"
 ON "public"."habit_stocks"
 AS PERMISSIVE
 FOR SELECT
 TO "public"
 USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
-
 
 CREATE POLICY "Enable update for users based on user_id"
 ON "public"."habit_stocks"
@@ -423,14 +372,12 @@ TO "public"
 USING (((SELECT "auth"."uid"() AS "uid") = "user_id"))
 WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
-
 CREATE POLICY "Enable delete for users based on user_id"
 ON "public"."occurrence_stock_usages"
 AS PERMISSIVE
 FOR DELETE
 TO "public"
 USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
-
 
 CREATE POLICY "Enable insert for authenticated users only"
 ON "public"."occurrence_stock_usages"
@@ -439,14 +386,12 @@ FOR INSERT
 TO "authenticated"
 WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
-
 CREATE POLICY "Enable read access for users based on user_id"
 ON "public"."occurrence_stock_usages"
 AS PERMISSIVE
 FOR SELECT
 TO "public"
 USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
-
 
 CREATE POLICY "Enable update for users based on user_id"
 ON "public"."occurrence_stock_usages"
@@ -456,12 +401,81 @@ TO "public"
 USING (((SELECT "auth"."uid"() AS "uid") = "user_id"))
 WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
+SET check_function_bodies = "off";
+
+CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_delete"() -- noqa
+RETURNS TRIGGER
+LANGUAGE "plpgsql"
+SECURITY DEFINER
+SET "search_path" TO "public", "pg_temp"
+AS $function$
+BEGIN
+    IF OLD.quantity IS NOT NULL THEN
+        UPDATE "public"."habit_stocks"
+        SET "remaining_items" = "remaining_items" + OLD.quantity,
+            "is_depleted" = (COALESCE("remaining_items", 0) + OLD.quantity) <= 0
+        WHERE "id" = OLD.habit_stock_id
+          AND "remaining_items" IS NOT NULL;
+    END IF;
+    RETURN OLD;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_insert"()
+RETURNS TRIGGER
+LANGUAGE "plpgsql"
+SECURITY DEFINER
+SET "search_path" TO "public", "pg_temp"
+AS $function$
+BEGIN
+    IF NEW.quantity IS NOT NULL THEN
+        UPDATE "public"."habit_stocks"
+        SET "remaining_items" = "remaining_items" - NEW.quantity,
+            "is_depleted" = ("remaining_items" - NEW.quantity) <= 0
+        WHERE "id" = NEW.habit_stock_id
+          AND "remaining_items" IS NOT NULL;
+    END IF;
+    RETURN NEW;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_update"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO "public", "pg_temp"
+    AS $$
+BEGIN
+    -- Restore old quantity to the old stock
+    IF OLD.quantity IS NOT NULL THEN
+        UPDATE "public"."habit_stocks"
+        SET "remaining_items" = "remaining_items" + OLD.quantity,
+            "is_depleted" = (COALESCE("remaining_items", 0) + OLD.quantity) <= 0
+        WHERE "id" = OLD.habit_stock_id
+          AND "remaining_items" IS NOT NULL;
+    END IF;
+
+    -- Apply new quantity to the new stock
+    IF NEW.quantity IS NOT NULL THEN
+        UPDATE "public"."habit_stocks"
+        SET "remaining_items" = "remaining_items" - NEW.quantity,
+            "is_depleted" = ("remaining_items" - NEW.quantity) <= 0
+        WHERE "id" = NEW.habit_stock_id
+          AND "remaining_items" IS NOT NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+ALTER FUNCTION "public"."update_stock_on_usage_update"() OWNER TO "postgres";
 
 CREATE TRIGGER "set_updated_at" BEFORE UPDATE ON "public"."habit_stock_metric_defaults"
 FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 CREATE TRIGGER "set_updated_at" BEFORE UPDATE ON "public"."habit_stocks"
 FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
+
+CREATE TRIGGER "on_stock_usage_update" AFTER UPDATE ON "public"."occurrence_stock_usages"
+FOR EACH ROW EXECUTE FUNCTION "public"."update_stock_on_usage_update"();
 
 CREATE TRIGGER "on_stock_usage_delete" AFTER DELETE ON "public"."occurrence_stock_usages"
 FOR EACH ROW EXECUTE FUNCTION "public"."update_stock_on_usage_delete"();

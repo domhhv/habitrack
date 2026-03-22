@@ -63,6 +63,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
         isPersisted: true,
         isRequired: m.isRequired,
         name: m.name,
+        presetName: '',
         sortOrder: m.sortOrder,
         type: m.type,
       };
@@ -87,6 +88,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           isRequired: false,
           isToBeAdded: true,
           name: 'Unnamed metric',
+          presetName: '',
           sortOrder: prev.length,
           type: 'number',
         },

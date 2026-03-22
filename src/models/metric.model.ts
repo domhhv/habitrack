@@ -88,6 +88,7 @@ export type FormMetricDefinitions = Omit<
   isToBeAdded?: boolean;
   isToBeRemoved?: boolean;
   isToBeUpdated?: boolean;
+  presetName: string;
 };
 
 export type HabitMetricInsert = CamelCasedPropertiesDeep<

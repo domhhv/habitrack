@@ -9,6 +9,7 @@ const makeTestHabit = (override: Partial<Habit> = {}): Habit => {
     metricDefinitions: [],
     motivation: null,
     name: 'Test Habit',
+    stocks: [],
     traitId: crypto.randomUUID(),
     updatedAt: null,
     userId: crypto.randomUUID(),

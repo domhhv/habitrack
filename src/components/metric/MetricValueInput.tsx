@@ -50,6 +50,12 @@ const NumberValueInput = ({
 }) => {
   const label = config.unit ? `${name} (${config.unit})` : name;
 
+  React.useEffect(() => {
+    if (config.min !== undefined) {
+      onChange({ numericValue: config.min });
+    }
+  }, [config.min, onChange]);
+
   return (
     <NumberInput
       size="sm"

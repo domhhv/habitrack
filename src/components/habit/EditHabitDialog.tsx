@@ -66,6 +66,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
           isPersisted: true,
           isRequired: m.isRequired,
           name: m.name,
+          presetName: '',
           sortOrder: m.sortOrder,
           type: m.type,
         };
@@ -161,6 +162,7 @@ const EditHabitDialog = ({ habit, onClose }: EditHabitDialogProps) => {
           isBeingEdited: true,
           isRequired: false,
           name: 'Unnamed metric',
+          presetName: '',
           sortOrder: prev.length,
           type: 'number',
         },

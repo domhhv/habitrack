@@ -3,7 +3,6 @@ import { PlusIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import type { Habit } from '@models';
-import { useHabitStocks, useStockActions } from '@stores';
 
 import AddStockForm from './AddStockForm';
 import StockListItem from './StockListItem';
@@ -13,27 +12,12 @@ type HabitStockManagerProps = {
 };
 
 const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
-  const stocks = useHabitStocks(habit.id);
-  const { fetchStocksByHabit } = useStockActions();
   const [isAdding, setIsAdding] = React.useState(false);
-  const [hasFetched, setHasFetched] = React.useState(false);
 
-  React.useEffect(() => {
-    setHasFetched(false);
-  }, [habit.id]);
-
-  React.useEffect(() => {
-    if (!hasFetched) {
-      void fetchStocksByHabit(habit.id).then(() => {
-        setHasFetched(true);
-      });
-    }
-  }, [habit.id, hasFetched, fetchStocksByHabit]);
-
-  const activeStocks = stocks.filter((s) => {
+  const activeStocks = habit.stocks.filter((s) => {
     return !s.isDepleted;
   });
-  const depletedStocks = stocks.filter((s) => {
+  const depletedStocks = habit.stocks.filter((s) => {
     return s.isDepleted;
   });
 
@@ -91,7 +75,7 @@ const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
             })}
           </div>
         )}
-        {!isAdding && stocks.length === 0 && hasFetched && (
+        {!isAdding && habit.stocks.length === 0 && (
           <p className="text-default-500 italic">No stocks</p>
         )}
       </div>

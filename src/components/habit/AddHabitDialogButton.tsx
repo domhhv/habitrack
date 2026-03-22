@@ -118,6 +118,7 @@ const AddHabitDialogButton = () => {
           isBeingEdited: true,
           isRequired: false,
           name: 'Unnamed metric',
+          presetName: '',
           sortOrder: prev.length,
           type: 'number',
         },

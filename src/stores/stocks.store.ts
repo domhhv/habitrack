@@ -1,5 +1,3 @@
-import { useShallow } from 'zustand/react/shallow';
-
 import type {
   Habit,
   MetricValue,
@@ -9,10 +7,10 @@ import type {
   HabitStockMetricDefaultInsert,
 } from '@models';
 import {
+  getHabit,
   patchStock,
   createStock,
   destroyStock,
-  listStocksByHabit,
   createStockMetricDefaults,
   destroyStockMetricDefaults,
 } from '@services';
@@ -20,18 +18,20 @@ import {
 import { useBoundStore, type SliceCreator } from './bound.store';
 
 export type StocksSlice = {
-  stocks: Record<HabitStockWithDefaults['id'], HabitStockWithDefaults>;
   stockActions: {
     addStock: (
       stock: HabitStockInsert,
       metricDefaults?: HabitStockMetricDefaultInsert[]
     ) => Promise<HabitStockWithDefaults>;
-    clearStocks: () => void;
-    fetchStocksByHabit: (habitId: Habit['id']) => Promise<void>;
-    removeStock: (id: HabitStockWithDefaults['id']) => Promise<void>;
+    refreshHabitStocks: (habitId: Habit['id']) => Promise<void>;
+    removeStock: (
+      id: HabitStockWithDefaults['id'],
+      habitId: Habit['id']
+    ) => Promise<void>;
     updateStock: (
       id: HabitStockWithDefaults['id'],
-      stock: HabitStockUpdate
+      stock: HabitStockUpdate,
+      habitId: Habit['id']
     ) => Promise<void>;
     updateStockMetricDefaults: (
       habitId: Habit['id'],
@@ -43,11 +43,23 @@ export type StocksSlice = {
   };
 };
 
-/* eslint-disable @typescript-eslint/no-dynamic-delete */
+const refreshHabitInStore = async (
+  habitId: Habit['id'],
+  set: Parameters<SliceCreator<keyof StocksSlice>>[0]
+) => {
+  const habit = await getHabit(habitId);
+
+  set(
+    (state) => {
+      state.habits[habitId] = habit;
+    },
+    undefined,
+    'stockActions.refreshHabitStocks'
+  );
+};
+
 export const createStocksSlice: SliceCreator<keyof StocksSlice> = (set) => {
   return {
-    stocks: {},
-
     stockActions: {
       addStock: async (
         stock: HabitStockInsert,
@@ -64,85 +76,40 @@ export const createStocksSlice: SliceCreator<keyof StocksSlice> = (set) => {
           });
 
           await createStockMetricDefaults(defaults);
-
-          const refreshed = await listStocksByHabit(newStock.habitId);
-          const created = refreshed.find((s) => {
-            return s.id === newStock.id;
-          });
-
-          if (created) {
-            set(
-              (state) => {
-                state.stocks[created.id] = created;
-              },
-              undefined,
-              'stockActions.addStock'
-            );
-
-            return created;
-          }
         }
 
-        set(
-          (state) => {
-            state.stocks[newStock.id] = newStock;
-          },
-          undefined,
-          'stockActions.addStock'
+        await refreshHabitInStore(newStock.habitId, set);
+
+        // Return the latest version from the refreshed habit
+        const state = useBoundStore.getState();
+        const refreshedStock = state.habits[newStock.habitId]?.stocks.find(
+          (s) => {
+            return s.id === newStock.id;
+          }
         );
 
-        return newStock;
+        return refreshedStock ?? newStock;
       },
 
-      clearStocks: () => {
-        set(
-          (state) => {
-            state.stocks = {};
-          },
-          undefined,
-          'stockActions.clearStocks'
-        );
+      refreshHabitStocks: async (habitId: Habit['id']) => {
+        await refreshHabitInStore(habitId, set);
       },
 
-      fetchStocksByHabit: async (habitId: Habit['id']) => {
-        const stocks = await listStocksByHabit(habitId);
-
-        set(
-          (state) => {
-            for (const stock of stocks) {
-              state.stocks[stock.id] = stock;
-            }
-          },
-          undefined,
-          'stockActions.fetchStocksByHabit'
-        );
-      },
-
-      removeStock: async (id: HabitStockWithDefaults['id']) => {
+      removeStock: async (
+        id: HabitStockWithDefaults['id'],
+        habitId: Habit['id']
+      ) => {
         await destroyStock(id);
-
-        set(
-          (state) => {
-            delete state.stocks[id];
-          },
-          undefined,
-          'stockActions.removeStock'
-        );
+        await refreshHabitInStore(habitId, set);
       },
 
       updateStock: async (
         id: HabitStockWithDefaults['id'],
-        stock: HabitStockUpdate
+        stock: HabitStockUpdate,
+        habitId: Habit['id']
       ) => {
-        const updated = await patchStock(id, stock);
-
-        set(
-          (state) => {
-            state.stocks[id] = updated;
-          },
-          undefined,
-          'stockActions.updateStock'
-        );
+        await patchStock(id, stock);
+        await refreshHabitInStore(habitId, set);
       },
 
       updateStockMetricDefaults: async (
@@ -174,36 +141,10 @@ export const createStocksSlice: SliceCreator<keyof StocksSlice> = (set) => {
           await createStockMetricDefaults(inserts);
         }
 
-        const refreshed = await listStocksByHabit(habitId);
-
-        set(
-          (state) => {
-            for (const stock of refreshed) {
-              state.stocks[stock.id] = stock;
-            }
-          },
-          undefined,
-          'stockActions.updateStockMetricDefaults'
-        );
+        await refreshHabitInStore(habitId, set);
       },
     },
   };
-};
-
-export const useStocks = () => {
-  return useBoundStore((state) => {
-    return state.stocks;
-  });
-};
-
-export const useHabitStocks = (habitId: Habit['id']) => {
-  return useBoundStore(
-    useShallow((state) => {
-      return Object.values(state.stocks).filter((stock) => {
-        return stock.habitId === habitId;
-      });
-    })
-  );
 };
 
 export const useStockActions = () => {

@@ -11,7 +11,6 @@ import { uploadImages, createOccurrenceStockUsages } from '@services';
 import {
   useUser,
   useHabits,
-  useStocks,
   useNoteActions,
   useStockActions,
   useMetricsActions,
@@ -31,11 +30,10 @@ const OccurrenceCreateFormContainer = () => {
   const { dayToLog } = useOccurrenceDrawerState();
   const user = useUser();
   const habits = useHabits();
-  const stocks = useStocks();
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote } = useNoteActions();
   const { updateStock } = useStockActions();
-  const { addOccurrence } = useOccurrenceActions();
+  const { addOccurrence, updateOccurrence } = useOccurrenceActions();
   const { saveMetricValues } = useMetricsActions();
 
   const buildMetricInserts = (
@@ -96,9 +94,16 @@ const OccurrenceCreateFormContainer = () => {
         }
       );
 
+      const habitStocks = habits[selectedHabitId]?.stocks ?? [];
+      const stocksById = new Map(
+        habitStocks.map((s) => {
+          return [s.id, s] as const;
+        })
+      );
+
       const costEntries = stockUsageInserts
         .map((usage) => {
-          const stock = stocks[usage.habitStockId];
+          const stock = stocksById.get(usage.habitStockId);
 
           if (
             !stock ||
@@ -171,12 +176,15 @@ const OccurrenceCreateFormContainer = () => {
             return { ...usage, occurrenceId: newOccurrence.id };
           })
         );
+
+        // Refresh the occurrence in the store so it includes the new stock usages
+        await updateOccurrence(newOccurrence, { cost, currency });
       }
 
       if (depletedStockIds.length > 0) {
         await Promise.all(
           depletedStockIds.map((stockId) => {
-            return updateStock(stockId, { isDepleted: true });
+            return updateStock(stockId, { isDepleted: true }, selectedHabitId);
           })
         );
       }
