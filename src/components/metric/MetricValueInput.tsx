@@ -51,10 +51,10 @@ const NumberValueInput = ({
   const label = config.unit ? `${name} (${config.unit})` : name;
 
   React.useEffect(() => {
-    if (config.min !== undefined) {
+    if (config.min !== undefined && value === undefined) {
       onChange({ numericValue: config.min });
     }
-  }, [config.min, onChange]);
+  }, [config.min, onChange, value]);
 
   return (
     <NumberInput

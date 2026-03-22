@@ -109,6 +109,7 @@ const OccurrenceCreateFormContainer = () => {
             !stock ||
             stock.cost === null ||
             stock.totalItems === null ||
+            stock.totalItems === 0 ||
             usage.quantity === null
           ) {
             return null;
