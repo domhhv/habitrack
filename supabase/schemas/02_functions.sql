@@ -1,9 +1,10 @@
+-- noqa: disable=all
 -- Utility functions for the application
 
 -- Function to create a profile when a new user is created in the auth system --
-CREATE OR REPLACE FUNCTION "public"."create_profile"() RETURNS "trigger" -- noqa
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO "public"
+CREATE FUNCTION "public"."create_profile"() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'pg_temp'
     AS $$
 BEGIN
     INSERT INTO "public"."profiles" (id, email, name, first_day_of_week)
@@ -15,12 +16,13 @@ $$;
 ALTER FUNCTION "public"."create_profile"() OWNER TO "postgres";
 
 -- Function to track the longest streak for a habit
-CREATE OR REPLACE FUNCTION "public"."get_longest_streak"(
+CREATE FUNCTION "public"."get_longest_streak"(
     "p_habit_id" UUID,
     "p_time_zone" TEXT DEFAULT 'UTC'::text
 )
-RETURNS "public"."streak_info"
-    LANGUAGE "plpgsql"
+RETURNS public.streak_info
+    LANGUAGE plpgsql
+    SET search_path TO 'public', 'pg_temp'
     AS $$
 DECLARE
     result streak_info;
@@ -68,12 +70,13 @@ $$;
 ALTER FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) OWNER TO "postgres";
 
 -- Function to get batched statistics for multiple habits
-CREATE OR REPLACE FUNCTION "public"."get_habits_stats"(
+CREATE FUNCTION "public"."get_habits_stats"(
     "p_habit_ids" UUID[],
     "p_time_zone" TEXT DEFAULT 'UTC'::text
 )
-RETURNS SETOF "public"."habit_stats"
-    LANGUAGE "plpgsql"
+RETURNS SETOF public.habit_stats
+    LANGUAGE plpgsql
+    SET search_path TO 'public', 'pg_temp'
     AS $$
 BEGIN
     RETURN QUERY
@@ -151,8 +154,9 @@ $$;
 ALTER FUNCTION "public"."get_habits_stats"("p_habit_ids" UUID[], "p_time_zone" TEXT) OWNER TO "postgres";
 
 -- Function to automatically update updated_at timestamp
-CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
+CREATE FUNCTION "public"."update_updated_at_column"() RETURNS trigger
+    LANGUAGE plpgsql
+    SET search_path TO 'public', 'pg_temp'
     AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
@@ -163,9 +167,9 @@ $$;
 ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
 
 -- Function to decrement remaining_items on stock usage insert (quantifiable stocks only)
-CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_insert"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO "public", "pg_temp"
+CREATE FUNCTION "public"."update_stock_on_usage_insert"() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'pg_temp'
     AS $$
 BEGIN
     IF NEW.quantity IS NOT NULL THEN
@@ -182,9 +186,9 @@ $$;
 ALTER FUNCTION "public"."update_stock_on_usage_insert"() OWNER TO "postgres";
 
 -- Function to restore remaining_items on stock usage delete
-CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_delete"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO "public", "pg_temp"
+CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_delete"() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'pg_temp'
     AS $$
 BEGIN
     IF OLD.quantity IS NOT NULL THEN
@@ -201,9 +205,9 @@ $$;
 ALTER FUNCTION "public"."update_stock_on_usage_delete"() OWNER TO "postgres";
 
 -- Function to handle remaining_items on stock usage update (restore old, apply new)
-CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_update"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO "public", "pg_temp"
+CREATE OR REPLACE FUNCTION "public"."update_stock_on_usage_update"() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'pg_temp'
     AS $$
 BEGIN
     -- Restore old quantity to the old stock

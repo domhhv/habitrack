@@ -41,8 +41,8 @@ ALTER TABLE "public"."habits" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Enable delete for users based on user_id" ON "public"."habits"
 FOR DELETE USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
-CREATE POLICY "Enable insert for authenticated users only" ON "public"."habits"
-FOR INSERT TO "authenticated" WITH CHECK (true);
+CREATE POLICY "Enable insert for users based on user_id" ON "public"."habits"
+FOR INSERT WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 CREATE POLICY "Enable read access for users based on user_id" ON "public"."habits"
 FOR SELECT USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
