@@ -74,7 +74,21 @@ CREATE POLICY "Enable delete for users based on user_id" ON "public"."occurrence
 FOR DELETE USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."occurrence_stock_usages"
-FOR INSERT TO "authenticated" WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
+FOR INSERT TO "authenticated" WITH CHECK (
+    (SELECT "auth"."uid"()) = "user_id"
+    AND EXISTS (
+        SELECT 1 FROM "public"."occurrences"
+        WHERE
+            "id" = "occurrence_id"
+            AND "user_id" = (SELECT "auth"."uid"())
+    )
+    AND EXISTS (
+        SELECT 1 FROM "public"."habit_stocks"
+        WHERE
+            "id" = "habit_stock_id"
+            AND "user_id" = (SELECT "auth"."uid"())
+    )
+);
 
 CREATE POLICY "Enable read access for users based on user_id" ON "public"."occurrence_stock_usages"
 FOR SELECT USING (((SELECT "auth"."uid"() AS "uid") = "user_id"));
