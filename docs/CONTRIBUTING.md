@@ -11,7 +11,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 ### Prerequisites
 
 - [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en/) (22.22.1)
+- [Node.js](https://nodejs.org/en/) (22.22.2)
 - [Docker](https://docs.docker.com/get-started/get-docker/)
 - Yarn is used as a package manager and is automatically available via Corepack (bundled with Node.js)
 
