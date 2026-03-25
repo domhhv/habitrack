@@ -227,6 +227,26 @@ const OccurrenceListItem = ({
     return formatCost(occurrence.cost ?? null, occurrence.currency ?? null);
   }, [occurrence.cost, occurrence.currency]);
 
+  const usedStockItems = React.useMemo(() => {
+    return occurrence.stockUsages
+      .map((usage) => {
+        const stock = stocksById.get(usage.habitStockId);
+
+        if (!stock) {
+          return null;
+        }
+
+        return {
+          habitStockId: usage.habitStockId,
+          name: stock.name,
+          quantity: usage.quantity,
+        };
+      })
+      .filter((entry) => {
+        return entry !== null;
+      });
+  }, [occurrence.stockUsages, stocksById]);
+
   const depletedStockCosts = React.useMemo(() => {
     return occurrence.stockUsages
       .map((usage) => {
@@ -353,6 +373,20 @@ const OccurrenceListItem = ({
           {formattedCost && (
             <div className="text-foreground-400 text-tiny pt-1">
               Spent {formattedCost}
+            </div>
+          )}
+          {usedStockItems.length > 0 && (
+            <div className="text-foreground-400 text-tiny flex flex-wrap gap-x-3 gap-y-0.5 pt-0.5">
+              {usedStockItems.map((item) => {
+                return (
+                  <span key={item.habitStockId}>
+                    {item.name}
+                    {item.quantity !== null &&
+                      item.quantity > 1 &&
+                      ` ×${item.quantity}`}
+                  </span>
+                );
+              })}
             </div>
           )}
           {depletedStockCosts.length > 0 && (
