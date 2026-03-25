@@ -32,7 +32,7 @@ const OccurrenceCreateFormContainer = () => {
   const habits = useHabits();
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote } = useNoteActions();
-  const { updateStock } = useStockActions();
+  const { refreshHabitStocks, updateStock } = useStockActions();
   const { addOccurrence, updateOccurrence } = useOccurrenceActions();
   const { saveMetricValues } = useMetricsActions();
 
@@ -188,6 +188,10 @@ const OccurrenceCreateFormContainer = () => {
             return updateStock(stockId, { isDepleted: true }, selectedHabitId);
           })
         );
+      }
+
+      if (stockUsageInserts.length > 0 && depletedStockIds.length === 0) {
+        await refreshHabitStocks(selectedHabitId);
       }
     };
 
