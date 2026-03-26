@@ -138,7 +138,7 @@ Hook: `useMetricsActions()` returns all actions.
 | `saveMetricValues(values)`                       | Upserts metric values, updates both `occurrences` and `occurrencesByDate`                             |
 | `removeMetricValue(occurrenceId, habitMetricId)` | Removes a specific metric value from occurrence                                                       |
 
-All actions update three data structures in the store: `habits`, `occurrences` (array), and `occurrencesByDate` (date-indexed map).
+Actions update the store's `habits`, `occurrences` (array), and `occurrencesByDate` (date-indexed map). Note: `saveMetricValues` and `removeMetricValue` only update `occurrences` and `occurrencesByDate`, as metric values are stored per occurrence, not in habit definitions.
 
 ## UI Components
 
