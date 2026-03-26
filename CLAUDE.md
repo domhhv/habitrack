@@ -96,6 +96,11 @@ Edit the appropriate schema file in `supabase/schemas/`:
 - `04_habits.sql` - Habits table
 - `05_occurrences.sql` - Occurrences table
 - `06_notes.sql` - Notes table
+- `08_habit_metrics.sql` - Habit metrics table
+- `09_occurrence_metric_values.sql` - Occurrence metric values table
+- `11_habit_stocks.sql` - Habit stocks table
+- `12_habit_stock_metric_defaults.sql` - Stock metric defaults table
+- `13_occurrence_stock_usages.sql` - Occurrence stock usages table
 
 Create a new declarative schema file for any new standalone entity introduced
 
@@ -167,6 +172,14 @@ Supabase storage buckets:
 - **Bundle analysis** available in production builds
 - **PWA capabilities** with installable web app features
 - **Vercel** deployment with preview environments for PRs
+
+### Feature Documentation
+
+End-to-end documentation for complex features (database → models → services → stores → UI):
+
+- **[docs/METRICS.md](docs/METRICS.md)** - Habit metric definitions and occurrence metric values
+- **[docs/STOCKS.md](docs/STOCKS.md)** - Habit stocks, stock metric defaults, occurrence stock usages, auto-depletion
+- **[docs/COSTS.md](docs/COSTS.md)** - Occurrence cost calculation, period summaries, multi-currency handling
 
 ### Important Conventions
 
