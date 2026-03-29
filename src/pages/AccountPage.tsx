@@ -18,12 +18,14 @@ const AccountPage = () => {
   const [email, handleEmailChange] = useTextField();
   const [password, handlePasswordChange, clearPassword] = useTextField();
   const [name, handleNameChange] = useTextField();
+  const [defaultCurrency, setDefaultCurrency] = React.useState('EUR');
   const [firstDayOfWeek, setFirstDayOfWeek] = React.useState<DaysOfWeek>('mon');
 
   React.useEffect(() => {
     handleEmailChange(profile?.email || '');
     handleNameChange(profile?.name || '');
     setFirstDayOfWeek(profile?.firstDayOfWeek || 'mon');
+    setDefaultCurrency(profile?.defaultCurrency || 'EUR');
   }, [profile, handleEmailChange, handleNameChange]);
 
   const title = <title>My Account | Habitrack</title>;
@@ -40,6 +42,7 @@ const AccountPage = () => {
           className="mx-auto w-96"
           title="Please log in to your account first"
         />
+        e
       </div>
     );
   }
@@ -52,7 +55,7 @@ const AccountPage = () => {
       const userAttributes: UserAttributes = {};
       const profileUpdatePayload: Pick<
         ProfilesUpdate,
-        'email' | 'name' | 'firstDayOfWeek'
+        'email' | 'name' | 'firstDayOfWeek' | 'defaultCurrency'
       > = {};
 
       if (password) {
@@ -70,6 +73,10 @@ const AccountPage = () => {
 
       if (name !== profile.name) {
         profileUpdatePayload.name = name;
+      }
+
+      if (defaultCurrency !== profile.defaultCurrency) {
+        profileUpdatePayload.defaultCurrency = defaultCurrency;
       }
 
       if (Object.keys(profileUpdatePayload).length) {
@@ -142,6 +149,32 @@ const AccountPage = () => {
                 return <SelectItem key={day.key}>{day.label}</SelectItem>;
               })}
             </Select>
+            <Select
+              variant="bordered"
+              isDisabled={isUpdating}
+              label="Default currency"
+              selectedKeys={[defaultCurrency]}
+              onSelectionChange={(value) => {
+                const [newDefaultCurrency] = Array.from(value);
+
+                if (typeof newDefaultCurrency !== 'string') {
+                  return;
+                }
+
+                setDefaultCurrency(newDefaultCurrency);
+              }}
+            >
+              {[
+                { key: 'EUR', label: 'EUR' },
+                { key: 'USD', label: 'USD' },
+                { key: 'GBP', label: 'GBP' },
+                { key: 'UAH', label: 'UAH' },
+              ].map((currency) => {
+                return (
+                  <SelectItem key={currency.key}>{currency.label}</SelectItem>
+                );
+              })}
+            </Select>
             <Button
               fullWidth
               type="submit"
@@ -151,6 +184,7 @@ const AccountPage = () => {
                 firstDayOfWeek === profile.firstDayOfWeek &&
                 name === profile.name &&
                 email === profile.email &&
+                defaultCurrency === profile.defaultCurrency &&
                 !password
               }
             >
