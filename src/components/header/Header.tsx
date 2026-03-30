@@ -1,11 +1,4 @@
-import {
-  cn,
-  Button,
-  Navbar,
-  Tooltip,
-  NavbarItem,
-  NavbarContent,
-} from '@heroui/react';
+import { cn, Button, Tooltip } from '@heroui/react';
 import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
@@ -41,15 +34,9 @@ const Header = () => {
   };
 
   return (
-    <Navbar
-      isBordered
-      height="3rem"
-      maxWidth="full"
-      isBlurred={false}
-      className="bg-background-100 dark:bg-background-900 [&>header]:static [&>header]:lg:px-16"
-    >
-      <NavbarContent justify="start" className="flex items-center gap-2">
-        <NavbarItem>
+    <nav className="bg-background-100 dark:bg-background-900 sticky top-0 z-50 h-12 w-full border-b border-b-slate-300 dark:border-b-slate-800">
+      <header className="flex h-full w-full items-center justify-between px-8 lg:px-16">
+        <div className="flex items-center gap-2">
           <Button
             as={Link}
             size="sm"
@@ -68,8 +55,6 @@ const Header = () => {
               'Calendar'
             )}
           </Button>
-        </NavbarItem>
-        <NavbarItem>
           <Button
             as={Link}
             size="sm"
@@ -85,8 +70,6 @@ const Header = () => {
               'Habits'
             )}
           </Button>
-        </NavbarItem>
-        <NavbarItem>
           <Button
             as={Link}
             size="sm"
@@ -98,20 +81,16 @@ const Header = () => {
           >
             {screenWidth < 498 ? <NoteIcon size={16} weight="bold" /> : 'Notes'}
           </Button>
-        </NavbarItem>
-        <NavbarItem>
           <ThemeToggle />
-        </NavbarItem>
-        {screenWidth > 390 && (
-          <Tooltip
-            showArrow
-            delay={500}
-            closeDelay={0}
-            color="secondary"
-            placement="right"
-            content="View source code on GitHub"
-          >
-            <NavbarItem>
+          {screenWidth > 390 && (
+            <Tooltip
+              showArrow
+              delay={500}
+              closeDelay={0}
+              color="secondary"
+              placement="right"
+              content="View source code on GitHub"
+            >
               <Button
                 as={Link}
                 size="sm"
@@ -124,61 +103,59 @@ const Header = () => {
               >
                 <GithubLogoIcon size={isDesktop ? 18 : 16} />
               </Button>
-            </NavbarItem>
-          </Tooltip>
-        )}
-      </NavbarContent>
-      <NavbarContent justify="end">
-        <div className="bg-background-100/90 dark:bg-background-900 fixed right-0 bottom-0 left-0 z-50 flex w-full gap-4 border-t border-t-slate-300 p-2 px-4 md:right-4 md:bottom-4 md:left-auto md:w-auto md:border-0 md:bg-transparent md:p-0 xl:static xl:right-auto xl:bottom-auto xl:flex-row-reverse xl:border-0 xl:bg-transparent xl:p-0 dark:border-t-slate-800 dark:md:bg-transparent dark:xl:bg-transparent">
-          <NavbarItem className="flex-1 md:flex-none">
-            <Button
-              size="sm"
-              variant="solid"
-              color="secondary"
-              fullWidth={screenWidth < 768}
-              onPress={dispatchNoteDrawerOpen}
-              className="max-md:h-6 max-md:gap-1"
-              radius={screenWidth < 768 ? 'full' : 'sm'}
-            >
-              <NotePencilIcon
-                weight="bold"
-                size={screenWidth < 768 ? 12 : 16}
-              />
-              Note
-              <Kbd
-                color="secondary"
-                shortcutParams={['n', dispatchNoteDrawerOpen]}
-              >
-                N
-              </Kbd>
-            </Button>
-          </NavbarItem>
-          <NavbarItem className="flex-1 md:flex-none">
-            <Button
-              size="sm"
-              variant="solid"
-              color="primary"
-              fullWidth={screenWidth < 768}
-              className="max-md:h-6 max-md:gap-1"
-              onPress={dispatchOccurrenceDrawerOpen}
-              radius={screenWidth < 768 ? 'full' : 'sm'}
-            >
-              <CalendarCheckIcon
-                weight="bold"
-                size={screenWidth < 768 ? 12 : 16}
-              />
-              Log
-              <Kbd
-                color="primary"
-                shortcutParams={['l', dispatchOccurrenceDrawerOpen]}
-              >
-                L
-              </Kbd>
-            </Button>
-          </NavbarItem>
+            </Tooltip>
+          )}
         </div>
         <div className="flex items-center gap-4">
-          <NavbarItem>
+          <div className="bg-background-100/90 dark:bg-background-900 fixed right-0 bottom-0 left-0 z-50 flex w-full gap-4 border-t border-t-slate-300 p-2 px-4 md:right-4 md:bottom-4 md:left-auto md:w-auto md:border-0 md:bg-transparent md:p-0 xl:static xl:right-auto xl:bottom-auto xl:flex-row-reverse xl:border-0 xl:bg-transparent xl:p-0 dark:border-t-slate-800 dark:md:bg-transparent dark:xl:bg-transparent">
+            <div className="flex-1 md:flex-none">
+              <Button
+                size="sm"
+                variant="solid"
+                color="secondary"
+                fullWidth={screenWidth < 768}
+                onPress={dispatchNoteDrawerOpen}
+                className="max-md:h-6 max-md:gap-1"
+                radius={screenWidth < 768 ? 'full' : 'sm'}
+              >
+                <NotePencilIcon
+                  weight="bold"
+                  size={screenWidth < 768 ? 12 : 16}
+                />
+                Note
+                <Kbd
+                  color="secondary"
+                  shortcutParams={['n', dispatchNoteDrawerOpen]}
+                >
+                  N
+                </Kbd>
+              </Button>
+            </div>
+            <div className="flex-1 md:flex-none">
+              <Button
+                size="sm"
+                variant="solid"
+                color="primary"
+                fullWidth={screenWidth < 768}
+                className="max-md:h-6 max-md:gap-1"
+                onPress={dispatchOccurrenceDrawerOpen}
+                radius={screenWidth < 768 ? 'full' : 'sm'}
+              >
+                <CalendarCheckIcon
+                  weight="bold"
+                  size={screenWidth < 768 ? 12 : 16}
+                />
+                Log
+                <Kbd
+                  color="primary"
+                  shortcutParams={['l', dispatchOccurrenceDrawerOpen]}
+                >
+                  L
+                </Kbd>
+              </Button>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
             <Button
               as={Link}
               size="sm"
@@ -207,13 +184,11 @@ const Header = () => {
                 M
               </Kbd>
             </Button>
-          </NavbarItem>
-          <NavbarItem>
             <AuthModalButton />
-          </NavbarItem>
+          </div>
         </div>
-      </NavbarContent>
-    </Navbar>
+      </header>
+    </nav>
   );
 };
 
