@@ -1,4 +1,4 @@
-import { useDisclosure, type SelectedItems } from '@heroui/react';
+import { cn, useDisclosure, type SelectedItems } from '@heroui/react';
 import {
   Select,
   Tooltip,
@@ -6,7 +6,6 @@ import {
   SelectItem,
   SelectSection,
 } from '@heroui/react';
-import { motion, AnimatePresence } from 'framer-motion';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 
@@ -123,41 +122,17 @@ const CalendarFilters = () => {
     });
   };
 
+  const isVisible = (isDesktop || filters.isShownOnMobile) && !!user;
+
   return (
-    <AnimatePresence mode="wait">
-      {(isDesktop || filters.isShownOnMobile) && user && (
-        <motion.div
-          initial={{
-            height: 0,
-            opacity: 0,
-          }}
-          className="flex max-w-full flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between"
-          exit={{
-            height: 0,
-            opacity: 0,
-            transition: {
-              height: {
-                duration: 0.4,
-              },
-              opacity: {
-                duration: 0.25,
-              },
-            },
-          }}
-          animate={{
-            height: 'auto',
-            opacity: 1,
-            transition: {
-              height: {
-                duration: 0.4,
-              },
-              opacity: {
-                delay: 0.15,
-                duration: 0.25,
-              },
-            },
-          }}
-        >
+    <div
+      className={cn(
+        'grid transition-all duration-400',
+        isVisible ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+      )}
+    >
+      <div className="overflow-hidden">
+        <div className="flex max-w-full flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between">
           <Select
             size="sm"
             radius="sm"
@@ -312,9 +287,9 @@ const CalendarFilters = () => {
               </SelectSection>
             </>
           </Select>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+      </div>
+    </div>
   );
 };
 

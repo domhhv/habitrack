@@ -2,7 +2,6 @@ import { cn, Button, Tooltip } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { toZoned, getWeeksInMonth } from '@internationalized/date';
 import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
-import { motion, AnimatePresence } from 'framer-motion';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
 import { useLocale, useCalendarGrid } from 'react-aria';
@@ -85,157 +84,145 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
         })}
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          exit={{ opacity: 0 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.1 }}
-          className="flex flex-1 flex-col"
-          key={state.focusedDate.toString()}
-        >
-          {weekIndexes.map((weekIndex) => {
-            const daysOfWeek = state
-              .getDatesInWeek(weekIndex)
-              .filter((value): value is CalendarDate => {
-                return Boolean(value);
-              });
-            const [firstDayOfWeek] = daysOfWeek;
-            const monday = daysOfWeek.find((d) => {
-              return d.toDate(state.timeZone).getDay() === 1;
+      <div className="flex flex-1 flex-col">
+        {weekIndexes.map((weekIndex) => {
+          const daysOfWeek = state
+            .getDatesInWeek(weekIndex)
+            .filter((value): value is CalendarDate => {
+              return Boolean(value);
             });
-            const thursday = daysOfWeek.find((d) => {
-              return d.toDate(state.timeZone).getDay() === 4;
-            });
+          const [firstDayOfWeek] = daysOfWeek;
+          const monday = daysOfWeek.find((d) => {
+            return d.toDate(state.timeZone).getDay() === 1;
+          });
+          const thursday = daysOfWeek.find((d) => {
+            return d.toDate(state.timeZone).getDay() === 4;
+          });
 
-            if (!monday || !thursday) {
-              return null;
-            }
+          if (!monday || !thursday) {
+            return null;
+          }
 
-            const weekNote = weekNotes.find((note) => {
-              return note.periodDate === monday.toString();
-            });
+          const weekNote = weekNotes.find((note) => {
+            return note.periodDate === monday.toString();
+          });
 
-            return (
+          return (
+            <div
+              key={weekIndex}
+              className="group relative flex items-end gap-1 md:gap-2"
+            >
               <div
-                key={weekIndex}
-                className="group relative flex items-end gap-1 md:gap-2"
+                className={cn(
+                  'absolute -top-1 -left-7 flex h-full flex-col lg:-left-9',
+                  weekIndex === 0 ? 'gap-1 lg:gap-1.5' : 'gap-0.5 lg:gap-1'
+                )}
               >
-                <div
-                  className={cn(
-                    'absolute -top-1 -left-7 flex h-full flex-col lg:-left-9',
-                    weekIndex === 0 ? 'gap-1 lg:gap-1.5' : 'gap-0.5 lg:gap-1'
-                  )}
-                >
-                  <Tooltip closeDelay={0} content="Go to this week">
-                    <Button
-                      as={Link}
-                      variant="ghost"
-                      radius={isDesktop ? 'md' : 'sm'}
-                      to={`/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`}
-                      className={cn(
-                        'mt-0.5 w-6 min-w-fit basis-6.75 p-0 lg:w-7 lg:basis-7.75',
-                        weekIndex === 0 && 'top-0.5'
-                      )}
-                    >
-                      {getISOWeek(monday.toDate(state.timeZone))}
-                    </Button>
-                  </Tooltip>
-                  <Tooltip
-                    closeDelay={0}
-                    content={
-                      weekNote
-                        ? 'Edit note about this week'
-                        : 'Add note about this week'
-                    }
+                <Tooltip closeDelay={0} content="Go to this week">
+                  <Button
+                    as={Link}
+                    variant="ghost"
+                    radius={isDesktop ? 'md' : 'sm'}
+                    to={`/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`}
+                    className={cn(
+                      'mt-0.5 w-6 min-w-fit basis-6.75 p-0 lg:w-7 lg:basis-7.75',
+                      weekIndex === 0 && 'top-0.5'
+                    )}
                   >
-                    <Button
-                      isIconOnly
-                      color="primary"
-                      radius={isDesktop ? 'md' : 'sm'}
-                      variant={isDesktop ? 'flat' : weekNote ? 'solid' : 'flat'}
-                      onPress={() => {
-                        openNoteDrawer(firstDayOfWeek, 'week');
-                      }}
-                      className={cn(
-                        'mb-0 w-6 min-w-fit basis-19.75 p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:w-7 lg:basis-26.75',
-                        (weekNote || !isDesktop) && 'opacity-100',
-                        weekIndex === 0 && 'basis-19.25 lg:basis-26.75'
-                      )}
-                    >
-                      {weekNote ? (
-                        <NoteIcon size={16} weight="bold" />
-                      ) : (
-                        <NotePencilIcon size={16} weight="bold" />
-                      )}
-                    </Button>
-                  </Tooltip>
-                </div>
-                <div
-                  className={cn(
-                    'flex h-27.5 w-full basis-full justify-between border-r-2 border-l-2 border-neutral-500 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto dark:border-neutral-400',
-                    weekIndex === 0 && 'rounded-t-lg',
-                    weekIndex === weeksInMonthCount - 1 && 'rounded-b-lg'
-                  )}
+                    {getISOWeek(monday.toDate(state.timeZone))}
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  closeDelay={0}
+                  content={
+                    weekNote
+                      ? 'Edit note about this week'
+                      : 'Add note about this week'
+                  }
                 >
-                  {state
-                    .getDatesInWeek(weekIndex)
-                    .map((calendarDate, dayIndex) => {
-                      if (!calendarDate) {
-                        return null;
-                      }
+                  <Button
+                    isIconOnly
+                    color="primary"
+                    radius={isDesktop ? 'md' : 'sm'}
+                    variant={isDesktop ? 'flat' : weekNote ? 'solid' : 'flat'}
+                    onPress={() => {
+                      openNoteDrawer(firstDayOfWeek, 'week');
+                    }}
+                    className={cn(
+                      'mb-0 w-6 min-w-fit basis-19.75 p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:w-7 lg:basis-26.75',
+                      (weekNote || !isDesktop) && 'opacity-100',
+                      weekIndex === 0 && 'basis-19.25 lg:basis-26.75'
+                    )}
+                  >
+                    {weekNote ? (
+                      <NoteIcon size={16} weight="bold" />
+                    ) : (
+                      <NotePencilIcon size={16} weight="bold" />
+                    )}
+                  </Button>
+                </Tooltip>
+              </div>
+              <div
+                className={cn(
+                  'flex h-27.5 w-full basis-full justify-between border-r-2 border-l-2 border-neutral-500 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto dark:border-neutral-400',
+                  weekIndex === 0 && 'rounded-t-lg',
+                  weekIndex === weeksInMonthCount - 1 && 'rounded-b-lg'
+                )}
+              >
+                {state
+                  .getDatesInWeek(weekIndex)
+                  .map((calendarDate, dayIndex) => {
+                    if (!calendarDate) {
+                      return null;
+                    }
 
-                      const startDate = toZoned(
-                        calendarDate,
-                        state.timeZone
-                      ).set({
+                    const startDate = toZoned(calendarDate, state.timeZone).set(
+                      {
                         hour: 0,
                         millisecond: 0,
                         minute: 0,
                         second: 0,
-                      });
+                      }
+                    );
 
-                      const endDate = toZoned(calendarDate, state.timeZone).set(
-                        {
-                          hour: 23,
-                          millisecond: 999,
-                          minute: 59,
-                          second: 59,
-                        }
-                      );
+                    const endDate = toZoned(calendarDate, state.timeZone).set({
+                      hour: 23,
+                      millisecond: 999,
+                      minute: 59,
+                      second: 59,
+                    });
 
-                      const dayOccurrences =
-                        occurrences[calendarDate.toString()] || {};
+                    const dayOccurrences =
+                      occurrences[calendarDate.toString()] || {};
 
-                      return (
-                        <MonthCalendarCell
-                          state={state}
-                          date={calendarDate}
-                          key={calendarDate.toString()}
-                          position={getCellPosition(weekIndex, dayIndex)}
-                          occurrences={Object.values(dayOccurrences).filter(
-                            (o) => {
-                              return (
-                                o.occurredAt.compare(startDate) >= 0 &&
-                                o.occurredAt.compare(endDate) <= 0 &&
-                                filters.habitIds.includes(o.habitId) &&
-                                (o.habit.trait
-                                  ? filters.traitIds.includes(
-                                      o.habit.trait?.id || ''
-                                    )
-                                  : true)
-                              );
-                            }
-                          )}
-                        />
-                      );
-                    })}
-                </div>
+                    return (
+                      <MonthCalendarCell
+                        state={state}
+                        date={calendarDate}
+                        key={calendarDate.toString()}
+                        position={getCellPosition(weekIndex, dayIndex)}
+                        occurrences={Object.values(dayOccurrences).filter(
+                          (o) => {
+                            return (
+                              o.occurredAt.compare(startDate) >= 0 &&
+                              o.occurredAt.compare(endDate) <= 0 &&
+                              filters.habitIds.includes(o.habitId) &&
+                              (o.habit.trait
+                                ? filters.traitIds.includes(
+                                    o.habit.trait?.id || ''
+                                  )
+                                : true)
+                            );
+                          }
+                        )}
+                      />
+                    );
+                  })}
               </div>
-            );
-          })}
-        </motion.div>
-      </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { Button, Slider, RangeCalendar } from '@heroui/react';
+import { cn, Button, Slider, RangeCalendar } from '@heroui/react';
 import {
   startOfWeek,
   startOfMonth,
@@ -11,7 +11,6 @@ import {
   NumberSevenIcon,
   CalendarDotsIcon,
 } from '@phosphor-icons/react';
-import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useLocale } from 'react-aria';
 
@@ -48,40 +47,14 @@ const NotePeriodPicker = ({
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {isShown && (
-        <motion.div
-          initial={{
-            height: 0,
-            opacity: 0,
-          }}
-          className="flex justify-between gap-2 max-[446px]:flex-col max-[446px]:items-center max-[446px]:justify-start max-[446px]:gap-4"
-          exit={{
-            height: 0,
-            opacity: 0,
-            transition: {
-              height: {
-                duration: 0.4,
-              },
-              opacity: {
-                duration: 0.25,
-              },
-            },
-          }}
-          animate={{
-            height: screenWidth > 445 ? 296 : 380,
-            opacity: 1,
-            transition: {
-              height: {
-                duration: 0.4,
-              },
-              opacity: {
-                delay: 0.15,
-                duration: 0.25,
-              },
-            },
-          }}
-        >
+    <div
+      className={cn(
+        'grid transition-all duration-400',
+        isShown ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+      )}
+    >
+      <div className="overflow-hidden">
+        <div className="flex justify-between gap-2 max-[446px]:flex-col max-[446px]:items-center max-[446px]:justify-start max-[446px]:gap-4">
           <Slider
             showSteps
             showTooltip
@@ -224,9 +197,9 @@ const NotePeriodPicker = ({
               <CaretRightIcon />
             </Button>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+      </div>
+    </div>
   );
 };
 
