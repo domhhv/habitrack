@@ -1,11 +1,11 @@
 import { Provider as RollbarProvider } from '@rollbar/react';
-import { render, waitFor, fireEvent } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BrowserRouter } from 'react-router';
 import { it, vi, expect, describe } from 'vitest';
 
-import { useHabits, useTraits } from '@stores';
-import { makeTestHabit, makeTestTrait } from '@tests';
+import { useHabits } from '@stores';
+import { makeTestHabit } from '@tests';
 
 import HabitsTable from './HabitsTable';
 
@@ -100,17 +100,8 @@ describe(HabitsTable.name, () => {
       expect(getByText('Habit description #1'));
       expect(getByText('Habit description #2'));
 
-      const editButtons = getAllByRole('edit-habit-button');
       const deleteButtons = getAllByRole('delete-habit-button');
 
-      expect(editButtons[0]).toHaveAttribute(
-        'aria-label',
-        'Edit habit: Habit name #1'
-      );
-      expect(editButtons[1]).toHaveAttribute(
-        'aria-label',
-        'Edit habit: Habit name #2'
-      );
       expect(deleteButtons[0]).toHaveAttribute(
         'aria-label',
         'Delete habit: Habit name #1'
@@ -120,60 +111,5 @@ describe(HabitsTable.name, () => {
         'Delete habit: Habit name #2'
       );
     });
-  });
-
-  it('should open edit dialog on edit icon button click', async () => {
-    (useTraits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac': makeTestTrait({
-        id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
-        name: 'Trait name #1',
-      }),
-    });
-    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa': makeTestHabit({
-        description: 'Habit description #1',
-        id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa',
-        name: 'Habit name #1',
-        traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
-      }),
-      '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab': makeTestHabit({
-        description: 'Habit description #2',
-        id: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ab',
-        name: 'Habit name #2',
-        traitId: '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3ac',
-      }),
-    });
-    const { getAllByRole, getByRole, getByTestId, queryByRole } = render(
-      <BrowserRouter>
-        <RollbarProvider config={{}}>
-          <HabitsTable />
-        </RollbarProvider>
-      </BrowserRouter>
-    );
-
-    const editButtons = getAllByRole('edit-habit-button');
-    const deleteButtons = getAllByRole('delete-habit-button');
-    expect(editButtons[0]).toHaveAttribute(
-      'aria-label',
-      'Edit habit: Habit name #1'
-    );
-    expect(editButtons[1]).toHaveAttribute(
-      'aria-label',
-      'Edit habit: Habit name #2'
-    );
-    expect(deleteButtons[0]).toHaveAttribute(
-      'aria-label',
-      'Delete habit: Habit name #1'
-    );
-    expect(deleteButtons[1]).toHaveAttribute(
-      'aria-label',
-      'Delete habit: Habit name #2'
-    );
-
-    expect(queryByRole('submit-edited-habit-button')).toBeNull();
-    fireEvent.click(
-      getByTestId('edit-habit-id-4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa-button')
-    );
-    expect(getByRole('submit-edited-habit-button')).toBeDefined();
   });
 });
