@@ -127,168 +127,157 @@ const CalendarFilters = () => {
   return (
     <div
       className={cn(
-        'grid transition-all duration-400',
-        isVisible ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        'hidden max-w-full flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between',
+        isVisible && 'flex'
       )}
     >
-      <div className="overflow-hidden">
-        <div className="flex max-w-full flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between">
-          <Select
-            size="sm"
-            radius="sm"
-            color="secondary"
-            variant="bordered"
-            selectionMode="multiple"
-            className="w-full md:w-50"
-            placeholder="Filter by habits"
-            selectedKeys={filters.habitIds}
-            isOpen={isHabitsFilterSelectOpen}
-            onChange={handleHabitsFilterChange}
-            onOpenChange={onHabitsFilterSelectOpenChange}
-            scrollShadowProps={{
-              visibility: 'bottom',
-            }}
-            renderValue={(selectedHabits: SelectedItems<Habit>) => {
+      <Select
+        size="sm"
+        radius="sm"
+        color="secondary"
+        variant="bordered"
+        selectionMode="multiple"
+        className="w-full md:w-50"
+        placeholder="Filter by habits"
+        selectedKeys={filters.habitIds}
+        isOpen={isHabitsFilterSelectOpen}
+        onChange={handleHabitsFilterChange}
+        onOpenChange={onHabitsFilterSelectOpenChange}
+        scrollShadowProps={{
+          visibility: 'bottom',
+        }}
+        renderValue={(selectedHabits: SelectedItems<Habit>) => {
+          return (
+            <CrossPlatformHorizontalScroll className="flex space-x-2">
+              {selectedHabits.map(({ key }) => {
+                if (typeof key !== 'string' || !habits[key]) {
+                  return null;
+                }
+
+                const { iconPath, id, name } = habits[key];
+
+                return (
+                  <Tooltip key={id} closeDelay={0} content={name}>
+                    <img
+                      className="h-4 w-4"
+                      alt={`${name} icon`}
+                      src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
+                    />
+                  </Tooltip>
+                );
+              })}
+            </CrossPlatformHorizontalScroll>
+          );
+        }}
+      >
+        <>
+          {!!Object.keys(habits).length && (
+            <SelectItem
+              key="toggle-all"
+              className="mb-0.5"
+              textValue="Toggle all"
+            >
+              <Checkbox
+                color="secondary"
+                isSelected={areAllHabitsSelected}
+                isIndeterminate={
+                  !areAllHabitsSelected && filters.habitIds.some(Boolean)
+                }
+              />
+              <span>{areAllHabitsSelected ? 'Unselect' : 'Select'} all</span>
+            </SelectItem>
+          )}
+          {Object.entries(habitsByTraitName).map(
+            ([traitName, habits], index, array) => {
+              if (!habits?.length) {
+                return null;
+              }
+
               return (
-                <CrossPlatformHorizontalScroll className="flex space-x-2">
-                  {selectedHabits.map(({ key }) => {
-                    if (typeof key !== 'string' || !habits[key]) {
-                      return null;
-                    }
-
-                    const { iconPath, id, name } = habits[key];
-
+                <SelectSection
+                  key={traitName}
+                  title={traitName}
+                  showDivider={index < array.length - 1}
+                  classNames={{
+                    heading:
+                      'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
+                  }}
+                >
+                  {habits.map((habit) => {
                     return (
-                      <Tooltip key={id} closeDelay={0} content={name}>
-                        <img
-                          className="h-4 w-4"
-                          alt={`${name} icon`}
-                          src={getPublicUrl(
-                            StorageBuckets.HABIT_ICONS,
-                            iconPath
-                          )}
-                        />
-                      </Tooltip>
+                      <SelectItem key={habit.id} textValue={habit.name}>
+                        <div className="flex items-center gap-2">
+                          <img
+                            alt={habit.name}
+                            className="h-4 w-4"
+                            src={getPublicUrl(
+                              StorageBuckets.HABIT_ICONS,
+                              habit.iconPath
+                            )}
+                          />
+                          <span className="truncate">{habit.name}</span>
+                        </div>
+                      </SelectItem>
                     );
                   })}
-                </CrossPlatformHorizontalScroll>
+                </SelectSection>
               );
-            }}
-          >
-            <>
-              {!!Object.keys(habits).length && (
-                <SelectItem
-                  key="toggle-all"
-                  className="mb-0.5"
-                  textValue="Toggle all"
-                >
-                  <Checkbox
-                    color="secondary"
-                    isSelected={areAllHabitsSelected}
-                    isIndeterminate={
-                      !areAllHabitsSelected && filters.habitIds.some(Boolean)
-                    }
-                  />
-                  <span>
-                    {areAllHabitsSelected ? 'Unselect' : 'Select'} all
-                  </span>
-                </SelectItem>
-              )}
-              {Object.entries(habitsByTraitName).map(
-                ([traitName, habits], index, array) => {
-                  if (!habits?.length) {
-                    return null;
-                  }
-
-                  return (
-                    <SelectSection
-                      key={traitName}
-                      title={traitName}
-                      showDivider={index < array.length - 1}
-                      classNames={{
-                        heading:
-                          'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-                      }}
-                    >
-                      {habits.map((habit) => {
-                        return (
-                          <SelectItem key={habit.id} textValue={habit.name}>
-                            <div className="flex items-center gap-2">
-                              <img
-                                alt={habit.name}
-                                className="h-4 w-4"
-                                src={getPublicUrl(
-                                  StorageBuckets.HABIT_ICONS,
-                                  habit.iconPath
-                                )}
-                              />
-                              <span className="truncate">{habit.name}</span>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectSection>
-                  );
+            }
+          )}
+        </>
+      </Select>
+      <Select
+        size="sm"
+        radius="sm"
+        color="secondary"
+        variant="bordered"
+        selectionMode="multiple"
+        placeholder="Filter by traits"
+        selectedKeys={filters.traitIds}
+        isOpen={isTraitsFilterSelectOpen}
+        onChange={handleTraitsFilterChange}
+        onOpenChange={onTraitsFilterSelectOpenChange}
+        className="w-full min-[450px]:w-1/2 md:w-[250px]"
+        renderValue={(selectedTraits: SelectedItems<Trait>) => {
+          return (
+            <CrossPlatformHorizontalScroll className="flex space-x-2">
+              {selectedTraits.map(({ key }) => {
+                if (typeof key !== 'string' || !traits[key]) {
+                  return null;
                 }
-              )}
-            </>
-          </Select>
-          <Select
-            size="sm"
-            radius="sm"
-            color="secondary"
-            variant="bordered"
-            selectionMode="multiple"
-            placeholder="Filter by traits"
-            selectedKeys={filters.traitIds}
-            isOpen={isTraitsFilterSelectOpen}
-            onChange={handleTraitsFilterChange}
-            onOpenChange={onTraitsFilterSelectOpenChange}
-            className="w-full min-[450px]:w-1/2 md:w-[250px]"
-            renderValue={(selectedTraits: SelectedItems<Trait>) => {
-              return (
-                <CrossPlatformHorizontalScroll className="flex space-x-2">
-                  {selectedTraits.map(({ key }) => {
-                    if (typeof key !== 'string' || !traits[key]) {
-                      return null;
-                    }
 
-                    const { color, id, name } = traits[key];
+                const { color, id, name } = traits[key];
 
-                    return <TraitChip key={id} trait={{ color, name }} />;
-                  })}
-                </CrossPlatformHorizontalScroll>
-              );
-            }}
-          >
-            <>
-              {!!Object.keys(traits).length && (
-                <SelectItem
-                  key="toggle-all"
-                  className="mb-0.5"
-                  textValue="Toggle all"
-                >
-                  <Checkbox
-                    color="secondary"
-                    isSelected={areAllTraitsSelected}
-                    isIndeterminate={
-                      !areAllTraitsSelected && filters.traitIds.some(Boolean)
-                    }
-                  />
-                  <span>
-                    {areAllTraitsSelected ? 'Unselect' : 'Select'} all
-                  </span>
-                </SelectItem>
-              )}
-              <SelectSection title="Filter by traits">
-                {Object.values(traits).map((trait) => {
-                  return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
-                })}
-              </SelectSection>
-            </>
-          </Select>
-        </div>
-      </div>
+                return <TraitChip key={id} trait={{ color, name }} />;
+              })}
+            </CrossPlatformHorizontalScroll>
+          );
+        }}
+      >
+        <>
+          {!!Object.keys(traits).length && (
+            <SelectItem
+              key="toggle-all"
+              className="mb-0.5"
+              textValue="Toggle all"
+            >
+              <Checkbox
+                color="secondary"
+                isSelected={areAllTraitsSelected}
+                isIndeterminate={
+                  !areAllTraitsSelected && filters.traitIds.some(Boolean)
+                }
+              />
+              <span>{areAllTraitsSelected ? 'Unselect' : 'Select'} all</span>
+            </SelectItem>
+          )}
+          <SelectSection title="Filter by traits">
+            {Object.values(traits).map((trait) => {
+              return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
+            })}
+          </SelectSection>
+        </>
+      </Select>
     </div>
   );
 };

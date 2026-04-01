@@ -428,10 +428,7 @@ const WeekCalendar = () => {
                                 }
 
                                 return (
-                                  <div
-                                    key={habitId}
-                                    className="animate-in fade-in duration-500"
-                                  >
+                                  <div key={habitId}>
                                     <OccurrenceChip
                                       occurrences={habitOccurrences}
                                     />

@@ -296,9 +296,7 @@ const MonthCalendarCell = ({
             }
 
             return (
-              <div key={habitId} className="animate-in fade-in duration-500">
-                <OccurrenceChip occurrences={habitOccurrences} />
-              </div>
+              <OccurrenceChip key={habitId} occurrences={habitOccurrences} />
             );
           }
         )}

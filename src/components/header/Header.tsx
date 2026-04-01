@@ -108,52 +108,48 @@ const Header = () => {
         </div>
         <div className="flex items-center gap-4">
           <div className="bg-background-100/90 dark:bg-background-900 fixed right-0 bottom-0 left-0 z-50 flex w-full gap-4 border-t border-t-slate-300 p-2 px-4 md:right-4 md:bottom-4 md:left-auto md:w-auto md:border-0 md:bg-transparent md:p-0 xl:static xl:right-auto xl:bottom-auto xl:flex-row-reverse xl:border-0 xl:bg-transparent xl:p-0 dark:border-t-slate-800 dark:md:bg-transparent dark:xl:bg-transparent">
-            <div className="flex-1 md:flex-none">
-              <Button
-                size="sm"
-                variant="solid"
+            <Button
+              size="sm"
+              variant="solid"
+              color="secondary"
+              fullWidth={screenWidth < 768}
+              onPress={dispatchNoteDrawerOpen}
+              radius={screenWidth < 768 ? 'full' : 'sm'}
+              className="flex-1 max-md:h-6 max-md:gap-1 md:flex-none"
+            >
+              <NotePencilIcon
+                weight="bold"
+                size={screenWidth < 768 ? 12 : 16}
+              />
+              Note
+              <Kbd
                 color="secondary"
-                fullWidth={screenWidth < 768}
-                onPress={dispatchNoteDrawerOpen}
-                className="max-md:h-6 max-md:gap-1"
-                radius={screenWidth < 768 ? 'full' : 'sm'}
+                shortcutParams={['n', dispatchNoteDrawerOpen]}
               >
-                <NotePencilIcon
-                  weight="bold"
-                  size={screenWidth < 768 ? 12 : 16}
-                />
-                Note
-                <Kbd
-                  color="secondary"
-                  shortcutParams={['n', dispatchNoteDrawerOpen]}
-                >
-                  N
-                </Kbd>
-              </Button>
-            </div>
-            <div className="flex-1 md:flex-none">
-              <Button
-                size="sm"
-                variant="solid"
+                N
+              </Kbd>
+            </Button>
+            <Button
+              size="sm"
+              variant="solid"
+              color="primary"
+              fullWidth={screenWidth < 768}
+              onPress={dispatchOccurrenceDrawerOpen}
+              radius={screenWidth < 768 ? 'full' : 'sm'}
+              className="flex-1 max-md:h-6 max-md:gap-1 md:flex-none"
+            >
+              <CalendarCheckIcon
+                weight="bold"
+                size={screenWidth < 768 ? 12 : 16}
+              />
+              Log
+              <Kbd
                 color="primary"
-                fullWidth={screenWidth < 768}
-                className="max-md:h-6 max-md:gap-1"
-                onPress={dispatchOccurrenceDrawerOpen}
-                radius={screenWidth < 768 ? 'full' : 'sm'}
+                shortcutParams={['l', dispatchOccurrenceDrawerOpen]}
               >
-                <CalendarCheckIcon
-                  weight="bold"
-                  size={screenWidth < 768 ? 12 : 16}
-                />
-                Log
-                <Kbd
-                  color="primary"
-                  shortcutParams={['l', dispatchOccurrenceDrawerOpen]}
-                >
-                  L
-                </Kbd>
-              </Button>
-            </div>
+                L
+              </Kbd>
+            </Button>
           </div>
           <div className="flex items-center gap-4">
             <Button
