@@ -15,7 +15,6 @@ import {
   CalendarBlankIcon,
   ArrowSquareLeftIcon,
 } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
@@ -315,15 +314,9 @@ const DayCalendar = () => {
                         }
 
                         return (
-                          <motion.div
-                            key={habitId}
-                            exit={{ scale: 0 }}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.5 }}
-                          >
+                          <div key={habitId}>
                             <OccurrenceChip occurrences={habitOccurrences} />
-                          </motion.div>
+                          </div>
                         );
                       }
                     )}

@@ -16,7 +16,6 @@ import {
   CalendarBlankIcon,
   ArrowSquareRightIcon,
 } from '@phosphor-icons/react';
-import { motion, AnimatePresence } from 'framer-motion';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useCalendarCell } from 'react-aria';
@@ -290,27 +289,17 @@ const MonthCalendarCell = ({
         cellHeader
       )}
       <div className="flex flex-wrap justify-center gap-2 overflow-x-auto overflow-y-visible px-0 py-0.5 pb-2 md:justify-start md:px-2">
-        <AnimatePresence mode="sync">
-          {Object.entries(groupedOccurrences).map(
-            ([habitId, habitOccurrences]) => {
-              if (!habitOccurrences) {
-                return null;
-              }
-
-              return (
-                <motion.div
-                  key={habitId}
-                  exit={{ scale: 0 }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <OccurrenceChip occurrences={habitOccurrences} />
-                </motion.div>
-              );
+        {Object.entries(groupedOccurrences).map(
+          ([habitId, habitOccurrences]) => {
+            if (!habitOccurrences) {
+              return null;
             }
-          )}
-        </AnimatePresence>
+
+            return (
+              <OccurrenceChip key={habitId} occurrences={habitOccurrences} />
+            );
+          }
+        )}
       </div>
     </div>
   );
