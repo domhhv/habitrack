@@ -11,14 +11,14 @@ import {
   TableHeader,
 } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
-import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
+import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { useRollbar } from '@rollbar/react';
 import pluralize from 'pluralize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 import { Link } from 'react-router';
 
-import { TraitChip, EditHabitDialog, AddHabitDialogButton } from '@components';
+import { TraitChip, AddHabitDialogButton } from '@components';
 import type { Habit, HabitStats } from '@models';
 import { StorageBuckets } from '@models';
 import { listFiles, deleteFile, getHabitsStats } from '@services';
@@ -40,7 +40,6 @@ const ROWS_PER_PAGE = 10;
 
 const HabitsTable = () => {
   const rollbar = useRollbar();
-  const [habitToEdit, setHabitToEdit] = React.useState<Habit | null>(null);
   const [page, setPage] = React.useState(1);
   const [habitsStats, setHabitsStats] = React.useState<
     Record<Habit['id'], HabitStats>
@@ -87,14 +86,6 @@ const HabitsTable = () => {
         rollbar.error(error);
       });
   }, [habits, rollbar]);
-
-  const handleEditStart = (habit: Habit) => {
-    setHabitToEdit(habit);
-  };
-
-  const handleEditEnd = () => {
-    setHabitToEdit(null);
-  };
 
   const handleDelete = async (habit: Habit) => {
     const confirmed = await askConfirmation({
@@ -270,32 +261,6 @@ const HabitsTable = () => {
                   >
                     <Tooltip
                       closeDelay={0}
-                      role="tooltip"
-                      content="Edit habit"
-                      id={`edit-tooltip-${habit.id}`}
-                    >
-                      <Button
-                        size="sm"
-                        isIconOnly
-                        variant="ghost"
-                        color="secondary"
-                        role="edit-habit-button"
-                        aria-label={`Edit habit: ${habit.name}`}
-                        aria-describedby={`edit-tooltip-${habit.id}`}
-                        data-testid={`edit-habit-id-${habit.id}-button`}
-                        onPress={() => {
-                          return handleEditStart(habit);
-                        }}
-                      >
-                        <PencilSimpleIcon
-                          size={16}
-                          weight="bold"
-                          aria-hidden="true"
-                        />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip
-                      closeDelay={0}
                       color="danger"
                       role="tooltip"
                       content="Delete habit"
@@ -329,8 +294,6 @@ const HabitsTable = () => {
           })}
         </TableBody>
       </Table>
-
-      <EditHabitDialog habit={habitToEdit} onClose={handleEditEnd} />
     </div>
   );
 };
