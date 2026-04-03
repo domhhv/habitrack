@@ -26,14 +26,11 @@ const HabitLongestStreak = ({ streak }: HabitLongestStreakProps) => {
   );
 
   return (
-    <Tooltip
-      showArrow
-      offset={12}
-      closeDelay={0}
-      content={range}
-      color="primary"
-    >
-      <span>{streak.streakLength} days</span>
+    <Tooltip closeDelay={0}>
+      <Tooltip.Trigger>
+        <span>{streak.streakLength} days</span>
+      </Tooltip.Trigger>
+      <Tooltip.Content>{range}</Tooltip.Content>
     </Tooltip>
   );
 };

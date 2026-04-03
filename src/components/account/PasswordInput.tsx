@@ -8,7 +8,7 @@ type PasswordInputProps = {
   onChange: ChangeEventHandler<HTMLInputElement>;
   testId?: string;
   value: string;
-  variant?: 'flat' | 'bordered' | 'faded' | 'underlined';
+  variant?: 'primary' | 'secondary';
   onReset?: () => void;
 };
 
@@ -19,7 +19,7 @@ const PasswordInput = ({
   onReset,
   testId = '',
   value,
-  variant = 'flat',
+  variant,
 }: PasswordInputProps) => {
   const [isVisible, setIsVisible] = React.useState(false);
 
@@ -30,43 +30,40 @@ const PasswordInput = ({
   };
 
   return (
-    <Input
-      value={value}
-      label={label}
-      variant={variant}
-      onChange={onChange}
-      data-testid={testId}
-      isDisabled={isDisabled}
-      type={isVisible ? 'text' : 'password'}
-      classNames={{
-        description: 'text-right',
-      }}
-      description={
-        onReset ? (
+    <div className="relative">
+      <Input
+        value={value}
+        variant={variant}
+        className="pr-10"
+        placeholder={label}
+        onChange={onChange}
+        data-testid={testId}
+        disabled={isDisabled}
+        type={isVisible ? 'text' : 'password'}
+      />
+      <button
+        type="button"
+        onClick={toggleVisibility}
+        aria-label="toggle password visibility"
+        className="absolute top-1/2 right-2 -translate-y-1/2 focus:outline-hidden"
+      >
+        {isVisible ? (
+          <EyeSlashIcon className="text-default-400 pointer-events-none text-2xl" />
+        ) : (
+          <EyeIcon className="text-default-400 pointer-events-none text-2xl" />
+        )}
+      </button>
+      {onReset && (
+        <div className="text-right">
           <Button
-            disableAnimation
             onPress={onReset}
             className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
           >
             Forgot password?
           </Button>
-        ) : null
-      }
-      endContent={
-        <button
-          type="button"
-          onClick={toggleVisibility}
-          className="focus:outline-hidden"
-          aria-label="toggle password visibility"
-        >
-          {isVisible ? (
-            <EyeSlashIcon className="text-default-400 pointer-events-none text-2xl" />
-          ) : (
-            <EyeIcon className="text-default-400 pointer-events-none text-2xl" />
-          )}
-        </button>
-      }
-    />
+        </div>
+      )}
+    </div>
   );
 };
 

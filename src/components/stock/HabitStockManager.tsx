@@ -29,7 +29,7 @@ const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
           <Button
             size="sm"
             isIconOnly
-            variant="light"
+            variant="ghost"
             aria-label="Add stock"
             onPress={() => {
               return setIsAdding(true);

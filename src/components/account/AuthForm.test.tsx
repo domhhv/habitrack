@@ -12,7 +12,7 @@ describe(AuthForm.name, () => {
     const onCancel = vi.fn();
     const disabled = false;
     const submitButtonLabel = 'Submit';
-    const { getByLabelText, getByTestId } = render(
+    const { getByPlaceholderText, getByTestId } = render(
       <AuthForm
         mode="login"
         onSubmit={onSubmit}
@@ -24,8 +24,8 @@ describe(AuthForm.name, () => {
       />
     );
 
-    const email = getByLabelText('Email');
-    const password = getByLabelText('Password');
+    const email = getByPlaceholderText('Email');
+    const password = getByPlaceholderText('Password');
     const submitForm = getByTestId('submit-form');
 
     act(() => {

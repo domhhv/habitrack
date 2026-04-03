@@ -1,8 +1,101 @@
-@import 'tailwindcss';
+@import '@heroui/styles/css';
 
-@plugin './utils/theme.ts';
+/* =========================================================
+   Custom theme: override HeroUI v3 CSS variables with
+   the project's green/teal palette (light & dark).
+   ========================================================= */
 
-@source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+:root,
+.light,
+[data-theme='light'] {
+  /* Accent (was "primary" in v2) */
+  --accent: #23c98f;
+  --accent-foreground: #ffffff;
+
+  /* Background */
+  --background: #f3fbf7;
+  --foreground: #333333;
+
+  /* Surface layers (mapped from v2 content1-4 / background shades) */
+  --surface: #ffffff;
+  --surface-secondary: #e8f7ee;
+  --surface-tertiary: #dff2e7;
+
+  /* Overlay */
+  --overlay: #ffffff;
+  --overlay-foreground: #333333;
+
+  /* Status */
+  --danger: #ff3561;
+  --danger-foreground: #ffffff;
+  --success: #05d023;
+  --success-foreground: #ffffff;
+  --warning: #ffdc00;
+  --warning-foreground: #333333;
+
+  /* Borders / separators */
+  --border: #c4e4d1;
+  --separator: #dff2e7;
+
+  /* Muted text */
+  --muted: #648f7c;
+
+  /* Field */
+  --field-background: #ffffff;
+  --field-foreground: #333333;
+  --field-border: transparent;
+
+  /* Disabled opacity */
+  --disabled-opacity: 0.5;
+}
+
+.dark,
+[data-theme='dark'] {
+  /* Accent (was "primary" in v2) */
+  --accent: #149065;
+  --accent-foreground: #ffffff;
+
+  /* Background */
+  --background: #19271f;
+  --foreground: #e5f5f1;
+
+  /* Surface layers */
+  --surface: #1e3129;
+  --surface-foreground: #e5f5f1;
+  --surface-secondary: #243b31;
+  --surface-tertiary: #2b4639;
+
+  /* Overlay */
+  --overlay: #1e3129;
+  --overlay-foreground: #e5f5f1;
+
+  /* Status */
+  --danger: #ce4a16;
+  --danger-foreground: #ffffff;
+  --success: #05b56b;
+  --success-foreground: #d5fbd6;
+  --warning: #cec810;
+  --warning-foreground: #ffffff;
+
+  /* Borders / separators */
+  --border: #345141;
+  --separator: #2b4639;
+
+  /* Muted text */
+  --muted: #9ca3af;
+
+  /* Field */
+  --field-background: #1e3129;
+  --field-foreground: #e5f5f1;
+  --field-border: transparent;
+
+  /* Disabled opacity */
+  --disabled-opacity: 0.5;
+}
+
+/* =========================================================
+   Global overrides
+   ========================================================= */
 
 @custom-variant dark (&:is(.dark *));
 

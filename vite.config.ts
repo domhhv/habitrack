@@ -62,16 +62,8 @@ export default defineConfig(({ mode }) => {
               return 'react-router';
             }
 
-            if (id.includes('heroui/theme')) {
-              return 'heroui-theme';
-            }
-
             if (id.includes('heroui')) {
               return 'heroui';
-            }
-
-            if (id.includes('framer-motion') || id.includes('motion-dom')) {
-              return 'framer-motion';
             }
 
             if (id.includes('node_modules')) {

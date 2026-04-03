@@ -68,7 +68,7 @@ const NotesList = () => {
     if (isLoading) {
       return (
         <div className="flex justify-center py-4">
-          <Spinner size="sm" color="primary" />
+          <Spinner size="sm" color="accent" />
         </div>
       );
     }

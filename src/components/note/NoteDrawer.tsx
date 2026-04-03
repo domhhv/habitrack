@@ -1,9 +1,12 @@
 import {
   cn,
   Form,
+  Label,
   Drawer,
   Button,
-  Textarea,
+  Spinner,
+  TextArea,
+  TextField,
   DrawerBody,
   DrawerHeader,
   DrawerFooter,
@@ -98,9 +101,9 @@ const NoteDrawer = () => {
 
     return askConfirmation({
       cancelText: 'Keep editing',
-      color: 'warning',
       confirmText: 'Discard',
       title: 'Unsaved changes',
+      variant: 'secondary',
       description:
         'You have unsaved changes. Are you sure you want to discard them?',
     });
@@ -234,18 +237,14 @@ const NoteDrawer = () => {
   };
 
   return (
-    <Drawer
-      isOpen={isOpen}
-      onOpenChange={changeOpen}
-      size={isMobile ? 'full' : 'lg'}
-    >
+    <Drawer isOpen={isOpen} onOpenChange={changeOpen}>
       <DrawerContent>
         <DrawerHeader className="items-center gap-2">
           Note for {formatPeriod()}
           <Button
             size="sm"
             isIconOnly
-            variant="light"
+            variant="ghost"
             onPress={togglePeriodPicker}
           >
             <CaretDownIcon
@@ -264,70 +263,76 @@ const NoteDrawer = () => {
               isShown={isPeriodPickerShown}
               onBeforeChange={confirmUnsavedChanges}
             />
-            <Textarea
-              autoFocus
+            <TextField
               isRequired
-              minRows={5}
-              name="content"
               value={content}
-              variant="faded"
-              disableAutosize
-              label="Your note"
-              maxRows={Infinity}
-              labelPlacement="outside"
+              variant="secondary"
+              className="max-h-full"
               onChange={changeContent}
-              disabled={isSaving || isRemoving}
-              description={getTextareaDescription()}
-              defaultValue={existingNote?.content || ''}
-              placeholder={`Start typing your note about this ${periodKind}...`}
-              errorMessage={`Empty notes are not allowed. ${existingNote ? 'If you want to empty an existing note, please remove it instead.' : ''}`}
-              classNames={{
-                base: 'max-h-full',
-                label: 'after:hidden',
-                input: cn(
-                  'resize-y min-h-10 field-sizing-content max-h-full',
+            >
+              <Label className="after:hidden">Your note</Label>
+              <TextArea
+                autoFocus
+                name="content"
+                disabled={isSaving || isRemoving}
+                defaultValue={existingNote?.content || ''}
+                placeholder={`Start typing your note about this ${periodKind}...`}
+                className={cn(
+                  'field-sizing-content max-h-full min-h-10 resize-y',
                   !isDesktop && 'text-base'
-                ),
-              }}
-              onKeyDown={(event) => {
-                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-                  void submitNote();
-                }
+                )}
+                onKeyDown={(event) => {
+                  if (
+                    (event.metaKey || event.ctrlKey) &&
+                    event.key === 'Enter'
+                  ) {
+                    void submitNote();
+                  }
 
-                if (event.key === 'Escape') {
-                  void closeDrawerWithConfirmation();
-                }
+                  if (event.key === 'Escape') {
+                    void closeDrawerWithConfirmation();
+                  }
 
-                return null;
-              }}
-            />
+                  return null;
+                }}
+              />
+              {getTextareaDescription() && (
+                <p className="text-foreground-500 text-sm">
+                  {getTextareaDescription()}
+                </p>
+              )}
+            </TextField>
           </DrawerBody>
           <DrawerFooter className="w-full self-end pt-0 sm:w-auto">
             {!!existingNote && (
               <Button
-                color="danger"
+                variant="danger"
                 onPress={removeNote}
-                disabled={isRemoving}
-                isLoading={isRemoving}
+                isDisabled={isRemoving}
               >
+                {isRemoving && <Spinner size="sm" />}
                 Remove
               </Button>
             )}
             <Button
               type="submit"
-              color="primary"
-              isLoading={isSaving}
+              variant="primary"
               fullWidth={isMobile && !existingNote}
               isDisabled={
+                isSaving ||
                 !user ||
                 isRemoving ||
                 !content ||
                 existingNote?.content === content
               }
             >
-              <Kbd size="md" color="primary">
-                {mod} {enter}
-              </Kbd>
+              {isSaving ? (
+                <Spinner size="sm" />
+              ) : (
+                <Kbd size="md" color="primary">
+                  {mod} {enter}
+                </Kbd>
+              )}
               {existingNote ? 'Save' : 'Add'}
             </Button>
           </DrawerFooter>

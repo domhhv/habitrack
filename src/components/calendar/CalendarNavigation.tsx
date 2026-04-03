@@ -1,5 +1,12 @@
-import { useDisclosure, type Selection } from '@heroui/react';
-import { cn, Button, Select, SelectItem, SelectSection } from '@heroui/react';
+import {
+  cn,
+  Label,
+  Button,
+  Header,
+  Select,
+  ListBox,
+  useOverlayState,
+} from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { FunnelSimpleIcon } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
@@ -34,11 +41,11 @@ const CalendarNavigation = ({
 
   const user = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
-  const [monthSelectValue, setMonthSelectValue] = React.useState<Selection>(
-    new Set([])
+  const [monthSelectValue, setMonthSelectValue] = React.useState<string | null>(
+    null
   );
-  const [yearSelectValue, setYearSelectValue] = React.useState<Selection>(
-    new Set([])
+  const [yearSelectValue, setYearSelectValue] = React.useState<string | null>(
+    null
   );
   const formatter = useDateFormatter({
     month: 'long',
@@ -52,16 +59,13 @@ const CalendarNavigation = ({
       return formatter.format(date.toDate(timeZone));
     });
   }, [formatter, focusedDate, timeZone]);
-  const { isOpen: isMonthSelectOpen, onOpenChange: onMonthSelectOpenChange } =
-    useDisclosure();
-  const { isOpen: isYearSelectOpen, onOpenChange: onYearSelectOpenChange } =
-    useDisclosure();
-  const { isOpen: isWeekSelectOpen, onOpenChange: onWeekSelectOpenChange } =
-    useDisclosure();
+  const monthSelectState = useOverlayState();
+  const yearSelectState = useOverlayState();
+  const weekSelectState = useOverlayState();
   const navigate = useNavigate();
   const firstDayOfWeek = useFirstDayOfWeek();
-  const [weekSelectValue, setWeekSelectValue] = React.useState<Selection>(
-    new Set([])
+  const [weekSelectValue, setWeekSelectValue] = React.useState<string | null>(
+    null
   );
   const weeks = React.useMemo(() => {
     return getWeeksOfYear(focusedDate.year, firstDayOfWeek);
@@ -74,13 +78,11 @@ const CalendarNavigation = ({
   }, [location.pathname]);
 
   React.useEffect(() => {
-    const newMonth = String(focusedDate.month);
-    setMonthSelectValue(new Set([newMonth]));
+    setMonthSelectValue(String(focusedDate.month));
   }, [focusedDate.month]);
 
   React.useEffect(() => {
-    const newYear = String(focusedDate.year);
-    setYearSelectValue(new Set([newYear]));
+    setYearSelectValue(String(focusedDate.year));
   }, [focusedDate.year]);
 
   React.useEffect(() => {
@@ -92,7 +94,7 @@ const CalendarNavigation = ({
     });
 
     if (weekIndex >= 0) {
-      setWeekSelectValue(new Set([String(weekIndex)]));
+      setWeekSelectValue(String(weekIndex));
     }
   }, [focusedDate, weeks]);
 
@@ -116,107 +118,90 @@ const CalendarNavigation = ({
     >
       <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
         <Select
-          size="sm"
-          radius="sm"
-          color="secondary"
-          variant="bordered"
-          isOpen={isMonthSelectOpen}
-          selectedKeys={monthSelectValue}
-          onOpenChange={onMonthSelectOpenChange}
-          scrollShadowProps={{
-            visibility: 'bottom',
-          }}
-          classNames={{
-            base: 'w-[70px] md:w-[125px]',
-            popoverContent: 'w-[100px] md:w-[125px]',
-          }}
-          onSelectionChange={(value) => {
-            const [newMonth] = Array.from(value);
-
+          value={monthSelectValue}
+          className="w-17.5 md:w-31.25"
+          isOpen={monthSelectState.isOpen}
+          onOpenChange={monthSelectState.setOpen}
+          onChange={(newMonth) => {
             if (typeof newMonth === 'string') {
               navigateToMonth(focusedDate.year, Number(newMonth));
             }
           }}
         >
-          <SelectSection
-            title="Month"
-            classNames={{
-              heading:
-                'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-            }}
-          >
-            {months.map((month, index) => {
-              return (
-                <SelectItem key={String(index + 1)}>
-                  {capitalize(isMobile ? month.substring(0, 3) : month)}
-                </SelectItem>
-              );
-            })}
-          </SelectSection>
+          <Label className="sr-only">Month</Label>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover className="w-25 md:w-31.25">
+            <ListBox>
+              <ListBox.Section>
+                <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                  Month
+                </Header>
+                {months.map((month, index) => {
+                  return (
+                    <ListBox.Item
+                      id={String(index + 1)}
+                      key={String(index + 1)}
+                      textValue={capitalize(
+                        isMobile ? month.substring(0, 3) : month
+                      )}
+                    >
+                      {capitalize(isMobile ? month.substring(0, 3) : month)}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  );
+                })}
+              </ListBox.Section>
+            </ListBox>
+          </Select.Popover>
         </Select>
         <Select
-          size="sm"
-          radius="sm"
-          color="secondary"
-          variant="bordered"
-          isOpen={isYearSelectOpen}
-          selectedKeys={yearSelectValue}
-          onOpenChange={onYearSelectOpenChange}
-          scrollShadowProps={{
-            visibility: 'bottom',
-          }}
-          classNames={{
-            base: 'w-[80px]',
-            popoverContent: 'w-[100px]',
-          }}
-          onSelectionChange={(value) => {
-            const [newYear] = Array.from(value);
-
+          className="w-20"
+          value={yearSelectValue}
+          isOpen={yearSelectState.isOpen}
+          onOpenChange={yearSelectState.setOpen}
+          onChange={(newYear) => {
             if (typeof newYear === 'string') {
               navigateToMonth(Number(newYear), focusedDate.month);
             }
           }}
         >
-          <SelectSection
-            title="Year"
-            classNames={{
-              heading:
-                'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-            }}
-          >
-            {YEARS.map((year) => {
-              return (
-                <SelectItem key={year.toString()}>{year.toString()}</SelectItem>
-              );
-            })}
-          </SelectSection>
+          <Label className="sr-only">Year</Label>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover className="w-25">
+            <ListBox>
+              <ListBox.Section>
+                <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                  Year
+                </Header>
+                {YEARS.map((year) => {
+                  return (
+                    <ListBox.Item
+                      id={year.toString()}
+                      key={year.toString()}
+                      textValue={year.toString()}
+                    >
+                      {year.toString()}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  );
+                })}
+              </ListBox.Section>
+            </ListBox>
+          </Select.Popover>
         </Select>
         {calendarMode === 'week' && (
           <Select
-            size="sm"
-            radius="sm"
-            color="secondary"
-            variant="bordered"
-            isVirtualized={false}
-            isOpen={isWeekSelectOpen}
-            selectedKeys={weekSelectValue}
-            onOpenChange={onWeekSelectOpenChange}
-            scrollShadowProps={{
-              visibility: 'bottom',
-            }}
-            classNames={{
-              base: 'w-[150px] md:w-[250px]',
-              popoverContent: 'w-[250px]',
-            }}
-            renderValue={([selectedValue]) => {
-              return (
-                selectedValue.textValue?.split(' ').slice(0, -1).join(' ') ||
-                'Select week'
-              );
-            }}
-            onSelectionChange={(value) => {
-              const [selectedIndex] = Array.from(value);
-
+            value={weekSelectValue}
+            className="w-37.5 md:w-62.5"
+            isOpen={weekSelectState.isOpen}
+            onOpenChange={weekSelectState.setOpen}
+            onChange={(selectedIndex) => {
               if (typeof selectedIndex === 'string') {
                 const week = weeks[Number(selectedIndex)];
 
@@ -229,19 +214,39 @@ const CalendarNavigation = ({
               }
             }}
           >
-            <SelectSection
-              title="Week"
-              classNames={{
-                heading:
-                  'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-              }}
-            >
-              {weeks.map((week, index) => {
-                return (
-                  <SelectItem key={String(index)}>{week.label}</SelectItem>
-                );
-              })}
-            </SelectSection>
+            <Label className="sr-only">Week</Label>
+            <Select.Trigger>
+              <Select.Value>
+                {({ selectedText }) => {
+                  return (
+                    selectedText?.split(' ').slice(0, -1).join(' ') ||
+                    'Select week'
+                  );
+                }}
+              </Select.Value>
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover className="w-62.5">
+              <ListBox>
+                <ListBox.Section>
+                  <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                    Week
+                  </Header>
+                  {weeks.map((week, index) => {
+                    return (
+                      <ListBox.Item
+                        id={String(index)}
+                        key={String(index)}
+                        textValue={week.label}
+                      >
+                        {week.label}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                    );
+                  })}
+                </ListBox.Section>
+              </ListBox>
+            </Select.Popover>
           </Select>
         )}
       </div>
@@ -255,12 +260,10 @@ const CalendarNavigation = ({
           <Button
             size="sm"
             isIconOnly
-            radius="sm"
-            variant="light"
-            color="secondary"
+            variant="ghost"
             aria-label="Toggle filters"
             onPress={toggleFiltersVisibility}
-            className={cn(isMobile && 'min-w-fit p-0')}
+            className={cn('rounded-sm', isMobile && 'min-w-fit p-0')}
           >
             <FunnelSimpleIcon size={20} />
           </Button>

@@ -1,15 +1,4 @@
-import {
-  cn,
-  Table,
-  Button,
-  Tooltip,
-  TableRow,
-  TableBody,
-  TableCell,
-  Pagination,
-  TableColumn,
-  TableHeader,
-} from '@heroui/react';
+import { Table, Button, Tooltip, Pagination } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { useRollbar } from '@rollbar/react';
@@ -89,8 +78,8 @@ const HabitsTable = () => {
 
   const handleDelete = async (habit: Habit) => {
     const confirmed = await askConfirmation({
-      color: 'danger',
       title: 'Delete habit',
+      variant: 'danger',
       description: (
         <div>
           Are you sure you want to delete <strong>{habit.name}</strong> habit?
@@ -133,14 +122,20 @@ const HabitsTable = () => {
 
   const habitsList = Object.values(habits);
 
-  const pages = Math.ceil(habitsList.length / ROWS_PER_PAGE);
+  const totalPages = Math.ceil(habitsList.length / ROWS_PER_PAGE);
+
+  const pages = Array.from({ length: totalPages }, (_, i) => {
+    return i + 1;
+  });
 
   const paginatedHabits = React.useMemo(() => {
     const start = (page - 1) * ROWS_PER_PAGE;
-    const end = start + ROWS_PER_PAGE;
 
-    return habitsList.slice(start, end);
+    return habitsList.slice(start, start + ROWS_PER_PAGE);
   }, [page, habitsList]);
+
+  const start = (page - 1) * ROWS_PER_PAGE + 1;
+  const end = Math.min(page * ROWS_PER_PAGE, habitsList.length);
 
   return (
     <div className="w-full space-y-4 px-8 pt-4 pb-2 lg:px-16">
@@ -163,136 +158,167 @@ const HabitsTable = () => {
       </div>
 
       <Table
-        shadow="none"
-        isHeaderSticky
         aria-label="Habits tracking table"
-        classNames={{
-          base: cn(
-            'overflow-scroll scrollbar-hide w-full [&>div]:bg-white [&>div]:dark:bg-background-800 h-[calc(100vh-148px)] min-h-[400px]'
-          ),
-        }}
-        bottomContent={
-          pages > 1 ? (
-            <div className="flex w-full justify-center">
-              <Pagination
-                isCompact
-                showShadow
-                page={page}
-                showControls
-                total={pages}
-                color="primary"
-                onChange={setPage}
-              />
-            </div>
-          ) : null
-        }
+        className="scrollbar-hide h-[calc(100vh-148px)] min-h-100 w-full overflow-scroll"
       >
-        <TableHeader columns={habitColumns}>
-          {(column) => {
-            return (
-              <TableColumn
-                key={column.key}
-                aria-label={column.label}
-                align={column.align || 'start'}
-              >
-                {column.label}
-              </TableColumn>
-            );
-          }}
-        </TableHeader>
-        <TableBody aria-label="Habits data" emptyContent="No habits yet">
-          {paginatedHabits.map((habit) => {
-            const habitStats = habitsStats[habit.id] || {};
+        <Table.ScrollContainer>
+          <Table.Content>
+            <Table.Header columns={habitColumns}>
+              {(column) => {
+                return (
+                  <Table.Column
+                    key={column.key}
+                    aria-label={column.label}
+                    isRowHeader={column.key === 'icon'}
+                  >
+                    {column.label}
+                  </Table.Column>
+                );
+              }}
+            </Table.Header>
+            <Table.Body items={paginatedHabits} aria-label="Habits data">
+              {(habit) => {
+                const habitStats = habitsStats[habit.id] || {};
 
-            return (
-              <TableRow
-                key={habit.id}
-                className="hover:bg-content2"
-                aria-labelledby={`habit-name-${habit.id}`}
-              >
-                <TableCell className="w-10 rounded-l-md">
-                  <HabitIcon habit={habit} />
-                </TableCell>
-                <TableCell>
-                  <Link
-                    className="font-semibold"
-                    to={`/habits/${habit.id}`}
-                    id={`habit-name-${habit.id}`}
+                return (
+                  <Table.Row
+                    key={habit.id}
+                    className="hover:bg-content2"
+                    aria-labelledby={`habit-name-${habit.id}`}
                   >
-                    {habit.name}
-                  </Link>
-                  {habit.description && (
-                    <p className="text-left text-xs">
-                      <i>{habit.description}</i>
-                    </p>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <TraitChip trait={habit.trait} />
-                </TableCell>
-                <TableCell>
-                  {dateFormatter.format(new Date(habit.createdAt))}
-                </TableCell>
-                <TableCell>
-                  <HabitLastEntry
-                    timestamp={Number(new Date(habitStats.lastEntryAt || 0))}
-                  />
-                </TableCell>
-                <TableCell>
-                  <HabitLongestStreak
-                    streak={{
-                      streakEnd: habitStats.longestStreakEnd,
-                      streakLength: habitStats.longestStreakLength,
-                      streakStart: habitStats.longestStreakStart,
-                    }}
-                  />
-                </TableCell>
-                <TableCell
-                  align="center"
-                  aria-label={`Total entries for ${habit.name}`}
-                >
-                  <HabitTotalEntries count={habitStats.totalEntries} />
-                </TableCell>
-                <TableCell aria-label="Actions" className="rounded-r-md">
-                  <div
-                    role="group"
-                    className="flex justify-end gap-2"
-                    aria-label={`Actions for habit ${habit.name}`}
-                  >
-                    <Tooltip
-                      closeDelay={0}
-                      color="danger"
-                      role="tooltip"
-                      content="Delete habit"
-                      id={`delete-tooltip-${habit.id}`}
-                    >
-                      <Button
-                        size="sm"
-                        isIconOnly
-                        color="danger"
-                        variant="ghost"
-                        className="group"
-                        role="delete-habit-button"
-                        aria-label={`Delete habit: ${habit.name}`}
-                        aria-describedby={`delete-tooltip-${habit.id}`}
-                        data-testid={`delete-habit-id-${habit.id}-button`}
-                        onPress={() => {
-                          return handleDelete(habit);
-                        }}
-                      >
-                        <TrashSimpleIcon
-                          size={16}
-                          weight="bold"
-                          aria-hidden="true"
+                    <Table.Collection>
+                      <Table.Cell className="w-10 rounded-l-md">
+                        <HabitIcon habit={habit} />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Link
+                          className="font-semibold"
+                          to={`/habits/${habit.id}`}
+                          id={`habit-name-${habit.id}`}
+                        >
+                          {habit.name}
+                        </Link>
+                        {habit.description && (
+                          <p className="text-left text-xs">
+                            <i>{habit.description}</i>
+                          </p>
+                        )}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <TraitChip trait={habit.trait} />
+                      </Table.Cell>
+                      <Table.Cell>
+                        {dateFormatter.format(new Date(habit.createdAt))}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <HabitLastEntry
+                          timestamp={Number(
+                            new Date(habitStats.lastEntryAt || 0)
+                          )}
                         />
-                      </Button>
-                    </Tooltip>
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <HabitLongestStreak
+                          streak={{
+                            streakEnd: habitStats.longestStreakEnd,
+                            streakLength: habitStats.longestStreakLength,
+                            streakStart: habitStats.longestStreakStart,
+                          }}
+                        />
+                      </Table.Cell>
+                      <Table.Cell
+                        className="text-center"
+                        aria-label={`Total entries for ${habit.name}`}
+                      >
+                        <HabitTotalEntries count={habitStats.totalEntries} />
+                      </Table.Cell>
+                      <Table.Cell aria-label="Actions" className="rounded-r-md">
+                        <div
+                          role="group"
+                          className="flex justify-end gap-2"
+                          aria-label={`Actions for habit ${habit.name}`}
+                        >
+                          <Tooltip closeDelay={0}>
+                            <Tooltip.Trigger>
+                              <Button
+                                size="sm"
+                                isIconOnly
+                                variant="ghost"
+                                className="group text-danger"
+                                aria-label={`Delete habit: ${habit.name}`}
+                                aria-describedby={`delete-tooltip-${habit.id}`}
+                                data-testid={`delete-habit-id-${habit.id}-button`}
+                                onPress={() => {
+                                  return handleDelete(habit);
+                                }}
+                              >
+                                <TrashSimpleIcon
+                                  size={16}
+                                  weight="bold"
+                                  aria-hidden="true"
+                                />
+                              </Button>
+                            </Tooltip.Trigger>
+                            <Tooltip.Content>Delete habit</Tooltip.Content>
+                          </Tooltip>
+                        </div>
+                      </Table.Cell>
+                    </Table.Collection>
+                  </Table.Row>
+                );
+              }}
+            </Table.Body>
+          </Table.Content>
+        </Table.ScrollContainer>
+        <Table.Footer>
+          <Pagination size="sm">
+            <Pagination.Summary>
+              {start} to {end} of {habitsList.length} results
+            </Pagination.Summary>
+            <Pagination.Content>
+              <Pagination.Item>
+                <Pagination.Previous
+                  isDisabled={page === 1}
+                  onPress={() => {
+                    return setPage((p) => {
+                      return Math.max(1, p - 1);
+                    });
+                  }}
+                >
+                  <Pagination.PreviousIcon />
+                  Prev
+                </Pagination.Previous>
+              </Pagination.Item>
+              {pages.map((p) => {
+                return (
+                  <Pagination.Item key={p}>
+                    <Pagination.Link
+                      isActive={p === page}
+                      onPress={() => {
+                        return setPage(p);
+                      }}
+                    >
+                      {p}
+                    </Pagination.Link>
+                  </Pagination.Item>
+                );
+              })}
+              <Pagination.Item>
+                <Pagination.Next
+                  isDisabled={page === totalPages}
+                  onPress={() => {
+                    return setPage((p) => {
+                      return Math.min(totalPages, p + 1);
+                    });
+                  }}
+                >
+                  Next
+                  <Pagination.NextIcon />
+                </Pagination.Next>
+              </Pagination.Item>
+            </Pagination.Content>
+          </Pagination>
+        </Table.Footer>
       </Table>
     </div>
   );

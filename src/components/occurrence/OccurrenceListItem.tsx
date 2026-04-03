@@ -176,10 +176,10 @@ const OccurrenceListItem = ({
   const handleRemoveMetricValue = async (habitMetricId: string) => {
     if (
       await askConfirmation({
-        color: 'danger',
         confirmText: 'Delete',
         description: 'Are you sure you want to delete this metric value?',
         title: 'Delete metric value',
+        variant: 'danger',
       })
     ) {
       setRemovingMetricId(habitMetricId);
@@ -338,33 +338,30 @@ const OccurrenceListItem = ({
                   <Chip
                     size="sm"
                     key={chip.id}
-                    variant="flat"
                     color="default"
-                    endContent={
-                      isRemoving ? (
-                        <Spinner
-                          size="sm"
-                          color="danger"
-                          className="ml-1 size-3 [&>div]:size-3"
-                        />
-                      ) : (
-                        <Button
-                          size="sm"
-                          isIconOnly
-                          color="danger"
-                          variant="light"
-                          aria-label="delete-metric-value"
-                          className="ml-0.5 h-4 w-4 min-w-0"
-                          onPress={() => {
-                            return handleRemoveMetricValue(chip.id);
-                          }}
-                        >
-                          <TrashSimpleIcon size={10} />
-                        </Button>
-                      )
-                    }
+                    variant="tertiary"
                   >
                     {chip.label}
+                    {isRemoving ? (
+                      <Spinner
+                        size="sm"
+                        color="danger"
+                        className="ml-1 size-3 [&>div]:size-3"
+                      />
+                    ) : (
+                      <Button
+                        size="sm"
+                        isIconOnly
+                        variant="ghost"
+                        aria-label="delete-metric-value"
+                        className="text-danger ml-0.5 h-4 w-4 min-w-0"
+                        onPress={() => {
+                          return handleRemoveMetricValue(chip.id);
+                        }}
+                      >
+                        <TrashSimpleIcon size={10} />
+                      </Button>
+                    )}
                   </Chip>
                 );
               })}
@@ -404,9 +401,8 @@ const OccurrenceListItem = ({
         <div className="flex items-center">
           <Button
             isIconOnly
-            variant="light"
+            variant="ghost"
             onPress={onEdit}
-            color="secondary"
             isDisabled={isBeingRemoved}
             aria-label="edit-habit-entry"
             className="h-6 w-6 min-w-0 rounded-lg"
@@ -419,19 +415,11 @@ const OccurrenceListItem = ({
           </Button>
           <Button
             isIconOnly
-            color="danger"
-            variant="light"
+            variant="ghost"
             onPress={onRemove}
-            isLoading={isBeingRemoved}
+            isPending={isBeingRemoved}
             aria-label="delete-habit-entry"
-            className="h-6 w-6 min-w-0 rounded-lg"
-            spinner={
-              <Spinner
-                size="sm"
-                color="danger"
-                className="size-3.5 [&>div]:size-3.5"
-              />
-            }
+            className="text-danger h-6 w-6 min-w-0 rounded-lg"
           >
             <TrashSimpleIcon
               size={14}

@@ -12,8 +12,8 @@ const TraitChip = ({ className, trait }: TraitChipProps) => {
   return (
     <Chip
       size="sm"
-      variant="faded"
-      color="secondary"
+      color="default"
+      variant="secondary"
       className={cn('h-5 border', className)}
     >
       <div className="flex items-center gap-1 font-semibold">

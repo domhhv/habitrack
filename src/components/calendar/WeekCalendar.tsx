@@ -26,7 +26,7 @@ import {
   useCalendarGrid,
   useDateFormatter,
 } from 'react-aria';
-import { Link, useParams } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
@@ -63,6 +63,7 @@ const WeekCalendar = () => {
   const occurrences = useOccurrences();
   const { locale } = useLocale();
   const params = useParams();
+  const navigate = useNavigate();
   const firstDayOfWeek = useFirstDayOfWeek();
   const state = useCalendarState({
     createCalendar,
@@ -240,25 +241,25 @@ const WeekCalendar = () => {
       >
         <div className="sticky left-0 flex flex-col items-center justify-center gap-4">
           <div className="flex items-center justify-center gap-2">
-            <Tooltip closeDelay={0} content={monthInfo.label}>
-              <Button
-                as={Link}
-                size="sm"
-                radius="sm"
-                variant="light"
-                color="secondary"
-                to={monthInfo.path}
-                className="min-w-fit gap-1 px-2"
-                aria-label={`Go to month view: ${monthInfo.label}`}
-                startContent={
+            <Tooltip closeDelay={0}>
+              <Tooltip.Trigger>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="min-w-fit gap-1 rounded-sm px-2"
+                  aria-label={`Go to month view: ${monthInfo.label}`}
+                  onPress={() => {
+                    navigate(monthInfo.path);
+                  }}
+                >
                   <ArrowSquareLeftIcon
                     weight="bold"
                     size={isDesktop ? 18 : 14}
                   />
-                }
-              >
-                <span className="hidden sm:inline">{monthInfo.label}</span>
-              </Button>
+                  <span className="hidden sm:inline">{monthInfo.label}</span>
+                </Button>
+              </Tooltip.Trigger>
+              <Tooltip.Content>{monthInfo.label}</Tooltip.Content>
             </Tooltip>
             <CalendarNavigation focusedDate={state.focusedDate} />
           </div>
@@ -298,68 +299,75 @@ const WeekCalendar = () => {
                     <div className="flex items-center justify-center gap-2">
                       <h3>{capitalize(weekDays[dayIndex])}</h3>
                       <div className="flex items-center justify-center gap-0.5">
-                        <Tooltip
-                          closeDelay={0}
-                          content={isNoteAdded ? 'Edit note' : 'Add note'}
-                        >
-                          <Button
-                            radius="sm"
-                            variant="light"
-                            color={isNoteAdded ? 'primary' : 'secondary'}
-                            aria-label={isNoteAdded ? 'Edit note' : 'Add note'}
-                            onPress={() => {
-                              openNoteDrawer(day, 'day');
-                            }}
-                            className={cn(
-                              'h-5 w-5 min-w-fit px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                              isNoteAdded && 'opacity-100'
-                            )}
-                          >
-                            {isNoteAdded ? (
-                              <NoteIcon
+                        <Tooltip closeDelay={0}>
+                          <Tooltip.Trigger>
+                            <Button
+                              variant="ghost"
+                              onPress={() => {
+                                openNoteDrawer(day, 'day');
+                              }}
+                              aria-label={
+                                isNoteAdded ? 'Edit note' : 'Add note'
+                              }
+                              className={cn(
+                                'h-5 w-5 min-w-fit rounded-sm px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                                isNoteAdded && 'opacity-100'
+                              )}
+                            >
+                              {isNoteAdded ? (
+                                <NoteIcon
+                                  weight="bold"
+                                  size={isDesktop ? 18 : 14}
+                                />
+                              ) : (
+                                <NoteBlankIcon
+                                  weight="bold"
+                                  size={isDesktop ? 18 : 14}
+                                />
+                              )}
+                            </Button>
+                          </Tooltip.Trigger>
+                          <Tooltip.Content>
+                            {isNoteAdded ? 'Edit note' : 'Add note'}
+                          </Tooltip.Content>
+                        </Tooltip>
+                        <Tooltip closeDelay={0}>
+                          <Tooltip.Trigger>
+                            <Button
+                              variant="ghost"
+                              aria-label="Log occurrence"
+                              className="h-5 w-5 min-w-fit rounded-sm px-0 lg:h-6 lg:w-6"
+                              onPress={() => {
+                                openOccurrenceDrawer({ dayToLog: day });
+                              }}
+                            >
+                              <CalendarBlankIcon
                                 weight="bold"
                                 size={isDesktop ? 18 : 14}
                               />
-                            ) : (
-                              <NoteBlankIcon
+                            </Button>
+                          </Tooltip.Trigger>
+                          <Tooltip.Content>Log occurrence</Tooltip.Content>
+                        </Tooltip>
+                        <Tooltip closeDelay={0}>
+                          <Tooltip.Trigger>
+                            <Button
+                              variant="ghost"
+                              aria-label="Open day"
+                              className="h-5 w-5 min-w-fit rounded-sm px-0 lg:h-6 lg:w-6"
+                              onPress={() => {
+                                navigate(
+                                  `/calendar/day/${day.year}/${day.month}/${day.day}`
+                                );
+                              }}
+                            >
+                              <ArrowSquareRightIcon
                                 weight="bold"
                                 size={isDesktop ? 18 : 14}
                               />
-                            )}
-                          </Button>
-                        </Tooltip>
-                        <Tooltip closeDelay={0} content="Log occurrence">
-                          <Button
-                            radius="sm"
-                            variant="light"
-                            color="secondary"
-                            aria-label="Log occurrence"
-                            className="h-5 w-5 min-w-fit px-0 lg:h-6 lg:w-6"
-                            onPress={() => {
-                              openOccurrenceDrawer({ dayToLog: day });
-                            }}
-                          >
-                            <CalendarBlankIcon
-                              weight="bold"
-                              size={isDesktop ? 18 : 14}
-                            />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip closeDelay={0} content="Open day">
-                          <Button
-                            as={Link}
-                            radius="sm"
-                            variant="light"
-                            color="secondary"
-                            aria-label="Open day"
-                            className="h-5 w-5 min-w-fit px-0 lg:h-6 lg:w-6"
-                            to={`/calendar/day/${day.year}/${day.month}/${day.day}`}
-                          >
-                            <ArrowSquareRightIcon
-                              weight="bold"
-                              size={isDesktop ? 18 : 14}
-                            />
-                          </Button>
+                            </Button>
+                          </Tooltip.Trigger>
+                          <Tooltip.Content>Open day</Tooltip.Content>
                         </Tooltip>
                       </div>
                     </div>

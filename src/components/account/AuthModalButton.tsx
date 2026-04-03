@@ -1,20 +1,16 @@
 import {
-  Tab,
   Tabs,
   Modal,
+  Toast,
   Button,
   Tooltip,
-  addToast,
-  ModalBody,
   ButtonGroup,
-  ModalHeader,
-  ModalContent,
-  useDisclosure,
-  VisuallyHidden,
+  useOverlayState,
 } from '@heroui/react';
 import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
 import React from 'react';
-import { Link } from 'react-router';
+import { VisuallyHidden } from 'react-aria';
+import { useNavigate } from 'react-router';
 
 import { Kbd } from '@components';
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
@@ -29,15 +25,16 @@ type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
   const user = useUser();
+  const navigate = useNavigate();
   const { screenWidth } = useScreenWidth();
-  const { isOpen, onClose, onOpen, onOpenChange } = useDisclosure();
+  const overlayState = useOverlayState();
   const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
   const firstDayOfWeek = useFirstDayOfWeek();
 
   const handleClose = () => {
     setMode('login');
-    onClose();
+    overlayState.close();
   };
 
   const handleTabChange = (key: React.Key) => {
@@ -99,15 +96,10 @@ const AuthModalButton = () => {
 
       handleClose();
 
-      addToast({
-        color: 'success',
-        title: successfulMessages[mode],
-      });
+      Toast.toast.success(successfulMessages[mode]);
     } catch (error) {
-      addToast({
-        color: 'danger',
+      Toast.toast.danger(errorMessages[mode], {
         description: `Error details: ${getErrorMessage(error)}`,
-        title: errorMessages[mode],
       });
     } finally {
       setAuthenticating(false);
@@ -133,38 +125,38 @@ const AuthModalButton = () => {
       {user?.id ? (
         <ButtonGroup size={screenWidth > 1024 ? 'md' : 'sm'}>
           <Button
-            as={Link}
             size="sm"
-            to="/account"
-            variant="solid"
-            color="secondary"
+            variant="secondary"
             data-testid="auth-button"
             isIconOnly={screenWidth < 1024}
-            startContent={<UserIcon weight="bold" data-testid="user-icon" />}
+            onPress={() => {
+              navigate('/account');
+            }}
           >
+            <UserIcon weight="bold" data-testid="user-icon" />
             {screenWidth > 1024 && 'Account'}
           </Button>
-          <Tooltip closeDelay={0} content="Log out">
-            <Button
-              size="sm"
-              isIconOnly
-              variant="solid"
-              color="secondary"
-              onPress={signOut}
-              startContent={
+          <Tooltip closeDelay={0}>
+            <Tooltip.Trigger>
+              <Button
+                size="sm"
+                isIconOnly
+                onPress={signOut}
+                variant="secondary"
+              >
                 <SignOutIcon weight="bold" data-testid="sign-out-icon" />
-              }
-            >
-              <VisuallyHidden>Log Out</VisuallyHidden>
-            </Button>
+                <VisuallyHidden>Log Out</VisuallyHidden>
+              </Button>
+            </Tooltip.Trigger>
+            <Tooltip.Content>Log out</Tooltip.Content>
           </Tooltip>
         </ButtonGroup>
       ) : (
         <Button
           size="sm"
-          color="primary"
-          onPress={onOpen}
+          variant="primary"
           data-testid="auth-button"
+          onPress={overlayState.open}
         >
           <Kbd
             color="primary"
@@ -172,7 +164,7 @@ const AuthModalButton = () => {
               'i',
               () => {
                 if (!user?.id) {
-                  onOpen();
+                  overlayState.open();
                 }
               },
             ]}
@@ -182,32 +174,50 @@ const AuthModalButton = () => {
           Log In
         </Button>
       )}
-      <Modal isOpen={isOpen} onClose={handleClose} onOpenChange={onOpenChange}>
-        <ModalContent>
-          <ModalHeader>{headerTitles[mode]}</ModalHeader>
-          <ModalBody>
-            {mode === 'reset-password' ? (
-              <AuthForm {...authFormProps} />
-            ) : (
-              <Tabs
-                fullWidth
-                color="primary"
-                onSelectionChange={handleTabChange}
-              >
-                <Tab key="login" title="Login" isDisabled={authenticating}>
+      <Modal state={overlayState}>
+        <Modal.Backdrop
+          onOpenChange={(open) => {
+            if (!open) {
+              handleClose();
+            }
+          }}
+        >
+          <Modal.Container>
+            <Modal.Dialog>
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>{headerTitles[mode]}</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                {mode === 'reset-password' ? (
                   <AuthForm {...authFormProps} />
-                </Tab>
-                <Tab
-                  key="register"
-                  title="Register"
-                  isDisabled={authenticating}
-                >
-                  <AuthForm {...authFormProps} />
-                </Tab>
-              </Tabs>
-            )}
-          </ModalBody>
-        </ModalContent>
+                ) : (
+                  <Tabs className="w-full" onSelectionChange={handleTabChange}>
+                    <Tabs.ListContainer>
+                      <Tabs.List aria-label="Auth mode">
+                        <Tabs.Tab id="login" isDisabled={authenticating}>
+                          Login
+                          <Tabs.Indicator />
+                        </Tabs.Tab>
+                        <Tabs.Tab id="register" isDisabled={authenticating}>
+                          <Tabs.Separator />
+                          Register
+                          <Tabs.Indicator />
+                        </Tabs.Tab>
+                      </Tabs.List>
+                    </Tabs.ListContainer>
+                    <Tabs.Panel id="login">
+                      <AuthForm {...authFormProps} />
+                    </Tabs.Panel>
+                    <Tabs.Panel id="register">
+                      <AuthForm {...authFormProps} />
+                    </Tabs.Panel>
+                  </Tabs>
+                )}
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
     </>
   );

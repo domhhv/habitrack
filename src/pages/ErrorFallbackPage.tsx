@@ -18,27 +18,21 @@ const ErrorFallbackPage = ({
 
   return (
     <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 items-center justify-center">
-      <Alert
-        title={title}
-        color="danger"
-        variant="solid"
-        description={`We're sorry for the inconvenience.${errorDescription}`}
-        classNames={{
-          base: 'w-4/5 max-w-3xl',
-          title: 'font-bold',
-        }}
-        endContent={
-          <Button
-            color="danger"
-            variant="faded"
-            onPress={() => {
-              window.location.reload();
-            }}
-          >
-            Reload
-          </Button>
-        }
-      />
+      <Alert status="danger" className="w-4/5 max-w-3xl">
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title className="font-bold">{title}</Alert.Title>
+          <Alert.Description>{`We're sorry for the inconvenience.${errorDescription}`}</Alert.Description>
+        </Alert.Content>
+        <Button
+          variant="danger-soft"
+          onPress={() => {
+            window.location.reload();
+          }}
+        >
+          Reload
+        </Button>
+      </Alert>
     </main>
   );
 };

@@ -25,8 +25,7 @@ const ThemeToggle = () => {
             size="sm"
             key={mode}
             isIconOnly
-            color="secondary"
-            variant={isSelected ? 'flat' : 'light'}
+            variant={isSelected ? 'secondary' : 'ghost'}
             onPress={() => {
               setThemeMode(mode);
             }}
