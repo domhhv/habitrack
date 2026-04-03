@@ -1,4 +1,12 @@
-import { cn, Alert, Input, Button, Select, SelectItem } from '@heroui/react';
+import {
+  cn,
+  Alert,
+  Input,
+  Label,
+  Button,
+  Select,
+  ListBox,
+} from '@heroui/react';
 import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
 import React from 'react';
@@ -37,11 +45,14 @@ const AccountPage = () => {
     return (
       <div className={cn(containerClassName, 'items-start pt-16')}>
         {title}
-        <Alert
-          color="danger"
-          className="mx-auto w-96"
-          title="Please log in to your account first"
-        />
+        <Alert status="danger" className="mx-auto w-96">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title className="font-bold">
+              Please log in to your account first
+            </Alert.Title>
+          </Alert.Content>
+        </Alert>
         e
       </div>
     );
@@ -107,85 +118,109 @@ const AccountPage = () => {
         >
           <div className="flex flex-col gap-2">
             <Input
-              isDisabled // TODO: Implement a flow for updating email
+              disabled
               value={email}
-              label="Email"
-              variant="bordered"
+              placeholder="Email"
+              variant="secondary"
               data-testid="email-input"
               onChange={handleEmailChange}
-              description="Updating an email is coming soon"
             />
             <PasswordInput
+              label="Password"
               value={password}
-              variant="bordered"
+              variant="secondary"
               isDisabled={isUpdating}
               testId="password-input"
-              label="Set new password"
               onChange={handlePasswordChange}
             />
             <Input
               value={name}
-              label="Name"
-              variant="bordered"
-              isDisabled={isUpdating}
+              placeholder="Name"
+              variant="secondary"
+              disabled={isUpdating}
               data-testid="name-input"
               onChange={handleNameChange}
             />
             <Select
-              variant="bordered"
-              label="Start week on"
+              variant="secondary"
+              value={firstDayOfWeek}
               isDisabled={isUpdating}
-              selectedKeys={[firstDayOfWeek]}
-              onSelectionChange={(value) => {
-                const [newDay] = Array.from(value);
-
-                setFirstDayOfWeek(newDay as DaysOfWeek);
+              onChange={(value) => {
+                const newDay = value as DaysOfWeek;
+                setFirstDayOfWeek(newDay);
               }}
             >
-              {[
-                { key: 'sun', label: 'Sunday' },
-                { key: 'mon', label: 'Monday' },
-              ].map((day) => {
-                return <SelectItem key={day.key}>{day.label}</SelectItem>;
-              })}
+              <Label>Start week on</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  {[
+                    { key: 'sun', label: 'Sunday' },
+                    { key: 'mon', label: 'Monday' },
+                  ].map((day) => {
+                    return (
+                      <ListBox.Item
+                        id={day.key}
+                        key={day.key}
+                        textValue={day.label}
+                      >
+                        <Label>{day.label}</Label>
+                      </ListBox.Item>
+                    );
+                  })}
+                </ListBox>
+              </Select.Popover>
             </Select>
             <Select
-              variant="bordered"
+              variant="secondary"
               isDisabled={isUpdating}
-              label="Default currency"
-              selectedKeys={[defaultCurrency]}
-              onSelectionChange={(value) => {
-                const [newDefaultCurrency] = Array.from(value);
-
-                if (typeof newDefaultCurrency !== 'string') {
-                  return;
+              value={defaultCurrency}
+              onChange={(value) => {
+                if (typeof value === 'string') {
+                  setDefaultCurrency(value);
                 }
-
-                setDefaultCurrency(newDefaultCurrency);
               }}
             >
-              {[
-                { key: 'EUR', label: 'EUR' },
-                { key: 'USD', label: 'USD' },
-                { key: 'GBP', label: 'GBP' },
-                { key: 'UAH', label: 'UAH' },
-              ].map((currency) => {
-                return (
-                  <SelectItem key={currency.key}>{currency.label}</SelectItem>
-                );
-              })}
+              <Label>Default currency</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  {[
+                    { key: 'EUR', label: 'EUR' },
+                    { key: 'USD', label: 'USD' },
+                    { key: 'GBP', label: 'GBP' },
+                    { key: 'UAH', label: 'UAH' },
+                  ].map((currency) => {
+                    return (
+                      <ListBox.Item
+                        id={currency.key}
+                        key={currency.key}
+                        textValue={currency.label}
+                      >
+                        <Label>{currency.label}</Label>
+                      </ListBox.Item>
+                    );
+                  })}
+                </ListBox>
+              </Select.Popover>
             </Select>
             <Button
               fullWidth
               type="submit"
-              color="primary"
-              isLoading={isUpdating}
+              variant="primary"
               isDisabled={
-                firstDayOfWeek === profile.firstDayOfWeek &&
-                name === profile.name &&
-                email === profile.email &&
-                defaultCurrency === profile.defaultCurrency &&
-                !password
+                isUpdating ||
+                (firstDayOfWeek === profile.firstDayOfWeek &&
+                  name === profile.name &&
+                  email === profile.email &&
+                  defaultCurrency === profile.defaultCurrency &&
+                  !password)
               }
             >
               Save

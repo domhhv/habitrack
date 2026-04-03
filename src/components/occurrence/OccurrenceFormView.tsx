@@ -2,15 +2,16 @@ import type { Selection, ButtonProps } from '@heroui/react';
 import {
   cn,
   Form,
+  Link,
+  Label,
   Button,
+  Header,
   Switch,
-  Listbox,
+  ListBox,
   Checkbox,
-  Textarea,
-  TimeInput,
-  NumberInput,
-  ListboxItem,
-  ListboxSection,
+  TextArea,
+  TimeField,
+  NumberField,
 } from '@heroui/react';
 import {
   now,
@@ -28,7 +29,6 @@ import groupBy from 'lodash.groupby';
 import isEqual from 'lodash.isequal';
 import pluralize from 'pluralize';
 import React from 'react';
-import { Link } from 'react-router';
 
 import { SignedImageViewer, MetricValuesSection } from '@components';
 import { useTextField, useScreenWidth } from '@hooks';
@@ -88,7 +88,7 @@ const OccurrenceFormView = ({
   const [previousMetricValues, setPreviousMetricValues] = React.useState<
     Record<string, MetricValue | undefined>
   >({});
-  const { isDesktop, isMobile } = useScreenWidth();
+  const { isDesktop, isMobile: _isMobile } = useScreenWidth();
   const [metricValues, setMetricValues] = React.useState<
     Record<string, MetricValue | undefined>
   >({});
@@ -709,9 +709,8 @@ const OccurrenceFormView = ({
   };
 
   const submitButtonSharedProps: ButtonProps = {
-    color: 'primary',
     isDisabled: isSubmitButtonDisabled,
-    isLoading: isSaving,
+    variant: 'primary',
   };
 
   return (
@@ -728,7 +727,7 @@ const OccurrenceFormView = ({
       ) : hasHabits ? (
         <>
           <div className="rounded-medium order-medium border-default-200 hover:border-default-400 focus-within:border-default-400 max-h-100 w-full overflow-y-auto border-2 px-3 py-2">
-            <Listbox
+            <ListBox
               aria-label="Habits"
               disallowEmptySelection
               selectionMode="single"
@@ -741,36 +740,37 @@ const OccurrenceFormView = ({
                 }
 
                 return (
-                  <ListboxSection
-                    showDivider
-                    key={traitName}
-                    title={traitName}
-                    classNames={{
-                      heading:
-                        'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-                    }}
-                  >
+                  <ListBox.Section key={traitName}>
+                    <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                      {traitName}
+                    </Header>
                     {habits.map((habit) => {
                       return (
-                        <ListboxItem key={habit.id} textValue={habit.name}>
-                          <div className="flex items-center gap-2">
-                            <img
-                              alt={habit.name}
-                              className="h-4 w-4"
-                              src={getPublicUrl(
-                                StorageBuckets.HABIT_ICONS,
-                                habit.iconPath
-                              )}
-                            />
-                            <span>{habit.name}</span>
-                          </div>
-                        </ListboxItem>
+                        <ListBox.Item
+                          id={habit.id}
+                          key={habit.id}
+                          textValue={habit.name}
+                        >
+                          <Label>
+                            <div className="flex items-center gap-2">
+                              <img
+                                alt={habit.name}
+                                className="h-4 w-4"
+                                src={getPublicUrl(
+                                  StorageBuckets.HABIT_ICONS,
+                                  habit.iconPath
+                                )}
+                              />
+                              <span>{habit.name}</span>
+                            </div>
+                          </Label>
+                        </ListBox.Item>
                       );
                     })}
-                  </ListboxSection>
+                  </ListBox.Section>
                 );
               })}
-            </Listbox>
+            </ListBox>
           </div>
           <p className="text-tiny text-foreground-400">
             {lastOccurredAt
@@ -805,9 +805,8 @@ const OccurrenceFormView = ({
                 <div key={stock.id} className="flex flex-col gap-1">
                   <div className="flex items-center justify-between gap-2">
                     <Checkbox
-                      size="sm"
                       isSelected={isSelected}
-                      onValueChange={(nextSelected) => {
+                      onChange={(nextSelected: boolean) => {
                         return handleStockSelectionChange(
                           stock.id,
                           nextSelected,
@@ -815,33 +814,42 @@ const OccurrenceFormView = ({
                         );
                       }}
                     >
-                      <span className="truncate">{stock.name}</span>
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      <Checkbox.Content>
+                        <Label className="truncate text-sm">{stock.name}</Label>
+                      </Checkbox.Content>
                     </Checkbox>
                     {isQuantifiable && (
-                      <NumberInput
-                        size="sm"
+                      <NumberField
                         minValue={1}
                         className="w-24"
                         isDisabled={!isSelected}
                         aria-label={`${stock.name} quantity`}
                         maxValue={stock.remainingItems ?? undefined}
                         value={(stockSelections[stock.id] ?? 1) as number}
-                        onValueChange={(value) => {
+                        onChange={(value: number) => {
                           return handleStockQuantityChange(
                             stock.id,
                             value ?? 1,
                             stock.remainingItems
                           );
                         }}
-                      />
+                      >
+                        <NumberField.Group>
+                          <NumberField.DecrementButton />
+                          <NumberField.Input />
+                          <NumberField.IncrementButton />
+                        </NumberField.Group>
+                      </NumberField>
                     )}
                   </div>
                   {isSelected && !isQuantifiable && (
                     <Checkbox
-                      size="sm"
                       className="pl-7"
                       isSelected={depletedStockIds.has(stock.id)}
-                      onValueChange={(checked) => {
+                      onChange={(checked: boolean) => {
                         setDepletedStockIds((prev) => {
                           const next = new Set(prev);
 
@@ -855,9 +863,14 @@ const OccurrenceFormView = ({
                         });
                       }}
                     >
-                      <span className="text-foreground-400 text-tiny">
-                        Mark as depleted
-                      </span>
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      <Checkbox.Content>
+                        <Label className="text-foreground-400 text-tiny">
+                          Mark as depleted
+                        </Label>
+                      </Checkbox.Content>
                     </Checkbox>
                   )}
                 </div>
@@ -920,21 +933,15 @@ const OccurrenceFormView = ({
           }
         }}
       />
-      <Textarea
+      <TextArea
         value={note}
-        variant="faded"
         placeholder="Note"
+        variant="secondary"
         onChange={handleNoteChange}
+        className={!isDesktop ? 'text-base' : undefined}
         onKeyDown={() => {
           return null;
         }}
-        classNames={
-          !isDesktop
-            ? {
-                input: 'text-base',
-              }
-            : undefined
-        }
       />
       <div className="w-full space-y-2">
         <div className={cn('flex gap-2', !hasSpecificTime && 'py-2')}>
@@ -942,24 +949,20 @@ const OccurrenceFormView = ({
             size="sm"
             className="basis-full"
             isSelected={hasSpecificTime}
-            onValueChange={setHasSpecificTime}
+            onChange={setHasSpecificTime}
           >
-            Specify time
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+            <Switch.Content>
+              <Label>Specify time</Label>
+            </Switch.Content>
           </Switch>
           {hasSpecificTime && (
-            <TimeInput
+            <TimeField
               value={time}
-              variant="faded"
               onChange={setTime}
-              size={isMobile ? 'sm' : 'md'}
-              classNames={
-                !isDesktop
-                  ? {
-                      input: 'text-base',
-                      inputWrapper: 'h-10',
-                    }
-                  : undefined
-              }
+              className={!isDesktop ? 'text-base' : undefined}
             />
           )}
         </div>
@@ -986,15 +989,11 @@ const OccurrenceFormView = ({
           {occurrenceToEdit ? 'Update' : 'Add'}
         </Button>
       ) : (
-        <Button
-          as={Link}
-          to="/habits"
-          {...submitButtonSharedProps}
-          fullWidth
-          onPress={handleClose}
-        >
-          Go to Habits
-        </Button>
+        <Link href="/habits" className="w-full">
+          <Button {...submitButtonSharedProps} fullWidth onPress={handleClose}>
+            Go to Habits
+          </Button>
+        </Link>
       )}
     </Form>
   );

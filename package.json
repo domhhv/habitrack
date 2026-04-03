@@ -52,7 +52,7 @@
     "db:gen-types": "supabase gen types --lang=typescript --schema public --schema auth --schema storage --local > supabase/database.types.ts && yarn eslint:fix supabase/database.types.ts"
   },
   "dependencies": {
-    "@heroui/react": "^2.8.10",
+    "@heroui/react": "^3.0.1",
     "@internationalized/date": "^3.12.0",
     "@phosphor-icons/react": "^2.1.10",
     "@redux-devtools/extension": "^4.0.0",
@@ -62,7 +62,6 @@
     "browser-image-compression": "^2.0.2",
     "camelcase-keys": "^10.0.2",
     "decamelize-keys": "^2.0.1",
-    "framer-motion": "^12.35.1",
     "immer": "^11.1.4",
     "lodash.capitalize": "^4.2.1",
     "lodash.groupby": "^4.6.0",

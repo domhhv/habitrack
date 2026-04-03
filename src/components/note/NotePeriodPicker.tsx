@@ -1,4 +1,4 @@
-import { cn, Button, Slider, RangeCalendar } from '@heroui/react';
+import { cn, Label, Button, Slider, RangeCalendar } from '@heroui/react';
 import {
   startOfWeek,
   startOfMonth,
@@ -21,6 +21,12 @@ type NotePeriodPickerProps = {
   endRange: CalendarDate;
   isShown: boolean;
   onBeforeChange?: () => Promise<boolean> | boolean;
+};
+
+const periodIcons: Record<string, React.ReactNode> = {
+  day: <SunIcon size={20} />,
+  month: <CalendarDotsIcon size={20} />,
+  week: <NumberSevenIcon size={20} />,
 };
 
 const NotePeriodPicker = ({
@@ -54,56 +60,11 @@ const NotePeriodPicker = ({
       )}
     >
       <Slider
-        showSteps
-        showTooltip
+        step={1}
         minValue={1}
         maxValue={3}
         value={['day', 'week', 'month'].indexOf(periodKind) + 1}
         orientation={screenWidth > 445 ? 'vertical' : 'horizontal'}
-        classNames={{
-          mark: 'min-[446px]:data-[in-range=true]:ml-4 max-[446px]:mt-2',
-        }}
-        marks={[
-          {
-            label: 'Day',
-            value: 1,
-          },
-          {
-            label: 'Week',
-            value: 2,
-          },
-          {
-            label: 'Month',
-            value: 3,
-          },
-        ]}
-        getTooltipValue={(value) => {
-          if (value === 1) {
-            return 'Day note';
-          }
-
-          if (value === 2) {
-            return 'Week note';
-          }
-
-          if (value === 3) {
-            return 'Month note';
-          }
-
-          return '';
-        }}
-        renderThumb={(props) => {
-          return (
-            <div
-              {...props}
-              className="bg-primary-600 top-1/2 left-1/2 mx-auto flex h-8 w-8 items-center justify-center rounded-full text-white"
-            >
-              {periodKind === 'day' && <SunIcon size={20} />}
-              {periodKind === 'week' && <NumberSevenIcon size={20} />}
-              {periodKind === 'month' && <CalendarDotsIcon size={20} />}
-            </div>
-          );
-        }}
         onChange={(value) => {
           const nextValue = Array.isArray(value) ? value[0] : value;
 
@@ -134,12 +95,22 @@ const NotePeriodPicker = ({
             }
           });
         }}
-      />
+      >
+        <Label className="sr-only">Period type</Label>
+        <Slider.Track>
+          <Slider.Fill />
+          <Slider.Thumb>
+            <div className="bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white">
+              {periodIcons[periodKind]}
+            </div>
+          </Slider.Thumb>
+        </Slider.Track>
+      </Slider>
       <div className="flex gap-1">
         <Button
           size="sm"
           isIconOnly
-          variant="flat"
+          variant="secondary"
           className="h-full w-5! min-w-auto"
           onPress={() => {
             void handleChange(() => {
@@ -162,20 +133,16 @@ const NotePeriodPicker = ({
           isReadOnly
           focusedValue={periodDate}
           firstDayOfWeek={firstDayOfWeek}
+          className="cursor-default [&_span]:cursor-default!"
           value={{
             end: endRange,
             start: periodDate,
-          }}
-          classNames={{
-            cell: '[&_span]:cursor-default! cursor-default',
-            nextButton: 'hidden',
-            prevButton: 'hidden',
           }}
         />
         <Button
           size="sm"
           isIconOnly
-          variant="flat"
+          variant="secondary"
           className="h-full w-5! min-w-auto"
           onPress={() => {
             void handleChange(() => {

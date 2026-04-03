@@ -1,11 +1,4 @@
-import {
-  cn,
-  Button,
-  Popover,
-  Tooltip,
-  PopoverContent,
-  PopoverTrigger,
-} from '@heroui/react';
+import { cn, Button, Popover, Tooltip } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { isToday } from '@internationalized/date';
 import {
@@ -19,7 +12,7 @@ import {
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useCalendarCell } from 'react-aria';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { OccurrenceChip } from '@components';
@@ -131,73 +124,79 @@ const MonthCalendarCell = ({
         )}
         {isDesktop && (
           <div className="flex items-center gap-1">
-            <Tooltip closeDelay={0} content="Open day">
-              <Button
-                as={Link}
-                radius="sm"
-                variant="light"
-                color="secondary"
-                aria-label="Open day"
-                to={`/calendar/day/${date.year}/${date.month}/${date.day}`}
-                className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
-              >
-                <ArrowSquareRightIcon size={18} weight="bold" />
-              </Button>
+            <Tooltip closeDelay={0}>
+              <Tooltip.Trigger>
+                <Button
+                  variant="ghost"
+                  aria-label="Open day"
+                  className="h-5 w-5 min-w-fit rounded-sm px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+                  onPress={() => {
+                    navigate(
+                      `/calendar/day/${date.year}/${date.month}/${date.day}`
+                    );
+                  }}
+                >
+                  <ArrowSquareRightIcon size={18} weight="bold" />
+                </Button>
+              </Tooltip.Trigger>
+              <Tooltip.Content>Open day</Tooltip.Content>
             </Tooltip>
-            <Tooltip closeDelay={0} content="Show habit log">
-              <Button
-                radius="sm"
-                variant="light"
-                color="secondary"
-                isDisabled={!user}
-                aria-label="Show habit log"
-                className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
-                onPress={() => {
-                  openOccurrenceDrawer({
-                    dayToDisplay: date,
-                  });
-                }}
-              >
-                <SquareHalfIcon size={18} weight="bold" />
-              </Button>
+            <Tooltip closeDelay={0}>
+              <Tooltip.Trigger>
+                <Button
+                  variant="ghost"
+                  isDisabled={!user}
+                  aria-label="Show habit log"
+                  className="h-5 w-5 min-w-fit rounded-sm px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+                  onPress={() => {
+                    openOccurrenceDrawer({
+                      dayToDisplay: date,
+                    });
+                  }}
+                >
+                  <SquareHalfIcon size={18} weight="bold" />
+                </Button>
+              </Tooltip.Trigger>
+              <Tooltip.Content>Show habit log</Tooltip.Content>
             </Tooltip>
-            <Tooltip closeDelay={0} content="Log habit">
-              <Button
-                radius="sm"
-                variant="light"
-                color="secondary"
-                isDisabled={!user}
-                aria-label="Log habit"
-                onPress={openLoggingDrawer}
-                className="h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
-              >
-                <CalendarPlusIcon size={18} weight="bold" />
-              </Button>
+            <Tooltip closeDelay={0}>
+              <Tooltip.Trigger>
+                <Button
+                  variant="ghost"
+                  isDisabled={!user}
+                  aria-label="Log habit"
+                  onPress={openLoggingDrawer}
+                  className="h-5 w-5 min-w-fit rounded-sm px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+                >
+                  <CalendarPlusIcon size={18} weight="bold" />
+                </Button>
+              </Tooltip.Trigger>
+              <Tooltip.Content>Log habit</Tooltip.Content>
             </Tooltip>
-            <Tooltip
-              closeDelay={0}
-              content={hasNote ? 'Edit note' : 'Add note'}
-            >
-              <Button
-                radius="sm"
-                variant="light"
-                isDisabled={!user}
-                color={hasNote ? 'primary' : 'secondary'}
-                aria-label={hasNote ? 'Edit note' : 'Add note'}
-                onPress={() => {
-                  openNoteDrawer(date, 'day');
-                }}
-                className={cn(
-                  'h-5 w-5 min-w-fit px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                  hasNote && 'opacity-100'
-                )}
-              >
-                {hasNote ? (
-                  <NoteIcon size={18} weight="bold" />
-                ) : (
-                  <NoteBlankIcon size={18} weight="bold" />
-                )}
-              </Button>
+            <Tooltip closeDelay={0}>
+              <Tooltip.Trigger>
+                <Button
+                  variant="ghost"
+                  isDisabled={!user}
+                  aria-label={hasNote ? 'Edit note' : 'Add note'}
+                  onPress={() => {
+                    openNoteDrawer(date, 'day');
+                  }}
+                  className={cn(
+                    'h-5 w-5 min-w-fit rounded-sm px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                    hasNote && 'text-accent opacity-100'
+                  )}
+                >
+                  {hasNote ? (
+                    <NoteIcon size={18} weight="bold" />
+                  ) : (
+                    <NoteBlankIcon size={18} weight="bold" />
+                  )}
+                </Button>
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                {hasNote ? 'Edit note' : 'Add note'}
+              </Tooltip.Content>
             </Tooltip>
           </div>
         )}
@@ -211,79 +210,70 @@ const MonthCalendarCell = ({
   return (
     <div ref={calendarCellRef} {...cellProps} className={cellRootClassName}>
       {!isDesktop && user ? (
-        <Popover
-          offset={4}
-          placement="bottom"
-          isOpen={isPopoverOpen}
-          onOpenChange={setIsPopoverOpen}
-        >
-          <PopoverTrigger>{cellHeader}</PopoverTrigger>
-          <PopoverContent>
-            <div className="flex flex-col gap-1 p-1">
-              <Button
-                size="sm"
-                variant="light"
-                color="secondary"
-                className="justify-start"
-                startContent={<ArrowSquareRightIcon size={16} weight="bold" />}
-                onPress={() => {
-                  setIsPopoverOpen(false);
-                  navigate(
-                    `/calendar/day/${date.year}/${date.month}/${date.day}`
-                  );
-                }}
-              >
-                Open day
-              </Button>
-              <Button
-                size="sm"
-                variant="light"
-                color="secondary"
-                className="justify-start"
-                startContent={<SquareHalfIcon size={16} weight="bold" />}
-                onPress={() => {
-                  setIsPopoverOpen(false);
-                  openOccurrenceDrawer({
-                    dayToDisplay: date,
-                  });
-                }}
-              >
-                Show habit log
-              </Button>
-              <Button
-                size="sm"
-                variant="light"
-                color="secondary"
-                className="justify-start"
-                startContent={<CalendarPlusIcon size={16} weight="bold" />}
-                onPress={() => {
-                  setIsPopoverOpen(false);
-                  openLoggingDrawer();
-                }}
-              >
-                Log habit
-              </Button>
-              <Button
-                size="sm"
-                variant="light"
-                className="justify-start"
-                color={hasNote ? 'primary' : 'secondary'}
-                onPress={() => {
-                  setIsPopoverOpen(false);
-                  openNoteDrawer(date, 'day');
-                }}
-                startContent={
-                  hasNote ? (
+        <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+          <Popover.Trigger>{cellHeader}</Popover.Trigger>
+          <Popover.Content offset={4} placement="bottom">
+            <Popover.Dialog>
+              <div className="flex flex-col gap-1 p-1">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="justify-start"
+                  onPress={() => {
+                    setIsPopoverOpen(false);
+                    navigate(
+                      `/calendar/day/${date.year}/${date.month}/${date.day}`
+                    );
+                  }}
+                >
+                  <ArrowSquareRightIcon size={16} weight="bold" />
+                  Open day
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="justify-start"
+                  onPress={() => {
+                    setIsPopoverOpen(false);
+                    openOccurrenceDrawer({
+                      dayToDisplay: date,
+                    });
+                  }}
+                >
+                  <SquareHalfIcon size={16} weight="bold" />
+                  Show habit log
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="justify-start"
+                  onPress={() => {
+                    setIsPopoverOpen(false);
+                    openLoggingDrawer();
+                  }}
+                >
+                  <CalendarPlusIcon size={16} weight="bold" />
+                  Log habit
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={cn('justify-start', hasNote && 'text-accent')}
+                  onPress={() => {
+                    setIsPopoverOpen(false);
+                    openNoteDrawer(date, 'day');
+                  }}
+                >
+                  {hasNote ? (
                     <NoteIcon size={16} weight="bold" />
                   ) : (
                     <NoteBlankIcon size={16} weight="bold" />
-                  )
-                }
-              >
-                {hasNote ? 'Edit note' : 'Add note'}
-              </Button>
-            </div>
-          </PopoverContent>
+                  )}
+                  {hasNote ? 'Edit note' : 'Add note'}
+                </Button>
+              </div>
+            </Popover.Dialog>
+          </Popover.Content>
         </Popover>
       ) : (
         cellHeader

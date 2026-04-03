@@ -82,15 +82,9 @@ const OccurrenceChip = ({
 
   if (hasTooltip) {
     chip = (
-      <Tooltip
-        radius="sm"
-        closeDelay={0}
-        content={habitName}
-        classNames={{
-          content: 'px-2 py-1.5',
-        }}
-      >
-        {chip}
+      <Tooltip closeDelay={0}>
+        <Tooltip.Trigger>{chip}</Tooltip.Trigger>
+        <Tooltip.Content className="px-2 py-1.5">{habitName}</Tooltip.Content>
       </Tooltip>
     );
   }
@@ -99,12 +93,12 @@ const OccurrenceChip = ({
     chip = (
       <Badge
         size="sm"
-        variant="solid"
-        color="primary"
+        color="accent"
+        variant="primary"
         placement="bottom-right"
-        content={occurrences.length}
       >
-        {chip}
+        <Badge.Anchor>{chip}</Badge.Anchor>
+        <Badge.Label>{occurrences.length}</Badge.Label>
       </Badge>
     );
   }
@@ -118,10 +112,12 @@ const OccurrenceChip = ({
       <Badge
         size="sm"
         placement="top-right"
-        content={<NoteIcon size={14} weight="fill" />}
         className="top-1 right-1 border-none bg-transparent"
       >
-        {chip}
+        <Badge.Anchor>{chip}</Badge.Anchor>
+        <Badge.Label>
+          <NoteIcon size={14} weight="fill" />
+        </Badge.Label>
       </Badge>
     );
   }
@@ -135,10 +131,12 @@ const OccurrenceChip = ({
       <Badge
         size="sm"
         placement="top-left"
-        content={<CameraIcon size={14} weight="fill" />}
         className="top-1 right-1 border-none bg-transparent"
       >
-        {chip}
+        <Badge.Anchor>{chip}</Badge.Anchor>
+        <Badge.Label>
+          <CameraIcon size={14} weight="fill" />
+        </Badge.Label>
       </Badge>
     );
   }

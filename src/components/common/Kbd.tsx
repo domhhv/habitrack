@@ -6,7 +6,7 @@ import { useHasKeyboard, useKeyboardShortcut } from '@hooks';
 import { noop } from '@utils';
 
 const kbdVariants = tv({
-  base: 'text-tiny hidden md:text-sm',
+  base: 'hidden text-xs md:text-sm',
   defaultVariants: {
     color: 'default',
     size: 'sm',
@@ -14,8 +14,8 @@ const kbdVariants = tv({
   variants: {
     color: {
       default: '',
-      primary: 'bg-primary-400 dark:bg-primary-700',
-      secondary: 'bg-secondary-300 dark:bg-secondary-700',
+      primary: 'bg-accent/30 dark:bg-accent/50',
+      secondary: 'bg-default/50 dark:bg-default/70',
     },
     size: {
       md: 'px-1.5 py-0.5',

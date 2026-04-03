@@ -1,4 +1,12 @@
-import { Chip, Input, Button, Switch, NumberInput } from '@heroui/react';
+import {
+  Chip,
+  Input,
+  Label,
+  Button,
+  Switch,
+  TextField,
+  NumberField,
+} from '@heroui/react';
 import {
   XIcon,
   TrashIcon,
@@ -75,10 +83,10 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
   const handleDelete = async () => {
     if (
       await askConfirmation({
-        color: 'danger',
         confirmText: 'Delete',
         description: 'Are you sure you want to delete this stock?',
         title: 'Delete stock',
+        variant: 'danger',
       })
     ) {
       void handleAsyncAction(
@@ -194,7 +202,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
           <div className="flex items-center gap-2">
             <span className="truncate text-sm font-medium">{stock.name}</span>
             {stock.isDepleted && (
-              <Chip size="sm" variant="flat" color="default">
+              <Chip size="sm" color="default" variant="tertiary">
                 Depleted
               </Chip>
             )}
@@ -230,7 +238,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
           <Button
             size="sm"
             isIconOnly
-            variant="light"
+            variant="ghost"
             onPress={handleToggleDepleted}
             isDisabled={isEditing || isSaving}
             aria-label={
@@ -245,7 +253,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
           <Button
             size="sm"
             isIconOnly
-            variant="light"
+            variant="ghost"
             onPress={startEditing}
             aria-label="Edit stock"
             isDisabled={isEditing || isSaving}
@@ -255,9 +263,9 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
           <Button
             size="sm"
             isIconOnly
-            color="danger"
-            variant="light"
+            variant="ghost"
             onPress={handleDelete}
+            className="text-danger"
             aria-label="Delete stock"
             isDisabled={isEditing || isSaving}
           >
@@ -267,43 +275,45 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
       </div>
       {isEditing && (
         <div className="flex flex-col gap-3">
-          <Input
-            size="sm"
-            label="Name"
-            value={name}
-            onValueChange={setName}
-            placeholder="Stock name"
-          />
+          <TextField value={name} onChange={setName}>
+            <Label>Name</Label>
+            <Input placeholder="Stock name" />
+          </TextField>
           <div className="flex gap-2">
-            <NumberInput
-              size="sm"
-              label="Cost"
+            <NumberField
               minValue={0}
               value={cost}
               className="flex-1"
-              placeholder="0.00"
-              onValueChange={setCost}
+              onChange={setCost}
               formatOptions={{
                 maximumFractionDigits: 2,
                 minimumFractionDigits: 2,
               }}
-            />
-            <Input
-              size="sm"
-              label="Currency"
-              value={currency}
-              className="w-24"
-              placeholder="EUR"
-              onValueChange={setCurrency}
-            />
+            >
+              <Label>Cost</Label>
+              <NumberField.Group>
+                <NumberField.DecrementButton />
+                <NumberField.Input placeholder="0.00" />
+                <NumberField.IncrementButton />
+              </NumberField.Group>
+            </NumberField>
+            <TextField value={currency} className="w-24" onChange={setCurrency}>
+              <Label>Currency</Label>
+              <Input placeholder="EUR" />
+            </TextField>
           </div>
           <div className="flex items-center gap-2">
             <Switch
               size="sm"
               isSelected={isQuantifiable}
-              onValueChange={setIsQuantifiable}
+              onChange={setIsQuantifiable}
             >
-              Quantifiable
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+              <Switch.Content>
+                <Label>Quantifiable</Label>
+              </Switch.Content>
             </Switch>
             <span className="text-foreground-400 text-tiny">
               {isQuantifiable ? 'Exact item count' : 'Approximate usage'}
@@ -311,32 +321,40 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
           </div>
           {isQuantifiable && (
             <div className="flex gap-2">
-              <NumberInput
-                size="sm"
+              <NumberField
                 minValue={1}
                 value={totalItems}
                 className="flex-1"
-                label="Total items"
-                placeholder="e.g. 20"
-                onValueChange={setTotalItems}
-              />
-              <NumberInput
-                size="sm"
+                onChange={setTotalItems}
+              >
+                <Label>Total items</Label>
+                <NumberField.Group>
+                  <NumberField.DecrementButton />
+                  <NumberField.Input placeholder="e.g. 20" />
+                  <NumberField.IncrementButton />
+                </NumberField.Group>
+              </NumberField>
+              <NumberField
                 minValue={0}
-                label="Remaining"
                 className="flex-1"
-                placeholder="e.g. 10"
                 value={remainingItems}
                 isDisabled={!totalItems}
-                onValueChange={setRemainingItems}
+                onChange={setRemainingItems}
                 maxValue={totalItems ?? undefined}
-              />
+              >
+                <Label>Remaining</Label>
+                <NumberField.Group>
+                  <NumberField.DecrementButton />
+                  <NumberField.Input placeholder="e.g. 10" />
+                  <NumberField.IncrementButton />
+                </NumberField.Group>
+              </NumberField>
             </div>
           )}
           {isQuantifiable && totalItems !== undefined && (
             <Button
               size="sm"
-              variant="light"
+              variant="ghost"
               onPress={() => {
                 return setRemainingItems(totalItems);
               }}
@@ -356,21 +374,20 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              color="primary"
+              variant="primary"
               onPress={handleSave}
-              isLoading={isSaving}
-              isDisabled={!name.trim() || !user}
-              startContent={!isSaving && <FloppyDiskIcon className="size-4" />}
+              isDisabled={isSaving || !name.trim() || !user}
             >
+              <FloppyDiskIcon className="size-4" />
               Save
             </Button>
             <Button
               size="sm"
-              variant="light"
+              variant="ghost"
               isDisabled={isSaving}
               onPress={handleCancel}
-              startContent={<XIcon className="size-4" />}
             >
+              <XIcon className="size-4" />
               Cancel
             </Button>
           </div>

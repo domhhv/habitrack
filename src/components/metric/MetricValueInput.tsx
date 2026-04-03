@@ -1,10 +1,12 @@
 import {
   Chip,
   Input,
+  Label,
   Slider,
   Switch,
-  Textarea,
-  NumberInput,
+  TextArea,
+  TextField,
+  NumberField,
 } from '@heroui/react';
 import React from 'react';
 
@@ -57,10 +59,8 @@ const NumberValueInput = ({
   }, [config.min, onChange, value]);
 
   return (
-    <NumberInput
-      size="sm"
-      label={label}
-      variant="faded"
+    <NumberField
+      variant="secondary"
       minValue={config.min}
       maxValue={config.max}
       value={value?.numericValue ?? 0}
@@ -69,7 +69,7 @@ const NumberValueInput = ({
           ? { maximumFractionDigits: config.decimalPlaces }
           : undefined
       }
-      onValueChange={(v) => {
+      onChange={(v) => {
         if (isNaN(v)) {
           onChange(undefined);
 
@@ -78,7 +78,14 @@ const NumberValueInput = ({
 
         onChange({ numericValue: v });
       }}
-    />
+    >
+      <Label className="text-sm">{label}</Label>
+      <NumberField.Group>
+        <NumberField.DecrementButton />
+        <NumberField.Input />
+        <NumberField.IncrementButton />
+      </NumberField.Group>
+    </NumberField>
   );
 };
 
@@ -94,19 +101,25 @@ const PercentageValueInput = ({
   return (
     <Slider
       step={1}
-      size="sm"
       minValue={0}
-      label={name}
       maxValue={100}
       value={value?.numericValue ?? 50}
-      getValue={(v) => {
-        return `${v}%`;
-      }}
       onChange={(v) => {
-        const numVal = typeof v === 'number' ? v : v[0];
+        const numVal = typeof v === 'number' ? v : (v as number[])[0];
         onChange({ numericValue: numVal });
       }}
-    />
+    >
+      <Label>{name}</Label>
+      <Slider.Output>
+        {({ state }) => {
+          return `${state.values[0]}%`;
+        }}
+      </Slider.Output>
+      <Slider.Track>
+        <Slider.Fill />
+        <Slider.Thumb />
+      </Slider.Track>
+    </Slider>
   );
 };
 
@@ -135,13 +148,11 @@ const DurationValueInput = ({
 
   if (format === 'minutes') {
     return (
-      <NumberInput
-        size="sm"
+      <NumberField
         minValue={0}
-        variant="faded"
-        label={`${name} (min)`}
+        variant="secondary"
         value={Math.floor(ms / 60000)}
-        onValueChange={(v) => {
+        onChange={(v) => {
           if (isNaN(v)) {
             onChange(undefined);
 
@@ -150,19 +161,24 @@ const DurationValueInput = ({
 
           onChange({ durationMs: v * 60000 });
         }}
-      />
+      >
+        <Label className="text-sm">{`${name} (min)`}</Label>
+        <NumberField.Group>
+          <NumberField.DecrementButton />
+          <NumberField.Input />
+          <NumberField.IncrementButton />
+        </NumberField.Group>
+      </NumberField>
     );
   }
 
   if (format === 'seconds') {
     return (
-      <NumberInput
-        size="sm"
+      <NumberField
         minValue={0}
-        variant="faded"
+        variant="secondary"
         value={totalSeconds}
-        label={`${name} (sec)`}
-        onValueChange={(v) => {
+        onChange={(v) => {
           if (isNaN(v)) {
             onChange(undefined);
 
@@ -171,45 +187,67 @@ const DurationValueInput = ({
 
           onChange({ durationMs: v * 1000 });
         }}
-      />
+      >
+        <Label className="text-sm">{`${name} (sec)`}</Label>
+        <NumberField.Group>
+          <NumberField.DecrementButton />
+          <NumberField.Input />
+          <NumberField.IncrementButton />
+        </NumberField.Group>
+      </NumberField>
     );
   }
 
   return (
     <div className="flex gap-2">
-      <NumberInput
-        size="sm"
+      <NumberField
         minValue={0}
-        label="Hours"
         value={hours}
-        variant="faded"
-        onValueChange={(v) => {
+        variant="secondary"
+        onChange={(v) => {
           handleChange(isNaN(v) ? 0 : v, minutes, seconds);
         }}
-      />
-      <NumberInput
-        size="sm"
-        label="Min"
+      >
+        <Label className="text-sm">Hours</Label>
+        <NumberField.Group>
+          <NumberField.DecrementButton />
+          <NumberField.Input />
+          <NumberField.IncrementButton />
+        </NumberField.Group>
+      </NumberField>
+      <NumberField
         minValue={0}
         maxValue={59}
         value={minutes}
-        variant="faded"
-        onValueChange={(v) => {
+        variant="secondary"
+        onChange={(v) => {
           handleChange(hours, isNaN(v) ? 0 : v, seconds);
         }}
-      />
+      >
+        <Label className="text-sm">Min</Label>
+        <NumberField.Group>
+          <NumberField.DecrementButton />
+          <NumberField.Input />
+          <NumberField.IncrementButton />
+        </NumberField.Group>
+      </NumberField>
       {format === 'hh:mm:ss' && (
-        <NumberInput
-          size="sm"
-          label="Sec"
+        <NumberField
           minValue={0}
           maxValue={59}
           value={seconds}
-          variant="faded"
-          onValueChange={(v) => {
+          variant="secondary"
+          onChange={(v) => {
             handleChange(hours, minutes, isNaN(v) ? 0 : v);
           }}
-        />
+        >
+          <Label className="text-sm">Sec</Label>
+          <NumberField.Group>
+            <NumberField.DecrementButton />
+            <NumberField.Input />
+            <NumberField.IncrementButton />
+          </NumberField.Group>
+        </NumberField>
       )}
     </div>
   );
@@ -234,17 +272,22 @@ const ScaleValueInput = ({
 
   return (
     <Slider
-      size="sm"
-      label={label}
       step={config.step}
       value={currentVal}
       minValue={config.min}
       maxValue={config.max}
       onChange={(v) => {
-        const numVal = typeof v === 'number' ? v : v[0];
+        const numVal = typeof v === 'number' ? v : (v as number[])[0];
         onChange({ numericValue: numVal });
       }}
-    />
+    >
+      <Label>{label}</Label>
+      <Slider.Output />
+      <Slider.Track>
+        <Slider.Fill />
+        <Slider.Thumb />
+      </Slider.Track>
+    </Slider>
   );
 };
 
@@ -300,36 +343,46 @@ const RangeValueInput = ({
     <div>
       <p className="mb-2 text-sm">{name}</p>
       <div className="flex gap-2">
-        <NumberInput
-          size="sm"
-          variant="faded"
+        <NumberField
           aria-label="From"
+          variant="secondary"
           minValue={config.min}
           maxValue={config.max}
-          description={config.unit && `${config.unit} from`}
           value={value?.rangeFrom ?? defaultValue.rangeFrom}
-          onValueChange={(v) => {
+          onChange={(v) => {
             onChange({
               rangeFrom: isNaN(v) ? 0 : v,
               rangeTo: value?.rangeTo ?? defaultValue.rangeTo,
             });
           }}
-        />
-        <NumberInput
-          size="sm"
-          variant="faded"
+        >
+          {config.unit && <Label className="text-sm">{config.unit} from</Label>}
+          <NumberField.Group>
+            <NumberField.DecrementButton />
+            <NumberField.Input />
+            <NumberField.IncrementButton />
+          </NumberField.Group>
+        </NumberField>
+        <NumberField
           aria-label="To"
+          variant="secondary"
           minValue={config.min}
           maxValue={config.max}
           value={value?.rangeTo ?? defaultValue.rangeTo}
-          description={config.unit && `${config.unit} to`}
-          onValueChange={(v) => {
+          onChange={(v) => {
             onChange({
               rangeFrom: value?.rangeFrom ?? defaultValue.rangeFrom,
               rangeTo: isNaN(v) ? 0 : v,
             });
           }}
-        />
+        >
+          {config.unit && <Label className="text-sm">{config.unit} to</Label>}
+          <NumberField.Group>
+            <NumberField.DecrementButton />
+            <NumberField.Input />
+            <NumberField.IncrementButton />
+          </NumberField.Group>
+        </NumberField>
       </div>
     </div>
   );
@@ -381,8 +434,8 @@ const ChoiceValueInput = ({
             <Chip
               key={option}
               className="cursor-pointer"
-              color={isSelected ? 'primary' : 'default'}
-              variant={isSelected ? 'solid' : 'bordered'}
+              color={isSelected ? 'accent' : 'default'}
+              variant={isSelected ? 'primary' : 'secondary'}
               onClick={() => {
                 handleToggle(option);
               }}
@@ -414,13 +467,18 @@ const BooleanValueInput = ({
     <Switch
       size="sm"
       isSelected={value?.booleanValue ?? false}
-      onValueChange={(v) => {
+      onChange={(v: boolean) => {
         onChange({ booleanValue: v });
       }}
     >
-      <span className="text-sm">
-        {name}: {value?.booleanValue ? trueLabel : falseLabel}
-      </span>
+      <Switch.Control>
+        <Switch.Thumb />
+      </Switch.Control>
+      <Switch.Content>
+        <Label className="text-sm">
+          {name}: {value?.booleanValue ? trueLabel : falseLabel}
+        </Label>
+      </Switch.Content>
     </Switch>
   );
 };
@@ -436,23 +494,39 @@ const TextValueInput = ({
   value: TextMetricValue | undefined;
   onChange: (value: TextMetricValue | undefined) => void;
 }) => {
-  const sharedProps = {
-    label: name,
-    maxLength: config.maxLength,
-    placeholder: config.placeholder || '',
-    size: 'sm' as const,
-    value: value?.textValue ?? '',
-    variant: 'faded' as const,
-    onValueChange: (textValue: string) => {
-      onChange({ textValue });
-    },
-  };
-
   if (config.multiline) {
-    return <Textarea {...sharedProps} />;
+    return (
+      <TextField
+        variant="secondary"
+        value={value?.textValue ?? ''}
+        onChange={(textValue: string) => {
+          onChange({ textValue });
+        }}
+      >
+        <Label className="text-sm">{name}</Label>
+        <TextArea
+          maxLength={config.maxLength}
+          placeholder={config.placeholder || ''}
+        />
+      </TextField>
+    );
   }
 
-  return <Input {...sharedProps} />;
+  return (
+    <TextField
+      variant="secondary"
+      value={value?.textValue ?? ''}
+      onChange={(textValue: string) => {
+        onChange({ textValue });
+      }}
+    >
+      <Label className="text-sm">{name}</Label>
+      <Input
+        maxLength={config.maxLength}
+        placeholder={config.placeholder || ''}
+      />
+    </TextField>
+  );
 };
 
 const MetricValueInput = ({

@@ -1,4 +1,4 @@
-import { Switch } from '@heroui/react';
+import { Label, Switch } from '@heroui/react';
 
 import { MetricValuesSection } from '@components';
 import type { Habit, MetricValue } from '@models';
@@ -48,14 +48,19 @@ const StockMetricDefaults = ({
                 <Switch
                   size="sm"
                   isSelected={compoundDefaults[metric.id] ?? false}
-                  onValueChange={(next) => {
+                  onChange={(next: boolean) => {
                     onCompoundChange({
                       ...compoundDefaults,
                       [metric.id]: next,
                     });
                   }}
                 >
-                  {metric.name}
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                  <Switch.Content>
+                    <Label>{metric.name}</Label>
+                  </Switch.Content>
                 </Switch>
               </div>
             );

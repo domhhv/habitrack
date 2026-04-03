@@ -1,4 +1,4 @@
-import { Button, Tooltip } from '@heroui/react';
+import { Spinner, Tooltip } from '@heroui/react';
 import React from 'react';
 
 import { VisuallyHiddenInput } from '@components';
@@ -39,24 +39,26 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
   };
 
   return (
-    <Tooltip closeDelay={0} content="Upload new icon">
-      <Button
-        size="lg"
-        isIconOnly
-        as="label"
-        variant="light"
-        isDisabled={!user?.id}
-        isLoading={isUploading}
-        className="flex h-12 w-12 cursor-pointer p-1 opacity-100"
-      >
-        <img
-          alt={habit.name}
-          role="habit-icon"
-          className="h-8 w-8"
-          src={getPublicUrl(StorageBuckets.HABIT_ICONS, habit.iconPath)}
-        />
-        <VisuallyHiddenInput onChange={handleFileChange} />
-      </Button>
+    <Tooltip closeDelay={0}>
+      <Tooltip.Trigger>
+        <label
+          aria-disabled={!user?.id || isUploading}
+          className="rounded-medium hover:bg-default-100 flex h-12 w-12 cursor-pointer items-center justify-center p-1 opacity-100"
+        >
+          {isUploading ? (
+            <Spinner size="sm" />
+          ) : (
+            <img
+              alt={habit.name}
+              role="habit-icon"
+              className="h-8 w-8"
+              src={getPublicUrl(StorageBuckets.HABIT_ICONS, habit.iconPath)}
+            />
+          )}
+          <VisuallyHiddenInput onChange={handleFileChange} />
+        </label>
+      </Tooltip.Trigger>
+      <Tooltip.Content>Upload new icon</Tooltip.Content>
     </Tooltip>
   );
 };

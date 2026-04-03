@@ -43,7 +43,7 @@ const OccurrenceDrawer = () => {
     React.useState('');
   const { askConfirmation } = useConfirmationActions();
   const { removeOccurrence } = useOccurrenceActions();
-  const { isMobile } = useScreenWidth();
+  const { isMobile: _isMobile } = useScreenWidth();
   const { dayToDisplay, dayToLog, habitIdToDisplay, isOpen, occurrenceToEdit } =
     useOccurrenceDrawerState();
   const { closeOccurrenceDrawer, setDayToDisplay } =
@@ -199,52 +199,53 @@ const OccurrenceDrawer = () => {
   };
 
   return (
-    <Drawer
-      isOpen={isOpen}
-      onOpenChange={changeOpen}
-      placement={isMobile ? 'bottom' : 'right'}
-      size={dayToLog && isMobile ? 'full' : 'md'}
-    >
+    <Drawer isOpen={isOpen} onOpenChange={changeOpen}>
       <DrawerContent>
         <DrawerHeader className="flex-col">
           {canNavigateDays ? (
             <div className="flex items-center gap-2">
               <div>{getMainTitle()}</div>
-              <Tooltip content="Previous day">
-                <Button
-                  size="sm"
-                  isIconOnly
-                  radius="sm"
-                  variant="light"
-                  aria-label="Previous day"
-                  onPress={() => {
-                    navigateDay(-1);
-                  }}
-                >
-                  <CaretLeftIcon
-                    size={16}
-                    focusable="false"
-                    aria-hidden="true"
-                  />
-                </Button>
+              <Tooltip closeDelay={0}>
+                <Tooltip.Trigger>
+                  <Button
+                    size="sm"
+                    isIconOnly
+                    variant="ghost"
+                    className="rounded-sm"
+                    aria-label="Previous day"
+                    onPress={() => {
+                      navigateDay(-1);
+                    }}
+                  >
+                    <CaretLeftIcon
+                      size={16}
+                      focusable="false"
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </Tooltip.Trigger>
+                <Tooltip.Content>Previous day</Tooltip.Content>
               </Tooltip>
-              <Tooltip content="Next day">
-                <Button
-                  size="sm"
-                  isIconOnly
-                  radius="sm"
-                  variant="light"
-                  aria-label="Next day"
-                  onPress={() => {
-                    navigateDay(1);
-                  }}
-                >
-                  <CaretRightIcon
-                    size={16}
-                    focusable="false"
-                    aria-hidden="true"
-                  />
-                </Button>
+              <Tooltip closeDelay={0}>
+                <Tooltip.Trigger>
+                  <Button
+                    size="sm"
+                    isIconOnly
+                    variant="ghost"
+                    aria-label="Next day"
+                    className="rounded-sm"
+                    onPress={() => {
+                      navigateDay(1);
+                    }}
+                  >
+                    <CaretRightIcon
+                      size={16}
+                      focusable="false"
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </Tooltip.Trigger>
+                <Tooltip.Content>Next day</Tooltip.Content>
               </Tooltip>
             </div>
           ) : (

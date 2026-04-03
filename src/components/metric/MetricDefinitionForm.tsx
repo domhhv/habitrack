@@ -1,13 +1,15 @@
 import {
   Chip,
   Input,
+  Label,
   Button,
+  Header,
   Select,
   Switch,
-  SelectItem,
+  ListBox,
+  ListBoxItem,
   Autocomplete,
-  AutocompleteItem,
-  AutocompleteSection,
+  ListBoxSection,
 } from '@heroui/react';
 import {
   TrashIcon,
@@ -16,7 +18,6 @@ import {
   PencilSimpleIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
-import type { Key } from 'react-aria';
 
 import { METRIC_PRESETS } from '@const';
 import type { MetricType, MetricConfig, FormMetricDefinitions } from '@models';
@@ -72,7 +73,7 @@ const MetricDefinitionForm = ({
               </Chip>
             )}
             {metric.isToBeUpdated && (
-              <Chip size="sm" color="secondary">
+              <Chip size="sm" color="default">
                 To be updated
               </Chip>
             )}
@@ -114,12 +115,8 @@ const MetricDefinitionForm = ({
 
       <div className="flex flex-col gap-3 pb-2">
         <Autocomplete
-          size="sm"
-          variant="faded"
-          maxListboxHeight={384}
-          value={metric.presetName}
-          label="Choose from presets (optional)"
-          placeholder="Search for units, e.g. kilometers, kcal..."
+          variant="secondary"
+          value={metric.presetName ?? null}
           onClear={() => {
             onChange({
               config: {},
@@ -128,7 +125,7 @@ const MetricDefinitionForm = ({
               type: 'number',
             });
           }}
-          onChange={(key: Key | null) => {
+          onChange={(key) => {
             const preset = ALL_PRESETS.find((p) => {
               return p.name === key;
             });
@@ -144,55 +141,72 @@ const MetricDefinitionForm = ({
             });
           }}
         >
-          {METRIC_PRESETS.map(({ group, presets }) => {
-            return (
-              <AutocompleteSection key={group} title={group}>
-                {presets.map((preset) => {
-                  return (
-                    <AutocompleteItem key={preset.name}>
-                      {preset.name}
-                    </AutocompleteItem>
-                  );
-                })}
-              </AutocompleteSection>
-            );
-          })}
+          <Autocomplete.Trigger>
+            <Autocomplete.Filter>
+              <Input placeholder="Search for units, e.g. kilometers, kcal..." />
+            </Autocomplete.Filter>
+            <Autocomplete.ClearButton />
+            <Autocomplete.Indicator />
+          </Autocomplete.Trigger>
+          <Autocomplete.Popover>
+            <ListBox>
+              {METRIC_PRESETS.map(({ group, presets }) => {
+                return (
+                  <ListBoxSection key={group}>
+                    <Header>{group}</Header>
+                    {presets.map((preset) => {
+                      return (
+                        <ListBoxItem id={preset.name} key={preset.name}>
+                          {preset.name}
+                        </ListBoxItem>
+                      );
+                    })}
+                  </ListBoxSection>
+                );
+              })}
+            </ListBox>
+          </Autocomplete.Popover>
         </Autocomplete>
         <Input
-          size="sm"
-          variant="faded"
-          label="Metric name"
           value={metric.name}
-          onValueChange={(name) => {
+          variant="secondary"
+          placeholder="Metric name"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             onChange({
-              name,
+              name: e.target.value,
             });
           }}
         />
         <Select
-          size="sm"
-          variant="faded"
-          label="Metric type"
-          selectedKeys={[metric.type]}
+          variant="secondary"
+          value={metric.type}
+          onChange={(key) => {
+            const value = key as MetricType;
+
+            onChange({
+              config: DEFAULT_CONFIGS[value],
+              type: value,
+            });
+          }}
         >
-          {(Object.entries(METRIC_TYPE_LABELS) as [MetricType, string][]).map(
-            ([value, label]) => {
-              return (
-                <SelectItem
-                  key={value}
-                  textValue={label}
-                  onPress={() => {
-                    onChange({
-                      config: DEFAULT_CONFIGS[value],
-                      type: value,
-                    });
-                  }}
-                >
-                  {label}
-                </SelectItem>
-              );
-            }
-          )}
+          <Label>Metric type</Label>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              {(
+                Object.entries(METRIC_TYPE_LABELS) as [MetricType, string][]
+              ).map(([value, label]) => {
+                return (
+                  <ListBox.Item id={value} key={value} textValue={label}>
+                    <Label>{label}</Label>
+                  </ListBox.Item>
+                );
+              })}
+            </ListBox>
+          </Select.Popover>
         </Select>
 
         <MetricConfigFields
@@ -223,28 +237,31 @@ const MetricDefinitionForm = ({
         <Switch
           size="sm"
           isSelected={metric.isRequired}
-          onValueChange={(val) => {
+          onChange={(val: boolean) => {
             onChange({ isRequired: val });
           }}
         >
-          <span className="text-xs">Required</span>
+          <Switch.Control>
+            <Switch.Thumb />
+          </Switch.Control>
+          <Switch.Content>
+            <Label className="text-xs">Required</Label>
+          </Switch.Content>
         </Switch>
 
         <Button
           size="sm"
-          color="danger"
-          variant="light"
+          variant="ghost"
           onPress={onRemove}
-          startContent={<TrashIcon size={14} />}
+          className="text-danger"
         >
+          <TrashIcon size={14} />
           {metric.isToBeAdded ? 'Remove' : 'Discard'}
         </Button>
 
         <Button
           size="sm"
-          variant="flat"
-          color="success"
-          startContent={<StackPlusIcon size={14} />}
+          variant="secondary"
           onPress={() => {
             onChange({
               isBeingEdited: false,
@@ -254,6 +271,7 @@ const MetricDefinitionForm = ({
             });
           }}
         >
+          <StackPlusIcon size={14} />
           Done
         </Button>
       </div>

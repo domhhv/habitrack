@@ -1,4 +1,4 @@
-import { Input, Switch } from '@heroui/react';
+import { Input, Label, Switch, TextField } from '@heroui/react';
 
 import type {
   MetricType,
@@ -27,47 +27,47 @@ const NumberConfigFields = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      <Input
-        size="sm"
-        label="Unit"
-        variant="faded"
+      <TextField
+        variant="secondary"
         value={config.unit || ''}
-        placeholder="e.g., km, kg, bpm"
-        onChange={(e) => {
-          onChange({ ...config, unit: e.target.value || undefined });
+        onChange={(value) => {
+          onChange({ ...config, unit: value || undefined });
         }}
-      />
+      >
+        <Label>Unit</Label>
+        <Input placeholder="e.g., km, kg, bpm" />
+      </TextField>
       <div className="flex gap-2">
-        <Input
-          size="sm"
-          label="Min"
+        <TextField
           type="number"
-          variant="faded"
-          placeholder="Optional"
+          variant="secondary"
           value={config.min?.toString() || ''}
-          onChange={(e) => {
-            const val = e.target.value;
+          onChange={(value) => {
+            const val = value;
             onChange({
               ...config,
               min: val ? Number(val) : undefined,
             });
           }}
-        />
-        <Input
-          size="sm"
-          label="Max"
+        >
+          <Label>Min</Label>
+          <Input placeholder="Optional" />
+        </TextField>
+        <TextField
           type="number"
-          variant="faded"
-          placeholder="Optional"
+          variant="secondary"
           value={config.max?.toString() || ''}
-          onChange={(e) => {
-            const val = e.target.value;
+          onChange={(value) => {
+            const val = value;
             onChange({
               ...config,
               max: val ? Number(val) : undefined,
             });
           }}
-        />
+        >
+          <Label>Max</Label>
+          <Input placeholder="Optional" />
+        </TextField>
       </div>
     </div>
   );
@@ -122,36 +122,39 @@ const ScaleConfigFields = ({
 }) => {
   return (
     <div className="flex gap-2">
-      <Input
-        size="sm"
-        label="Min"
+      <TextField
         type="number"
-        variant="faded"
+        variant="secondary"
         value={config.min?.toString() || '1'}
-        onChange={(e) => {
-          onChange({ ...config, min: Number(e.target.value) || 1 });
+        onChange={(value) => {
+          onChange({ ...config, min: Number(value) || 1 });
         }}
-      />
-      <Input
-        size="sm"
-        label="Max"
+      >
+        <Label>Min</Label>
+        <Input />
+      </TextField>
+      <TextField
         type="number"
-        variant="faded"
+        variant="secondary"
         value={config.max?.toString() || '10'}
-        onChange={(e) => {
-          onChange({ ...config, max: Number(e.target.value) || 10 });
+        onChange={(value) => {
+          onChange({ ...config, max: Number(value) || 10 });
         }}
-      />
-      <Input
-        size="sm"
-        label="Step"
+      >
+        <Label>Max</Label>
+        <Input />
+      </TextField>
+      <TextField
         type="number"
-        variant="faded"
+        variant="secondary"
         value={config.step?.toString() || '1'}
-        onChange={(e) => {
-          onChange({ ...config, step: Number(e.target.value) || 1 });
+        onChange={(value) => {
+          onChange({ ...config, step: Number(value) || 1 });
         }}
-      />
+      >
+        <Label>Step</Label>
+        <Input />
+      </TextField>
     </div>
   );
 };
@@ -165,24 +168,29 @@ const RangeConfigFields = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      <Input
-        size="sm"
-        label="Unit"
-        variant="faded"
+      <TextField
+        variant="secondary"
         value={config.unit || ''}
-        placeholder="e.g., pages, reps"
-        onChange={(e) => {
-          onChange({ ...config, unit: e.target.value || undefined });
+        onChange={(value) => {
+          onChange({ ...config, unit: value || undefined });
         }}
-      />
+      >
+        <Label>Unit</Label>
+        <Input placeholder="e.g., pages, reps" />
+      </TextField>
       <Switch
         size="sm"
         isSelected={config.continueFromLast || false}
-        onValueChange={(val) => {
+        onChange={(val: boolean) => {
           onChange({ ...config, continueFromLast: val });
         }}
       >
-        <span className="text-xs">Continue from last value</span>
+        <Switch.Control>
+          <Switch.Thumb />
+        </Switch.Control>
+        <Switch.Content>
+          <Label className="text-xs">Continue from last value</Label>
+        </Switch.Content>
       </Switch>
       {config.continueFromLast && (
         <p className="text-foreground-500 text-xs">
@@ -227,15 +235,15 @@ const ChoiceConfigFields = ({
       {options.map((option, index) => {
         return (
           <div key={index} className="flex items-center gap-2">
-            <Input
-              size="sm"
+            <TextField
               value={option}
-              variant="faded"
-              placeholder={`Option ${index + 1}`}
-              onChange={(e) => {
-                handleOptionChange(index, e.target.value);
+              variant="secondary"
+              onChange={(value) => {
+                handleOptionChange(index, value);
               }}
-            />
+            >
+              <Input placeholder={`Option ${index + 1}`} />
+            </TextField>
             <button
               type="button"
               className="text-danger text-sm"
@@ -258,11 +266,16 @@ const ChoiceConfigFields = ({
       <Switch
         size="sm"
         isSelected={config.allowMultiple || false}
-        onValueChange={(val) => {
+        onChange={(val: boolean) => {
           onChange({ ...config, allowMultiple: val });
         }}
       >
-        <span className="text-xs">Allow multiple selections</span>
+        <Switch.Control>
+          <Switch.Thumb />
+        </Switch.Control>
+        <Switch.Content>
+          <Label className="text-xs">Allow multiple selections</Label>
+        </Switch.Content>
       </Switch>
     </div>
   );
@@ -277,26 +290,26 @@ const BooleanConfigFields = ({
 }) => {
   return (
     <div className="flex gap-2">
-      <Input
-        size="sm"
-        variant="faded"
-        placeholder="Yes"
-        label="True label"
+      <TextField
+        variant="secondary"
         value={config.trueLabel || ''}
-        onChange={(e) => {
-          onChange({ ...config, trueLabel: e.target.value || undefined });
+        onChange={(value) => {
+          onChange({ ...config, trueLabel: value || undefined });
         }}
-      />
-      <Input
-        size="sm"
-        variant="faded"
-        placeholder="No"
-        label="False label"
+      >
+        <Label>True label</Label>
+        <Input placeholder="Yes" />
+      </TextField>
+      <TextField
+        variant="secondary"
         value={config.falseLabel || ''}
-        onChange={(e) => {
-          onChange({ ...config, falseLabel: e.target.value || undefined });
+        onChange={(value) => {
+          onChange({ ...config, falseLabel: value || undefined });
         }}
-      />
+      >
+        <Label>False label</Label>
+        <Input placeholder="No" />
+      </TextField>
     </div>
   );
 };
@@ -310,26 +323,31 @@ const TextConfigFields = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      <Input
-        size="sm"
+      <TextField
         type="number"
-        variant="faded"
-        label="Max length"
-        placeholder="Optional"
+        variant="secondary"
         value={config.maxLength?.toString() || ''}
-        onChange={(e) => {
-          const val = e.target.value;
+        onChange={(value) => {
+          const val = value;
           onChange({ ...config, maxLength: val ? Number(val) : undefined });
         }}
-      />
+      >
+        <Label>Max length</Label>
+        <Input placeholder="Optional" />
+      </TextField>
       <Switch
         size="sm"
         isSelected={config.multiline || false}
-        onValueChange={(val) => {
+        onChange={(val: boolean) => {
           onChange({ ...config, multiline: val });
         }}
       >
-        <span className="text-xs">Allow multiline</span>
+        <Switch.Control>
+          <Switch.Thumb />
+        </Switch.Control>
+        <Switch.Content>
+          <Label className="text-xs">Allow multiline</Label>
+        </Switch.Content>
       </Switch>
     </div>
   );

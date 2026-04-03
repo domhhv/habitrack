@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader } from '@heroui/react';
+import { Card } from '@heroui/react';
 import { parseDate, getLocalTimeZone } from '@internationalized/date';
 import {
   SunIcon,
@@ -117,8 +117,8 @@ const NoteListItem = ({ note }: NoteListItemProps) => {
     note.updatedAt && timestampFormatter.format(new Date(note.updatedAt));
 
   return (
-    <Card shadow="sm" className="w-full space-y-2">
-      <CardHeader className="flex gap-3 pb-0">
+    <Card className="w-full space-y-2">
+      <Card.Header className="flex gap-3 pb-0">
         {renderIcon()}
         <div className="flex flex-col">
           <p className="text-md font-semibold">{getTitle()}</p>
@@ -126,8 +126,8 @@ const NoteListItem = ({ note }: NoteListItemProps) => {
             {formattedCreatedAtTimestamp}
           </p>
         </div>
-      </CardHeader>
-      <CardBody className="space-y-1 pt-1">
+      </Card.Header>
+      <Card.Content className="space-y-1 pt-1">
         <p className="text-default-700 dark:text-default-600 whitespace-pre-wrap">
           {note.content}
         </p>
@@ -136,7 +136,7 @@ const NoteListItem = ({ note }: NoteListItemProps) => {
             Last updated at {formattedUpdatedAtTimestamp}
           </p>
         )}
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 };
