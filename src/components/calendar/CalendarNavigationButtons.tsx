@@ -128,10 +128,8 @@ const CalendarNavigationButtons = ({
   return (
     <>
       <Button
-        size="sm"
         isIconOnly
-        variant="ghost"
-        className="rounded-sm"
+        variant="tertiary"
         onPress={() => {
           navigate(previousRangePath);
         }}
@@ -140,9 +138,8 @@ const CalendarNavigationButtons = ({
       </Button>
       {!isSameRange && (
         <Button
-          size="sm"
-          variant="ghost"
-          className={cn('rounded-sm', isMobile && 'min-w-fit p-0')}
+          variant="tertiary"
+          className={cn(isMobile && 'min-w-fit px-2')}
           onPress={() => {
             navigate(todayRangePath);
           }}
@@ -152,10 +149,8 @@ const CalendarNavigationButtons = ({
         </Button>
       )}
       <Button
-        size="sm"
         isIconOnly
-        variant="ghost"
-        className="rounded-sm"
+        variant="tertiary"
         onPress={() => {
           navigate(nextRangePath);
         }}

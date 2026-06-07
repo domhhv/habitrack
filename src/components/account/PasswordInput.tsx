@@ -1,4 +1,4 @@
-import { Input, Button } from '@heroui/react';
+import { Label, Button, TextField, InputGroup } from '@heroui/react';
 import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import React, { type ChangeEventHandler } from 'react';
 
@@ -30,29 +30,33 @@ const PasswordInput = ({
   };
 
   return (
-    <div className="relative">
-      <Input
-        value={value}
-        variant={variant}
-        className="pr-10"
-        placeholder={label}
-        onChange={onChange}
-        data-testid={testId}
-        disabled={isDisabled}
-        type={isVisible ? 'text' : 'password'}
-      />
-      <button
-        type="button"
-        onClick={toggleVisibility}
-        aria-label="toggle password visibility"
-        className="absolute top-1/2 right-2 -translate-y-1/2 focus:outline-hidden"
-      >
-        {isVisible ? (
-          <EyeSlashIcon className="text-default-400 pointer-events-none text-2xl" />
-        ) : (
-          <EyeIcon className="text-default-400 pointer-events-none text-2xl" />
-        )}
-      </button>
+    <TextField fullWidth name="password">
+      <Label>Password</Label>
+      <InputGroup variant={variant}>
+        <InputGroup.Input
+          value={value}
+          placeholder={label}
+          onChange={onChange}
+          data-testid={testId}
+          disabled={isDisabled}
+          type={isVisible ? 'text' : 'password'}
+        />
+        <InputGroup.Suffix className="px-0">
+          <Button
+            size="sm"
+            isIconOnly
+            variant="ghost"
+            onPress={toggleVisibility}
+            aria-label={isVisible ? 'Hide password' : 'Show password'}
+          >
+            {isVisible ? (
+              <EyeIcon className="size-4" />
+            ) : (
+              <EyeSlashIcon className="size-4" />
+            )}
+          </Button>
+        </InputGroup.Suffix>
+      </InputGroup>
       {onReset && (
         <div className="text-right">
           <Button
@@ -63,7 +67,7 @@ const PasswordInput = ({
           </Button>
         </div>
       )}
-    </div>
+    </TextField>
   );
 };
 

@@ -58,8 +58,10 @@ const OccurrencePhotosUploader = ({
         </p>
         <Input
           multiple
+          fullWidth
           type="file"
           ref={fileInputRef}
+          variant="secondary"
           onChange={handleFileChange}
           accept={allowedTypes.join(',')}
         />

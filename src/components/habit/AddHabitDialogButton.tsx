@@ -5,6 +5,7 @@ import {
   Select,
   ListBox,
   Spinner,
+  TextField,
   InputGroup,
   useOverlayState,
 } from '@heroui/react';
@@ -134,43 +135,50 @@ const AddHabitDialogButton = () => {
 
       <Modal state={addDialogState}>
         <Modal.Backdrop>
-          <Modal.Container size="lg">
+          <Modal.Container size="lg" scroll="outside">
             <Modal.Dialog>
               <Modal.CloseTrigger />
               <Modal.Header>
                 <Modal.Heading>Add New Habit</Modal.Heading>
               </Modal.Header>
-              <Modal.Body>
-                <InputGroup>
-                  <InputGroup.Input
-                    required
-                    value={name}
-                    maxLength={50}
-                    onChange={handleNameChange}
-                    placeholder="Enter habit name"
-                  />
-                  <InputGroup.Suffix>
-                    <span className="text-foreground-400 text-tiny whitespace-nowrap">
-                      {name.length}/50
-                    </span>
-                  </InputGroup.Suffix>
-                </InputGroup>
-                <InputGroup>
-                  <InputGroup.Input
-                    maxLength={100}
-                    value={description}
-                    onChange={handleDescriptionChange}
-                    placeholder="Enter habit description (optional)"
-                  />
-                  <InputGroup.Suffix>
-                    <span className="text-foreground-400 text-tiny whitespace-nowrap">
-                      {description.length}/100
-                    </span>
-                  </InputGroup.Suffix>
-                </InputGroup>
+              <Modal.Body className="space-y-4">
+                <TextField fullWidth name="name" variant="secondary">
+                  <Label>Name</Label>
+                  <InputGroup>
+                    <InputGroup.Input
+                      required
+                      value={name}
+                      maxLength={50}
+                      onChange={handleNameChange}
+                      placeholder="Enter habit name"
+                    />
+                    <InputGroup.Suffix>
+                      <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                        {name.length}/50
+                      </span>
+                    </InputGroup.Suffix>
+                  </InputGroup>
+                </TextField>
+                <TextField fullWidth name="description" variant="secondary">
+                  <Label>Description</Label>
+                  <InputGroup>
+                    <InputGroup.Input
+                      maxLength={100}
+                      value={description}
+                      onChange={handleDescriptionChange}
+                      placeholder="Enter short description (optional)"
+                    />
+                    <InputGroup.Suffix>
+                      <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                        {description.length}/100
+                      </span>
+                    </InputGroup.Suffix>
+                  </InputGroup>
+                </TextField>
                 <Select
+                  variant="secondary"
                   value={traitId || null}
-                  placeholder="Choose a trait"
+                  placeholder="Choose a trait (optional)"
                   onChange={(key) => {
                     setTraitId(typeof key === 'string' ? key : '');
                   }}
@@ -198,19 +206,20 @@ const AddHabitDialogButton = () => {
                   </Select.Popover>
                 </Select>
                 <Button
+                  fullWidth
                   size="sm"
-                  variant="ghost"
+                  variant="tertiary"
                   className="min-h-8"
                   onPress={traitModalState.open}
                 >
                   <PlusIcon />
                   Or add a new trait
                 </Button>
-                <label className="rounded-medium border-default-200 hover:bg-default-100 flex min-h-8 w-full cursor-pointer items-center justify-center gap-2 border px-4 py-2 text-sm">
+                <Button fullWidth size="sm" variant="tertiary">
                   <CloudArrowUpIcon />
                   Upload habit icon
-                  <VisuallyHiddenInput onChange={handleIconChange} />
-                </label>
+                </Button>
+                <VisuallyHiddenInput onChange={handleIconChange} />
                 {icon && <p>{icon.name}</p>}
 
                 {metricDefinitions.map((md) => {
@@ -243,7 +252,9 @@ const AddHabitDialogButton = () => {
                   );
                 })}
                 <Button
+                  fullWidth
                   size="sm"
+                  variant="tertiary"
                   className="min-h-8"
                   onPress={addMetric}
                   isDisabled={isAdding}

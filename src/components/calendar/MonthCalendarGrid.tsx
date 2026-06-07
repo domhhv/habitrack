@@ -115,24 +115,24 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
             >
               <div
                 className={cn(
-                  'absolute -top-1 -left-7 flex h-full flex-col lg:-left-9',
+                  'absolute -left-7 flex h-full flex-col lg:-left-9',
                   weekIndex === 0 ? 'gap-1 lg:gap-1.5' : 'gap-0.5 lg:gap-1'
                 )}
               >
                 <Tooltip closeDelay={0}>
                   <Tooltip.Trigger>
                     <Button
-                      variant="ghost"
+                      size="sm"
+                      variant="tertiary"
+                      className={cn(
+                        'mt-0 h-6.75 w-6 min-w-fit p-0 lg:h-7.75 lg:w-7',
+                        weekIndex === 0 && 'top-0.5'
+                      )}
                       onPress={() => {
                         navigate(
                           `/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`
                         );
                       }}
-                      className={cn(
-                        'mt-0.5 w-6 min-w-fit basis-6.75 p-0 lg:w-7 lg:basis-7.75',
-                        isDesktop ? 'rounded-md' : 'rounded-sm',
-                        weekIndex === 0 && 'top-0.5'
-                      )}
                     >
                       {getISOWeek(monday.toDate(state.timeZone))}
                     </Button>
@@ -143,15 +143,14 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
                   <Tooltip.Trigger>
                     <Button
                       isIconOnly
-                      variant={!isDesktop && weekNote ? 'primary' : 'ghost'}
+                      variant="outline"
                       onPress={() => {
                         openNoteDrawer(firstDayOfWeek, 'week');
                       }}
                       className={cn(
-                        'text-accent mb-0 w-6 min-w-fit basis-19.75 p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:w-7 lg:basis-26.75',
-                        isDesktop ? 'rounded-md' : 'rounded-sm',
+                        'text-accent mb-0 h-19.75 w-6 min-w-fit rounded-3xl p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:h-26.75 lg:w-7',
                         (weekNote || !isDesktop) && 'opacity-100',
-                        weekIndex === 0 && 'basis-19.25 lg:basis-26.75'
+                        weekIndex === 0 && 'h-19.25 lg:h-26.75'
                       )}
                     >
                       {weekNote ? (
@@ -171,8 +170,8 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
               <div
                 className={cn(
                   'flex h-27.5 w-full basis-full justify-between border-r-2 border-l-2 border-neutral-500 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto dark:border-neutral-400',
-                  weekIndex === 0 && 'rounded-t-lg',
-                  weekIndex === weeksInMonthCount - 1 && 'rounded-b-lg'
+                  weekIndex === 0 && 'rounded-t-3xl',
+                  weekIndex === weeksInMonthCount - 1 && 'rounded-b-3xl'
                 )}
               >
                 {state

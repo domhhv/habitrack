@@ -26,7 +26,7 @@ type AuthMode = 'login' | 'register' | 'reset-password';
 const AuthModalButton = () => {
   const user = useUser();
   const navigate = useNavigate();
-  const { screenWidth } = useScreenWidth();
+  const { isDesktop } = useScreenWidth();
   const overlayState = useOverlayState();
   const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
@@ -123,26 +123,26 @@ const AuthModalButton = () => {
   return (
     <>
       {user?.id ? (
-        <ButtonGroup size={screenWidth > 1024 ? 'md' : 'sm'}>
+        <ButtonGroup>
           <Button
-            size="sm"
             variant="secondary"
+            isIconOnly={!isDesktop}
             data-testid="auth-button"
-            isIconOnly={screenWidth < 1024}
+            className="border-r-background-700 rounded-r-none border-r"
             onPress={() => {
               navigate('/account');
             }}
           >
             <UserIcon weight="bold" data-testid="user-icon" />
-            {screenWidth > 1024 && 'Account'}
+            {isDesktop && 'Account'}
           </Button>
-          <Tooltip closeDelay={0}>
+          <Tooltip delay={0} closeDelay={0}>
             <Tooltip.Trigger>
               <Button
-                size="sm"
                 isIconOnly
                 onPress={signOut}
                 variant="secondary"
+                className="rounded-l-none rounded-r-3xl"
               >
                 <SignOutIcon weight="bold" data-testid="sign-out-icon" />
                 <VisuallyHidden>Log Out</VisuallyHidden>
@@ -158,8 +158,9 @@ const AuthModalButton = () => {
           data-testid="auth-button"
           onPress={overlayState.open}
         >
+          Log In
           <Kbd
-            color="primary"
+            variant="default"
             shortcutParams={[
               'i',
               () => {
@@ -171,7 +172,6 @@ const AuthModalButton = () => {
           >
             I
           </Kbd>
-          Log In
         </Button>
       )}
       <Modal state={overlayState}>

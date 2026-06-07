@@ -1,5 +1,6 @@
 import {
   Chip,
+  Form,
   Input,
   Label,
   Button,
@@ -7,9 +8,12 @@ import {
   Select,
   Switch,
   ListBox,
-  ListBoxItem,
+  useFilter,
+  TextField,
+  EmptyState,
+  FieldError,
+  SearchField,
   Autocomplete,
-  ListBoxSection,
 } from '@heroui/react';
 import {
   TrashIcon,
@@ -61,6 +65,18 @@ const MetricDefinitionForm = ({
   onChange,
   onRemove,
 }: MetricDefinitionFormProps) => {
+  const { contains } = useFilter({ sensitivity: 'base' });
+
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  const submitMetric = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    onChange({
+      isBeingEdited: false,
+      ...(metric.isPersisted ? { isToBeUpdated: true } : { isToBeAdded: true }),
+    });
+  };
+
   if (!metric.isBeingEdited) {
     return (
       <div className="flex items-center justify-between gap-16">
@@ -113,15 +129,17 @@ const MetricDefinitionForm = ({
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 pb-2">
+      <Form onSubmit={submitMetric} className="flex flex-col gap-3 pb-2">
         <Autocomplete
           variant="secondary"
+          placeholder="Select a preset"
           value={metric.presetName ?? null}
           onClear={() => {
             onChange({
               config: {},
               isRequired: false,
               name: '',
+              presetName: undefined,
               type: 'number',
             });
           }}
@@ -141,42 +159,63 @@ const MetricDefinitionForm = ({
             });
           }}
         >
+          <Label>Preset</Label>
           <Autocomplete.Trigger>
-            <Autocomplete.Filter>
-              <Input placeholder="Search for units, e.g. kilometers, kcal..." />
-            </Autocomplete.Filter>
+            <Autocomplete.Value />
             <Autocomplete.ClearButton />
             <Autocomplete.Indicator />
           </Autocomplete.Trigger>
           <Autocomplete.Popover>
-            <ListBox>
-              {METRIC_PRESETS.map(({ group, presets }) => {
-                return (
-                  <ListBoxSection key={group}>
-                    <Header>{group}</Header>
-                    {presets.map((preset) => {
-                      return (
-                        <ListBoxItem id={preset.name} key={preset.name}>
-                          {preset.name}
-                        </ListBoxItem>
-                      );
-                    })}
-                  </ListBoxSection>
-                );
-              })}
-            </ListBox>
+            <Autocomplete.Filter filter={contains}>
+              <SearchField autoFocus name="search" variant="secondary">
+                <SearchField.Group>
+                  <SearchField.SearchIcon />
+                  <SearchField.Input placeholder="Search for units, e.g. kilometers, kcal..." />
+                  <SearchField.ClearButton />
+                </SearchField.Group>
+              </SearchField>
+              <ListBox
+                renderEmptyState={() => {
+                  return <EmptyState>No results found</EmptyState>;
+                }}
+              >
+                {METRIC_PRESETS.map(({ group, presets }) => {
+                  return (
+                    <ListBox.Section key={group}>
+                      <Header>{group}</Header>
+                      {presets.map((preset) => {
+                        return (
+                          <ListBox.Item
+                            id={preset.name}
+                            key={preset.name}
+                            textValue={preset.name}
+                          >
+                            {preset.name}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        );
+                      })}
+                    </ListBox.Section>
+                  );
+                })}
+              </ListBox>
+            </Autocomplete.Filter>
           </Autocomplete.Popover>
         </Autocomplete>
-        <Input
-          value={metric.name}
-          variant="secondary"
-          placeholder="Metric name"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            onChange({
-              name: e.target.value,
-            });
-          }}
-        />
+        <TextField fullWidth name="name" variant="secondary">
+          <Label>Metric name</Label>
+          <Input
+            required
+            value={metric.name}
+            placeholder="Metric name"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              onChange({
+                name: e.target.value,
+              });
+            }}
+          />
+          <FieldError />
+        </TextField>
         <Select
           variant="secondary"
           value={metric.type}
@@ -235,7 +274,6 @@ const MetricDefinitionForm = ({
         />
 
         <Switch
-          size="sm"
           isSelected={metric.isRequired}
           onChange={(val: boolean) => {
             onChange({ isRequired: val });
@@ -250,31 +288,20 @@ const MetricDefinitionForm = ({
         </Switch>
 
         <Button
-          size="sm"
-          variant="ghost"
+          fullWidth
           onPress={onRemove}
+          variant="danger-soft"
           className="text-danger"
         >
           <TrashIcon size={14} />
           {metric.isToBeAdded ? 'Remove' : 'Discard'}
         </Button>
 
-        <Button
-          size="sm"
-          variant="secondary"
-          onPress={() => {
-            onChange({
-              isBeingEdited: false,
-              ...(metric.isPersisted
-                ? { isToBeUpdated: true }
-                : { isToBeAdded: true }),
-            });
-          }}
-        >
+        <Button fullWidth type="submit" variant="secondary">
           <StackPlusIcon size={14} />
           Done
         </Button>
-      </div>
+      </Form>
     </div>
   );
 };

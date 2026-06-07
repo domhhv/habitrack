@@ -1,4 +1,17 @@
-import { Input, Label, Switch, TextField } from '@heroui/react';
+import {
+  Input,
+  Label,
+  Button,
+  Switch,
+  TextField,
+  NumberField,
+} from '@heroui/react';
+import {
+  XIcon,
+  PlusIcon,
+  CaretUpIcon,
+  CaretDownIcon,
+} from '@phosphor-icons/react';
 
 import type {
   MetricType,
@@ -38,10 +51,11 @@ const NumberConfigFields = ({
         <Input placeholder="e.g., km, kg, bpm" />
       </TextField>
       <div className="flex gap-2">
-        <TextField
-          type="number"
+        <NumberField
+          name="min"
+          className="w-full"
           variant="secondary"
-          value={config.min?.toString() || ''}
+          value={config.min || undefined}
           onChange={(value) => {
             const val = value;
             onChange({
@@ -50,13 +64,24 @@ const NumberConfigFields = ({
             });
           }}
         >
-          <Label>Min</Label>
-          <Input placeholder="Optional" />
-        </TextField>
-        <TextField
-          type="number"
+          <Label>Minimum value</Label>
+          <NumberField.Group className="flex">
+            <NumberField.Input className="flex-1" placeholder="Optional" />
+            <div className="border-field-placeholder/15 flex h-full flex-col border-l">
+              <NumberField.IncrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pt-0.5 text-sm">
+                <CaretUpIcon />
+              </NumberField.IncrementButton>
+              <NumberField.DecrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pb-0.5 text-sm">
+                <CaretDownIcon />
+              </NumberField.DecrementButton>
+            </div>
+          </NumberField.Group>
+        </NumberField>
+        <NumberField
+          name="min"
+          className="w-full"
           variant="secondary"
-          value={config.max?.toString() || ''}
+          value={config.max || undefined}
           onChange={(value) => {
             const val = value;
             onChange({
@@ -65,9 +90,19 @@ const NumberConfigFields = ({
             });
           }}
         >
-          <Label>Max</Label>
-          <Input placeholder="Optional" />
-        </TextField>
+          <Label>Maximum value</Label>
+          <NumberField.Group className="flex">
+            <NumberField.Input className="flex-1" placeholder="Optional" />
+            <div className="border-field-placeholder/15 flex h-full flex-col border-l">
+              <NumberField.IncrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pt-0.5 text-sm">
+                <CaretUpIcon />
+              </NumberField.IncrementButton>
+              <NumberField.DecrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pb-0.5 text-sm">
+                <CaretDownIcon />
+              </NumberField.DecrementButton>
+            </div>
+          </NumberField.Group>
+        </NumberField>
       </div>
     </div>
   );
@@ -93,20 +128,15 @@ const DurationConfigFields = ({
     <div className="flex flex-wrap gap-2">
       {formats.map((format) => {
         return (
-          <button
+          <Button
             key={format}
-            type="button"
+            variant={config.format === format ? 'primary' : 'secondary'}
             onClick={() => {
               onChange({ ...config, format });
             }}
-            className={`rounded-md px-3 py-1.5 text-xs ${
-              config.format === format
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-default-100'
-            }`}
           >
             {format}
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -231,12 +261,13 @@ const ChoiceConfigFields = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {options.map((option, index) => {
         return (
-          <div key={index} className="flex items-center gap-2">
+          <div key={index} className="flex w-full items-center gap-2">
             <TextField
               value={option}
+              className="flex-1"
               variant="secondary"
               onChange={(value) => {
                 handleOptionChange(index, value);
@@ -244,25 +275,21 @@ const ChoiceConfigFields = ({
             >
               <Input placeholder={`Option ${index + 1}`} />
             </TextField>
-            <button
-              type="button"
-              className="text-danger text-sm"
+            <Button
+              variant="danger-soft"
               onClick={() => {
                 handleRemoveOption(index);
               }}
             >
-              &times;
-            </button>
+              <XIcon size={16} weight="bold" />
+            </Button>
           </div>
         );
       })}
-      <button
-        type="button"
-        onClick={handleAddOption}
-        className="text-primary self-start text-xs"
-      >
-        + Add option
-      </button>
+      <Button fullWidth variant="secondary" onClick={handleAddOption}>
+        <PlusIcon />
+        Add option
+      </Button>
       <Switch
         size="sm"
         isSelected={config.allowMultiple || false}

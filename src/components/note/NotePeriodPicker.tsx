@@ -1,6 +1,13 @@
-import { cn, Label, Button, Slider, RangeCalendar } from '@heroui/react';
+import {
+  cn,
+  Button,
+  ButtonGroup,
+  Description,
+  RangeCalendar,
+} from '@heroui/react';
 import {
   startOfWeek,
+  isSameMonth,
   startOfMonth,
   type CalendarDate,
 } from '@internationalized/date';
@@ -14,19 +21,13 @@ import {
 import React from 'react';
 import { useLocale } from 'react-aria';
 
-import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
+import { useFirstDayOfWeek } from '@hooks';
 import { useNoteDrawerState, useNoteDrawerActions } from '@stores';
 
 type NotePeriodPickerProps = {
   endRange: CalendarDate;
   isShown: boolean;
   onBeforeChange?: () => Promise<boolean> | boolean;
-};
-
-const periodIcons: Record<string, React.ReactNode> = {
-  day: <SunIcon size={20} />,
-  month: <CalendarDotsIcon size={20} />,
-  week: <NumberSevenIcon size={20} />,
 };
 
 const NotePeriodPicker = ({
@@ -36,7 +37,6 @@ const NotePeriodPicker = ({
 }: NotePeriodPickerProps) => {
   const firstDayOfWeek = useFirstDayOfWeek();
   const { locale } = useLocale();
-  const { screenWidth } = useScreenWidth();
   const { periodDate, periodKind } = useNoteDrawerState();
   const { setPeriodDate, setPeriodKind } = useNoteDrawerActions();
 
@@ -55,63 +55,69 @@ const NotePeriodPicker = ({
   return (
     <div
       className={cn(
-        'hidden justify-between gap-2 max-[446px]:flex-col max-[446px]:items-center max-[446px]:justify-start max-[446px]:gap-4',
+        'mt-2 hidden flex-col items-center justify-start gap-4 max-[446px]:gap-4',
         isShown && 'flex'
       )}
     >
-      <Slider
-        step={1}
-        minValue={1}
-        maxValue={3}
-        value={['day', 'week', 'month'].indexOf(periodKind) + 1}
-        orientation={screenWidth > 445 ? 'vertical' : 'horizontal'}
-        onChange={(value) => {
-          const nextValue = Array.isArray(value) ? value[0] : value;
-
-          void handleChange(() => {
-            switch (nextValue) {
-              case 1:
-                setPeriodDate(periodDate);
-                setPeriodKind('day');
-                break;
-
-              case 2: {
-                const weekStart = startOfWeek(
-                  periodDate,
-                  locale,
-                  firstDayOfWeek
-                );
-                setPeriodDate(weekStart);
-                setPeriodKind('week');
-                break;
-              }
-
-              case 3: {
-                const monthStart = startOfMonth(periodDate);
-                setPeriodDate(monthStart);
-                setPeriodKind('month');
-                break;
-              }
-            }
-          });
-        }}
-      >
-        <Label className="sr-only">Period type</Label>
-        <Slider.Track>
-          <Slider.Fill />
-          <Slider.Thumb>
-            <div className="bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white">
-              {periodIcons[periodKind]}
-            </div>
-          </Slider.Thumb>
-        </Slider.Track>
-      </Slider>
+      <ButtonGroup size="sm">
+        <Button
+          variant={periodKind === 'month' ? 'primary' : 'secondary'}
+          onPress={() => {
+            void handleChange(() => {
+              setPeriodDate(startOfMonth(periodDate));
+              setPeriodKind('month');
+            });
+          }}
+        >
+          <CalendarDotsIcon size={20} />
+          Month
+        </Button>
+        <Button
+          variant={periodKind === 'week' ? 'primary' : 'secondary'}
+          onPress={() => {
+            void handleChange(() => {
+              const nextPeriodDate = startOfWeek(
+                periodDate,
+                locale,
+                firstDayOfWeek
+              );
+              setPeriodDate(
+                isSameMonth(nextPeriodDate, periodDate)
+                  ? nextPeriodDate
+                  : nextPeriodDate.add({ weeks: 1 })
+              );
+              setPeriodKind('week');
+            });
+          }}
+        >
+          <ButtonGroup.Separator />
+          <NumberSevenIcon size={20} />
+          Week
+        </Button>
+        <Button
+          variant={periodKind === 'day' ? 'primary' : 'secondary'}
+          onPress={() => {
+            void handleChange(() => {
+              const nextPeriodDate =
+                periodKind === 'month'
+                  ? startOfMonth(periodDate)
+                  : startOfWeek(periodDate, locale, firstDayOfWeek);
+              setPeriodDate(nextPeriodDate);
+              setPeriodKind('day');
+            });
+          }}
+        >
+          <ButtonGroup.Separator />
+          <SunIcon size={20} />
+          Day
+        </Button>
+      </ButtonGroup>
       <div className="flex gap-1">
         <Button
           size="sm"
           isIconOnly
-          variant="secondary"
-          className="h-full w-5! min-w-auto"
+          variant="outline"
+          className="h-auto w-5! min-w-auto self-stretch"
           onPress={() => {
             void handleChange(() => {
               switch (periodKind) {
@@ -133,17 +139,38 @@ const NotePeriodPicker = ({
           isReadOnly
           focusedValue={periodDate}
           firstDayOfWeek={firstDayOfWeek}
-          className="cursor-default [&_span]:cursor-default!"
+          aria-label="Note period picker calendar"
+          isDateUnavailable={() => {
+            return false;
+          }}
           value={{
             end: endRange,
             start: periodDate,
           }}
-        />
+        >
+          <RangeCalendar.Header className="text-center">
+            <RangeCalendar.Heading />
+          </RangeCalendar.Header>
+          <RangeCalendar.Grid>
+            <RangeCalendar.GridHeader>
+              {(day) => {
+                return (
+                  <RangeCalendar.HeaderCell>{day}</RangeCalendar.HeaderCell>
+                );
+              }}
+            </RangeCalendar.GridHeader>
+            <RangeCalendar.GridBody>
+              {(date) => {
+                return <RangeCalendar.Cell date={date} />;
+              }}
+            </RangeCalendar.GridBody>
+          </RangeCalendar.Grid>
+        </RangeCalendar>
         <Button
           size="sm"
           isIconOnly
-          variant="secondary"
-          className="h-full w-5! min-w-auto"
+          variant="outline"
+          className="h-auto w-5! min-w-auto self-stretch"
           onPress={() => {
             void handleChange(() => {
               switch (periodKind) {
@@ -162,6 +189,7 @@ const NotePeriodPicker = ({
           <CaretRightIcon />
         </Button>
       </div>
+      <Description className="text-center">Calendar is read-only</Description>
     </div>
   );
 };

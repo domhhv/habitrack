@@ -4,6 +4,7 @@ import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
+import { CustomButton } from '@components';
 import type {
   Occurrence,
   MetricValue,
@@ -335,12 +336,7 @@ const OccurrenceListItem = ({
                 const isRemoving = removingMetricId === chip.id;
 
                 return (
-                  <Chip
-                    size="sm"
-                    key={chip.id}
-                    color="default"
-                    variant="tertiary"
-                  >
+                  <Chip key={chip.id}>
                     {chip.label}
                     {isRemoving ? (
                       <Spinner
@@ -398,34 +394,27 @@ const OccurrenceListItem = ({
             </div>
           )}
         </div>
-        <div className="flex items-center">
-          <Button
+        <div className="flex items-center gap-2">
+          <CustomButton
+            size="sm"
             isIconOnly
-            variant="ghost"
+            variant="light"
             onPress={onEdit}
             isDisabled={isBeingRemoved}
             aria-label="edit-habit-entry"
-            className="h-6 w-6 min-w-0 rounded-lg"
           >
-            <PencilSimpleIcon
-              size={14}
-              fill="bold"
-              className="dark:fill-white"
-            />
-          </Button>
+            <PencilSimpleIcon size={14} weight="bold" />
+          </CustomButton>
           <Button
+            size="sm"
             isIconOnly
-            variant="ghost"
             onPress={onRemove}
+            variant="danger-soft"
             isPending={isBeingRemoved}
             aria-label="delete-habit-entry"
-            className="text-danger h-6 w-6 min-w-0 rounded-lg"
+            // className="h-6 w-6 min-w-0 rounded-lg"
           >
-            <TrashSimpleIcon
-              size={14}
-              fill="bold"
-              className="dark:fill-white"
-            />
+            <TrashSimpleIcon weight="bold" />
           </Button>
         </div>
       </div>

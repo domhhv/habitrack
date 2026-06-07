@@ -1,4 +1,4 @@
-import { Table, Button, Tooltip, Pagination } from '@heroui/react';
+import { cn, Table, Button, Tooltip, Pagination } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { useRollbar } from '@rollbar/react';
@@ -157,10 +157,7 @@ const HabitsTable = () => {
         )}
       </div>
 
-      <Table
-        aria-label="Habits tracking table"
-        className="scrollbar-hide h-[calc(100vh-148px)] min-h-100 w-full overflow-scroll"
-      >
+      <Table aria-label="Habits tracking table">
         <Table.ScrollContainer>
           <Table.Content>
             <Table.Header columns={habitColumns}>
@@ -170,6 +167,11 @@ const HabitsTable = () => {
                     key={column.key}
                     aria-label={column.label}
                     isRowHeader={column.key === 'icon'}
+                    className={cn(
+                      column.key === 'actions' && 'text-right',
+                      ['icon', 'total-entries'].includes(column.key) &&
+                        'text-center'
+                    )}
                   >
                     {column.label}
                   </Table.Column>
@@ -294,6 +296,7 @@ const HabitsTable = () => {
                   <Pagination.Item key={p}>
                     <Pagination.Link
                       isActive={p === page}
+                      className={cn(p === page && 'bg-accent text-white')}
                       onPress={() => {
                         return setPage(p);
                       }}

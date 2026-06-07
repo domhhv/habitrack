@@ -1,4 +1,4 @@
-import type { Selection, ButtonProps } from '@heroui/react';
+import type { Selection, TimeValue, ButtonProps } from '@heroui/react';
 import {
   cn,
   Form,
@@ -7,14 +7,17 @@ import {
   Button,
   Header,
   Switch,
+  Spinner,
   ListBox,
   Checkbox,
   TextArea,
+  TextField,
   TimeField,
   NumberField,
 } from '@heroui/react';
 import {
   now,
+  Time,
   toZoned,
   isToday,
   isSameDay,
@@ -77,7 +80,7 @@ const OccurrenceFormView = ({
   const timeZone = getLocalTimeZone();
   const [note, handleNoteChange, clearNote] = useTextField();
   const [selectedHabitId, setSelectedHabitId] = React.useState('');
-  const [time, setTime] = React.useState<ZonedDateTime | null>(null);
+  const [time, setTime] = React.useState<TimeValue | null>(null);
   const [hasSpecificTime, setHasSpecificTime] = React.useState(true);
   const [isDateTimeInFuture, setIsDateTimeInFuture] = React.useState(false);
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] =
@@ -445,9 +448,7 @@ const OccurrenceFormView = ({
     if (dayToLog) {
       const { hour, minute } = now(timeZone);
 
-      setTime(
-        toZoned(toCalendarDateTime(dayToLog).set({ hour, minute }), timeZone)
-      );
+      setTime(new Time(hour, minute, 0));
     }
   }, [
     dayToLog,
@@ -714,7 +715,7 @@ const OccurrenceFormView = ({
   };
 
   return (
-    <Form>
+    <Form className="space-y-3">
       {occurrenceToEdit ? (
         <OccurrenceChip
           isHabitNameShown
@@ -726,7 +727,7 @@ const OccurrenceFormView = ({
         />
       ) : hasHabits ? (
         <>
-          <div className="rounded-medium order-medium border-default-200 hover:border-default-400 focus-within:border-default-400 max-h-100 w-full overflow-y-auto border-2 px-3 py-2">
+          <div className="rounded-medium order-medium bg-default max-h-100 w-full overflow-y-auto rounded-3xl p-1">
             <ListBox
               aria-label="Habits"
               disallowEmptySelection
@@ -741,7 +742,7 @@ const OccurrenceFormView = ({
 
                 return (
                   <ListBox.Section key={traitName}>
-                    <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                    <Header className="bg-background shadow-small rounded-small sticky top-1 z-20 flex w-auto rounded-2xl px-2 py-1.5">
                       {traitName}
                     </Header>
                     {habits.map((habit) => {
@@ -750,6 +751,10 @@ const OccurrenceFormView = ({
                           id={habit.id}
                           key={habit.id}
                           textValue={habit.name}
+                          className={cn(
+                            'hover:bg-accent-soft-hover relevant z-10 border-2 border-transparent',
+                            selectedHabitId === habit.id && 'border-accent'
+                          )}
                         >
                           <Label>
                             <div className="flex items-center gap-2">
@@ -805,6 +810,7 @@ const OccurrenceFormView = ({
                 <div key={stock.id} className="flex flex-col gap-1">
                   <div className="flex items-center justify-between gap-2">
                     <Checkbox
+                      variant="secondary"
                       isSelected={isSelected}
                       onChange={(nextSelected: boolean) => {
                         return handleStockSelectionChange(
@@ -824,7 +830,7 @@ const OccurrenceFormView = ({
                     {isQuantifiable && (
                       <NumberField
                         minValue={1}
-                        className="w-24"
+                        className="w-28"
                         isDisabled={!isSelected}
                         aria-label={`${stock.name} quantity`}
                         maxValue={stock.remainingItems ?? undefined}
@@ -933,39 +939,40 @@ const OccurrenceFormView = ({
           }
         }}
       />
-      <TextArea
-        value={note}
-        placeholder="Note"
-        variant="secondary"
-        onChange={handleNoteChange}
-        className={!isDesktop ? 'text-base' : undefined}
-        onKeyDown={() => {
-          return null;
-        }}
-      />
+      <TextField value={note} variant="secondary" onChange={handleNoteChange}>
+        <Label>Note</Label>
+        <TextArea
+          fullWidth
+          placeholder="Note"
+          className={!isDesktop ? 'text-base' : undefined}
+        />
+      </TextField>
       <div className="w-full space-y-2">
-        <div className={cn('flex gap-2', !hasSpecificTime && 'py-2')}>
-          <Switch
-            size="sm"
-            className="basis-full"
-            isSelected={hasSpecificTime}
-            onChange={setHasSpecificTime}
-          >
-            <Switch.Control>
-              <Switch.Thumb />
-            </Switch.Control>
-            <Switch.Content>
-              <Label>Specify time</Label>
-            </Switch.Content>
-          </Switch>
-          {hasSpecificTime && (
-            <TimeField
-              value={time}
-              onChange={setTime}
-              className={!isDesktop ? 'text-base' : undefined}
-            />
-          )}
-        </div>
+        <Switch
+          // size="sm"
+          className="basis-full"
+          isSelected={hasSpecificTime}
+          onChange={setHasSpecificTime}
+        >
+          <Switch.Control>
+            <Switch.Thumb />
+          </Switch.Control>
+          <Switch.Content>
+            <Label>Specify time</Label>
+          </Switch.Content>
+        </Switch>
+        {hasSpecificTime && (
+          <TimeField fullWidth name="time" value={time} onChange={setTime}>
+            <Label>Time</Label>
+            <TimeField.Group variant="secondary">
+              <TimeField.Input>
+                {(segment) => {
+                  return <TimeField.Segment segment={segment} />;
+                }}
+              </TimeField.Input>
+            </TimeField.Group>
+          </TimeField>
+        )}
         {isDateTimeInFuture && hasSpecificTime && (
           <p className="text-sm text-gray-600">
             You are logging a habit for the future. Are you a time traveler?
@@ -985,8 +992,20 @@ const OccurrenceFormView = ({
         />
       )}
       {hasHabits ? (
-        <Button {...submitButtonSharedProps} fullWidth onPress={handleSubmit}>
-          {occurrenceToEdit ? 'Update' : 'Add'}
+        <Button
+          {...submitButtonSharedProps}
+          fullWidth
+          isPending={isSaving}
+          onPress={handleSubmit}
+        >
+          {({ isPending }) => {
+            return (
+              <>
+                {isPending && <Spinner color="current" className="size-5" />}
+                {occurrenceToEdit ? 'Update' : 'Add'}
+              </>
+            );
+          }}
         </Button>
       ) : (
         <Link href="/habits" className="w-full">

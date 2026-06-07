@@ -65,7 +65,7 @@ const OccurrenceChip = ({
         return setIsFocused(false);
       }}
       className={cn(
-        'relative rounded-md border-2 bg-white p-1.5 dark:bg-black',
+        'relative rounded-2xl border-2 bg-white p-1.5 dark:bg-black',
         isHabitNameShown && 'flex items-center gap-2 px-1 py-0.5',
         hasMargin && 'md:mr-1 md:mb-1',
         screenWidth < 400 && 'p-1'
@@ -91,15 +91,17 @@ const OccurrenceChip = ({
 
   if (hasCounter && occurrences.length > 1) {
     chip = (
-      <Badge
-        size="sm"
-        color="accent"
-        variant="primary"
-        placement="bottom-right"
-      >
-        <Badge.Anchor>{chip}</Badge.Anchor>
-        <Badge.Label>{occurrences.length}</Badge.Label>
-      </Badge>
+      <Badge.Anchor>
+        {chip}
+        <Badge
+          size="sm"
+          color="accent"
+          variant="primary"
+          placement="bottom-right"
+        >
+          {occurrences.length}
+        </Badge>
+      </Badge.Anchor>
     );
   }
 
@@ -109,16 +111,16 @@ const OccurrenceChip = ({
     })
   ) {
     chip = (
-      <Badge
-        size="sm"
-        placement="top-right"
-        className="top-1 right-1 border-none bg-transparent"
-      >
-        <Badge.Anchor>{chip}</Badge.Anchor>
-        <Badge.Label>
+      <Badge.Anchor>
+        {chip}
+        <Badge
+          size="sm"
+          placement="top-right"
+          className="border-none bg-transparent"
+        >
           <NoteIcon size={14} weight="fill" />
-        </Badge.Label>
-      </Badge>
+        </Badge>
+      </Badge.Anchor>
     );
   }
 
@@ -128,16 +130,16 @@ const OccurrenceChip = ({
     })
   ) {
     chip = (
-      <Badge
-        size="sm"
-        placement="top-left"
-        className="top-1 right-1 border-none bg-transparent"
-      >
-        <Badge.Anchor>{chip}</Badge.Anchor>
-        <Badge.Label>
+      <Badge.Anchor>
+        {chip}
+        <Badge
+          size="sm"
+          placement="top-left"
+          className="border-none bg-transparent"
+        >
           <CameraIcon size={14} weight="fill" />
-        </Badge.Label>
-      </Badge>
+        </Badge>
+      </Badge.Anchor>
     );
   }
 

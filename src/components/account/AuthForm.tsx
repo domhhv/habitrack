@@ -1,4 +1,4 @@
-import { cn, Input, Button } from '@heroui/react';
+import { cn, Input, Label, Button, TextField } from '@heroui/react';
 import { type SubmitEventHandler } from 'react';
 
 import { useTextField } from '@hooks';
@@ -60,13 +60,18 @@ const AuthForm = ({
           </p>
         )}
         <div>
-          <Input
+          <TextField
+            fullWidth
+            name="email"
             type="email"
             value={email}
-            placeholder="Email"
-            disabled={isDisabled}
+            variant="secondary"
+            isDisabled={isDisabled}
             onChange={handleEmailChange}
-          />
+          >
+            <Label>Email</Label>
+            <Input placeholder="me@email.com" />
+          </TextField>
           {mode === 'reset-password' && (
             <div className="text-right">
               <Button
@@ -79,17 +84,23 @@ const AuthForm = ({
           )}
         </div>
         {mode === 'register' && (
-          <Input
+          <TextField
+            fullWidth
+            name="name"
             value={name}
-            disabled={isDisabled}
+            variant="secondary"
+            isDisabled={isDisabled}
             onChange={handleNameChange}
-            placeholder="Name (optional)"
-          />
+          >
+            <Label>Name</Label>
+            <Input placeholder="Optional" />
+          </TextField>
         )}
         {['login', 'register'].includes(mode) && (
           <PasswordInput
             value={password}
             label="Password"
+            variant="secondary"
             isDisabled={isDisabled}
             onChange={handlePasswordChange}
             onReset={

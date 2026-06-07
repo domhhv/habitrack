@@ -199,7 +199,7 @@ const DurationValueInput = ({
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="space-y-2">
       <NumberField
         minValue={0}
         value={hours}
@@ -283,9 +283,31 @@ const ScaleValueInput = ({
     >
       <Label>{label}</Label>
       <Slider.Output />
-      <Slider.Track>
+      <Slider.Track
+        className="rounded-full"
+        render={({ children, ...props }) => {
+          return (
+            <div {...props} data-custom="foo">
+              {Array.from({ length: config.max - config.min + 1 }, (_, i) => {
+                return (
+                  <div
+                    key={i}
+                    data-slot="step"
+                    data-in-range={currentVal >= i + config.min}
+                    style={{
+                      left: `${((i + config.min - config.min) / (config.max - config.min)) * 100}%`,
+                    }}
+                    className="bg-accent absolute top-1/2 z-10 h-2 w-2 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full data-[in-range=true]:bg-white"
+                  ></div>
+                );
+              })}
+              {children}
+            </div>
+          );
+        }}
+      >
         <Slider.Fill />
-        <Slider.Thumb />
+        <Slider.Thumb className="w-5 rounded-full after:w-4 after:rounded-full" />
       </Slider.Track>
     </Slider>
   );

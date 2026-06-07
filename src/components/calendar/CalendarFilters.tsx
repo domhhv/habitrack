@@ -12,7 +12,7 @@ import {
 import groupBy from 'lodash.groupby';
 import React from 'react';
 
-import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
+import { TraitChip } from '@components';
 import { useScreenWidth } from '@hooks';
 import type { Habit } from '@models';
 import { StorageBuckets } from '@models';
@@ -121,62 +121,20 @@ const CalendarFilters = () => {
 
   const isVisible = (isDesktop || filters.isShownOnMobile) && !!user;
 
-  const _renderHabitValue = (selectedKeys: React.Key[]) => {
-    return (
-      <CrossPlatformHorizontalScroll className="flex space-x-2">
-        {selectedKeys.map((key) => {
-          if (typeof key !== 'string' || !habits[key]) {
-            return null;
-          }
-
-          const { iconPath, id, name } = habits[key] as Habit;
-
-          return (
-            <Tooltip key={id} closeDelay={0}>
-              <Tooltip.Trigger>
-                <img
-                  className="h-4 w-4"
-                  alt={`${name} icon`}
-                  src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
-                />
-              </Tooltip.Trigger>
-              <Tooltip.Content>{name}</Tooltip.Content>
-            </Tooltip>
-          );
-        })}
-      </CrossPlatformHorizontalScroll>
-    );
-  };
-
-  const _renderTraitValue = (selectedKeys: React.Key[]) => {
-    return (
-      <CrossPlatformHorizontalScroll className="flex space-x-2">
-        {selectedKeys.map((key) => {
-          if (typeof key !== 'string' || !traits[key]) {
-            return null;
-          }
-
-          const { color, id, name } = traits[key];
-
-          return <TraitChip key={id} trait={{ color, name }} />;
-        })}
-      </CrossPlatformHorizontalScroll>
-    );
-  };
-
   return (
     <div
       className={cn(
-        'hidden max-w-full flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between',
+        'hidden max-w-full flex-col items-stretch justify-end gap-2 min-[550px]:flex-row lg:justify-between',
         isVisible && 'flex'
       )}
     >
       <Select
+        variant="secondary"
         value={filters.habitIds}
         selectionMode="multiple"
-        className="w-full md:w-50"
         placeholder="Filter by habits"
         isOpen={habitsFilterSelectState.isOpen}
+        className="w-full min-[550px]:w-1/2 md:w-50"
         onOpenChange={habitsFilterSelectState.setOpen}
         onChange={(keys) => {
           handleHabitsFilterChange(
@@ -184,11 +142,53 @@ const CalendarFilters = () => {
           );
         }}
       >
-        <Label>Filter by habits</Label>
         <Select.Trigger>
-          <Select.Value />
+          <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-2 overflow-y-auto">
+            {({ defaultChildren, isPlaceholder, state }) => {
+              if (isPlaceholder || state.selectedItems.length === 0) {
+                return defaultChildren;
+              }
+
+              const selectedItem = Object.values(habits).find((habit) => {
+                return habit.id === state.selectedItems[0]?.key;
+              });
+
+              if (!selectedItem) {
+                return defaultChildren;
+              }
+
+              return (
+                <>
+                  {state.selectedItems.map(({ key }) => {
+                    if (typeof key !== 'string' || !habits[key]) {
+                      return null;
+                    }
+
+                    const { iconPath, id, name } = habits[key] as Habit;
+
+                    return (
+                      <Tooltip key={id} delay={0} closeDelay={0}>
+                        <Tooltip.Trigger className="block h-4 w-4 shrink-0">
+                          <img
+                            className="h-4 w-4"
+                            alt={`${name} icon`}
+                            src={getPublicUrl(
+                              StorageBuckets.HABIT_ICONS,
+                              iconPath
+                            )}
+                          />
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>{name}</Tooltip.Content>
+                      </Tooltip>
+                    );
+                  })}
+                </>
+              );
+            }}
+          </Select.Value>
           <Select.Indicator />
         </Select.Trigger>
+        <Label>Filter by habits</Label>
         <Select.Popover>
           <ListBox>
             {!!Object.keys(habits).length && (
@@ -198,6 +198,7 @@ const CalendarFilters = () => {
                 textValue="Toggle all"
               >
                 <Checkbox
+                  variant="secondary"
                   isSelected={areAllHabitsSelected}
                   isIndeterminate={
                     !areAllHabitsSelected && filters.habitIds.some(Boolean)
@@ -258,23 +259,51 @@ const CalendarFilters = () => {
         </Select.Popover>
       </Select>
       <Select
+        variant="secondary"
         value={filters.traitIds}
         selectionMode="multiple"
         placeholder="Filter by traits"
         isOpen={traitsFilterSelectState.isOpen}
         onOpenChange={traitsFilterSelectState.setOpen}
-        className="w-full min-[450px]:w-1/2 md:w-[250px]"
+        className="w-full min-[550px]:w-1/2 md:w-[250px]"
         onChange={(keys) => {
           handleTraitsFilterChange(
             Array.isArray(keys) ? (keys as string[]) : []
           );
         }}
       >
-        <Label>Filter by traits</Label>
         <Select.Trigger>
-          <Select.Value />
+          <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-1 overflow-y-auto">
+            {({ defaultChildren, isPlaceholder, state }) => {
+              if (isPlaceholder || state.selectedItems.length === 0) {
+                return defaultChildren;
+              }
+
+              return (
+                <>
+                  {state.selectedItems.map(({ key }) => {
+                    if (typeof key !== 'string' || !traits[key]) {
+                      return null;
+                    }
+
+                    const { color, id, name } = traits[key];
+
+                    return (
+                      <TraitChip
+                        key={id}
+                        color="accent"
+                        variant="soft"
+                        trait={{ color, name }}
+                      />
+                    );
+                  })}
+                </>
+              );
+            }}
+          </Select.Value>
           <Select.Indicator />
         </Select.Trigger>
+        <Label>Filter by traits</Label>
         <Select.Popover>
           <ListBox>
             {!!Object.keys(traits).length && (
@@ -284,6 +313,7 @@ const CalendarFilters = () => {
                 textValue="Toggle all"
               >
                 <Checkbox
+                  variant="secondary"
                   isSelected={areAllTraitsSelected}
                   isIndeterminate={
                     !areAllTraitsSelected && filters.traitIds.some(Boolean)

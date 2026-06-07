@@ -1,11 +1,4 @@
-import {
-  Button,
-  Drawer,
-  Tooltip,
-  DrawerBody,
-  DrawerHeader,
-  DrawerContent,
-} from '@heroui/react';
+import { Button, Drawer, Tooltip } from '@heroui/react';
 import type { ZonedDateTime } from '@internationalized/date';
 import {
   now,
@@ -200,84 +193,93 @@ const OccurrenceDrawer = () => {
 
   return (
     <Drawer isOpen={isOpen} onOpenChange={changeOpen}>
-      <DrawerContent>
-        <DrawerHeader className="flex-col">
-          {canNavigateDays ? (
-            <div className="flex items-center gap-2">
-              <div>{getMainTitle()}</div>
-              <Tooltip closeDelay={0}>
-                <Tooltip.Trigger>
-                  <Button
-                    size="sm"
-                    isIconOnly
-                    variant="ghost"
-                    className="rounded-sm"
-                    aria-label="Previous day"
-                    onPress={() => {
-                      navigateDay(-1);
-                    }}
-                  >
-                    <CaretLeftIcon
-                      size={16}
-                      focusable="false"
-                      aria-hidden="true"
-                    />
-                  </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content>Previous day</Tooltip.Content>
-              </Tooltip>
-              <Tooltip closeDelay={0}>
-                <Tooltip.Trigger>
-                  <Button
-                    size="sm"
-                    isIconOnly
-                    variant="ghost"
-                    aria-label="Next day"
-                    className="rounded-sm"
-                    onPress={() => {
-                      navigateDay(1);
-                    }}
-                  >
-                    <CaretRightIcon
-                      size={16}
-                      focusable="false"
-                      aria-hidden="true"
-                    />
-                  </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content>Next day</Tooltip.Content>
-              </Tooltip>
-            </div>
-          ) : (
-            getMainTitle()
-          )}
-          {occurrencesData?.hasOccurrencesWithAndWithoutTime && (
-            <p className="text-default-400 dark:text-default-600 text-xs">
-              Has occurrences with and without specific times
-            </p>
-          )}
-        </DrawerHeader>
-        <DrawerBody>
-          {occurrencesData && (
-            <OccurrenceList
-              onRemove={dispatchOccurrenceRemoval}
-              hasChips={!!occurrencesData.dayOccurrences}
-              occurrenceIdBeingRemoved={occurrenceIdBeingRemoved}
-              occurrencesWithTime={occurrencesData.occurrencesWithTime}
-              occurrencesWithoutTime={occurrencesData.occurrencesWithoutTime}
-              hasOccurrencesWithTime={occurrencesData.hasOccurrencesWithTime}
-              hasOccurrencesWithoutTime={
-                occurrencesData.hasOccurrencesWithoutTime
-              }
-              hasOccurrencesWithAndWithoutTime={
-                occurrencesData.hasOccurrencesWithAndWithoutTime
-              }
-            />
-          )}
-          {dayToLog && <OccurrenceCreateFormContainer />}
-          {occurrenceToEdit && <OccurrenceUpdateFormContainer />}
-        </DrawerBody>
-      </DrawerContent>
+      <Drawer.Backdrop>
+        <Drawer.Content placement="right">
+          <Drawer.Dialog>
+            <Drawer.CloseTrigger />
+            <Drawer.Header className="flex-col">
+              {canNavigateDays ? (
+                <div className="flex items-center gap-2">
+                  <div>{getMainTitle()}</div>
+                  <Tooltip closeDelay={0}>
+                    <Tooltip.Trigger>
+                      <Button
+                        size="sm"
+                        isIconOnly
+                        variant="ghost"
+                        className="rounded-sm"
+                        aria-label="Previous day"
+                        onPress={() => {
+                          navigateDay(-1);
+                        }}
+                      >
+                        <CaretLeftIcon
+                          size={16}
+                          focusable="false"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>Previous day</Tooltip.Content>
+                  </Tooltip>
+                  <Tooltip closeDelay={0}>
+                    <Tooltip.Trigger>
+                      <Button
+                        size="sm"
+                        isIconOnly
+                        variant="ghost"
+                        aria-label="Next day"
+                        className="rounded-sm"
+                        onPress={() => {
+                          navigateDay(1);
+                        }}
+                      >
+                        <CaretRightIcon
+                          size={16}
+                          focusable="false"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>Next day</Tooltip.Content>
+                  </Tooltip>
+                </div>
+              ) : (
+                getMainTitle()
+              )}
+              {occurrencesData?.hasOccurrencesWithAndWithoutTime && (
+                <p className="text-default-400 dark:text-default-600 text-xs">
+                  Has occurrences with and without specific times
+                </p>
+              )}
+            </Drawer.Header>
+            <Drawer.Body>
+              {occurrencesData && (
+                <OccurrenceList
+                  onRemove={dispatchOccurrenceRemoval}
+                  hasChips={!!occurrencesData.dayOccurrences}
+                  occurrenceIdBeingRemoved={occurrenceIdBeingRemoved}
+                  occurrencesWithTime={occurrencesData.occurrencesWithTime}
+                  occurrencesWithoutTime={
+                    occurrencesData.occurrencesWithoutTime
+                  }
+                  hasOccurrencesWithTime={
+                    occurrencesData.hasOccurrencesWithTime
+                  }
+                  hasOccurrencesWithoutTime={
+                    occurrencesData.hasOccurrencesWithoutTime
+                  }
+                  hasOccurrencesWithAndWithoutTime={
+                    occurrencesData.hasOccurrencesWithAndWithoutTime
+                  }
+                />
+              )}
+              {dayToLog && <OccurrenceCreateFormContainer />}
+              {occurrenceToEdit && <OccurrenceUpdateFormContainer />}
+            </Drawer.Body>
+          </Drawer.Dialog>
+        </Drawer.Content>
+      </Drawer.Backdrop>
     </Drawer>
   );
 };

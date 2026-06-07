@@ -118,6 +118,7 @@ const CalendarNavigation = ({
     >
       <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
         <Select
+          variant="secondary"
           value={monthSelectValue}
           className="w-17.5 md:w-31.25"
           isOpen={monthSelectState.isOpen}
@@ -159,6 +160,7 @@ const CalendarNavigation = ({
         </Select>
         <Select
           className="w-20"
+          variant="secondary"
           value={yearSelectValue}
           isOpen={yearSelectState.isOpen}
           onOpenChange={yearSelectState.setOpen}
@@ -197,6 +199,7 @@ const CalendarNavigation = ({
         </Select>
         {calendarMode === 'week' && (
           <Select
+            variant="secondary"
             value={weekSelectValue}
             className="w-37.5 md:w-62.5"
             isOpen={weekSelectState.isOpen}
@@ -229,7 +232,7 @@ const CalendarNavigation = ({
             <Select.Popover className="w-62.5">
               <ListBox>
                 <ListBox.Section>
-                  <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                  <Header className="bg-background shadow-small rounded-small sticky top-1 z-20 flex w-auto rounded-2xl px-2 py-1.5">
                     Week
                   </Header>
                   {weeks.map((week, index) => {

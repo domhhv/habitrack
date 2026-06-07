@@ -6,6 +6,7 @@ import {
   Button,
   Select,
   ListBox,
+  TextField,
 } from '@heroui/react';
 import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
@@ -117,14 +118,16 @@ const AccountPage = () => {
           className="mt-4 w-full md:w-96"
         >
           <div className="flex flex-col gap-2">
-            <Input
-              disabled
+            <TextField
+              isDisabled
               value={email}
-              placeholder="Email"
               variant="secondary"
               data-testid="email-input"
               onChange={handleEmailChange}
-            />
+            >
+              <Label>Email</Label>
+              <Input placeholder="Email" />
+            </TextField>
             <PasswordInput
               label="Password"
               value={password}
@@ -133,14 +136,16 @@ const AccountPage = () => {
               testId="password-input"
               onChange={handlePasswordChange}
             />
-            <Input
+            <TextField
               value={name}
-              placeholder="Name"
               variant="secondary"
-              disabled={isUpdating}
+              isDisabled={isUpdating}
               data-testid="name-input"
               onChange={handleNameChange}
-            />
+            >
+              <Label>Name</Label>
+              <Input placeholder="Name" />
+            </TextField>
             <Select
               variant="secondary"
               value={firstDayOfWeek}

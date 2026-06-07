@@ -1,11 +1,11 @@
 import {
   cn,
-  Input,
   Label,
   Button,
   Spinner,
-  TextArea,
   Dropdown,
+  TextField,
+  InputGroup,
 } from '@heroui/react';
 import { XIcon, CheckIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
@@ -210,180 +210,182 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
   return (
     <div className="flex flex-col gap-10 py-8">
       <div className="flex gap-4">
-        <div
-          style={{ borderColor: habit.trait?.color || '' }}
-          className="border-content3 justify-self-start rounded-2xl border-3 p-4"
-        >
-          <HabitIcon habit={habit} />
+        <div className="space-y-2">
+          <div
+            style={{ borderColor: habit.trait?.color || '' }}
+            className="border-content3 justify-self-start rounded-2xl border-3 p-4"
+          >
+            <HabitIcon habit={habit} />
+          </div>
+          <Dropdown>
+            <Dropdown.Trigger>
+              <TraitChip trait={habit.trait} className="hover:bg-content2" />
+              {isUpdatingTrait && (
+                <Spinner size="sm" className="h-0 translate-0" />
+              )}
+            </Dropdown.Trigger>
+            <Dropdown.Popover>
+              <Dropdown.Menu
+                selectionMode="single"
+                aria-label="Select trait"
+                selectedKeys={new Set([habit.traitId || 'no-trait'])}
+                onAction={async (key) => {
+                  const nextTraitId = key === 'no-trait' ? null : String(key);
+                  const currentTraitId = habit.traitId ?? null;
+
+                  if (isUpdatingTrait || nextTraitId === currentTraitId) {
+                    return;
+                  }
+
+                  setIsUpdatingTrait(true);
+
+                  try {
+                    await updateHabit(habit.id, {
+                      traitId: nextTraitId,
+                    });
+                  } finally {
+                    setIsUpdatingTrait(false);
+                  }
+                }}
+              >
+                {[
+                  <Dropdown.Item
+                    id="no-trait"
+                    key="no-trait"
+                    textValue="No trait"
+                  >
+                    <Label>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-block h-2 w-2 rounded-full bg-black" />
+                        No trait
+                      </div>
+                    </Label>
+                  </Dropdown.Item>,
+                  ...Object.values(traits).map((trait) => {
+                    return (
+                      <Dropdown.Item
+                        id={trait.id}
+                        key={trait.id}
+                        textValue={trait.name}
+                      >
+                        <Label>
+                          <div className="flex items-center gap-2">
+                            <span
+                              style={{ backgroundColor: trait.color }}
+                              className="inline-block h-2 w-2 rounded-full"
+                            />
+                            {trait.name}
+                          </div>
+                        </Label>
+                      </Dropdown.Item>
+                    );
+                  }),
+                ]}
+              </Dropdown.Menu>
+            </Dropdown.Popover>
+          </Dropdown>
         </div>
         <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            {isEditingName ? (
-              <div className="flex items-center gap-1">
-                <Input
-                  autoFocus
-                  value={name}
-                  maxLength={50}
-                  placeholder="Untitled"
-                  onKeyDown={handleKeyDown}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                  }}
-                />
-                <span className="text-foreground-400 text-tiny whitespace-nowrap">
-                  {name.length}/50
-                </span>
-                <Button
-                  size="sm"
-                  isIconOnly
-                  variant="ghost"
-                  onPress={saveHabit}
-                  aria-label="Save name"
-                  isDisabled={!name.trim()}
-                >
-                  <CheckIcon className="size-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  isIconOnly
-                  variant="ghost"
-                  onPress={cancelEditing}
-                  aria-label="Cancel name editing"
-                >
-                  <XIcon className="size-4" />
-                </Button>
-              </div>
-            ) : (
-              <div className="group flex items-center gap-2">
-                <h1 className="text-2xl font-bold">{habit.name}</h1>
-                <Button
-                  size="sm"
-                  isIconOnly
-                  variant="ghost"
-                  aria-label="Edit name"
-                  onPress={() => {
-                    setName(habit.name);
-                    setIsEditingName(true);
-                  }}
-                  className={cn(
-                    'opacity-0 transition-opacity group-hover:opacity-100',
-                    isEditing && 'invisible'
-                  )}
-                >
-                  <PencilSimpleIcon className="size-4" />
-                </Button>
-              </div>
-            )}
-            <Dropdown>
-              <Dropdown.Trigger>
-                <button
-                  type="button"
-                  disabled={isUpdatingTrait}
-                  className="h-5 cursor-pointer space-x-2"
-                >
-                  <TraitChip
-                    trait={habit.trait}
-                    className="hover:bg-content2"
+          {isEditingName ? (
+            <div className="flex items-center gap-1">
+              <TextField className="w-96">
+                <InputGroup>
+                  <InputGroup.Input
+                    required
+                    value={name}
+                    maxLength={50}
+                    placeholder="Enter habit name"
+                    onChange={(e) => {
+                      setName(e.target.value);
+                    }}
                   />
-                  {isUpdatingTrait && (
-                    <Spinner size="sm" className="h-0 translate-0" />
-                  )}
-                </button>
-              </Dropdown.Trigger>
-              <Dropdown.Popover>
-                <Dropdown.Menu
-                  selectionMode="single"
-                  aria-label="Select trait"
-                  selectedKeys={new Set([habit.traitId || 'no-trait'])}
-                  onAction={async (key) => {
-                    const nextTraitId = key === 'no-trait' ? null : String(key);
-                    const currentTraitId = habit.traitId ?? null;
-
-                    if (isUpdatingTrait || nextTraitId === currentTraitId) {
-                      return;
-                    }
-
-                    setIsUpdatingTrait(true);
-
-                    try {
-                      await updateHabit(habit.id, {
-                        traitId: nextTraitId,
-                      });
-                    } finally {
-                      setIsUpdatingTrait(false);
-                    }
-                  }}
-                >
-                  {[
-                    <Dropdown.Item
-                      id="no-trait"
-                      key="no-trait"
-                      textValue="No trait"
+                  <InputGroup.Suffix className="space-x-2">
+                    <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                      {name.length}/50
+                    </span>
+                    <Button
+                      size="sm"
+                      isIconOnly
+                      variant="ghost"
+                      onPress={saveHabit}
+                      aria-label="Save name"
+                      isDisabled={!name.trim()}
                     >
-                      <Label>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block h-2 w-2 rounded-full bg-black" />
-                          No trait
-                        </div>
-                      </Label>
-                    </Dropdown.Item>,
-                    ...Object.values(traits).map((trait) => {
-                      return (
-                        <Dropdown.Item
-                          id={trait.id}
-                          key={trait.id}
-                          textValue={trait.name}
-                        >
-                          <Label>
-                            <div className="flex items-center gap-2">
-                              <span
-                                style={{ backgroundColor: trait.color }}
-                                className="inline-block h-2 w-2 rounded-full"
-                              />
-                              {trait.name}
-                            </div>
-                          </Label>
-                        </Dropdown.Item>
-                      );
-                    }),
-                  ]}
-                </Dropdown.Menu>
-              </Dropdown.Popover>
-            </Dropdown>
-          </div>
+                      <CheckIcon className="size-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      isIconOnly
+                      variant="ghost"
+                      onPress={cancelEditing}
+                      aria-label="Cancel name editing"
+                    >
+                      <XIcon className="size-4" />
+                    </Button>
+                  </InputGroup.Suffix>
+                </InputGroup>
+              </TextField>
+            </div>
+          ) : (
+            <div className="group flex items-center gap-2">
+              <h1 className="text-2xl font-bold">{habit.name}</h1>
+              <Button
+                size="sm"
+                isIconOnly
+                variant="ghost"
+                aria-label="Edit name"
+                onPress={() => {
+                  setName(habit.name);
+                  setIsEditingName(true);
+                }}
+                className={cn(
+                  'opacity-0 transition-opacity group-hover:opacity-100',
+                  isEditing && 'invisible'
+                )}
+              >
+                <PencilSimpleIcon className="size-4" />
+              </Button>
+            </div>
+          )}
           {isEditingDescription ? (
             <div className="flex items-center gap-1">
-              <Input
-                autoFocus
-                maxLength={100}
-                value={description}
-                onKeyDown={handleKeyDown}
-                placeholder="No description"
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                }}
-              />
-              <span className="text-foreground-400 text-tiny whitespace-nowrap">
-                {description.length}/100
-              </span>
-              <Button
-                size="sm"
-                isIconOnly
-                variant="ghost"
-                onPress={saveHabit}
-                aria-label="Save description"
-              >
-                <CheckIcon className="size-4" />
-              </Button>
-              <Button
-                size="sm"
-                isIconOnly
-                variant="ghost"
-                onPress={cancelEditing}
-                aria-label="Cancel description editing"
-              >
-                <XIcon className="size-4" />
-              </Button>
+              <TextField className="w-96">
+                <InputGroup>
+                  <InputGroup.Input
+                    autoFocus
+                    maxLength={100}
+                    value={description}
+                    onKeyDown={handleKeyDown}
+                    placeholder="No description"
+                    onChange={(e) => {
+                      setDescription(e.target.value);
+                    }}
+                  />
+                  <InputGroup.Suffix className="space-x-2">
+                    <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                      {description.length}/100
+                    </span>
+                    <Button
+                      size="sm"
+                      isIconOnly
+                      variant="ghost"
+                      onPress={saveHabit}
+                      aria-label="Save description"
+                    >
+                      <CheckIcon className="size-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      isIconOnly
+                      variant="ghost"
+                      onPress={cancelEditing}
+                      aria-label="Cancel description editing"
+                    >
+                      <XIcon className="size-4" />
+                    </Button>
+                  </InputGroup.Suffix>
+                </InputGroup>
+              </TextField>
             </div>
           ) : (
             <div className="group flex items-center gap-2">
@@ -414,42 +416,47 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
       </div>
       {isEditingMotivation ? (
         <div>
-          <TextArea
-            maxLength={2000}
-            value={motivation}
-            onChange={(e) => {
-              setMotivation(e.target.value);
-            }}
-            placeholder="Why do you want to track this habit? If you know the reasons for establishing a good habit or breaking a bad one, this is a good place to outline your goals."
-          />
-          <div className="mt-1 flex items-center gap-1">
-            <span className="text-foreground-400 text-tiny whitespace-nowrap">
-              {motivation.length}/2000
-            </span>
-            <Button
-              size="sm"
-              isIconOnly
-              variant="ghost"
-              onPress={saveHabit}
-              aria-label="Save motivation"
-            >
-              <CheckIcon className="size-4" />
-            </Button>
-            <Button
-              size="sm"
-              isIconOnly
-              variant="ghost"
-              onPress={cancelEditing}
-              aria-label="Cancel motivation editing"
-            >
-              <XIcon className="size-4" />
-            </Button>
-          </div>
+          <TextField fullWidth className="flex flex-col">
+            <InputGroup>
+              <InputGroup.TextArea
+                maxLength={2000}
+                className="h-24"
+                value={motivation}
+                onChange={(e) => {
+                  setMotivation(e.target.value);
+                }}
+                placeholder="Why do you want to track this habit? If you know the reasons for establishing a good habit or breaking a bad one, this is a good place to outline your goals."
+              />
+              <InputGroup.Suffix className="items-center space-x-2 self-end py-2">
+                <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                  {motivation.length}/2000
+                </span>
+                <Button
+                  size="sm"
+                  isIconOnly
+                  variant="ghost"
+                  onPress={saveHabit}
+                  aria-label="Save motivation"
+                >
+                  <CheckIcon className="size-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  isIconOnly
+                  variant="ghost"
+                  onPress={cancelEditing}
+                  aria-label="Cancel motivation editing"
+                >
+                  <XIcon className="size-4" />
+                </Button>
+              </InputGroup.Suffix>
+            </InputGroup>
+          </TextField>
         </div>
       ) : (
         <div className="group">
           <h2 className="mt-4 mb-1 text-sm font-medium">Motivation</h2>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <p
               className={cn(
                 !habit.motivation && 'text-default-500 italic',
@@ -542,7 +549,6 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
               );
             })}
             <Button
-              size="sm"
               className="min-h-8"
               onPress={addMetric}
               isDisabled={isSavingMetrics}
@@ -551,7 +557,6 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
             </Button>
             <div className="flex items-center gap-2">
               <Button
-                size="sm"
                 variant="primary"
                 onPress={saveMetrics}
                 isDisabled={isSavingMetrics || !user?.id}
@@ -560,7 +565,6 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 Save
               </Button>
               <Button
-                size="sm"
                 variant="ghost"
                 isDisabled={isSavingMetrics}
                 onPress={cancelEditingMetrics}

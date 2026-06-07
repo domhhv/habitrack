@@ -19,7 +19,7 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async ({
     target: { files },
   }) => {
-    if (!user || !files) {
+    if (!user || !files || isUploading) {
       return null;
     }
 
@@ -55,7 +55,10 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
               src={getPublicUrl(StorageBuckets.HABIT_ICONS, habit.iconPath)}
             />
           )}
-          <VisuallyHiddenInput onChange={handleFileChange} />
+          <VisuallyHiddenInput
+            isDisabled={isUploading}
+            onChange={handleFileChange}
+          />
         </label>
       </Tooltip.Trigger>
       <Tooltip.Content>Upload new icon</Tooltip.Content>
