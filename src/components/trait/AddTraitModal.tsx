@@ -1,13 +1,4 @@
-import {
-  Input,
-  Modal,
-  Button,
-  Textarea,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalContent,
-} from '@heroui/react';
+import { Input, Modal, Button, TextArea } from '@heroui/react';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
@@ -68,62 +59,85 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalContent>
-        <ModalHeader>Add New Trait</ModalHeader>
-        <ModalBody className="gap-4">
-          <Input
-            label="Name"
-            value={label}
-            variant="faded"
-            isDisabled={isAdding}
-            onChange={handleLabelChange}
-            placeholder="e. g. Moderately Bad"
-          />
-          <Textarea
-            variant="faded"
-            value={description}
-            label="Description"
-            isDisabled={isAdding}
-            onChange={handleDescriptionChange}
-          />
-          <div className="flex gap-2">
-            <HexColorPicker color={color} onChange={handleTraitColorChange} />
-            <div className="flex w-1/2 flex-col gap-2">
+    <Modal>
+      <Modal.Backdrop
+        isOpen={isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            onClose();
+          }
+        }}
+      >
+        <Modal.Container>
+          <Modal.Dialog>
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>Add New Trait</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body className="gap-4">
               <Input
-                variant="faded"
-                startContent="#"
-                aria-label='"Color"'
-                value={color.slice(1)}
-                onChange={(event) => {
-                  return handleTraitColorChange(event.target.value);
+                value={label}
+                variant="secondary"
+                disabled={isAdding}
+                onChange={handleLabelChange}
+                placeholder="e. g. Moderately Bad"
+              />
+              <TextArea
+                variant="secondary"
+                value={description}
+                disabled={isAdding}
+                onChange={(e) => {
+                  handleDescriptionChange(e.target.value);
                 }}
               />
-              <p className="text-sm">
-                This is how habits of this trait will appear on your calendar
-              </p>
-              <div className="flex">
-                <OccurrenceChip
-                  isClickable={false}
-                  colorOverride={color}
-                  occurrences={[makeTestOccurrence()]}
+              <div className="flex gap-2">
+                <HexColorPicker
+                  color={color}
+                  onChange={handleTraitColorChange}
                 />
+                <div className="flex w-1/2 flex-col gap-2">
+                  <div className="relative flex items-center">
+                    <span className="pointer-events-none absolute left-2 text-sm">
+                      #
+                    </span>
+                    <Input
+                      className="pl-5"
+                      aria-label="Color"
+                      variant="secondary"
+                      value={color.slice(1)}
+                      onChange={(event) => {
+                        handleTraitColorChange(event.target.value);
+                      }}
+                    />
+                  </div>
+                  <p className="text-sm">
+                    This is how habits of this trait will appear on your
+                    calendar
+                  </p>
+                  <div className="flex">
+                    <OccurrenceChip
+                      isClickable={false}
+                      colorOverride={color}
+                      occurrences={[makeTestOccurrence()]}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            fullWidth
-            type="submit"
-            color="primary"
-            onPress={handleAdd}
-            isDisabled={isAdding || !user?.id}
-          >
-            Add Trait
-          </Button>
-        </ModalFooter>
-      </ModalContent>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                fullWidth
+                type="submit"
+                variant="primary"
+                onPress={handleAdd}
+                isDisabled={isAdding || !user?.id}
+              >
+                Add Trait
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </Modal>
   );
 };

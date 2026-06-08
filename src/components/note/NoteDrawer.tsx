@@ -1,13 +1,12 @@
 import {
   cn,
   Form,
+  Label,
   Drawer,
   Button,
-  Textarea,
-  DrawerBody,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerContent,
+  Spinner,
+  TextArea,
+  TextField,
 } from '@heroui/react';
 import {
   endOfWeek,
@@ -98,9 +97,9 @@ const NoteDrawer = () => {
 
     return askConfirmation({
       cancelText: 'Keep editing',
-      color: 'warning',
       confirmText: 'Discard',
       title: 'Unsaved changes',
+      variant: 'secondary',
       description:
         'You have unsaved changes. Are you sure you want to discard them?',
     });
@@ -234,105 +233,112 @@ const NoteDrawer = () => {
   };
 
   return (
-    <Drawer
-      isOpen={isOpen}
-      onOpenChange={changeOpen}
-      size={isMobile ? 'full' : 'lg'}
-    >
-      <DrawerContent>
-        <DrawerHeader className="items-center gap-2">
-          Note for {formatPeriod()}
-          <Button
-            size="sm"
-            isIconOnly
-            variant="light"
-            onPress={togglePeriodPicker}
-          >
-            <CaretDownIcon
-              size={16}
-              className={cn(
-                'transition-transform duration-300 ease-linear',
-                isPeriodPickerShown && 'rotate-180'
-              )}
-            />
-          </Button>
-        </DrawerHeader>
-        <Form onSubmit={submitNote} className="max-h-[calc(100%-64px)]">
-          <DrawerBody className="w-full space-y-4 py-0.5">
-            <NotePeriodPicker
-              endRange={getEndRangeDate()}
-              isShown={isPeriodPickerShown}
-              onBeforeChange={confirmUnsavedChanges}
-            />
-            <Textarea
-              autoFocus
-              isRequired
-              minRows={5}
-              name="content"
-              value={content}
-              variant="faded"
-              disableAutosize
-              label="Your note"
-              maxRows={Infinity}
-              labelPlacement="outside"
-              onChange={changeContent}
-              disabled={isSaving || isRemoving}
-              description={getTextareaDescription()}
-              defaultValue={existingNote?.content || ''}
-              placeholder={`Start typing your note about this ${periodKind}...`}
-              errorMessage={`Empty notes are not allowed. ${existingNote ? 'If you want to empty an existing note, please remove it instead.' : ''}`}
-              classNames={{
-                base: 'max-h-full',
-                label: 'after:hidden',
-                input: cn(
-                  'resize-y min-h-10 field-sizing-content max-h-full',
-                  !isDesktop && 'text-base'
-                ),
-              }}
-              onKeyDown={(event) => {
-                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-                  void submitNote();
-                }
-
-                if (event.key === 'Escape') {
-                  void closeDrawerWithConfirmation();
-                }
-
-                return null;
-              }}
-            />
-          </DrawerBody>
-          <DrawerFooter className="w-full self-end pt-0 sm:w-auto">
-            {!!existingNote && (
+    <Drawer isOpen={isOpen} onOpenChange={changeOpen}>
+      <Drawer.Backdrop>
+        <Drawer.Content placement="right">
+          <Drawer.Dialog>
+            <Drawer.CloseTrigger />
+            <Drawer.Header className="flex-row items-center gap-2">
+              <span>Note for {formatPeriod()}</span>
               <Button
-                color="danger"
-                onPress={removeNote}
-                disabled={isRemoving}
-                isLoading={isRemoving}
+                size="sm"
+                isIconOnly
+                variant="ghost"
+                onPress={togglePeriodPicker}
               >
-                Remove
+                <CaretDownIcon
+                  size={16}
+                  className={cn(
+                    'transition-transform duration-300 ease-linear',
+                    isPeriodPickerShown && 'rotate-180'
+                  )}
+                />
               </Button>
-            )}
-            <Button
-              type="submit"
-              color="primary"
-              isLoading={isSaving}
-              fullWidth={isMobile && !existingNote}
-              isDisabled={
-                !user ||
-                isRemoving ||
-                !content ||
-                existingNote?.content === content
-              }
-            >
-              <Kbd size="md" color="primary">
-                {mod} {enter}
-              </Kbd>
-              {existingNote ? 'Save' : 'Add'}
-            </Button>
-          </DrawerFooter>
-        </Form>
-      </DrawerContent>
+            </Drawer.Header>
+            <Form onSubmit={submitNote} className="max-h-[calc(100%-64px)]">
+              <Drawer.Body className="w-full space-y-4 py-0.5">
+                <NotePeriodPicker
+                  endRange={getEndRangeDate()}
+                  isShown={isPeriodPickerShown}
+                  onBeforeChange={confirmUnsavedChanges}
+                />
+                <TextField
+                  fullWidth
+                  isRequired
+                  value={content}
+                  variant="secondary"
+                  className="max-h-full"
+                  onChange={changeContent}
+                >
+                  <Label className="after:hidden">Your note</Label>
+                  <TextArea
+                    autoFocus
+                    name="content"
+                    disabled={isSaving || isRemoving}
+                    placeholder={`Start typing your note about this ${periodKind}...`}
+                    className={cn(
+                      'field-sizing-content max-h-full min-h-20 resize-y',
+                      !isDesktop && 'text-base'
+                    )}
+                    onKeyDown={(event) => {
+                      if (
+                        (event.metaKey || event.ctrlKey) &&
+                        event.key === 'Enter'
+                      ) {
+                        void submitNote();
+                      }
+
+                      if (event.key === 'Escape') {
+                        void closeDrawerWithConfirmation();
+                      }
+
+                      return null;
+                    }}
+                  />
+                  {getTextareaDescription() && (
+                    <p className="text-foreground-500 text-sm">
+                      {getTextareaDescription()}
+                    </p>
+                  )}
+                </TextField>
+              </Drawer.Body>
+              <Drawer.Footer className="w-full self-end pt-0 sm:w-auto">
+                {!!existingNote && (
+                  <Button
+                    variant="danger"
+                    onPress={removeNote}
+                    isDisabled={isRemoving}
+                  >
+                    {isRemoving && <Spinner size="sm" color="current" />}
+                    Remove
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  fullWidth={isMobile && !existingNote}
+                  isDisabled={
+                    isSaving ||
+                    !user ||
+                    isRemoving ||
+                    !content ||
+                    existingNote?.content === content
+                  }
+                >
+                  {isSaving ? (
+                    <Spinner size="sm" color="current" />
+                  ) : (
+                    <Kbd size="md" variant="default">
+                      {mod} {enter}
+                    </Kbd>
+                  )}
+                  {existingNote ? 'Save' : 'Add'}
+                </Button>
+              </Drawer.Footer>
+            </Form>
+          </Drawer.Dialog>
+        </Drawer.Content>
+      </Drawer.Backdrop>
     </Drawer>
   );
 };

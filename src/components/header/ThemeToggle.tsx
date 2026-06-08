@@ -25,13 +25,12 @@ const ThemeToggle = () => {
             size="sm"
             key={mode}
             isIconOnly
-            color="secondary"
-            variant={isSelected ? 'flat' : 'light'}
+            variant={isSelected ? 'tertiary' : 'ghost'}
             onPress={() => {
               setThemeMode(mode);
             }}
           >
-            <Icon size={14} weight={isSelected ? 'bold' : 'regular'} />
+            <Icon size={14} />
           </Button>
         );
       })}

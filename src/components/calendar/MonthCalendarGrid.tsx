@@ -5,7 +5,7 @@ import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
 import { useLocale, useCalendarGrid } from 'react-aria';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
@@ -45,6 +45,7 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const weekNotes = useWeekNotes();
   const { openNoteDrawer } = useNoteDrawerActions();
+  const navigate = useNavigate();
 
   const getCellPosition = (
     weekIndex: number,
@@ -114,59 +115,68 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
             >
               <div
                 className={cn(
-                  'absolute -top-1 -left-7 flex h-full flex-col lg:-left-9',
+                  'absolute -left-7 flex h-full flex-col lg:-left-9',
                   weekIndex === 0 ? 'gap-1 lg:gap-1.5' : 'gap-0.5 lg:gap-1'
                 )}
               >
-                <Tooltip closeDelay={0} content="Go to this week">
-                  <Button
-                    as={Link}
-                    variant="ghost"
-                    radius={isDesktop ? 'md' : 'sm'}
-                    to={`/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`}
-                    className={cn(
-                      'mt-0.5 w-6 min-w-fit basis-6.75 p-0 lg:w-7 lg:basis-7.75',
-                      weekIndex === 0 && 'top-0.5'
-                    )}
-                  >
-                    {getISOWeek(monday.toDate(state.timeZone))}
-                  </Button>
+                <Tooltip closeDelay={0}>
+                  <Tooltip.Trigger>
+                    <Button
+                      size="sm"
+                      variant="tertiary"
+                      className={cn(
+                        'mt-0 h-6.75 w-6 min-w-fit p-0 lg:h-7.75 lg:w-7',
+                        weekIndex === 0 && 'top-0.5'
+                      )}
+                      onPress={() => {
+                        navigate(
+                          `/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`
+                        );
+                      }}
+                    >
+                      {getISOWeek(monday.toDate(state.timeZone))}
+                    </Button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Content>Go to this week</Tooltip.Content>
                 </Tooltip>
-                <Tooltip
-                  closeDelay={0}
-                  content={
-                    weekNote
+                <Tooltip closeDelay={0}>
+                  <Tooltip.Trigger>
+                    <Button
+                      isIconOnly
+                      variant="outline"
+                      onPress={() => {
+                        openNoteDrawer(firstDayOfWeek, 'week');
+                      }}
+                      aria-label={
+                        weekNote
+                          ? `Edit note about week ${weekIndex + 1}`
+                          : `Add note about week ${weekIndex + 1}`
+                      }
+                      className={cn(
+                        'text-accent mb-0 h-19.75 w-6 min-w-fit rounded-3xl p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:h-26.75 lg:w-7',
+                        (weekNote || !isDesktop) && 'opacity-100',
+                        weekIndex === 0 && 'h-19.25 lg:h-26.75'
+                      )}
+                    >
+                      {weekNote ? (
+                        <NoteIcon size={16} weight="bold" />
+                      ) : (
+                        <NotePencilIcon size={16} weight="bold" />
+                      )}
+                    </Button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Content>
+                    {weekNote
                       ? 'Edit note about this week'
-                      : 'Add note about this week'
-                  }
-                >
-                  <Button
-                    isIconOnly
-                    color="primary"
-                    radius={isDesktop ? 'md' : 'sm'}
-                    variant={isDesktop ? 'flat' : weekNote ? 'solid' : 'flat'}
-                    onPress={() => {
-                      openNoteDrawer(firstDayOfWeek, 'week');
-                    }}
-                    className={cn(
-                      'mb-0 w-6 min-w-fit basis-19.75 p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:w-7 lg:basis-26.75',
-                      (weekNote || !isDesktop) && 'opacity-100',
-                      weekIndex === 0 && 'basis-19.25 lg:basis-26.75'
-                    )}
-                  >
-                    {weekNote ? (
-                      <NoteIcon size={16} weight="bold" />
-                    ) : (
-                      <NotePencilIcon size={16} weight="bold" />
-                    )}
-                  </Button>
+                      : 'Add note about this week'}
+                  </Tooltip.Content>
                 </Tooltip>
               </div>
               <div
                 className={cn(
                   'flex h-27.5 w-full basis-full justify-between border-r-2 border-l-2 border-neutral-500 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto dark:border-neutral-400',
-                  weekIndex === 0 && 'rounded-t-lg',
-                  weekIndex === weeksInMonthCount - 1 && 'rounded-b-lg'
+                  weekIndex === 0 && 'rounded-t-3xl',
+                  weekIndex === weeksInMonthCount - 1 && 'rounded-b-3xl'
                 )}
               >
                 {state

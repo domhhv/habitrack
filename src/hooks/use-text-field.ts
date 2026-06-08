@@ -1,17 +1,29 @@
 import React, { type ChangeEvent } from 'react';
 
-type ReturnValue = [
-  string,
-  (value: string | ChangeEvent<HTMLInputElement>) => void,
-  () => void,
-];
+type TextFieldHandler = (
+  value:
+    | string
+    | ChangeEvent<HTMLInputElement>
+    | ChangeEvent<HTMLTextAreaElement>
+) => void;
+
+type ReturnValue = [string, TextFieldHandler, () => void];
 
 const useTextField = (initialValue = ''): ReturnValue => {
   const [value, setValue] = React.useState(initialValue);
 
   const handleChange = React.useCallback(
-    (value: string | ChangeEvent<HTMLInputElement>) => {
-      setValue(typeof value === 'string' ? value : value.target.value);
+    (
+      value:
+        | string
+        | ChangeEvent<HTMLInputElement>
+        | ChangeEvent<HTMLTextAreaElement>
+    ) => {
+      if (typeof value === 'string') {
+        setValue(value);
+      } else {
+        setValue(value.target.value);
+      }
     },
     []
   );

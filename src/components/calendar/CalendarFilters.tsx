@@ -1,17 +1,20 @@
-import { cn, useDisclosure, type SelectedItems } from '@heroui/react';
 import {
+  cn,
+  Label,
+  Header,
   Select,
+  ListBox,
   Tooltip,
   Checkbox,
-  SelectItem,
-  SelectSection,
+  Separator,
+  useOverlayState,
 } from '@heroui/react';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 
-import { TraitChip, CrossPlatformHorizontalScroll } from '@components';
+import { TraitChip } from '@components';
 import { useScreenWidth } from '@hooks';
-import type { Habit, Trait } from '@models';
+import type { Habit } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import {
@@ -29,14 +32,8 @@ const CalendarFilters = () => {
   const user = useUser();
   const { isDesktop } = useScreenWidth();
   const changeCalendarFilters = useCalendarFiltersChange();
-  const {
-    isOpen: isHabitsFilterSelectOpen,
-    onOpenChange: onHabitsFilterSelectOpenChange,
-  } = useDisclosure();
-  const {
-    isOpen: isTraitsFilterSelectOpen,
-    onOpenChange: onTraitsFilterSelectOpenChange,
-  } = useDisclosure();
+  const habitsFilterSelectState = useOverlayState();
+  const traitsFilterSelectState = useOverlayState();
 
   const areAllHabitsSelected = React.useMemo(() => {
     if (filters.habitIds.length === 1 && filters.habitIds.includes('')) {
@@ -60,10 +57,10 @@ const CalendarFilters = () => {
     });
   }, [habits]);
 
-  const handleHabitsFilterChange: React.ChangeEventHandler<
-    HTMLSelectElement
-  > = (event) => {
-    if (event.target.value.includes('toggle-all')) {
+  const handleHabitsFilterChange = (value: React.Key[]) => {
+    const values = value.map(String);
+
+    if (values.includes('toggle-all')) {
       if (areAllHabitsSelected) {
         changeCalendarFilters({
           ...filters,
@@ -87,14 +84,14 @@ const CalendarFilters = () => {
 
     changeCalendarFilters({
       ...filters,
-      habitIds: event.target.value.split(','),
+      habitIds: values,
     });
   };
 
-  const handleTraitsFilterChange: React.ChangeEventHandler<
-    HTMLSelectElement
-  > = (event) => {
-    if (event.target.value.includes('toggle-all')) {
+  const handleTraitsFilterChange = (value: React.Key[]) => {
+    const values = value.map(String);
+
+    if (values.includes('toggle-all')) {
       if (areAllTraitsSelected) {
         changeCalendarFilters({
           ...filters,
@@ -118,7 +115,7 @@ const CalendarFilters = () => {
 
     changeCalendarFilters({
       ...filters,
-      traitIds: event.target.value.split(','),
+      traitIds: values,
     });
   };
 
@@ -127,156 +124,229 @@ const CalendarFilters = () => {
   return (
     <div
       className={cn(
-        'hidden max-w-full flex-col items-stretch justify-end gap-2 min-[450px]:flex-row lg:justify-between',
+        'hidden max-w-full flex-col items-stretch justify-end gap-2 min-[550px]:flex-row lg:justify-between',
         isVisible && 'flex'
       )}
     >
       <Select
-        size="sm"
-        radius="sm"
-        color="secondary"
-        variant="bordered"
+        variant="secondary"
+        value={filters.habitIds}
         selectionMode="multiple"
-        className="w-full md:w-50"
         placeholder="Filter by habits"
-        selectedKeys={filters.habitIds}
-        isOpen={isHabitsFilterSelectOpen}
-        onChange={handleHabitsFilterChange}
-        onOpenChange={onHabitsFilterSelectOpenChange}
-        scrollShadowProps={{
-          visibility: 'bottom',
-        }}
-        renderValue={(selectedHabits: SelectedItems<Habit>) => {
-          return (
-            <CrossPlatformHorizontalScroll className="flex space-x-2">
-              {selectedHabits.map(({ key }) => {
-                if (typeof key !== 'string' || !habits[key]) {
-                  return null;
-                }
-
-                const { iconPath, id, name } = habits[key];
-
-                return (
-                  <Tooltip key={id} closeDelay={0} content={name}>
-                    <img
-                      className="h-4 w-4"
-                      alt={`${name} icon`}
-                      src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
-                    />
-                  </Tooltip>
-                );
-              })}
-            </CrossPlatformHorizontalScroll>
+        isOpen={habitsFilterSelectState.isOpen}
+        className="w-full min-[550px]:w-1/2 md:w-50"
+        onOpenChange={habitsFilterSelectState.setOpen}
+        onChange={(keys) => {
+          handleHabitsFilterChange(
+            Array.isArray(keys) ? (keys as string[]) : []
           );
         }}
       >
-        <>
-          {!!Object.keys(habits).length && (
-            <SelectItem
-              key="toggle-all"
-              className="mb-0.5"
-              textValue="Toggle all"
-            >
-              <Checkbox
-                color="secondary"
-                isSelected={areAllHabitsSelected}
-                isIndeterminate={
-                  !areAllHabitsSelected && filters.habitIds.some(Boolean)
-                }
-              />
-              <span>{areAllHabitsSelected ? 'Unselect' : 'Select'} all</span>
-            </SelectItem>
-          )}
-          {Object.entries(habitsByTraitName).map(
-            ([traitName, habits], index, array) => {
-              if (!habits?.length) {
-                return null;
+        <Select.Trigger>
+          <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-2 overflow-x-auto">
+            {({ defaultChildren, isPlaceholder, state }) => {
+              if (isPlaceholder || state.selectedItems.length === 0) {
+                return defaultChildren;
+              }
+
+              const selectedItem = Object.values(habits).find((habit) => {
+                return habit.id === state.selectedItems[0]?.key;
+              });
+
+              if (!selectedItem) {
+                return defaultChildren;
               }
 
               return (
-                <SelectSection
-                  key={traitName}
-                  title={traitName}
-                  showDivider={index < array.length - 1}
-                  classNames={{
-                    heading:
-                      'flex w-full sticky top-1 z-20 py-1.5 px-2 pl-4 bg-default-100 shadow-small rounded-small',
-                  }}
-                >
-                  {habits.map((habit) => {
+                <>
+                  {state.selectedItems.map(({ key }) => {
+                    if (typeof key !== 'string' || !habits[key]) {
+                      return null;
+                    }
+
+                    const { iconPath, id, name } = habits[key] as Habit;
+
                     return (
-                      <SelectItem key={habit.id} textValue={habit.name}>
-                        <div className="flex items-center gap-2">
+                      <Tooltip key={id} delay={0} closeDelay={0}>
+                        <Tooltip.Trigger className="block h-4 w-4 shrink-0">
                           <img
-                            alt={habit.name}
                             className="h-4 w-4"
+                            alt={`${name} icon`}
                             src={getPublicUrl(
                               StorageBuckets.HABIT_ICONS,
-                              habit.iconPath
+                              iconPath
                             )}
                           />
-                          <span className="truncate">{habit.name}</span>
-                        </div>
-                      </SelectItem>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>{name}</Tooltip.Content>
+                      </Tooltip>
                     );
                   })}
-                </SelectSection>
+                </>
               );
-            }
-          )}
-        </>
-      </Select>
-      <Select
-        size="sm"
-        radius="sm"
-        color="secondary"
-        variant="bordered"
-        selectionMode="multiple"
-        placeholder="Filter by traits"
-        selectedKeys={filters.traitIds}
-        isOpen={isTraitsFilterSelectOpen}
-        onChange={handleTraitsFilterChange}
-        onOpenChange={onTraitsFilterSelectOpenChange}
-        className="w-full min-[450px]:w-1/2 md:w-[250px]"
-        renderValue={(selectedTraits: SelectedItems<Trait>) => {
-          return (
-            <CrossPlatformHorizontalScroll className="flex space-x-2">
-              {selectedTraits.map(({ key }) => {
-                if (typeof key !== 'string' || !traits[key]) {
+            }}
+          </Select.Value>
+          <Select.Indicator />
+        </Select.Trigger>
+        <Label>Filter by habits</Label>
+        <Select.Popover>
+          <ListBox>
+            {!!Object.keys(habits).length && (
+              <ListBox.Item
+                id="toggle-all"
+                className="mb-0.5"
+                textValue="Toggle all"
+              >
+                <Checkbox
+                  variant="secondary"
+                  isSelected={areAllHabitsSelected}
+                  isIndeterminate={
+                    !areAllHabitsSelected && filters.habitIds.some(Boolean)
+                  }
+                >
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Content>
+                    <Label>
+                      {areAllHabitsSelected ? 'Unselect' : 'Select'} all
+                    </Label>
+                  </Checkbox.Content>
+                </Checkbox>
+              </ListBox.Item>
+            )}
+            {Object.entries(habitsByTraitName).map(
+              ([traitName, traitHabits], index, array) => {
+                if (!traitHabits?.length) {
                   return null;
                 }
 
-                const { color, id, name } = traits[key];
-
-                return <TraitChip key={id} trait={{ color, name }} />;
-              })}
-            </CrossPlatformHorizontalScroll>
+                return (
+                  <React.Fragment key={traitName}>
+                    <ListBox.Section>
+                      <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                        {traitName}
+                      </Header>
+                      {traitHabits.map((habit) => {
+                        return (
+                          <ListBox.Item
+                            id={habit.id}
+                            key={habit.id}
+                            textValue={habit.name}
+                          >
+                            <div className="flex items-center gap-2">
+                              <img
+                                alt={habit.name}
+                                className="h-4 w-4"
+                                src={getPublicUrl(
+                                  StorageBuckets.HABIT_ICONS,
+                                  habit.iconPath
+                                )}
+                              />
+                              <span className="truncate">{habit.name}</span>
+                            </div>
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        );
+                      })}
+                    </ListBox.Section>
+                    {index < array.length - 1 && <Separator />}
+                  </React.Fragment>
+                );
+              }
+            )}
+          </ListBox>
+        </Select.Popover>
+      </Select>
+      <Select
+        variant="secondary"
+        value={filters.traitIds}
+        selectionMode="multiple"
+        placeholder="Filter by traits"
+        isOpen={traitsFilterSelectState.isOpen}
+        onOpenChange={traitsFilterSelectState.setOpen}
+        className="w-full min-[550px]:w-1/2 md:w-[250px]"
+        onChange={(keys) => {
+          handleTraitsFilterChange(
+            Array.isArray(keys) ? (keys as string[]) : []
           );
         }}
       >
-        <>
-          {!!Object.keys(traits).length && (
-            <SelectItem
-              key="toggle-all"
-              className="mb-0.5"
-              textValue="Toggle all"
-            >
-              <Checkbox
-                color="secondary"
-                isSelected={areAllTraitsSelected}
-                isIndeterminate={
-                  !areAllTraitsSelected && filters.traitIds.some(Boolean)
-                }
-              />
-              <span>{areAllTraitsSelected ? 'Unselect' : 'Select'} all</span>
-            </SelectItem>
-          )}
-          <SelectSection title="Filter by traits">
-            {Object.values(traits).map((trait) => {
-              return <SelectItem key={trait.id}>{trait.name}</SelectItem>;
-            })}
-          </SelectSection>
-        </>
+        <Select.Trigger>
+          <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-1 overflow-x-auto">
+            {({ defaultChildren, isPlaceholder, state }) => {
+              if (isPlaceholder || state.selectedItems.length === 0) {
+                return defaultChildren;
+              }
+
+              return (
+                <>
+                  {state.selectedItems.map(({ key }) => {
+                    if (typeof key !== 'string' || !traits[key]) {
+                      return null;
+                    }
+
+                    const { color, id, name } = traits[key];
+
+                    return (
+                      <TraitChip
+                        key={id}
+                        color="accent"
+                        variant="soft"
+                        trait={{ color, name }}
+                      />
+                    );
+                  })}
+                </>
+              );
+            }}
+          </Select.Value>
+          <Select.Indicator />
+        </Select.Trigger>
+        <Label>Filter by traits</Label>
+        <Select.Popover>
+          <ListBox>
+            {!!Object.keys(traits).length && (
+              <ListBox.Item
+                id="toggle-all"
+                className="mb-0.5"
+                textValue="Toggle all"
+              >
+                <Checkbox
+                  variant="secondary"
+                  isSelected={areAllTraitsSelected}
+                  isIndeterminate={
+                    !areAllTraitsSelected && filters.traitIds.some(Boolean)
+                  }
+                >
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Content>
+                    <Label>
+                      {areAllTraitsSelected ? 'Unselect' : 'Select'} all
+                    </Label>
+                  </Checkbox.Content>
+                </Checkbox>
+              </ListBox.Item>
+            )}
+            <ListBox.Section>
+              <Header>Filter by traits</Header>
+              {Object.values(traits).map((trait) => {
+                return (
+                  <ListBox.Item
+                    id={trait.id}
+                    key={trait.id}
+                    textValue={trait.name}
+                  >
+                    {trait.name}
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                );
+              })}
+            </ListBox.Section>
+          </ListBox>
+        </Select.Popover>
       </Select>
     </div>
   );

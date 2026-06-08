@@ -1,4 +1,17 @@
-import { Input, Switch } from '@heroui/react';
+import {
+  Input,
+  Label,
+  Button,
+  Switch,
+  TextField,
+  NumberField,
+} from '@heroui/react';
+import {
+  XIcon,
+  PlusIcon,
+  CaretUpIcon,
+  CaretDownIcon,
+} from '@phosphor-icons/react';
 
 import type {
   MetricType,
@@ -27,47 +40,69 @@ const NumberConfigFields = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      <Input
-        size="sm"
-        label="Unit"
-        variant="faded"
+      <TextField
+        variant="secondary"
         value={config.unit || ''}
-        placeholder="e.g., km, kg, bpm"
-        onChange={(e) => {
-          onChange({ ...config, unit: e.target.value || undefined });
+        onChange={(value) => {
+          onChange({ ...config, unit: value || undefined });
         }}
-      />
+      >
+        <Label>Unit</Label>
+        <Input placeholder="e.g., km, kg, bpm" />
+      </TextField>
       <div className="flex gap-2">
-        <Input
-          size="sm"
-          label="Min"
-          type="number"
-          variant="faded"
-          placeholder="Optional"
-          value={config.min?.toString() || ''}
-          onChange={(e) => {
-            const val = e.target.value;
+        <NumberField
+          name="min"
+          className="w-full"
+          variant="secondary"
+          value={config.min ?? undefined}
+          onChange={(value) => {
+            const val = value;
             onChange({
               ...config,
               min: val ? Number(val) : undefined,
             });
           }}
-        />
-        <Input
-          size="sm"
-          label="Max"
-          type="number"
-          variant="faded"
-          placeholder="Optional"
-          value={config.max?.toString() || ''}
-          onChange={(e) => {
-            const val = e.target.value;
+        >
+          <Label>Minimum value</Label>
+          <NumberField.Group className="flex">
+            <NumberField.Input className="flex-1" placeholder="Optional" />
+            <div className="border-field-placeholder/15 flex h-full flex-col border-l">
+              <NumberField.IncrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pt-0.5 text-sm">
+                <CaretUpIcon />
+              </NumberField.IncrementButton>
+              <NumberField.DecrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pb-0.5 text-sm">
+                <CaretDownIcon />
+              </NumberField.DecrementButton>
+            </div>
+          </NumberField.Group>
+        </NumberField>
+        <NumberField
+          name="max"
+          className="w-full"
+          variant="secondary"
+          value={config.max ?? undefined}
+          onChange={(value) => {
+            const val = value;
             onChange({
               ...config,
               max: val ? Number(val) : undefined,
             });
           }}
-        />
+        >
+          <Label>Maximum value</Label>
+          <NumberField.Group className="flex">
+            <NumberField.Input className="flex-1" placeholder="Optional" />
+            <div className="border-field-placeholder/15 flex h-full flex-col border-l">
+              <NumberField.IncrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pt-0.5 text-sm">
+                <CaretUpIcon />
+              </NumberField.IncrementButton>
+              <NumberField.DecrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pb-0.5 text-sm">
+                <CaretDownIcon />
+              </NumberField.DecrementButton>
+            </div>
+          </NumberField.Group>
+        </NumberField>
       </div>
     </div>
   );
@@ -93,20 +128,15 @@ const DurationConfigFields = ({
     <div className="flex flex-wrap gap-2">
       {formats.map((format) => {
         return (
-          <button
+          <Button
             key={format}
-            type="button"
+            variant={config.format === format ? 'primary' : 'secondary'}
             onClick={() => {
               onChange({ ...config, format });
             }}
-            className={`rounded-md px-3 py-1.5 text-xs ${
-              config.format === format
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-default-100'
-            }`}
           >
             {format}
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -122,36 +152,39 @@ const ScaleConfigFields = ({
 }) => {
   return (
     <div className="flex gap-2">
-      <Input
-        size="sm"
-        label="Min"
+      <TextField
         type="number"
-        variant="faded"
+        variant="secondary"
         value={config.min?.toString() || '1'}
-        onChange={(e) => {
-          onChange({ ...config, min: Number(e.target.value) || 1 });
+        onChange={(value) => {
+          onChange({ ...config, min: Number(value) || 1 });
         }}
-      />
-      <Input
-        size="sm"
-        label="Max"
+      >
+        <Label>Min</Label>
+        <Input />
+      </TextField>
+      <TextField
         type="number"
-        variant="faded"
+        variant="secondary"
         value={config.max?.toString() || '10'}
-        onChange={(e) => {
-          onChange({ ...config, max: Number(e.target.value) || 10 });
+        onChange={(value) => {
+          onChange({ ...config, max: Number(value) || 10 });
         }}
-      />
-      <Input
-        size="sm"
-        label="Step"
+      >
+        <Label>Max</Label>
+        <Input />
+      </TextField>
+      <TextField
         type="number"
-        variant="faded"
+        variant="secondary"
         value={config.step?.toString() || '1'}
-        onChange={(e) => {
-          onChange({ ...config, step: Number(e.target.value) || 1 });
+        onChange={(value) => {
+          onChange({ ...config, step: Number(value) || 1 });
         }}
-      />
+      >
+        <Label>Step</Label>
+        <Input />
+      </TextField>
     </div>
   );
 };
@@ -165,24 +198,29 @@ const RangeConfigFields = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      <Input
-        size="sm"
-        label="Unit"
-        variant="faded"
+      <TextField
+        variant="secondary"
         value={config.unit || ''}
-        placeholder="e.g., pages, reps"
-        onChange={(e) => {
-          onChange({ ...config, unit: e.target.value || undefined });
+        onChange={(value) => {
+          onChange({ ...config, unit: value || undefined });
         }}
-      />
+      >
+        <Label>Unit</Label>
+        <Input placeholder="e.g., pages, reps" />
+      </TextField>
       <Switch
         size="sm"
         isSelected={config.continueFromLast || false}
-        onValueChange={(val) => {
+        onChange={(val: boolean) => {
           onChange({ ...config, continueFromLast: val });
         }}
       >
-        <span className="text-xs">Continue from last value</span>
+        <Switch.Control>
+          <Switch.Thumb />
+        </Switch.Control>
+        <Switch.Content>
+          <Label className="text-xs">Continue from last value</Label>
+        </Switch.Content>
       </Switch>
       {config.continueFromLast && (
         <p className="text-foreground-500 text-xs">
@@ -223,46 +261,48 @@ const ChoiceConfigFields = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {options.map((option, index) => {
         return (
-          <div key={index} className="flex items-center gap-2">
-            <Input
-              size="sm"
+          <div key={index} className="flex w-full items-center gap-2">
+            <TextField
               value={option}
-              variant="faded"
-              placeholder={`Option ${index + 1}`}
-              onChange={(e) => {
-                handleOptionChange(index, e.target.value);
+              className="flex-1"
+              variant="secondary"
+              onChange={(value) => {
+                handleOptionChange(index, value);
               }}
-            />
-            <button
-              type="button"
-              className="text-danger text-sm"
+            >
+              <Input placeholder={`Option ${index + 1}`} />
+            </TextField>
+            <Button
+              variant="danger-soft"
               onClick={() => {
                 handleRemoveOption(index);
               }}
             >
-              &times;
-            </button>
+              <XIcon size={16} weight="bold" />
+            </Button>
           </div>
         );
       })}
-      <button
-        type="button"
-        onClick={handleAddOption}
-        className="text-primary self-start text-xs"
-      >
-        + Add option
-      </button>
+      <Button fullWidth variant="secondary" onClick={handleAddOption}>
+        <PlusIcon />
+        Add option
+      </Button>
       <Switch
         size="sm"
         isSelected={config.allowMultiple || false}
-        onValueChange={(val) => {
+        onChange={(val: boolean) => {
           onChange({ ...config, allowMultiple: val });
         }}
       >
-        <span className="text-xs">Allow multiple selections</span>
+        <Switch.Control>
+          <Switch.Thumb />
+        </Switch.Control>
+        <Switch.Content>
+          <Label className="text-xs">Allow multiple selections</Label>
+        </Switch.Content>
       </Switch>
     </div>
   );
@@ -277,26 +317,26 @@ const BooleanConfigFields = ({
 }) => {
   return (
     <div className="flex gap-2">
-      <Input
-        size="sm"
-        variant="faded"
-        placeholder="Yes"
-        label="True label"
+      <TextField
+        variant="secondary"
         value={config.trueLabel || ''}
-        onChange={(e) => {
-          onChange({ ...config, trueLabel: e.target.value || undefined });
+        onChange={(value) => {
+          onChange({ ...config, trueLabel: value || undefined });
         }}
-      />
-      <Input
-        size="sm"
-        variant="faded"
-        placeholder="No"
-        label="False label"
+      >
+        <Label>True label</Label>
+        <Input placeholder="Yes" />
+      </TextField>
+      <TextField
+        variant="secondary"
         value={config.falseLabel || ''}
-        onChange={(e) => {
-          onChange({ ...config, falseLabel: e.target.value || undefined });
+        onChange={(value) => {
+          onChange({ ...config, falseLabel: value || undefined });
         }}
-      />
+      >
+        <Label>False label</Label>
+        <Input placeholder="No" />
+      </TextField>
     </div>
   );
 };
@@ -310,26 +350,31 @@ const TextConfigFields = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      <Input
-        size="sm"
+      <TextField
         type="number"
-        variant="faded"
-        label="Max length"
-        placeholder="Optional"
+        variant="secondary"
         value={config.maxLength?.toString() || ''}
-        onChange={(e) => {
-          const val = e.target.value;
+        onChange={(value) => {
+          const val = value;
           onChange({ ...config, maxLength: val ? Number(val) : undefined });
         }}
-      />
+      >
+        <Label>Max length</Label>
+        <Input placeholder="Optional" />
+      </TextField>
       <Switch
         size="sm"
         isSelected={config.multiline || false}
-        onValueChange={(val) => {
+        onChange={(val: boolean) => {
           onChange({ ...config, multiline: val });
         }}
       >
-        <span className="text-xs">Allow multiline</span>
+        <Switch.Control>
+          <Switch.Thumb />
+        </Switch.Control>
+        <Switch.Content>
+          <Label className="text-xs">Allow multiline</Label>
+        </Switch.Content>
       </Switch>
     </div>
   );

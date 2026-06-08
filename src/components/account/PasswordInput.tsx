@@ -1,4 +1,4 @@
-import { Input, Button } from '@heroui/react';
+import { Label, Button, TextField, InputGroup } from '@heroui/react';
 import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import React, { type ChangeEventHandler } from 'react';
 
@@ -8,7 +8,7 @@ type PasswordInputProps = {
   onChange: ChangeEventHandler<HTMLInputElement>;
   testId?: string;
   value: string;
-  variant?: 'flat' | 'bordered' | 'faded' | 'underlined';
+  variant?: 'primary' | 'secondary';
   onReset?: () => void;
 };
 
@@ -19,7 +19,7 @@ const PasswordInput = ({
   onReset,
   testId = '',
   value,
-  variant = 'flat',
+  variant,
 }: PasswordInputProps) => {
   const [isVisible, setIsVisible] = React.useState(false);
 
@@ -30,43 +30,44 @@ const PasswordInput = ({
   };
 
   return (
-    <Input
-      value={value}
-      label={label}
-      variant={variant}
-      onChange={onChange}
-      data-testid={testId}
-      isDisabled={isDisabled}
-      type={isVisible ? 'text' : 'password'}
-      classNames={{
-        description: 'text-right',
-      }}
-      description={
-        onReset ? (
+    <TextField fullWidth name="password">
+      <Label>Password</Label>
+      <InputGroup variant={variant}>
+        <InputGroup.Input
+          value={value}
+          placeholder={label}
+          onChange={onChange}
+          data-testid={testId}
+          disabled={isDisabled}
+          type={isVisible ? 'text' : 'password'}
+        />
+        <InputGroup.Suffix className="px-0">
           <Button
-            disableAnimation
+            size="sm"
+            isIconOnly
+            variant="ghost"
+            onPress={toggleVisibility}
+            aria-label={isVisible ? 'Hide password' : 'Show password'}
+          >
+            {isVisible ? (
+              <EyeIcon className="size-4" />
+            ) : (
+              <EyeSlashIcon className="size-4" />
+            )}
+          </Button>
+        </InputGroup.Suffix>
+      </InputGroup>
+      {onReset && (
+        <div className="text-right">
+          <Button
             onPress={onReset}
             className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
           >
             Forgot password?
           </Button>
-        ) : null
-      }
-      endContent={
-        <button
-          type="button"
-          onClick={toggleVisibility}
-          className="focus:outline-hidden"
-          aria-label="toggle password visibility"
-        >
-          {isVisible ? (
-            <EyeSlashIcon className="text-default-400 pointer-events-none text-2xl" />
-          ) : (
-            <EyeIcon className="text-default-400 pointer-events-none text-2xl" />
-          )}
-        </button>
-      }
-    />
+        </div>
+      )}
+    </TextField>
   );
 };
 

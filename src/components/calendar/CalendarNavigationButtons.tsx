@@ -15,7 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import React from 'react';
 import { useLocale } from 'react-aria';
-import { Link, useNavigate, useLocation } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { useScreenWidth, useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
@@ -128,40 +128,32 @@ const CalendarNavigationButtons = ({
   return (
     <>
       <Button
-        as={Link}
-        size="sm"
         isIconOnly
-        radius="sm"
-        variant="light"
-        color="secondary"
-        role="navigate-back"
-        to={previousRangePath}
+        variant="tertiary"
+        onPress={() => {
+          navigate(previousRangePath);
+        }}
       >
         <ArrowFatLeftIcon size={20} />
       </Button>
       {!isSameRange && (
         <Button
-          as={Link}
-          size="sm"
-          radius="sm"
-          variant="light"
-          color="secondary"
-          to={todayRangePath}
-          className={cn(isMobile && 'min-w-fit p-0')}
-          startContent={<ArrowsClockwiseIcon size={20} />}
+          variant="tertiary"
+          className={cn(isMobile && 'min-w-fit px-2')}
+          onPress={() => {
+            navigate(todayRangePath);
+          }}
         >
+          <ArrowsClockwiseIcon size={20} />
           {(!isMobile || screenWidth < 446) && 'Today'}
         </Button>
       )}
       <Button
-        as={Link}
-        size="sm"
         isIconOnly
-        radius="sm"
-        variant="light"
-        color="secondary"
-        to={nextRangePath}
-        role="navigate-forward"
+        variant="tertiary"
+        onPress={() => {
+          navigate(nextRangePath);
+        }}
       >
         <ArrowFatRightIcon size={20} />
       </Button>

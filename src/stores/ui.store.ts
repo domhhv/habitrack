@@ -22,10 +22,10 @@ type OccurrenceDrawerOptions = {
 
 export type ConfirmationOptions = {
   cancelText?: string;
-  color?: ButtonProps['color'];
   confirmText?: string;
   description?: ReactNode;
   title?: string;
+  variant?: ButtonProps['variant'];
 };
 
 export type CalendarFilters = {
@@ -85,11 +85,11 @@ let resolveConfirm: ((value: boolean) => void) | null = null;
 
 const initialConfirmationState = {
   cancelText: undefined,
-  color: undefined,
   confirmText: undefined,
   description: undefined,
   isOpen: false,
   title: undefined,
+  variant: undefined,
 };
 
 export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
@@ -146,11 +146,11 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
           set((state) => {
             state.confirmation = {
               cancelText: options.cancelText,
-              color: options.color,
               confirmText: options.confirmText,
               description: options.description,
               isOpen: true,
               title: options.title,
+              variant: options.variant,
             };
           });
         });

@@ -1,5 +1,5 @@
+export { default as CustomButton } from './Button';
 export { default as ConfirmationDialog } from './ConfirmationDialog';
-export { default as CrossPlatformHorizontalScroll } from './CrossPlatformHorizontalScroll';
 export { default as ImageCarousel } from './ImageCarousel';
 export { default as Kbd } from './Kbd';
 export { default as SignedImageViewer } from './SignedImageViewer';

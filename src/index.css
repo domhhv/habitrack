@@ -1,10 +1,138 @@
 @import 'tailwindcss';
-
-@plugin './utils/theme.ts';
-
-@source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@import '@heroui/styles/css';
 
 @custom-variant dark (&:is(.dark *));
+
+:root,
+.light,
+.default,
+[data-theme='light'],
+[data-theme='default'] {
+  --accent: oklch(58.01% 0.121 162.81);
+  --accent-foreground: oklch(99.11% 0 0);
+  --background: oklch(97.02% 0.0015 162.81);
+  --border: oklch(90% 0.0015 162.81);
+  --danger: oklch(65.32% 0.2335 14.82);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(94% 0.0015 162.81);
+  --default-foreground: oklch(21.03% 0.0059 162.81);
+  --field-background: oklch(100% 0.0008 162.81);
+  --field-border: transparent;
+  --field-foreground: oklch(21.03% 0.0015 162.81);
+  --field-placeholder: oklch(55.17% 0.003 162.81);
+  --focus: oklch(58.01% 0.121 162.81);
+  --foreground: oklch(21.03% 0.0015 162.81);
+  --muted: oklch(55.17% 0.003 162.81);
+  --overlay: oklch(100% 0.0004 162.81);
+  --overlay-foreground: oklch(21.03% 0.0015 162.81);
+  --scrollbar: oklch(87.1% 0.0015 162.81);
+  --segment: oklch(100% 0.0015 162.81);
+  --segment-foreground: oklch(21.03% 0.0015 162.81);
+  --separator: oklch(92% 0.0015 162.81);
+  --success: oklch(73.29% 0.1941 139.89);
+  --success-foreground: oklch(21.03% 0.0059 139.89);
+  --surface: oklch(100% 0.0008 162.81);
+  --surface-foreground: oklch(21.03% 0.0015 162.81);
+  --surface-secondary: oklch(95.24% 0.0012 162.81);
+  --surface-secondary-foreground: oklch(21.03% 0.0015 162.81);
+  --surface-tertiary: oklch(93.73% 0.0012 162.81);
+  --surface-tertiary-foreground: oklch(21.03% 0.0015 162.81);
+  --warning: oklch(78.19% 0.159 61.41);
+  --warning-foreground: oklch(21.03% 0.0059 61.41);
+  --radius: 0.25rem;
+  --field-radius: 0.75rem;
+}
+
+.dark,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --accent: oklch(58.01% 0.121 162.81);
+  --accent-foreground: oklch(99.11% 0 0);
+  --background: oklch(12% 0.0015 162.81);
+  --border: oklch(28% 0.0015 162.81);
+  --danger: oklch(59.4% 0.1973 13.71);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(27.4% 0.0015 162.81);
+  --default-foreground: oklch(99.11% 0 0);
+  --field-background: oklch(21.03% 0.003 162.81);
+  --field-border: transparent;
+  --field-foreground: oklch(99.11% 0.0015 162.81);
+  --field-placeholder: oklch(70.5% 0.003 162.81);
+  --focus: oklch(58.01% 0.121 162.81);
+  --foreground: oklch(99.11% 0.0015 162.81);
+  --muted: oklch(70.5% 0.003 162.81);
+  --overlay: oklch(21.03% 0.003 162.81);
+  --overlay-foreground: oklch(99.11% 0.0015 162.81);
+  --scrollbar: oklch(70.5% 0.0015 162.81);
+  --segment: oklch(39.64% 0.0015 162.81);
+  --segment-foreground: oklch(99.11% 0.0015 162.81);
+  --separator: oklch(25% 0.0015 162.81);
+  --success: oklch(73.29% 0.1941 139.89);
+  --success-foreground: oklch(21.03% 0.0059 139.89);
+  --surface: oklch(21.03% 0.003 162.81);
+  --surface-foreground: oklch(99.11% 0.0015 162.81);
+  --surface-secondary: oklch(25.7% 0.0023 162.81);
+  --surface-secondary-foreground: oklch(99.11% 0.0015 162.81);
+  --surface-tertiary: oklch(27.21% 0.0023 162.81);
+  --surface-tertiary-foreground: oklch(99.11% 0.0015 162.81);
+  --warning: oklch(82.03% 0.1392 65.42);
+  --warning-foreground: oklch(21.03% 0.0059 65.42);
+}
+
+@theme {
+  --color-foreground: oklch(32.11% 0 0);
+  --color-background-50: oklch(98.1% 0.0099 164.88);
+  --color-background-100: oklch(96.25% 0.0198 159.76);
+  --color-background-200: oklch(94.41% 0.0285 160.58);
+  --color-background-300: oklch(92.67% 0.0381 159.39);
+  --color-background-400: oklch(89.04% 0.0488 159.37);
+  --color-background-500: oklch(85.51% 0.0568 160.98);
+  --color-background-600: oklch(81.98% 0.0734 162.08);
+  --color-background-700: oklch(75.58% 0.0767 162.89);
+  --color-background-800: oklch(69.06% 0.0802 163.55);
+  --color-background-900: oklch(61.29% 0.0721 165.42);
+  --color-background: oklch(98.1% 0.0099 164.88);
+  --color-background-foreground: oklch(32.11% 0 0);
+}
+
+@layer base {
+  .dark {
+    --color-foreground: oklch(95.72% 0.0177 179.33);
+    --color-background-50: oklch(44.45% 0.0627 156.9);
+    --color-background-100: oklch(40.67% 0.0574 159.48);
+    --color-background-200: oklch(36.81% 0.0521 162.73);
+    --color-background-300: oklch(32.97% 0.0444 165.31);
+    --color-background-400: oklch(29.39% 0.0375 166.24);
+    --color-background-500: oklch(25.7% 0.0318 159.04);
+    --color-background-600: oklch(22.18% 0.0271 156.36);
+    --color-background-700: oklch(18.2% 0.0148 153.68);
+    --color-background-800: oklch(14.29% 0.0116 144.94);
+    --color-background-900: oklch(10.35% 0.0055 145.17);
+    --color-background: oklch(25.7% 0.0318 159.04);
+  }
+}
+
+@layer components {
+  .kbd {
+    @apply rounded-2xl;
+  }
+
+  .button--sm {
+    @apply text-xs leading-3;
+  }
+
+  .switch--sm,
+  .switch--md,
+  .switch--lg {
+    .switch__control {
+      @apply rounded-4xl;
+    }
+
+    .switch__thumb {
+      @apply rounded-3xl;
+    }
+  }
+}
 
 @layer utilities {
   .scrollbar-hide {
@@ -17,29 +145,9 @@
   }
 }
 
-th,
-td,
-tr,
-button,
-[role='button'],
-[data-slot='value'],
-[data-slot='input'],
-[data-label='true'] {
-  font-weight: 600 !important;
-}
-
-button,
-[role='button'] {
-  cursor: pointer;
-}
-
 #root:has([data-overlay-container='true']) [data-overlay-container='true'] {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-}
-
-div[data-placement='top-center'] {
-  z-index: 51;
 }

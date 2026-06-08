@@ -1,4 +1,4 @@
-import { addToast } from '@heroui/react';
+import { Toast } from '@heroui/react';
 import imageCompression from 'browser-image-compression';
 import pluralize from 'pluralize';
 
@@ -136,11 +136,10 @@ export const uploadImages = async (
     .concat(rejectedUploadReasons);
 
   if (failedUploadErrors.length) {
-    addToast({
-      color: 'danger',
-      description: `Error details: ${failedUploadErrors.join(', ')}`,
-      title: `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
-    });
+    Toast.toast.danger(
+      `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
+      { description: `Error details: ${failedUploadErrors.join(', ')}` }
+    );
   }
 
   return fulfilledUploadResults.filter(isSuccessfulUpload).map(({ value }) => {

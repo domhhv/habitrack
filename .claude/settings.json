@@ -26,7 +26,13 @@
       "mcp__claude_ai_Supabase__list_projects",
       "mcp__claude_ai_Supabase__execute_sql",
       "mcp__heroui-migration__get_component_migration_guides",
-      "mcp__heroui-migration__get_migration_workflow"
+      "mcp__heroui-migration__get_migration_workflow",
+      "mcp__heroui-migration__get_styling_migration_guide",
+      "mcp__heroui-migration__list_component_migration_guides",
+      "mcp__heroui-migration__get_hooks_migration_guide",
+      "Bash(git checkout:*)",
+      "Bash(yarn install:*)",
+      "Bash(python3 -c ':*)"
     ]
   },
   "hooks": {

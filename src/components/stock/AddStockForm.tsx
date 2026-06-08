@@ -1,4 +1,11 @@
-import { Input, Button, Switch, NumberInput } from '@heroui/react';
+import {
+  Input,
+  Label,
+  Button,
+  Switch,
+  TextField,
+  NumberField,
+} from '@heroui/react';
 import { XIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 import React from 'react';
 
@@ -86,44 +93,45 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
   return (
     <div className="border-content3 flex flex-col gap-3 rounded-lg border p-4">
       <h3 className="text-sm font-medium">New stock item</h3>
-      <Input
-        autoFocus
-        size="sm"
-        label="Name"
-        value={name}
-        onValueChange={setName}
-        placeholder="e.g. Velo Berry Frost 14mg"
-      />
+      <TextField autoFocus value={name} onChange={setName}>
+        <Label>Name</Label>
+        <Input placeholder="e.g. Velo Berry Frost 14mg" />
+      </TextField>
       <div className="flex gap-2">
-        <NumberInput
-          size="sm"
-          label="Cost"
+        <NumberField
           minValue={0}
           value={cost}
           className="flex-1"
-          placeholder="0.00"
-          onValueChange={setCost}
+          onChange={setCost}
           formatOptions={{
             maximumFractionDigits: 2,
             minimumFractionDigits: 2,
           }}
-        />
-        <Input
-          size="sm"
-          label="Currency"
-          value={currency}
-          className="w-24"
-          placeholder="EUR"
-          onValueChange={setCurrency}
-        />
+        >
+          <Label>Cost</Label>
+          <NumberField.Group>
+            <NumberField.DecrementButton />
+            <NumberField.Input placeholder="0.00" />
+            <NumberField.IncrementButton />
+          </NumberField.Group>
+        </NumberField>
+        <TextField value={currency} className="w-24" onChange={setCurrency}>
+          <Label>Currency</Label>
+          <Input placeholder="EUR" />
+        </TextField>
       </div>
       <div className="flex items-center gap-2">
         <Switch
           size="sm"
           isSelected={isQuantifiable}
-          onValueChange={setIsQuantifiable}
+          onChange={setIsQuantifiable}
         >
-          Quantifiable
+          <Switch.Control>
+            <Switch.Thumb />
+          </Switch.Control>
+          <Switch.Content>
+            <Label>Quantifiable</Label>
+          </Switch.Content>
         </Switch>
         <span className="text-foreground-400 text-tiny">
           {isQuantifiable
@@ -132,14 +140,14 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
         </span>
       </div>
       {isQuantifiable && (
-        <NumberInput
-          size="sm"
-          minValue={1}
-          value={totalItems}
-          label="Total items"
-          placeholder="e.g. 20"
-          onValueChange={setTotalItems}
-        />
+        <NumberField minValue={1} value={totalItems} onChange={setTotalItems}>
+          <Label>Total items</Label>
+          <NumberField.Group>
+            <NumberField.DecrementButton />
+            <NumberField.Input placeholder="e.g. 20" />
+            <NumberField.IncrementButton />
+          </NumberField.Group>
+        </NumberField>
       )}
       {habit.metricDefinitions.length > 0 && (
         <StockMetricDefaults
@@ -153,21 +161,22 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
       <div className="flex items-center gap-2">
         <Button
           size="sm"
-          color="primary"
-          isLoading={isSaving}
+          variant="primary"
           onPress={handleSubmit}
-          isDisabled={!name.trim() || (isQuantifiable && !totalItems)}
-          startContent={!isSaving && <FloppyDiskIcon className="size-4" />}
+          isDisabled={
+            isSaving || !name.trim() || (isQuantifiable && !totalItems)
+          }
         >
+          <FloppyDiskIcon className="size-4" />
           Save
         </Button>
         <Button
           size="sm"
-          variant="light"
+          variant="ghost"
           onPress={onClose}
           isDisabled={isSaving}
-          startContent={<XIcon className="size-4" />}
         >
+          <XIcon className="size-4" />
           Cancel
         </Button>
       </div>
