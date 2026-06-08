@@ -16,19 +16,18 @@
     "jsx": "react-jsx",
     "noEmit": true,
     "sourceMap": true,
-    "baseUrl": "./src",
     "noErrorTruncation": true,
     "paths": {
-      "@pages": ["pages"],
-      "@services": ["services"],
-      "@components": ["components"],
-      "@utils": ["utils"],
-      "@hooks": ["hooks"],
-      "@models": ["models"],
-      "@stores": ["stores"],
-      "@const": ["constants"],
-      "@tests": ["../tests"],
-      "@db-types": ["../supabase/database.types"]
+      "@pages": ["./src/pages"],
+      "@services": ["./src/services"],
+      "@components": ["./src/components"],
+      "@utils": ["./src/utils"],
+      "@hooks": ["./src/hooks"],
+      "@models": ["./src/models"],
+      "@stores": ["./src/stores"],
+      "@const": ["./src/constants"],
+      "@tests": ["./tests"],
+      "@db-types": ["./supabase/database.types"]
     }
   },
   "include": [

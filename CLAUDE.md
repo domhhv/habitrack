@@ -142,7 +142,7 @@ yarn db:gen-types
 ### Code Quality Standards
 
 - **TypeScript strict mode** with full type coverage
-- **ESLint v9** flat config with custom rules
+- **ESLint v10** flat config with custom rules
 - **Prettier** with Tailwind plugin for formatting
 - **Import organization** via ESLint perfectionist plugin
 

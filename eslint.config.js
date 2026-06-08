@@ -1,186 +1,165 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { defineConfig, globalIgnores } from 'eslint/config';
 
-import { fixupConfigRules, fixupPluginRules } from '@eslint/compat';
-import { FlatCompat } from '@eslint/eslintrc';
+import globals from 'globals';
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
+import tsEslint from 'typescript-eslint';
 import importPlugin from 'eslint-plugin-import';
 import jsxA11Y from 'eslint-plugin-jsx-a11y';
 import perfectionist from 'eslint-plugin-perfectionist';
-import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import switchCase from 'eslint-plugin-switch-case';
 import unusedImports from 'eslint-plugin-unused-imports';
+import eslintConfigPrettier from 'eslint-config-prettier/flat';
 
-import globals from 'globals';
+const plugins = {
+  import: importPlugin,
+  'jsx-a11y': jsxA11Y,
+  'react-hooks': reactHooks,
+  '@stylistic': stylistic,
+  js,
+  perfectionist,
+  'switch-case': switchCase,
+  'unused-imports': unusedImports,
+};
 
-const compat = new FlatCompat({
-  baseDirectory: path.dirname(fileURLToPath(import.meta.url)),
-  recommendedConfig: js.configs.recommended,
-});
+const rules = {
+  '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+  '@typescript-eslint/consistent-type-imports': 'error',
+  '@typescript-eslint/no-deprecated': 'error',
+  'arrow-body-style': ['error', 'always'],
+  curly: 'error',
+  'import/no-duplicates': 'error',
+  'import/order': 'off',
+  'no-undef': 'off',
+  'no-useless-rename': 'error',
+  'object-shorthand': 'error',
+  'switch-case/no-case-curly': 'off',
 
-export default [
-  {
-    ignores: ['**/dist/', 'tests/coverage', '.yarn/releases'],
-  },
-  ...fixupConfigRules(
-    compat.extends(
-      'eslint:recommended',
-      'plugin:@typescript-eslint/strict',
-      'plugin:@typescript-eslint/stylistic',
-      'plugin:react/recommended',
-      'plugin:react-hooks/recommended',
-      'plugin:switch-case/recommended',
-      'prettier'
-    )
-  ),
-  {
-    languageOptions: {
-      ecmaVersion: 'latest',
-      parser: tsParser,
-      sourceType: 'module',
+  '@typescript-eslint/no-unused-vars': [
+    'error',
+    {
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+    },
+  ],
 
-      globals: {
-        ...globals.browser,
+  'no-console': [
+    'warn',
+    {
+      allow: ['warn', 'error'],
+    },
+  ],
+
+  'padding-line-between-statements': [
+    'error',
+    { blankLine: 'always', next: 'return', prev: '*' },
+    { blankLine: 'always', next: 'block-like', prev: '*' },
+    { blankLine: 'always', next: 'block', prev: '*' },
+    { blankLine: 'always', next: '*', prev: 'block-like' },
+    { blankLine: 'always', next: '*', prev: 'block' },
+  ],
+
+  'perfectionist/sort-exports': [
+    'error',
+    {
+      ignoreCase: true,
+      order: 'asc',
+      type: 'alphabetical',
+    },
+  ],
+
+  'perfectionist/sort-imports': [
+    'error',
+    {
+      ignoreCase: true,
+      newlinesBetween: 1,
+      order: 'asc',
+      tsconfig: { rootDir: '.' },
+      type: 'alphabetical',
+      groups: [
+        'builtin',
+        { newlinesBetween: 1 },
+        'external',
+        { newlinesBetween: 1 },
+        'internal',
+        { newlinesBetween: 1 },
+        'parent',
+        { newlinesBetween: 1 },
+        ['index', 'sibling'],
+      ],
+    },
+  ],
+
+  'perfectionist/sort-jsx-props': [
+    'error',
+    {
+      type: 'line-length',
+    },
+  ],
+
+  'perfectionist/sort-named-imports': [
+    'error',
+    {
+      type: 'line-length',
+    },
+  ],
+
+  'perfectionist/sort-object-types': [
+    'error',
+    {
+      groups: ['unknown', 'method', 'multiline-member'],
+    },
+  ],
+
+  'perfectionist/sort-objects': [
+    'error',
+    {
+      groups: ['unknown', 'method', 'multiline-member'],
+    },
+  ],
+
+  'react-hooks/exhaustive-deps': 'error',
+
+  'switch-case/newline-between-switch-case': [
+    'error',
+    'always',
+    { fallthrough: 'never' },
+  ],
+};
+
+export default defineConfig(
+  [
+    globalIgnores(['**/dist/', 'tests/coverage', '.yarn/releases']),
+    {
+      extends: [
+        js.configs.recommended,
+        tsEslint.configs.recommended,
+        switchCase.configs.recommended,
+      ],
+      files: ['*.{ts}', 'src/**/*.{ts,tsx}', 'tests/*.ts'],
+      languageOptions: {
+        parserOptions: {
+          projectService: true,
+          tsconfigRootDir: import.meta.dirname,
+        },
       },
-
-      parserOptions: {
-        project: ['./tsconfig.json', './tsconfig.eslint.json'],
-        tsconfigRootDir: import.meta.dirname,
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
+      plugins,
+      rules,
     },
-
-    plugins: {
-      '@stylistic': stylistic,
-      '@typescript-eslint': fixupPluginRules(typescriptEslint),
-      import: importPlugin,
-      'jsx-a11y': jsxA11Y,
-      perfectionist,
-      react: fixupPluginRules(react),
-      'react-hooks': fixupPluginRules(reactHooks),
-      'switch-case': fixupPluginRules(switchCase),
-      'unused-imports': unusedImports,
-    },
-
-    rules: {
-      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
-      '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/no-deprecated': 'error',
-      'arrow-body-style': ['error', 'always'],
-      curly: 'error',
-      'import/no-duplicates': 'error',
-      'import/order': 'off',
-      'no-undef': 'off',
-      'no-useless-rename': 'error',
-      'object-shorthand': 'error',
-      'react/react-in-jsx-scope': 'off',
-      'switch-case/no-case-curly': 'off',
-
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
+    {
+      extends: [
+        js.configs.recommended,
+        tsEslint.configs.recommended,
+        switchCase.configs.recommended,
+      ],
+      files: ['*.{js}', 'scripts/*.js'],
+      languageOptions: {
+        globals: {
+          ...globals.node,
         },
-      ],
-
-      'no-console': [
-        'warn',
-        {
-          allow: ['warn', 'error'],
-        },
-      ],
-
-      'padding-line-between-statements': [
-        'error',
-        { blankLine: 'always', next: 'return', prev: '*' },
-        { blankLine: 'always', next: 'block-like', prev: '*' },
-        { blankLine: 'always', next: 'block', prev: '*' },
-        { blankLine: 'always', next: '*', prev: 'block-like' },
-        { blankLine: 'always', next: '*', prev: 'block' },
-      ],
-
-      'perfectionist/sort-exports': [
-        'error',
-        {
-          ignoreCase: true,
-          order: 'asc',
-          type: 'alphabetical',
-        },
-      ],
-
-      'perfectionist/sort-imports': [
-        'error',
-        {
-          ignoreCase: true,
-          newlinesBetween: 1,
-          order: 'asc',
-          tsconfig: { rootDir: '.' },
-          type: 'alphabetical',
-          groups: [
-            'builtin',
-            { newlinesBetween: 1 },
-            'external',
-            { newlinesBetween: 1 },
-            'internal',
-            { newlinesBetween: 1 },
-            'parent',
-            { newlinesBetween: 1 },
-            ['index', 'sibling'],
-          ],
-        },
-      ],
-
-      'perfectionist/sort-jsx-props': [
-        'error',
-        {
-          type: 'line-length',
-        },
-      ],
-
-      'perfectionist/sort-named-imports': [
-        'error',
-        {
-          type: 'line-length',
-        },
-      ],
-
-      'perfectionist/sort-object-types': [
-        'error',
-        {
-          groups: ['unknown', 'method', 'multiline-member'],
-        },
-      ],
-
-      'perfectionist/sort-objects': [
-        'error',
-        {
-          groups: ['unknown', 'method', 'multiline-member'],
-        },
-      ],
-
-      'react/boolean-prop-naming': [
-        'error',
-        { propTypeNames: ['bool', 'mutuallyExclusiveTrueProps'] },
-      ],
-
-      'switch-case/newline-between-switch-case': [
-        'error',
-        'always',
-        { fallthrough: 'never' },
-      ],
-    },
-
-    settings: {
-      react: {
-        version: 'detect',
       },
     },
-  },
-];
+  ],
+  eslintConfigPrettier
+);

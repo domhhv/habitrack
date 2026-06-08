@@ -25,7 +25,6 @@ export type HabitsSlice = {
 };
 
 export const createHabitsSlice: SliceCreator<keyof HabitsSlice> = (set) => {
-  /* eslint-disable @typescript-eslint/no-dynamic-delete */
   return {
     habits: {},
     isFetchingHabits: true,

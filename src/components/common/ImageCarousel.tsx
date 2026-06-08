@@ -70,6 +70,7 @@ const ImageCarousel = ({
   }
 
   const currentImageUrl = imageUrls[currentIndex];
+  const { signedUrl } = currentImageUrl;
 
   return (
     <div className={`relative overflow-hidden ${width} ${height} bg-gray-100`}>
@@ -119,24 +120,26 @@ const ImageCarousel = ({
         </Button>
       </div>
 
-      <Tooltip closeDelay={0}>
-        <Tooltip.Trigger>
-          <div className="pointer-events-auto absolute top-4 right-14 z-10">
-            <Button
-              size="sm"
-              isIconOnly
-              variant="secondary"
-              className="rounded-full"
-              onPress={() => {
-                window.open(currentImageUrl.signedUrl, '_blank');
-              }}
-            >
-              <ArrowSquareOutIcon size={18} weight="bold" />
-            </Button>
-          </div>
-        </Tooltip.Trigger>
-        <Tooltip.Content>Open this photo in a new tab</Tooltip.Content>
-      </Tooltip>
+      {signedUrl && (
+        <Tooltip closeDelay={0}>
+          <Tooltip.Trigger>
+            <div className="pointer-events-auto absolute top-4 right-14 z-10">
+              <Button
+                size="sm"
+                isIconOnly
+                variant="secondary"
+                className="rounded-full"
+                onPress={() => {
+                  window.open(signedUrl, '_blank', 'noopener,noreferrer');
+                }}
+              >
+                <ArrowSquareOutIcon size={18} weight="bold" />
+              </Button>
+            </div>
+          </Tooltip.Trigger>
+          <Tooltip.Content>Open this photo in a new tab</Tooltip.Content>
+        </Tooltip>
+      )}
 
       <Tooltip closeDelay={0}>
         <Tooltip.Trigger>

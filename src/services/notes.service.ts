@@ -2,14 +2,14 @@ import type { ZonedDateTime } from '@internationalized/date';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-import type { Tables } from '@db-types';
+import type { Tables, TablesInsert } from '@db-types';
 import type { Note, NotesUpdate, NotesInsert, NoteWithHabit } from '@models';
 import { supabaseClient } from '@utils';
 
 export const createNote = async (note: NotesInsert): Promise<Note> => {
   const { data, error } = await supabaseClient
     .from('notes')
-    .insert(decamelizeKeys(note))
+    .insert(decamelizeKeys(note) as TablesInsert<'notes'>)
     .select()
     .single();
 

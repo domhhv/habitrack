@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 declare let SUPABASE_URL: string;
 declare let SUPABASE_ANON_KEY: string;
 declare let ROLLBAR_CLIENT_ENV: string;

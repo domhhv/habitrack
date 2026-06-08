@@ -6,12 +6,6 @@ import { makeTestOccurrence } from '@tests';
 
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
 
-vi.mock('@hooks', () => {
-  return {
-    useScreenWidth: vi.fn(),
-  };
-});
-
 vi.mock('@stores', async (importOriginal) => {
   const original = (await importOriginal()) as object;
 
