@@ -76,7 +76,10 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
       : null;
 
   const avgCostPerOccurrence =
-    stock.isDepleted && stock.cost !== null && stock.usageCount > 0
+    stock.isDepleted &&
+    stock.cost !== null &&
+    stock.usageCount > 0 &&
+    stock.totalItems === null
       ? stock.cost / stock.usageCount
       : null;
 
