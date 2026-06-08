@@ -34,7 +34,6 @@ const rules = {
   'no-undef': 'off',
   'no-useless-rename': 'error',
   'object-shorthand': 'error',
-  'react/react-in-jsx-scope': 'off',
   'switch-case/no-case-curly': 'off',
 
   '@typescript-eslint/no-unused-vars': [

@@ -34,7 +34,7 @@ Habitrack is a simple and intuitive web app designed for logging habits and v is
 
 This app showcases the use of the following tools and technologies:
 
-- React 19 with TypeScript 5.9, bundled with [Vite 7](https://vite.dev/)
+- React 19.2 with TypeScript 6, bundled with [Vite 8](https://vite.dev/)
 - [React Router](https://reactrouter.com) v7 for routing (declarative mode)
 - [Zustand](https://zustand.docs.pmnd.rs/) v5 for global state management
 - [Tailwind CSS](https://tailwindcss.com) v4 for styling
@@ -81,7 +81,7 @@ There's also a public roadmap on Featurebase where you can upvote and suggest ne
 
 - [x] **Migrate to Vitest**: Replace Jest with Vitest.
 - [x] **Migrate to ESLint v9**: Update to ESLint v9 and use flat config.
-- [ ] **Migrate to HeroUI 3**: Update to [HeroUI v3](https://v3.heroui.com/) (currently in beta) once it reaches stable release.
+- [x] **Migrate to HeroUI 3**: Update to [HeroUI v3](https://v3.heroui.com/) (currently in beta) once it reaches stable release.
 
 ## Local development
 
@@ -242,7 +242,7 @@ There are two types of linting in the project: JavaScript/TypeScript linting and
 
 #### JS/TS
 
-The project uses [ESLint](https://eslint.org/) v9 with a custom flat config for linting. To run ESLint, use the following command:
+The project uses [ESLint](https://eslint.org/) v10 with a custom flat config for linting. To run ESLint, use the following command:
 
 ```bash
 yarn eslint:check # Check for linting errors

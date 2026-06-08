@@ -130,7 +130,7 @@ const ImageCarousel = ({
                 variant="secondary"
                 className="rounded-full"
                 onPress={() => {
-                  window.open(signedUrl, '_blank');
+                  window.open(signedUrl, '_blank', 'noopener,noreferrer');
                 }}
               >
                 <ArrowSquareOutIcon size={18} weight="bold" />
