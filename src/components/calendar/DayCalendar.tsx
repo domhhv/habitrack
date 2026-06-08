@@ -1,4 +1,4 @@
-import { cn, Button, Tooltip, Calendar, ScrollShadow } from '@heroui/react';
+import { cn, Tooltip, Calendar, ScrollShadow } from '@heroui/react';
 import {
   today,
   isToday,
@@ -18,9 +18,9 @@ import {
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
-import { Link, useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 
-import { OccurrenceChip, SwipeableContainer } from '@components';
+import { CustomButton, OccurrenceChip, SwipeableContainer } from '@components';
 import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useDayNotes,
@@ -53,6 +53,9 @@ const DayCalendar = () => {
   const { locale } = useLocale();
   const timeZone = getLocalTimeZone();
   const [focusedDate, setFocusedDate] = React.useState(() => {
+    return today(timeZone);
+  });
+  const [focusedCalendarMonth, setFocusedCalendarMonth] = React.useState(() => {
     return today(timeZone);
   });
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
@@ -170,6 +173,7 @@ const DayCalendar = () => {
 
   const handleCalendarChange = (value: CalendarDate) => {
     navigate(`/calendar/day/${value.year}/${value.month}/${value.day}`);
+    setFocusedCalendarMonth(value);
   };
 
   const handleSwipeLeft = () => {
@@ -197,71 +201,79 @@ const DayCalendar = () => {
             <CalendarNavigationButtons focusedDate={focusedDate} />
           </div>
           <div className="flex items-center justify-center gap-2 px-8 py-2">
-            <Tooltip closeDelay={0} content={weekInfo.label}>
-              <Button
-                as={Link}
-                size="sm"
-                radius="sm"
-                variant="light"
-                color="secondary"
-                to={weekInfo.path}
-                className="min-w-fit gap-1 px-2"
-                aria-label={`Go to week view: ${weekInfo.label}`}
-                startContent={
-                  <ArrowSquareLeftIcon
-                    weight="bold"
-                    size={isDesktop ? 18 : 14}
-                  />
-                }
-              >
-                <span className="hidden sm:inline">{weekInfo.label}</span>
-              </Button>
+            <Tooltip delay={0} closeDelay={0}>
+              <Tooltip.Trigger>
+                <CustomButton
+                  size="lg"
+                  variant="light"
+                  className="min-w-fit gap-2 px-2"
+                  aria-label={`Go to week view: ${weekInfo.label}`}
+                  onPress={() => {
+                    navigate(weekInfo.path);
+                  }}
+                >
+                  <ArrowSquareLeftIcon weight="bold" className="h-5 w-5" />
+                  <span className="hidden sm:inline">{weekInfo.label}</span>
+                </CustomButton>
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                Go to the week view of {weekInfo.label}
+              </Tooltip.Content>
             </Tooltip>
-            <h2
-              className={cn(
-                'text-center text-lg text-stone-600 dark:text-stone-300',
-                isFocusedToday &&
-                  'text-primary-600 dark:text-primary-400 font-bold'
-              )}
-            >
-              {formattedDate}
-            </h2>
-            <div className="flex items-center gap-1">
-              <Tooltip
-                closeDelay={0}
-                content={dayNote ? 'Edit note' : 'Add note'}
+            <div className="flex items-center gap-3">
+              <h2
+                className={cn(
+                  'text-center text-base text-stone-600 dark:text-stone-300',
+                  isFocusedToday &&
+                    'text-primary-600 dark:text-primary-400 font-bold'
+                )}
               >
-                <Button
-                  radius="sm"
-                  variant="light"
-                  className="h-6 w-6 min-w-fit px-0"
-                  color={dayNote ? 'primary' : 'secondary'}
-                  aria-label={dayNote ? 'Edit note' : 'Add note'}
-                  onPress={() => {
-                    openNoteDrawer(focusedDate, 'day');
-                  }}
-                >
-                  {dayNote ? (
-                    <NoteIcon weight="bold" size={isDesktop ? 18 : 14} />
-                  ) : (
-                    <NoteBlankIcon weight="bold" size={isDesktop ? 18 : 14} />
-                  )}
-                </Button>
-              </Tooltip>
-              <Tooltip closeDelay={0} content="Log occurrence">
-                <Button
-                  radius="sm"
-                  variant="light"
-                  color="secondary"
-                  aria-label="Log occurrence"
-                  className="h-6 w-6 min-w-fit px-0"
-                  onPress={() => {
-                    openOccurrenceDrawer({ dayToLog: focusedDate });
-                  }}
-                >
-                  <CalendarBlankIcon weight="bold" size={isDesktop ? 18 : 14} />
-                </Button>
-              </Tooltip>
+                {formattedDate}
+              </h2>
+              <div className="flex items-center gap-2">
+                <Tooltip closeDelay={0}>
+                  <Tooltip.Trigger>
+                    <CustomButton
+                      variant="light"
+                      className="h-6 w-6 min-w-fit rounded-xl px-0"
+                      aria-label={dayNote ? 'Edit note' : 'Add note'}
+                      onPress={() => {
+                        openNoteDrawer(focusedDate, 'day');
+                      }}
+                    >
+                      {dayNote ? (
+                        <NoteIcon weight="bold" size={isDesktop ? 18 : 14} />
+                      ) : (
+                        <NoteBlankIcon
+                          weight="bold"
+                          size={isDesktop ? 18 : 14}
+                        />
+                      )}
+                    </CustomButton>
+                  </Tooltip.Trigger>
+                  <Tooltip.Content>
+                    {dayNote ? 'Edit note' : 'Add note'}
+                  </Tooltip.Content>
+                </Tooltip>
+                <Tooltip closeDelay={0}>
+                  <Tooltip.Trigger>
+                    <CustomButton
+                      variant="light"
+                      aria-label="Log occurrence"
+                      className="h-6 w-6 min-w-fit rounded-xl px-0"
+                      onPress={() => {
+                        openOccurrenceDrawer({ dayToLog: focusedDate });
+                      }}
+                    >
+                      <CalendarBlankIcon
+                        weight="bold"
+                        size={isDesktop ? 18 : 14}
+                      />
+                    </CustomButton>
+                  </Tooltip.Trigger>
+                  <Tooltip.Content>Log occurrence</Tooltip.Content>
+                </Tooltip>
+              </div>
             </div>
           </div>
           <div className="flex flex-col px-8 py-4 lg:px-16">
@@ -331,12 +343,29 @@ const DayCalendar = () => {
         <Calendar
           value={focusedDate}
           onChange={handleCalendarChange}
-          firstDayOfWeek={firstDayOfWeek}
-          classNames={{
-            base: 'w-full shadow-none bg-transparent',
-            content: 'w-full',
-          }}
-        />
+          aria-label="Focused date calendar"
+          focusedValue={focusedCalendarMonth}
+          onFocusChange={setFocusedCalendarMonth}
+          defaultValue={today(getLocalTimeZone())}
+        >
+          <Calendar.Header>
+            <Calendar.Heading />
+            <Calendar.NavButton slot="previous" />
+            <Calendar.NavButton slot="next" />
+          </Calendar.Header>
+          <Calendar.Grid>
+            <Calendar.GridHeader>
+              {(day) => {
+                return <Calendar.HeaderCell>{day}</Calendar.HeaderCell>;
+              }}
+            </Calendar.GridHeader>
+            <Calendar.GridBody>
+              {(date) => {
+                return <Calendar.Cell date={date} />;
+              }}
+            </Calendar.GridBody>
+          </Calendar.Grid>
+        </Calendar>
         <div className="flex items-center justify-center gap-2">
           <CalendarNavigationButtons focusedDate={focusedDate} />
         </div>

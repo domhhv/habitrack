@@ -1,4 +1,4 @@
-import { addToast } from '@heroui/react';
+import { Toast } from '@heroui/react';
 import capitalize from 'lodash.capitalize';
 
 import getErrorMessage from './get-error-message';
@@ -60,10 +60,7 @@ const handleAsyncAction = async <T>(
   try {
     const result = await action;
 
-    addToast({
-      color: 'success',
-      title: messages.success,
-    });
+    Toast.toast.success(messages.success);
 
     return result;
   } catch (error) {
@@ -71,10 +68,8 @@ const handleAsyncAction = async <T>(
     rollbar.error(error instanceof Error ? error : new Error(errorMessage));
     console.error(error);
 
-    addToast({
-      color: 'danger',
+    Toast.toast.danger(messages.error, {
       description: `Error details: ${errorMessage}`,
-      title: messages.error,
     });
 
     throw error;

@@ -23,11 +23,10 @@ const App = () => {
   if (isLoading) {
     return (
       <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 items-center justify-center">
-        <Spinner
-          labelColor="primary"
-          className="flex-row gap-4"
-          label="Loading your session..."
-        />
+        <div className="flex flex-row items-center gap-4">
+          <Spinner color="accent" />
+          <span>Loading your session...</span>
+        </div>
       </main>
     );
   }

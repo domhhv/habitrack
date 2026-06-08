@@ -1,13 +1,19 @@
 import {
   Chip,
+  Form,
   Input,
+  Label,
   Button,
+  Header,
   Select,
   Switch,
-  SelectItem,
+  ListBox,
+  useFilter,
+  TextField,
+  EmptyState,
+  FieldError,
+  SearchField,
   Autocomplete,
-  AutocompleteItem,
-  AutocompleteSection,
 } from '@heroui/react';
 import {
   TrashIcon,
@@ -16,7 +22,6 @@ import {
   PencilSimpleIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
-import type { Key } from 'react-aria';
 
 import { METRIC_PRESETS } from '@const';
 import type { MetricType, MetricConfig, FormMetricDefinitions } from '@models';
@@ -60,6 +65,18 @@ const MetricDefinitionForm = ({
   onChange,
   onRemove,
 }: MetricDefinitionFormProps) => {
+  const { contains } = useFilter({ sensitivity: 'base' });
+
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  const submitMetric = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    onChange({
+      isBeingEdited: false,
+      ...(metric.isPersisted ? { isToBeUpdated: true } : { isToBeAdded: true }),
+    });
+  };
+
   if (!metric.isBeingEdited) {
     return (
       <div className="flex items-center justify-between gap-16">
@@ -72,7 +89,7 @@ const MetricDefinitionForm = ({
               </Chip>
             )}
             {metric.isToBeUpdated && (
-              <Chip size="sm" color="secondary">
+              <Chip size="sm" color="default">
                 To be updated
               </Chip>
             )}
@@ -112,23 +129,21 @@ const MetricDefinitionForm = ({
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 pb-2">
+      <Form onSubmit={submitMetric} className="flex flex-col gap-3 pb-2">
         <Autocomplete
-          size="sm"
-          variant="faded"
-          maxListboxHeight={384}
-          value={metric.presetName}
-          label="Choose from presets (optional)"
-          placeholder="Search for units, e.g. kilometers, kcal..."
+          variant="secondary"
+          placeholder="Select a preset"
+          value={metric.presetName ?? null}
           onClear={() => {
             onChange({
               config: {},
               isRequired: false,
               name: '',
+              presetName: undefined,
               type: 'number',
             });
           }}
-          onChange={(key: Key | null) => {
+          onChange={(key) => {
             const preset = ALL_PRESETS.find((p) => {
               return p.name === key;
             });
@@ -144,55 +159,94 @@ const MetricDefinitionForm = ({
             });
           }}
         >
-          {METRIC_PRESETS.map(({ group, presets }) => {
-            return (
-              <AutocompleteSection key={group} title={group}>
-                {presets.map((preset) => {
+          <Label>Preset</Label>
+          <Autocomplete.Trigger>
+            <Autocomplete.Value />
+            <Autocomplete.ClearButton />
+            <Autocomplete.Indicator />
+          </Autocomplete.Trigger>
+          <Autocomplete.Popover>
+            <Autocomplete.Filter filter={contains}>
+              <SearchField autoFocus name="search" variant="secondary">
+                <SearchField.Group>
+                  <SearchField.SearchIcon />
+                  <SearchField.Input placeholder="Search for units, e.g. kilometers, kcal..." />
+                  <SearchField.ClearButton />
+                </SearchField.Group>
+              </SearchField>
+              <ListBox
+                renderEmptyState={() => {
+                  return <EmptyState>No results found</EmptyState>;
+                }}
+              >
+                {METRIC_PRESETS.map(({ group, presets }) => {
                   return (
-                    <AutocompleteItem key={preset.name}>
-                      {preset.name}
-                    </AutocompleteItem>
+                    <ListBox.Section key={group}>
+                      <Header>{group}</Header>
+                      {presets.map((preset) => {
+                        return (
+                          <ListBox.Item
+                            id={preset.name}
+                            key={preset.name}
+                            textValue={preset.name}
+                          >
+                            {preset.name}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        );
+                      })}
+                    </ListBox.Section>
                   );
                 })}
-              </AutocompleteSection>
-            );
-          })}
+              </ListBox>
+            </Autocomplete.Filter>
+          </Autocomplete.Popover>
         </Autocomplete>
-        <Input
-          size="sm"
-          variant="faded"
-          label="Metric name"
+        <TextField
+          fullWidth
+          name="name"
+          variant="secondary"
           value={metric.name}
-          onValueChange={(name) => {
+          onChange={(value) => {
             onChange({
-              name,
+              name: value,
             });
           }}
-        />
-        <Select
-          size="sm"
-          variant="faded"
-          label="Metric type"
-          selectedKeys={[metric.type]}
         >
-          {(Object.entries(METRIC_TYPE_LABELS) as [MetricType, string][]).map(
-            ([value, label]) => {
-              return (
-                <SelectItem
-                  key={value}
-                  textValue={label}
-                  onPress={() => {
-                    onChange({
-                      config: DEFAULT_CONFIGS[value],
-                      type: value,
-                    });
-                  }}
-                >
-                  {label}
-                </SelectItem>
-              );
-            }
-          )}
+          <Label>Metric name</Label>
+          <Input required placeholder="Metric name" />
+          <FieldError />
+        </TextField>
+        <Select
+          variant="secondary"
+          value={metric.type}
+          onChange={(key) => {
+            const value = key as MetricType;
+
+            onChange({
+              config: DEFAULT_CONFIGS[value],
+              type: value,
+            });
+          }}
+        >
+          <Label>Metric type</Label>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              {(
+                Object.entries(METRIC_TYPE_LABELS) as [MetricType, string][]
+              ).map(([value, label]) => {
+                return (
+                  <ListBox.Item id={value} key={value} textValue={label}>
+                    <Label>{label}</Label>
+                  </ListBox.Item>
+                );
+              })}
+            </ListBox>
+          </Select.Popover>
         </Select>
 
         <MetricConfigFields
@@ -221,42 +275,34 @@ const MetricDefinitionForm = ({
         />
 
         <Switch
-          size="sm"
           isSelected={metric.isRequired}
-          onValueChange={(val) => {
+          onChange={(val: boolean) => {
             onChange({ isRequired: val });
           }}
         >
-          <span className="text-xs">Required</span>
+          <Switch.Control>
+            <Switch.Thumb />
+          </Switch.Control>
+          <Switch.Content>
+            <Label className="text-xs">Required</Label>
+          </Switch.Content>
         </Switch>
 
         <Button
-          size="sm"
-          color="danger"
-          variant="light"
+          fullWidth
           onPress={onRemove}
-          startContent={<TrashIcon size={14} />}
+          variant="danger-soft"
+          className="text-danger"
         >
+          <TrashIcon size={14} />
           {metric.isToBeAdded ? 'Remove' : 'Discard'}
         </Button>
 
-        <Button
-          size="sm"
-          variant="flat"
-          color="success"
-          startContent={<StackPlusIcon size={14} />}
-          onPress={() => {
-            onChange({
-              isBeingEdited: false,
-              ...(metric.isPersisted
-                ? { isToBeUpdated: true }
-                : { isToBeAdded: true }),
-            });
-          }}
-        >
+        <Button fullWidth type="submit" variant="secondary">
+          <StackPlusIcon size={14} />
           Done
         </Button>
-      </div>
+      </Form>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { addToast } from '@heroui/react';
+import { Toast } from '@heroui/react';
 import React from 'react';
 import { useLocation, useSearchParams } from 'react-router';
 
@@ -19,10 +19,7 @@ const useAuthSearchParams = () => {
           refresh_token: refreshToken,
         })
         .then(() => {
-          addToast({
-            color: 'success',
-            title: `Email confirmed! You're now logged in 🎉`,
-          });
+          Toast.toast.success(`Email confirmed! You're now logged in 🎉`);
         });
     }
 
@@ -33,10 +30,8 @@ const useAuthSearchParams = () => {
           refresh_token: refreshToken,
         })
         .then(() => {
-          addToast({
-            color: 'success',
+          Toast.toast.success(`You're now logged in to Habitrack`, {
             description: 'You can update your password on this page',
-            title: `You're now logged in to Habitrack`,
           });
         });
     }

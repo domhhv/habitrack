@@ -1,11 +1,9 @@
 import {
+  Label,
   Button,
   Tooltip,
   Dropdown,
-  DropdownItem,
-  DropdownMenu,
   type Selection,
-  DropdownTrigger,
 } from '@heroui/react';
 import { isSameDay, getLocalTimeZone } from '@internationalized/date';
 import { CaretDownIcon } from '@phosphor-icons/react';
@@ -138,35 +136,46 @@ const HabitLastEntry = ({ timestamp }: HabitLastEntryProps) => {
 
   return (
     <div className="flex items-center gap-2">
-      <Tooltip
-        showArrow
-        offset={12}
-        closeDelay={0}
-        color="primary"
-        content={fullDateTimeFormatter.format(new Date(timestamp))}
-      >
-        <span>{capitalize(formatRelativeDate(timestamp))}</span>
+      <Tooltip closeDelay={0}>
+        <Tooltip.Trigger>
+          <span>{capitalize(formatRelativeDate(timestamp))}</span>
+        </Tooltip.Trigger>
+        <Tooltip.Content offset={12}>
+          <Tooltip.Arrow />
+          {fullDateTimeFormatter.format(new Date(timestamp))}
+        </Tooltip.Content>
       </Tooltip>
       <Dropdown>
-        <DropdownTrigger>
-          <Button size="sm" isIconOnly variant="light">
+        <Dropdown.Trigger>
+          <Button size="sm" isIconOnly variant="ghost">
             <CaretDownIcon />
           </Button>
-        </DropdownTrigger>
-        <DropdownMenu
-          variant="flat"
-          disallowEmptySelection
-          selectionMode="single"
-          aria-label="Single selection example"
-          selectedKeys={selectedDistanceFormat}
-          onSelectionChange={setSelectedDistanceFormat}
-        >
-          <DropdownItem key="default">Default</DropdownItem>
-          <DropdownItem key="hours">Hours</DropdownItem>
-          <DropdownItem key="days">Days</DropdownItem>
-          <DropdownItem key="weeks">Weeks</DropdownItem>
-          <DropdownItem key="months">Months</DropdownItem>
-        </DropdownMenu>
+        </Dropdown.Trigger>
+        <Dropdown.Popover>
+          <Dropdown.Menu
+            disallowEmptySelection
+            selectionMode="single"
+            aria-label="Single selection example"
+            selectedKeys={selectedDistanceFormat}
+            onSelectionChange={setSelectedDistanceFormat}
+          >
+            <Dropdown.Item id="default">
+              <Label>Default</Label>
+            </Dropdown.Item>
+            <Dropdown.Item id="hours">
+              <Label>Hours</Label>
+            </Dropdown.Item>
+            <Dropdown.Item id="days">
+              <Label>Days</Label>
+            </Dropdown.Item>
+            <Dropdown.Item id="weeks">
+              <Label>Weeks</Label>
+            </Dropdown.Item>
+            <Dropdown.Item id="months">
+              <Label>Months</Label>
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
       </Dropdown>
     </div>
   );

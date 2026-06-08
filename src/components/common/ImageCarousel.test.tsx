@@ -31,7 +31,7 @@ describe(ImageCarousel.name, () => {
 
     const deleteButtons = container.querySelectorAll('button');
     const deleteButton = Array.from(deleteButtons).find((btn) => {
-      return btn.hasAttribute('data-loading');
+      return btn.hasAttribute('data-pending');
     });
 
     expect(deleteButton).toBeDefined();
@@ -50,7 +50,7 @@ describe(ImageCarousel.name, () => {
 
     const deleteButtons = container.querySelectorAll('button');
     const deleteButton = Array.from(deleteButtons).find((btn) => {
-      return btn.hasAttribute('data-loading');
+      return btn.hasAttribute('data-pending');
     });
 
     if (deleteButton) {
@@ -108,8 +108,8 @@ describe(ImageCarousel.name, () => {
     const deleteButtons = container.querySelectorAll('button');
     const loadingButtons = Array.from(deleteButtons).filter((btn) => {
       return (
-        btn.hasAttribute('data-loading') &&
-        btn.getAttribute('data-loading') === 'true'
+        btn.hasAttribute('data-pending') &&
+        btn.getAttribute('data-pending') === 'true'
       );
     });
 

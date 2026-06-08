@@ -1,10 +1,4 @@
-import {
-  Modal,
-  Button,
-  ModalBody,
-  ModalHeader,
-  ModalContent,
-} from '@heroui/react';
+import { Modal, Button, Spinner } from '@heroui/react';
 import React from 'react';
 
 type ConfirmDialogProps = {
@@ -25,32 +19,43 @@ const ConfirmDialog = ({
   onConfirm,
 }: ConfirmDialogProps) => {
   return (
-    <Modal isOpen={isOpen} onClose={onCancel}>
-      <ModalContent>
-        <ModalHeader>{heading}</ModalHeader>
-        <ModalBody>
-          {children}
-          <div className="mt-2 mb-4 flex flex-row justify-end gap-4">
-            <Button
-              variant="ghost"
-              color="secondary"
-              onPress={onCancel}
-              isDisabled={isLoading}
-              role="confirm-dialog-cancel"
-            >
-              Cancel
-            </Button>
-            <Button
-              color="danger"
-              onPress={onConfirm}
-              isLoading={isLoading}
-              role="confirm-dialog-confirm"
-            >
-              Confirm
-            </Button>
-          </div>
-        </ModalBody>
-      </ModalContent>
+    <Modal>
+      <Modal.Backdrop
+        isOpen={isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            onCancel();
+          }
+        }}
+      >
+        <Modal.Container>
+          <Modal.Dialog>
+            <Modal.Header>
+              <Modal.Heading>{heading}</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              {children}
+              <div className="mt-2 mb-4 flex flex-row justify-end gap-4">
+                <Button
+                  variant="outline"
+                  onPress={onCancel}
+                  isDisabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="danger"
+                  onPress={onConfirm}
+                  isDisabled={isLoading}
+                >
+                  {isLoading && <Spinner size="sm" />}
+                  Confirm
+                </Button>
+              </div>
+            </Modal.Body>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </Modal>
   );
 };

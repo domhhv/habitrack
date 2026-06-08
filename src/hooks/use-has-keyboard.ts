@@ -4,11 +4,21 @@ const useHasKeyboard = () => {
   const [hasKeyboard, setHasKeyboard] = React.useState(true);
 
   React.useEffect(() => {
-    const canHover = window.matchMedia('(hover: hover)').matches;
+    const detectKeyboard = () => {
+      const canHover = window.matchMedia('(hover: hover)').matches;
 
-    const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+      const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
-    setHasKeyboard(canHover && hasFinePointer);
+      setHasKeyboard(canHover && hasFinePointer);
+    };
+
+    detectKeyboard();
+
+    window.addEventListener('resize', detectKeyboard);
+
+    return () => {
+      window.removeEventListener('resize', detectKeyboard);
+    };
   }, []);
 
   return hasKeyboard;

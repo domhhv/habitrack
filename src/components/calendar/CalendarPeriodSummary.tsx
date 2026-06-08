@@ -92,10 +92,9 @@ const CalendarPeriodSummary = ({
             <Button
               size="sm"
               isIconOnly
-              variant="light"
-              color="primary"
-              className="h-5 w-5 min-w-fit"
+              variant="ghost"
               aria-label="Edit weekly note"
+              className="text-accent h-5 w-5 min-w-fit"
               onPress={() => {
                 openNoteDrawer(date, kind);
               }}
@@ -111,13 +110,12 @@ const CalendarPeriodSummary = ({
       {!note && date && (
         <Button
           size="sm"
-          variant="flat"
-          color="secondary"
-          startContent={<NotePencilIcon size={14} weight="bold" />}
+          variant="secondary"
           onPress={() => {
             openNoteDrawer(date, kind);
           }}
         >
+          <NotePencilIcon size={14} weight="bold" />
           Add note
         </Button>
       )}

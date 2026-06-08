@@ -4,6 +4,7 @@ import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
+import { CustomButton } from '@components';
 import type {
   Occurrence,
   MetricValue,
@@ -176,10 +177,10 @@ const OccurrenceListItem = ({
   const handleRemoveMetricValue = async (habitMetricId: string) => {
     if (
       await askConfirmation({
-        color: 'danger',
         confirmText: 'Delete',
         description: 'Are you sure you want to delete this metric value?',
         title: 'Delete metric value',
+        variant: 'danger',
       })
     ) {
       setRemovingMetricId(habitMetricId);
@@ -335,36 +336,28 @@ const OccurrenceListItem = ({
                 const isRemoving = removingMetricId === chip.id;
 
                 return (
-                  <Chip
-                    size="sm"
-                    key={chip.id}
-                    variant="flat"
-                    color="default"
-                    endContent={
-                      isRemoving ? (
-                        <Spinner
-                          size="sm"
-                          color="danger"
-                          className="ml-1 size-3 [&>div]:size-3"
-                        />
-                      ) : (
-                        <Button
-                          size="sm"
-                          isIconOnly
-                          color="danger"
-                          variant="light"
-                          aria-label="delete-metric-value"
-                          className="ml-0.5 h-4 w-4 min-w-0"
-                          onPress={() => {
-                            return handleRemoveMetricValue(chip.id);
-                          }}
-                        >
-                          <TrashSimpleIcon size={10} />
-                        </Button>
-                      )
-                    }
-                  >
+                  <Chip key={chip.id}>
                     {chip.label}
+                    {isRemoving ? (
+                      <Spinner
+                        size="sm"
+                        color="danger"
+                        className="ml-1 size-3 [&>div]:size-3"
+                      />
+                    ) : (
+                      <Button
+                        size="sm"
+                        isIconOnly
+                        variant="ghost"
+                        aria-label="delete-metric-value"
+                        className="text-danger ml-0.5 h-4 w-4 min-w-0"
+                        onPress={() => {
+                          return handleRemoveMetricValue(chip.id);
+                        }}
+                      >
+                        <TrashSimpleIcon size={10} />
+                      </Button>
+                    )}
                   </Chip>
                 );
               })}
@@ -401,43 +394,27 @@ const OccurrenceListItem = ({
             </div>
           )}
         </div>
-        <div className="flex items-center">
-          <Button
+        <div className="flex items-center gap-2">
+          <CustomButton
+            size="sm"
             isIconOnly
             variant="light"
             onPress={onEdit}
-            color="secondary"
             isDisabled={isBeingRemoved}
             aria-label="edit-habit-entry"
-            className="h-6 w-6 min-w-0 rounded-lg"
           >
-            <PencilSimpleIcon
-              size={14}
-              fill="bold"
-              className="dark:fill-white"
-            />
-          </Button>
+            <PencilSimpleIcon size={14} weight="bold" />
+          </CustomButton>
           <Button
+            size="sm"
             isIconOnly
-            color="danger"
-            variant="light"
             onPress={onRemove}
-            isLoading={isBeingRemoved}
+            variant="danger-soft"
+            isPending={isBeingRemoved}
             aria-label="delete-habit-entry"
-            className="h-6 w-6 min-w-0 rounded-lg"
-            spinner={
-              <Spinner
-                size="sm"
-                color="danger"
-                className="size-3.5 [&>div]:size-3.5"
-              />
-            }
+            // className="h-6 w-6 min-w-0 rounded-lg"
           >
-            <TrashSimpleIcon
-              size={14}
-              fill="bold"
-              className="dark:fill-white"
-            />
+            <TrashSimpleIcon weight="bold" />
           </Button>
         </div>
       </div>

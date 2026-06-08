@@ -1,4 +1,4 @@
-import { Button, Tooltip } from '@heroui/react';
+import { Button, Spinner, Tooltip } from '@heroui/react';
 import {
   TrashIcon,
   CaretLeftIcon,
@@ -99,11 +99,10 @@ const ImageCarousel = ({
         <Button
           size="sm"
           isIconOnly
-          radius="full"
-          variant="shadow"
+          variant="primary"
           onPress={handlePrev}
-          className="pointer-events-auto"
           isDisabled={imageUrls.length <= 1}
+          className="pointer-events-auto rounded-full"
         >
           <CaretLeftIcon size={20} weight="bold" />
         </Button>
@@ -111,49 +110,62 @@ const ImageCarousel = ({
         <Button
           size="sm"
           isIconOnly
-          radius="full"
-          variant="shadow"
+          variant="primary"
           onPress={handleNext}
-          className="pointer-events-auto"
           isDisabled={imageUrls.length <= 1}
+          className="pointer-events-auto rounded-full"
         >
           <CaretRightIcon size={20} weight="bold" />
         </Button>
       </div>
 
-      <Tooltip closeDelay={0} content="Open this photo in a new tab">
-        <div className="pointer-events-auto absolute top-4 right-14 z-10">
-          <Button
-            size="sm"
-            isIconOnly
-            radius="full"
-            variant="shadow"
-            color="secondary"
-            onPress={() => {
-              window.open(currentImageUrl.signedUrl, '_blank');
-            }}
-          >
-            <ArrowSquareOutIcon size={18} weight="bold" />
-          </Button>
-        </div>
+      <Tooltip closeDelay={0}>
+        <Tooltip.Trigger>
+          <div className="pointer-events-auto absolute top-4 right-14 z-10">
+            <Button
+              size="sm"
+              isIconOnly
+              variant="secondary"
+              className="rounded-full"
+              onPress={() => {
+                window.open(currentImageUrl.signedUrl, '_blank');
+              }}
+            >
+              <ArrowSquareOutIcon size={18} weight="bold" />
+            </Button>
+          </div>
+        </Tooltip.Trigger>
+        <Tooltip.Content>Open this photo in a new tab</Tooltip.Content>
       </Tooltip>
 
-      <Tooltip closeDelay={0} content="Delete this photo">
-        <div className="pointer-events-auto absolute top-4 right-4 z-10">
-          <Button
-            size="sm"
-            isIconOnly
-            radius="full"
-            color="danger"
-            variant="shadow"
-            isLoading={imagePathBeingDeleted === currentImageUrl.path}
-            onPress={() => {
-              handleDelete(currentIndex);
-            }}
-          >
-            <TrashIcon size={18} weight="bold" />
-          </Button>
-        </div>
+      <Tooltip closeDelay={0}>
+        <Tooltip.Trigger>
+          <div className="pointer-events-auto absolute top-4 right-4 z-10">
+            <Button
+              size="sm"
+              isIconOnly
+              variant="danger"
+              className="rounded-full"
+              isPending={imagePathBeingDeleted === currentImageUrl.path}
+              onPress={() => {
+                handleDelete(currentIndex);
+              }}
+            >
+              {({ isPending }) => {
+                return (
+                  <>
+                    {isPending ? (
+                      <Spinner size="sm" color="current" />
+                    ) : (
+                      <TrashIcon size={18} weight="bold" />
+                    )}
+                  </>
+                );
+              }}
+            </Button>
+          </div>
+        </Tooltip.Trigger>
+        <Tooltip.Content>Delete this photo</Tooltip.Content>
       </Tooltip>
 
       <div className="absolute right-0 bottom-4 left-0 z-10">

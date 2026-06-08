@@ -1,56 +1,67 @@
-import { cn, Kbd as HeroUIKbd } from '@heroui/react';
+import { cn, kbdVariants, Kbd as CoreKbd } from '@heroui/react';
 import { type ComponentProps } from 'react';
 import { tv } from 'tailwind-variants';
 
 import { useHasKeyboard, useKeyboardShortcut } from '@hooks';
 import { noop } from '@utils';
 
-const kbdVariants = tv({
-  base: 'text-tiny hidden md:text-sm',
+const customKbdVariants = tv({
+  base: 'hidden',
+  extend: kbdVariants,
   defaultVariants: {
-    color: 'default',
     size: 'sm',
+    variant: 'default',
   },
   variants: {
-    color: {
-      default: '',
-      primary: 'bg-primary-400 dark:bg-primary-700',
-      secondary: 'bg-secondary-300 dark:bg-secondary-700',
-    },
     size: {
-      md: 'px-1.5 py-0.5',
-      sm: 'px-1 py-0',
+      md: {
+        base: 'h-6 px-2 leading-6',
+      },
+      sm: {
+        base: 'h-5 px-1 text-xs leading-5',
+      },
+      xs: {
+        base: 'h-4 px-0.5 text-xs leading-4',
+      },
     },
   },
 });
 
-type KbdVariants = Parameters<typeof kbdVariants>[0];
+type KbdVariants = Parameters<typeof customKbdVariants>[0];
 
-type KbdProps = ComponentProps<typeof HeroUIKbd> &
+type KbdProps = ComponentProps<typeof CoreKbd> &
   KbdVariants & {
+    isSolid?: boolean;
     shortcutParams?: Parameters<typeof useKeyboardShortcut>;
   };
 
 const Kbd = ({
   className,
-  color = 'default',
+  isSolid = false,
   shortcutParams = ['', noop, { enabled: false }],
-  size = 'sm',
+  size,
+  variant = 'light',
   ...props
 }: KbdProps) => {
   const hasKeyboard = useHasKeyboard();
 
   useKeyboardShortcut(...shortcutParams);
 
+  const { base } = customKbdVariants({ size, variant });
+
   return (
-    <HeroUIKbd
-      className={cn(
-        kbdVariants({ color, size }),
-        hasKeyboard && 'block',
-        className
-      )}
+    <CoreKbd
+      className={base({
+        className: cn(
+          hasKeyboard && 'block',
+          isSolid && 'bg-accent text-accent-foreground',
+          className
+        ),
+      })}
       {...props}
-    />
+    >
+      <CoreKbd.Content>{props.children}</CoreKbd.Content>
+    </CoreKbd>
   );
 };
 

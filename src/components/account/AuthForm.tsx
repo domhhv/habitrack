@@ -1,4 +1,4 @@
-import { cn, Input, Button } from '@heroui/react';
+import { cn, Input, Label, Button, TextField } from '@heroui/react';
 import { type SubmitEventHandler } from 'react';
 
 import { useTextField } from '@hooks';
@@ -59,39 +59,48 @@ const AuthForm = ({
             your password.
           </p>
         )}
-        <Input
-          type="email"
-          value={email}
-          label="Email"
-          isDisabled={isDisabled}
-          onChange={handleEmailChange}
-          classNames={{
-            description: 'text-right',
-          }}
-          description={
-            mode === 'reset-password' && (
+        <div>
+          <TextField
+            fullWidth
+            name="email"
+            type="email"
+            value={email}
+            variant="secondary"
+            isDisabled={isDisabled}
+            onChange={handleEmailChange}
+          >
+            <Label>Email</Label>
+            <Input placeholder="me@email.com" />
+          </TextField>
+          {mode === 'reset-password' && (
+            <div className="text-right">
               <Button
-                disableAnimation
                 onPress={goBackToLogin}
                 className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
               >
                 Back to login
               </Button>
-            )
-          }
-        />
+            </div>
+          )}
+        </div>
         {mode === 'register' && (
-          <Input
+          <TextField
+            fullWidth
+            name="name"
             value={name}
+            variant="secondary"
             isDisabled={isDisabled}
-            label="Name (optional)"
             onChange={handleNameChange}
-          />
+          >
+            <Label>Name</Label>
+            <Input placeholder="Optional" />
+          </TextField>
         )}
         {['login', 'register'].includes(mode) && (
           <PasswordInput
             value={password}
             label="Password"
+            variant="secondary"
             isDisabled={isDisabled}
             onChange={handlePasswordChange}
             onReset={
@@ -105,13 +114,17 @@ const AuthForm = ({
         )}
       </div>
       <div className="mt-4 flex justify-end gap-2">
-        <Button variant="flat" onPress={handleCancel} isDisabled={isDisabled}>
+        <Button
+          variant="secondary"
+          onPress={handleCancel}
+          isDisabled={isDisabled}
+        >
           Cancel
         </Button>
         <Button
           type="submit"
-          color="primary"
-          isLoading={isDisabled}
+          variant="primary"
+          isDisabled={isDisabled}
           data-testid="submit-button"
         >
           {submitButtonLabel}

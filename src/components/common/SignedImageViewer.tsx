@@ -1,4 +1,4 @@
-import { addToast } from '@heroui/react';
+import { Toast } from '@heroui/react';
 import React from 'react';
 
 import type { SignedUrls, StorageBuckets } from '@models';
@@ -42,12 +42,10 @@ const SignedImageViewer = ({
 
         setSignedImageUrls(signedUrls);
       } catch (error) {
-        addToast({
-          color: 'danger',
-          description: `Error details: ${getErrorMessage(error)}`,
-          title:
-            'Something went wrong while loading photo previews. Please try reloading the page.',
-        });
+        Toast.toast.danger(
+          'Something went wrong while loading photo previews. Please try reloading the page.',
+          { description: `Error details: ${getErrorMessage(error)}` }
+        );
       }
     };
 
@@ -78,10 +76,7 @@ const SignedImageViewer = ({
     try {
       await deleteFile(bucket, path);
 
-      addToast({
-        color: 'success',
-        title: 'Successfully deleted photo',
-      });
+      Toast.toast.success('Successfully deleted photo');
 
       setSignedImageUrls((prev) => {
         const newUrls = [...prev];
@@ -92,10 +87,8 @@ const SignedImageViewer = ({
 
       onDelete(path);
     } catch (error) {
-      return addToast({
-        color: 'danger',
+      Toast.toast.danger('Failed to delete photo', {
         description: `Error details: ${getErrorMessage(error)}`,
-        title: 'Failed to delete photo',
       });
     } finally {
       setImagePathBeingDeleted('');
