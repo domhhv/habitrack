@@ -58,7 +58,8 @@ const CalendarPeriodSummary = ({
             !stock ||
             !stock.isDepleted ||
             stock.cost === null ||
-            stock.usageCount === 0
+            stock.usageCount === 0 ||
+            stock.totalItems !== null
           ) {
             continue;
           }

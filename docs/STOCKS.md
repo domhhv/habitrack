@@ -220,7 +220,7 @@ Displays and edits a single stock. Shows:
 - Cost formatted via `Intl.NumberFormat`
 - Remaining/total count for quantifiable stocks
 - Cost per item: `stock.cost / stock.totalItems`
-- Avg cost per occurrence (when depleted): `stock.cost / stock.usageCount`
+- Avg cost per occurrence (semi-quantifiable only, when depleted): `stock.cost / stock.usageCount`. Quantifiable stocks omit this since their per-occurrence cost is exactly attributable via cost per item.
 
 Actions: toggle `isDepleted`, edit mode, delete with confirmation.
 

@@ -108,7 +108,7 @@ Two cost sections:
 
 1. **Direct cost** (from `occurrence.cost`): Displayed as "Spent EUR X.XX" using `formatCost()` (which uses `Intl.NumberFormat`). Only shown if `occurrence.cost` is not null.
 
-2. **Depleted stock average costs**: For each stock used in this occurrence that is now depleted, shows "{stock name}: avg EUR X.XX/occurrence". Calculated as `stock.cost / stock.usageCount`. Only shown for depleted stocks with a cost.
+2. **Depleted stock average costs**: For each **semi-quantifiable** stock used in this occurrence that is now depleted, shows "{stock name}: avg EUR X.XX/occurrence". Calculated as `stock.cost / stock.usageCount`. Only shown for depleted semi-quantifiable stocks (`total_items IS NULL`) with a cost — quantifiable stocks are excluded because their exact per-occurrence cost is already reflected in the direct "Spent" amount.
 
 ### Period summary display
 
@@ -118,10 +118,11 @@ Two cost sections per habit:
 
 1. **Aggregated direct costs** (from `OccurrenceSummaryItem.costByCurrency`): Sums all `occurrence.cost` values by currency for the period. Displayed per currency.
 
-2. **Depleted stock costs for period**: For each depleted stock with usages in the period:
+2. **Depleted stock costs for period**: For each depleted **semi-quantifiable** stock (`total_items IS NULL`) with usages in the period:
    - `avgCost = stock.cost / stock.usageCount`
    - `totalCost = avgCost * occurrenceCountInPeriod`
    - Displayed as "{stock name}: EUR X.XX (avg EUR Y.YY/occurrence)"
+   - Quantifiable stocks are excluded — their exact costs are already summed into the aggregated direct costs above.
 
 ## Cost Aggregation
 
@@ -163,7 +164,7 @@ OccurrenceListItem renders:
   1. If occurrence.cost !== null → "Spent {formatCost(cost, currency)}"
   2. For each stockUsage:
      → look up stock in habit.stocks
-     → if stock.isDepleted && stock.cost:
+     → if stock.isDepleted && stock.cost && stock.totalItems === null:
         → show "avg {stock.cost / stock.usageCount}/occurrence"
 ```
 
@@ -172,7 +173,7 @@ OccurrenceListItem renders:
 ```
 CalendarPeriodSummary receives occurrenceSummary:
   1. Direct costs: iterate costByCurrency → display per currency
-  2. Stock costs: for each habit's depleted stocks with usages in period:
+  2. Stock costs: for each habit's depleted semi-quantifiable stocks (total_items === null) with usages in period:
      → avgCost = stock.cost / stock.usageCount
      → totalCost = avgCost * habit occurrence count in period
      → display "{stock}: {totalCost} (avg {avgCost}/occurrence)"

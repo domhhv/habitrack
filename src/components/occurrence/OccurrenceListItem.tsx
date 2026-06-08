@@ -257,7 +257,8 @@ const OccurrenceListItem = ({
           !stock ||
           !stock.isDepleted ||
           stock.cost === null ||
-          stock.usageCount === 0
+          stock.usageCount === 0 ||
+          stock.totalItems !== null
         ) {
           return null;
         }
