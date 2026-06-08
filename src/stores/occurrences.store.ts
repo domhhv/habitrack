@@ -52,7 +52,6 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
   set,
   getState
 ) => {
-  /* eslint-disable @typescript-eslint/no-dynamic-delete */
   return {
     occurrences: [],
     occurrencesByDate: {},

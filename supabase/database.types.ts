@@ -8,47 +8,21 @@ export type Json =
 
 export type Database = {
   auth: {
-    CompositeTypes: Record<never, never>
-    Views: Record<never, never>
-    Enums: {
-      aal_level: "aal1" | "aal2" | "aal3"
-      code_challenge_method: "s256" | "plain"
-      factor_status: "unverified" | "verified"
-      factor_type: "totp" | "webauthn" | "phone"
-      oauth_authorization_status: "pending" | "approved" | "denied" | "expired"
-      oauth_client_type: "public" | "confidential"
-      oauth_registration_type: "dynamic" | "manual"
-      oauth_response_type: "code"
-      one_time_token_type:
-        | "confirmation_token"
-        | "reauthentication_token"
-        | "recovery_token"
-        | "email_change_token_new"
-        | "email_change_token_current"
-        | "phone_change_token"
-    }
-    Functions: {
-      email: { Args: never; Returns: string }
-      jwt: { Args: never; Returns: Json }
-      role: { Args: never; Returns: string }
-      uid: { Args: never; Returns: string }
-    }
     Tables: {
       audit_log_entries: {
-        Relationships: []
-        Insert: {
-          created_at?: string | null
-          id: string
-          instance_id?: string | null
-          ip_address?: string
-          payload?: Json | null
-        }
         Row: {
           created_at: string | null
           id: string
           instance_id: string | null
           ip_address: string
           payload: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          instance_id?: string | null
+          ip_address?: string
+          payload?: Json | null
         }
         Update: {
           created_at?: string | null
@@ -57,35 +31,9 @@ export type Database = {
           ip_address?: string
           payload?: Json | null
         }
+        Relationships: []
       }
       custom_oauth_providers: {
-        Relationships: []
-        Insert: {
-          acceptable_client_ids?: string[]
-          attribute_mapping?: Json
-          authorization_params?: Json
-          authorization_url?: string | null
-          cached_discovery?: Json | null
-          client_id: string
-          client_secret: string
-          created_at?: string
-          discovery_cached_at?: string | null
-          discovery_url?: string | null
-          email_optional?: boolean
-          enabled?: boolean
-          id?: string
-          identifier: string
-          issuer?: string | null
-          jwks_uri?: string | null
-          name: string
-          pkce_enabled?: boolean
-          provider_type: string
-          scopes?: string[]
-          skip_nonce_check?: boolean
-          token_url?: string | null
-          updated_at?: string
-          userinfo_url?: string | null
-        }
         Row: {
           acceptable_client_ids: string[]
           attribute_mapping: Json
@@ -111,6 +59,32 @@ export type Database = {
           token_url: string | null
           updated_at: string
           userinfo_url: string | null
+        }
+        Insert: {
+          acceptable_client_ids?: string[]
+          attribute_mapping?: Json
+          authorization_params?: Json
+          authorization_url?: string | null
+          cached_discovery?: Json | null
+          client_id: string
+          client_secret: string
+          created_at?: string
+          discovery_cached_at?: string | null
+          discovery_url?: string | null
+          email_optional?: boolean
+          enabled?: boolean
+          id?: string
+          identifier: string
+          issuer?: string | null
+          jwks_uri?: string | null
+          name: string
+          pkce_enabled?: boolean
+          provider_type: string
+          scopes?: string[]
+          skip_nonce_check?: boolean
+          token_url?: string | null
+          updated_at?: string
+          userinfo_url?: string | null
         }
         Update: {
           acceptable_client_ids?: string[]
@@ -138,35 +112,17 @@ export type Database = {
           updated_at?: string
           userinfo_url?: string | null
         }
+        Relationships: []
       }
       flow_state: {
-        Relationships: []
-        Insert: {
-          auth_code?: string | null
-          auth_code_issued_at?: string | null
-          authentication_method: string
-          code_challenge?: string | null
-          created_at?: string | null
-          email_optional?: boolean
-          id: string
-          invite_token?: string | null
-          linking_target_id?: string | null
-          oauth_client_state_id?: string | null
-          provider_access_token?: string | null
-          provider_refresh_token?: string | null
-          provider_type: string
-          referrer?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          code_challenge_method?:
-            | Database["auth"]["Enums"]["code_challenge_method"]
-            | null
-        }
         Row: {
           auth_code: string | null
           auth_code_issued_at: string | null
           authentication_method: string
           code_challenge: string | null
+          code_challenge_method:
+            | Database["auth"]["Enums"]["code_challenge_method"]
+            | null
           created_at: string | null
           email_optional: boolean
           id: string
@@ -179,15 +135,36 @@ export type Database = {
           referrer: string | null
           updated_at: string | null
           user_id: string | null
-          code_challenge_method:
+        }
+        Insert: {
+          auth_code?: string | null
+          auth_code_issued_at?: string | null
+          authentication_method: string
+          code_challenge?: string | null
+          code_challenge_method?:
             | Database["auth"]["Enums"]["code_challenge_method"]
             | null
+          created_at?: string | null
+          email_optional?: boolean
+          id: string
+          invite_token?: string | null
+          linking_target_id?: string | null
+          oauth_client_state_id?: string | null
+          provider_access_token?: string | null
+          provider_refresh_token?: string | null
+          provider_type: string
+          referrer?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           auth_code?: string | null
           auth_code_issued_at?: string | null
           authentication_method?: string
           code_challenge?: string | null
+          code_challenge_method?:
+            | Database["auth"]["Enums"]["code_challenge_method"]
+            | null
           created_at?: string | null
           email_optional?: boolean
           id?: string
@@ -200,32 +177,10 @@ export type Database = {
           referrer?: string | null
           updated_at?: string | null
           user_id?: string | null
-          code_challenge_method?:
-            | Database["auth"]["Enums"]["code_challenge_method"]
-            | null
         }
+        Relationships: []
       }
       identities: {
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          identity_data: Json
-          last_sign_in_at?: string | null
-          provider: string
-          provider_id: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Relationships: [
-          {
-            columns: ["user_id"]
-            foreignKeyName: "identities_user_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "users"
-          },
-        ]
         Row: {
           created_at: string | null
           email: string | null
@@ -235,6 +190,17 @@ export type Database = {
           provider: string
           provider_id: string
           updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          identity_data: Json
+          last_sign_in_at?: string | null
+          provider: string
+          provider_id: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -248,22 +214,30 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "identities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       instances: {
-        Relationships: []
-        Insert: {
-          created_at?: string | null
-          id: string
-          raw_base_config?: string | null
-          updated_at?: string | null
-          uuid?: string | null
-        }
         Row: {
           created_at: string | null
           id: string
           raw_base_config: string | null
           updated_at: string | null
           uuid: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          raw_base_config?: string | null
+          updated_at?: string | null
+          uuid?: string | null
         }
         Update: {
           created_at?: string | null
@@ -272,25 +246,17 @@ export type Database = {
           updated_at?: string | null
           uuid?: string | null
         }
+        Relationships: []
       }
       mfa_amr_claims: {
-        Insert: {
+        Row: {
           authentication_method: string
           created_at: string
           id: string
           session_id: string
           updated_at: string
         }
-        Relationships: [
-          {
-            columns: ["session_id"]
-            foreignKeyName: "mfa_amr_claims_session_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "sessions"
-          },
-        ]
-        Row: {
+        Insert: {
           authentication_method: string
           created_at: string
           id: string
@@ -304,26 +270,17 @@ export type Database = {
           session_id?: string
           updated_at?: string
         }
-      }
-      mfa_challenges: {
-        Insert: {
-          created_at: string
-          factor_id: string
-          id: string
-          ip_address: unknown
-          otp_code?: string | null
-          verified_at?: string | null
-          web_authn_session_data?: Json | null
-        }
         Relationships: [
           {
-            columns: ["factor_id"]
-            foreignKeyName: "mfa_challenges_auth_factor_id_fkey"
+            foreignKeyName: "mfa_amr_claims_session_id_fkey"
+            columns: ["session_id"]
             isOneToOne: false
+            referencedRelation: "sessions"
             referencedColumns: ["id"]
-            referencedRelation: "mfa_factors"
           },
         ]
+      }
+      mfa_challenges: {
         Row: {
           created_at: string
           factor_id: string
@@ -332,6 +289,15 @@ export type Database = {
           otp_code: string | null
           verified_at: string | null
           web_authn_session_data: Json | null
+        }
+        Insert: {
+          created_at: string
+          factor_id: string
+          id: string
+          ip_address: unknown
+          otp_code?: string | null
+          verified_at?: string | null
+          web_authn_session_data?: Json | null
         }
         Update: {
           created_at?: string
@@ -342,32 +308,17 @@ export type Database = {
           verified_at?: string | null
           web_authn_session_data?: Json | null
         }
-      }
-      mfa_factors: {
-        Insert: {
-          created_at: string
-          factor_type: Database["auth"]["Enums"]["factor_type"]
-          friendly_name?: string | null
-          id: string
-          last_challenged_at?: string | null
-          last_webauthn_challenge_data?: Json | null
-          phone?: string | null
-          secret?: string | null
-          status: Database["auth"]["Enums"]["factor_status"]
-          updated_at: string
-          user_id: string
-          web_authn_aaguid?: string | null
-          web_authn_credential?: Json | null
-        }
         Relationships: [
           {
-            columns: ["user_id"]
-            foreignKeyName: "mfa_factors_user_id_fkey"
+            foreignKeyName: "mfa_challenges_auth_factor_id_fkey"
+            columns: ["factor_id"]
             isOneToOne: false
+            referencedRelation: "mfa_factors"
             referencedColumns: ["id"]
-            referencedRelation: "users"
           },
         ]
+      }
+      mfa_factors: {
         Row: {
           created_at: string
           factor_type: Database["auth"]["Enums"]["factor_type"]
@@ -382,6 +333,21 @@ export type Database = {
           user_id: string
           web_authn_aaguid: string | null
           web_authn_credential: Json | null
+        }
+        Insert: {
+          created_at: string
+          factor_type: Database["auth"]["Enums"]["factor_type"]
+          friendly_name?: string | null
+          id: string
+          last_challenged_at?: string | null
+          last_webauthn_challenge_data?: Json | null
+          phone?: string | null
+          secret?: string | null
+          status: Database["auth"]["Enums"]["factor_status"]
+          updated_at: string
+          user_id: string
+          web_authn_aaguid?: string | null
+          web_authn_credential?: Json | null
         }
         Update: {
           created_at?: string
@@ -398,51 +364,26 @@ export type Database = {
           web_authn_aaguid?: string | null
           web_authn_credential?: Json | null
         }
-      }
-      oauth_authorizations: {
-        Insert: {
-          approved_at?: string | null
-          authorization_code?: string | null
-          authorization_id: string
-          client_id: string
-          code_challenge?: string | null
-          created_at?: string
-          expires_at?: string
-          id: string
-          nonce?: string | null
-          redirect_uri: string
-          resource?: string | null
-          response_type?: Database["auth"]["Enums"]["oauth_response_type"]
-          scope: string
-          state?: string | null
-          status?: Database["auth"]["Enums"]["oauth_authorization_status"]
-          user_id?: string | null
-          code_challenge_method?:
-            | Database["auth"]["Enums"]["code_challenge_method"]
-            | null
-        }
         Relationships: [
           {
-            columns: ["client_id"]
-            foreignKeyName: "oauth_authorizations_client_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "oauth_clients"
-          },
-          {
+            foreignKeyName: "mfa_factors_user_id_fkey"
             columns: ["user_id"]
-            foreignKeyName: "oauth_authorizations_user_id_fkey"
             isOneToOne: false
-            referencedColumns: ["id"]
             referencedRelation: "users"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      oauth_authorizations: {
         Row: {
           approved_at: string | null
           authorization_code: string | null
           authorization_id: string
           client_id: string
           code_challenge: string | null
+          code_challenge_method:
+            | Database["auth"]["Enums"]["code_challenge_method"]
+            | null
           created_at: string
           expires_at: string
           id: string
@@ -454,9 +395,27 @@ export type Database = {
           state: string | null
           status: Database["auth"]["Enums"]["oauth_authorization_status"]
           user_id: string | null
-          code_challenge_method:
+        }
+        Insert: {
+          approved_at?: string | null
+          authorization_code?: string | null
+          authorization_id: string
+          client_id: string
+          code_challenge?: string | null
+          code_challenge_method?:
             | Database["auth"]["Enums"]["code_challenge_method"]
             | null
+          created_at?: string
+          expires_at?: string
+          id: string
+          nonce?: string | null
+          redirect_uri: string
+          resource?: string | null
+          response_type?: Database["auth"]["Enums"]["oauth_response_type"]
+          scope: string
+          state?: string | null
+          status?: Database["auth"]["Enums"]["oauth_authorization_status"]
+          user_id?: string | null
         }
         Update: {
           approved_at?: string | null
@@ -464,6 +423,9 @@ export type Database = {
           authorization_id?: string
           client_id?: string
           code_challenge?: string | null
+          code_challenge_method?:
+            | Database["auth"]["Enums"]["code_challenge_method"]
+            | null
           created_at?: string
           expires_at?: string
           id?: string
@@ -475,21 +437,33 @@ export type Database = {
           state?: string | null
           status?: Database["auth"]["Enums"]["oauth_authorization_status"]
           user_id?: string | null
-          code_challenge_method?:
-            | Database["auth"]["Enums"]["code_challenge_method"]
-            | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_authorizations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "oauth_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oauth_authorizations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       oauth_client_states: {
-        Relationships: []
-        Insert: {
-          code_verifier?: string | null
+        Row: {
+          code_verifier: string | null
           created_at: string
           id: string
           provider_type: string
         }
-        Row: {
-          code_verifier: string | null
+        Insert: {
+          code_verifier?: string | null
           created_at: string
           id: string
           provider_type: string
@@ -500,24 +474,9 @@ export type Database = {
           id?: string
           provider_type?: string
         }
+        Relationships: []
       }
       oauth_clients: {
-        Relationships: []
-        Insert: {
-          client_name?: string | null
-          client_secret_hash?: string | null
-          client_type?: Database["auth"]["Enums"]["oauth_client_type"]
-          client_uri?: string | null
-          created_at?: string
-          deleted_at?: string | null
-          grant_types: string
-          id: string
-          logo_uri?: string | null
-          redirect_uris: string
-          registration_type: Database["auth"]["Enums"]["oauth_registration_type"]
-          token_endpoint_auth_method: string
-          updated_at?: string
-        }
         Row: {
           client_name: string | null
           client_secret_hash: string | null
@@ -532,6 +491,21 @@ export type Database = {
           registration_type: Database["auth"]["Enums"]["oauth_registration_type"]
           token_endpoint_auth_method: string
           updated_at: string
+        }
+        Insert: {
+          client_name?: string | null
+          client_secret_hash?: string | null
+          client_type?: Database["auth"]["Enums"]["oauth_client_type"]
+          client_uri?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          grant_types: string
+          id: string
+          logo_uri?: string | null
+          redirect_uris: string
+          registration_type: Database["auth"]["Enums"]["oauth_registration_type"]
+          token_endpoint_auth_method: string
+          updated_at?: string
         }
         Update: {
           client_name?: string | null
@@ -548,37 +522,22 @@ export type Database = {
           token_endpoint_auth_method?: string
           updated_at?: string
         }
+        Relationships: []
       }
       oauth_consents: {
-        Insert: {
-          client_id: string
-          granted_at?: string
-          id: string
-          revoked_at?: string | null
-          scopes: string
-          user_id: string
-        }
-        Relationships: [
-          {
-            columns: ["client_id"]
-            foreignKeyName: "oauth_consents_client_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "oauth_clients"
-          },
-          {
-            columns: ["user_id"]
-            foreignKeyName: "oauth_consents_user_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "users"
-          },
-        ]
         Row: {
           client_id: string
           granted_at: string
           id: string
           revoked_at: string | null
+          scopes: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          granted_at?: string
+          id: string
+          revoked_at?: string | null
           scopes: string
           user_id: string
         }
@@ -590,26 +549,24 @@ export type Database = {
           scopes?: string
           user_id?: string
         }
-      }
-      one_time_tokens: {
-        Insert: {
-          created_at?: string
-          id: string
-          relates_to: string
-          token_hash: string
-          token_type: Database["auth"]["Enums"]["one_time_token_type"]
-          updated_at?: string
-          user_id: string
-        }
         Relationships: [
           {
-            columns: ["user_id"]
-            foreignKeyName: "one_time_tokens_user_id_fkey"
+            foreignKeyName: "oauth_consents_client_id_fkey"
+            columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "oauth_clients"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oauth_consents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      one_time_tokens: {
         Row: {
           created_at: string
           id: string
@@ -617,6 +574,15 @@ export type Database = {
           token_hash: string
           token_type: Database["auth"]["Enums"]["one_time_token_type"]
           updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          relates_to: string
+          token_hash: string
+          token_type: Database["auth"]["Enums"]["one_time_token_type"]
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -628,28 +594,17 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-      }
-      refresh_tokens: {
-        Insert: {
-          created_at?: string | null
-          id?: number
-          instance_id?: string | null
-          parent?: string | null
-          revoked?: boolean | null
-          session_id?: string | null
-          token?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
         Relationships: [
           {
-            columns: ["session_id"]
-            foreignKeyName: "refresh_tokens_session_id_fkey"
+            foreignKeyName: "one_time_tokens_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
-            referencedRelation: "sessions"
           },
         ]
+      }
+      refresh_tokens: {
         Row: {
           created_at: string | null
           id: number
@@ -660,6 +615,17 @@ export type Database = {
           token: string | null
           updated_at: string | null
           user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          instance_id?: string | null
+          parent?: string | null
+          revoked?: boolean | null
+          session_id?: string | null
+          token?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -672,28 +638,17 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
-      }
-      saml_providers: {
-        Insert: {
-          attribute_mapping?: Json | null
-          created_at?: string | null
-          entity_id: string
-          id: string
-          metadata_url?: string | null
-          metadata_xml: string
-          name_id_format?: string | null
-          sso_provider_id: string
-          updated_at?: string | null
-        }
         Relationships: [
           {
-            columns: ["sso_provider_id"]
-            foreignKeyName: "saml_providers_sso_provider_id_fkey"
+            foreignKeyName: "refresh_tokens_session_id_fkey"
+            columns: ["session_id"]
             isOneToOne: false
+            referencedRelation: "sessions"
             referencedColumns: ["id"]
-            referencedRelation: "sso_providers"
           },
         ]
+      }
+      saml_providers: {
         Row: {
           attribute_mapping: Json | null
           created_at: string | null
@@ -704,6 +659,17 @@ export type Database = {
           name_id_format: string | null
           sso_provider_id: string
           updated_at: string | null
+        }
+        Insert: {
+          attribute_mapping?: Json | null
+          created_at?: string | null
+          entity_id: string
+          id: string
+          metadata_url?: string | null
+          metadata_xml: string
+          name_id_format?: string | null
+          sso_provider_id: string
+          updated_at?: string | null
         }
         Update: {
           attribute_mapping?: Json | null
@@ -716,34 +682,17 @@ export type Database = {
           sso_provider_id?: string
           updated_at?: string | null
         }
-      }
-      saml_relay_states: {
-        Insert: {
-          created_at?: string | null
-          flow_state_id?: string | null
-          for_email?: string | null
-          id: string
-          redirect_to?: string | null
-          request_id: string
-          sso_provider_id: string
-          updated_at?: string | null
-        }
         Relationships: [
           {
-            columns: ["flow_state_id"]
-            foreignKeyName: "saml_relay_states_flow_state_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "flow_state"
-          },
-          {
+            foreignKeyName: "saml_providers_sso_provider_id_fkey"
             columns: ["sso_provider_id"]
-            foreignKeyName: "saml_relay_states_sso_provider_id_fkey"
             isOneToOne: false
-            referencedColumns: ["id"]
             referencedRelation: "sso_providers"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      saml_relay_states: {
         Row: {
           created_at: string | null
           flow_state_id: string | null
@@ -753,6 +702,16 @@ export type Database = {
           request_id: string
           sso_provider_id: string
           updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          flow_state_id?: string | null
+          for_email?: string | null
+          id: string
+          redirect_to?: string | null
+          request_id: string
+          sso_provider_id: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string | null
@@ -764,53 +723,36 @@ export type Database = {
           sso_provider_id?: string
           updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "saml_relay_states_flow_state_id_fkey"
+            columns: ["flow_state_id"]
+            isOneToOne: false
+            referencedRelation: "flow_state"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saml_relay_states_sso_provider_id_fkey"
+            columns: ["sso_provider_id"]
+            isOneToOne: false
+            referencedRelation: "sso_providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       schema_migrations: {
-        Relationships: []
-        Insert: {
+        Row: {
           version: string
         }
-        Row: {
+        Insert: {
           version: string
         }
         Update: {
           version?: string
         }
+        Relationships: []
       }
       sessions: {
-        Insert: {
-          aal?: Database["auth"]["Enums"]["aal_level"] | null
-          created_at?: string | null
-          factor_id?: string | null
-          id: string
-          ip?: unknown
-          not_after?: string | null
-          oauth_client_id?: string | null
-          refresh_token_counter?: number | null
-          refresh_token_hmac_key?: string | null
-          refreshed_at?: string | null
-          scopes?: string | null
-          tag?: string | null
-          updated_at?: string | null
-          user_agent?: string | null
-          user_id: string
-        }
-        Relationships: [
-          {
-            columns: ["oauth_client_id"]
-            foreignKeyName: "sessions_oauth_client_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "oauth_clients"
-          },
-          {
-            columns: ["user_id"]
-            foreignKeyName: "sessions_user_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "users"
-          },
-        ]
         Row: {
           aal: Database["auth"]["Enums"]["aal_level"] | null
           created_at: string | null
@@ -828,6 +770,23 @@ export type Database = {
           user_agent: string | null
           user_id: string
         }
+        Insert: {
+          aal?: Database["auth"]["Enums"]["aal_level"] | null
+          created_at?: string | null
+          factor_id?: string | null
+          id: string
+          ip?: unknown
+          not_after?: string | null
+          oauth_client_id?: string | null
+          refresh_token_counter?: number | null
+          refresh_token_hmac_key?: string | null
+          refreshed_at?: string | null
+          scopes?: string | null
+          tag?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
         Update: {
           aal?: Database["auth"]["Enums"]["aal_level"] | null
           created_at?: string | null
@@ -845,30 +804,37 @@ export type Database = {
           user_agent?: string | null
           user_id?: string
         }
-      }
-      sso_domains: {
-        Insert: {
-          created_at?: string | null
-          domain: string
-          id: string
-          sso_provider_id: string
-          updated_at?: string | null
-        }
         Relationships: [
           {
-            columns: ["sso_provider_id"]
-            foreignKeyName: "sso_domains_sso_provider_id_fkey"
+            foreignKeyName: "sessions_oauth_client_id_fkey"
+            columns: ["oauth_client_id"]
             isOneToOne: false
+            referencedRelation: "oauth_clients"
             referencedColumns: ["id"]
-            referencedRelation: "sso_providers"
+          },
+          {
+            foreignKeyName: "sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      sso_domains: {
         Row: {
           created_at: string | null
           domain: string
           id: string
           sso_provider_id: string
           updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          domain: string
+          id: string
+          sso_provider_id: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string | null
@@ -877,22 +843,30 @@ export type Database = {
           sso_provider_id?: string
           updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "sso_domains_sso_provider_id_fkey"
+            columns: ["sso_provider_id"]
+            isOneToOne: false
+            referencedRelation: "sso_providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sso_providers: {
-        Relationships: []
-        Insert: {
-          created_at?: string | null
-          disabled?: boolean | null
-          id: string
-          resource_id?: string | null
-          updated_at?: string | null
-        }
         Row: {
           created_at: string | null
           disabled: boolean | null
           id: string
           resource_id: string | null
           updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          disabled?: boolean | null
+          id: string
+          resource_id?: string | null
+          updated_at?: string | null
         }
         Update: {
           created_at?: string | null
@@ -901,46 +875,9 @@ export type Database = {
           resource_id?: string | null
           updated_at?: string | null
         }
+        Relationships: []
       }
       users: {
-        Relationships: []
-        Insert: {
-          aud?: string | null
-          banned_until?: string | null
-          confirmation_sent_at?: string | null
-          confirmation_token?: string | null
-          confirmed_at?: string | null
-          created_at?: string | null
-          deleted_at?: string | null
-          email?: string | null
-          email_change?: string | null
-          email_change_confirm_status?: number | null
-          email_change_sent_at?: string | null
-          email_change_token_current?: string | null
-          email_change_token_new?: string | null
-          email_confirmed_at?: string | null
-          encrypted_password?: string | null
-          id: string
-          instance_id?: string | null
-          invited_at?: string | null
-          is_anonymous?: boolean
-          is_sso_user?: boolean
-          is_super_admin?: boolean | null
-          last_sign_in_at?: string | null
-          phone?: string | null
-          phone_change?: string | null
-          phone_change_sent_at?: string | null
-          phone_change_token?: string | null
-          phone_confirmed_at?: string | null
-          raw_app_meta_data?: Json | null
-          raw_user_meta_data?: Json | null
-          reauthentication_sent_at?: string | null
-          reauthentication_token?: string | null
-          recovery_sent_at?: string | null
-          recovery_token?: string | null
-          role?: string | null
-          updated_at?: string | null
-        }
         Row: {
           aud: string | null
           banned_until: string | null
@@ -978,6 +915,43 @@ export type Database = {
           role: string | null
           updated_at: string | null
         }
+        Insert: {
+          aud?: string | null
+          banned_until?: string | null
+          confirmation_sent_at?: string | null
+          confirmation_token?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          email_change?: string | null
+          email_change_confirm_status?: number | null
+          email_change_sent_at?: string | null
+          email_change_token_current?: string | null
+          email_change_token_new?: string | null
+          email_confirmed_at?: string | null
+          encrypted_password?: string | null
+          id: string
+          instance_id?: string | null
+          invited_at?: string | null
+          is_anonymous?: boolean
+          is_sso_user?: boolean
+          is_super_admin?: boolean | null
+          last_sign_in_at?: string | null
+          phone?: string | null
+          phone_change?: string | null
+          phone_change_sent_at?: string | null
+          phone_change_token?: string | null
+          phone_confirmed_at?: string | null
+          raw_app_meta_data?: Json | null
+          raw_user_meta_data?: Json | null
+          reauthentication_sent_at?: string | null
+          reauthentication_token?: string | null
+          recovery_sent_at?: string | null
+          recovery_token?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
         Update: {
           aud?: string | null
           banned_until?: string | null
@@ -1015,85 +989,136 @@ export type Database = {
           role?: string | null
           updated_at?: string | null
         }
+        Relationships: []
       }
-    }
-  }
-  public: {
-    Views: Record<never, never>
-    CompositeTypes: {
-      habit_stats: {
-        habit_id: string | null
-        last_entry_at: string | null
-        longest_streak_end: string | null
-        longest_streak_length: number | null
-        longest_streak_start: string | null
-        total_entries: number | null
-      }
-      streak_info: {
-        streak_end: string | null
-        streak_length: number | null
-        streak_start: string | null
-      }
-    }
-    Enums: {
-      days_of_week: "sun" | "mon"
-      note_period_kind: "day" | "week" | "month"
-      user_plans: "free" | "pro"
-      metric_type:
-        | "number"
-        | "duration"
-        | "percentage"
-        | "scale"
-        | "range"
-        | "choice"
-        | "boolean"
-        | "text"
-    }
-    Functions: {
-      get_habits_stats: {
-        Args: { p_habit_ids: string[]; p_time_zone?: string }
-        Returns: Database["public"]["CompositeTypes"]["habit_stats"][]
-        SetofOptions: {
-          from: "*"
-          isOneToOne: false
-          isSetofReturn: true
-          to: "habit_stats"
+      webauthn_challenges: {
+        Row: {
+          challenge_type: string
+          created_at: string
+          expires_at: string
+          id: string
+          session_data: Json
+          user_id: string | null
         }
-      }
-      get_longest_streak: {
-        Args: { p_habit_id: string; p_time_zone?: string }
-        Returns: Database["public"]["CompositeTypes"]["streak_info"]
-        SetofOptions: {
-          from: "*"
-          isOneToOne: true
-          isSetofReturn: false
-          to: "streak_info"
-        }
-      }
-    }
-    Tables: {
-      habit_metrics: {
         Insert: {
-          config?: Json
+          challenge_type: string
           created_at?: string
-          habit_id: string
+          expires_at: string
           id?: string
-          is_required?: boolean
-          name: string
-          sort_order?: number
-          type: Database["public"]["Enums"]["metric_type"]
-          updated_at?: string | null
-          user_id: string
+          session_data: Json
+          user_id?: string | null
+        }
+        Update: {
+          challenge_type?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_data?: Json
+          user_id?: string | null
         }
         Relationships: [
           {
-            columns: ["habit_id"]
-            foreignKeyName: "habit_metrics_habit_id_fkey"
+            foreignKeyName: "webauthn_challenges_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
-            referencedRelation: "habits"
           },
         ]
+      }
+      webauthn_credentials: {
+        Row: {
+          aaguid: string | null
+          attestation_type: string
+          backed_up: boolean
+          backup_eligible: boolean
+          created_at: string
+          credential_id: string
+          friendly_name: string
+          id: string
+          last_used_at: string | null
+          public_key: string
+          sign_count: number
+          transports: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aaguid?: string | null
+          attestation_type?: string
+          backed_up?: boolean
+          backup_eligible?: boolean
+          created_at?: string
+          credential_id: string
+          friendly_name?: string
+          id?: string
+          last_used_at?: string | null
+          public_key: string
+          sign_count?: number
+          transports?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aaguid?: string | null
+          attestation_type?: string
+          backed_up?: boolean
+          backup_eligible?: boolean
+          created_at?: string
+          credential_id?: string
+          friendly_name?: string
+          id?: string
+          last_used_at?: string | null
+          public_key?: string
+          sign_count?: number
+          transports?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webauthn_credentials_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      email: { Args: never; Returns: string }
+      jwt: { Args: never; Returns: Json }
+      role: { Args: never; Returns: string }
+      uid: { Args: never; Returns: string }
+    }
+    Enums: {
+      aal_level: "aal1" | "aal2" | "aal3"
+      code_challenge_method: "s256" | "plain"
+      factor_status: "unverified" | "verified"
+      factor_type: "totp" | "webauthn" | "phone"
+      oauth_authorization_status: "pending" | "approved" | "denied" | "expired"
+      oauth_client_type: "public" | "confidential"
+      oauth_registration_type: "dynamic" | "manual"
+      oauth_response_type: "code"
+      one_time_token_type:
+        | "confirmation_token"
+        | "reauthentication_token"
+        | "recovery_token"
+        | "email_change_token_new"
+        | "email_change_token_current"
+        | "phone_change_token"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  public: {
+    Tables: {
+      habit_metrics: {
         Row: {
           config: Json
           created_at: string
@@ -1104,6 +1129,18 @@ export type Database = {
           sort_order: number
           type: Database["public"]["Enums"]["metric_type"]
           updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          habit_id: string
+          id?: string
+          is_required?: boolean
+          name: string
+          sort_order?: number
+          type: Database["public"]["Enums"]["metric_type"]
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -1118,34 +1155,17 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-      }
-      habit_stock_metric_defaults: {
-        Insert: {
-          created_at?: string
-          habit_metric_id: string
-          habit_stock_id: string
-          id?: string
-          should_compound?: boolean
-          updated_at?: string | null
-          user_id: string
-          value: Json
-        }
         Relationships: [
           {
-            columns: ["habit_metric_id"]
-            foreignKeyName: "habit_stock_metric_defaults_habit_metric_id_fkey"
+            foreignKeyName: "habit_metrics_habit_id_fkey"
+            columns: ["habit_id"]
             isOneToOne: false
+            referencedRelation: "habits"
             referencedColumns: ["id"]
-            referencedRelation: "habit_metrics"
-          },
-          {
-            columns: ["habit_stock_id"]
-            foreignKeyName: "habit_stock_metric_defaults_habit_stock_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "habit_stocks"
           },
         ]
+      }
+      habit_stock_metric_defaults: {
         Row: {
           created_at: string
           habit_metric_id: string
@@ -1153,6 +1173,16 @@ export type Database = {
           id: string
           should_compound: boolean
           updated_at: string | null
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          habit_metric_id: string
+          habit_stock_id: string
+          id?: string
+          should_compound?: boolean
+          updated_at?: string | null
           user_id: string
           value: Json
         }
@@ -1166,31 +1196,24 @@ export type Database = {
           user_id?: string
           value?: Json
         }
-      }
-      habit_stocks: {
-        Insert: {
-          cost?: number | null
-          created_at?: string
-          currency?: string
-          habit_id: string
-          id?: string
-          is_depleted?: boolean
-          name: string
-          purchased_at?: string
-          remaining_items?: number | null
-          total_items?: number | null
-          updated_at?: string | null
-          user_id: string
-        }
         Relationships: [
           {
-            columns: ["habit_id"]
-            foreignKeyName: "habit_stocks_habit_id_fkey"
+            foreignKeyName: "habit_stock_metric_defaults_habit_metric_id_fkey"
+            columns: ["habit_metric_id"]
             isOneToOne: false
+            referencedRelation: "habit_metrics"
             referencedColumns: ["id"]
-            referencedRelation: "habits"
+          },
+          {
+            foreignKeyName: "habit_stock_metric_defaults_habit_stock_id_fkey"
+            columns: ["habit_stock_id"]
+            isOneToOne: false
+            referencedRelation: "habit_stocks"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      habit_stocks: {
         Row: {
           cost: number | null
           created_at: string
@@ -1205,6 +1228,20 @@ export type Database = {
           updated_at: string | null
           user_id: string
         }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          currency?: string
+          habit_id: string
+          id?: string
+          is_depleted?: boolean
+          name: string
+          purchased_at?: string
+          remaining_items?: number | null
+          total_items?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
         Update: {
           cost?: number | null
           created_at?: string
@@ -1219,28 +1256,17 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-      }
-      habits: {
-        Insert: {
-          created_at?: string
-          description?: string | null
-          icon_path?: string | null
-          id?: string
-          motivation?: string | null
-          name?: string
-          trait_id?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
         Relationships: [
           {
-            columns: ["trait_id"]
-            foreignKeyName: "habits_trait_id_fkey"
+            foreignKeyName: "habit_stocks_habit_id_fkey"
+            columns: ["habit_id"]
             isOneToOne: false
+            referencedRelation: "habits"
             referencedColumns: ["id"]
-            referencedRelation: "traits"
           },
         ]
+      }
+      habits: {
         Row: {
           created_at: string
           description: string | null
@@ -1250,6 +1276,17 @@ export type Database = {
           name: string
           trait_id: string | null
           updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon_path?: string | null
+          id?: string
+          motivation?: string | null
+          name?: string
+          trait_id?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -1263,27 +1300,17 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-      }
-      notes: {
-        Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          occurrence_id?: string | null
-          period_date?: string | null
-          period_kind?: Database["public"]["Enums"]["note_period_kind"] | null
-          updated_at?: string | null
-          user_id: string
-        }
         Relationships: [
           {
-            columns: ["occurrence_id"]
-            foreignKeyName: "notes_occurrence_id_fkey"
-            isOneToOne: true
+            foreignKeyName: "habits_trait_id_fkey"
+            columns: ["trait_id"]
+            isOneToOne: false
+            referencedRelation: "traits"
             referencedColumns: ["id"]
-            referencedRelation: "occurrences"
           },
         ]
+      }
+      notes: {
         Row: {
           content: string
           created_at: string
@@ -1292,6 +1319,16 @@ export type Database = {
           period_date: string | null
           period_kind: Database["public"]["Enums"]["note_period_kind"] | null
           updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          occurrence_id?: string | null
+          period_date?: string | null
+          period_kind?: Database["public"]["Enums"]["note_period_kind"] | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -1304,39 +1341,32 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-      }
-      occurrence_metric_values: {
-        Insert: {
-          created_at?: string
-          habit_metric_id: string
-          id?: string
-          occurrence_id: string
-          updated_at?: string | null
-          user_id: string
-          value: Json
-        }
         Relationships: [
           {
-            columns: ["habit_metric_id"]
-            foreignKeyName: "occurrence_metric_values_habit_metric_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "habit_metrics"
-          },
-          {
+            foreignKeyName: "notes_occurrence_id_fkey"
             columns: ["occurrence_id"]
-            foreignKeyName: "occurrence_metric_values_occurrence_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
+            isOneToOne: true
             referencedRelation: "occurrences"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      occurrence_metric_values: {
         Row: {
           created_at: string
           habit_metric_id: string
           id: string
           occurrence_id: string
           updated_at: string | null
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          habit_metric_id: string
+          id?: string
+          occurrence_id: string
+          updated_at?: string | null
           user_id: string
           value: Json
         }
@@ -1349,33 +1379,24 @@ export type Database = {
           user_id?: string
           value?: Json
         }
-      }
-      occurrence_stock_usages: {
-        Insert: {
-          created_at?: string
-          habit_stock_id: string
-          id?: string
-          occurrence_id: string
-          quantity?: number | null
-          updated_at?: string | null
-          user_id: string
-        }
         Relationships: [
           {
-            columns: ["habit_stock_id"]
-            foreignKeyName: "occurrence_stock_usages_habit_stock_id_fkey"
+            foreignKeyName: "occurrence_metric_values_habit_metric_id_fkey"
+            columns: ["habit_metric_id"]
             isOneToOne: false
+            referencedRelation: "habit_metrics"
             referencedColumns: ["id"]
-            referencedRelation: "habit_stocks"
           },
           {
+            foreignKeyName: "occurrence_metric_values_occurrence_id_fkey"
             columns: ["occurrence_id"]
-            foreignKeyName: "occurrence_stock_usages_occurrence_id_fkey"
             isOneToOne: false
-            referencedColumns: ["id"]
             referencedRelation: "occurrences"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      occurrence_stock_usages: {
         Row: {
           created_at: string
           habit_stock_id: string
@@ -1383,6 +1404,15 @@ export type Database = {
           occurrence_id: string
           quantity: number | null
           updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          habit_stock_id: string
+          id?: string
+          occurrence_id: string
+          quantity?: number | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -1394,30 +1424,24 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-      }
-      occurrences: {
-        Insert: {
-          cost?: number | null
-          created_at?: string
-          currency?: string | null
-          habit_id: string
-          has_specific_time?: boolean
-          id?: string
-          occurred_at?: string
-          photo_paths?: string[] | null
-          time_zone?: string
-          updated_at?: string | null
-          user_id: string
-        }
         Relationships: [
           {
-            columns: ["habit_id"]
-            foreignKeyName: "occurrences_habit_id_fkey"
+            foreignKeyName: "occurrence_stock_usages_habit_stock_id_fkey"
+            columns: ["habit_stock_id"]
             isOneToOne: false
+            referencedRelation: "habit_stocks"
             referencedColumns: ["id"]
-            referencedRelation: "habits"
+          },
+          {
+            foreignKeyName: "occurrence_stock_usages_occurrence_id_fkey"
+            columns: ["occurrence_id"]
+            isOneToOne: false
+            referencedRelation: "occurrences"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      occurrences: {
         Row: {
           cost: number | null
           created_at: string
@@ -1429,6 +1453,19 @@ export type Database = {
           photo_paths: string[] | null
           time_zone: string
           updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          habit_id: string
+          has_specific_time?: boolean
+          id?: string
+          occurred_at?: string
+          photo_paths?: string[] | null
+          time_zone?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -1444,19 +1481,17 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "occurrences_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
-        Relationships: []
-        Insert: {
-          created_at?: string
-          default_currency?: string
-          email: string
-          first_day_of_week?: Database["public"]["Enums"]["days_of_week"]
-          id: string
-          name?: string | null
-          plan?: Database["public"]["Enums"]["user_plans"]
-          updated_at?: string | null
-        }
         Row: {
           created_at: string
           default_currency: string
@@ -1466,6 +1501,16 @@ export type Database = {
           name: string | null
           plan: Database["public"]["Enums"]["user_plans"]
           updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          default_currency?: string
+          email: string
+          first_day_of_week?: Database["public"]["Enums"]["days_of_week"]
+          id: string
+          name?: string | null
+          plan?: Database["public"]["Enums"]["user_plans"]
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
@@ -1477,18 +1522,9 @@ export type Database = {
           plan?: Database["public"]["Enums"]["user_plans"]
           updated_at?: string | null
         }
+        Relationships: []
       }
       traits: {
-        Relationships: []
-        Insert: {
-          color: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          updated_at?: string | null
-          user_id?: string | null
-        }
         Row: {
           color: string
           created_at: string
@@ -1497,6 +1533,15 @@ export type Database = {
           name: string
           updated_at: string | null
           user_id: string | null
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           color?: string
@@ -1507,24 +1552,482 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      get_habits_stats: {
+        Args: { p_habit_ids: string[]; p_time_zone?: string }
+        Returns: Database["public"]["CompositeTypes"]["habit_stats"][]
+        SetofOptions: {
+          from: "*"
+          to: "habit_stats"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_longest_streak: {
+        Args: { p_habit_id: string; p_time_zone?: string }
+        Returns: Database["public"]["CompositeTypes"]["streak_info"]
+        SetofOptions: {
+          from: "*"
+          to: "streak_info"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+    }
+    Enums: {
+      days_of_week: "sun" | "mon"
+      metric_type:
+        | "number"
+        | "duration"
+        | "percentage"
+        | "scale"
+        | "range"
+        | "choice"
+        | "boolean"
+        | "text"
+      note_period_kind: "day" | "week" | "month"
+      user_plans: "free" | "pro"
+    }
+    CompositeTypes: {
+      habit_stats: {
+        habit_id: string | null
+        last_entry_at: string | null
+        longest_streak_length: number | null
+        longest_streak_start: string | null
+        longest_streak_end: string | null
+        total_entries: number | null
+      }
+      streak_info: {
+        streak_length: number | null
+        streak_start: string | null
+        streak_end: string | null
       }
     }
   }
   storage: {
-    CompositeTypes: Record<never, never>
-    Views: Record<never, never>
-    Enums: {
-      buckettype: "STANDARD" | "ANALYTICS" | "VECTOR"
+    Tables: {
+      buckets: {
+        Row: {
+          allowed_mime_types: string[] | null
+          avif_autodetection: boolean | null
+          created_at: string | null
+          file_size_limit: number | null
+          id: string
+          name: string
+          owner: string | null
+          owner_id: string | null
+          public: boolean | null
+          type: Database["storage"]["Enums"]["buckettype"]
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
+          created_at?: string | null
+          file_size_limit?: number | null
+          id: string
+          name: string
+          owner?: string | null
+          owner_id?: string | null
+          public?: boolean | null
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
+          created_at?: string | null
+          file_size_limit?: number | null
+          id?: string
+          name?: string
+          owner?: string | null
+          owner_id?: string | null
+          public?: boolean | null
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      buckets_analytics: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          format: string
+          id: string
+          name: string
+          type: Database["storage"]["Enums"]["buckettype"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          format?: string
+          id?: string
+          name: string
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          format?: string
+          id?: string
+          name?: string
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      buckets_vectors: {
+        Row: {
+          created_at: string
+          id: string
+          type: Database["storage"]["Enums"]["buckettype"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      iceberg_namespaces: {
+        Row: {
+          bucket_name: string
+          catalog_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          bucket_name: string
+          catalog_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          bucket_name?: string
+          catalog_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iceberg_namespaces_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "buckets_analytics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iceberg_tables: {
+        Row: {
+          bucket_name: string
+          catalog_id: string
+          created_at: string
+          id: string
+          location: string
+          name: string
+          namespace_id: string
+          remote_table_id: string | null
+          shard_id: string | null
+          shard_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          bucket_name: string
+          catalog_id: string
+          created_at?: string
+          id?: string
+          location: string
+          name: string
+          namespace_id: string
+          remote_table_id?: string | null
+          shard_id?: string | null
+          shard_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bucket_name?: string
+          catalog_id?: string
+          created_at?: string
+          id?: string
+          location?: string
+          name?: string
+          namespace_id?: string
+          remote_table_id?: string | null
+          shard_id?: string | null
+          shard_key?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iceberg_tables_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "buckets_analytics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iceberg_tables_namespace_id_fkey"
+            columns: ["namespace_id"]
+            isOneToOne: false
+            referencedRelation: "iceberg_namespaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      migrations: {
+        Row: {
+          executed_at: string | null
+          hash: string
+          id: number
+          name: string
+        }
+        Insert: {
+          executed_at?: string | null
+          hash: string
+          id: number
+          name: string
+        }
+        Update: {
+          executed_at?: string | null
+          hash?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      objects: {
+        Row: {
+          bucket_id: string | null
+          created_at: string | null
+          id: string
+          last_accessed_at: string | null
+          metadata: Json | null
+          name: string | null
+          owner: string | null
+          owner_id: string | null
+          path_tokens: string[] | null
+          updated_at: string | null
+          user_metadata: Json | null
+          version: string | null
+        }
+        Insert: {
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          user_metadata?: Json | null
+          version?: string | null
+        }
+        Update: {
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          user_metadata?: Json | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objects_bucketId_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      s3_multipart_uploads: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          id: string
+          in_progress_size: number
+          key: string
+          owner_id: string | null
+          upload_signature: string
+          user_metadata: Json | null
+          version: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          id: string
+          in_progress_size?: number
+          key: string
+          owner_id?: string | null
+          upload_signature: string
+          user_metadata?: Json | null
+          version: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          id?: string
+          in_progress_size?: number
+          key?: string
+          owner_id?: string | null
+          upload_signature?: string
+          user_metadata?: Json | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "s3_multipart_uploads_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      s3_multipart_uploads_parts: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          etag: string
+          id: string
+          key: string
+          owner_id: string | null
+          part_number: number
+          size: number
+          upload_id: string
+          version: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          etag: string
+          id?: string
+          key: string
+          owner_id?: string | null
+          part_number: number
+          size?: number
+          upload_id: string
+          version: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          etag?: string
+          id?: string
+          key?: string
+          owner_id?: string | null
+          part_number?: number
+          size?: number
+          upload_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "s3_multipart_uploads_parts_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "s3_multipart_uploads_parts_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "s3_multipart_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vector_indexes: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          data_type: string
+          dimension: number
+          distance_metric: string
+          id: string
+          metadata_configuration: Json | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          data_type: string
+          dimension: number
+          distance_metric: string
+          id?: string
+          metadata_configuration?: Json | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          data_type?: string
+          dimension?: number
+          distance_metric?: string
+          id?: string
+          metadata_configuration?: Json | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vector_indexes_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets_vectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
     }
     Functions: {
-      extension: { Args: { name: string }; Returns: string }
-      filename: { Args: { name: string }; Returns: string }
-      foldername: { Args: { name: string }; Returns: string[] }
-      operation: { Args: never; Returns: string }
       can_insert_object: {
         Args: { bucketid: string; metadata: Json; name: string; owner: string }
         Returns: undefined
       }
+      extension: { Args: { name: string }; Returns: string }
+      filename: { Args: { name: string }; Returns: string }
+      foldername: { Args: { name: string }; Returns: string[] }
       get_common_prefix: {
         Args: { p_delimiter: string; p_key: string; p_prefix: string }
         Returns: string
@@ -1570,6 +2073,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      operation: { Args: never; Returns: string }
       search: {
         Args: {
           bucketname: string
@@ -1633,411 +2137,11 @@ export type Database = {
         }[]
       }
     }
-    Tables: {
-      buckets: {
-        Relationships: []
-        Insert: {
-          allowed_mime_types?: string[] | null
-          avif_autodetection?: boolean | null
-          created_at?: string | null
-          file_size_limit?: number | null
-          id: string
-          name: string
-          owner?: string | null
-          owner_id?: string | null
-          public?: boolean | null
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string | null
-        }
-        Row: {
-          allowed_mime_types: string[] | null
-          avif_autodetection: boolean | null
-          created_at: string | null
-          file_size_limit: number | null
-          id: string
-          name: string
-          owner: string | null
-          owner_id: string | null
-          public: boolean | null
-          type: Database["storage"]["Enums"]["buckettype"]
-          updated_at: string | null
-        }
-        Update: {
-          allowed_mime_types?: string[] | null
-          avif_autodetection?: boolean | null
-          created_at?: string | null
-          file_size_limit?: number | null
-          id?: string
-          name?: string
-          owner?: string | null
-          owner_id?: string | null
-          public?: boolean | null
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string | null
-        }
-      }
-      buckets_analytics: {
-        Relationships: []
-        Insert: {
-          created_at?: string
-          deleted_at?: string | null
-          format?: string
-          id?: string
-          name: string
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string
-        }
-        Row: {
-          created_at: string
-          deleted_at: string | null
-          format: string
-          id: string
-          name: string
-          type: Database["storage"]["Enums"]["buckettype"]
-          updated_at: string
-        }
-        Update: {
-          created_at?: string
-          deleted_at?: string | null
-          format?: string
-          id?: string
-          name?: string
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string
-        }
-      }
-      buckets_vectors: {
-        Relationships: []
-        Insert: {
-          created_at?: string
-          id: string
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string
-        }
-        Row: {
-          created_at: string
-          id: string
-          type: Database["storage"]["Enums"]["buckettype"]
-          updated_at: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string
-        }
-      }
-      iceberg_namespaces: {
-        Insert: {
-          bucket_name: string
-          catalog_id: string
-          created_at?: string
-          id?: string
-          metadata?: Json
-          name: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            columns: ["catalog_id"]
-            foreignKeyName: "iceberg_namespaces_catalog_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "buckets_analytics"
-          },
-        ]
-        Row: {
-          bucket_name: string
-          catalog_id: string
-          created_at: string
-          id: string
-          metadata: Json
-          name: string
-          updated_at: string
-        }
-        Update: {
-          bucket_name?: string
-          catalog_id?: string
-          created_at?: string
-          id?: string
-          metadata?: Json
-          name?: string
-          updated_at?: string
-        }
-      }
-      iceberg_tables: {
-        Insert: {
-          bucket_name: string
-          catalog_id: string
-          created_at?: string
-          id?: string
-          location: string
-          name: string
-          namespace_id: string
-          remote_table_id?: string | null
-          shard_id?: string | null
-          shard_key?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            columns: ["catalog_id"]
-            foreignKeyName: "iceberg_tables_catalog_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "buckets_analytics"
-          },
-          {
-            columns: ["namespace_id"]
-            foreignKeyName: "iceberg_tables_namespace_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "iceberg_namespaces"
-          },
-        ]
-        Row: {
-          bucket_name: string
-          catalog_id: string
-          created_at: string
-          id: string
-          location: string
-          name: string
-          namespace_id: string
-          remote_table_id: string | null
-          shard_id: string | null
-          shard_key: string | null
-          updated_at: string
-        }
-        Update: {
-          bucket_name?: string
-          catalog_id?: string
-          created_at?: string
-          id?: string
-          location?: string
-          name?: string
-          namespace_id?: string
-          remote_table_id?: string | null
-          shard_id?: string | null
-          shard_key?: string | null
-          updated_at?: string
-        }
-      }
-      migrations: {
-        Relationships: []
-        Insert: {
-          executed_at?: string | null
-          hash: string
-          id: number
-          name: string
-        }
-        Row: {
-          executed_at: string | null
-          hash: string
-          id: number
-          name: string
-        }
-        Update: {
-          executed_at?: string | null
-          hash?: string
-          id?: number
-          name?: string
-        }
-      }
-      objects: {
-        Insert: {
-          bucket_id?: string | null
-          created_at?: string | null
-          id?: string
-          last_accessed_at?: string | null
-          metadata?: Json | null
-          name?: string | null
-          owner?: string | null
-          owner_id?: string | null
-          path_tokens?: string[] | null
-          updated_at?: string | null
-          user_metadata?: Json | null
-          version?: string | null
-        }
-        Relationships: [
-          {
-            columns: ["bucket_id"]
-            foreignKeyName: "objects_bucketId_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "buckets"
-          },
-        ]
-        Row: {
-          bucket_id: string | null
-          created_at: string | null
-          id: string
-          last_accessed_at: string | null
-          metadata: Json | null
-          name: string | null
-          owner: string | null
-          owner_id: string | null
-          path_tokens: string[] | null
-          updated_at: string | null
-          user_metadata: Json | null
-          version: string | null
-        }
-        Update: {
-          bucket_id?: string | null
-          created_at?: string | null
-          id?: string
-          last_accessed_at?: string | null
-          metadata?: Json | null
-          name?: string | null
-          owner?: string | null
-          owner_id?: string | null
-          path_tokens?: string[] | null
-          updated_at?: string | null
-          user_metadata?: Json | null
-          version?: string | null
-        }
-      }
-      s3_multipart_uploads: {
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          id: string
-          in_progress_size?: number
-          key: string
-          owner_id?: string | null
-          upload_signature: string
-          user_metadata?: Json | null
-          version: string
-        }
-        Relationships: [
-          {
-            columns: ["bucket_id"]
-            foreignKeyName: "s3_multipart_uploads_bucket_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "buckets"
-          },
-        ]
-        Row: {
-          bucket_id: string
-          created_at: string
-          id: string
-          in_progress_size: number
-          key: string
-          owner_id: string | null
-          upload_signature: string
-          user_metadata: Json | null
-          version: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          id?: string
-          in_progress_size?: number
-          key?: string
-          owner_id?: string | null
-          upload_signature?: string
-          user_metadata?: Json | null
-          version?: string
-        }
-      }
-      s3_multipart_uploads_parts: {
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          etag: string
-          id?: string
-          key: string
-          owner_id?: string | null
-          part_number: number
-          size?: number
-          upload_id: string
-          version: string
-        }
-        Relationships: [
-          {
-            columns: ["bucket_id"]
-            foreignKeyName: "s3_multipart_uploads_parts_bucket_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "buckets"
-          },
-          {
-            columns: ["upload_id"]
-            foreignKeyName: "s3_multipart_uploads_parts_upload_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "s3_multipart_uploads"
-          },
-        ]
-        Row: {
-          bucket_id: string
-          created_at: string
-          etag: string
-          id: string
-          key: string
-          owner_id: string | null
-          part_number: number
-          size: number
-          upload_id: string
-          version: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          etag?: string
-          id?: string
-          key?: string
-          owner_id?: string | null
-          part_number?: number
-          size?: number
-          upload_id?: string
-          version?: string
-        }
-      }
-      vector_indexes: {
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          data_type: string
-          dimension: number
-          distance_metric: string
-          id?: string
-          metadata_configuration?: Json | null
-          name: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            columns: ["bucket_id"]
-            foreignKeyName: "vector_indexes_bucket_id_fkey"
-            isOneToOne: false
-            referencedColumns: ["id"]
-            referencedRelation: "buckets_vectors"
-          },
-        ]
-        Row: {
-          bucket_id: string
-          created_at: string
-          data_type: string
-          dimension: number
-          distance_metric: string
-          id: string
-          metadata_configuration: Json | null
-          name: string
-          updated_at: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          data_type?: string
-          dimension?: number
-          distance_metric?: string
-          id?: string
-          metadata_configuration?: Json | null
-          name?: string
-          updated_at?: string
-        }
-      }
+    Enums: {
+      buckettype: "STANDARD" | "ANALYTICS" | "VECTOR"
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
@@ -2183,8 +2287,6 @@ export const Constants = {
   public: {
     Enums: {
       days_of_week: ["sun", "mon"],
-      note_period_kind: ["day", "week", "month"],
-      user_plans: ["free", "pro"],
       metric_type: [
         "number",
         "duration",
@@ -2195,6 +2297,8 @@ export const Constants = {
         "boolean",
         "text",
       ],
+      note_period_kind: ["day", "week", "month"],
+      user_plans: ["free", "pro"],
     },
   },
   storage: {

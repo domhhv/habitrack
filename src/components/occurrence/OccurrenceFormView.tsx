@@ -233,7 +233,6 @@ const OccurrenceFormView = ({
 
           for (const metricId of orphanedMetricIds) {
             if (metricId in next) {
-              // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
               delete next[metricId];
               hasChanges = true;
             }
@@ -289,7 +288,6 @@ const OccurrenceFormView = ({
       // Remove orphaned metrics that the user hasn't manually edited
       for (const metricId of orphanedMetricIds) {
         if (metricId in next && !compoundMetricIds.has(metricId)) {
-          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete next[metricId];
           hasChanges = true;
         }
@@ -686,7 +684,6 @@ const OccurrenceFormView = ({
       if (isSelected) {
         next[stockId] = prev[stockId] ?? defaultQuantity;
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete next[stockId];
       }
 
@@ -940,7 +937,6 @@ const OccurrenceFormView = ({
               const nextValue = nextValues[metricId];
 
               if (!isEqual(prevValue, nextValue)) {
-                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete next[metricId];
                 editedMetricIds.push(metricId);
               }
@@ -968,7 +964,6 @@ const OccurrenceFormView = ({
               const next = { ...prev };
 
               for (const metricId of editedMetricIds) {
-                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete next[metricId];
               }
 
