@@ -147,6 +147,11 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
                       onPress={() => {
                         openNoteDrawer(firstDayOfWeek, 'week');
                       }}
+                      aria-label={
+                        weekNote
+                          ? `Edit note about week ${weekIndex + 1}`
+                          : `Add note about week ${weekIndex + 1}`
+                      }
                       className={cn(
                         'text-accent mb-0 h-19.75 w-6 min-w-fit rounded-3xl p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 lg:h-26.75 lg:w-7',
                         (weekNote || !isDesktop) && 'opacity-100',

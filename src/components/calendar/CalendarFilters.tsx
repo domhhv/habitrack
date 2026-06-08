@@ -143,7 +143,7 @@ const CalendarFilters = () => {
         }}
       >
         <Select.Trigger>
-          <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-2 overflow-y-auto">
+          <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-2 overflow-x-auto">
             {({ defaultChildren, isPlaceholder, state }) => {
               if (isPlaceholder || state.selectedItems.length === 0) {
                 return defaultChildren;
@@ -273,7 +273,7 @@ const CalendarFilters = () => {
         }}
       >
         <Select.Trigger>
-          <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-1 overflow-y-auto">
+          <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-1 overflow-x-auto">
             {({ defaultChildren, isPlaceholder, state }) => {
               if (isPlaceholder || state.selectedItems.length === 0) {
                 return defaultChildren;

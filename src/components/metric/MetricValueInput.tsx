@@ -287,7 +287,7 @@ const ScaleValueInput = ({
         className="rounded-full"
         render={({ children, ...props }) => {
           return (
-            <div {...props} data-custom="foo">
+            <div {...props}>
               {Array.from({ length: config.max - config.min + 1 }, (_, i) => {
                 return (
                   <div
@@ -295,7 +295,7 @@ const ScaleValueInput = ({
                     data-slot="step"
                     data-in-range={currentVal >= i + config.min}
                     style={{
-                      left: `${((i + config.min - config.min) / (config.max - config.min)) * 100}%`,
+                      left: `${(i / (config.max - config.min)) * 100}%`,
                     }}
                     className="bg-accent absolute top-1/2 z-10 h-2 w-2 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full data-[in-range=true]:bg-white"
                   ></div>

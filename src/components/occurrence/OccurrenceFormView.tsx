@@ -727,7 +727,7 @@ const OccurrenceFormView = ({
         />
       ) : hasHabits ? (
         <>
-          <div className="rounded-medium order-medium bg-default max-h-100 w-full overflow-y-auto rounded-3xl p-1">
+          <div className="rounded-medium border-medium bg-default max-h-100 w-full overflow-y-auto rounded-3xl p-1">
             <ListBox
               aria-label="Habits"
               disallowEmptySelection
@@ -752,7 +752,7 @@ const OccurrenceFormView = ({
                           key={habit.id}
                           textValue={habit.name}
                           className={cn(
-                            'hover:bg-accent-soft-hover relevant z-10 border-2 border-transparent',
+                            'hover:bg-accent-soft-hover relative z-10 border-2 border-transparent',
                             selectedHabitId === habit.id && 'border-accent'
                           )}
                         >

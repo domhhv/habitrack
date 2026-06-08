@@ -55,7 +55,7 @@ const NumberConfigFields = ({
           name="min"
           className="w-full"
           variant="secondary"
-          value={config.min || undefined}
+          value={config.min ?? undefined}
           onChange={(value) => {
             const val = value;
             onChange({
@@ -78,10 +78,10 @@ const NumberConfigFields = ({
           </NumberField.Group>
         </NumberField>
         <NumberField
-          name="min"
+          name="max"
           className="w-full"
           variant="secondary"
-          value={config.max || undefined}
+          value={config.max ?? undefined}
           onChange={(value) => {
             const val = value;
             onChange({

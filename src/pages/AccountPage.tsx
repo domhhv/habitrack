@@ -7,6 +7,7 @@ import {
   Select,
   ListBox,
   TextField,
+  Description,
 } from '@heroui/react';
 import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
@@ -54,7 +55,6 @@ const AccountPage = () => {
             </Alert.Title>
           </Alert.Content>
         </Alert>
-        e
       </div>
     );
   }
@@ -127,6 +127,7 @@ const AccountPage = () => {
             >
               <Label>Email</Label>
               <Input placeholder="Email" />
+              <Description>Email updates coming soon</Description>
             </TextField>
             <PasswordInput
               label="Password"

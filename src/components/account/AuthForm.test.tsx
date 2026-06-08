@@ -24,7 +24,7 @@ describe(AuthForm.name, () => {
       />
     );
 
-    const email = getByPlaceholderText('Email');
+    const email = getByPlaceholderText('me@email.com');
     const password = getByPlaceholderText('Password');
     const submitForm = getByTestId('submit-form');
 

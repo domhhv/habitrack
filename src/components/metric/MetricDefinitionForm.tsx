@@ -202,18 +202,19 @@ const MetricDefinitionForm = ({
             </Autocomplete.Filter>
           </Autocomplete.Popover>
         </Autocomplete>
-        <TextField fullWidth name="name" variant="secondary">
+        <TextField
+          fullWidth
+          name="name"
+          variant="secondary"
+          value={metric.name}
+          onChange={(value) => {
+            onChange({
+              name: value,
+            });
+          }}
+        >
           <Label>Metric name</Label>
-          <Input
-            required
-            value={metric.name}
-            placeholder="Metric name"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              onChange({
-                name: e.target.value,
-              });
-            }}
-          />
+          <Input required placeholder="Metric name" />
           <FieldError />
         </TextField>
         <Select

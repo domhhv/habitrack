@@ -15,7 +15,7 @@ type TraitChipProps = {
 const TraitChip = ({
   className,
   color = 'default',
-  size = 'md',
+  size = 'sm',
   trait,
   variant = 'secondary',
 }: TraitChipProps) => {

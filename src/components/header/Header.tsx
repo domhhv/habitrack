@@ -21,6 +21,9 @@ import {
 
 import ThemeToggle from './ThemeToggle';
 
+const ICON_ONLY_BREAKPOINT = 521;
+const COMPACT_BUTTON_BREAKPOINT = 339;
+
 const Header = () => {
   const user = useUser();
   const navigate = useNavigate();
@@ -44,28 +47,38 @@ const Header = () => {
       <header className="flex h-full w-full items-center justify-between px-8 lg:px-16">
         <div className="flex items-center gap-2">
           <Button
-            isIconOnly={screenWidth < 521}
-            className={cn(screenWidth < 339 && 'min-w-fit px-2')}
+            isIconOnly={screenWidth < ICON_ONLY_BREAKPOINT}
             variant={pathname.startsWith('/calendar') ? 'tertiary' : 'ghost'}
             onPress={() => {
               navigate('/calendar/month');
             }}
+            className={cn(
+              screenWidth < COMPACT_BUTTON_BREAKPOINT && 'min-w-fit px-2'
+            )}
           >
-            {screenWidth < 521 ? <CalendarDotsIcon size={16} /> : 'Calendar'}
+            {screenWidth < ICON_ONLY_BREAKPOINT ? (
+              <CalendarDotsIcon size={16} />
+            ) : (
+              'Calendar'
+            )}
           </Button>
           {!!user && (
             <>
               <Button
-                isIconOnly={screenWidth < 521}
+                isIconOnly={screenWidth < ICON_ONLY_BREAKPOINT}
                 variant={pathname === '/habits' ? 'tertiary' : 'ghost'}
                 onPress={() => {
                   navigate('/habits');
                 }}
               >
-                {screenWidth < 521 ? <RepeatIcon size={16} /> : 'Habits'}
+                {screenWidth < ICON_ONLY_BREAKPOINT ? (
+                  <RepeatIcon size={16} />
+                ) : (
+                  'Habits'
+                )}
               </Button>
               <Button
-                isIconOnly={screenWidth < 521}
+                isIconOnly={screenWidth < ICON_ONLY_BREAKPOINT}
                 variant={pathname === '/notes' ? 'tertiary' : 'ghost'}
                 onPress={() => {
                   navigate('/notes');
@@ -74,7 +87,11 @@ const Header = () => {
                   pathname === '/notes' && 'dark:text-secondary-500'
                 )}
               >
-                {screenWidth < 521 ? <NoteIcon size={16} /> : 'Notes'}
+                {screenWidth < ICON_ONLY_BREAKPOINT ? (
+                  <NoteIcon size={16} />
+                ) : (
+                  'Notes'
+                )}
               </Button>
             </>
           )}
@@ -129,10 +146,7 @@ const Header = () => {
                 onPress={dispatchOccurrenceDrawerOpen}
                 className="flex-1 max-md:h-6 max-md:gap-1 max-md:rounded-full md:flex-none"
               >
-                <CalendarCheckIcon
-                  size={isMobile ? 12 : 16}
-                  className="size-3 md:size-4"
-                />
+                <CalendarCheckIcon size={isMobile ? 12 : 16} />
                 Log
                 <Kbd
                   variant="default"
