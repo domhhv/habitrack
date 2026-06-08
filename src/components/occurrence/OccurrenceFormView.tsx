@@ -128,6 +128,38 @@ const OccurrenceFormView = ({
     );
   }, [occurrenceToEdit]);
 
+  // Quantity this occurrence already consumes per stock. When editing, the DB
+  // trigger restores this amount before applying the new quantity, so it's
+  // available headroom on top of the stock's current remainingItems.
+  const existingUsageQuantityByStockId = React.useMemo(() => {
+    const map = new Map<string, number>();
+
+    if (!occurrenceToEdit) {
+      return map;
+    }
+
+    for (const usage of occurrenceToEdit.stockUsages) {
+      map.set(usage.habitStockId, usage.quantity ?? 0);
+    }
+
+    return map;
+  }, [occurrenceToEdit]);
+
+  // remainingItems is depleted by this occurrence's own existing usage, so the
+  // true max selectable quantity adds that usage back in.
+  const getEffectiveMaxQuantity = React.useCallback(
+    (stockId: string, remainingItems: number | null) => {
+      if (remainingItems === null) {
+        return null;
+      }
+
+      return (
+        remainingItems + (existingUsageQuantityByStockId.get(stockId) ?? 0)
+      );
+    },
+    [existingUsageQuantityByStockId]
+  );
+
   const activeStocks = React.useMemo(() => {
     return habitStocks.filter((stock) => {
       return !stock.isDepleted || existingUsageStockIds.has(stock.id);
@@ -579,11 +611,13 @@ const OccurrenceFormView = ({
 
     const hasExcessiveQuantity = selectedStocks.some((stock) => {
       const quantity = stockSelections[stock.id];
+      const effectiveMax = getEffectiveMaxQuantity(
+        stock.id,
+        stock.remainingItems
+      );
 
       return (
-        quantity !== null &&
-        stock.remainingItems !== null &&
-        quantity > stock.remainingItems
+        quantity !== null && effectiveMax !== null && quantity > effectiveMax
       );
     });
 
@@ -805,6 +839,10 @@ const OccurrenceFormView = ({
                 stock.id
               );
               const isQuantifiable = stock.totalItems !== null;
+              const effectiveMaxQuantity = getEffectiveMaxQuantity(
+                stock.id,
+                stock.remainingItems
+              );
 
               return (
                 <div key={stock.id} className="flex flex-col gap-1">
@@ -833,13 +871,13 @@ const OccurrenceFormView = ({
                         className="w-28"
                         isDisabled={!isSelected}
                         aria-label={`${stock.name} quantity`}
-                        maxValue={stock.remainingItems ?? undefined}
+                        maxValue={effectiveMaxQuantity ?? undefined}
                         value={(stockSelections[stock.id] ?? 1) as number}
                         onChange={(value: number) => {
                           return handleStockQuantityChange(
                             stock.id,
                             value ?? 1,
-                            stock.remainingItems
+                            effectiveMaxQuantity
                           );
                         }}
                       >
