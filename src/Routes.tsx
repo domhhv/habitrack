@@ -6,6 +6,7 @@ import {
   HabitsPage,
   AccountPage,
   DayCalendarPage,
+  OAuthConsentPage,
   HabitDetailsPage,
   WeekCalendarPage,
   MonthCalendarPage,
@@ -30,6 +31,7 @@ const AppRoutes = () => {
       <Route path="/habits/:habitId" element={<HabitDetailsPage />} />
       <Route path="/notes" element={<NotesPage />} />
       <Route path="/account" element={<AccountPage />} />
+      <Route path="/oauth/consent" element={<OAuthConsentPage />} />
       <Route path="*" element={<Navigate replace to="/calendar/month" />} />
     </Routes>
   );

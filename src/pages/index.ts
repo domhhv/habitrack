@@ -5,4 +5,5 @@ export { default as HabitDetailsPage } from './HabitDetailsPage';
 export { default as HabitsPage } from './HabitsPage';
 export { default as MonthCalendarPage } from './MonthCalendarPage';
 export { default as NotesPage } from './NotesPage';
+export { default as OAuthConsentPage } from './OAuthConsentPage';
 export { default as WeekCalendarPage } from './WeekCalendarPage';
