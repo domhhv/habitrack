@@ -232,6 +232,14 @@ enabled = true
 policy = "oneshot"
 inspector_port = 8083
 
+# MCP server exposing habits/occurrences to OAuth-authenticated MCP clients.
+# verify_jwt is false on purpose: the function performs its own JWT verification
+# and must serve the unauthenticated OAuth discovery handshake (see
+# supabase/functions/mcp/auth.ts).
+[functions.mcp]
+enabled = true
+verify_jwt = false
+
 [analytics]
 enabled = false
 port = 54327
