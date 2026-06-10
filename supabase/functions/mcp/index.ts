@@ -10,7 +10,7 @@
 // ourselves in `authenticate()`.
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { McpServer, StreamableHttpTransport } from 'mcp-lite';
+import { McpServer, StreamableHttpTransport, type Ctx } from 'mcp-lite';
 import { z } from 'zod';
 
 import {
@@ -30,22 +30,54 @@ const userClient = (user: AuthedUser): SupabaseClient =>
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-// The current authed user for the in-flight request. mcp-lite tool handlers
-// don't receive the raw Request, so we stash the user per request before
-// dispatching. Edge Function invocations are single-request, so this is safe.
-let currentUser: AuthedUser | null = null;
+// The authenticated user is threaded per request via mcp-lite's `authInfo`
+// (set on `httpHandler(req, { authInfo })`), so each tool handler reads it from
+// its own `ctx` — no shared mutable state, no cross-request leakage.
+const userFromContext = (ctx: Ctx): AuthedUser => {
+  const user = ctx.authInfo?.extra?.user as AuthedUser | undefined;
 
-const requireUser = (): AuthedUser => {
-  if (!currentUser) {
+  if (!user) {
     throw new Error('Not authenticated');
   }
 
-  return currentUser;
+  return user;
+};
+
+// Reject the request unless the token was granted the scope a tool needs.
+const ensureScope = (user: AuthedUser, scope: string): AuthedUser => {
+  if (!user.scopes.includes(scope)) {
+    throw new Error(`Missing required scope: ${scope}`);
+  }
+
+  return user;
 };
 
 const ok = (data: unknown) => ({
   content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }],
 });
+
+// Build a PostgREST select string from a base column list plus the embedded
+// resources a client opted into via `include`. Keeping the base lean and the
+// joins opt-in keeps default payloads small while letting clients pull the
+// full picture (stocks, metrics, etc.) when they ask. Curated column lists —
+// not `*` — so payloads stay stable and free of internal columns.
+const buildSelect = (
+  base: string,
+  include: string[],
+  joins: Record<string, string>
+): string => {
+  const parts = [base];
+
+  for (const key of include) {
+    const join = joins[key];
+
+    if (join) {
+      parts.push(join);
+    }
+  }
+
+  return parts.join(',');
+};
 
 const mcp = new McpServer({
   name: 'habitrack',
@@ -53,16 +85,55 @@ const mcp = new McpServer({
   schemaAdapter: (schema) => z.toJSONSchema(schema as z.ZodType),
 });
 
+// Recorded metric values are stored as JSONB whose shape depends on the metric
+// definition's `type`. Surfacing the mapping in the tool descriptions lets a
+// client interpret `metric_values[].value` without guessing.
+const METRIC_VALUE_SHAPES =
+  'A metric definition\'s `type` determines the JSONB shape of a recorded ' +
+  '`value`: number/percentage/scale → {numericValue}; duration → ' +
+  '{durationMs}; range → {rangeFrom,rangeTo}; choice → {selectedOption} or ' +
+  '{selectedOptions}; boolean → {booleanValue}; text → {textValue}. The ' +
+  "definition's `config` (JSONB) holds type-specific settings (units, min/max, " +
+  'options, labels, etc.).';
+
+const HABIT_INCLUDES = ['trait', 'metrics', 'stocks'] as const;
+
+const HABIT_JOINS: Record<string, string> = {
+  trait: 'trait:traits(id, name, color)',
+  metrics:
+    'metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required)',
+  stocks:
+    'stocks:habit_stocks(id, name, cost, currency, total_items, remaining_items, is_depleted, purchased_at, metric_defaults:habit_stock_metric_defaults(id, habit_metric_id, value, should_compound))',
+};
+
 mcp.tool('list_habits', {
   description:
-    "List the authenticated user's habits, including trait name and color.",
-  inputSchema: z.object({}),
-  handler: async () => {
-    const supabase = userClient(requireUser());
+    "List the authenticated user's habits. By default returns the core habit " +
+    'fields; pass `include` to embed the trait, metric definitions, and/or ' +
+    'stocks (with their metric defaults). ' +
+    METRIC_VALUE_SHAPES,
+  inputSchema: z.object({
+    include: z
+      .array(z.enum(HABIT_INCLUDES))
+      .default([])
+      .describe(
+        'Embedded resources to fetch: "trait", "metrics", "stocks". Omit for the lean row.'
+      ),
+  }),
+  handler: async (args: { include: string[] }, ctx: Ctx) => {
+    const supabase = userClient(
+      ensureScope(userFromContext(ctx), 'habits:read')
+    );
+
+    const select = buildSelect(
+      'id, name, description, icon_path',
+      args.include,
+      HABIT_JOINS
+    );
 
     const { data, error } = await supabase
       .from('habits')
-      .select('id, name, description, icon_path, trait:traits(name, color)')
+      .select(select)
       .order('name');
 
     if (error) {
@@ -73,9 +144,26 @@ mcp.tool('list_habits', {
   },
 });
 
+const OCCURRENCE_INCLUDES = ['habit', 'metrics', 'stock_usages'] as const;
+
+const OCCURRENCE_JOINS: Record<string, string> = {
+  habit:
+    'habit:habits(id, name, icon_path, trait:traits(id, name, color), metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required))',
+  metrics:
+    'metric_values:occurrence_metric_values(id, habit_metric_id, value)',
+  stock_usages:
+    'stock_usages:occurrence_stock_usages(id, habit_stock_id, quantity)',
+};
+
 mcp.tool('list_occurrences', {
   description:
-    'List the user\'s habit occurrences (loggings) within an optional date range. Dates are ISO 8601.',
+    "List the user's habit occurrences (loggings) within an optional date " +
+    'range (ISO 8601). By default returns the core occurrence fields; pass ' +
+    '`include` to embed the habit (with trait + metric definitions), recorded ' +
+    'metric values, and/or stock usages. Each recorded value carries its ' +
+    '`habit_metric_id`; include `habit` to get the matching definition (its ' +
+    '`type` and `config`) needed to interpret it. ' +
+    METRIC_VALUE_SHAPES,
   inputSchema: z.object({
     habit_id: z
       .string()
@@ -88,18 +176,36 @@ mcp.tool('list_occurrences', {
       .describe('Inclusive lower bound, ISO timestamp.'),
     to: z.string().optional().describe('Inclusive upper bound, ISO timestamp.'),
     limit: z.number().int().min(1).max(500).default(100),
+    include: z
+      .array(z.enum(OCCURRENCE_INCLUDES))
+      .default([])
+      .describe(
+        'Embedded resources: "habit", "metrics" (recorded values), "stock_usages". Omit for the lean row.'
+      ),
   }),
-  handler: async (args: {
-    habit_id?: string;
-    from?: string;
-    to?: string;
-    limit: number;
-  }) => {
-    const supabase = userClient(requireUser());
+  handler: async (
+    args: {
+      habit_id?: string;
+      from?: string;
+      to?: string;
+      limit: number;
+      include: string[];
+    },
+    ctx: Ctx
+  ) => {
+    const supabase = userClient(
+      ensureScope(userFromContext(ctx), 'habits:read')
+    );
+
+    const select = buildSelect(
+      'id, habit_id, occurred_at, time_zone, created_at',
+      args.include,
+      OCCURRENCE_JOINS
+    );
 
     let query = supabase
       .from('occurrences')
-      .select('id, habit_id, occurred_at, time_zone, created_at')
+      .select(select)
       .order('occurred_at', { ascending: false })
       .limit(args.limit);
 
@@ -137,12 +243,15 @@ mcp.tool('log_occurrence', {
       .describe('IANA time zone, e.g. "Europe/Berlin".')
       .default('UTC'),
   }),
-  handler: async (args: {
-    habit_id: string;
-    occurred_at?: string;
-    time_zone: string;
-  }) => {
-    const user = requireUser();
+  handler: async (
+    args: {
+      habit_id: string;
+      occurred_at?: string;
+      time_zone: string;
+    },
+    ctx: Ctx
+  ) => {
+    const user = ensureScope(userFromContext(ctx), 'habits:write');
     const supabase = userClient(user);
 
     const { data, error } = await supabase
@@ -163,6 +272,142 @@ mcp.tool('log_occurrence', {
     }
 
     return ok(data);
+  },
+});
+
+const NOTE_INCLUDES = ['habit'] as const;
+
+const NOTE_BASE_COLUMNS =
+  'id, content, occurrence_id, period_kind, period_date, created_at, updated_at';
+
+// A note targets at most one occurrence; pull that occurrence's habit so
+// clients can attribute the note. Period notes have no occurrence → null.
+const NOTE_HABIT_EMBED =
+  'occurrence:occurrences(id, occurred_at, habit:habits(id, name, icon_path))';
+
+// The note's effective date is its occurrence's `occurred_at` (occurrence
+// notes) or its `period_date` (period notes) — not `created_at`. Range
+// filtering must therefore hit whichever target the note has, mirroring the
+// two-query strategy in src/services/notes.service.ts.
+const noteTargetDate = (note: Record<string, unknown>): string => {
+  const occurrence = note.occurrence as { occurred_at?: string } | null;
+
+  return (
+    occurrence?.occurred_at ??
+    (note.period_date as string | null) ??
+    (note.created_at as string)
+  );
+};
+
+mcp.tool('list_notes', {
+  description:
+    "List the user's notes. A note is attached either to an occurrence or to " +
+    'a time period (day/week/month). By default returns the core note fields; ' +
+    'pass `include: ["habit"]` to embed the linked occurrence and its habit. ' +
+    'When a date range is given it filters on the note\'s target date — the ' +
+    "occurrence's time for occurrence notes, the period date for period notes.",
+  inputSchema: z.object({
+    from: z
+      .string()
+      .optional()
+      .describe("Inclusive lower bound on the note's target date, ISO."),
+    to: z
+      .string()
+      .optional()
+      .describe("Inclusive upper bound on the note's target date, ISO."),
+    limit: z.number().int().min(1).max(500).default(100),
+    include: z
+      .array(z.enum(NOTE_INCLUDES))
+      .default([])
+      .describe('Embedded resources: "habit". Omit for the lean row.'),
+  }),
+  handler: async (
+    args: { from?: string; to?: string; limit: number; include: string[] },
+    ctx: Ctx
+  ) => {
+    const supabase = userClient(
+      ensureScope(userFromContext(ctx), 'habits:read')
+    );
+
+    const wantsHabit = args.include.includes('habit');
+    const hasRange = Boolean(args.from || args.to);
+
+    // No range → one simple query; the occurrence embed is optional.
+    if (!hasRange) {
+      const select = wantsHabit
+        ? `${NOTE_BASE_COLUMNS}, ${NOTE_HABIT_EMBED}`
+        : NOTE_BASE_COLUMNS;
+
+      const { data, error } = await supabase
+        .from('notes')
+        .select(select)
+        .order('created_at', { ascending: false })
+        .limit(args.limit);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return ok(data);
+    }
+
+    // Range → two queries against the two possible target dates, then merge.
+    // Period notes are filtered on `period_date`; occurrence notes on the
+    // joined `occurred_at` via an inner join so out-of-range ones drop out.
+    // We always select the occurrence embed here (needed for sorting); it's
+    // stripped from the output below unless the client asked for `habit`.
+    const periodQuery = supabase
+      .from('notes')
+      .select(`${NOTE_BASE_COLUMNS}, ${NOTE_HABIT_EMBED}`)
+      .not('period_date', 'is', null);
+
+    const occurrenceQuery = supabase
+      .from('notes')
+      .select(
+        `${NOTE_BASE_COLUMNS}, occurrence:occurrences!inner(id, occurred_at, habit:habits(id, name, icon_path))`
+      );
+
+    if (args.from) {
+      periodQuery.gte('period_date', args.from);
+      occurrenceQuery.gte('occurrences.occurred_at', args.from);
+    }
+    if (args.to) {
+      periodQuery.lte('period_date', args.to);
+      occurrenceQuery.lte('occurrences.occurred_at', args.to);
+    }
+
+    const [periodResult, occurrenceResult] = await Promise.all([
+      periodQuery,
+      occurrenceQuery,
+    ]);
+
+    if (periodResult.error) {
+      throw new Error(periodResult.error.message);
+    }
+    if (occurrenceResult.error) {
+      throw new Error(occurrenceResult.error.message);
+    }
+
+    const byId = new Map<string, Record<string, unknown>>();
+    for (const note of [...periodResult.data, ...occurrenceResult.data]) {
+      byId.set(note.id as string, note as Record<string, unknown>);
+    }
+
+    const merged = [...byId.values()]
+      .sort((a, b) => noteTargetDate(b).localeCompare(noteTargetDate(a)))
+      .slice(0, args.limit)
+      .map((note) => {
+        if (wantsHabit) {
+          return note;
+        }
+
+        // Drop the occurrence embed we only fetched for filtering/sorting.
+        const { occurrence: _occurrence, ...rest } = note;
+
+        return rest;
+      });
+
+    return ok(merged);
   },
 });
 
@@ -203,16 +448,18 @@ Deno.serve(async (req) => {
     return res;
   }
 
-  currentUser = user;
-
-  try {
-    const res = await httpHandler(req);
-    for (const [k, v] of Object.entries(cors)) {
-      res.headers.set(k, v);
-    }
-
-    return res;
-  } finally {
-    currentUser = null;
+  // Thread the authed user through mcp-lite's request-local authInfo so each
+  // tool handler reads it from its own ctx (see userFromContext).
+  const res = await httpHandler(req, {
+    authInfo: {
+      token: user.token,
+      scopes: user.scopes,
+      extra: { user },
+    },
+  });
+  for (const [k, v] of Object.entries(cors)) {
+    res.headers.set(k, v);
   }
+
+  return res;
 });

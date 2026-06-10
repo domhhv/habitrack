@@ -7,7 +7,7 @@ Supabase OAuth 2.1 server, so no separate auth system is needed.
 
 ## How it works
 
-```
+```text
 MCP client (ChatGPT / Claude)
   │  1. GET <mcp>/.well-known/oauth-protected-resource  → discovers the Supabase auth server
   │  2. Dynamic Client Registration + OAuth 2.1 (PKCE) against Supabase
@@ -40,12 +40,31 @@ server.
 
 ### Tools exposed
 
-- `list_habits` — the user's habits with trait name/color.
-- `list_occurrences` — occurrences, optional `habit_id` / `from` / `to` / `limit`.
+Read tools return a lean core row by default and accept an `include` array to
+embed related data only when asked — keeping default payloads small.
+
+- `list_habits` — the user's habits. `include`: `trait`, `metrics` (metric
+  definitions), `stocks` (with their metric defaults).
+- `list_occurrences` — occurrences, optional `habit_id` / `from` / `to` /
+  `limit`. `include`: `habit` (with trait + metric definitions), `metrics`
+  (recorded values), `stock_usages`. A recorded value's JSONB shape depends on
+  its metric `type`; include `habit` to get the definition needed to interpret
+  it (the tool description spells out the per-type shapes).
+- `list_notes` — the user's notes (attached to an occurrence or a day/week/month
+  period), optional `from` / `to` / `limit`. `include`: `habit` (the linked
+  occurrence and its habit). A date range filters on the note's **target date**
+  — the occurrence's time for occurrence notes, the `period_date` for period
+  notes — not `created_at`, matching the app's `listNotes` two-query strategy.
 - `log_occurrence` — create an occurrence for a habit.
 
-Add more by registering them in `index.ts` with `mcp.tool(...)`, reusing the
-shapes in `src/services/`.
+The `include` joins mirror what `src/services/` selects, trimmed to explicit
+column lists (no `*`) and returned as snake_case straight from the DB. Add more
+tools by registering them in `index.ts` with `mcp.tool(...)`.
+
+> Scopes: read tools require `habits:read`, `log_occurrence` requires
+> `habits:write`. These claims are only present on tokens minted through the
+> OAuth consent flow — a plain Supabase session token (no `scope` claim) is
+> rejected by design.
 
 ## One-time setup
 
@@ -78,7 +97,7 @@ functions. For `supabase functions serve`, put them in `supabase/functions/.env`
 
 The function's public URL is the MCP endpoint:
 
-```
+```text
 https://<project-ref>.supabase.co/functions/v1/mcp
 ```
 
@@ -145,11 +164,10 @@ register, prompt for consent, and call the tools.
   code runs. We verify the JWT ourselves in `auth.ts`.
 - Streamable HTTP clients must send
   `Accept: application/json, text/event-stream`.
-- `currentUser` in `index.ts` is a per-invocation module variable; this is safe
-  because each Edge Function invocation handles a single request.
-- Scopes (`habits:read`, `habits:write`) are advisory today — RLS is the real
-  boundary. To make them enforced, check `user.scopes` inside each tool.
-
-```
-
-```
+- The authenticated user is threaded per request via mcp-lite's `authInfo`
+  (`httpHandler(req, { authInfo })`), so each tool handler reads it from its own
+  `ctx` — no shared mutable state and no risk of cross-request leakage.
+- Scopes (`habits:read`, `habits:write`) are enforced per tool via `ensureScope`
+  in `index.ts`; RLS remains the data-access boundary. The scopes must actually
+  be granted on the token (requested by the client and consented to), or those
+  tools will be rejected.

@@ -2,15 +2,14 @@ import { Card, Chip, Alert, Button, Spinner } from '@heroui/react';
 import type { OAuthAuthorizationDetails } from '@supabase/supabase-js';
 import React from 'react';
 
-import { useUser } from '@stores';
-import { supabaseClient } from '@utils';
+import { supabaseClient, getErrorMessage } from '@utils';
 
 // Human-readable labels for the scopes we expose. Anything unknown is shown
 // verbatim so new scopes still render sensibly.
 const SCOPE_LABELS: Record<string, string> = {
   email: 'Your email address',
-  'habits:read': 'Read your habits and occurrences',
-  'habits:write': 'Create and update occurrences',
+  'habits:read': 'Read your habits, occurrences, and notes',
+  'habits:write': 'Log occurrences for your habits',
   openid: 'Verify your identity',
   profile: 'Your basic profile',
 };
@@ -26,10 +25,10 @@ const SCOPE_LABELS: Record<string, string> = {
  * Route: /oauth/consent
  */
 const OAuthConsentPage = () => {
-  const user = useUser();
   const [details, setDetails] =
     React.useState<OAuthAuthorizationDetails | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -45,45 +44,51 @@ const OAuthConsentPage = () => {
       return;
     }
 
-    // `useUser` returns null both while the session is still loading and when
-    // the user is genuinely logged out. Confirm with getSession before
-    // deciding to bounce to login, so we don't redirect mid-load.
-    if (user === null) {
-      supabaseClient.auth.getSession().then(({ data }) => {
-        if (!data.session) {
-          const returnTo = encodeURIComponent(
-            window.location.pathname + window.location.search
-          );
-          window.location.href = `/account?returnTo=${returnTo}`;
-        }
-      });
+    // Resolve the session ourselves rather than waiting on the global user
+    // store to hydrate — `getSession` reads the persisted session directly, so
+    // the page never stalls on the spinner awaiting external state. No session
+    // means genuinely logged out: bounce to login and return here after.
+    const run = async () => {
+      const {
+        data: { session },
+      } = await supabaseClient.auth.getSession();
 
-      return;
-    }
+      if (!session) {
+        const returnTo = encodeURIComponent(
+          window.location.pathname + window.location.search
+        );
+        window.location.href = `/account?returnTo=${returnTo}`;
 
-    supabaseClient.auth.oauth
-      .getAuthorizationDetails(authorizationId)
-      .then(({ data, error: detailsError }) => {
-        if (detailsError) {
-          throw detailsError;
-        }
+        return;
+      }
 
-        // Already consented previously → Supabase hands back a redirect URL.
-        if ('redirect_url' in data) {
-          window.location.href = data.redirect_url;
+      const { data, error: detailsError } =
+        await supabaseClient.auth.oauth.getAuthorizationDetails(
+          authorizationId
+        );
 
-          return;
-        }
+      if (detailsError) {
+        throw detailsError;
+      }
 
-        setDetails(data);
-      })
+      // Already consented previously → Supabase hands back a redirect URL.
+      if ('redirect_url' in data) {
+        window.location.href = data.redirect_url;
+
+        return;
+      }
+
+      setDetails(data);
+    };
+
+    run()
       .catch((err: Error) => {
         setError(err.message);
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [authorizationId, user]);
+  }, [authorizationId]);
 
   const decide = async (approve: boolean) => {
     if (!authorizationId) {
@@ -91,6 +96,7 @@ const OAuthConsentPage = () => {
     }
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       // skipBrowserRedirect: true so we control navigation explicitly.
@@ -108,8 +114,11 @@ const OAuthConsentPage = () => {
       }
 
       window.location.href = data.redirect_url;
-    } catch (err) {
-      setError((err as Error).message);
+    } catch (error) {
+      // A transient approve/deny failure is retryable — surface it inline on
+      // the consent card rather than tripping the fatal "couldn't load" screen.
+      setSubmitError(getErrorMessage(error));
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -179,6 +188,14 @@ const OAuthConsentPage = () => {
             <span className="font-mono">{details.redirect_uri}</span>. You can
             revoke this access at any time from your account settings.
           </p>
+          {submitError && (
+            <Alert status="danger">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Description>{submitError}</Alert.Description>
+              </Alert.Content>
+            </Alert>
+          )}
         </Card.Content>
         <Card.Footer className="justify-end gap-2">
           <Button
