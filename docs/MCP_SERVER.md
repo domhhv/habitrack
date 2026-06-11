@@ -61,14 +61,44 @@ The `include` joins mirror what `src/services/` selects, trimmed to explicit
 column lists (no `*`) and returned as snake_case straight from the DB. Add more
 tools by registering them in `index.ts` with `mcp.tool(...)`.
 
-> Scopes: read tools require `habits:read`, `log_occurrence` requires
-> `habits:write`. These claims are only present on tokens minted through the
-> OAuth consent flow — a plain Supabase session token (no `scope` claim) is
-> rejected by design.
+> Scopes: Supabase's OAuth server only negotiates the standard scopes
+> (`openid` / `profile` / `email` / `phone`). Custom scopes such as
+> `habits:read` are **rejected at `/authorize`**, so we don't advertise or
+> require them. Any valid OAuth-issued token can call every tool; the read vs.
+> write distinction is enforced by which tools exist, and **RLS** is the data
+> boundary (each query runs as the token's user). `authenticate()` rejects
+> missing/invalid tokens with a `401`.
 
 ## One-time setup
 
-### 1. Enable the Supabase OAuth Server
+### 1. Migrate JWT signing keys to asymmetric (REQUIRED — do this first)
+
+In the Supabase Dashboard → **Settings → JWT Keys**, rotate the project's signing
+key from the legacy **HS256** shared secret to an asymmetric key (**ECC P-256**,
+i.e. ES256 — the recommended/only option in the dashboard; RS256 also works).
+
+This is **not optional** for the OAuth flow. The `openid` scope makes Supabase
+mint an OpenID ID token, which **cannot be signed with HS256**. On an HS256
+project the token exchange fails with:
+
+```text
+POST /oauth/token → 500: "Error generating ID token"
+                        "HS256 is not supported for ID token signing"
+```
+
+The visible symptom is misleading: the user reaches consent, clicks **Allow**,
+returns to the client, and only then sees a generic error — because no token was
+ever issued, so every subsequent MCP request is `401`. Confirm the fix by
+checking the JWKS is non-empty:
+
+```text
+GET https://<ref>.supabase.co/auth/v1/.well-known/jwks.json
+→ { "keys": [ { "alg": "ES256", "kty": "EC", ... } ] }   # not { "keys": [] }
+```
+
+`auth.ts` verifies incoming tokens against this JWKS.
+
+### 2. Enable the Supabase OAuth Server
 
 In the Supabase Dashboard → **Authentication → OAuth Server**:
 
@@ -79,11 +109,7 @@ In the Supabase Dashboard → **Authentication → OAuth Server**:
    `https://www.habitrack.io/oauth/consent` (and the local equivalent,
    `http://localhost:5173/oauth/consent`, for dev).
 
-> Requires asymmetric JWT signing keys (RS256/ES256). If the project is still on
-> the legacy shared HS256 secret, migrate to signing keys first
-> (Settings → JWT Keys) — `auth.ts` verifies via the JWKS endpoint.
-
-### 2. Deploy the Edge Function
+### 3. Deploy the Edge Function
 
 ```bash
 supabase functions deploy mcp           # remote
@@ -167,7 +193,7 @@ register, prompt for consent, and call the tools.
 - The authenticated user is threaded per request via mcp-lite's `authInfo`
   (`httpHandler(req, { authInfo })`), so each tool handler reads it from its own
   `ctx` — no shared mutable state and no risk of cross-request leakage.
-- Scopes (`habits:read`, `habits:write`) are enforced per tool via `ensureScope`
-  in `index.ts`; RLS remains the data-access boundary. The scopes must actually
-  be granted on the token (requested by the client and consented to), or those
-  tools will be rejected.
+- Tools are not scope-gated (see the scopes note above — Supabase rejects custom
+  scopes at `/authorize`). Authorization is: a valid OAuth-issued token + RLS.
+  If Supabase ever supports registering custom OAuth scopes, re-add per-tool
+  scope checks reading `ctx.authInfo.scopes`.

@@ -43,14 +43,13 @@ const userFromContext = (ctx: Ctx): AuthedUser => {
   return user;
 };
 
-// Reject the request unless the token was granted the scope a tool needs.
-const ensureScope = (user: AuthedUser, scope: string): AuthedUser => {
-  if (!user.scopes.includes(scope)) {
-    throw new Error(`Missing required scope: ${scope}`);
-  }
-
-  return user;
-};
+// Note on authorization: Supabase's OAuth server only negotiates the standard
+// scopes (openid/profile/email/phone) — custom scopes like "habits:read" are
+// rejected at /authorize, so we can't express read-vs-write granularity via
+// scopes. A successfully issued token already means the user consented to
+// connect their account, and RLS scopes every query to that user. The
+// read/write distinction is therefore enforced by which tools we expose, not
+// by scope checks. `authenticate()` rejects any missing/invalid token (401).
 
 const ok = (data: unknown) => ({
   content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }],
@@ -121,9 +120,7 @@ mcp.tool('list_habits', {
       ),
   }),
   handler: async (args: { include: string[] }, ctx: Ctx) => {
-    const supabase = userClient(
-      ensureScope(userFromContext(ctx), 'habits:read')
-    );
+    const supabase = userClient(userFromContext(ctx));
 
     const select = buildSelect(
       'id, name, description, icon_path',
@@ -193,9 +190,7 @@ mcp.tool('list_occurrences', {
     },
     ctx: Ctx
   ) => {
-    const supabase = userClient(
-      ensureScope(userFromContext(ctx), 'habits:read')
-    );
+    const supabase = userClient(userFromContext(ctx));
 
     const select = buildSelect(
       'id, habit_id, occurred_at, time_zone, created_at',
@@ -251,7 +246,7 @@ mcp.tool('log_occurrence', {
     },
     ctx: Ctx
   ) => {
-    const user = ensureScope(userFromContext(ctx), 'habits:write');
+    const user = userFromContext(ctx);
     const supabase = userClient(user);
 
     const { data, error } = await supabase
@@ -325,9 +320,7 @@ mcp.tool('list_notes', {
     args: { from?: string; to?: string; limit: number; include: string[] },
     ctx: Ctx
   ) => {
-    const supabase = userClient(
-      ensureScope(userFromContext(ctx), 'habits:read')
-    );
+    const supabase = userClient(userFromContext(ctx));
 
     const wantsHabit = args.include.includes('habit');
     const hasRange = Boolean(args.from || args.to);
