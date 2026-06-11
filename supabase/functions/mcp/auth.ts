@@ -48,7 +48,10 @@ export const protectedResourceMetadata = () => ({
   resource: resourceUrl(),
   authorization_servers: [ISSUER],
   bearer_methods_supported: ['header'],
-  scopes_supported: ['openid', 'email', 'profile', 'habits:read', 'habits:write'],
+  // Only the scopes Supabase's OAuth server actually negotiates. Custom scopes
+  // (e.g. habits:read) are rejected at /authorize, so advertising them here
+  // would break the flow — clients would request a scope that can't be granted.
+  scopes_supported: ['openid', 'email', 'profile'],
 });
 
 /** 401 challenge that tells the client where the discovery document lives. */

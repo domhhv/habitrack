@@ -32,7 +32,12 @@
       "mcp__heroui-migration__get_hooks_migration_guide",
       "Bash(git checkout:*)",
       "Bash(yarn install:*)",
-      "Bash(python3 -c ':*)"
+      "Bash(python3 -c ':*)",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__fill",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__list_network_requests",
+      "mcp__chrome-devtools__get_network_request"
     ]
   },
   "hooks": {

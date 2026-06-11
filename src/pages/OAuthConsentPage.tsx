@@ -8,8 +8,6 @@ import { supabaseClient, getErrorMessage } from '@utils';
 // verbatim so new scopes still render sensibly.
 const SCOPE_LABELS: Record<string, string> = {
   email: 'Your email address',
-  'habits:read': 'Read your habits, occurrences, and notes',
-  'habits:write': 'Log occurrences for your habits',
   openid: 'Verify your identity',
   profile: 'Your basic profile',
 };
@@ -174,6 +172,9 @@ const OAuthConsentPage = () => {
               This will allow it to:
             </p>
             <div className="flex flex-wrap gap-2">
+              <Chip size="sm" variant="soft">
+                Read and log your habits, occurrences, and notes
+              </Chip>
               {scopes.map((scope) => {
                 return (
                   <Chip size="sm" key={scope} variant="soft">
