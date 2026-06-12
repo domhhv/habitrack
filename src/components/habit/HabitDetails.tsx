@@ -339,7 +339,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                   setIsEditingName(true);
                 }}
                 className={cn(
-                  'opacity-0 transition-opacity group-hover:opacity-100',
+                  'transition-opacity group-hover:opacity-100 lg:opacity-0',
                   isEditing && 'invisible'
                 )}
               >
@@ -404,7 +404,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                   setIsEditingDescription(true);
                 }}
                 className={cn(
-                  'opacity-0 transition-opacity group-hover:opacity-100',
+                  'transition-opacity group-hover:opacity-100 lg:opacity-0',
                   isEditing && 'invisible'
                 )}
               >
@@ -475,7 +475,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 setIsEditingMotivation(true);
               }}
               className={cn(
-                'opacity-0 transition-opacity group-hover:opacity-100',
+                'transition-opacity group-hover:opacity-100 lg:opacity-0',
                 isEditing && 'invisible'
               )}
             >
@@ -495,7 +495,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
               aria-label="Edit metrics"
               onPress={startEditingMetrics}
               className={cn(
-                'opacity-0 transition-opacity group-hover:opacity-100',
+                'transition-opacity group-hover:opacity-100 lg:opacity-0',
                 isEditing && 'invisible'
               )}
             >
