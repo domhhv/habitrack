@@ -235,7 +235,7 @@ const NoteDrawer = () => {
   return (
     <Drawer isOpen={isOpen} onOpenChange={changeOpen}>
       <Drawer.Backdrop>
-        <Drawer.Content placement="right">
+        <Drawer.Content placement={isMobile ? 'bottom' : 'right'}>
           <Drawer.Dialog>
             <Drawer.CloseTrigger />
             <Drawer.Header className="flex-row items-center gap-2">

@@ -36,7 +36,7 @@ const OccurrenceDrawer = () => {
     React.useState('');
   const { askConfirmation } = useConfirmationActions();
   const { removeOccurrence } = useOccurrenceActions();
-  const { isMobile: _isMobile } = useScreenWidth();
+  const { isMobile } = useScreenWidth();
   const { dayToDisplay, dayToLog, habitIdToDisplay, isOpen, occurrenceToEdit } =
     useOccurrenceDrawerState();
   const { closeOccurrenceDrawer, setDayToDisplay } =
@@ -194,7 +194,7 @@ const OccurrenceDrawer = () => {
   return (
     <Drawer isOpen={isOpen} onOpenChange={changeOpen}>
       <Drawer.Backdrop>
-        <Drawer.Content placement="right">
+        <Drawer.Content placement={isMobile ? 'bottom' : 'right'}>
           <Drawer.Dialog>
             <Drawer.CloseTrigger />
             <Drawer.Header className="flex-col">

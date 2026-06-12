@@ -37,7 +37,7 @@ const HabitDetailsPage = () => {
   }
 
   return (
-    <div className="mx-auto w-7xl max-w-full">
+    <div className="mx-auto w-7xl max-w-full px-8 pb-2 lg:px-16">
       <title>{habits[habitId].name}</title>
       <HabitDetails habit={habits[habitId]} />
     </div>
