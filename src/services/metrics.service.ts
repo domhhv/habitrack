@@ -1,3 +1,4 @@
+import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
 import type {
@@ -7,7 +8,7 @@ import type {
   OccurrenceMetricValue,
   OccurrenceMetricValueInsert,
 } from '@models';
-import { supabaseClient, deepCamelcaseKeys, deepCamelcaseArray } from '@utils';
+import { supabaseClient } from '@utils';
 
 export const createHabitMetrics = async (
   metrics: HabitMetricInsert[]
@@ -25,7 +26,7 @@ export const createHabitMetrics = async (
     throw new Error(error.message);
   }
 
-  return deepCamelcaseArray<HabitMetric>(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const patchHabitMetric = async (
@@ -43,7 +44,7 @@ export const patchHabitMetric = async (
     throw new Error(error.message);
   }
 
-  return deepCamelcaseKeys<HabitMetric>(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const destroyHabitMetrics = async (ids: string[]) => {
@@ -84,7 +85,7 @@ export const upsertMetricValues = async (
     throw new Error(error.message);
   }
 
-  return deepCamelcaseArray<OccurrenceMetricValue>(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const destroyMetricValue = async (

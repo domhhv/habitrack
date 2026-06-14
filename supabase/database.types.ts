@@ -1,10 +1,17 @@
+/**
+* NOTE: This Json type is patched by scripts/patch-json-type.mjs after every
+* `yarn db:gen-types`. Supabase generates a self-referential Json type whose deep
+* recursion makes camelcase-keys' type inference blow the TS instantiation depth
+* limit (TS2589). The non-recursive form below avoids that; call sites narrow
+* JSON columns (e.g. metric config/value) to their concrete shapes anyway.
+*/
 export type Json =
   | string
   | number
   | boolean
   | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+  | { [key: string]: unknown }
+  | unknown[]
 
 export type Database = {
   auth: {
@@ -1881,6 +1888,7 @@ export type Database = {
           id: string
           in_progress_size: number
           key: string
+          metadata: Json | null
           owner_id: string | null
           upload_signature: string
           user_metadata: Json | null
@@ -1892,6 +1900,7 @@ export type Database = {
           id: string
           in_progress_size?: number
           key: string
+          metadata?: Json | null
           owner_id?: string | null
           upload_signature: string
           user_metadata?: Json | null
@@ -1903,6 +1912,7 @@ export type Database = {
           id?: string
           in_progress_size?: number
           key?: string
+          metadata?: Json | null
           owner_id?: string | null
           upload_signature?: string
           user_metadata?: Json | null
@@ -2021,6 +2031,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      allow_any_operation: {
+        Args: { expected_operations: string[] }
+        Returns: boolean
+      }
+      allow_only_operation: {
+        Args: { expected_operation: string }
+        Returns: boolean
+      }
       can_insert_object: {
         Args: { bucketid: string; metadata: Json; name: string; owner: string }
         Returns: undefined

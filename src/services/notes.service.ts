@@ -120,8 +120,7 @@ export const listAllNotes = async ({
 
   return data.map((note) => {
     const habit = note.occurrences?.habits ?? null;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { occurrences, ...noteWithoutOccurrences } = note;
+    const { occurrences: _occurrences, ...noteWithoutOccurrences } = note;
 
     return camelcaseKeys({
       ...noteWithoutOccurrences,

@@ -1,3 +1,4 @@
+import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
 import type {
@@ -5,7 +6,7 @@ import type {
   OccurrenceStockUsageInsert,
   OccurrenceStockUsageUpdate,
 } from '@models';
-import { supabaseClient, deepCamelcaseArray } from '@utils';
+import { supabaseClient } from '@utils';
 
 export const createOccurrenceStockUsages = async (
   usages: OccurrenceStockUsageInsert[]
@@ -27,7 +28,7 @@ export const createOccurrenceStockUsages = async (
     throw new Error(error.message);
   }
 
-  return deepCamelcaseArray<OccurrenceStockUsage>(data);
+  return camelcaseKeys(data);
 };
 
 export const updateOccurrenceStockUsage = async (
@@ -45,7 +46,7 @@ export const updateOccurrenceStockUsage = async (
     throw new Error(error.message);
   }
 
-  return deepCamelcaseArray<OccurrenceStockUsage>([data])[0];
+  return camelcaseKeys([data])[0];
 };
 
 export const deleteOccurrenceStockUsages = async (
