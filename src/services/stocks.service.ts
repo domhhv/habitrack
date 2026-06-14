@@ -88,7 +88,7 @@ export const createStockMetricDefaults = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const destroyStockMetricDefaults = async (

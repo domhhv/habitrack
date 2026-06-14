@@ -26,7 +26,7 @@ export const createHabitMetrics = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const patchHabitMetric = async (
@@ -44,7 +44,7 @@ export const patchHabitMetric = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const destroyHabitMetrics = async (ids: string[]) => {
@@ -85,7 +85,7 @@ export const upsertMetricValues = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const destroyMetricValue = async (
