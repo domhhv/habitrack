@@ -1,3 +1,4 @@
+import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
 import {
@@ -8,7 +9,7 @@ import {
   type HabitStockWithDefaults,
 } from '@models';
 import { uploadFile } from '@services';
-import { supabaseClient, deepCamelcaseKeys } from '@utils';
+import { supabaseClient } from '@utils';
 
 const HABIT_SELECT = `
   *,
@@ -27,22 +28,16 @@ type RawHabit = Omit<Habit, 'stocks'> & {
   })[];
 };
 
-const transformHabit = (data: unknown): Habit => {
-  const raw = deepCamelcaseKeys<RawHabit>(data);
-
+const transformHabit = ({ stocks, ...habit }: RawHabit): Habit => {
   return {
-    ...raw,
-    stocks: raw.stocks.map(({ usages, ...stock }) => {
+    ...habit,
+    stocks: stocks.map(({ usages, ...stock }) => {
       return {
         ...stock,
         usageCount: usages?.[0]?.count ?? 0,
       };
     }),
   };
-};
-
-const transformHabits = (data: unknown[]): Habit[] => {
-  return data.map(transformHabit);
 };
 
 export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
@@ -56,10 +51,10 @@ export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
     throw new Error(error.message);
   }
 
-  return transformHabit(data);
+  return transformHabit(camelcaseKeys(data, { deep: true }));
 };
 
-export const listHabits = async () => {
+export const listHabits = async (): Promise<Habit[]> => {
   const { data, error } = await supabaseClient
     .from('habits')
     .select(HABIT_SELECT)
@@ -69,7 +64,9 @@ export const listHabits = async () => {
     throw new Error(error.message);
   }
 
-  return transformHabits(data);
+  return camelcaseKeys(data, { deep: true }).map((habit) => {
+    return transformHabit(habit);
+  });
 };
 
 export const patchHabit = async (
@@ -87,7 +84,7 @@ export const patchHabit = async (
     throw new Error(error.message);
   }
 
-  return transformHabit(data);
+  return transformHabit(camelcaseKeys(data, { deep: true }));
 };
 
 export const getHabit = async (id: Habit['id']): Promise<Habit> => {
@@ -101,7 +98,7 @@ export const getHabit = async (id: Habit['id']): Promise<Habit> => {
     throw new Error(error.message);
   }
 
-  return transformHabit(data);
+  return transformHabit(camelcaseKeys(data, { deep: true }));
 };
 
 export const destroyHabit = async (id: Habit['id']) => {

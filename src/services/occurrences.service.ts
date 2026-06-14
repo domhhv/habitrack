@@ -10,11 +10,13 @@ import type {
   OccurrencesUpdate,
 } from '@models';
 import { StorageBuckets } from '@models';
-import { supabaseClient, deepCamelcaseKeys, deepCamelcaseArray } from '@utils';
+import { supabaseClient } from '@utils';
 
 import { deleteFile } from './storage.service';
 
-export const createOccurrence = async (occurrence: OccurrencesInsert) => {
+export const createOccurrence = async (
+  occurrence: OccurrencesInsert
+): Promise<RawOccurrence> => {
   const { data, error } = await supabaseClient
     .from('occurrences')
     .insert(decamelizeKeys(occurrence))
@@ -24,7 +26,7 @@ export const createOccurrence = async (occurrence: OccurrencesInsert) => {
       habit:habits(name, icon_path, trait:traits(id, name, color),
       metric_definitions:habit_metrics(id, name, type, config, sort_order, is_required, created_at, updated_at)),
       metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id),
-      stock_usages:occurrence_stock_usages(id, habit_stock_id, quantity, created_at, updated_at))
+      stock_usages:occurrence_stock_usages(id, habit_stock_id, quantity, created_at, updated_at)
     `
     )
     .single();
@@ -33,7 +35,7 @@ export const createOccurrence = async (occurrence: OccurrencesInsert) => {
     throw new Error(error.message);
   }
 
-  return deepCamelcaseKeys<RawOccurrence>(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const listOccurrences = async ([rangeStart, rangeEnd]: [
@@ -59,7 +61,7 @@ export const listOccurrences = async ([rangeStart, rangeEnd]: [
     throw new Error(error.message);
   }
 
-  return deepCamelcaseArray<RawOccurrence>(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const patchOccurrence = async (
@@ -85,7 +87,7 @@ export const patchOccurrence = async (
     throw new Error(error.message);
   }
 
-  return deepCamelcaseKeys<RawOccurrence>(data);
+  return camelcaseKeys(data, { deep: true });
 };
 
 export const destroyOccurrence = async ({
@@ -135,7 +137,7 @@ export const getLatestHabitOccurrence = async (habitId: Habit['id']) => {
     return null;
   }
 
-  return deepCamelcaseKeys<RawOccurrence>(data[0]);
+  return camelcaseKeys(data[0], { deep: true });
 };
 
 export const getLongestHabitStreak = async (

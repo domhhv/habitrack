@@ -95,9 +95,7 @@ const formatMetricValue = (
 
     case 'choice': {
       if ('selectedOptions' in value) {
-        return (value as { selectedOptions: string[] }).selectedOptions.join(
-          ', '
-        );
+        return value.selectedOptions.join(', ');
       }
 
       return (value as { selectedOption: string }).selectedOption;
@@ -413,7 +411,6 @@ const OccurrenceListItem = ({
             variant="danger-soft"
             isPending={isBeingRemoved}
             aria-label="delete-habit-entry"
-            // className="h-6 w-6 min-w-0 rounded-lg"
           >
             <TrashSimpleIcon weight="bold" />
           </Button>
