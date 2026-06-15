@@ -179,7 +179,7 @@ const HabitsTable = () => {
               }}
             </Table.Header>
             <Table.Body items={paginatedHabits} aria-label="Habits data">
-              {(habit) => {
+              {paginatedHabits.map((habit) => {
                 const habitStats = habitsStats[habit.id] || {};
 
                 return (
@@ -268,7 +268,7 @@ const HabitsTable = () => {
                     </Table.Collection>
                   </Table.Row>
                 );
-              }}
+              })}
             </Table.Body>
           </Table.Content>
         </Table.ScrollContainer>
