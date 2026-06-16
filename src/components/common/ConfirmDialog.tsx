@@ -1,5 +1,7 @@
-import { Modal, Button, Spinner } from '@heroui/react';
+import { Modal, Spinner } from '@heroui/react';
 import React from 'react';
+
+import { CustomButton } from '@components';
 
 type ConfirmDialogProps = {
   children: React.ReactNode;
@@ -36,21 +38,21 @@ const ConfirmDialog = ({
             <Modal.Body>
               {children}
               <div className="mt-2 mb-4 flex flex-row justify-end gap-4">
-                <Button
+                <CustomButton
                   variant="outline"
                   onPress={onCancel}
                   isDisabled={isLoading}
                 >
                   Cancel
-                </Button>
-                <Button
+                </CustomButton>
+                <CustomButton
                   variant="danger"
                   onPress={onConfirm}
                   isDisabled={isLoading}
                 >
                   {isLoading && <Spinner size="sm" />}
                   Confirm
-                </Button>
+                </CustomButton>
               </div>
             </Modal.Body>
           </Modal.Dialog>

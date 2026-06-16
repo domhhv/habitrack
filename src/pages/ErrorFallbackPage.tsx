@@ -1,6 +1,7 @@
-import { Alert, Button } from '@heroui/react';
+import { Alert } from '@heroui/react';
 import React from 'react';
 
+import { CustomButton } from '@components';
 import { getErrorMessage } from '@utils';
 
 type ErrorFallbackPageProps = {
@@ -24,14 +25,14 @@ const ErrorFallbackPage = ({
           <Alert.Title className="font-bold">{title}</Alert.Title>
           <Alert.Description>{`We're sorry for the inconvenience.${errorDescription}`}</Alert.Description>
         </Alert.Content>
-        <Button
+        <CustomButton
           variant="danger-soft"
           onPress={() => {
             window.location.reload();
           }}
         >
           Reload
-        </Button>
+        </CustomButton>
       </Alert>
     </main>
   );

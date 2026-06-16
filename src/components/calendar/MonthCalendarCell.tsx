@@ -87,10 +87,10 @@ const MonthCalendarCell = ({
 
   const cellRootClassName = cn(
     'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 focus:border-neutral-100 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-36',
-    position === 'top-left' && 'rounded-tl-md',
-    position === 'top-right' && 'rounded-tr-md',
-    position === 'bottom-left' && 'rounded-bl-md',
-    position === 'bottom-right' && 'rounded-br-md',
+    position === 'top-left' && 'rounded-tl-3xl',
+    position === 'top-right' && 'rounded-tr-3xl',
+    position === 'bottom-left' && 'rounded-bl-3xl',
+    position === 'bottom-right' && 'rounded-br-3xl',
     isTodayCell &&
       'bg-background-100 hover:bg-background-300 dark:bg-background-500 dark:hover:bg-background-300'
   );

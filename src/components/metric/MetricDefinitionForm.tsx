@@ -3,7 +3,6 @@ import {
   Form,
   Input,
   Label,
-  Button,
   Header,
   Select,
   Switch,
@@ -23,6 +22,7 @@ import {
 } from '@phosphor-icons/react';
 import React from 'react';
 
+import { CustomButton } from '@components';
 import { METRIC_PRESETS } from '@const';
 import type { MetricType, MetricConfig, FormMetricDefinitions } from '@models';
 
@@ -102,17 +102,17 @@ const MetricDefinitionForm = ({
           <p>{metric.type}</p>
         </div>
         <div className="space-x-2">
-          <Button
+          <CustomButton
             isIconOnly
             onPress={() => {
               onChange({ isBeingEdited: true });
             }}
           >
             <PencilSimpleIcon />
-          </Button>
-          <Button isIconOnly onPress={onRemove}>
+          </CustomButton>
+          <CustomButton isIconOnly onPress={onRemove}>
             <TrashSimpleIcon />
-          </Button>
+          </CustomButton>
         </div>
       </div>
     );
@@ -288,7 +288,7 @@ const MetricDefinitionForm = ({
           </Switch.Content>
         </Switch>
 
-        <Button
+        <CustomButton
           fullWidth
           onPress={onRemove}
           variant="danger-soft"
@@ -296,12 +296,12 @@ const MetricDefinitionForm = ({
         >
           <TrashIcon size={14} />
           {metric.isToBeAdded ? 'Remove' : 'Discard'}
-        </Button>
+        </CustomButton>
 
-        <Button fullWidth type="submit" variant="secondary">
+        <CustomButton fullWidth type="submit" variant="secondary">
           <StackPlusIcon size={14} />
           Done
-        </Button>
+        </CustomButton>
       </Form>
     </div>
   );

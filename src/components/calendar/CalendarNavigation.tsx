@@ -1,7 +1,6 @@
 import {
   cn,
   Label,
-  Button,
   Header,
   Select,
   ListBox,
@@ -15,6 +14,7 @@ import { useDateFormatter } from 'react-aria';
 import { useLocation, useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
+import { CustomButton } from '@components';
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import { useUser, useCalendarFilters, useCalendarFiltersChange } from '@stores';
 import { getWeeksOfYear } from '@utils';
@@ -260,7 +260,7 @@ const CalendarNavigation = ({
         )}
       >
         {!isDesktop && !!user && (
-          <Button
+          <CustomButton
             size="sm"
             isIconOnly
             variant="ghost"
@@ -269,7 +269,7 @@ const CalendarNavigation = ({
             className={cn('rounded-sm', isMobile && 'min-w-fit p-0')}
           >
             <FunnelSimpleIcon size={20} />
-          </Button>
+          </CustomButton>
         )}
         <CalendarNavigationButtons focusedDate={focusedDate} />
       </div>

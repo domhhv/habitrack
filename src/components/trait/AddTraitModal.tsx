@@ -1,8 +1,8 @@
-import { Input, Modal, Button, TextArea } from '@heroui/react';
+import { Input, Label, Modal, TextField } from '@heroui/react';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
-import { OccurrenceChip } from '@components';
+import { CustomButton, OccurrenceChip } from '@components';
 import { useTextField } from '@hooks';
 import { useUser, useTraitActions } from '@stores';
 import { makeTestOccurrence } from '@tests';
@@ -74,23 +74,30 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
             <Modal.Header>
               <Modal.Heading>Add New Trait</Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="gap-4">
-              <Input
-                value={label}
-                variant="secondary"
-                disabled={isAdding}
-                onChange={handleLabelChange}
-                placeholder="e. g. Moderately Bad"
-              />
-              <TextArea
-                variant="secondary"
-                value={description}
-                disabled={isAdding}
-                onChange={(e) => {
-                  handleDescriptionChange(e.target.value);
-                }}
-              />
-              <div className="flex gap-2">
+            <Modal.Body className="space-y-4">
+              <TextField fullWidth name="name" variant="secondary">
+                <Label>Label</Label>
+                <Input
+                  value={label}
+                  variant="secondary"
+                  disabled={isAdding}
+                  onChange={handleLabelChange}
+                  placeholder="e. g. Moderately Bad"
+                />
+              </TextField>
+              <TextField fullWidth name="name" variant="secondary">
+                <Label>Description</Label>
+                <Input
+                  variant="secondary"
+                  value={description}
+                  disabled={isAdding}
+                  placeholder="Optional"
+                  onChange={(e) => {
+                    handleDescriptionChange(e.target.value);
+                  }}
+                />
+              </TextField>
+              <div className="flex gap-4">
                 <HexColorPicker
                   color={color}
                   onChange={handleTraitColorChange}
@@ -125,7 +132,7 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
               </div>
             </Modal.Body>
             <Modal.Footer>
-              <Button
+              <CustomButton
                 fullWidth
                 type="submit"
                 variant="primary"
@@ -133,7 +140,7 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
                 isDisabled={isAdding || !user?.id}
               >
                 Add Trait
-              </Button>
+              </CustomButton>
             </Modal.Footer>
           </Modal.Dialog>
         </Modal.Container>

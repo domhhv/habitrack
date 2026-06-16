@@ -1,7 +1,6 @@
 import {
   Label,
   Modal,
-  Button,
   Select,
   ListBox,
   Spinner,
@@ -13,6 +12,7 @@ import { PlusIcon, CloudArrowUpIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import {
+  CustomButton,
   AddTraitModal,
   VisuallyHiddenInput,
   MetricDefinitionForm,
@@ -124,14 +124,14 @@ const AddHabitDialogButton = () => {
         onClose={traitModalState.close}
       />
 
-      <Button
+      <CustomButton
         variant="primary"
         onPress={addDialogState.open}
         data-testid="add-habit-button"
       >
         <PlusIcon weight="bold" />
         Add habit
-      </Button>
+      </CustomButton>
 
       <Modal state={addDialogState}>
         <Modal.Backdrop>
@@ -205,7 +205,7 @@ const AddHabitDialogButton = () => {
                     </ListBox>
                   </Select.Popover>
                 </Select>
-                <Button
+                <CustomButton
                   fullWidth
                   size="sm"
                   variant="tertiary"
@@ -214,11 +214,11 @@ const AddHabitDialogButton = () => {
                 >
                   <PlusIcon />
                   Or add a new trait
-                </Button>
-                <Button fullWidth size="sm" variant="tertiary">
+                </CustomButton>
+                <CustomButton fullWidth size="sm" variant="tertiary">
                   <CloudArrowUpIcon />
                   Upload habit icon
-                </Button>
+                </CustomButton>
                 <VisuallyHiddenInput onChange={handleIconChange} />
                 {icon && <p>{icon.name}</p>}
 
@@ -251,7 +251,7 @@ const AddHabitDialogButton = () => {
                     />
                   );
                 })}
-                <Button
+                <CustomButton
                   fullWidth
                   size="sm"
                   variant="tertiary"
@@ -260,10 +260,10 @@ const AddHabitDialogButton = () => {
                   isDisabled={isAdding}
                 >
                   Add metric
-                </Button>
+                </CustomButton>
               </Modal.Body>
               <Modal.Footer>
-                <Button
+                <CustomButton
                   fullWidth
                   type="submit"
                   variant="primary"
@@ -272,7 +272,7 @@ const AddHabitDialogButton = () => {
                 >
                   {isAdding && <Spinner size="sm" />}
                   Submit
-                </Button>
+                </CustomButton>
               </Modal.Footer>
             </Modal.Dialog>
           </Modal.Container>

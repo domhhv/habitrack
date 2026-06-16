@@ -1,4 +1,4 @@
-import { Button, Spinner, Tooltip } from '@heroui/react';
+import { Spinner, Tooltip } from '@heroui/react';
 import {
   TrashIcon,
   CaretLeftIcon,
@@ -7,6 +7,7 @@ import {
 } from '@phosphor-icons/react';
 import React, { useState } from 'react';
 
+import { CustomButton } from '@components';
 import type { SignedUrls } from '@models';
 
 import SwipeableContainer from './SwipeableContainer';
@@ -97,7 +98,7 @@ const ImageCarousel = ({
       </SwipeableContainer>
 
       <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-between p-4">
-        <Button
+        <CustomButton
           size="sm"
           isIconOnly
           variant="primary"
@@ -106,9 +107,9 @@ const ImageCarousel = ({
           className="pointer-events-auto rounded-full"
         >
           <CaretLeftIcon size={20} weight="bold" />
-        </Button>
+        </CustomButton>
 
-        <Button
+        <CustomButton
           size="sm"
           isIconOnly
           variant="primary"
@@ -117,14 +118,14 @@ const ImageCarousel = ({
           className="pointer-events-auto rounded-full"
         >
           <CaretRightIcon size={20} weight="bold" />
-        </Button>
+        </CustomButton>
       </div>
 
       {signedUrl && (
         <Tooltip closeDelay={0}>
           <Tooltip.Trigger>
             <div className="pointer-events-auto absolute top-4 right-14 z-10">
-              <Button
+              <CustomButton
                 size="sm"
                 isIconOnly
                 variant="secondary"
@@ -134,7 +135,7 @@ const ImageCarousel = ({
                 }}
               >
                 <ArrowSquareOutIcon size={18} weight="bold" />
-              </Button>
+              </CustomButton>
             </div>
           </Tooltip.Trigger>
           <Tooltip.Content>Open this photo in a new tab</Tooltip.Content>
@@ -144,7 +145,7 @@ const ImageCarousel = ({
       <Tooltip closeDelay={0}>
         <Tooltip.Trigger>
           <div className="pointer-events-auto absolute top-4 right-4 z-10">
-            <Button
+            <CustomButton
               size="sm"
               isIconOnly
               variant="danger"
@@ -165,7 +166,7 @@ const ImageCarousel = ({
                   </>
                 );
               }}
-            </Button>
+            </CustomButton>
           </div>
         </Tooltip.Trigger>
         <Tooltip.Content>Delete this photo</Tooltip.Content>
@@ -175,8 +176,9 @@ const ImageCarousel = ({
         <div className="mx-auto flex w-max items-center justify-center gap-2 rounded-full bg-black/30 p-2 backdrop-blur-xs">
           {imageUrls.map((_, index) => {
             return (
-              <button
+              <CustomButton
                 key={index}
+                type="button"
                 onClick={() => {
                   setDirection(index > currentIndex ? 1 : -1);
                   setCurrentIndex(index);

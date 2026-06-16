@@ -1,4 +1,4 @@
-import { cn, Button, Tooltip } from '@heroui/react';
+import { cn, Tooltip } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { toZoned, getWeeksInMonth } from '@internationalized/date';
 import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
@@ -8,6 +8,7 @@ import { useLocale, useCalendarGrid } from 'react-aria';
 import { useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
+import { CustomButton } from '@components';
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useWeekNotes,
@@ -121,7 +122,7 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
               >
                 <Tooltip closeDelay={0}>
                   <Tooltip.Trigger>
-                    <Button
+                    <CustomButton
                       size="sm"
                       variant="tertiary"
                       className={cn(
@@ -135,13 +136,13 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
                       }}
                     >
                       {getISOWeek(monday.toDate(state.timeZone))}
-                    </Button>
+                    </CustomButton>
                   </Tooltip.Trigger>
                   <Tooltip.Content>Go to this week</Tooltip.Content>
                 </Tooltip>
                 <Tooltip closeDelay={0}>
                   <Tooltip.Trigger>
-                    <Button
+                    <CustomButton
                       isIconOnly
                       variant="outline"
                       onPress={() => {
@@ -163,7 +164,7 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
                       ) : (
                         <NotePencilIcon size={16} weight="bold" />
                       )}
-                    </Button>
+                    </CustomButton>
                   </Tooltip.Trigger>
                   <Tooltip.Content>
                     {weekNote

@@ -2,7 +2,6 @@ import {
   Chip,
   Input,
   Label,
-  Button,
   Switch,
   TextField,
   NumberField,
@@ -16,6 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import React from 'react';
 
+import { CustomButton } from '@components';
 import type { Habit, MetricValue, HabitStockWithDefaults } from '@models';
 import { useUser, useStockActions, useConfirmationActions } from '@stores';
 import { handleAsyncAction } from '@utils';
@@ -238,7 +238,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
           )}
         </div>
         <div className="flex items-center gap-1">
-          <Button
+          <CustomButton
             size="sm"
             isIconOnly
             variant="ghost"
@@ -252,8 +252,8 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
               className="size-4"
               weight={stock.isDepleted ? 'fill' : 'regular'}
             />
-          </Button>
-          <Button
+          </CustomButton>
+          <CustomButton
             size="sm"
             isIconOnly
             variant="ghost"
@@ -262,8 +262,8 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
             isDisabled={isEditing || isSaving}
           >
             <PencilSimpleIcon className="size-4" />
-          </Button>
-          <Button
+          </CustomButton>
+          <CustomButton
             size="sm"
             isIconOnly
             variant="ghost"
@@ -273,7 +273,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
             isDisabled={isEditing || isSaving}
           >
             <TrashIcon className="size-4" />
-          </Button>
+          </CustomButton>
         </div>
       </div>
       {isEditing && (
@@ -355,7 +355,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
             </div>
           )}
           {isQuantifiable && totalItems !== undefined && (
-            <Button
+            <CustomButton
               size="sm"
               variant="ghost"
               onPress={() => {
@@ -363,7 +363,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
               }}
             >
               Reset remaining to total
-            </Button>
+            </CustomButton>
           )}
           {metricDefinitions.length > 0 && (
             <StockMetricDefaults
@@ -375,7 +375,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
             />
           )}
           <div className="flex items-center gap-2">
-            <Button
+            <CustomButton
               size="sm"
               variant="primary"
               onPress={handleSave}
@@ -383,8 +383,8 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
             >
               <FloppyDiskIcon className="size-4" />
               Save
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               size="sm"
               variant="ghost"
               isDisabled={isSaving}
@@ -392,7 +392,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
             >
               <XIcon className="size-4" />
               Cancel
-            </Button>
+            </CustomButton>
           </div>
         </div>
       )}

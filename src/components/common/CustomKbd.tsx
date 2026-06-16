@@ -1,4 +1,8 @@
-import { cn, kbdVariants, Kbd as CoreKbd } from '@heroui/react';
+import {
+  cn,
+  Kbd as CoreKbd,
+  kbdVariants as coreKbdVariants,
+} from '@heroui/react';
 import { type ComponentProps } from 'react';
 import { tv } from 'tailwind-variants';
 
@@ -7,7 +11,7 @@ import { noop } from '@utils';
 
 const customKbdVariants = tv({
   base: 'hidden',
-  extend: kbdVariants,
+  extend: coreKbdVariants,
   defaultVariants: {
     size: 'sm',
     variant: 'default',
@@ -27,22 +31,22 @@ const customKbdVariants = tv({
   },
 });
 
-type KbdVariants = Parameters<typeof customKbdVariants>[0];
+type CustomKbdVariants = Parameters<typeof customKbdVariants>[0];
 
-type KbdProps = ComponentProps<typeof CoreKbd> &
-  KbdVariants & {
+type CustomKbdProps = ComponentProps<typeof CoreKbd> &
+  CustomKbdVariants & {
     isSolid?: boolean;
     shortcutParams?: Parameters<typeof useKeyboardShortcut>;
   };
 
-const Kbd = ({
+const CustomKbd = ({
   className,
   isSolid = false,
   shortcutParams = ['', noop, { enabled: false }],
   size,
   variant = 'light',
   ...props
-}: KbdProps) => {
+}: CustomKbdProps) => {
   const hasKeyboard = useHasKeyboard();
 
   useKeyboardShortcut(...shortcutParams);
@@ -65,4 +69,4 @@ const Kbd = ({
   );
 };
 
-export default Kbd;
+export default CustomKbd;

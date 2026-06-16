@@ -1,4 +1,4 @@
-import { Button, Drawer, Tooltip } from '@heroui/react';
+import { Drawer, Tooltip } from '@heroui/react';
 import type { ZonedDateTime } from '@internationalized/date';
 import {
   now,
@@ -13,6 +13,7 @@ import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
+import { CustomButton } from '@components';
 import { useScreenWidth } from '@hooks';
 import { type Occurrence } from '@models';
 import {
@@ -203,7 +204,7 @@ const OccurrenceDrawer = () => {
                   <div>{getMainTitle()}</div>
                   <Tooltip closeDelay={0}>
                     <Tooltip.Trigger>
-                      <Button
+                      <CustomButton
                         size="sm"
                         isIconOnly
                         variant="ghost"
@@ -218,13 +219,13 @@ const OccurrenceDrawer = () => {
                           focusable="false"
                           aria-hidden="true"
                         />
-                      </Button>
+                      </CustomButton>
                     </Tooltip.Trigger>
                     <Tooltip.Content>Previous day</Tooltip.Content>
                   </Tooltip>
                   <Tooltip closeDelay={0}>
                     <Tooltip.Trigger>
-                      <Button
+                      <CustomButton
                         size="sm"
                         isIconOnly
                         variant="ghost"
@@ -239,7 +240,7 @@ const OccurrenceDrawer = () => {
                           focusable="false"
                           aria-hidden="true"
                         />
-                      </Button>
+                      </CustomButton>
                     </Tooltip.Trigger>
                     <Tooltip.Content>Next day</Tooltip.Content>
                   </Tooltip>

@@ -1,4 +1,4 @@
-import { cn, Chip, Button, Spinner } from '@heroui/react';
+import { cn, Chip, Spinner } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
@@ -344,7 +344,7 @@ const OccurrenceListItem = ({
                         className="ml-1 size-3 [&>div]:size-3"
                       />
                     ) : (
-                      <Button
+                      <CustomButton
                         size="sm"
                         isIconOnly
                         variant="ghost"
@@ -355,7 +355,7 @@ const OccurrenceListItem = ({
                         }}
                       >
                         <TrashSimpleIcon size={10} />
-                      </Button>
+                      </CustomButton>
                     )}
                   </Chip>
                 );
@@ -404,7 +404,7 @@ const OccurrenceListItem = ({
           >
             <PencilSimpleIcon size={14} weight="bold" />
           </CustomButton>
-          <Button
+          <CustomButton
             size="sm"
             isIconOnly
             onPress={onRemove}
@@ -413,7 +413,7 @@ const OccurrenceListItem = ({
             aria-label="delete-habit-entry"
           >
             <TrashSimpleIcon weight="bold" />
-          </Button>
+          </CustomButton>
         </div>
       </div>
     </li>
