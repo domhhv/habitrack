@@ -308,8 +308,7 @@ const WeekCalendar = () => {
                                 isNoteAdded ? 'Edit note' : 'Add note'
                               }
                               className={cn(
-                                'h-5 w-5 min-w-fit rounded-xl px-0 opacity-100 group-hover:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                                isNoteAdded && 'opacity-100'
+                                'h-5 w-5 min-w-fit rounded-xl px-0 lg:h-6 lg:w-6'
                               )}
                             >
                               {isNoteAdded ? (

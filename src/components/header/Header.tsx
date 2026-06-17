@@ -1,4 +1,4 @@
-import { cn, Button, Tooltip } from '@heroui/react';
+import { cn, Tooltip } from '@heroui/react';
 import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
@@ -11,7 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import { useLocation, useNavigate } from 'react-router';
 
-import { Kbd, AuthModalButton } from '@components';
+import { CustomKbd, CustomButton, AuthModalButton } from '@components';
 import { useScreenWidth } from '@hooks';
 import {
   useUser,
@@ -46,7 +46,7 @@ const Header = () => {
     <nav className="bg-background-100 dark:bg-background-900 sticky top-0 z-50 h-16 w-full border-b border-b-slate-300 dark:border-b-slate-800">
       <header className="flex h-full w-full items-center justify-between px-8 lg:px-16">
         <div className="flex items-center gap-2">
-          <Button
+          <CustomButton
             isIconOnly={screenWidth < ICON_ONLY_BREAKPOINT}
             variant={pathname.startsWith('/calendar') ? 'tertiary' : 'ghost'}
             onPress={() => {
@@ -61,10 +61,10 @@ const Header = () => {
             ) : (
               'Calendar'
             )}
-          </Button>
+          </CustomButton>
           {!!user && (
             <>
-              <Button
+              <CustomButton
                 isIconOnly={screenWidth < ICON_ONLY_BREAKPOINT}
                 variant={pathname === '/habits' ? 'tertiary' : 'ghost'}
                 onPress={() => {
@@ -76,8 +76,8 @@ const Header = () => {
                 ) : (
                   'Habits'
                 )}
-              </Button>
-              <Button
+              </CustomButton>
+              <CustomButton
                 isIconOnly={screenWidth < ICON_ONLY_BREAKPOINT}
                 variant={pathname === '/notes' ? 'tertiary' : 'ghost'}
                 onPress={() => {
@@ -92,14 +92,14 @@ const Header = () => {
                 ) : (
                   'Notes'
                 )}
-              </Button>
+              </CustomButton>
             </>
           )}
           <ThemeToggle />
           {screenWidth > 390 && (
             <Tooltip closeDelay={0}>
               <Tooltip.Trigger>
-                <Button
+                <CustomButton
                   isIconOnly
                   variant="ghost"
                   onPress={() => {
@@ -111,7 +111,7 @@ const Header = () => {
                   }}
                 >
                   <GithubLogoIcon size={isDesktop ? 18 : 16} />
-                </Button>
+                </CustomButton>
               </Tooltip.Trigger>
               <Tooltip.Content showArrow offset={10} placement="bottom">
                 <Tooltip.Arrow />
@@ -123,7 +123,7 @@ const Header = () => {
         <div className="flex items-center gap-4">
           {!!user && (
             <div className="bg-background-100/90 dark:bg-background-900 fixed right-0 bottom-0 left-0 z-50 flex w-full gap-4 border-t border-t-slate-300 p-2 px-4 md:right-4 md:bottom-4 md:left-auto md:w-auto md:border-0 md:bg-transparent md:p-0 xl:static xl:right-auto xl:bottom-auto xl:flex-row-reverse xl:border-0 xl:bg-transparent xl:p-0 dark:border-t-slate-800 dark:md:bg-transparent dark:xl:bg-transparent">
-              <Button
+              <CustomButton
                 variant="secondary"
                 fullWidth={isMobile}
                 onPress={dispatchNoteDrawerOpen}
@@ -131,16 +131,16 @@ const Header = () => {
               >
                 <NotePencilIcon size={isMobile ? 12 : 16} />
                 Note
-                <Kbd
+                <CustomKbd
                   isSolid
                   variant="light"
                   size={isMobile ? 'sm' : 'md'}
                   shortcutParams={['n', dispatchNoteDrawerOpen]}
                 >
                   N
-                </Kbd>
-              </Button>
-              <Button
+                </CustomKbd>
+              </CustomButton>
+              <CustomButton
                 variant="primary"
                 fullWidth={isMobile}
                 onPress={dispatchOccurrenceDrawerOpen}
@@ -148,18 +148,18 @@ const Header = () => {
               >
                 <CalendarCheckIcon size={isMobile ? 12 : 16} />
                 Log
-                <Kbd
+                <CustomKbd
                   variant="default"
                   size={isMobile ? 'sm' : 'md'}
                   shortcutParams={['l', dispatchOccurrenceDrawerOpen]}
                 >
                   L
-                </Kbd>
-              </Button>
+                </CustomKbd>
+              </CustomButton>
             </div>
           )}
           <div className="flex items-center gap-4">
-            <Button
+            <CustomButton
               variant="secondary"
               className="hidden xl:inline-flex"
               onPress={() => {
@@ -172,7 +172,7 @@ const Header = () => {
             >
               <ArrowSquareOutIcon size={16} />
               Roadmap
-              <Kbd
+              <CustomKbd
                 isSolid
                 size="md"
                 shortcutParams={[
@@ -187,8 +187,8 @@ const Header = () => {
                 ]}
               >
                 M
-              </Kbd>
-            </Button>
+              </CustomKbd>
+            </CustomButton>
             <AuthModalButton />
           </div>
         </div>

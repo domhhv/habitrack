@@ -1,10 +1,9 @@
-import type { Selection, TimeValue, ButtonProps } from '@heroui/react';
+import type { Selection, TimeValue } from '@heroui/react';
 import {
   cn,
   Form,
   Link,
   Label,
-  Button,
   Header,
   Switch,
   Spinner,
@@ -33,7 +32,11 @@ import isEqual from 'lodash.isequal';
 import pluralize from 'pluralize';
 import React from 'react';
 
-import { SignedImageViewer, MetricValuesSection } from '@components';
+import {
+  CustomButton,
+  SignedImageViewer,
+  MetricValuesSection,
+} from '@components';
 import { useTextField, useScreenWidth } from '@hooks';
 import type { Habit, Occurrence, MetricValue } from '@models';
 import { StorageBuckets } from '@models';
@@ -740,11 +743,6 @@ const OccurrenceFormView = ({
     return `${pluralize('day', daysDifference, true)}`;
   };
 
-  const submitButtonSharedProps: ButtonProps = {
-    isDisabled: isSubmitButtonDisabled,
-    variant: 'primary',
-  };
-
   return (
     <Form className="space-y-3">
       {occurrenceToEdit ? (
@@ -1025,11 +1023,12 @@ const OccurrenceFormView = ({
         />
       )}
       {hasHabits ? (
-        <Button
-          {...submitButtonSharedProps}
+        <CustomButton
           fullWidth
+          variant="primary"
           isPending={isSaving}
           onPress={handleSubmit}
+          isDisabled={isSubmitButtonDisabled}
         >
           {({ isPending }) => {
             return (
@@ -1039,12 +1038,17 @@ const OccurrenceFormView = ({
               </>
             );
           }}
-        </Button>
+        </CustomButton>
       ) : (
         <Link href="/habits" className="w-full">
-          <Button {...submitButtonSharedProps} fullWidth onPress={handleClose}>
+          <CustomButton
+            fullWidth
+            variant="primary"
+            onPress={handleClose}
+            isDisabled={isSubmitButtonDisabled}
+          >
             Go to Habits
-          </Button>
+          </CustomButton>
         </Link>
       )}
     </Form>

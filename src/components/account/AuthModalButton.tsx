@@ -2,7 +2,6 @@ import {
   Tabs,
   Modal,
   Toast,
-  Button,
   Tooltip,
   ButtonGroup,
   useOverlayState,
@@ -12,7 +11,7 @@ import React from 'react';
 import { VisuallyHidden } from 'react-aria';
 import { useNavigate } from 'react-router';
 
-import { Kbd } from '@components';
+import { CustomKbd, CustomButton } from '@components';
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import type { DaysOfWeek } from '@models';
 import { signIn, signUp, signOut, sendPasswordResetEmail } from '@services';
@@ -124,7 +123,7 @@ const AuthModalButton = () => {
     <>
       {user?.id ? (
         <ButtonGroup>
-          <Button
+          <CustomButton
             variant="secondary"
             isIconOnly={!isDesktop}
             data-testid="auth-button"
@@ -135,10 +134,10 @@ const AuthModalButton = () => {
           >
             <UserIcon weight="bold" data-testid="user-icon" />
             {isDesktop && 'Account'}
-          </Button>
+          </CustomButton>
           <Tooltip delay={0} closeDelay={0}>
             <Tooltip.Trigger>
-              <Button
+              <CustomButton
                 isIconOnly
                 onPress={signOut}
                 variant="secondary"
@@ -146,20 +145,20 @@ const AuthModalButton = () => {
               >
                 <SignOutIcon weight="bold" data-testid="sign-out-icon" />
                 <VisuallyHidden>Log Out</VisuallyHidden>
-              </Button>
+              </CustomButton>
             </Tooltip.Trigger>
             <Tooltip.Content>Log out</Tooltip.Content>
           </Tooltip>
         </ButtonGroup>
       ) : (
-        <Button
-          size="sm"
+        <CustomButton
           variant="primary"
           data-testid="auth-button"
           onPress={overlayState.open}
         >
           Log In
-          <Kbd
+          <CustomKbd
+            size="md"
             variant="default"
             shortcutParams={[
               'i',
@@ -171,8 +170,8 @@ const AuthModalButton = () => {
             ]}
           >
             I
-          </Kbd>
-        </Button>
+          </CustomKbd>
+        </CustomButton>
       )}
       <Modal state={overlayState}>
         <Modal.Backdrop

@@ -1,11 +1,4 @@
-import {
-  Input,
-  Label,
-  Button,
-  Switch,
-  TextField,
-  NumberField,
-} from '@heroui/react';
+import { Input, Label, Switch, TextField, NumberField } from '@heroui/react';
 import {
   XIcon,
   PlusIcon,
@@ -13,6 +6,7 @@ import {
   CaretDownIcon,
 } from '@phosphor-icons/react';
 
+import { CustomButton } from '@components';
 import type {
   MetricType,
   MetricConfig,
@@ -128,7 +122,7 @@ const DurationConfigFields = ({
     <div className="flex flex-wrap gap-2">
       {formats.map((format) => {
         return (
-          <Button
+          <CustomButton
             key={format}
             variant={config.format === format ? 'primary' : 'secondary'}
             onClick={() => {
@@ -136,7 +130,7 @@ const DurationConfigFields = ({
             }}
           >
             {format}
-          </Button>
+          </CustomButton>
         );
       })}
     </div>
@@ -275,21 +269,22 @@ const ChoiceConfigFields = ({
             >
               <Input placeholder={`Option ${index + 1}`} />
             </TextField>
-            <Button
+            <CustomButton
               variant="danger-soft"
+              aria-label={`Remove option ${index + 1}`}
               onClick={() => {
                 handleRemoveOption(index);
               }}
             >
               <XIcon size={16} weight="bold" />
-            </Button>
+            </CustomButton>
           </div>
         );
       })}
-      <Button fullWidth variant="secondary" onClick={handleAddOption}>
+      <CustomButton fullWidth variant="secondary" onClick={handleAddOption}>
         <PlusIcon />
         Add option
-      </Button>
+      </CustomButton>
       <Switch
         size="sm"
         isSelected={config.allowMultiple || false}

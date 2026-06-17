@@ -1,7 +1,8 @@
-import { Button, ButtonGroup } from '@heroui/react';
+import { ButtonGroup } from '@heroui/react';
 import { MoonIcon, SunDimIcon, DesktopIcon } from '@phosphor-icons/react';
 import React from 'react';
 
+import { CustomButton } from '@components';
 import { ThemeModes } from '@const';
 import { useThemeMode } from '@hooks';
 
@@ -21,7 +22,7 @@ const ThemeToggle = () => {
         const Icon = modesToIcons[mode];
 
         return (
-          <Button
+          <CustomButton
             size="sm"
             key={mode}
             isIconOnly
@@ -31,7 +32,7 @@ const ThemeToggle = () => {
             }}
           >
             <Icon size={14} />
-          </Button>
+          </CustomButton>
         );
       })}
     </ButtonGroup>

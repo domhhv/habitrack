@@ -1,7 +1,8 @@
-import { Card, Chip, Alert, Button, Spinner } from '@heroui/react';
+import { Card, Chip, Alert, Spinner } from '@heroui/react';
 import type { OAuthAuthorizationDetails } from '@supabase/supabase-js';
 import React from 'react';
 
+import { CustomButton } from '@components';
 import { supabaseClient, getErrorMessage } from '@utils';
 
 // Human-readable labels for the scopes we expose. Anything unknown is shown
@@ -199,7 +200,7 @@ const OAuthConsentPage = () => {
           )}
         </Card.Content>
         <Card.Footer className="justify-end gap-2">
-          <Button
+          <CustomButton
             variant="outline"
             isDisabled={isSubmitting}
             onPress={() => {
@@ -207,8 +208,8 @@ const OAuthConsentPage = () => {
             }}
           >
             Deny
-          </Button>
-          <Button
+          </CustomButton>
+          <CustomButton
             variant="primary"
             isDisabled={isSubmitting}
             onPress={() => {
@@ -216,7 +217,7 @@ const OAuthConsentPage = () => {
             }}
           >
             Allow
-          </Button>
+          </CustomButton>
         </Card.Footer>
       </Card>
     </div>

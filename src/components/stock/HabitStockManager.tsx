@@ -1,7 +1,7 @@
-import { Button } from '@heroui/react';
 import { PlusIcon } from '@phosphor-icons/react';
 import React from 'react';
 
+import { CustomButton } from '@components';
 import type { Habit } from '@models';
 
 import AddStockForm from './AddStockForm';
@@ -26,7 +26,7 @@ const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
       <div className="mb-1 flex items-center gap-2">
         <h2 className="text-sm font-medium">Stocks</h2>
         {!isAdding && (
-          <Button
+          <CustomButton
             size="sm"
             isIconOnly
             variant="ghost"
@@ -36,7 +36,7 @@ const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
             }}
           >
             <PlusIcon className="size-4" />
-          </Button>
+          </CustomButton>
         )}
       </div>
       <div className="flex flex-col gap-2">

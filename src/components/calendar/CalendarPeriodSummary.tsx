@@ -1,8 +1,8 @@
-import { Button } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
 import React from 'react';
 
+import { CustomButton } from '@components';
 import type {
   NoteOfPeriod,
   NotePeriodKind,
@@ -90,7 +90,7 @@ const CalendarPeriodSummary = ({
             <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
               Note
             </h4>
-            <Button
+            <CustomButton
               size="sm"
               isIconOnly
               variant="ghost"
@@ -101,7 +101,7 @@ const CalendarPeriodSummary = ({
               }}
             >
               <NotePencilIcon size={14} weight="bold" />
-            </Button>
+            </CustomButton>
           </div>
           <p className="line-clamp-4 text-sm text-stone-500 dark:text-stone-400">
             {note.content}
@@ -109,7 +109,7 @@ const CalendarPeriodSummary = ({
         </div>
       )}
       {!note && date && (
-        <Button
+        <CustomButton
           size="sm"
           variant="secondary"
           onPress={() => {
@@ -118,7 +118,7 @@ const CalendarPeriodSummary = ({
         >
           <NotePencilIcon size={14} weight="bold" />
           Add note
-        </Button>
+        </CustomButton>
       )}
       {occurrenceSummary.length > 0 && (
         <div className="space-y-2">

@@ -1,6 +1,7 @@
-import { cn, Input, Label, Button, TextField } from '@heroui/react';
+import { cn, Input, Label, TextField } from '@heroui/react';
 import { type SubmitEventHandler } from 'react';
 
+import { CustomButton } from '@components';
 import { useTextField } from '@hooks';
 
 import PasswordInput from './PasswordInput';
@@ -74,12 +75,12 @@ const AuthForm = ({
           </TextField>
           {mode === 'reset-password' && (
             <div className="text-right">
-              <Button
+              <CustomButton
                 onPress={goBackToLogin}
                 className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
               >
                 Back to login
-              </Button>
+              </CustomButton>
             </div>
           )}
         </div>
@@ -114,21 +115,21 @@ const AuthForm = ({
         )}
       </div>
       <div className="mt-4 flex justify-end gap-2">
-        <Button
+        <CustomButton
           variant="secondary"
           onPress={handleCancel}
           isDisabled={isDisabled}
         >
           Cancel
-        </Button>
-        <Button
+        </CustomButton>
+        <CustomButton
           type="submit"
           variant="primary"
           isDisabled={isDisabled}
           data-testid="submit-button"
         >
           {submitButtonLabel}
-        </Button>
+        </CustomButton>
       </div>
     </form>
   );

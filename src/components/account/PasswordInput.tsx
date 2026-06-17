@@ -2,6 +2,8 @@ import { Label, Button, TextField, InputGroup } from '@heroui/react';
 import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import React, { type ChangeEventHandler } from 'react';
 
+import { CustomButton } from '@components';
+
 type PasswordInputProps = {
   isDisabled: boolean;
   label: string;
@@ -41,8 +43,8 @@ const PasswordInput = ({
           disabled={isDisabled}
           type={isVisible ? 'text' : 'password'}
         />
-        <InputGroup.Suffix className="px-0">
-          <Button
+        <InputGroup.Suffix className="pr-0.5">
+          <CustomButton
             size="sm"
             isIconOnly
             variant="ghost"
@@ -54,7 +56,7 @@ const PasswordInput = ({
             ) : (
               <EyeSlashIcon className="size-4" />
             )}
-          </Button>
+          </CustomButton>
         </InputGroup.Suffix>
       </InputGroup>
       {onReset && (

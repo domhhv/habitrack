@@ -1,10 +1,4 @@
-import {
-  cn,
-  Button,
-  ButtonGroup,
-  Description,
-  RangeCalendar,
-} from '@heroui/react';
+import { cn, ButtonGroup, Description, RangeCalendar } from '@heroui/react';
 import {
   startOfWeek,
   isSameMonth,
@@ -21,6 +15,7 @@ import {
 import React from 'react';
 import { useLocale } from 'react-aria';
 
+import { CustomButton } from '@components';
 import { useFirstDayOfWeek } from '@hooks';
 import { useNoteDrawerState, useNoteDrawerActions } from '@stores';
 
@@ -60,7 +55,7 @@ const NotePeriodPicker = ({
       )}
     >
       <ButtonGroup size="sm">
-        <Button
+        <CustomButton
           variant={periodKind === 'month' ? 'primary' : 'secondary'}
           onPress={() => {
             void handleChange(() => {
@@ -71,8 +66,8 @@ const NotePeriodPicker = ({
         >
           <CalendarDotsIcon size={20} />
           Month
-        </Button>
-        <Button
+        </CustomButton>
+        <CustomButton
           variant={periodKind === 'week' ? 'primary' : 'secondary'}
           onPress={() => {
             void handleChange(() => {
@@ -93,8 +88,8 @@ const NotePeriodPicker = ({
           <ButtonGroup.Separator />
           <NumberSevenIcon size={20} />
           Week
-        </Button>
-        <Button
+        </CustomButton>
+        <CustomButton
           variant={periodKind === 'day' ? 'primary' : 'secondary'}
           onPress={() => {
             void handleChange(() => {
@@ -110,10 +105,10 @@ const NotePeriodPicker = ({
           <ButtonGroup.Separator />
           <SunIcon size={20} />
           Day
-        </Button>
+        </CustomButton>
       </ButtonGroup>
       <div className="flex gap-1">
-        <Button
+        <CustomButton
           size="sm"
           isIconOnly
           variant="outline"
@@ -134,7 +129,7 @@ const NotePeriodPicker = ({
           }}
         >
           <CaretLeftIcon />
-        </Button>
+        </CustomButton>
         <RangeCalendar
           isReadOnly
           focusedValue={periodDate}
@@ -166,7 +161,7 @@ const NotePeriodPicker = ({
             </RangeCalendar.GridBody>
           </RangeCalendar.Grid>
         </RangeCalendar>
-        <Button
+        <CustomButton
           size="sm"
           isIconOnly
           variant="outline"
@@ -187,7 +182,7 @@ const NotePeriodPicker = ({
           }}
         >
           <CaretRightIcon />
-        </Button>
+        </CustomButton>
       </div>
       <Description className="text-center">Calendar is read-only</Description>
     </div>

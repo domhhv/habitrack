@@ -1,14 +1,8 @@
-import {
-  Input,
-  Label,
-  Button,
-  Switch,
-  TextField,
-  NumberField,
-} from '@heroui/react';
+import { Input, Label, Switch, TextField, NumberField } from '@heroui/react';
 import { XIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 import React from 'react';
 
+import { CustomButton } from '@components';
 import type {
   Habit,
   MetricValue,
@@ -159,7 +153,7 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
         />
       )}
       <div className="flex items-center gap-2">
-        <Button
+        <CustomButton
           size="sm"
           variant="primary"
           onPress={handleSubmit}
@@ -169,8 +163,8 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
         >
           <FloppyDiskIcon className="size-4" />
           Save
-        </Button>
-        <Button
+        </CustomButton>
+        <CustomButton
           size="sm"
           variant="ghost"
           onPress={onClose}
@@ -178,7 +172,7 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
         >
           <XIcon className="size-4" />
           Cancel
-        </Button>
+        </CustomButton>
       </div>
     </div>
   );

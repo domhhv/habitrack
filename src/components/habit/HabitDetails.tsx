@@ -1,7 +1,6 @@
 import {
   cn,
   Label,
-  Button,
   Spinner,
   Dropdown,
   TextField,
@@ -12,6 +11,7 @@ import React from 'react';
 
 import {
   TraitChip,
+  CustomButton,
   HabitStockManager,
   MetricDefinitionForm,
 } from '@components';
@@ -303,7 +303,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                     <span className="text-foreground-400 text-tiny whitespace-nowrap">
                       {name.length}/50
                     </span>
-                    <Button
+                    <CustomButton
                       size="sm"
                       isIconOnly
                       variant="ghost"
@@ -312,8 +312,8 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                       isDisabled={!name.trim()}
                     >
                       <CheckIcon className="size-4" />
-                    </Button>
-                    <Button
+                    </CustomButton>
+                    <CustomButton
                       size="sm"
                       isIconOnly
                       variant="ghost"
@@ -321,7 +321,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                       aria-label="Cancel name editing"
                     >
                       <XIcon className="size-4" />
-                    </Button>
+                    </CustomButton>
                   </InputGroup.Suffix>
                 </InputGroup>
               </TextField>
@@ -329,7 +329,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           ) : (
             <div className="group flex items-center gap-2">
               <h1 className="text-2xl font-bold">{habit.name}</h1>
-              <Button
+              <CustomButton
                 size="sm"
                 isIconOnly
                 variant="ghost"
@@ -344,7 +344,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 )}
               >
                 <PencilSimpleIcon className="size-4" />
-              </Button>
+              </CustomButton>
             </div>
           )}
           {isEditingDescription ? (
@@ -365,7 +365,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                     <span className="text-foreground-400 text-tiny whitespace-nowrap">
                       {description.length}/100
                     </span>
-                    <Button
+                    <CustomButton
                       size="sm"
                       isIconOnly
                       variant="ghost"
@@ -373,8 +373,8 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                       aria-label="Save description"
                     >
                       <CheckIcon className="size-4" />
-                    </Button>
-                    <Button
+                    </CustomButton>
+                    <CustomButton
                       size="sm"
                       isIconOnly
                       variant="ghost"
@@ -382,7 +382,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                       aria-label="Cancel description editing"
                     >
                       <XIcon className="size-4" />
-                    </Button>
+                    </CustomButton>
                   </InputGroup.Suffix>
                 </InputGroup>
               </TextField>
@@ -394,7 +394,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
               >
                 {habit.description || 'No description'}
               </p>
-              <Button
+              <CustomButton
                 size="sm"
                 isIconOnly
                 variant="ghost"
@@ -409,7 +409,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 )}
               >
                 <PencilSimpleIcon className="size-4" />
-              </Button>
+              </CustomButton>
             </div>
           )}
         </div>
@@ -431,7 +431,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 <span className="text-foreground-400 text-tiny whitespace-nowrap">
                   {motivation.length}/2000
                 </span>
-                <Button
+                <CustomButton
                   size="sm"
                   isIconOnly
                   variant="ghost"
@@ -439,8 +439,8 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                   aria-label="Save motivation"
                 >
                   <CheckIcon className="size-4" />
-                </Button>
-                <Button
+                </CustomButton>
+                <CustomButton
                   size="sm"
                   isIconOnly
                   variant="ghost"
@@ -448,7 +448,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                   aria-label="Cancel motivation editing"
                 >
                   <XIcon className="size-4" />
-                </Button>
+                </CustomButton>
               </InputGroup.Suffix>
             </InputGroup>
           </TextField>
@@ -465,7 +465,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
             >
               {habit.motivation || 'No motivation set'}
             </p>
-            <Button
+            <CustomButton
               size="sm"
               isIconOnly
               variant="ghost"
@@ -480,7 +480,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
               )}
             >
               <PencilSimpleIcon className="size-4" />
-            </Button>
+            </CustomButton>
           </div>
         </div>
       )}
@@ -488,7 +488,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
         <div className="mb-1 flex items-center gap-2">
           <h2 className="text-sm font-medium">Metrics</h2>
           {!isEditingMetrics && (
-            <Button
+            <CustomButton
               size="sm"
               isIconOnly
               variant="ghost"
@@ -500,7 +500,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
               )}
             >
               <PencilSimpleIcon className="size-4" />
-            </Button>
+            </CustomButton>
           )}
         </div>
         {isEditingMetrics ? (
@@ -548,29 +548,29 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 />
               );
             })}
-            <Button
+            <CustomButton
               className="min-h-8"
               onPress={addMetric}
               isDisabled={isSavingMetrics}
             >
               Add metric
-            </Button>
+            </CustomButton>
             <div className="flex items-center gap-2">
-              <Button
+              <CustomButton
                 variant="primary"
                 onPress={saveMetrics}
                 isDisabled={isSavingMetrics || !user?.id}
               >
                 {isSavingMetrics && <Spinner size="sm" />}
                 Save
-              </Button>
-              <Button
+              </CustomButton>
+              <CustomButton
                 variant="ghost"
                 isDisabled={isSavingMetrics}
                 onPress={cancelEditingMetrics}
               >
                 Cancel
-              </Button>
+              </CustomButton>
             </div>
           </div>
         ) : (

@@ -1,4 +1,4 @@
-import { cn, Button } from '@heroui/react';
+import { cn } from '@heroui/react';
 import {
   today,
   isToday,
@@ -18,6 +18,7 @@ import { useLocale } from 'react-aria';
 import { useNavigate, useLocation } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
+import { CustomButton } from '@components';
 import { useScreenWidth, useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
 import { useNoteDrawerState, useOccurrenceDrawerState } from '@stores';
 
@@ -127,7 +128,7 @@ const CalendarNavigationButtons = ({
 
   return (
     <>
-      <Button
+      <CustomButton
         isIconOnly
         variant="tertiary"
         onPress={() => {
@@ -135,9 +136,9 @@ const CalendarNavigationButtons = ({
         }}
       >
         <ArrowFatLeftIcon size={20} />
-      </Button>
+      </CustomButton>
       {!isSameRange && (
-        <Button
+        <CustomButton
           variant="tertiary"
           className={cn(isMobile && 'min-w-fit px-2')}
           onPress={() => {
@@ -146,9 +147,9 @@ const CalendarNavigationButtons = ({
         >
           <ArrowsClockwiseIcon size={20} />
           {(!isMobile || screenWidth < 446) && 'Today'}
-        </Button>
+        </CustomButton>
       )}
-      <Button
+      <CustomButton
         isIconOnly
         variant="tertiary"
         onPress={() => {
@@ -156,7 +157,7 @@ const CalendarNavigationButtons = ({
         }}
       >
         <ArrowFatRightIcon size={20} />
-      </Button>
+      </CustomButton>
     </>
   );
 };

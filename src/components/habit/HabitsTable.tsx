@@ -1,4 +1,4 @@
-import { cn, Table, Button, Tooltip, Pagination } from '@heroui/react';
+import { cn, Table, Tooltip, Pagination } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { useRollbar } from '@rollbar/react';
@@ -7,7 +7,7 @@ import React from 'react';
 import { useDateFormatter } from 'react-aria';
 import { Link } from 'react-router';
 
-import { TraitChip, AddHabitDialogButton } from '@components';
+import { TraitChip, CustomButton, AddHabitDialogButton } from '@components';
 import type { Habit, HabitStats } from '@models';
 import { StorageBuckets } from '@models';
 import { listFiles, deleteFile, getHabitsStats } from '@services';
@@ -242,7 +242,7 @@ const HabitsTable = () => {
                         >
                           <Tooltip closeDelay={0}>
                             <Tooltip.Trigger>
-                              <Button
+                              <CustomButton
                                 size="sm"
                                 isIconOnly
                                 variant="ghost"
@@ -259,7 +259,7 @@ const HabitsTable = () => {
                                   weight="bold"
                                   aria-hidden="true"
                                 />
-                              </Button>
+                              </CustomButton>
                             </Tooltip.Trigger>
                             <Tooltip.Content>Delete habit</Tooltip.Content>
                           </Tooltip>

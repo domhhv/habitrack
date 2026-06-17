@@ -1,5 +1,6 @@
-import { Modal, Button } from '@heroui/react';
+import { Modal } from '@heroui/react';
 
+import { CustomButton } from '@components';
 import { useConfirmationState, useConfirmationActions } from '@stores';
 
 const ConfirmationDialog = () => {
@@ -30,12 +31,12 @@ const ConfirmationDialog = () => {
             </Modal.Header>
             <Modal.Body>{description}</Modal.Body>
             <Modal.Footer>
-              <Button variant="outline" onPress={rejectConfirmation}>
+              <CustomButton variant="outline" onPress={rejectConfirmation}>
                 {cancelText}
-              </Button>
-              <Button variant={variant} onPress={approveConfirmation}>
+              </CustomButton>
+              <CustomButton variant={variant} onPress={approveConfirmation}>
                 {confirmText}
-              </Button>
+              </CustomButton>
             </Modal.Footer>
           </Modal.Dialog>
         </Modal.Container>

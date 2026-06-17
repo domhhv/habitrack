@@ -35,6 +35,7 @@ const rules = {
   'no-useless-rename': 'error',
   'object-shorthand': 'error',
   'switch-case/no-case-curly': 'off',
+  'unused-imports/no-unused-imports': 'error',
 
   '@typescript-eslint/no-unused-vars': [
     'error',

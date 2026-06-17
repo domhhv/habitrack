@@ -3,7 +3,6 @@ import {
   Form,
   Label,
   Drawer,
-  Button,
   Spinner,
   TextArea,
   TextField,
@@ -17,7 +16,7 @@ import { CaretDownIcon } from '@phosphor-icons/react';
 import React, { type SyntheticEvent } from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
 
-import { Kbd } from '@components';
+import { CustomKbd, CustomButton } from '@components';
 import {
   useTextField,
   useScreenWidth,
@@ -240,7 +239,7 @@ const NoteDrawer = () => {
             <Drawer.CloseTrigger />
             <Drawer.Header className="flex-row items-center gap-2">
               <span>Note for {formatPeriod()}</span>
-              <Button
+              <CustomButton
                 size="sm"
                 isIconOnly
                 variant="ghost"
@@ -253,7 +252,7 @@ const NoteDrawer = () => {
                     isPeriodPickerShown && 'rotate-180'
                   )}
                 />
-              </Button>
+              </CustomButton>
             </Drawer.Header>
             <Form onSubmit={submitNote} className="max-h-[calc(100%-64px)]">
               <Drawer.Body className="w-full space-y-4 py-0.5">
@@ -304,16 +303,16 @@ const NoteDrawer = () => {
               </Drawer.Body>
               <Drawer.Footer className="w-full self-end pt-0 sm:w-auto">
                 {!!existingNote && (
-                  <Button
+                  <CustomButton
                     variant="danger"
                     onPress={removeNote}
                     isDisabled={isRemoving}
                   >
                     {isRemoving && <Spinner size="sm" color="current" />}
                     Remove
-                  </Button>
+                  </CustomButton>
                 )}
-                <Button
+                <CustomButton
                   type="submit"
                   variant="primary"
                   fullWidth={isMobile && !existingNote}
@@ -328,12 +327,12 @@ const NoteDrawer = () => {
                   {isSaving ? (
                     <Spinner size="sm" color="current" />
                   ) : (
-                    <Kbd size="md" variant="default">
+                    <CustomKbd size="md" variant="default">
                       {mod} {enter}
-                    </Kbd>
+                    </CustomKbd>
                   )}
                   {existingNote ? 'Save' : 'Add'}
-                </Button>
+                </CustomButton>
               </Drawer.Footer>
             </Form>
           </Drawer.Dialog>

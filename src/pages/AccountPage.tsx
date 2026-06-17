@@ -3,7 +3,6 @@ import {
   Alert,
   Input,
   Label,
-  Button,
   Select,
   ListBox,
   TextField,
@@ -13,7 +12,7 @@ import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
 import React from 'react';
 
-import { PasswordInput } from '@components';
+import { CustomButton, PasswordInput } from '@components';
 import { useTextField, useAuthSearchParams } from '@hooks';
 import type { DaysOfWeek, ProfilesUpdate } from '@models';
 import { useProfile, useUserActions } from '@stores';
@@ -216,7 +215,7 @@ const AccountPage = () => {
                 </ListBox>
               </Select.Popover>
             </Select>
-            <Button
+            <CustomButton
               fullWidth
               type="submit"
               variant="primary"
@@ -230,7 +229,7 @@ const AccountPage = () => {
               }
             >
               Save
-            </Button>
+            </CustomButton>
           </div>
         </form>
       </div>

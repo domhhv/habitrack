@@ -1,10 +1,4 @@
-import {
-  Label,
-  Button,
-  Tooltip,
-  Dropdown,
-  type Selection,
-} from '@heroui/react';
+import { Label, Tooltip, Dropdown, type Selection } from '@heroui/react';
 import { isSameDay, getLocalTimeZone } from '@internationalized/date';
 import { CaretDownIcon } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
@@ -12,6 +6,7 @@ import pluralize from 'pluralize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
+import { CustomButton } from '@components';
 import {
   isThisWeek,
   differenceInDays,
@@ -147,9 +142,14 @@ const HabitLastEntry = ({ timestamp }: HabitLastEntryProps) => {
       </Tooltip>
       <Dropdown>
         <Dropdown.Trigger>
-          <Button size="sm" isIconOnly variant="ghost">
+          <CustomButton
+            size="sm"
+            isIconOnly
+            variant="ghost"
+            aria-label="Select relative time format"
+          >
             <CaretDownIcon />
-          </Button>
+          </CustomButton>
         </Dropdown.Trigger>
         <Dropdown.Popover>
           <Dropdown.Menu
