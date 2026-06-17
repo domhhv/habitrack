@@ -32,7 +32,7 @@ const CalendarNavigationButtons = ({
   const timeZone = getLocalTimeZone();
   const location = useLocation();
   const { locale } = useLocale();
-  const { isMobile, screenWidth } = useScreenWidth();
+  const { isMobile } = useScreenWidth();
   const navigate = useNavigate();
   const occurrenceDrawerState = useOccurrenceDrawerState();
   const noteDrawerState = useNoteDrawerState();
@@ -146,7 +146,6 @@ const CalendarNavigationButtons = ({
           }}
         >
           <ArrowsClockwiseIcon size={20} />
-          {(!isMobile || screenWidth < 446) && 'Today'}
         </CustomButton>
       )}
       <CustomButton

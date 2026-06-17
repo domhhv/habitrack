@@ -14,10 +14,12 @@ import { useParams } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { useFirstDayOfWeek } from '@hooks';
-import { useCalendarRangeChange } from '@stores';
+import { useMonthNotes, useOccurrences, useCalendarRangeChange } from '@stores';
+import { buildMetricTotals, buildOccurrenceSummary } from '@utils';
 
 import CalendarFilters from './CalendarFilters';
 import CalendarNavigation from './CalendarNavigation';
+import CalendarPeriodSummary from './CalendarPeriodSummary';
 import MonthCalendarGrid from './MonthCalendarGrid';
 
 type MonthCalendarProps = {
@@ -26,11 +28,47 @@ type MonthCalendarProps = {
 
 const MonthCalendar = ({ state }: MonthCalendarProps) => {
   const changeCalendarRange = useCalendarRangeChange();
+  const monthNotes = useMonthNotes();
+  const occurrences = useOccurrences();
   const params = useParams();
   const { locale } = useLocale();
   const firstDayOfWeek = useFirstDayOfWeek();
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
+
+  const monthStart = React.useMemo(() => {
+    return startOfMonth(state.focusedDate);
+  }, [state.focusedDate]);
+
+  const monthNote = React.useMemo(() => {
+    return monthNotes.find((note) => {
+      return note.periodDate === monthStart.toString();
+    });
+  }, [monthNotes, monthStart]);
+
+  const occurrenceSummary = React.useMemo(() => {
+    const monthOccurrencesById: Record<
+      string,
+      (typeof occurrences)[string][string]
+    > = {};
+
+    for (const dayOccurrences of Object.values(occurrences)) {
+      for (const [id, occurrence] of Object.entries(dayOccurrences)) {
+        if (
+          occurrence.occurredAt.year === monthStart.year &&
+          occurrence.occurredAt.month === monthStart.month
+        ) {
+          monthOccurrencesById[id] = occurrence;
+        }
+      }
+    }
+
+    return buildOccurrenceSummary(monthOccurrencesById);
+  }, [occurrences, monthStart]);
+
+  const metricTotals = React.useMemo(() => {
+    return buildMetricTotals(occurrenceSummary);
+  }, [occurrenceSummary]);
 
   React.useEffect(() => {
     if (!isFocusedDateInitialized && state.focusedDate.day !== 1) {
@@ -86,13 +124,20 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
   }, [params, state]);
 
   return (
-    <>
-      <div className="flex flex-col items-stretch justify-between gap-2 px-0 pt-2 md:pt-0 lg:flex-row lg:gap-0 lg:px-0">
+    <div className="flex w-full flex-1 gap-0 md:gap-6">
+      <MonthCalendarGrid state={state} />
+      <aside className="hidden w-86 shrink-0 flex-col gap-4 overflow-y-auto py-8 xl:flex">
         <CalendarNavigation focusedDate={state.focusedDate} />
         <CalendarFilters />
-      </div>
-      <MonthCalendarGrid state={state} />
-    </>
+        <CalendarPeriodSummary
+          kind="month"
+          note={monthNote}
+          date={monthStart}
+          metricTotals={metricTotals}
+          occurrenceSummary={occurrenceSummary}
+        />
+      </aside>
+    </div>
   );
 };
 

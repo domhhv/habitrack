@@ -124,17 +124,17 @@ const CalendarFilters = () => {
   return (
     <div
       className={cn(
-        'hidden max-w-full flex-col items-stretch justify-end gap-2 min-[550px]:flex-row lg:justify-between',
+        'hidden max-w-full flex-col items-stretch justify-end gap-2',
         isVisible && 'flex'
       )}
     >
       <Select
+        fullWidth
         variant="secondary"
         value={filters.habitIds}
         selectionMode="multiple"
         placeholder="Filter by habits"
         isOpen={habitsFilterSelectState.isOpen}
-        className="w-full min-[550px]:w-1/2 md:w-50"
         onOpenChange={habitsFilterSelectState.setOpen}
         onChange={(keys) => {
           handleHabitsFilterChange(
@@ -142,6 +142,7 @@ const CalendarFilters = () => {
           );
         }}
       >
+        <Label>Filter by habits</Label>
         <Select.Trigger>
           <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-2 overflow-x-auto">
             {({ defaultChildren, isPlaceholder, state }) => {
@@ -188,7 +189,6 @@ const CalendarFilters = () => {
           </Select.Value>
           <Select.Indicator />
         </Select.Trigger>
-        <Label>Filter by habits</Label>
         <Select.Popover>
           <ListBox>
             {!!Object.keys(habits).length && (
@@ -259,19 +259,20 @@ const CalendarFilters = () => {
         </Select.Popover>
       </Select>
       <Select
+        fullWidth
         variant="secondary"
         value={filters.traitIds}
         selectionMode="multiple"
         placeholder="Filter by traits"
         isOpen={traitsFilterSelectState.isOpen}
         onOpenChange={traitsFilterSelectState.setOpen}
-        className="w-full min-[550px]:w-1/2 md:w-[250px]"
         onChange={(keys) => {
           handleTraitsFilterChange(
             Array.isArray(keys) ? (keys as string[]) : []
           );
         }}
       >
+        <Label>Filter by traits</Label>
         <Select.Trigger>
           <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-1 overflow-x-auto">
             {({ defaultChildren, isPlaceholder, state }) => {
@@ -303,7 +304,6 @@ const CalendarFilters = () => {
           </Select.Value>
           <Select.Indicator />
         </Select.Trigger>
-        <Label>Filter by traits</Label>
         <Select.Popover>
           <ListBox>
             {!!Object.keys(traits).length && (

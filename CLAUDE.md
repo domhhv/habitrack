@@ -92,12 +92,13 @@ Use these aliases throughout the codebase:
 
 Edit the appropriate schema file in `supabase/schemas/`:
 
-- `03_traits.sql` - Traits table
-- `04_habits.sql` - Habits table
-- `05_occurrences.sql` - Occurrences table
-- `06_notes.sql` - Notes table
+- `04_traits.sql` - Traits table
+- `05_habits.sql` - Habits table
+- `06_occurrences.sql` - Occurrences table
+- `07_notes.sql` - Notes table
 - `08_habit_metrics.sql` - Habit metrics table
 - `09_occurrence_metric_values.sql` - Occurrence metric values table
+- `10_accounts.sql` - User accounts table
 - `11_habit_stocks.sql` - Habit stocks table
 - `12_habit_stock_metric_defaults.sql` - Stock metric defaults table
 - `13_occurrence_stock_usages.sql` - Occurrence stock usages table
@@ -182,6 +183,16 @@ End-to-end documentation for complex features (database → models → services 
 - **[docs/COSTS.md](docs/COSTS.md)** - Occurrence cost calculation, period summaries, multi-currency handling
 
 ### Important Conventions
+
+#### Comments
+
+Never add explanatory comments unless absolutely necessary.
+
+Code must be clean, readable, and self-documenting.
+
+If a comment is necessary, use the multi-line comments (block comments) format. JSDoc and TODO comments are allowed.
+
+Never use single-line comments except for ESLint or TypeScript directives.
 
 - **Imports**: Use `@` path aliases as defined in tsconfig.json
 - **Components**: Arrow functions preferred over function declarations
