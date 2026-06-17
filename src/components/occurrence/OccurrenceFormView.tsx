@@ -1,6 +1,5 @@
 import type { Selection, TimeValue } from '@heroui/react';
 import {
-  cn,
   Form,
   Link,
   Label,
@@ -771,7 +770,7 @@ const OccurrenceFormView = ({
 
                 return (
                   <ListBox.Section key={traitName}>
-                    <Header className="bg-background shadow-small rounded-small sticky top-1 z-20 flex w-auto rounded-2xl px-2 py-1.5">
+                    <Header className="bg-background shadow-small rounded-small sticky top-1 z-20 mb-1 flex w-full rounded-2xl px-2 py-1.5">
                       {traitName}
                     </Header>
                     {habits.map((habit) => {
@@ -780,10 +779,7 @@ const OccurrenceFormView = ({
                           id={habit.id}
                           key={habit.id}
                           textValue={habit.name}
-                          className={cn(
-                            'hover:bg-accent-soft-hover relative z-10 border-2 border-transparent',
-                            selectedHabitId === habit.id && 'border-accent'
-                          )}
+                          className="hover:bg-accent-soft-hover relative z-10 border-2 border-transparent"
                         >
                           <Label>
                             <div className="flex items-center gap-2">
@@ -798,6 +794,7 @@ const OccurrenceFormView = ({
                               <span>{habit.name}</span>
                             </div>
                           </Label>
+                          <ListBox.ItemIndicator />
                         </ListBox.Item>
                       );
                     })}
@@ -943,7 +940,6 @@ const OccurrenceFormView = ({
             return next;
           });
 
-          // Also check non-compounded stock-filled metrics for user edits
           for (const metricId of Object.keys(stockFilledMetrics)) {
             if (editedMetricIds.includes(metricId)) {
               continue;

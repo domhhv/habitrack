@@ -172,6 +172,12 @@ export const useDayNotes = () => {
   });
 };
 
+export const useMonthNotes = () => {
+  return usePeriodNotes().filter((note) => {
+    return note.periodKind === 'month';
+  });
+};
+
 export const useNoteActions = () => {
   return useBoundStore((state) => {
     return state.noteActions;

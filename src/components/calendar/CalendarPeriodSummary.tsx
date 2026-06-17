@@ -1,5 +1,5 @@
 import type { CalendarDate } from '@internationalized/date';
-import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
+import { NotePencilIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { CustomButton } from '@components';
@@ -36,45 +36,48 @@ const CalendarPeriodSummary = ({
       { avgCost: number; currency: string; name: string; totalCost: number }[]
     > = {};
 
-    for (const { count, habitId, occurrences } of occurrenceSummary) {
+    for (const { habitId, occurrences } of occurrenceSummary) {
       const habitStocks = habits[habitId]?.stocks ?? [];
       const stocksById = new Map(
         habitStocks.map((s) => {
           return [s.id, s] as const;
         })
       );
-      const seen = new Set<string>();
+
+      const periodUsageByStock = new Map<string, number>();
 
       for (const occurrence of occurrences) {
         for (const usage of occurrence.stockUsages) {
-          if (seen.has(usage.habitStockId)) {
-            continue;
-          }
-
-          seen.add(usage.habitStockId);
-          const stock = stocksById.get(usage.habitStockId);
-
-          if (
-            !stock ||
-            !stock.isDepleted ||
-            stock.cost === null ||
-            stock.usageCount === 0 ||
-            stock.totalItems !== null
-          ) {
-            continue;
-          }
-
-          const avgCost = stock.cost / stock.usageCount;
-          const entries = result[habitId] ?? [];
-
-          entries.push({
-            avgCost,
-            currency: stock.currency,
-            name: stock.name,
-            totalCost: avgCost * count,
-          });
-          result[habitId] = entries;
+          periodUsageByStock.set(
+            usage.habitStockId,
+            (periodUsageByStock.get(usage.habitStockId) ?? 0) + 1
+          );
         }
+      }
+
+      for (const [habitStockId, periodUsageCount] of periodUsageByStock) {
+        const stock = stocksById.get(habitStockId);
+
+        if (
+          !stock ||
+          !stock.isDepleted ||
+          stock.cost === null ||
+          stock.usageCount === 0 ||
+          stock.totalItems !== null
+        ) {
+          continue;
+        }
+
+        const avgCost = stock.cost / stock.usageCount;
+        const entries = result[habitId] ?? [];
+
+        entries.push({
+          avgCost,
+          currency: stock.currency,
+          name: stock.name,
+          totalCost: avgCost * periodUsageCount,
+        });
+        result[habitId] = entries;
       }
     }
 
@@ -86,8 +89,7 @@ const CalendarPeriodSummary = ({
       {note && date && (
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <NoteIcon size={16} weight="bold" className="text-primary-500" />
-            <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+            <h4 className="text-lg font-semibold text-stone-700 dark:text-stone-200">
               Note
             </h4>
             <CustomButton
@@ -95,21 +97,22 @@ const CalendarPeriodSummary = ({
               isIconOnly
               variant="ghost"
               aria-label="Edit weekly note"
-              className="text-accent h-5 w-5 min-w-fit"
+              className="text-accent h-5 w-5 min-w-fit rounded-md"
               onPress={() => {
                 openNoteDrawer(date, kind);
               }}
             >
-              <NotePencilIcon size={14} weight="bold" />
+              <NotePencilIcon size={18} weight="bold" />
             </CustomButton>
           </div>
-          <p className="line-clamp-4 text-sm text-stone-500 dark:text-stone-400">
+          <p className="line-clamp-4 text-stone-500 dark:text-stone-400">
             {note.content}
           </p>
         </div>
       )}
       {!note && date && (
         <CustomButton
+          fullWidth
           size="sm"
           variant="secondary"
           onPress={() => {
@@ -117,7 +120,7 @@ const CalendarPeriodSummary = ({
           }}
         >
           <NotePencilIcon size={14} weight="bold" />
-          Add note
+          Add a note about this {kind}
         </CustomButton>
       )}
       {occurrenceSummary.length > 0 && (

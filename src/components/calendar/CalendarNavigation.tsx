@@ -112,15 +112,15 @@ const CalendarNavigation = ({
   return (
     <div
       className={cn(
-        'flex flex-col items-stretch justify-end gap-2 max-[445px]:gap-4 min-[446px]:flex-row lg:justify-between lg:gap-2',
+        'flex items-stretch justify-end gap-2 lg:justify-between',
         className
       )}
     >
-      <div className="mr-0 flex items-stretch gap-2 lg:mr-2">
+      <div className="mr-0 flex items-stretch gap-2">
         <Select
           variant="secondary"
           value={monthSelectValue}
-          className="w-17.5 md:w-31.25"
+          className="w-17.5 md:w-28"
           isOpen={monthSelectState.isOpen}
           onOpenChange={monthSelectState.setOpen}
           onChange={(newMonth) => {
