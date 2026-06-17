@@ -104,13 +104,18 @@ const MetricDefinitionForm = ({
         <div className="space-x-2">
           <CustomButton
             isIconOnly
+            aria-label="Edit metric"
             onPress={() => {
               onChange({ isBeingEdited: true });
             }}
           >
             <PencilSimpleIcon />
           </CustomButton>
-          <CustomButton isIconOnly onPress={onRemove}>
+          <CustomButton
+            isIconOnly
+            onPress={onRemove}
+            aria-label="Remove metric"
+          >
             <TrashSimpleIcon />
           </CustomButton>
         </div>

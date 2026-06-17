@@ -85,7 +85,7 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
                   placeholder="e. g. Moderately Bad"
                 />
               </TextField>
-              <TextField fullWidth name="name" variant="secondary">
+              <TextField fullWidth name="description" variant="secondary">
                 <Label>Description</Label>
                 <Input
                   variant="secondary"

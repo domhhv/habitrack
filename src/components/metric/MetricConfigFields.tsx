@@ -271,6 +271,7 @@ const ChoiceConfigFields = ({
             </TextField>
             <CustomButton
               variant="danger-soft"
+              aria-label={`Remove option ${index + 1}`}
               onClick={() => {
                 handleRemoveOption(index);
               }}

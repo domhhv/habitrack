@@ -142,7 +142,12 @@ const HabitLastEntry = ({ timestamp }: HabitLastEntryProps) => {
       </Tooltip>
       <Dropdown>
         <Dropdown.Trigger>
-          <CustomButton size="sm" isIconOnly variant="ghost">
+          <CustomButton
+            size="sm"
+            isIconOnly
+            variant="ghost"
+            aria-label="Select relative time format"
+          >
             <CaretDownIcon />
           </CustomButton>
         </Dropdown.Trigger>

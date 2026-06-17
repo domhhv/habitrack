@@ -1,6 +1,6 @@
 import type { ButtonProps } from '@heroui/react';
 import { Button, buttonVariants } from '@heroui/react';
-import type { MouseEventHandler } from 'react';
+import type { PointerEventHandler } from 'react';
 import React from 'react';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
@@ -30,7 +30,7 @@ const CustomButton = ({
   variant,
   ...props
 }: CustomButtonProps) => {
-  const createRipple: MouseEventHandler = React.useCallback((event) => {
+  const createRipple: PointerEventHandler = React.useCallback((event) => {
     const button = event.currentTarget;
 
     if (!(button instanceof HTMLElement)) {
@@ -47,9 +47,7 @@ const CustomButton = ({
     circle.style.top = `${event.clientY - rect.top - radius}px`;
     circle.classList.add('ripple');
 
-    circle.addEventListener('animationend', () => {
-      return circle.remove();
-    });
+    circle.addEventListener('animationend', circle.remove);
 
     button.appendChild(circle);
   }, []);
