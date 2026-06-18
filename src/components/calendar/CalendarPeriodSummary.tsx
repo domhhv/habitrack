@@ -1,3 +1,4 @@
+import { cn } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { NotePencilIcon } from '@phosphor-icons/react';
 import React from 'react';
@@ -13,19 +14,21 @@ import { getPublicUrl } from '@services';
 import { useHabits, useNoteDrawerActions } from '@stores';
 
 type CalendarPeriodSummaryProps = {
-  date: CalendarDate | null;
+  className?: string;
   kind: NonNullable<NotePeriodKind>;
   metricTotals: Record<string, { formattedTotal: string; name: string }[]>;
   note: NoteOfPeriod | undefined;
   occurrenceSummary: OccurrenceSummaryItem[];
+  startDate: CalendarDate | null;
 };
 
 const CalendarPeriodSummary = ({
-  date,
+  className,
   kind,
   metricTotals,
   note,
   occurrenceSummary,
+  startDate,
 }: CalendarPeriodSummaryProps) => {
   const { openNoteDrawer } = useNoteDrawerActions();
   const habits = useHabits();
@@ -85,8 +88,8 @@ const CalendarPeriodSummary = ({
   }, [occurrenceSummary, habits]);
 
   return (
-    <>
-      {note && date && (
+    <div className={cn('space-y-4', className)}>
+      {note && startDate && (
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h4 className="text-lg font-semibold text-stone-700 dark:text-stone-200">
@@ -99,7 +102,7 @@ const CalendarPeriodSummary = ({
               aria-label="Edit weekly note"
               className="text-accent h-5 w-5 min-w-fit rounded-md"
               onPress={() => {
-                openNoteDrawer(date, kind);
+                openNoteDrawer(startDate, kind);
               }}
             >
               <NotePencilIcon size={18} weight="bold" />
@@ -110,13 +113,13 @@ const CalendarPeriodSummary = ({
           </p>
         </div>
       )}
-      {!note && date && (
+      {!note && startDate && (
         <CustomButton
           fullWidth
           size="sm"
           variant="secondary"
           onPress={() => {
-            openNoteDrawer(date, kind);
+            openNoteDrawer(startDate, kind);
           }}
         >
           <NotePencilIcon size={14} weight="bold" />
@@ -210,7 +213,7 @@ const CalendarPeriodSummary = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

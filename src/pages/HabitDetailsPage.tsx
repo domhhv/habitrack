@@ -1,13 +1,12 @@
 import { Alert, Spinner } from '@heroui/react';
 import React from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams } from 'react-router';
 
 import { CustomButton, HabitDetails } from '@components';
 import { useHabits, useIsFetchingHabits } from '@stores';
 
 const HabitDetailsPage = () => {
   const { habitId = '' } = useParams();
-  const navigate = useNavigate();
   const habits = useHabits();
   const isFetchingHabits = useIsFetchingHabits();
 
@@ -23,12 +22,7 @@ const HabitDetailsPage = () => {
           <Alert.Content>
             <Alert.Title className="font-bold">Habit not found</Alert.Title>
           </Alert.Content>
-          <CustomButton
-            variant="danger-soft"
-            onPress={() => {
-              navigate('/habits');
-            }}
-          >
+          <CustomButton href="/habits" variant="danger-soft">
             My habits
           </CustomButton>
         </Alert>

@@ -1,5 +1,10 @@
-import type { ButtonProps } from '@heroui/react';
-import { Button, buttonVariants } from '@heroui/react';
+import {
+  Link,
+  Button,
+  buttonVariants,
+  type LinkProps,
+  type ButtonProps,
+} from '@heroui/react';
 import type { PointerEventHandler } from 'react';
 import React from 'react';
 import type { VariantProps } from 'tailwind-variants';
@@ -18,18 +23,15 @@ const customButtonVariants = tv({
 
 type CustomButtonVariants = VariantProps<typeof customButtonVariants>;
 
-export type CustomButtonProps = Omit<
-  ButtonProps,
-  'className' | 'variant' | 'size'
-> &
-  CustomButtonVariants & { className?: string };
+type CustomButtonBaseProps = CustomButtonVariants & { className?: string };
 
-const CustomButton = ({
-  className,
-  size,
-  variant,
-  ...props
-}: CustomButtonProps) => {
+export type CustomButtonProps =
+  | (Omit<ButtonProps, 'className' | 'variant' | 'size'> &
+      CustomButtonBaseProps & { href?: undefined })
+  | (Omit<LinkProps, 'className' | 'variant' | 'size'> &
+      CustomButtonBaseProps & { href: string });
+
+const CustomButton = (props: CustomButtonProps) => {
   const createRipple: PointerEventHandler = React.useCallback((event) => {
     const button = event.currentTarget;
 
@@ -52,15 +54,49 @@ const CustomButton = ({
     button.appendChild(circle);
   }, []);
 
+  const className = customButtonVariants({
+    className: props.className,
+    size: props.size,
+    variant: props.variant,
+  });
+
+  if (props.href !== undefined) {
+    const {
+      className: _className,
+      size: _size,
+      variant: _variant,
+      ...linkProps
+    } = props;
+
+    return (
+      <Link
+        {...linkProps}
+        className={className}
+        onPointerDown={(event) => {
+          createRipple(event);
+          linkProps.onPointerDown?.(event);
+        }}
+      />
+    );
+  }
+
+  const {
+    className: _className,
+    href: _href,
+    size,
+    variant,
+    ...buttonProps
+  } = props;
+
   return (
     <Button
       size={size}
       {...(variant !== 'light' && { variant })}
-      className={customButtonVariants({ className, size, variant })}
-      {...props}
+      className={className}
+      {...buttonProps}
       onPointerDown={(event) => {
         createRipple(event);
-        props.onPointerDown?.(event);
+        buttonProps.onPointerDown?.(event);
       }}
     />
   );

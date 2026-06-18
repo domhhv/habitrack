@@ -12,7 +12,6 @@ import {
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useCalendarCell } from 'react-aria';
-import { useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { CustomButton, OccurrenceChip } from '@components';
@@ -45,11 +44,12 @@ const MonthCalendarCell = ({
   position,
   state,
 }: MonthCalendarCellProps) => {
-  const dayNotes = useDayNotes();
   const user = useUser();
-  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
+  const dayNotes = useDayNotes();
   const { openNoteDrawer } = useNoteDrawerActions();
+  const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { isDesktop, isMobile, screenWidth } = useScreenWidth();
+  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const calendarCellRef = React.useRef<HTMLDivElement | null>(null);
   const { cellProps, formattedDate, isOutsideVisibleRange } = useCalendarCell(
     { date },
@@ -102,9 +102,6 @@ const MonthCalendarCell = ({
     isMobile && 'pl-1'
   );
 
-  const navigate = useNavigate();
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-
   const openLoggingDrawer = () => {
     if (!user) {
       return;
@@ -129,12 +126,8 @@ const MonthCalendarCell = ({
                 <CustomButton
                   variant="light"
                   aria-label="Open day"
+                  href={`/calendar/day/${date.year}/${date.month}/${date.day}`}
                   className="h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
-                  onPress={() => {
-                    navigate(
-                      `/calendar/day/${date.year}/${date.month}/${date.day}`
-                    );
-                  }}
                 >
                   <ArrowSquareRightIcon size={18} weight="bold" />
                 </CustomButton>
@@ -212,19 +205,15 @@ const MonthCalendarCell = ({
       {!isDesktop && user ? (
         <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
           <Popover.Trigger>{cellHeader}</Popover.Trigger>
-          <Popover.Content offset={4} placement="bottom">
-            <Popover.Dialog>
+          <Popover.Content offset={12} placement="bottom">
+            <Popover.Dialog className="p-0">
+              <Popover.Arrow />
               <div className="flex flex-col gap-1 p-1">
                 <CustomButton
                   size="sm"
                   variant="ghost"
-                  className="justify-start"
-                  onPress={() => {
-                    setIsPopoverOpen(false);
-                    navigate(
-                      `/calendar/day/${date.year}/${date.month}/${date.day}`
-                    );
-                  }}
+                  className="justify-start gap-2"
+                  href={`/calendar/day/${date.year}/${date.month}/${date.day}`}
                 >
                   <ArrowSquareRightIcon size={16} weight="bold" />
                   Open day

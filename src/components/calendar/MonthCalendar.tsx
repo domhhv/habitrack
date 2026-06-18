@@ -124,19 +124,20 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
   }, [params, state]);
 
   return (
-    <div className="flex w-full flex-1 gap-0 md:gap-6">
-      <MonthCalendarGrid state={state} />
-      <aside className="hidden w-86 shrink-0 flex-col gap-4 overflow-y-auto py-8 xl:flex">
+    <div className="flex w-full flex-1 flex-col gap-2 md:gap-6 lg:flex-row-reverse">
+      <aside className="flex shrink-0 flex-col gap-4 overflow-y-auto pt-4 pb-2 lg:w-86 lg:py-8">
         <CalendarNavigation focusedDate={state.focusedDate} />
         <CalendarFilters />
         <CalendarPeriodSummary
           kind="month"
           note={monthNote}
-          date={monthStart}
+          startDate={monthStart}
+          className="hidden lg:block"
           metricTotals={metricTotals}
           occurrenceSummary={occurrenceSummary}
         />
       </aside>
+      <MonthCalendarGrid state={state} />
     </div>
   );
 };

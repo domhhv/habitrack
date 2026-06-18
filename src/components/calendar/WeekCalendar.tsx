@@ -26,7 +26,7 @@ import {
   useCalendarGrid,
   useDateFormatter,
 } from 'react-aria';
-import { useParams, useNavigate } from 'react-router';
+import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { CustomButton, OccurrenceChip } from '@components';
@@ -63,7 +63,6 @@ const WeekCalendar = () => {
   const occurrences = useOccurrences();
   const { locale } = useLocale();
   const params = useParams();
-  const navigate = useNavigate();
   const firstDayOfWeek = useFirstDayOfWeek();
   const state = useCalendarState({
     createCalendar,
@@ -245,11 +244,9 @@ const WeekCalendar = () => {
               <Tooltip.Trigger>
                 <CustomButton
                   variant="light"
+                  href={monthInfo.path}
                   className="min-w-fit gap-2 px-2"
                   aria-label={`Go to month view: ${monthInfo.label}`}
-                  onPress={() => {
-                    navigate(monthInfo.path);
-                  }}
                 >
                   <ArrowSquareLeftIcon weight="bold" />
                   <span className="hidden sm:inline">{monthInfo.label}</span>
@@ -351,12 +348,8 @@ const WeekCalendar = () => {
                             <CustomButton
                               variant="light"
                               aria-label="Open day"
+                              href={`/calendar/day/${day.year}/${day.month}/${day.day}`}
                               className="h-5 w-5 min-w-fit rounded-xl px-0 lg:h-6 lg:w-6"
-                              onPress={() => {
-                                navigate(
-                                  `/calendar/day/${day.year}/${day.month}/${day.day}`
-                                );
-                              }}
                             >
                               <ArrowSquareRightIcon
                                 weight="bold"
@@ -451,11 +444,11 @@ const WeekCalendar = () => {
             })}
         </div>
       </ScrollShadow>
-      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-8 xl:flex">
+      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto pr-8 xl:flex">
         <CalendarPeriodSummary
           kind="week"
-          date={monday}
           note={weekNote}
+          startDate={monday}
           metricTotals={metricTotals}
           occurrenceSummary={occurrenceSummary}
         />

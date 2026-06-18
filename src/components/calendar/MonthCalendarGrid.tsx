@@ -5,7 +5,6 @@ import { NoteIcon, NotePencilIcon } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
 import { useLocale, useCalendarGrid } from 'react-aria';
-import { useNavigate } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { CustomButton } from '@components';
@@ -46,7 +45,6 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
   const weekNotes = useWeekNotes();
   const { openNoteDrawer } = useNoteDrawerActions();
-  const navigate = useNavigate();
 
   const getCellPosition = (
     weekIndex: number,
@@ -109,6 +107,8 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
             return note.periodDate === monday.toString();
           });
 
+          const weekIsoNumber = getISOWeek(monday.toDate(state.timeZone));
+
           return (
             <div
               key={weekIndex}
@@ -125,15 +125,12 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
                     <CustomButton
                       size="sm"
                       variant="tertiary"
+                      aria-label={`Go to week ${weekIsoNumber}`}
+                      href={`/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`}
                       className={cn(
                         'mt-0 h-6.75 w-6 min-w-fit p-0 lg:h-7.75 lg:w-7',
                         weekIndex === 0 && 'top-0.5'
                       )}
-                      onPress={() => {
-                        navigate(
-                          `/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`
-                        );
-                      }}
                     >
                       {getISOWeek(monday.toDate(state.timeZone))}
                     </CustomButton>
