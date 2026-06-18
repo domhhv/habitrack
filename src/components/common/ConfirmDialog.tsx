@@ -1,7 +1,7 @@
-import { Modal, Spinner } from '@heroui/react';
+import { Modal } from '@heroui/react';
 import React from 'react';
 
-import { CustomButton } from '@components';
+import { CustomButton, InfinityLoader } from '@components';
 
 type ConfirmDialogProps = {
   children: React.ReactNode;
@@ -50,7 +50,7 @@ const ConfirmDialog = ({
                   onPress={onConfirm}
                   isDisabled={isLoading}
                 >
-                  {isLoading && <Spinner size="sm" />}
+                  {isLoading && <InfinityLoader size={16} />}
                   Confirm
                 </CustomButton>
               </div>

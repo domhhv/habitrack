@@ -1,8 +1,8 @@
-import { Card, Chip, Alert, Spinner } from '@heroui/react';
+import { Card, Chip, Alert } from '@heroui/react';
 import type { OAuthAuthorizationDetails } from '@supabase/supabase-js';
 import React from 'react';
 
-import { CustomButton } from '@components';
+import { CustomButton, InfinityLoader } from '@components';
 import { supabaseClient, getErrorMessage } from '@utils';
 
 // Human-readable labels for the scopes we expose. Anything unknown is shown
@@ -128,7 +128,7 @@ const OAuthConsentPage = () => {
     return (
       <div className="mt-16 flex w-full flex-col items-center gap-3">
         {title}
-        <Spinner />
+        <InfinityLoader color="var(--accent)" />
         <p className="text-default-500 text-sm">
           Loading authorization request…
         </p>

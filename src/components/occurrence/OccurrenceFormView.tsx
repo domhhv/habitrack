@@ -5,7 +5,6 @@ import {
   Label,
   Header,
   Switch,
-  Spinner,
   ListBox,
   Checkbox,
   TextArea,
@@ -1026,14 +1025,7 @@ const OccurrenceFormView = ({
           onPress={handleSubmit}
           isDisabled={isSubmitButtonDisabled}
         >
-          {({ isPending }) => {
-            return (
-              <>
-                {isPending && <Spinner color="current" className="size-5" />}
-                {occurrenceToEdit ? 'Update' : 'Add'}
-              </>
-            );
-          }}
+          {occurrenceToEdit ? 'Update' : 'Add'}
         </CustomButton>
       ) : (
         <Link href="/habits" className="w-full">

@@ -1,7 +1,7 @@
-import { Spinner, ScrollShadow } from '@heroui/react';
+import { ScrollShadow } from '@heroui/react';
 import React from 'react';
 
-import { NoteListItem } from '@components';
+import { NoteListItem, InfinityLoader } from '@components';
 import type { NoteWithHabit } from '@models';
 import { listAllNotes } from '@services';
 
@@ -68,7 +68,7 @@ const NotesList = () => {
     if (isLoading) {
       return (
         <div className="flex justify-center py-4">
-          <Spinner size="sm" color="accent" />
+          <InfinityLoader color="var(--accent)" />
         </div>
       );
     }

@@ -1,4 +1,4 @@
-import { Spinner, Tooltip } from '@heroui/react';
+import { Tooltip } from '@heroui/react';
 import {
   TrashIcon,
   CaretLeftIcon,
@@ -156,15 +156,11 @@ const ImageCarousel = ({
               }}
             >
               {({ isPending }) => {
-                return (
-                  <>
-                    {isPending ? (
-                      <Spinner size="sm" color="current" />
-                    ) : (
-                      <TrashIcon size={18} weight="bold" />
-                    )}
-                  </>
-                );
+                if (isPending) {
+                  return null;
+                }
+
+                return <TrashIcon size={18} weight="bold" />;
               }}
             </CustomButton>
           </div>

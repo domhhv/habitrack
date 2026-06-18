@@ -1,11 +1,4 @@
-import {
-  cn,
-  Label,
-  Spinner,
-  Dropdown,
-  TextField,
-  InputGroup,
-} from '@heroui/react';
+import { cn, Label, Dropdown, TextField, InputGroup } from '@heroui/react';
 import { XIcon, CheckIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 
@@ -220,9 +213,6 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           <Dropdown>
             <Dropdown.Trigger>
               <TraitChip trait={habit.trait} className="hover:bg-content2" />
-              {isUpdatingTrait && (
-                <Spinner size="sm" className="h-0 translate-0" />
-              )}
             </Dropdown.Trigger>
             <Dropdown.Popover>
               <Dropdown.Menu
@@ -559,9 +549,9 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
               <CustomButton
                 variant="primary"
                 onPress={saveMetrics}
+                isPending={isSavingMetrics}
                 isDisabled={isSavingMetrics || !user?.id}
               >
-                {isSavingMetrics && <Spinner size="sm" />}
                 Save
               </CustomButton>
               <CustomButton
