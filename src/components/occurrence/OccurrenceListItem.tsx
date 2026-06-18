@@ -1,10 +1,10 @@
-import { cn, Chip, Spinner } from '@heroui/react';
+import { cn, Chip } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
-import { CustomButton } from '@components';
+import { CustomButton, InfinityLoader } from '@components';
 import type {
   Occurrence,
   MetricValue,
@@ -335,14 +335,10 @@ const OccurrenceListItem = ({
                 const isRemoving = removingMetricId === chip.id;
 
                 return (
-                  <Chip key={chip.id}>
+                  <Chip key={chip.id} className="gap-2">
                     {chip.label}
                     {isRemoving ? (
-                      <Spinner
-                        size="sm"
-                        color="danger"
-                        className="ml-1 size-3 [&>div]:size-3"
-                      />
+                      <InfinityLoader size={16} color="var(--danger)" />
                     ) : (
                       <CustomButton
                         size="sm"

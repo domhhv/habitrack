@@ -1,4 +1,5 @@
 import {
+  cn,
   Link,
   Button,
   buttonVariants,
@@ -9,6 +10,8 @@ import type { PointerEventHandler } from 'react';
 import React from 'react';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
+
+import InfinityLoader from './InfinityLoader';
 
 const customButtonVariants = tv({
   base: 'text-md relative overflow-hidden font-semibold data-[pending=true]:opacity-40',
@@ -81,6 +84,7 @@ const CustomButton = (props: CustomButtonProps) => {
   }
 
   const {
+    children,
     className: _className,
     href: _href,
     size,
@@ -92,13 +96,29 @@ const CustomButton = (props: CustomButtonProps) => {
     <Button
       size={size}
       {...(variant !== 'light' && { variant })}
-      className={className}
+      className={cn('data-[pending="true"]:opacity-75!', className)}
       {...buttonProps}
       onPointerDown={(event) => {
         createRipple(event);
         buttonProps.onPointerDown?.(event);
       }}
-    />
+    >
+      {(renderProps) => {
+        const content =
+          typeof children === 'function'
+            ? (children as (props: typeof renderProps) => React.ReactNode)(
+                renderProps
+              )
+            : children;
+
+        return (
+          <>
+            {renderProps.isPending && <InfinityLoader />}
+            {content}
+          </>
+        );
+      }}
+    </Button>
   );
 };
 

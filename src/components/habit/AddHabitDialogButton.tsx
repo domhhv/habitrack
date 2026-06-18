@@ -3,7 +3,6 @@ import {
   Modal,
   Select,
   ListBox,
-  Spinner,
   TextField,
   InputGroup,
   useOverlayState,
@@ -268,9 +267,9 @@ const AddHabitDialogButton = () => {
                   type="submit"
                   variant="primary"
                   onPress={handleAdd}
+                  isPending={isAdding}
                   isDisabled={isAdding || !user?.id || !name}
                 >
-                  {isAdding && <Spinner size="sm" />}
                   Submit
                 </CustomButton>
               </Modal.Footer>

@@ -1,7 +1,7 @@
-import { Spinner, Tooltip } from '@heroui/react';
+import { Button, Tooltip } from '@heroui/react';
 import React from 'react';
 
-import { VisuallyHiddenInput } from '@components';
+import { InfinityLoader, VisuallyHiddenInput } from '@components';
 import { type Habit, StorageBuckets } from '@models';
 import { deleteFile, getPublicUrl, uploadHabitIcon } from '@services';
 import { useUser, useHabitActions } from '@stores';
@@ -15,6 +15,7 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
   const { updateHabit } = useHabitActions();
   const user = useUser();
   const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async ({
     target: { files },
@@ -39,14 +40,19 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
   };
 
   return (
-    <Tooltip closeDelay={0}>
+    <Tooltip delay={0} closeDelay={0}>
       <Tooltip.Trigger>
-        <label
-          aria-disabled={!user?.id || isUploading}
+        <Button
+          variant="ghost"
+          aria-label="Upload habit icon"
+          isDisabled={!user?.id || isUploading}
+          onClick={() => {
+            fileInputRef.current?.click();
+          }}
           className="rounded-medium hover:bg-default-100 flex h-12 w-12 cursor-pointer items-center justify-center p-1 opacity-100"
         >
           {isUploading ? (
-            <Spinner size="sm" />
+            <InfinityLoader size={32} color="var(--accent)" />
           ) : (
             <img
               alt={habit.name}
@@ -55,11 +61,12 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
               src={getPublicUrl(StorageBuckets.HABIT_ICONS, habit.iconPath)}
             />
           )}
-          <VisuallyHiddenInput
-            isDisabled={isUploading}
-            onChange={handleFileChange}
-          />
-        </label>
+        </Button>
+        <VisuallyHiddenInput
+          ref={fileInputRef}
+          isDisabled={isUploading}
+          onChange={handleFileChange}
+        />
       </Tooltip.Trigger>
       <Tooltip.Content>Upload new icon</Tooltip.Content>
     </Tooltip>

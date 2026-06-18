@@ -1,8 +1,8 @@
-import { Alert, Spinner } from '@heroui/react';
+import { Alert } from '@heroui/react';
 import React from 'react';
 import { useParams } from 'react-router';
 
-import { CustomButton, HabitDetails } from '@components';
+import { CustomButton, HabitDetails, InfinityLoader } from '@components';
 import { useHabits, useIsFetchingHabits } from '@stores';
 
 const HabitDetailsPage = () => {
@@ -11,7 +11,7 @@ const HabitDetailsPage = () => {
   const isFetchingHabits = useIsFetchingHabits();
 
   if (isFetchingHabits) {
-    return <Spinner />;
+    return <InfinityLoader color="var(--accent)" />;
   }
 
   if (!isFetchingHabits && !habits[habitId]) {
