@@ -103,11 +103,18 @@ const CustomButton = (props: CustomButtonProps) => {
         buttonProps.onPointerDown?.(event);
       }}
     >
-      {({ isPending }) => {
+      {(renderProps) => {
+        const content =
+          typeof children === 'function'
+            ? (children as (props: typeof renderProps) => React.ReactNode)(
+                renderProps
+              )
+            : children;
+
         return (
           <>
-            {isPending && <InfinityLoader />}
-            {children}
+            {renderProps.isPending && <InfinityLoader />}
+            {content}
           </>
         );
       }}
