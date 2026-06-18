@@ -23,7 +23,6 @@ import { getWeeksOfYear } from '@utils';
 import CalendarNavigationButtons from './CalendarNavigationButtons';
 
 export type MonthCalendarNavigationProps = {
-  className?: string;
   focusedDate: CalendarState['focusedDate'];
 };
 
@@ -31,10 +30,7 @@ const YEARS = Array.from({ length: 31 }, (_, i) => {
   return 2000 + i;
 });
 
-const CalendarNavigation = ({
-  className,
-  focusedDate,
-}: MonthCalendarNavigationProps) => {
+const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   const timeZone = getLocalTimeZone();
   const filters = useCalendarFilters();
   const changeCalendarFilters = useCalendarFiltersChange();
@@ -106,146 +102,50 @@ const CalendarNavigation = ({
   };
 
   return (
-    <div className={cn('flex items-stretch justify-between gap-2', className)}>
-      <div className="mr-0 flex items-stretch gap-2">
-        <Select
-          variant="secondary"
-          value={monthSelectValue}
-          className="w-17.5 md:w-28"
-          isOpen={monthSelectState.isOpen}
-          onOpenChange={monthSelectState.setOpen}
-        >
-          <Label className="sr-only">Month</Label>
-          <Select.Trigger>
-            <Select.Value
-              render={() => {
-                return (
-                  <span className="flex items-center gap-1">
-                    {formatter.format(focusedDate.toDate(timeZone))}
-                  </span>
-                );
-              }}
-            />
-            <Select.Indicator />
-          </Select.Trigger>
-          <Select.Popover className="w-25 md:w-31.25">
-            <ListBox>
-              <ListBox.Section>
-                <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-3">
-                  Month
-                </Header>
-                {months.map((month, index) => {
-                  return (
-                    <ListBox.Item
-                      className="p-0"
-                      id={String(index + 1)}
-                      key={String(index + 1)}
-                      textValue={capitalize(
-                        isMobile ? month.substring(0, 3) : month
-                      )}
-                    >
-                      <Link
-                        className="flex w-full px-2.5 py-1.5 no-underline!"
-                        href={`/calendar/${calendarMode}/${focusedDate.year}/${index + 1}/1`}
-                      >
-                        {capitalize(isMobile ? month.substring(0, 3) : month)}
-                        <ListBox.ItemIndicator />
-                      </Link>
-                    </ListBox.Item>
-                  );
-                })}
-              </ListBox.Section>
-            </ListBox>
-          </Select.Popover>
-        </Select>
-        <Select
-          className="w-20"
-          variant="secondary"
-          value={yearSelectValue}
-          isOpen={yearSelectState.isOpen}
-          onOpenChange={yearSelectState.setOpen}
-        >
-          <Label className="sr-only">Year</Label>
-          <Select.Trigger>
-            <Select.Value
-              render={() => {
-                return (
-                  <span className="flex items-center gap-1">
-                    {yearSelectValue}
-                  </span>
-                );
-              }}
-            />
-            <Select.Indicator />
-          </Select.Trigger>
-          <Select.Popover className="w-25">
-            <ListBox>
-              <ListBox.Section>
-                <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
-                  Year
-                </Header>
-                {YEARS.map((year) => {
-                  return (
-                    <ListBox.Item
-                      id={year.toString()}
-                      key={year.toString()}
-                      textValue={year.toString()}
-                    >
-                      <Link
-                        className="flex w-full px-2.5 py-1.5 no-underline!"
-                        href={`/calendar/${calendarMode}/${year}/${focusedDate.month}/1`}
-                      >
-                        {year.toString()}
-                        <ListBox.ItemIndicator />
-                      </Link>
-                    </ListBox.Item>
-                  );
-                })}
-              </ListBox.Section>
-            </ListBox>
-          </Select.Popover>
-        </Select>
-        {calendarMode === 'week' && (
+    <div className="flex w-full flex-col gap-2">
+      <div className="flex items-stretch justify-between gap-2">
+        <div className="mr-0 flex items-stretch gap-2">
           <Select
             variant="secondary"
-            className="w-37.5 md:w-62.5"
-            isOpen={weekSelectState.isOpen}
-            value={selectedWeek?.key ?? null}
-            onOpenChange={weekSelectState.setOpen}
+            value={monthSelectValue}
+            className="w-17.5 md:w-28"
+            isOpen={monthSelectState.isOpen}
+            onOpenChange={monthSelectState.setOpen}
           >
-            <Label className="sr-only">Week</Label>
+            <Label className="sr-only">Month</Label>
             <Select.Trigger>
               <Select.Value
                 render={() => {
                   return (
                     <span className="flex items-center gap-1">
-                      {selectedWeek
-                        ? selectedWeek.label.split(' ').slice(0, -1).join(' ')
-                        : 'Select week'}
+                      {formatter.format(focusedDate.toDate(timeZone))}
                     </span>
                   );
                 }}
               />
               <Select.Indicator />
             </Select.Trigger>
-            <Select.Popover className="w-62.5">
+            <Select.Popover className="w-25 md:w-31.25">
               <ListBox>
                 <ListBox.Section>
-                  <Header className="bg-background shadow-small rounded-small sticky top-1 z-20 flex w-auto rounded-2xl px-2 py-1.5">
-                    Week
+                  <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-3">
+                    Month
                   </Header>
-                  {weeks.map((week) => {
+                  {months.map((month, index) => {
                     return (
                       <ListBox.Item
-                        id={week.key}
-                        key={week.key}
-                        textValue={week.label}
+                        className="p-0"
+                        id={String(index + 1)}
+                        key={String(index + 1)}
+                        textValue={capitalize(
+                          isMobile ? month.substring(0, 3) : month
+                        )}
                       >
                         <Link
                           className="flex w-full px-2.5 py-1.5 no-underline!"
-                          href={`/calendar/week/${week.anchorDate.year}/${week.anchorDate.month}/${week.anchorDate.day}`}
+                          href={`/calendar/${calendarMode}/${focusedDate.year}/${index + 1}/1`}
                         >
-                          {week.label}
+                          {capitalize(isMobile ? month.substring(0, 3) : month)}
                           <ListBox.ItemIndicator />
                         </Link>
                       </ListBox.Item>
@@ -255,28 +155,126 @@ const CalendarNavigation = ({
               </ListBox>
             </Select.Popover>
           </Select>
-        )}
-      </div>
-      <div
-        className={cn(
-          'flex gap-1 lg:gap-2',
-          calendarMode === 'week' && 'justify-center'
-        )}
-      >
-        {!isDesktop && !!user && (
-          <CustomButton
-            size="sm"
-            isIconOnly
-            variant="ghost"
-            aria-label="Toggle filters"
-            onPress={toggleFiltersVisibility}
-            className={cn(isMobile && 'min-w-fit p-0')}
+          <Select
+            className="w-20"
+            variant="secondary"
+            value={yearSelectValue}
+            isOpen={yearSelectState.isOpen}
+            onOpenChange={yearSelectState.setOpen}
           >
-            <FunnelSimpleIcon size={20} />
-          </CustomButton>
-        )}
-        <CalendarNavigationButtons focusedDate={focusedDate} />
+            <Label className="sr-only">Year</Label>
+            <Select.Trigger>
+              <Select.Value
+                render={() => {
+                  return (
+                    <span className="flex items-center gap-1">
+                      {yearSelectValue}
+                    </span>
+                  );
+                }}
+              />
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover className="w-25">
+              <ListBox>
+                <ListBox.Section>
+                  <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                    Year
+                  </Header>
+                  {YEARS.map((year) => {
+                    return (
+                      <ListBox.Item
+                        id={year.toString()}
+                        key={year.toString()}
+                        textValue={year.toString()}
+                      >
+                        <Link
+                          className="flex w-full px-2.5 py-1.5 no-underline!"
+                          href={`/calendar/${calendarMode}/${year}/${focusedDate.month}/1`}
+                        >
+                          {year.toString()}
+                          <ListBox.ItemIndicator />
+                        </Link>
+                      </ListBox.Item>
+                    );
+                  })}
+                </ListBox.Section>
+              </ListBox>
+            </Select.Popover>
+          </Select>
+        </div>
+        <div
+          className={cn(
+            'flex gap-1 lg:gap-2',
+            calendarMode === 'week' && 'justify-center'
+          )}
+        >
+          {!isDesktop && !!user && (
+            <CustomButton
+              size="sm"
+              isIconOnly
+              variant="ghost"
+              aria-label="Toggle filters"
+              onPress={toggleFiltersVisibility}
+              className={cn(isMobile && 'min-w-fit p-0')}
+            >
+              <FunnelSimpleIcon size={20} />
+            </CustomButton>
+          )}
+          <CalendarNavigationButtons focusedDate={focusedDate} />
+        </div>
       </div>
+      {calendarMode === 'week' && (
+        <Select
+          variant="secondary"
+          className="md:w-62.5"
+          isOpen={weekSelectState.isOpen}
+          value={selectedWeek?.key ?? null}
+          onOpenChange={weekSelectState.setOpen}
+        >
+          <Label className="sr-only">Week</Label>
+          <Select.Trigger>
+            <Select.Value
+              render={() => {
+                return (
+                  <span className="flex items-center gap-1">
+                    {selectedWeek
+                      ? selectedWeek.label.split(' ').slice(0, -1).join(' ')
+                      : 'Select week'}
+                  </span>
+                );
+              }}
+            />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover className="w-62.5">
+            <ListBox>
+              <ListBox.Section>
+                <Header className="bg-background shadow-small rounded-small sticky top-1 z-20 flex w-auto rounded-2xl px-2 py-1.5">
+                  Week
+                </Header>
+                {weeks.map((week) => {
+                  return (
+                    <ListBox.Item
+                      id={week.key}
+                      key={week.key}
+                      textValue={week.label}
+                    >
+                      <Link
+                        className="flex w-full px-2.5 py-1.5 no-underline!"
+                        href={`/calendar/week/${week.anchorDate.year}/${week.anchorDate.month}/${week.anchorDate.day}`}
+                      >
+                        {week.label}
+                        <ListBox.ItemIndicator />
+                      </Link>
+                    </ListBox.Item>
+                  );
+                })}
+              </ListBox.Section>
+            </ListBox>
+          </Select.Popover>
+        </Select>
+      )}
     </div>
   );
 };

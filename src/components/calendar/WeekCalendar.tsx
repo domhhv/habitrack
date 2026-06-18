@@ -232,35 +232,51 @@ const WeekCalendar = () => {
     dayFormatter,
   ]);
 
+  const calendarControls = (
+    <>
+      <Tooltip closeDelay={0}>
+        <Tooltip.Trigger>
+          <CustomButton
+            variant="tertiary"
+            href={monthInfo.path}
+            size={isDesktop ? 'md' : 'sm'}
+            aria-label={`Go to month view: ${monthInfo.label}`}
+          >
+            <ArrowSquareLeftIcon weight="bold" />
+            <span>{monthInfo.label}</span>
+          </CustomButton>
+        </Tooltip.Trigger>
+        <Tooltip.Content>
+          Go to the month view of {monthInfo.label}
+        </Tooltip.Content>
+      </Tooltip>
+      <div className="flex flex-col items-center justify-center gap-2">
+        <CalendarNavigation focusedDate={state.focusedDate} />
+      </div>
+      <div className="w-10/12 md:w-auto">
+        <CalendarFilters />
+      </div>
+    </>
+  );
+
   return (
-    <div className="flex w-full flex-1 gap-0 md:gap-6">
+    <div className="flex w-full flex-1 flex-col gap-0 md:gap-6 lg:flex-row-reverse">
+      <aside className="flex shrink-0 flex-col gap-2 overflow-y-auto pt-4 pb-2 lg:w-86">
+        {isDesktop && calendarControls}
+        <CalendarPeriodSummary
+          kind="week"
+          note={weekNote}
+          startDate={monday}
+          metricTotals={metricTotals}
+          occurrenceSummary={occurrenceSummary}
+        />
+      </aside>
       <ScrollShadow
         orientation="horizontal"
         className="relative w-full overflow-y-scroll"
       >
-        <div className="sticky left-0 flex flex-col items-center justify-center gap-4">
-          <div className="flex items-center justify-center gap-2">
-            <Tooltip closeDelay={0}>
-              <Tooltip.Trigger>
-                <CustomButton
-                  variant="light"
-                  href={monthInfo.path}
-                  className="min-w-fit gap-2 px-2"
-                  aria-label={`Go to month view: ${monthInfo.label}`}
-                >
-                  <ArrowSquareLeftIcon weight="bold" />
-                  <span className="hidden sm:inline">{monthInfo.label}</span>
-                </CustomButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content>
-                Go to the month view of {monthInfo.label}
-              </Tooltip.Content>
-            </Tooltip>
-            <CalendarNavigation focusedDate={state.focusedDate} />
-          </div>
-          <div className="w-10/12 md:w-auto">
-            <CalendarFilters />
-          </div>
+        <div className="sticky left-0 flex flex-col items-start justify-center gap-2 lg:items-center">
+          {!isDesktop && calendarControls}
         </div>
         <div
           {...gridProps}
@@ -444,15 +460,6 @@ const WeekCalendar = () => {
             })}
         </div>
       </ScrollShadow>
-      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto pr-8 xl:flex">
-        <CalendarPeriodSummary
-          kind="week"
-          note={weekNote}
-          startDate={monday}
-          metricTotals={metricTotals}
-          occurrenceSummary={occurrenceSummary}
-        />
-      </aside>
     </div>
   );
 };
