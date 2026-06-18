@@ -1,12 +1,4 @@
-import {
-  cn,
-  Form,
-  Label,
-  Drawer,
-  Spinner,
-  TextArea,
-  TextField,
-} from '@heroui/react';
+import { cn, Form, Label, Drawer, TextArea, TextField } from '@heroui/react';
 import {
   endOfWeek,
   endOfMonth,
@@ -306,15 +298,16 @@ const NoteDrawer = () => {
                   <CustomButton
                     variant="danger"
                     onPress={removeNote}
+                    isPending={isRemoving}
                     isDisabled={isRemoving}
                   >
-                    {isRemoving && <Spinner size="sm" color="current" />}
                     Remove
                   </CustomButton>
                 )}
                 <CustomButton
                   type="submit"
                   variant="primary"
+                  isPending={isSaving}
                   fullWidth={isMobile && !existingNote}
                   isDisabled={
                     isSaving ||
@@ -324,13 +317,9 @@ const NoteDrawer = () => {
                     existingNote?.content === content
                   }
                 >
-                  {isSaving ? (
-                    <Spinner size="sm" color="current" />
-                  ) : (
-                    <CustomKbd size="md" variant="default">
-                      {mod} {enter}
-                    </CustomKbd>
-                  )}
+                  <CustomKbd size="md" variant="default">
+                    {mod} {enter}
+                  </CustomKbd>
                   {existingNote ? 'Save' : 'Add'}
                 </CustomButton>
               </Drawer.Footer>

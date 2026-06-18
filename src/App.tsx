@@ -1,10 +1,10 @@
-import { Spinner } from '@heroui/react';
 import { Analytics } from '@vercel/analytics/react';
 import React from 'react';
 
 import {
   AppHeader,
   NoteDrawer,
+  InfinityLoader,
   OccurrenceDrawer,
   ConfirmationDialog,
 } from '@components';
@@ -24,7 +24,7 @@ const App = () => {
     return (
       <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 items-center justify-center">
         <div className="flex flex-row items-center gap-4">
-          <Spinner color="accent" />
+          <InfinityLoader color="var(--accent)" />
           <span>Loading your session...</span>
         </div>
       </main>
