@@ -206,11 +206,9 @@ const DayCalendar = () => {
                 <CustomButton
                   size="lg"
                   variant="light"
+                  href={weekInfo.path}
                   className="min-w-fit gap-2 px-2"
                   aria-label={`Go to week view: ${weekInfo.label}`}
-                  onPress={() => {
-                    navigate(weekInfo.path);
-                  }}
                 >
                   <ArrowSquareLeftIcon weight="bold" className="h-5 w-5" />
                   <span className="hidden sm:inline">{weekInfo.label}</span>
@@ -372,7 +370,7 @@ const DayCalendar = () => {
         <CalendarPeriodSummary
           kind="day"
           note={dayNote}
-          date={focusedDate}
+          startDate={focusedDate}
           metricTotals={metricTotals}
           occurrenceSummary={occurrenceSummary}
         />

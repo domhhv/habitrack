@@ -1,4 +1,4 @@
-import { cn, Tooltip } from '@heroui/react';
+import { Tooltip } from '@heroui/react';
 import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
@@ -9,7 +9,7 @@ import {
   CalendarCheckIcon,
   ArrowSquareOutIcon,
 } from '@phosphor-icons/react';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation } from 'react-router';
 
 import { CustomKbd, CustomButton, AuthModalButton } from '@components';
 import { useScreenWidth } from '@hooks';
@@ -21,13 +21,9 @@ import {
 
 import ThemeToggle from './ThemeToggle';
 
-const ICON_ONLY_BREAKPOINT = 521;
-const COMPACT_BUTTON_BREAKPOINT = 339;
-
 const Header = () => {
   const user = useUser();
-  const navigate = useNavigate();
-  const { isDesktop, isMobile, screenWidth } = useScreenWidth();
+  const { isDesktop, isMobile } = useScreenWidth();
   const { pathname } = useLocation();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
@@ -47,78 +43,54 @@ const Header = () => {
       <header className="flex h-full w-full items-center justify-between px-8 lg:px-16">
         <div className="flex items-center gap-2">
           <CustomButton
-            isIconOnly={screenWidth < ICON_ONLY_BREAKPOINT}
+            href="/calendar/month"
+            size={isMobile ? 'sm' : 'md'}
+            aria-label='Go to "Calendar" page'
             variant={pathname.startsWith('/calendar') ? 'tertiary' : 'ghost'}
-            onPress={() => {
-              navigate('/calendar/month');
-            }}
-            className={cn(
-              screenWidth < COMPACT_BUTTON_BREAKPOINT && 'min-w-fit px-2'
-            )}
           >
-            {screenWidth < ICON_ONLY_BREAKPOINT ? (
-              <CalendarDotsIcon size={16} />
-            ) : (
-              'Calendar'
-            )}
+            <CalendarDotsIcon size={16} className="sm:hidden" />
+            <span className="max-sm:hidden">Calendar</span>
           </CustomButton>
           {!!user && (
             <>
               <CustomButton
-                isIconOnly={screenWidth < ICON_ONLY_BREAKPOINT}
+                href="/habits"
+                size={isMobile ? 'sm' : 'md'}
+                aria-label='Go to "Habits" page'
                 variant={pathname === '/habits' ? 'tertiary' : 'ghost'}
-                onPress={() => {
-                  navigate('/habits');
-                }}
               >
-                {screenWidth < ICON_ONLY_BREAKPOINT ? (
-                  <RepeatIcon size={16} />
-                ) : (
-                  'Habits'
-                )}
+                <RepeatIcon size={16} className="sm:hidden" />
+                <span className="max-sm:hidden">Habits</span>
               </CustomButton>
               <CustomButton
-                isIconOnly={screenWidth < ICON_ONLY_BREAKPOINT}
+                href="/notes"
+                aria-label='Go to "Notes" page'
                 variant={pathname === '/notes' ? 'tertiary' : 'ghost'}
-                onPress={() => {
-                  navigate('/notes');
-                }}
-                className={cn(
-                  pathname === '/notes' && 'dark:text-secondary-500'
-                )}
               >
-                {screenWidth < ICON_ONLY_BREAKPOINT ? (
-                  <NoteIcon size={16} />
-                ) : (
-                  'Notes'
-                )}
+                <NoteIcon size={16} className="sm:hidden" />
+                <span className="max-sm:hidden">Notes</span>
               </CustomButton>
             </>
           )}
           <ThemeToggle />
-          {screenWidth > 390 && (
-            <Tooltip closeDelay={0}>
-              <Tooltip.Trigger>
-                <CustomButton
-                  isIconOnly
-                  variant="ghost"
-                  onPress={() => {
-                    window.open(
-                      'https://github.com/domhhv/habitrack',
-                      '_blank',
-                      'noopener,noreferrer'
-                    );
-                  }}
-                >
-                  <GithubLogoIcon size={isDesktop ? 18 : 16} />
-                </CustomButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content showArrow offset={10} placement="bottom">
-                <Tooltip.Arrow />
-                View source code on GitHub
-              </Tooltip.Content>
-            </Tooltip>
-          )}
+          <Tooltip closeDelay={0}>
+            <Tooltip.Trigger>
+              <CustomButton
+                variant="ghost"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="max-sm:hidden"
+                aria-label="View source code on GitHub"
+                href="https://github.com/domhhv/habitrack"
+              >
+                <GithubLogoIcon size={isDesktop ? 18 : 16} />
+              </CustomButton>
+            </Tooltip.Trigger>
+            <Tooltip.Content showArrow offset={10} placement="bottom">
+              <Tooltip.Arrow />
+              View source code on GitHub
+            </Tooltip.Content>
+          </Tooltip>
         </div>
         <div className="flex items-center gap-4">
           {!!user && (
@@ -160,18 +132,14 @@ const Header = () => {
           )}
           <div className="flex items-center gap-4">
             <CustomButton
+              target="_blank"
               variant="secondary"
-              className="hidden xl:inline-flex"
-              onPress={() => {
-                window.open(
-                  'https://habitrack.featurebase.app/roadmap',
-                  '_blank',
-                  'noopener,noreferrer'
-                );
-              }}
+              rel="noopener noreferrer"
+              className="hidden gap-2 xl:flex"
+              href="https://habitrack.featurebase.app/roadmap"
             >
               <ArrowSquareOutIcon size={16} />
-              Roadmap
+              <span>Roadmap</span>
               <CustomKbd
                 isSolid
                 size="md"

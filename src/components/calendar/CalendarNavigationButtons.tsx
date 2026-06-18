@@ -1,4 +1,3 @@
-import { cn } from '@heroui/react';
 import {
   today,
   isToday,
@@ -19,7 +18,7 @@ import { useNavigate, useLocation } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { CustomButton } from '@components';
-import { useScreenWidth, useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
+import { useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
 import { useNoteDrawerState, useOccurrenceDrawerState } from '@stores';
 
 type CalendarNavigationButtonsProps = {
@@ -32,7 +31,6 @@ const CalendarNavigationButtons = ({
   const timeZone = getLocalTimeZone();
   const location = useLocation();
   const { locale } = useLocale();
-  const { isMobile } = useScreenWidth();
   const navigate = useNavigate();
   const occurrenceDrawerState = useOccurrenceDrawerState();
   const noteDrawerState = useNoteDrawerState();
@@ -129,31 +127,28 @@ const CalendarNavigationButtons = ({
   return (
     <>
       <CustomButton
-        isIconOnly
+        className="px-3"
         variant="tertiary"
-        onPress={() => {
-          navigate(previousRangePath);
-        }}
+        href={previousRangePath}
+        aria-label={`Previous ${calendarMode}`}
       >
         <ArrowFatLeftIcon size={20} />
       </CustomButton>
       {!isSameRange && (
         <CustomButton
+          className="px-3"
           variant="tertiary"
-          className={cn(isMobile && 'min-w-fit px-2')}
-          onPress={() => {
-            navigate(todayRangePath);
-          }}
+          href={todayRangePath}
+          aria-label={`Current ${calendarMode}`}
         >
           <ArrowsClockwiseIcon size={20} />
         </CustomButton>
       )}
       <CustomButton
-        isIconOnly
+        className="px-3"
         variant="tertiary"
-        onPress={() => {
-          navigate(nextRangePath);
-        }}
+        href={nextRangePath}
+        aria-label={`Next ${calendarMode}`}
       >
         <ArrowFatRightIcon size={20} />
       </CustomButton>

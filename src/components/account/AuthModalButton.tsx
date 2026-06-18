@@ -9,7 +9,6 @@ import {
 import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { VisuallyHidden } from 'react-aria';
-import { useNavigate } from 'react-router';
 
 import { CustomKbd, CustomButton } from '@components';
 import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
@@ -24,8 +23,7 @@ type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
   const user = useUser();
-  const navigate = useNavigate();
-  const { isDesktop } = useScreenWidth();
+  const { isDesktop, isMobile } = useScreenWidth();
   const overlayState = useOverlayState();
   const [authenticating, setAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
@@ -124,16 +122,16 @@ const AuthModalButton = () => {
       {user?.id ? (
         <ButtonGroup>
           <CustomButton
+            href="/account"
             variant="secondary"
             isIconOnly={!isDesktop}
             data-testid="auth-button"
+            size={isMobile ? 'sm' : 'md'}
+            aria-label='Go to "Account" page'
             className="border-r-background-700 rounded-r-none border-r"
-            onPress={() => {
-              navigate('/account');
-            }}
           >
             <UserIcon weight="bold" data-testid="user-icon" />
-            {isDesktop && 'Account'}
+            <span className="max-sm:hidden">Account</span>
           </CustomButton>
           <Tooltip delay={0} closeDelay={0}>
             <Tooltip.Trigger>
@@ -141,6 +139,8 @@ const AuthModalButton = () => {
                 isIconOnly
                 onPress={signOut}
                 variant="secondary"
+                aria-label="Log out"
+                size={isMobile ? 'sm' : 'md'}
                 className="rounded-l-none rounded-r-3xl"
               >
                 <SignOutIcon weight="bold" data-testid="sign-out-icon" />

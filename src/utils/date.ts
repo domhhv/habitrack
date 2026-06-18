@@ -154,22 +154,19 @@ export const getWeeksOfYear = (
     const weekNumber = getISOWeek(anchorDate.toDate(getLocalTimeZone()));
     const weekKey = weekStart.toString();
 
-    weeks.push({
-      anchorDate,
-      endDate: weekEnd,
-      key: weekKey,
-      label: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)} ${anchorDate.year}`,
-      startDate: weekStart,
-      textValue: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)} ${anchorDate.year}`,
-      weekNumber,
-      year: anchorDate.year,
-    });
+    if (anchorDate.year === year) {
+      weeks.push({
+        anchorDate,
+        endDate: weekEnd,
+        key: weekKey,
+        label: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)} ${anchorDate.year}`,
+        startDate: weekStart,
+        textValue: `W${weekNumber}: ${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)} ${anchorDate.year}`,
+        weekNumber,
+      });
+    }
 
     current = current.add({ days: 7 });
-  }
-
-  if (weeks.at(-1)?.weekNumber === 1) {
-    weeks.pop();
   }
 
   return weeks;
