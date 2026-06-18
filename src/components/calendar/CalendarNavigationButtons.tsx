@@ -18,7 +18,7 @@ import { useNavigate, useLocation } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { CustomButton } from '@components';
-import { useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
+import { useScreenWidth, useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
 import { useNoteDrawerState, useOccurrenceDrawerState } from '@stores';
 
 type CalendarNavigationButtonsProps = {
@@ -35,6 +35,7 @@ const CalendarNavigationButtons = ({
   const occurrenceDrawerState = useOccurrenceDrawerState();
   const noteDrawerState = useNoteDrawerState();
   const firstDayOfWeek = useFirstDayOfWeek();
+  const { isDesktop } = useScreenWidth();
 
   const calendarMode = React.useMemo(() => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -130,6 +131,7 @@ const CalendarNavigationButtons = ({
         className="px-3"
         variant="tertiary"
         href={previousRangePath}
+        size={isDesktop ? 'md' : 'sm'}
         aria-label={`Previous ${calendarMode}`}
       >
         <ArrowFatLeftIcon size={20} />
@@ -139,6 +141,7 @@ const CalendarNavigationButtons = ({
           className="px-3"
           variant="tertiary"
           href={todayRangePath}
+          size={isDesktop ? 'md' : 'sm'}
           aria-label={`Current ${calendarMode}`}
         >
           <ArrowsClockwiseIcon size={20} />
@@ -148,6 +151,7 @@ const CalendarNavigationButtons = ({
         className="px-3"
         variant="tertiary"
         href={nextRangePath}
+        size={isDesktop ? 'md' : 'sm'}
         aria-label={`Next ${calendarMode}`}
       >
         <ArrowFatRightIcon size={20} />
