@@ -16,11 +16,11 @@ jobs:
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.0
 
-      - uses: supabase/setup-cli@v2
+      - uses: supabase/setup-cli@v2.1.1
         with:
-          version: latest
+          version: 2.107.0
 
       - run: supabase link --project-ref $SUPABASE_PROJECT_ID
       - run: supabase db push

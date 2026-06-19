@@ -130,7 +130,9 @@
   "resolutions": {
     "@internationalized/date": "3.12.2",
     "react-aria": "3.50.0",
-    "react-stately": "3.48.0"
+    "react-stately": "3.48.0",
+    "map-obj": "6.0.0",
+    "quick-lru": "7.3.0"
   },
   "packageManager": "yarn@4.16.0"
 }
