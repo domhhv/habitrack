@@ -45,7 +45,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
     null
   );
   const formatter = useDateFormatter({
-    month: 'long',
+    month: isDesktop ? 'long' : 'short',
   });
   const months = React.useMemo(() => {
     return [
@@ -118,7 +118,9 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
                 render={() => {
                   return (
                     <span className="flex items-center gap-1">
-                      {formatter.format(focusedDate.toDate(timeZone))}
+                      {capitalize(
+                        formatter.format(focusedDate.toDate(timeZone))
+                      )}
                     </span>
                   );
                 }}
@@ -137,15 +139,13 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
                         className="p-0"
                         id={String(index + 1)}
                         key={String(index + 1)}
-                        textValue={capitalize(
-                          isMobile ? month.substring(0, 3) : month
-                        )}
+                        textValue={capitalize(month)}
                       >
                         <Link
                           className="flex w-full px-2.5 py-1.5 no-underline!"
                           href={`/calendar/${calendarMode}/${focusedDate.year}/${index + 1}/1`}
                         >
-                          {capitalize(isMobile ? month.substring(0, 3) : month)}
+                          {capitalize(month)}
                           <ListBox.ItemIndicator />
                         </Link>
                       </ListBox.Item>

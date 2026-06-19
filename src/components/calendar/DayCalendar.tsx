@@ -12,8 +12,8 @@ import {
 import {
   NoteIcon,
   NoteBlankIcon,
+  ArrowsOutIcon,
   CalendarBlankIcon,
-  ArrowSquareLeftIcon,
 } from '@phosphor-icons/react';
 import groupBy from 'lodash.groupby';
 import React from 'react';
@@ -210,7 +210,7 @@ const DayCalendar = () => {
                   className="min-w-fit gap-2 px-2"
                   aria-label={`Go to week view: ${weekInfo.label}`}
                 >
-                  <ArrowSquareLeftIcon weight="bold" className="h-5 w-5" />
+                  <ArrowsOutIcon weight="bold" className="h-5 w-5" />
                   <span className="hidden sm:inline">{weekInfo.label}</span>
                 </CustomButton>
               </Tooltip.Trigger>
