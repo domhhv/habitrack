@@ -249,6 +249,12 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
   };
 };
 
+export const useFlatOccurrences = () => {
+  return useBoundStore((state) => {
+    return state.occurrences;
+  });
+};
+
 export const useOccurrences = () => {
   return useBoundStore((state) => {
     return state.occurrencesByDate;

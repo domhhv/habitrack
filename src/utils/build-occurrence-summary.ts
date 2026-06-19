@@ -3,12 +3,10 @@ import groupBy from 'lodash.groupby';
 import type { Occurrence, OccurrenceSummaryItem } from '@models';
 
 const buildOccurrenceSummary = (
-  occurrencesById: Record<string, Occurrence>
+  occurrences: Occurrence[]
 ): OccurrenceSummaryItem[] => {
-  const allOccurrences = Object.values(occurrencesById);
-
-  const grouped = groupBy(allOccurrences, (o) => {
-    return o.habitId;
+  const grouped = groupBy(occurrences, (occurrence) => {
+    return occurrence.habitId;
   });
 
   return Object.entries(grouped).map(([habitId, habitOccurrences]) => {

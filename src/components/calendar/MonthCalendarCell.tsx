@@ -6,7 +6,6 @@ import {
   NoteBlankIcon,
   SquareHalfIcon,
   CalendarPlusIcon,
-  CalendarBlankIcon,
   ArrowSquareRightIcon,
 } from '@phosphor-icons/react';
 import groupBy from 'lodash.groupby';
@@ -97,7 +96,18 @@ const MonthCalendarCell = ({
     drawerDate && isOccurrenceDrawerOpen && isEqualDay(drawerDate, date);
 
   const cellHeaderClassName = cn(
-    'flex w-full items-center justify-between border-b border-neutral-500 pl-1.5 pr-0.5 py-0.5 text-sm dark:border-neutral-400',
+    'flex w-full items-center justify-between border-b border-neutral-500 pl-1.5 pr-0.5 py-0.5 text-sm dark:border-neutral-400 sticky top-0 ',
+    'bg-background-50 group-hover/cell:bg-background-200 dark:bg-background-800 dark:group-hover/cell:bg-background-900 transition-colors',
+    isTodayCell &&
+      'bg-background-100 group-hover/cell:bg-background-300 dark:bg-background-600 dark:group-hover/cell:bg-background-500',
+    isDrawerDate &&
+      isDesktop &&
+      isTodayCell &&
+      'bg-background-300 dark:bg-background-500 z-51',
+    isDrawerDate &&
+      isDesktop &&
+      !isTodayCell &&
+      'bg-background-200 dark:bg-background-900 z-51',
     isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600',
     isTodayCell ? 'w-full self-auto md:self-start' : 'w-full',
     isMobile && 'pl-1',
@@ -124,12 +134,12 @@ const MonthCalendarCell = ({
       >
         {formattedDate}
       </p>
-      <div className="flex items-center justify-between gap-2 pr-2">
+      <div className="flex items-center justify-between">
         {isMobile && screenWidth > 360 && hasNote && (
           <NoteIcon size={12} weight="bold" />
         )}
-        {isDesktop && (
-          <div className="flex items-center gap-1">
+        {screenWidth >= 1360 && (
+          <div className="flex items-center">
             <Tooltip delay={0} closeDelay={0}>
               <Tooltip.Trigger className="flex">
                 <CustomButton
@@ -212,9 +222,6 @@ const MonthCalendarCell = ({
             </Tooltip>
           </div>
         )}
-        {isTodayCell && !isMobile && (
-          <CalendarBlankIcon size={16} weight="fill" />
-        )}
       </div>
     </div>
   );
@@ -227,13 +234,15 @@ const MonthCalendarCell = ({
     >
       <div
         className={cn(
-          'bg-background-50 hover:bg-background-200 dark:bg-background-800 dark:hover:bg-background-900 relative flex-1 space-y-2 transition-colors',
+          'bg-background-50 group-hover/cell:bg-background-200 dark:bg-background-800 dark:group-hover/cell:bg-background-900 relative flex-1 space-y-2 overflow-x-auto overflow-y-visible transition-colors',
           isTodayCell &&
-            'bg-background-100 hover:bg-background-300 dark:bg-background-600 dark:hover:bg-background-500',
+            'bg-background-100 group-hover/cell:bg-background-300 dark:bg-background-600 dark:group-hover/cell:bg-background-500',
           isDrawerDate &&
+            isDesktop &&
             isTodayCell &&
             'bg-background-300 dark:bg-background-500 z-51',
           isDrawerDate &&
+            isDesktop &&
             !isTodayCell &&
             'bg-background-200 dark:bg-background-900 z-51',
           position === 'top-left' && 'rounded-tl-3xl',
@@ -242,9 +251,11 @@ const MonthCalendarCell = ({
           position === 'bottom-right' && 'rounded-br-3xl'
         )}
       >
-        {!isDesktop && user ? (
+        {screenWidth < 1360 && user ? (
           <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-            <Popover.Trigger>{cellHeader}</Popover.Trigger>
+            <Popover.Trigger className="sticky top-0 z-10 w-full">
+              {cellHeader}
+            </Popover.Trigger>
             <Popover.Content offset={12} placement="bottom">
               <Popover.Dialog className="p-0">
                 <Popover.Arrow />
@@ -307,7 +318,7 @@ const MonthCalendarCell = ({
         ) : (
           cellHeader
         )}
-        <div className="flex flex-wrap justify-center gap-2 overflow-x-auto overflow-y-visible px-0 py-0.5 pb-2 md:justify-start md:px-2">
+        <div className="flex flex-wrap justify-center gap-2 px-0 py-0.5 pb-2 md:px-2 xl:justify-start">
           {Object.entries(groupedOccurrences).map(
             ([habitId, habitOccurrences]) => {
               if (!habitOccurrences) {
