@@ -1,6 +1,6 @@
 {
   "plugins": ["prettier-plugin-tailwindcss"],
-  "tailwindFunctions": ["clsx", "twJoin", "twMerge", "tv"],
+  "tailwindFunctions": ["clsx", "twJoin", "twMerge", "tv", "cn"],
   "trailingComma": "es5",
   "tabWidth": 2,
   "semi": true,

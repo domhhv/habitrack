@@ -4,8 +4,6 @@ import globals from 'globals';
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import tsEslint from 'typescript-eslint';
-import importPlugin from 'eslint-plugin-import';
-import jsxA11Y from 'eslint-plugin-jsx-a11y';
 import perfectionist from 'eslint-plugin-perfectionist';
 import reactHooks from 'eslint-plugin-react-hooks';
 import switchCase from 'eslint-plugin-switch-case';
@@ -13,8 +11,6 @@ import unusedImports from 'eslint-plugin-unused-imports';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
 
 const plugins = {
-  import: importPlugin,
-  'jsx-a11y': jsxA11Y,
   'react-hooks': reactHooks,
   '@stylistic': stylistic,
   js,
@@ -29,8 +25,6 @@ const rules = {
   '@typescript-eslint/no-deprecated': 'error',
   'arrow-body-style': ['error', 'always'],
   curly: 'error',
-  'import/no-duplicates': 'error',
-  'import/order': 'off',
   'no-undef': 'off',
   'no-useless-rename': 'error',
   'object-shorthand': 'error',

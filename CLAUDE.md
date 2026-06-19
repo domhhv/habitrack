@@ -156,7 +156,7 @@ Supabase storage buckets:
 
 ### Environment Requirements
 
-- Node.js 22.22.3
+- Node.js 24.17.0
 - Docker (for local Supabase)
 - Yarn is used as a package manager and is automatically available via Corepack (bundled with Node.js)
 
