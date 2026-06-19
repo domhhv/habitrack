@@ -96,7 +96,7 @@ const MonthCalendarCell = ({
     drawerDate && isOccurrenceDrawerOpen && isEqualDay(drawerDate, date);
 
   const cellHeaderClassName = cn(
-    'flex w-full items-center justify-between border-b border-neutral-500 pl-1.5 pr-0.5 py-0.5 text-sm dark:border-neutral-400 sticky top-0 ',
+    'sticky top-0 flex w-full items-center justify-between border-b border-neutral-500 py-0.5 pr-0.5 pl-1.5 text-sm dark:border-neutral-400',
     'bg-background-50 group-hover/cell:bg-background-200 dark:bg-background-800 dark:group-hover/cell:bg-background-900 transition-colors',
     isTodayCell &&
       'bg-background-100 group-hover/cell:bg-background-300 dark:bg-background-600 dark:group-hover/cell:bg-background-500',

@@ -13,16 +13,16 @@ jobs:
       !contains(github.event.pull_request.body, '[skip build]')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.0
+      - uses: actions/setup-node@v6.4.0
         with:
-          node-version: 'latest'
+          node-version: 24.17.0
 
       - run: yarn install
 
       - run: yarn build
 
       - name: Upload webpack stats artifact
-        uses: relative-ci/agent-upload-artifact-action@v2
+        uses: relative-ci/agent-upload-artifact-action@v2.0.0
         with:
           webpackStatsFile: ./dist/webpack-stats.json
