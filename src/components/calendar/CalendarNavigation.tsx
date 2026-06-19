@@ -103,7 +103,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="flex items-stretch justify-between gap-2">
+      <div className="flex justify-between gap-2">
         <div className="mr-0 flex items-stretch gap-2">
           <Select
             variant="secondary"
@@ -203,12 +203,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
             </Select.Popover>
           </Select>
         </div>
-        <div
-          className={cn(
-            'flex gap-1 lg:gap-2',
-            calendarMode === 'week' && 'justify-center'
-          )}
-        >
+        <div className="flex gap-1 lg:gap-2">
           {!isDesktop && !!user && (
             <CustomButton
               size="sm"

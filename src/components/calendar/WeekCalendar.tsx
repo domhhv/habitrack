@@ -35,7 +35,7 @@ import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useDayNotes,
   useWeekNotes,
-  useOccurrences,
+  useFlatOccurrences,
   useNoteDrawerActions,
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
@@ -61,7 +61,7 @@ const WeekCalendar = () => {
   const { isDesktop, screenWidth } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
-  const occurrences = useOccurrences();
+  const occurrences = useFlatOccurrences();
   const { locale } = useLocale();
   const params = useParams();
   const firstDayOfWeek = useFirstDayOfWeek();
@@ -157,20 +157,18 @@ const WeekCalendar = () => {
 
   const groupOccurrences = React.useCallback(
     (day: CalendarDate, hour: number) => {
-      const dayOccurrences = occurrences[day.toString()] || {};
-      const relatedOccurrences = Object.values(dayOccurrences).filter(
+      const relatedOccurrences = occurrences.filter(
         ({ hasSpecificTime, occurredAt }) => {
-          const occurrenceDate = occurredAt;
           const matchesDay =
-            occurrenceDate.year === day.year &&
-            occurrenceDate.month === day.month &&
-            occurrenceDate.day === day.day;
+            occurredAt.year === day.year &&
+            occurredAt.month === day.month &&
+            occurredAt.day === day.day;
 
           if (!hasSpecificTime) {
             return matchesDay && hour === 0;
           }
 
-          return matchesDay && occurrenceDate.hour === hour;
+          return matchesDay && occurredAt.hour === hour;
         }
       );
 
@@ -184,19 +182,17 @@ const WeekCalendar = () => {
   );
 
   const occurrenceSummary = React.useMemo(() => {
-    const weekOccurrencesById: Record<
-      string,
-      (typeof occurrences)[string][string]
-    > = {};
+    const weekStart = startOfWeek(state.focusedDate, locale, firstDayOfWeek);
+    const weekEnd = endOfWeek(state.focusedDate, locale, firstDayOfWeek);
 
-    for (const dayOccurrences of Object.values(occurrences)) {
-      for (const [id, occurrence] of Object.entries(dayOccurrences)) {
-        weekOccurrencesById[id] = occurrence;
-      }
-    }
+    const weekOccurrences = occurrences.filter((occurrence) => {
+      const date = toCalendarDate(occurrence.occurredAt);
 
-    return buildOccurrenceSummary(weekOccurrencesById);
-  }, [occurrences]);
+      return date.compare(weekStart) >= 0 && date.compare(weekEnd) <= 0;
+    });
+
+    return buildOccurrenceSummary(weekOccurrences);
+  }, [occurrences, state.focusedDate, locale, firstDayOfWeek]);
 
   const metricTotals = React.useMemo(() => {
     return buildMetricTotals(occurrenceSummary);

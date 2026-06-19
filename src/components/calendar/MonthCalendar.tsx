@@ -14,7 +14,11 @@ import { useParams } from 'react-router';
 import type { CalendarState } from 'react-stately';
 
 import { useFirstDayOfWeek } from '@hooks';
-import { useMonthNotes, useOccurrences, useCalendarRangeChange } from '@stores';
+import {
+  useMonthNotes,
+  useFlatOccurrences,
+  useCalendarRangeChange,
+} from '@stores';
 import { buildMetricTotals, buildOccurrenceSummary } from '@utils';
 
 import CalendarFilters from './CalendarFilters';
@@ -29,7 +33,7 @@ type MonthCalendarProps = {
 const MonthCalendar = ({ state }: MonthCalendarProps) => {
   const changeCalendarRange = useCalendarRangeChange();
   const monthNotes = useMonthNotes();
-  const occurrences = useOccurrences();
+  const occurrences = useFlatOccurrences();
   const params = useParams();
   const { locale } = useLocale();
   const firstDayOfWeek = useFirstDayOfWeek();
@@ -47,23 +51,14 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
   }, [monthNotes, monthStart]);
 
   const occurrenceSummary = React.useMemo(() => {
-    const monthOccurrencesById: Record<
-      string,
-      (typeof occurrences)[string][string]
-    > = {};
+    const monthOccurrences = occurrences.filter((occurrence) => {
+      return (
+        occurrence.occurredAt.year === monthStart.year &&
+        occurrence.occurredAt.month === monthStart.month
+      );
+    });
 
-    for (const dayOccurrences of Object.values(occurrences)) {
-      for (const [id, occurrence] of Object.entries(dayOccurrences)) {
-        if (
-          occurrence.occurredAt.year === monthStart.year &&
-          occurrence.occurredAt.month === monthStart.month
-        ) {
-          monthOccurrencesById[id] = occurrence;
-        }
-      }
-    }
-
-    return buildOccurrenceSummary(monthOccurrencesById);
+    return buildOccurrenceSummary(monthOccurrences);
   }, [occurrences, monthStart]);
 
   const metricTotals = React.useMemo(() => {
