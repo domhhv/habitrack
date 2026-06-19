@@ -74,7 +74,7 @@ const CustomButton = (props: CustomButtonProps) => {
     return (
       <Link
         {...linkProps}
-        className={className}
+        className={cn('gap-2', className)}
         onPointerDown={(event) => {
           createRipple(event);
           linkProps.onPointerDown?.(event);

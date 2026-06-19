@@ -1,4 +1,4 @@
-import { cn, Tooltip, ScrollShadow } from '@heroui/react';
+import { cn, Tooltip, Accordion, ScrollShadow } from '@heroui/react';
 import {
   today,
   isToday,
@@ -13,8 +13,9 @@ import {
 import {
   NoteIcon,
   NoteBlankIcon,
+  ArrowsOutIcon,
+  CaretDownIcon,
   CalendarBlankIcon,
-  ArrowSquareLeftIcon,
   ArrowSquareRightIcon,
 } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
@@ -34,7 +35,7 @@ import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useDayNotes,
   useWeekNotes,
-  useOccurrences,
+  useFlatOccurrences,
   useNoteDrawerActions,
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
@@ -60,7 +61,7 @@ const WeekCalendar = () => {
   const { isDesktop, screenWidth } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
-  const occurrences = useOccurrences();
+  const occurrences = useFlatOccurrences();
   const { locale } = useLocale();
   const params = useParams();
   const firstDayOfWeek = useFirstDayOfWeek();
@@ -156,20 +157,18 @@ const WeekCalendar = () => {
 
   const groupOccurrences = React.useCallback(
     (day: CalendarDate, hour: number) => {
-      const dayOccurrences = occurrences[day.toString()] || {};
-      const relatedOccurrences = Object.values(dayOccurrences).filter(
+      const relatedOccurrences = occurrences.filter(
         ({ hasSpecificTime, occurredAt }) => {
-          const occurrenceDate = occurredAt;
           const matchesDay =
-            occurrenceDate.year === day.year &&
-            occurrenceDate.month === day.month &&
-            occurrenceDate.day === day.day;
+            occurredAt.year === day.year &&
+            occurredAt.month === day.month &&
+            occurredAt.day === day.day;
 
           if (!hasSpecificTime) {
             return matchesDay && hour === 0;
           }
 
-          return matchesDay && occurrenceDate.hour === hour;
+          return matchesDay && occurredAt.hour === hour;
         }
       );
 
@@ -183,19 +182,17 @@ const WeekCalendar = () => {
   );
 
   const occurrenceSummary = React.useMemo(() => {
-    const weekOccurrencesById: Record<
-      string,
-      (typeof occurrences)[string][string]
-    > = {};
+    const weekStart = startOfWeek(state.focusedDate, locale, firstDayOfWeek);
+    const weekEnd = endOfWeek(state.focusedDate, locale, firstDayOfWeek);
 
-    for (const dayOccurrences of Object.values(occurrences)) {
-      for (const [id, occurrence] of Object.entries(dayOccurrences)) {
-        weekOccurrencesById[id] = occurrence;
-      }
-    }
+    const weekOccurrences = occurrences.filter((occurrence) => {
+      const date = toCalendarDate(occurrence.occurredAt);
 
-    return buildOccurrenceSummary(weekOccurrencesById);
-  }, [occurrences]);
+      return date.compare(weekStart) >= 0 && date.compare(weekEnd) <= 0;
+    });
+
+    return buildOccurrenceSummary(weekOccurrences);
+  }, [occurrences, state.focusedDate, locale, firstDayOfWeek]);
 
   const metricTotals = React.useMemo(() => {
     return buildMetricTotals(occurrenceSummary);
@@ -220,7 +217,7 @@ const WeekCalendar = () => {
     const rangeEnd = dayFormatter.format(monthEnd.toDate(timeZone));
 
     return {
-      label: `${monthName}: ${rangeStart} – ${rangeEnd}`,
+      label: `${capitalize(monthName)}: ${rangeStart} – ${rangeEnd}`,
       path: `/calendar/month/${thursday.year}/${thursday.month}/1`,
     };
   }, [
@@ -232,39 +229,78 @@ const WeekCalendar = () => {
     dayFormatter,
   ]);
 
+  const calendarControls = (
+    <>
+      <Tooltip closeDelay={0}>
+        <Tooltip.Trigger>
+          <CustomButton
+            variant="tertiary"
+            href={monthInfo.path}
+            size={isDesktop ? 'md' : 'sm'}
+            aria-label={`Go to month view: ${monthInfo.label}`}
+          >
+            <ArrowsOutIcon weight="bold" />
+            <span>{monthInfo.label}</span>
+          </CustomButton>
+        </Tooltip.Trigger>
+        <Tooltip.Content>
+          Go to the month view of {monthInfo.label}
+        </Tooltip.Content>
+      </Tooltip>
+      <div className="flex flex-col items-center justify-center gap-2">
+        <CalendarNavigation focusedDate={state.focusedDate} />
+      </div>
+      <div className="w-10/12 md:w-auto">
+        <CalendarFilters />
+      </div>
+    </>
+  );
+
   return (
-    <div className="flex w-full flex-1 gap-0 md:gap-6">
+    <div className="flex w-full flex-1 flex-col gap-0 md:gap-6 lg:flex-row-reverse">
+      <aside className="flex shrink-0 flex-col gap-2 overflow-y-auto pt-4 pb-2 max-lg:hidden max-lg:px-8 lg:w-86">
+        {calendarControls}
+        <CalendarPeriodSummary
+          kind="week"
+          note={weekNote}
+          startDate={monday}
+          className="max-lg:pb-2"
+          metricTotals={metricTotals}
+          occurrenceSummary={occurrenceSummary}
+        />
+      </aside>
       <ScrollShadow
         orientation="horizontal"
         className="relative w-full overflow-y-scroll"
       >
-        <div className="sticky left-0 flex flex-col items-center justify-center gap-4">
-          <div className="flex items-center justify-center gap-2">
-            <Tooltip closeDelay={0}>
-              <Tooltip.Trigger>
-                <CustomButton
-                  variant="light"
-                  href={monthInfo.path}
-                  className="min-w-fit gap-2 px-2"
-                  aria-label={`Go to month view: ${monthInfo.label}`}
-                >
-                  <ArrowSquareLeftIcon weight="bold" />
-                  <span className="hidden sm:inline">{monthInfo.label}</span>
-                </CustomButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content>
-                Go to the month view of {monthInfo.label}
-              </Tooltip.Content>
-            </Tooltip>
-            <CalendarNavigation focusedDate={state.focusedDate} />
-          </div>
-          <div className="w-10/12 md:w-auto">
-            <CalendarFilters />
-          </div>
+        <div className="sticky left-0 flex flex-col items-start justify-center gap-2 px-8 pt-2 lg:hidden lg:items-center">
+          <Accordion>
+            <Accordion.Item key="summary">
+              <Accordion.Heading>
+                <Accordion.Trigger className="bg-default flex w-full items-center gap-2 rounded-3xl py-2">
+                  Summary
+                  <Accordion.Indicator>
+                    <CaretDownIcon />
+                  </Accordion.Indicator>
+                </Accordion.Trigger>
+              </Accordion.Heading>
+              <Accordion.Panel>
+                <CalendarPeriodSummary
+                  kind="week"
+                  note={weekNote}
+                  className="pt-2"
+                  startDate={monday}
+                  metricTotals={metricTotals}
+                  occurrenceSummary={occurrenceSummary}
+                />
+              </Accordion.Panel>
+            </Accordion.Item>
+          </Accordion>
+          {calendarControls}
         </div>
         <div
           {...gridProps}
-          className="flex min-w-lg justify-around px-8 py-4 lg:px-16 xl:pr-2"
+          className="flex min-w-lg justify-around py-4 max-lg:px-8 xl:pr-2"
         >
           {state
             .getDatesInWeek(firstDayOfWeek === 'sun' ? 0 : 1)
@@ -444,15 +480,6 @@ const WeekCalendar = () => {
             })}
         </div>
       </ScrollShadow>
-      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto pr-8 xl:flex">
-        <CalendarPeriodSummary
-          kind="week"
-          note={weekNote}
-          startDate={monday}
-          metricTotals={metricTotals}
-          occurrenceSummary={occurrenceSummary}
-        />
-      </aside>
     </div>
   );
 };

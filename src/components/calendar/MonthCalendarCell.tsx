@@ -1,12 +1,11 @@
 import { cn, Popover, Tooltip } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
-import { isToday } from '@internationalized/date';
+import { isToday, isEqualDay } from '@internationalized/date';
 import {
   NoteIcon,
   NoteBlankIcon,
   SquareHalfIcon,
   CalendarPlusIcon,
-  CalendarBlankIcon,
   ArrowSquareRightIcon,
 } from '@phosphor-icons/react';
 import groupBy from 'lodash.groupby';
@@ -21,6 +20,7 @@ import {
   useUser,
   useDayNotes,
   useNoteDrawerActions,
+  useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
 } from '@stores';
 
@@ -47,6 +47,12 @@ const MonthCalendarCell = ({
   const user = useUser();
   const dayNotes = useDayNotes();
   const { openNoteDrawer } = useNoteDrawerActions();
+  const {
+    dayToDisplay,
+    dayToLog,
+    isOpen: isOccurrenceDrawerOpen,
+    occurrenceToEdit,
+  } = useOccurrenceDrawerState();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { isDesktop, isMobile, screenWidth } = useScreenWidth();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
@@ -85,21 +91,27 @@ const MonthCalendarCell = ({
     }
   );
 
-  const cellRootClassName = cn(
-    'group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 transition-colors last-of-type:border-r-0 hover:bg-neutral-200 focus:border-neutral-100 dark:border-neutral-400 dark:hover:bg-neutral-800 lg:h-36',
-    position === 'top-left' && 'rounded-tl-3xl',
-    position === 'top-right' && 'rounded-tr-3xl',
-    position === 'bottom-left' && 'rounded-bl-3xl',
-    position === 'bottom-right' && 'rounded-br-3xl',
-    isTodayCell &&
-      'bg-background-100 hover:bg-background-300 dark:bg-background-500 dark:hover:bg-background-300'
-  );
+  const drawerDate = occurrenceToEdit?.occurredAt || dayToLog || dayToDisplay;
+  const isDrawerDate =
+    drawerDate && isOccurrenceDrawerOpen && isEqualDay(drawerDate, date);
 
   const cellHeaderClassName = cn(
-    'flex w-full items-center justify-between border-b border-neutral-500 pl-1.5 pr-0.5 py-0.5 text-sm dark:border-neutral-400',
+    'flex w-full items-center justify-between border-b border-neutral-500 pl-1.5 pr-0.5 py-0.5 text-sm dark:border-neutral-400 sticky top-0 ',
+    'bg-background-50 group-hover/cell:bg-background-200 dark:bg-background-800 dark:group-hover/cell:bg-background-900 transition-colors',
+    isTodayCell &&
+      'bg-background-100 group-hover/cell:bg-background-300 dark:bg-background-600 dark:group-hover/cell:bg-background-500',
+    isDrawerDate &&
+      isDesktop &&
+      isTodayCell &&
+      'bg-background-300 dark:bg-background-500 z-51',
+    isDrawerDate &&
+      isDesktop &&
+      !isTodayCell &&
+      'bg-background-200 dark:bg-background-900 z-51',
     isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600',
     isTodayCell ? 'w-full self-auto md:self-start' : 'w-full',
-    isMobile && 'pl-1'
+    isMobile && 'pl-1',
+    isDrawerDate && 'border-backdrop dark:border-neutral-400/40'
   );
 
   const openLoggingDrawer = () => {
@@ -114,60 +126,76 @@ const MonthCalendarCell = ({
 
   const cellHeader = (
     <div className={cellHeaderClassName}>
-      <p className={cn('font-bold', isMobile && 'text-sm')}>{formattedDate}</p>
-      <div className="flex items-center justify-between gap-2">
+      <p
+        className={cn(
+          'font-bold',
+          isMobile && 'text-sm hover:bg-neutral-200 dark:hover:bg-neutral-800'
+        )}
+      >
+        {formattedDate}
+      </p>
+      <div className="flex items-center justify-between">
         {isMobile && screenWidth > 360 && hasNote && (
           <NoteIcon size={12} weight="bold" />
         )}
-        {isDesktop && (
-          <div className="flex items-center gap-1">
-            <Tooltip closeDelay={0}>
-              <Tooltip.Trigger>
+        {screenWidth >= 1360 && (
+          <div className="flex items-center">
+            <Tooltip delay={0} closeDelay={0}>
+              <Tooltip.Trigger className="flex">
                 <CustomButton
                   variant="light"
                   aria-label="Open day"
                   href={`/calendar/day/${date.year}/${date.month}/${date.day}`}
-                  className="h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+                  className={cn(
+                    'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                    (isTodayCell || isDrawerDate) && 'opacity-100'
+                  )}
                 >
                   <ArrowSquareRightIcon size={18} weight="bold" />
                 </CustomButton>
               </Tooltip.Trigger>
               <Tooltip.Content>Open day</Tooltip.Content>
             </Tooltip>
-            <Tooltip closeDelay={0}>
-              <Tooltip.Trigger>
+            <Tooltip delay={0} closeDelay={0}>
+              <Tooltip.Trigger className="flex">
                 <CustomButton
                   variant="light"
                   isDisabled={!user}
                   aria-label="Show habit log"
-                  className="h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
                   onPress={() => {
                     openOccurrenceDrawer({
                       dayToDisplay: date,
                     });
                   }}
+                  className={cn(
+                    'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                    (isTodayCell || isDrawerDate) && 'opacity-100'
+                  )}
                 >
                   <SquareHalfIcon size={18} weight="bold" />
                 </CustomButton>
               </Tooltip.Trigger>
               <Tooltip.Content>Show habit log</Tooltip.Content>
             </Tooltip>
-            <Tooltip closeDelay={0}>
-              <Tooltip.Trigger>
+            <Tooltip delay={0} closeDelay={0}>
+              <Tooltip.Trigger className="flex">
                 <CustomButton
                   variant="light"
                   isDisabled={!user}
                   aria-label="Log habit"
                   onPress={openLoggingDrawer}
-                  className="h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6"
+                  className={cn(
+                    'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                    (isTodayCell || isDrawerDate) && 'opacity-100'
+                  )}
                 >
                   <CalendarPlusIcon size={18} weight="bold" />
                 </CustomButton>
               </Tooltip.Trigger>
               <Tooltip.Content>Log habit</Tooltip.Content>
             </Tooltip>
-            <Tooltip closeDelay={0}>
-              <Tooltip.Trigger>
+            <Tooltip delay={0} closeDelay={0}>
+              <Tooltip.Trigger className="flex">
                 <CustomButton
                   variant="light"
                   isDisabled={!user}
@@ -177,6 +205,7 @@ const MonthCalendarCell = ({
                   }}
                   className={cn(
                     'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                    (isTodayCell || isDrawerDate) && 'opacity-100',
                     hasNote && 'text-accent opacity-100'
                   )}
                 >
@@ -193,92 +222,115 @@ const MonthCalendarCell = ({
             </Tooltip>
           </div>
         )}
-        {isTodayCell && !isMobile && (
-          <CalendarBlankIcon weight="fill" size={isMobile ? 18 : 20} />
-        )}
       </div>
     </div>
   );
 
   return (
-    <div ref={calendarCellRef} {...cellProps} className={cellRootClassName}>
-      {!isDesktop && user ? (
-        <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-          <Popover.Trigger>{cellHeader}</Popover.Trigger>
-          <Popover.Content offset={12} placement="bottom">
-            <Popover.Dialog className="p-0">
-              <Popover.Arrow />
-              <div className="flex flex-col gap-1 p-1">
-                <CustomButton
-                  size="sm"
-                  variant="ghost"
-                  className="justify-start gap-2"
-                  href={`/calendar/day/${date.year}/${date.month}/${date.day}`}
-                >
-                  <ArrowSquareRightIcon size={16} weight="bold" />
-                  Open day
-                </CustomButton>
-                <CustomButton
-                  size="sm"
-                  variant="ghost"
-                  className="justify-start"
-                  onPress={() => {
-                    setIsPopoverOpen(false);
-                    openOccurrenceDrawer({
-                      dayToDisplay: date,
-                    });
-                  }}
-                >
-                  <SquareHalfIcon size={16} weight="bold" />
-                  Show habit log
-                </CustomButton>
-                <CustomButton
-                  size="sm"
-                  variant="ghost"
-                  className="justify-start"
-                  onPress={() => {
-                    setIsPopoverOpen(false);
-                    openLoggingDrawer();
-                  }}
-                >
-                  <CalendarPlusIcon size={16} weight="bold" />
-                  Log habit
-                </CustomButton>
-                <CustomButton
-                  size="sm"
-                  variant="ghost"
-                  className={cn('justify-start', hasNote && 'text-accent')}
-                  onPress={() => {
-                    setIsPopoverOpen(false);
-                    openNoteDrawer(date, 'day');
-                  }}
-                >
-                  {hasNote ? (
-                    <NoteIcon size={16} weight="bold" />
-                  ) : (
-                    <NoteBlankIcon size={16} weight="bold" />
-                  )}
-                  {hasNote ? 'Edit note' : 'Add note'}
-                </CustomButton>
-              </div>
-            </Popover.Dialog>
-          </Popover.Content>
-        </Popover>
-      ) : (
-        cellHeader
-      )}
-      <div className="flex flex-wrap justify-center gap-2 overflow-x-auto overflow-y-visible px-0 py-0.5 pb-2 md:justify-start md:px-2">
-        {Object.entries(groupedOccurrences).map(
-          ([habitId, habitOccurrences]) => {
-            if (!habitOccurrences) {
-              return null;
-            }
-
-            return (
-              <OccurrenceChip key={habitId} occurrences={habitOccurrences} />
-            );
-          }
+    <div
+      ref={calendarCellRef}
+      {...cellProps}
+      className="group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 last-of-type:border-r-0 focus:border-neutral-100 lg:h-36 dark:border-neutral-400"
+    >
+      <div
+        className={cn(
+          'bg-background-50 group-hover/cell:bg-background-200 dark:bg-background-800 dark:group-hover/cell:bg-background-900 relative flex-1 space-y-2 overflow-x-auto overflow-y-visible transition-colors',
+          isTodayCell &&
+            'bg-background-100 group-hover/cell:bg-background-300 dark:bg-background-600 dark:group-hover/cell:bg-background-500',
+          isDrawerDate &&
+            isDesktop &&
+            isTodayCell &&
+            'bg-background-300 dark:bg-background-500 z-51',
+          isDrawerDate &&
+            isDesktop &&
+            !isTodayCell &&
+            'bg-background-200 dark:bg-background-900 z-51',
+          position === 'top-left' && 'rounded-tl-3xl',
+          position === 'top-right' && 'rounded-tr-3xl',
+          position === 'bottom-left' && 'rounded-bl-3xl',
+          position === 'bottom-right' && 'rounded-br-3xl'
         )}
+      >
+        {screenWidth < 1360 && user ? (
+          <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+            <Popover.Trigger className="sticky top-0 z-10 w-full">
+              {cellHeader}
+            </Popover.Trigger>
+            <Popover.Content offset={12} placement="bottom">
+              <Popover.Dialog className="p-0">
+                <Popover.Arrow />
+                <div className="flex flex-col gap-1 p-1">
+                  <CustomButton
+                    size="sm"
+                    variant="ghost"
+                    className="justify-start gap-2"
+                    href={`/calendar/day/${date.year}/${date.month}/${date.day}`}
+                  >
+                    <ArrowSquareRightIcon size={16} weight="bold" />
+                    Open day
+                  </CustomButton>
+                  <CustomButton
+                    size="sm"
+                    variant="ghost"
+                    className="justify-start"
+                    onPress={() => {
+                      setIsPopoverOpen(false);
+                      openOccurrenceDrawer({
+                        dayToDisplay: date,
+                      });
+                    }}
+                  >
+                    <SquareHalfIcon size={16} weight="bold" />
+                    Show habit log
+                  </CustomButton>
+                  <CustomButton
+                    size="sm"
+                    variant="ghost"
+                    className="justify-start"
+                    onPress={() => {
+                      setIsPopoverOpen(false);
+                      openLoggingDrawer();
+                    }}
+                  >
+                    <CalendarPlusIcon size={16} weight="bold" />
+                    Log habit
+                  </CustomButton>
+                  <CustomButton
+                    size="sm"
+                    variant="ghost"
+                    className={cn('justify-start', hasNote && 'text-accent')}
+                    onPress={() => {
+                      setIsPopoverOpen(false);
+                      openNoteDrawer(date, 'day');
+                    }}
+                  >
+                    {hasNote ? (
+                      <NoteIcon size={16} weight="bold" />
+                    ) : (
+                      <NoteBlankIcon size={16} weight="bold" />
+                    )}
+                    {hasNote ? 'Edit note' : 'Add note'}
+                  </CustomButton>
+                </div>
+              </Popover.Dialog>
+            </Popover.Content>
+          </Popover>
+        ) : (
+          cellHeader
+        )}
+        <div className="flex flex-wrap justify-center gap-2 px-0 py-0.5 pb-2 md:px-2 xl:justify-start">
+          {Object.entries(groupedOccurrences).map(
+            ([habitId, habitOccurrences]) => {
+              if (!habitOccurrences) {
+                return null;
+              }
+
+              return (
+                <OccurrenceChip key={habitId} occurrences={habitOccurrences} />
+              );
+            }
+          )}
+        </div>
       </div>
     </div>
   );

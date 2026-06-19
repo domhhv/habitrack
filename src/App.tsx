@@ -25,7 +25,7 @@ const App = () => {
       <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 items-center justify-center">
         <div className="flex flex-row items-center gap-4">
           <InfinityLoader color="var(--accent)" />
-          <span>Loading your session...</span>
+          <span>We're preparing the app...</span>
         </div>
       </main>
     );

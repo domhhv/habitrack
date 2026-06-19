@@ -12,8 +12,8 @@ import {
 import {
   NoteIcon,
   NoteBlankIcon,
+  ArrowsOutIcon,
   CalendarBlankIcon,
-  ArrowSquareLeftIcon,
 } from '@phosphor-icons/react';
 import groupBy from 'lodash.groupby';
 import React from 'react';
@@ -24,7 +24,7 @@ import { CustomButton, OccurrenceChip, SwipeableContainer } from '@components';
 import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useDayNotes,
-  useOccurrences,
+  useFlatOccurrences,
   useNoteDrawerActions,
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
@@ -47,7 +47,7 @@ const DayCalendar = () => {
   const { isDesktop } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
-  const occurrences = useOccurrences();
+  const occurrences = useFlatOccurrences();
   const params = useParams();
   const navigate = useNavigate();
   const { locale } = useLocale();
@@ -113,7 +113,13 @@ const DayCalendar = () => {
   }, [dayNotes, focusedDate]);
 
   const dayOccurrences = React.useMemo(() => {
-    return occurrences[focusedDate.toString()] || {};
+    return occurrences.filter((occurrence) => {
+      return (
+        occurrence.occurredAt.year === focusedDate.year &&
+        occurrence.occurredAt.month === focusedDate.month &&
+        occurrence.occurredAt.day === focusedDate.day
+      );
+    });
   }, [occurrences, focusedDate]);
 
   const occurrenceSummary = React.useMemo(() => {
@@ -126,7 +132,7 @@ const DayCalendar = () => {
 
   const groupOccurrences = React.useCallback(
     (hour: number) => {
-      const relatedOccurrences = Object.values(dayOccurrences).filter(
+      const relatedOccurrences = dayOccurrences.filter(
         ({ hasSpecificTime, occurredAt }) => {
           if (!hasSpecificTime) {
             return hour === 0;
@@ -210,7 +216,7 @@ const DayCalendar = () => {
                   className="min-w-fit gap-2 px-2"
                   aria-label={`Go to week view: ${weekInfo.label}`}
                 >
-                  <ArrowSquareLeftIcon weight="bold" className="h-5 w-5" />
+                  <ArrowsOutIcon weight="bold" className="h-5 w-5" />
                   <span className="hidden sm:inline">{weekInfo.label}</span>
                 </CustomButton>
               </Tooltip.Trigger>

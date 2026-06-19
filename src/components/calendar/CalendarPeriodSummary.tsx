@@ -116,7 +116,6 @@ const CalendarPeriodSummary = ({
       {!note && startDate && (
         <CustomButton
           fullWidth
-          size="sm"
           variant="secondary"
           onPress={() => {
             openNoteDrawer(startDate, kind);
