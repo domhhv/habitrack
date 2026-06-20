@@ -15,10 +15,14 @@ import { rollbar } from '@utils';
 const Providers = ({ children }: PropsWithChildren) => {
   const navigate = useNavigate();
 
+  const useHrefWrapper = (href: string) => {
+    return /^\w+:\/\//.test(href) ? href : useHref(href);
+  };
+
   return (
     <RollbarProvider instance={rollbar}>
       <RollbarErrorBoundary fallbackUI={ErrorFallbackPage}>
-        <RouterProvider useHref={useHref} navigate={navigate}>
+        <RouterProvider navigate={navigate} useHref={useHrefWrapper}>
           <I18nProvider>
             {children}
             <Toast.Provider placement="top" />

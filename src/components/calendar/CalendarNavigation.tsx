@@ -26,8 +26,8 @@ export type MonthCalendarNavigationProps = {
   focusedDate: CalendarState['focusedDate'];
 };
 
-const YEARS = Array.from({ length: 31 }, (_, i) => {
-  return 2000 + i;
+const YEARS = Array.from({ length: 11 }, (_, i) => {
+  return 2020 + i;
 });
 
 const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
@@ -130,7 +130,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
             <Select.Popover className="w-25 md:w-31.25">
               <ListBox>
                 <ListBox.Section>
-                  <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-3">
+                  <Header className="bg-background text-background-inverse shadow-small rounded-small sticky top-1 z-20 flex w-full rounded-3xl px-2 py-1.5 pl-4">
                     Month
                   </Header>
                   {months.map((month, index) => {
@@ -175,10 +175,10 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
               />
               <Select.Indicator />
             </Select.Trigger>
-            <Select.Popover className="w-25">
+            <Select.Popover className="w-28">
               <ListBox>
                 <ListBox.Section>
-                  <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                  <Header className="bg-background text-background-inverse shadow-small rounded-small sticky top-1 z-20 flex w-full rounded-3xl px-2 py-1.5 pl-4">
                     Year
                   </Header>
                   {YEARS.map((year) => {
@@ -189,7 +189,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
                         textValue={year.toString()}
                       >
                         <Link
-                          className="flex w-full px-2.5 py-1.5 no-underline!"
+                          className="flex w-full py-1.5 no-underline!"
                           href={`/calendar/${calendarMode}/${year}/${focusedDate.month}/1`}
                         >
                           {year.toString()}

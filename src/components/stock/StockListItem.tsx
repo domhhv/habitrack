@@ -199,7 +199,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
   };
 
   return (
-    <div className="border-content3 flex flex-col gap-3 rounded-lg border p-3">
+    <div className="border-border flex flex-col gap-3 rounded-lg border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">

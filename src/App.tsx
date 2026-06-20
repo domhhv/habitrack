@@ -22,7 +22,7 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 items-center justify-center">
+      <main className="flex h-full flex-1 items-center justify-center">
         <div className="flex flex-row items-center gap-4">
           <InfinityLoader color="var(--accent)" />
           <span>We're preparing the app...</span>
@@ -47,7 +47,7 @@ const App = () => {
       <NoteDrawer />
       <OccurrenceDrawer />
       <ConfirmationDialog />
-      <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 flex-col items-start max-md:pb-11.25">
+      <main className="bg-background flex h-full flex-1 flex-col items-start max-md:pb-11.25">
         <AppRoutes />
       </main>
     </>

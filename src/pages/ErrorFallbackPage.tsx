@@ -18,7 +18,7 @@ const ErrorFallbackPage = ({
     : '';
 
   return (
-    <main className="bg-background-50 dark:bg-background-700 flex h-full flex-1 items-center justify-center">
+    <main className="bg-background flex h-full flex-1 items-center justify-center">
       <Alert status="danger" className="w-4/5 max-w-3xl">
         <Alert.Indicator />
         <Alert.Content>

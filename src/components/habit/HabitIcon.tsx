@@ -49,7 +49,7 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
           onClick={() => {
             fileInputRef.current?.click();
           }}
-          className="rounded-medium hover:bg-default-100 flex h-12 w-12 cursor-pointer items-center justify-center p-1 opacity-100"
+          className="rounded-medium hover:bg-surface-tertiary flex h-12 w-12 cursor-pointer items-center justify-center p-1 opacity-100"
         >
           {isUploading ? (
             <InfinityLoader size={32} color="var(--accent)" />

@@ -19,9 +19,9 @@ type NoteListItemProps = {
 type PeriodKind = 'day' | 'week' | 'month';
 
 const PERIOD_ICONS: Record<PeriodKind, React.ReactNode> = {
-  day: <SunIcon size={24} weight="bold" aria-label="Day note" />,
-  month: <CalendarBlankIcon size={24} weight="bold" aria-label="Month note" />,
-  week: <CalendarIcon size={24} weight="bold" aria-label="Week note" />,
+  day: <SunIcon size={36} weight="bold" aria-label="Day note" />,
+  month: <CalendarBlankIcon size={36} weight="bold" aria-label="Month note" />,
+  week: <CalendarIcon size={36} weight="bold" aria-label="Week note" />,
 };
 
 const NoteListItem = ({ note }: NoteListItemProps) => {
@@ -83,32 +83,6 @@ const NoteListItem = ({ note }: NoteListItemProps) => {
     return 'Note';
   };
 
-  const renderIcon = () => {
-    if (isPeriodNote && note.periodKind) {
-      return (
-        <div className="text-primary bg-primary-100 dark:bg-primary-900 flex h-10 w-10 items-center justify-center rounded-full">
-          {PERIOD_ICONS[note.periodKind]}
-        </div>
-      );
-    }
-
-    if (isOccurrenceNote && note.habit?.iconPath) {
-      return (
-        <img
-          className="h-10 w-10 object-cover"
-          alt={note.habit.name || 'Habit icon'}
-          src={getPublicUrl(StorageBuckets.HABIT_ICONS, note.habit.iconPath)}
-        />
-      );
-    }
-
-    return (
-      <div className="text-default-500 bg-default-100 dark:bg-default-200 flex h-10 w-10 items-center justify-center rounded-full">
-        <CalendarBlankIcon size={24} weight="bold" aria-label="Note" />
-      </div>
-    );
-  };
-
   const formattedCreatedAtTimestamp = timestampFormatter.format(
     new Date(note.createdAt)
   );
@@ -119,7 +93,18 @@ const NoteListItem = ({ note }: NoteListItemProps) => {
   return (
     <Card className="w-full space-y-2">
       <Card.Header className="flex gap-3 pb-0">
-        {renderIcon()}
+        {isPeriodNote && note.periodKind && (
+          <div className="text-accent flex h-10 w-10 items-center justify-center rounded-full">
+            {PERIOD_ICONS[note.periodKind]}
+          </div>
+        )}
+        {isOccurrenceNote && note.habit?.iconPath && (
+          <img
+            className="h-10 w-10 object-cover"
+            alt={note.habit.name || 'Habit icon'}
+            src={getPublicUrl(StorageBuckets.HABIT_ICONS, note.habit.iconPath)}
+          />
+        )}
         <div className="flex flex-col">
           <p className="text-md font-semibold">{getTitle()}</p>
           <p className="text-small text-default-500">

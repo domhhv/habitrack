@@ -96,22 +96,15 @@ const MonthCalendarCell = ({
     drawerDate && isOccurrenceDrawerOpen && isEqualDay(drawerDate, date);
 
   const cellHeaderClassName = cn(
-    'sticky top-0 flex w-full items-center justify-between border-b border-neutral-500 py-0.5 pr-0.5 pl-1.5 text-sm dark:border-neutral-400',
-    'bg-background-50 group-hover/cell:bg-background-200 dark:bg-background-800 dark:group-hover/cell:bg-background-900 transition-colors',
+    'border-border sticky top-0 flex w-full items-center justify-between border-b py-0.5 pr-0.5 pl-1.5 text-sm',
+    'bg-background group-hover/cell:bg-background-secondary transition-colors',
     isTodayCell &&
-      'bg-background-100 group-hover/cell:bg-background-300 dark:bg-background-600 dark:group-hover/cell:bg-background-500',
-    isDrawerDate &&
-      isDesktop &&
-      isTodayCell &&
-      'bg-background-300 dark:bg-background-500 z-51',
-    isDrawerDate &&
-      isDesktop &&
-      !isTodayCell &&
-      'bg-background-200 dark:bg-background-900 z-51',
+      'bg-background-secondary group-hover/cell:bg-background-tertiary',
+    isDrawerDate && isDesktop && isTodayCell && 'bg-background-tertiary z-51',
+    isDrawerDate && isDesktop && !isTodayCell && 'bg-background-secondary z-51',
     isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600',
     isTodayCell ? 'w-full self-auto md:self-start' : 'w-full',
-    isMobile && 'pl-1',
-    isDrawerDate && 'border-backdrop dark:border-neutral-400/40'
+    isMobile && 'pl-1'
   );
 
   const openLoggingDrawer = () => {
@@ -129,7 +122,8 @@ const MonthCalendarCell = ({
       <p
         className={cn(
           'font-bold',
-          isMobile && 'text-sm hover:bg-neutral-200 dark:hover:bg-neutral-800'
+          isMobile && 'text-sm',
+          isTodayCell && 'font-extrabold'
         )}
       >
         {formattedDate}
@@ -230,21 +224,21 @@ const MonthCalendarCell = ({
     <div
       ref={calendarCellRef}
       {...cellProps}
-      className="group/cell flex h-auto flex-1 flex-col gap-2 border-r-2 border-neutral-500 last-of-type:border-r-0 focus:border-neutral-100 lg:h-36 dark:border-neutral-400"
+      className="group/cell border-border flex h-auto flex-1 flex-col gap-2 border-r-2 last-of-type:border-r-0 lg:h-36"
     >
       <div
         className={cn(
-          'bg-background-50 group-hover/cell:bg-background-200 dark:bg-background-800 dark:group-hover/cell:bg-background-900 relative flex-1 space-y-2 overflow-x-auto overflow-y-visible transition-colors',
+          'bg-background group-hover/cell:bg-background-secondary relative flex-1 space-y-2 overflow-x-auto overflow-y-visible transition-colors',
           isTodayCell &&
-            'bg-background-100 group-hover/cell:bg-background-300 dark:bg-background-600 dark:group-hover/cell:bg-background-500',
+            'bg-background-secondary group-hover/cell:bg-background-tertiary',
           isDrawerDate &&
             isDesktop &&
             isTodayCell &&
-            'bg-background-300 dark:bg-background-500 z-51',
+            'bg-background-tertiary z-51',
           isDrawerDate &&
             isDesktop &&
             !isTodayCell &&
-            'bg-background-200 dark:bg-background-900 z-51',
+            'bg-background-secondary z-51',
           position === 'top-left' && 'rounded-tl-3xl',
           position === 'top-right' && 'rounded-tr-3xl',
           position === 'bottom-left' && 'rounded-bl-3xl',

@@ -14,10 +14,12 @@ import { tv } from 'tailwind-variants';
 import InfinityLoader from './InfinityLoader';
 
 const customButtonVariants = tv({
-  base: 'text-md relative overflow-hidden font-semibold data-[pending=true]:opacity-40',
+  base: 'text-md relative overflow-hidden font-semibold has-[kbd]:pr-2 data-[pending=true]:opacity-40',
   extend: buttonVariants,
   variants: {
     variant: {
+      bordered:
+        'border-accent text-accent hover:bg-accent-soft-hover data-[pending=true]:bg-background-300/50 border-2 bg-transparent shadow-none text-shadow-none',
       light:
         'text-accent hover:bg-accent-soft-hover data-[pending=true]:bg-background-300/50 bg-transparent shadow-none text-shadow-none',
     },
@@ -95,7 +97,7 @@ const CustomButton = (props: CustomButtonProps) => {
   return (
     <Button
       size={size}
-      {...(variant !== 'light' && { variant })}
+      {...(variant !== 'light' && variant !== 'bordered' && { variant })}
       className={cn('data-[pending="true"]:opacity-75!', className)}
       {...buttonProps}
       onPointerDown={(event) => {

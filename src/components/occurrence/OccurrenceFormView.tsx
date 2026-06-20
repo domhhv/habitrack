@@ -754,7 +754,7 @@ const OccurrenceFormView = ({
         />
       ) : hasHabits ? (
         <>
-          <div className="rounded-medium border-medium bg-default max-h-100 w-full overflow-y-auto rounded-3xl p-1">
+          <div className="bg-background-secondary max-h-100 w-full overflow-y-auto rounded-3xl p-1">
             <ListBox
               aria-label="Habits"
               disallowEmptySelection
@@ -841,6 +841,7 @@ const OccurrenceFormView = ({
                     <Checkbox
                       variant="secondary"
                       isSelected={isSelected}
+                      className="flex-row items-center gap-2"
                       onChange={(nextSelected: boolean) => {
                         return handleStockSelectionChange(
                           stock.id,
@@ -853,7 +854,9 @@ const OccurrenceFormView = ({
                         <Checkbox.Indicator />
                       </Checkbox.Control>
                       <Checkbox.Content>
-                        <Label className="truncate text-sm">{stock.name}</Label>
+                        <Label className="max-w-40 text-sm text-wrap">
+                          {stock.name}
+                        </Label>
                       </Checkbox.Content>
                     </Checkbox>
                     {isQuantifiable && (

@@ -25,7 +25,7 @@ const AuthModalButton = () => {
   const user = useUser();
   const { isDesktop, isMobile } = useScreenWidth();
   const overlayState = useOverlayState();
-  const [authenticating, setAuthenticating] = React.useState(false);
+  const [isAuthenticating, setIsAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
   const firstDayOfWeek = useFirstDayOfWeek();
 
@@ -85,11 +85,11 @@ const AuthModalButton = () => {
     name: string
   ) => {
     try {
-      setAuthenticating(true);
+      setIsAuthenticating(true);
 
       await actions[mode](email, password, name, firstDayOfWeek);
 
-      setAuthenticating(false);
+      setIsAuthenticating(false);
 
       handleClose();
 
@@ -99,12 +99,12 @@ const AuthModalButton = () => {
         description: `Error details: ${getErrorMessage(error)}`,
       });
     } finally {
-      setAuthenticating(false);
+      setIsAuthenticating(false);
     }
   };
 
   const authFormProps = {
-    isDisabled: authenticating,
+    isAuthenticating,
     mode,
     onCancel: handleClose,
     onSubmit: handleSubmit,
@@ -123,12 +123,12 @@ const AuthModalButton = () => {
         <ButtonGroup>
           <CustomButton
             href="/account"
-            variant="secondary"
+            variant="bordered"
             isIconOnly={!isDesktop}
             data-testid="auth-button"
             size={isMobile ? 'sm' : 'md'}
             aria-label='Go to "Account" page'
-            className="border-r-background-700 rounded-r-none border-r"
+            className="rounded-r-none border-r-0"
           >
             <UserIcon weight="bold" data-testid="user-icon" />
             <span className="max-sm:hidden">Account</span>
@@ -138,7 +138,7 @@ const AuthModalButton = () => {
               <CustomButton
                 isIconOnly
                 onPress={signOut}
-                variant="secondary"
+                variant="bordered"
                 aria-label="Log out"
                 size={isMobile ? 'sm' : 'md'}
                 className="rounded-l-none rounded-r-3xl"
@@ -194,11 +194,11 @@ const AuthModalButton = () => {
                   <Tabs className="w-full" onSelectionChange={handleTabChange}>
                     <Tabs.ListContainer>
                       <Tabs.List aria-label="Auth mode">
-                        <Tabs.Tab id="login" isDisabled={authenticating}>
+                        <Tabs.Tab id="login" isDisabled={isAuthenticating}>
                           Login
                           <Tabs.Indicator />
                         </Tabs.Tab>
-                        <Tabs.Tab id="register" isDisabled={authenticating}>
+                        <Tabs.Tab id="register" isDisabled={isAuthenticating}>
                           <Tabs.Separator />
                           Register
                           <Tabs.Indicator />

@@ -185,7 +185,7 @@ const HabitsTable = () => {
                 return (
                   <Table.Row
                     key={habit.id}
-                    className="hover:bg-content2"
+                    className="hover:bg-background"
                     aria-labelledby={`habit-name-${habit.id}`}
                   >
                     <Table.Collection>
