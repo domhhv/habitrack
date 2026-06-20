@@ -22,7 +22,7 @@ const ThemeToggle = () => {
         const Icon = modesToIcons[mode];
 
         return (
-          <>
+          <React.Fragment key={mode}>
             {index > 0 && (
               <ButtonGroup.Separator
                 className={cn(
@@ -33,7 +33,6 @@ const ThemeToggle = () => {
             )}
             <CustomButton
               size="sm"
-              key={mode}
               isIconOnly
               variant={'outline'}
               className={cn('size-8', isSelected && 'text-accent')}
@@ -43,7 +42,7 @@ const ThemeToggle = () => {
             >
               <Icon size={14} />
             </CustomButton>
-          </>
+          </React.Fragment>
         );
       })}
     </ButtonGroup>

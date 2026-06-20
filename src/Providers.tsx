@@ -16,7 +16,9 @@ const Providers = ({ children }: PropsWithChildren) => {
   const navigate = useNavigate();
 
   const useHrefWrapper = (href: string) => {
-    return /^\w+:\/\//.test(href) ? href : useHref(href);
+    return /^(?:[a-zA-Z][a-zA-Z\d+.-]*:|\/\/)/.test(href)
+      ? href
+      : useHref(href);
   };
 
   return (
