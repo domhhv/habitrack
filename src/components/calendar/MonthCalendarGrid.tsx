@@ -172,7 +172,7 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
               </div>
               <div
                 className={cn(
-                  'flex h-27.5 w-full basis-full justify-between border-r-2 border-l-2 border-neutral-500 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto dark:border-neutral-400',
+                  'border-border flex h-27.5 w-full basis-full justify-between border-r-2 border-l-2 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto',
                   weekIndex === 0 && 'rounded-t-3xl',
                   weekIndex === weeksInMonthCount - 1 && 'rounded-b-3xl'
                 )}

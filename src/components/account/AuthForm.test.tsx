@@ -19,7 +19,7 @@ describe(AuthForm.name, () => {
         onCancel={onCancel}
         onModeChange={noop}
         goBackToLogin={noop}
-        isDisabled={disabled}
+        isAuthenticating={disabled}
         submitButtonLabel={submitButtonLabel}
       />
     );
@@ -51,7 +51,7 @@ describe(AuthForm.name, () => {
         onCancel={onCancel}
         onModeChange={noop}
         goBackToLogin={noop}
-        isDisabled={disabled}
+        isAuthenticating={disabled}
         submitButtonLabel={submitButtonLabel}
       />
     );

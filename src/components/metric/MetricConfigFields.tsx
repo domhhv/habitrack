@@ -61,7 +61,7 @@ const NumberConfigFields = ({
           <Label>Minimum value</Label>
           <NumberField.Group className="flex">
             <NumberField.Input className="flex-1" placeholder="Optional" />
-            <div className="border-field-placeholder/15 flex h-full flex-col border-l">
+            <div className="border-border flex h-full flex-col border-l">
               <NumberField.IncrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pt-0.5 text-sm">
                 <CaretUpIcon />
               </NumberField.IncrementButton>
@@ -87,7 +87,7 @@ const NumberConfigFields = ({
           <Label>Maximum value</Label>
           <NumberField.Group className="flex">
             <NumberField.Input className="flex-1" placeholder="Optional" />
-            <div className="border-field-placeholder/15 flex h-full flex-col border-l">
+            <div className="border-border flex h-full flex-col border-l">
               <NumberField.IncrementButton className="flex h-1/2 w-6 items-center justify-center rounded-none border-0 pt-0.5 text-sm">
                 <CaretUpIcon />
               </NumberField.IncrementButton>

@@ -1,4 +1,4 @@
-import { ButtonGroup } from '@heroui/react';
+import { cn, ButtonGroup } from '@heroui/react';
 import { MoonIcon, SunDimIcon, DesktopIcon } from '@phosphor-icons/react';
 import React from 'react';
 
@@ -16,23 +16,33 @@ const ThemeToggle = () => {
   const { setThemeMode, themeMode } = useThemeMode();
 
   return (
-    <ButtonGroup>
-      {Object.values(ThemeModes).map((mode) => {
+    <ButtonGroup variant="outline" className="relative">
+      {Object.values(ThemeModes).map((mode, index) => {
         const isSelected = themeMode === mode;
         const Icon = modesToIcons[mode];
 
         return (
-          <CustomButton
-            size="sm"
-            key={mode}
-            isIconOnly
-            variant={isSelected ? 'tertiary' : 'ghost'}
-            onPress={() => {
-              setThemeMode(mode);
-            }}
-          >
-            <Icon size={14} />
-          </CustomButton>
+          <React.Fragment key={mode}>
+            {index > 0 && (
+              <ButtonGroup.Separator
+                className={cn(
+                  index === 1 && 'left-7.75',
+                  index === 2 && 'left-15.75'
+                )}
+              />
+            )}
+            <CustomButton
+              size="sm"
+              isIconOnly
+              variant={'outline'}
+              className={cn('size-8', isSelected && 'text-accent')}
+              onPress={() => {
+                setThemeMode(mode);
+              }}
+            >
+              <Icon size={14} />
+            </CustomButton>
+          </React.Fragment>
         );
       })}
     </ButtonGroup>

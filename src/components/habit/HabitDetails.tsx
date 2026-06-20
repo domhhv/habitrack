@@ -206,13 +206,13 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
         <div className="space-y-2">
           <div
             style={{ borderColor: habit.trait?.color || '' }}
-            className="border-content3 justify-self-start rounded-2xl border-3 p-4"
+            className="border-border justify-self-start rounded-2xl border-3 p-4"
           >
             <HabitIcon habit={habit} />
           </div>
           <Dropdown>
             <Dropdown.Trigger>
-              <TraitChip trait={habit.trait} className="hover:bg-content2" />
+              <TraitChip trait={habit.trait} className="hover:bg-background" />
             </Dropdown.Trigger>
             <Dropdown.Popover>
               <Dropdown.Menu

@@ -73,21 +73,25 @@ const WeekCalendar = () => {
   });
   useCalendar({ firstDayOfWeek }, state);
 
-  const monday = React.useMemo(() => {
-    const [monday] = state.getDatesInWeek(firstDayOfWeek === 'sun' ? 0 : 1);
+  const weekStart = React.useMemo(() => {
+    return startOfWeek(state.focusedDate, locale, firstDayOfWeek);
+  }, [state.focusedDate, locale, firstDayOfWeek]);
 
-    return monday;
-  }, [state, firstDayOfWeek]);
+  const weekDates = React.useMemo(() => {
+    return [...Array(7).keys()].map((i) => {
+      return weekStart.add({ days: i });
+    });
+  }, [weekStart]);
 
   const weekNote = React.useMemo(() => {
-    if (!monday) {
+    if (!weekStart) {
       return;
     }
 
     return weekNotes.find((note) => {
-      return note.periodDate === monday.toString();
+      return note.periodDate === weekStart.toString();
     });
-  }, [weekNotes, monday]);
+  }, [weekNotes, weekStart]);
 
   const { gridProps, weekDays } = useCalendarGrid(
     {
@@ -217,7 +221,7 @@ const WeekCalendar = () => {
     const rangeEnd = dayFormatter.format(monthEnd.toDate(timeZone));
 
     return {
-      label: `${capitalize(monthName)}: ${rangeStart} – ${rangeEnd}`,
+      label: `${capitalize(monthName)} (${rangeStart} - ${rangeEnd})`,
       path: `/calendar/month/${thursday.year}/${thursday.month}/1`,
     };
   }, [
@@ -263,7 +267,7 @@ const WeekCalendar = () => {
         <CalendarPeriodSummary
           kind="week"
           note={weekNote}
-          startDate={monday}
+          startDate={weekStart}
           className="max-lg:pb-2"
           metricTotals={metricTotals}
           occurrenceSummary={occurrenceSummary}
@@ -277,7 +281,7 @@ const WeekCalendar = () => {
           <Accordion>
             <Accordion.Item key="summary">
               <Accordion.Heading>
-                <Accordion.Trigger className="bg-default flex w-full items-center gap-2 rounded-3xl py-2">
+                <Accordion.Trigger className="bg-background-secondary flex w-full items-center gap-2 rounded-3xl py-2">
                   Summary
                   <Accordion.Indicator>
                     <CaretDownIcon />
@@ -289,7 +293,7 @@ const WeekCalendar = () => {
                   kind="week"
                   note={weekNote}
                   className="pt-2"
-                  startDate={monday}
+                  startDate={weekStart}
                   metricTotals={metricTotals}
                   occurrenceSummary={occurrenceSummary}
                 />
@@ -302,182 +306,175 @@ const WeekCalendar = () => {
           {...gridProps}
           className="flex min-w-lg justify-around py-4 max-lg:px-8 xl:pr-2"
         >
-          {state
-            .getDatesInWeek(firstDayOfWeek === 'sun' ? 0 : 1)
-            .map((day, dayIndex) => {
-              if (!day) {
-                return null;
-              }
+          {weekDates.map((day, dayIndex) => {
+            if (!day) {
+              return null;
+            }
 
-              const isNoteAdded = hasNote(day);
-              const dstType = isDstTransitionDay(day, getLocalTimeZone());
-              const dstHour = dstType
-                ? findDstTransitionHour(day, getLocalTimeZone())
-                : null;
+            const isNoteAdded = hasNote(day);
+            const dstType = isDstTransitionDay(day, getLocalTimeZone());
+            const dstHour = dstType
+              ? findDstTransitionHour(day, getLocalTimeZone())
+              : null;
 
-              return (
+            return (
+              <div
+                key={dayIndex}
+                className="group flex min-w-32 flex-1 flex-col gap-4"
+              >
                 <div
-                  key={dayIndex}
-                  className="group flex min-w-32 flex-1 flex-col gap-4"
+                  className={cn(
+                    'space-y-2 text-center text-stone-600 dark:text-stone-300',
+                    isToday(day, state.timeZone) &&
+                      'text-primary-600 dark:text-primary-400 font-bold'
+                  )}
                 >
-                  <div
-                    className={cn(
-                      'space-y-2 text-center text-stone-600 dark:text-stone-300',
-                      isToday(day, state.timeZone) &&
-                        'text-primary-600 dark:text-primary-400 font-bold'
-                    )}
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <h3>{capitalize(weekDays[dayIndex])}</h3>
-                      <div className="flex items-center justify-center gap-0.5">
-                        <Tooltip closeDelay={0}>
-                          <Tooltip.Trigger>
-                            <CustomButton
-                              variant="light"
-                              onPress={() => {
-                                openNoteDrawer(day, 'day');
-                              }}
-                              aria-label={
-                                isNoteAdded ? 'Edit note' : 'Add note'
-                              }
-                              className={cn(
-                                'h-5 w-5 min-w-fit rounded-xl px-0 lg:h-6 lg:w-6'
-                              )}
-                            >
-                              {isNoteAdded ? (
-                                <NoteIcon
-                                  weight="bold"
-                                  size={isDesktop ? 18 : 14}
-                                />
-                              ) : (
-                                <NoteBlankIcon
-                                  weight="bold"
-                                  size={isDesktop ? 18 : 14}
-                                />
-                              )}
-                            </CustomButton>
-                          </Tooltip.Trigger>
-                          <Tooltip.Content>
-                            {isNoteAdded ? 'Edit note' : 'Add note'}
-                          </Tooltip.Content>
-                        </Tooltip>
-                        <Tooltip closeDelay={0}>
-                          <Tooltip.Trigger>
-                            <CustomButton
-                              variant="light"
-                              aria-label="Log occurrence"
-                              className="h-5 w-5 min-w-fit rounded-xl px-0 lg:h-6 lg:w-6"
-                              onPress={() => {
-                                openOccurrenceDrawer({ dayToLog: day });
-                              }}
-                            >
-                              <CalendarBlankIcon
-                                weight="bold"
-                                size={isDesktop ? 18 : 14}
-                              />
-                            </CustomButton>
-                          </Tooltip.Trigger>
-                          <Tooltip.Content>Log occurrence</Tooltip.Content>
-                        </Tooltip>
-                        <Tooltip closeDelay={0}>
-                          <Tooltip.Trigger>
-                            <CustomButton
-                              variant="light"
-                              aria-label="Open day"
-                              href={`/calendar/day/${day.year}/${day.month}/${day.day}`}
-                              className="h-5 w-5 min-w-fit rounded-xl px-0 lg:h-6 lg:w-6"
-                            >
-                              <ArrowSquareRightIcon
-                                weight="bold"
-                                size={isDesktop ? 18 : 14}
-                              />
-                            </CustomButton>
-                          </Tooltip.Trigger>
-                          <Tooltip.Content>Open day</Tooltip.Content>
-                        </Tooltip>
-                      </div>
-                    </div>
-                    <h6>{day.day}</h6>
-                  </div>
-                  <div
-                    className={cn(
-                      'flex flex-col border-r border-stone-300 group-last-of-type:border-r-0 dark:border-stone-600',
-                      isToday(day, state.timeZone) &&
-                        'to-background-100 dark:to-background-500 bg-linear-to-b from-transparent from-0% to-[4px]'
-                    )}
-                  >
-                    {[...Array(24).keys()].map((hour) => {
-                      const isSkippedHour =
-                        dstType === 'spring' && hour === dstHour;
-                      const isDuplicatedHour =
-                        dstType === 'fall' &&
-                        dstHour !== null &&
-                        hour === dstHour - 1;
-
-                      return (
-                        <div
-                          key={`${dayIndex}-${hour}`}
-                          className={cn(
-                            'group/minutes-cell relative flex gap-4',
-                            isSkippedHour && 'opacity-40'
-                          )}
-                        >
-                          {dayIndex === 0 && (
-                            <p className="absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right text-stone-600 md:static md:-translate-y-3 md:pl-2 md:text-base dark:text-stone-200">
-                              {hour !== 0 && hour}
-                            </p>
-                          )}
-                          <div
+                  <div className="flex items-center justify-center gap-2">
+                    <h3>{capitalize(weekDays[dayIndex])}</h3>
+                    <div className="flex items-center justify-center gap-0.5">
+                      <Tooltip closeDelay={0}>
+                        <Tooltip.Trigger>
+                          <CustomButton
+                            variant="light"
+                            aria-label={isNoteAdded ? 'Edit note' : 'Add note'}
+                            onPress={() => {
+                              openNoteDrawer(day, 'day');
+                            }}
                             className={cn(
-                              'flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500',
-                              isSkippedHour &&
-                                'bg-stone-200/50 dark:bg-stone-700/50',
-                              isDuplicatedHour &&
-                                'border-l-warning-400 dark:border-l-warning-500 border-l-3'
+                              'h-5 w-5 min-w-fit rounded-xl px-0 lg:h-6 lg:w-6'
                             )}
                           >
-                            {isSkippedHour && (
-                              <p className="text-xs text-stone-400 italic dark:text-stone-500">
-                                DST skip
-                              </p>
+                            {isNoteAdded ? (
+                              <NoteIcon
+                                weight="bold"
+                                size={isDesktop ? 18 : 14}
+                              />
+                            ) : (
+                              <NoteBlankIcon
+                                weight="bold"
+                                size={isDesktop ? 18 : 14}
+                              />
                             )}
-                            {isDuplicatedHour && (
-                              <p className="text-warning-500 dark:text-warning-400 text-xs italic">
-                                DST repeat
-                              </p>
-                            )}
-                            {isToday(day, state.timeZone) &&
-                              now.getHours() === hour && (
-                                <div
-                                  className="bg-primary absolute right-0 left-0 z-10 h-0.5"
-                                  style={{
-                                    top: `${(now.getMinutes() / 60) * 100}%`,
-                                  }}
-                                />
-                              )}
-                            {groupOccurrences(day, hour).map(
-                              ([habitId, habitOccurrences]) => {
-                                if (!habitOccurrences) {
-                                  return null;
-                                }
-
-                                return (
-                                  <div key={habitId}>
-                                    <OccurrenceChip
-                                      occurrences={habitOccurrences}
-                                    />
-                                  </div>
-                                );
-                              }
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                          </CustomButton>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>
+                          {isNoteAdded ? 'Edit note' : 'Add note'}
+                        </Tooltip.Content>
+                      </Tooltip>
+                      <Tooltip closeDelay={0}>
+                        <Tooltip.Trigger>
+                          <CustomButton
+                            variant="light"
+                            aria-label="Log occurrence"
+                            className="h-5 w-5 min-w-fit rounded-xl px-0 lg:h-6 lg:w-6"
+                            onPress={() => {
+                              openOccurrenceDrawer({ dayToLog: day });
+                            }}
+                          >
+                            <CalendarBlankIcon
+                              weight="bold"
+                              size={isDesktop ? 18 : 14}
+                            />
+                          </CustomButton>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>Log occurrence</Tooltip.Content>
+                      </Tooltip>
+                      <Tooltip closeDelay={0}>
+                        <Tooltip.Trigger>
+                          <CustomButton
+                            variant="light"
+                            aria-label="Open day"
+                            href={`/calendar/day/${day.year}/${day.month}/${day.day}`}
+                            className="h-5 w-5 min-w-fit rounded-xl px-0 lg:h-6 lg:w-6"
+                          >
+                            <ArrowSquareRightIcon
+                              weight="bold"
+                              size={isDesktop ? 18 : 14}
+                            />
+                          </CustomButton>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>Open day</Tooltip.Content>
+                      </Tooltip>
+                    </div>
                   </div>
+                  <h6>{day.day}</h6>
                 </div>
-              );
-            })}
+                <div
+                  className={cn(
+                    'border-border flex flex-col border-r group-last-of-type:border-r-0',
+                    isToday(day, state.timeZone) &&
+                      'to-background-secondary bg-linear-to-b from-transparent from-0% to-[4px]'
+                  )}
+                >
+                  {[...Array(24).keys()].map((hour) => {
+                    const isSkippedHour =
+                      dstType === 'spring' && hour === dstHour;
+                    const isDuplicatedHour =
+                      dstType === 'fall' &&
+                      dstHour !== null &&
+                      hour === dstHour - 1;
+
+                    const isCurrentHour =
+                      isToday(day, state.timeZone) && now.getHours() === hour;
+
+                    return (
+                      <div
+                        key={`${dayIndex}-${hour}`}
+                        className="group/minutes-cell relative flex gap-4"
+                      >
+                        {dayIndex === 0 && (
+                          <p className="text-foreground absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right md:static md:-translate-y-3 md:pl-2 md:text-base">
+                            {hour !== 0 && hour}
+                          </p>
+                        )}
+                        <div
+                          className={cn(
+                            'border-border flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b p-2 group-last-of-type/minutes-cell:border-b-0',
+                            isSkippedHour && 'bg-background-secondary',
+                            isDuplicatedHour && 'border-l-warning border-l-3'
+                          )}
+                        >
+                          {isSkippedHour && (
+                            <p className="text-muted text-xs italic">
+                              DST skip
+                            </p>
+                          )}
+                          {isDuplicatedHour && (
+                            <p className="text-warning text-xs italic">
+                              DST repeat
+                            </p>
+                          )}
+                          {isCurrentHour && (
+                            <div
+                              className="bg-accent absolute right-0 left-0 z-10 h-0.5"
+                              style={{
+                                top: `${(now.getMinutes() / 60) * 100}%`,
+                              }}
+                            />
+                          )}
+                          {groupOccurrences(day, hour).map(
+                            ([habitId, habitOccurrences]) => {
+                              if (!habitOccurrences) {
+                                return null;
+                              }
+
+                              return (
+                                <div key={habitId}>
+                                  <OccurrenceChip
+                                    occurrences={habitOccurrences}
+                                  />
+                                </div>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </ScrollShadow>
     </div>

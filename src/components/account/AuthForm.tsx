@@ -7,7 +7,7 @@ import { useTextField } from '@hooks';
 import PasswordInput from './PasswordInput';
 
 type AuthFormProps = {
-  isDisabled: boolean;
+  isAuthenticating: boolean;
   mode: 'login' | 'register' | 'reset-password';
   submitButtonLabel: string;
   goBackToLogin: () => void;
@@ -18,7 +18,7 @@ type AuthFormProps = {
 
 const AuthForm = ({
   goBackToLogin,
-  isDisabled,
+  isAuthenticating,
   mode,
   onCancel,
   onModeChange,
@@ -67,8 +67,8 @@ const AuthForm = ({
             type="email"
             value={email}
             variant="secondary"
-            isDisabled={isDisabled}
             onChange={handleEmailChange}
+            isDisabled={isAuthenticating}
           >
             <Label>Email</Label>
             <Input placeholder="me@email.com" />
@@ -90,8 +90,8 @@ const AuthForm = ({
             name="name"
             value={name}
             variant="secondary"
-            isDisabled={isDisabled}
             onChange={handleNameChange}
+            isDisabled={isAuthenticating}
           >
             <Label>Name</Label>
             <Input placeholder="Optional" />
@@ -102,7 +102,7 @@ const AuthForm = ({
             value={password}
             label="Password"
             variant="secondary"
-            isDisabled={isDisabled}
+            isDisabled={isAuthenticating}
             onChange={handlePasswordChange}
             onReset={
               mode === 'login'
@@ -118,15 +118,15 @@ const AuthForm = ({
         <CustomButton
           variant="secondary"
           onPress={handleCancel}
-          isDisabled={isDisabled}
+          isDisabled={isAuthenticating}
         >
           Cancel
         </CustomButton>
         <CustomButton
           type="submit"
           variant="primary"
-          isDisabled={isDisabled}
           data-testid="submit-button"
+          isPending={isAuthenticating}
         >
           {submitButtonLabel}
         </CustomButton>

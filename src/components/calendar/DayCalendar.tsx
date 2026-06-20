@@ -285,39 +285,38 @@ const DayCalendar = () => {
               const isSkippedHour = dstType === 'spring' && hour === dstHour;
               const isDuplicatedHour =
                 dstType === 'fall' && dstHour !== null && hour === dstHour - 1;
+              const isCurrentHour = isFocusedToday && now.getHours() === hour;
 
               return (
                 <div
                   key={hour}
-                  className={cn(
-                    'group/minutes-cell relative flex gap-4',
-                    isSkippedHour && 'opacity-40'
-                  )}
+                  className="group/minutes-cell relative flex gap-4"
                 >
-                  <p className="w-6 shrink-0 -translate-y-3 text-right text-stone-600 dark:text-stone-200">
+                  <p
+                    className={cn(
+                      'text-foreground w-6 shrink-0 -translate-y-3 text-right',
+                      (isSkippedHour || isDuplicatedHour) && 'text-muted',
+                      isCurrentHour && 'text-accent font-extrabold'
+                    )}
+                  >
                     {hour !== 0 && hour}
                   </p>
                   <div
                     className={cn(
-                      'flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b border-stone-300 p-2 group-last-of-type/minutes-cell:border-b-0 dark:border-stone-500',
-                      isSkippedHour && 'bg-stone-200/50 dark:bg-stone-700/50',
-                      isDuplicatedHour &&
-                        'border-l-warning-400 dark:border-l-warning-500 border-l-3'
+                      'border-border flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b p-2 group-last-of-type/minutes-cell:border-b-0',
+                      isSkippedHour && 'bg-background-secondary',
+                      isDuplicatedHour && 'border-l-warning border-l-3'
                     )}
                   >
                     {isSkippedHour && (
-                      <p className="text-xs text-stone-400 italic dark:text-stone-500">
-                        DST skip
-                      </p>
+                      <p className="text-muted text-xs italic">DST skip</p>
                     )}
                     {isDuplicatedHour && (
-                      <p className="text-warning-500 dark:text-warning-400 text-xs italic">
-                        DST repeat
-                      </p>
+                      <p className="text-warning italic">DST repeat</p>
                     )}
-                    {isFocusedToday && now.getHours() === hour && (
+                    {isCurrentHour && (
                       <div
-                        className="bg-primary absolute right-0 left-0 z-10 h-0.5"
+                        className="bg-accent absolute right-0 left-0 z-10 h-0.5"
                         style={{
                           top: `${(now.getMinutes() / 60) * 100}%`,
                         }}

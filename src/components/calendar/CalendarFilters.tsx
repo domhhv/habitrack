@@ -200,6 +200,7 @@ const CalendarFilters = () => {
                 <Checkbox
                   variant="secondary"
                   isSelected={areAllHabitsSelected}
+                  className="flex-row items-center gap-2"
                   isIndeterminate={
                     !areAllHabitsSelected && filters.habitIds.some(Boolean)
                   }
@@ -224,7 +225,7 @@ const CalendarFilters = () => {
                 return (
                   <React.Fragment key={traitName}>
                     <ListBox.Section>
-                      <Header className="bg-default-100 shadow-small rounded-small sticky top-1 z-20 flex w-full px-2 py-1.5 pl-4">
+                      <Header className="bg-background text-background-inverse shadow-small rounded-small sticky top-1 z-20 flex w-full rounded-3xl px-2 py-1.5 pl-4">
                         {traitName}
                       </Header>
                       {traitHabits.map((habit) => {

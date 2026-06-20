@@ -80,11 +80,9 @@ const OccurrencePhotosUploader = ({
         return (
           <div
             key={file.name}
-            className="flex items-center justify-between rounded-md border border-gray-300 bg-gray-50 p-1 dark:border-gray-700 dark:bg-gray-800"
+            className="border-border bg-background flex items-center justify-between rounded-md border px-2 py-1"
           >
-            <p className="pl-1 text-sm text-gray-700 dark:text-gray-100">
-              {file.name}
-            </p>
+            <p className="text-foreground pr-2 text-sm">{file.name}</p>
             <Button
               size="sm"
               isIconOnly

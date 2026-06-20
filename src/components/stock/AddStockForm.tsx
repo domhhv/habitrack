@@ -85,7 +85,7 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
   };
 
   return (
-    <div className="border-content3 flex flex-col gap-3 rounded-lg border p-4">
+    <div className="border-border flex flex-col gap-3 rounded-lg border p-4">
       <h3 className="text-sm font-medium">New stock item</h3>
       <TextField autoFocus value={name} onChange={setName}>
         <Label>Name</Label>

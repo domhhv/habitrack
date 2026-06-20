@@ -1,4 +1,4 @@
-import { Tooltip } from '@heroui/react';
+import { cn, Tooltip } from '@heroui/react';
 import {
   TrashIcon,
   CaretLeftIcon,
@@ -63,7 +63,7 @@ const ImageCarousel = ({
   if (imageUrls.length === 0) {
     return (
       <div
-        className={`relative flex items-center justify-center ${width} ${height} bg-gray-100`}
+        className={`relative flex items-center justify-center ${width} ${height} bg-muted`}
       >
         <p className="text-gray-500">No images available</p>
       </div>
@@ -74,7 +74,7 @@ const ImageCarousel = ({
   const { signedUrl } = currentImageUrl;
 
   return (
-    <div className={`relative overflow-hidden ${width} ${height} bg-gray-100`}>
+    <div className={`relative overflow-hidden ${width} ${height} bg-muted`}>
       <SwipeableContainer
         direction={direction}
         onSwipeLeft={handleNext}
@@ -83,7 +83,7 @@ const ImageCarousel = ({
         swipeKey={String(currentIndex)}
       >
         {!!currentImageUrl.error && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-red-500/50">
+          <div className="bg-danger absolute inset-0 flex items-center justify-center rounded-sm">
             <p className="text-white">Error loading image</p>
           </div>
         )}
@@ -171,6 +171,8 @@ const ImageCarousel = ({
       <div className="absolute right-0 bottom-4 left-0 z-10">
         <div className="mx-auto flex w-max items-center justify-center gap-2 rounded-full bg-black/30 p-2 backdrop-blur-xs">
           {imageUrls.map((_, index) => {
+            const isActive = currentIndex === index;
+
             return (
               <CustomButton
                 key={index}
@@ -179,11 +181,11 @@ const ImageCarousel = ({
                   setDirection(index > currentIndex ? 1 : -1);
                   setCurrentIndex(index);
                 }}
-                className={`rounded-full border border-white/30 shadow-xs transition-all ${
-                  currentIndex === index
-                    ? 'h-2 w-6 bg-white'
-                    : 'h-2 w-2 bg-white/50 hover:bg-white/70'
-                }`}
+                className={cn(
+                  'h-2 rounded-full shadow-xs transition-all',
+                  isActive && 'bg-white',
+                  !isActive && 'bg-background-tertiary hover:bg-surface'
+                )}
               />
             );
           })}
