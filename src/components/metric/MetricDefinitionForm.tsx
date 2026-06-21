@@ -25,6 +25,7 @@ import React from 'react';
 import { CustomButton } from '@components';
 import { METRIC_PRESETS } from '@const';
 import type { MetricType, MetricConfig, FormMetricDefinitions } from '@models';
+import { isMetricType } from '@utils';
 
 import MetricConfigFields from './MetricConfigFields';
 
@@ -225,13 +226,13 @@ const MetricDefinitionForm = ({
         <Select
           variant="secondary"
           value={metric.type}
-          onChange={(key) => {
-            const value = key as MetricType;
-
-            onChange({
-              config: DEFAULT_CONFIGS[value],
-              type: value,
-            });
+          onChange={(value) => {
+            if (isMetricType(value)) {
+              onChange({
+                config: DEFAULT_CONFIGS[value],
+                type: value,
+              });
+            }
           }}
         >
           <Label>Metric type</Label>
@@ -241,9 +242,7 @@ const MetricDefinitionForm = ({
           </Select.Trigger>
           <Select.Popover>
             <ListBox>
-              {(
-                Object.entries(METRIC_TYPE_LABELS) as [MetricType, string][]
-              ).map(([value, label]) => {
+              {Object.entries(METRIC_TYPE_LABELS).map(([value, label]) => {
                 return (
                   <ListBox.Item id={value} key={value} textValue={label}>
                     <Label>{label}</Label>

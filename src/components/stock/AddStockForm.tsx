@@ -62,16 +62,16 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
 
     const metricDefaultInserts: HabitStockMetricDefaultInsert[] =
       Object.entries(metricDefaults)
-        .filter(([, val]) => {
-          return val !== undefined;
+        .filter((entry): entry is [string, MetricValue] => {
+          return entry[1] !== undefined;
         })
-        .map(([metricId, val]) => {
+        .map(([metricId, value]) => {
           return {
             habitMetricId: metricId,
             habitStockId: '',
             shouldCompound: compoundDefaults[metricId] ?? false,
             userId: user.id,
-            value: val as MetricValue,
+            value,
           };
         });
 

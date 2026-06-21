@@ -9,13 +9,43 @@ import type {
   HabitStockMetricDefault,
   HabitStockMetricDefaultInsert,
 } from '@models';
-import { supabaseClient } from '@utils';
+import { supabaseClient, parseMetricValueHolder } from '@utils';
 
 const STOCK_WITH_DEFAULTS_SELECT = `
   *,
   metric_defaults:habit_stock_metric_defaults(id, habit_metric_id, value, should_compound, created_at, updated_at),
   usages:occurrence_stock_usages(count)
 `;
+
+type RawStock = Omit<
+  HabitStockWithDefaults,
+  'metricDefaults' | 'usageCount'
+> & {
+  usages: { count: number }[];
+  metricDefaults: (Omit<
+    HabitStockWithDefaults['metricDefaults'][number],
+    'value'
+  > & {
+    value: unknown;
+  })[];
+};
+
+/**
+ * DB-read boundary for stocks. Camelcased rows carry each default's `value` as `Json`; the
+ * structural metric-value predicate validates and narrows it cast-free (throwing on malformed data;
+ * defended at write time by the `validate_metric_value` trigger).
+ */
+const toStockWithDefaults = ({
+  metricDefaults,
+  usages,
+  ...stock
+}: RawStock): HabitStockWithDefaults => {
+  return {
+    ...stock,
+    metricDefaults: metricDefaults.map(parseMetricValueHolder),
+    usageCount: usages?.[0]?.count ?? 0,
+  };
+};
 
 export const createStock = async (
   body: HabitStockInsert
@@ -30,12 +60,7 @@ export const createStock = async (
     throw new Error(error.message);
   }
 
-  const { usages, ...stock } = camelcaseKeys(data, { deep: true });
-
-  return {
-    ...stock,
-    usageCount: usages?.[0]?.count ?? 0,
-  };
+  return toStockWithDefaults(camelcaseKeys(data, { deep: true }));
 };
 
 export const patchStock = async (
@@ -53,12 +78,7 @@ export const patchStock = async (
     throw new Error(error.message);
   }
 
-  const { usages, ...updatedStock } = camelcaseKeys(data, { deep: true });
-
-  return {
-    ...updatedStock,
-    usageCount: usages?.[0]?.count ?? 0,
-  };
+  return toStockWithDefaults(camelcaseKeys(data, { deep: true }));
 };
 
 export const destroyStock = async (id: HabitStock['id']) => {
@@ -88,7 +108,9 @@ export const createStockMetricDefaults = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return camelcaseKeys(data, { deep: true }).map((metricDefault) => {
+    return parseMetricValueHolder(metricDefault);
+  });
 };
 
 export const destroyStockMetricDefaults = async (

@@ -151,8 +151,9 @@ const AccountPage = () => {
               value={firstDayOfWeek}
               isDisabled={isUpdating}
               onChange={(value) => {
-                const newDay = value as DaysOfWeek;
-                setFirstDayOfWeek(newDay);
+                if (value === 'sun' || value === 'mon') {
+                  setFirstDayOfWeek(value);
+                }
               }}
             >
               <Label>Start week on</Label>

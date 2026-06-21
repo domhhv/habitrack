@@ -1,8 +1,6 @@
-import type {
-  NumberMetricConfig,
-  DurationMetricConfig,
-  OccurrenceSummaryItem,
-} from '@models';
+import type { OccurrenceSummaryItem } from '@models';
+
+import { isNumericValue, isDurationValue } from './metric-value';
 
 const buildMetricTotals = (summary: OccurrenceSummaryItem[]) => {
   const totals: Record<string, { formattedTotal: string; name: string }[]> = {};
@@ -38,13 +36,13 @@ const buildMetricTotals = (summary: OccurrenceSummaryItem[]) => {
           continue;
         }
 
-        const value = mv.value as Record<string, unknown>;
+        const value = mv.value;
 
-        if (metric.type === 'number') {
-          sum += (value as { numericValue: number }).numericValue;
+        if (metric.type === 'number' && isNumericValue(value)) {
+          sum += value.numericValue;
           hasValues = true;
-        } else if (metric.type === 'duration') {
-          sum += (value as { durationMs: number }).durationMs;
+        } else if (metric.type === 'duration' && isDurationValue(value)) {
+          sum += value.durationMs;
           hasValues = true;
         }
       }
@@ -56,7 +54,7 @@ const buildMetricTotals = (summary: OccurrenceSummaryItem[]) => {
       let formattedTotal: string;
 
       if (metric.type === 'number') {
-        const config = metric.config as NumberMetricConfig;
+        const { config } = metric;
         const formatted =
           config.decimalPlaces != null
             ? sum.toFixed(config.decimalPlaces)
@@ -66,7 +64,7 @@ const buildMetricTotals = (summary: OccurrenceSummaryItem[]) => {
           ? `${formatted} ${config.unit}`
           : formatted;
       } else {
-        const config = metric.config as DurationMetricConfig;
+        const { config } = metric;
         const totalSec = Math.floor(sum / 1000);
         const h = Math.floor(totalSec / 3600);
         const m = Math.floor((totalSec % 3600) / 60);

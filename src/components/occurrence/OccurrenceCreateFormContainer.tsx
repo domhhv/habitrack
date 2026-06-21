@@ -42,15 +42,15 @@ const OccurrenceCreateFormContainer = () => {
     userId: string
   ): OccurrenceMetricValueInsert[] => {
     return Object.entries(metricValues)
-      .filter(([, val]) => {
-        return val !== undefined;
+      .filter((entry): entry is [string, MetricValue] => {
+        return entry[1] !== undefined;
       })
-      .map(([metricId, val]) => {
+      .map(([metricId, value]) => {
         return {
           habitMetricId: metricId,
           occurrenceId,
           userId,
-          value: val as MetricValue,
+          value,
         };
       });
   };
@@ -96,8 +96,8 @@ const OccurrenceCreateFormContainer = () => {
 
       const habitStocks = habits[selectedHabitId]?.stocks ?? [];
       const stocksById = new Map(
-        habitStocks.map((s) => {
-          return [s.id, s] as const;
+        habitStocks.map((stock) => {
+          return [stock.id, stock];
         })
       );
 
@@ -122,7 +122,7 @@ const OccurrenceCreateFormContainer = () => {
         })
         .filter((entry) => {
           return entry !== null;
-        }) as { amount: number; currency: string }[];
+        });
 
       let cost: number | null = null;
       let currency: string | null = null;

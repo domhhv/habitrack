@@ -14,7 +14,6 @@ import React from 'react';
 
 import { TraitChip } from '@components';
 import { useScreenWidth } from '@hooks';
-import type { Habit } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import {
@@ -134,13 +133,9 @@ const CalendarFilters = () => {
         value={filters.habitIds}
         selectionMode="multiple"
         placeholder="Filter by habits"
+        onChange={handleHabitsFilterChange}
         isOpen={habitsFilterSelectState.isOpen}
         onOpenChange={habitsFilterSelectState.setOpen}
-        onChange={(keys) => {
-          handleHabitsFilterChange(
-            Array.isArray(keys) ? (keys as string[]) : []
-          );
-        }}
       >
         <Label>Filter by habits</Label>
         <Select.Trigger>
@@ -165,7 +160,7 @@ const CalendarFilters = () => {
                       return null;
                     }
 
-                    const { iconPath, id, name } = habits[key] as Habit;
+                    const { iconPath, id, name } = habits[key];
 
                     return (
                       <Tooltip key={id} delay={0} closeDelay={0}>
@@ -265,13 +260,9 @@ const CalendarFilters = () => {
         value={filters.traitIds}
         selectionMode="multiple"
         placeholder="Filter by traits"
+        onChange={handleTraitsFilterChange}
         isOpen={traitsFilterSelectState.isOpen}
         onOpenChange={traitsFilterSelectState.setOpen}
-        onChange={(keys) => {
-          handleTraitsFilterChange(
-            Array.isArray(keys) ? (keys as string[]) : []
-          );
-        }}
       >
         <Label>Filter by traits</Label>
         <Select.Trigger>

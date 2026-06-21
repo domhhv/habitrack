@@ -25,7 +25,7 @@ import {
   useHabitActions,
   useMetricsActions,
 } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { handleAsyncAction, buildHabitMetricInsert } from '@utils';
 
 const AddHabitDialogButton = () => {
   const [traitId, setTraitId] = React.useState('');
@@ -79,15 +79,7 @@ const AddHabitDialogButton = () => {
       if (metricDefinitions.length > 0) {
         await addHabitMetrics(
           metricDefinitions.map((metric) => {
-            return {
-              config: metric.config,
-              habitId: habit.id,
-              isRequired: metric.isRequired,
-              name: metric.name,
-              sortOrder: metric.sortOrder,
-              type: metric.type,
-              userId: user.id,
-            };
+            return buildHabitMetricInsert(metric, habit.id, user.id);
           })
         );
       }

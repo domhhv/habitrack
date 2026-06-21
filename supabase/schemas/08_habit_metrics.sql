@@ -20,6 +20,29 @@ ALTER TABLE "public"."habit_metrics" OWNER TO "postgres";
 ALTER TABLE ONLY "public"."habit_metrics"
 ADD CONSTRAINT "habit_metrics_pkey" PRIMARY KEY ("id");
 
+-- Validate that config shape matches the metric type. Types with all-optional config
+-- (number/duration/range/boolean/text) only require an object; scale/choice require their
+-- structural keys; percentage must be empty.
+-- noqa: disable=all
+ALTER TABLE "public"."habit_metrics"
+ADD CONSTRAINT "habit_metrics_config_shape_check" CHECK (
+    jsonb_typeof(config) = 'object'
+    AND CASE type
+        WHEN 'scale' THEN (
+            config ? 'min' AND config ? 'max' AND config ? 'step'
+            AND jsonb_typeof(config -> 'min') = 'number'
+            AND jsonb_typeof(config -> 'max') = 'number'
+            AND jsonb_typeof(config -> 'step') = 'number'
+        )
+        WHEN 'choice' THEN (
+            config ? 'options' AND jsonb_typeof(config -> 'options') = 'array'
+        )
+        WHEN 'percentage' THEN (config = '{}'::jsonb)
+        ELSE TRUE
+    END
+);
+-- noqa: enable=all
+
 -- Foreign keys
 ALTER TABLE ONLY "public"."habit_metrics"
 ADD CONSTRAINT "habit_metrics_habit_id_fkey" FOREIGN KEY ("habit_id") REFERENCES "public"."habits" (

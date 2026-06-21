@@ -35,6 +35,7 @@ const rules = {
     'error',
     {
       argsIgnorePattern: '^_',
+      ignoreRestSiblings: true,
       varsIgnorePattern: '^_',
     },
   ],

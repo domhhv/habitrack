@@ -117,8 +117,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
     const compoundMap: Record<string, boolean> = {};
 
     for (const metricDefault of stock.metricDefaults) {
-      defaults[metricDefault.habitMetricId] =
-        metricDefault.value as MetricValue;
+      defaults[metricDefault.habitMetricId] = metricDefault.value;
       compoundMap[metricDefault.habitMetricId] =
         metricDefault.shouldCompound ?? false;
     }
@@ -187,8 +186,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
     const compoundMap: Record<string, boolean> = {};
 
     for (const metricDefault of stock.metricDefaults) {
-      defaults[metricDefault.habitMetricId] =
-        metricDefault.value as MetricValue;
+      defaults[metricDefault.habitMetricId] = metricDefault.value;
       compoundMap[metricDefault.habitMetricId] =
         metricDefault.shouldCompound ?? false;
     }

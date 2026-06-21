@@ -15,7 +15,7 @@ import {
   useHabitActions,
   useMetricsActions,
 } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { handleAsyncAction, buildHabitMetricInsert } from '@utils';
 
 import HabitIcon from './HabitIcon';
 
@@ -49,7 +49,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
   const startEditingMetrics = () => {
     const localMetrics = habit.metricDefinitions.map((m) => {
       return {
-        config: m.config as FormMetricDefinitions['config'],
+        config: m.config,
         id: m.id,
         isPersisted: true,
         isRequired: m.isRequired,
@@ -110,15 +110,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           return md.isToBeAdded && !md.isToBeRemoved;
         })
         .map((metric) => {
-          return {
-            config: metric.config,
-            habitId: habit.id,
-            isRequired: metric.isRequired,
-            name: metric.name,
-            sortOrder: metric.sortOrder,
-            type: metric.type,
-            userId: user.id,
-          };
+          return buildHabitMetricInsert(metric, habit.id, user.id);
         });
 
       const metricsToUpdate = metricDefinitions.filter((md) => {

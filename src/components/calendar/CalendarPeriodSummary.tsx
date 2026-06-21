@@ -42,8 +42,8 @@ const CalendarPeriodSummary = ({
     for (const { habitId, occurrences } of occurrenceSummary) {
       const habitStocks = habits[habitId]?.stocks ?? [];
       const stocksById = new Map(
-        habitStocks.map((s) => {
-          return [s.id, s] as const;
+        habitStocks.map((stock) => {
+          return [stock.id, stock];
         })
       );
 

@@ -12,12 +12,18 @@ export type HabitStockUpdate = CamelCasedPropertiesDeep<
   TablesUpdate<'habit_stocks'>
 >;
 
-export type HabitStockMetricDefault = CamelCasedPropertiesDeep<
-  Tables<'habit_stock_metric_defaults'>
->;
-export type HabitStockMetricDefaultInsert = CamelCasedPropertiesDeep<
-  TablesInsert<'habit_stock_metric_defaults'>
->;
+export type HabitStockMetricDefault = Omit<
+  CamelCasedPropertiesDeep<Tables<'habit_stock_metric_defaults'>>,
+  'value'
+> & {
+  value: MetricValue;
+};
+export type HabitStockMetricDefaultInsert = Omit<
+  CamelCasedPropertiesDeep<TablesInsert<'habit_stock_metric_defaults'>>,
+  'value'
+> & {
+  value: MetricValue;
+};
 
 export type HabitStockWithDefaults = HabitStock & {
   metricDefaults: Omit<HabitStockMetricDefault, 'userId' | 'habitStockId'>[];

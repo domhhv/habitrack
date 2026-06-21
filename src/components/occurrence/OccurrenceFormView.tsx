@@ -40,6 +40,7 @@ import type { Habit, Occurrence, MetricValue } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl, getLatestHabitOccurrence } from '@services';
 import { useHabits } from '@stores';
+import { isNumericValue } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
@@ -267,18 +268,14 @@ const OccurrenceFormView = ({
           continue;
         }
 
-        const numericValue = metricDefault.value as MetricValue | undefined as
-          | { numericValue: number }
-          | undefined;
-
-        if (!numericValue || typeof numericValue.numericValue !== 'number') {
+        if (!isNumericValue(metricDefault.value)) {
           continue;
         }
 
         compoundMetricIds.add(metricDefault.habitMetricId);
         compoundSums[metricDefault.habitMetricId] =
           (compoundSums[metricDefault.habitMetricId] || 0) +
-          numericValue.numericValue * quantity;
+          metricDefault.value.numericValue * quantity;
       }
     }
 
@@ -305,7 +302,7 @@ const OccurrenceFormView = ({
             if (shouldOverride) {
               next[metricId] = {
                 numericValue: compoundSums[metricId] ?? 0,
-              } as MetricValue;
+              };
               hasChanges = true;
             }
 
@@ -313,7 +310,7 @@ const OccurrenceFormView = ({
           }
 
           if (next[metricId] === undefined) {
-            next[metricId] = metricDefault.value as MetricValue;
+            next[metricId] = metricDefault.value;
             hasChanges = true;
           }
         }
@@ -432,7 +429,7 @@ const OccurrenceFormView = ({
         const prevMetrics: Record<string, MetricValue | undefined> = {};
 
         for (const mv of occurrence.metricValues) {
-          prevMetrics[mv.habitMetricId] = mv.value as MetricValue;
+          prevMetrics[mv.habitMetricId] = mv.value;
         }
 
         setPreviousMetricValues(prevMetrics);
@@ -468,7 +465,7 @@ const OccurrenceFormView = ({
       const initialMetricValues: Record<string, MetricValue | undefined> = {};
 
       for (const mv of occurrenceToEdit.metricValues) {
-        initialMetricValues[mv.habitMetricId] = mv.value as MetricValue;
+        initialMetricValues[mv.habitMetricId] = mv.value;
       }
 
       setMetricValues(initialMetricValues);
@@ -512,7 +509,7 @@ const OccurrenceFormView = ({
         const existingMetricValues: Record<string, MetricValue> = {};
 
         for (const mv of occurrenceToEdit.metricValues) {
-          existingMetricValues[mv.habitMetricId] = mv.value as MetricValue;
+          existingMetricValues[mv.habitMetricId] = mv.value;
         }
 
         const allMetricIds = new Set<string>([
@@ -661,10 +658,8 @@ const OccurrenceFormView = ({
     onClose();
   };
 
-  const handleHabitSelectionChange = (keys: Selection) => {
-    const id = [...keys][0] as string;
-
-    if (id) {
+  const handleHabitSelectionChange = ([id]: Selection) => {
+    if (typeof id === 'string' && id) {
       setSelectedHabitId(id);
       setMetricValues({});
       setStockSelections({});
@@ -865,8 +860,8 @@ const OccurrenceFormView = ({
                         className="w-28"
                         isDisabled={!isSelected}
                         aria-label={`${stock.name} quantity`}
+                        value={stockSelections[stock.id] ?? 1}
                         maxValue={effectiveMaxQuantity ?? undefined}
-                        value={(stockSelections[stock.id] ?? 1) as number}
                         onChange={(value: number) => {
                           return handleStockQuantityChange(
                             stock.id,

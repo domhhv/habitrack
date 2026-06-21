@@ -6,15 +6,9 @@ import { useDateFormatter } from 'react-aria';
 
 import { CustomButton, InfinityLoader } from '@components';
 import type {
+  Habit,
   Occurrence,
   MetricValue,
-  HabitMetric,
-  MetricConfig,
-  RangeMetricConfig,
-  ScaleMetricConfig,
-  NumberMetricConfig,
-  BooleanMetricConfig,
-  DurationMetricConfig,
   HabitStockWithDefaults,
 } from '@models';
 import {
@@ -23,97 +17,81 @@ import {
   useConfirmationActions,
   useNotesByOccurrenceId,
 } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { matchMetricValue, handleAsyncAction } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
 
 const formatMetricValue = (
-  metric: HabitMetric,
+  metric: Habit['metricDefinitions'][number],
   value: MetricValue | undefined
 ): string => {
   if (value === undefined) {
     return '';
   }
 
-  const config = metric.config as MetricConfig;
+  return matchMetricValue(metric.type, value, {
+    boolean: ({ booleanValue }) => {
+      const config = metric.type === 'boolean' ? metric.config : undefined;
 
-  switch (metric.type) {
-    case 'number': {
-      const numConfig = config as NumberMetricConfig;
-      const v = (value as { numericValue: number }).numericValue;
-
-      return numConfig.unit ? `${v} ${numConfig.unit}` : String(v);
-    }
-
-    case 'percentage': {
-      const v = (value as { numericValue: number }).numericValue;
-
-      return `${v}%`;
-    }
-
-    case 'duration': {
-      const durConfig = config as DurationMetricConfig;
-      const ms = (value as { durationMs: number }).durationMs;
-      const totalSec = Math.floor(ms / 1000);
+      return booleanValue
+        ? config?.trueLabel || 'Yes'
+        : config?.falseLabel || 'No';
+    },
+    choice: (choiceValue) => {
+      return 'selectedOptions' in choiceValue
+        ? choiceValue.selectedOptions.join(', ')
+        : choiceValue.selectedOption;
+    },
+    duration: ({ durationMs }) => {
+      const totalSec = Math.floor(durationMs / 1000);
       const h = Math.floor(totalSec / 3600);
       const m = Math.floor((totalSec % 3600) / 60);
       const s = totalSec % 60;
+      const format =
+        metric.type === 'duration' ? metric.config.format : undefined;
 
-      if (durConfig.format === 'minutes') {
-        return `${Math.floor(ms / 60000)} min`;
+      if (format === 'minutes') {
+        return `${Math.floor(durationMs / 60000)} min`;
       }
 
-      if (durConfig.format === 'seconds') {
+      if (format === 'seconds') {
         return `${totalSec} sec`;
       }
 
-      if (durConfig.format === 'hh:mm:ss') {
+      if (format === 'hh:mm:ss') {
         return `${h}h ${m}m ${s}s`;
       }
 
       return `${h}h ${m}m`;
-    }
-
-    case 'scale': {
-      const scaleConfig = config as ScaleMetricConfig;
-      const v = (value as { numericValue: number }).numericValue;
-      const label = scaleConfig.labels?.[String(v)];
-
-      return label ? `${v} (${label})` : String(v);
-    }
-
-    case 'range': {
-      const rangeConfig = config as RangeMetricConfig;
-      const { rangeFrom, rangeTo } = value as {
-        rangeFrom: number;
-        rangeTo: number;
-      };
-      const unit = rangeConfig.unit ? ` ${rangeConfig.unit}` : '';
+    },
+    number: ({ numericValue }) => {
+      return metric.type === 'number' && metric.config.unit
+        ? `${numericValue} ${metric.config.unit}`
+        : String(numericValue);
+    },
+    percentage: ({ numericValue }) => {
+      return `${numericValue}%`;
+    },
+    range: ({ rangeFrom, rangeTo }) => {
+      const unit =
+        metric.type === 'range' && metric.config.unit
+          ? ` ${metric.config.unit}`
+          : '';
 
       return `${rangeFrom}–${rangeTo}${unit}`;
-    }
+    },
+    scale: ({ numericValue }) => {
+      const label =
+        metric.type === 'scale'
+          ? metric.config.labels?.[String(numericValue)]
+          : undefined;
 
-    case 'choice': {
-      if ('selectedOptions' in value) {
-        return value.selectedOptions.join(', ');
-      }
-
-      return (value as { selectedOption: string }).selectedOption;
-    }
-
-    case 'boolean': {
-      const boolConfig = config as BooleanMetricConfig;
-      const v = (value as { booleanValue: boolean }).booleanValue;
-
-      return v ? boolConfig.trueLabel || 'Yes' : boolConfig.falseLabel || 'No';
-    }
-
-    case 'text':
-      return (value as { textValue: string }).textValue;
-
-    default:
-      return JSON.stringify(value);
-  }
+      return label ? `${numericValue} (${label})` : String(numericValue);
+    },
+    text: ({ textValue }) => {
+      return textValue;
+    },
+  });
 };
 
 const formatCost = (cost: number | null, currency: string | null) => {
@@ -156,8 +134,8 @@ const OccurrenceListItem = ({
     }
 
     return new Map(
-      habit.stocks.map((s) => {
-        return [s.id, s] as const;
+      habit.stocks.map((stock) => {
+        return [stock.id, stock];
       })
     );
   }, [habits, occurrence.habitId]);
@@ -202,7 +180,7 @@ const OccurrenceListItem = ({
 
     const valuesByMetricId = new Map(
       values.map((v) => {
-        return [v.habitMetricId, v.value as MetricValue];
+        return [v.habitMetricId, v.value];
       })
     );
 
@@ -213,7 +191,7 @@ const OccurrenceListItem = ({
       .map((d) => {
         return {
           id: d.id,
-          label: `${d.name}: ${formatMetricValue(d as HabitMetric, valuesByMetricId.get(d.id))}`,
+          label: `${d.name}: ${formatMetricValue(d, valuesByMetricId.get(d.id))}`,
         };
       });
   }, [occurrence.habit.metricDefinitions, occurrence.metricValues]);

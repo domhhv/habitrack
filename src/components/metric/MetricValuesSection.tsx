@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { Habit, MetricValue, MetricConfig } from '@models';
+import type { Habit, MetricValue } from '@models';
 
 import MetricValueInput from './MetricValueInput';
 
@@ -41,9 +41,9 @@ const MetricValuesSection = ({
             key={metric.id}
             name={metric.name}
             type={metric.type}
+            config={metric.config}
             value={values[metric.id]}
             onChange={handleChange(metric.id)}
-            config={metric.config as MetricConfig}
             previousValue={previousValues?.[metric.id]}
           />
         );
