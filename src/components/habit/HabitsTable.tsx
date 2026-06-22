@@ -124,8 +124,6 @@ const HabitsTable = () => {
 
   const totalPages = Math.ceil(habitsList.length / ROWS_PER_PAGE);
 
-  console.log({ totalPages });
-
   const pages = Array.from({ length: totalPages }, (_, i) => {
     return i + 1;
   });
@@ -147,7 +145,7 @@ const HabitsTable = () => {
             Your habits
           </h1>
 
-          {!!habits.length && <AddHabitDialogButton />}
+          {!!habitsList.length && <AddHabitDialogButton />}
         </div>
 
         {!!habitsList.length && (
