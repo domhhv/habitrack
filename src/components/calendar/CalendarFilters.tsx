@@ -195,15 +195,14 @@ const CalendarFilters = () => {
                 <Checkbox
                   variant="secondary"
                   isSelected={areAllHabitsSelected}
-                  className="flex-row items-center gap-2"
                   isIndeterminate={
                     !areAllHabitsSelected && filters.habitIds.some(Boolean)
                   }
                 >
-                  <Checkbox.Control>
-                    <Checkbox.Indicator />
-                  </Checkbox.Control>
                   <Checkbox.Content>
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
                     <Label>
                       {areAllHabitsSelected ? 'Unselect' : 'Select'} all
                     </Label>
@@ -311,10 +310,10 @@ const CalendarFilters = () => {
                     !areAllTraitsSelected && filters.traitIds.some(Boolean)
                   }
                 >
-                  <Checkbox.Control>
-                    <Checkbox.Indicator />
-                  </Checkbox.Control>
                   <Checkbox.Content>
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
                     <Label>
                       {areAllTraitsSelected ? 'Unselect' : 'Select'} all
                     </Label>

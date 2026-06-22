@@ -95,18 +95,6 @@ const MonthCalendarCell = ({
   const isDrawerDate =
     drawerDate && isOccurrenceDrawerOpen && isEqualDay(drawerDate, date);
 
-  const cellHeaderClassName = cn(
-    'border-border sticky top-0 flex w-full items-center justify-between border-b py-0.5 pr-0.5 pl-1.5 text-sm',
-    'bg-background group-hover/cell:bg-background-secondary transition-colors',
-    isTodayCell &&
-      'bg-background-secondary group-hover/cell:bg-background-tertiary',
-    isDrawerDate && isDesktop && isTodayCell && 'bg-background-tertiary z-51',
-    isDrawerDate && isDesktop && !isTodayCell && 'bg-background-secondary z-51',
-    isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600',
-    isTodayCell ? 'w-full self-auto md:self-start' : 'w-full',
-    isMobile && 'pl-1'
-  );
-
   const openLoggingDrawer = () => {
     if (!user) {
       return;
@@ -118,7 +106,25 @@ const MonthCalendarCell = ({
   };
 
   const cellHeader = (
-    <div className={cellHeaderClassName}>
+    <div
+      className={cn(
+        'border-border sticky top-0 flex w-full items-center justify-between border-b py-0.5 pr-0.5 pl-1.5 text-sm',
+        'group-hover/cell:bg-background dark:group-hover/cell:bg-surface bg-white transition-colors dark:bg-black',
+        isTodayCell &&
+          'bg-background dark:bg-surface dark:group-hover/cell:bg-surface-secondary group-hover/cell:bg-background-secondary',
+        isDrawerDate &&
+          isDesktop &&
+          !isTodayCell &&
+          'bg-background dark:bg-surface z-51',
+        isDrawerDate &&
+          isDesktop &&
+          isTodayCell &&
+          'bg-background-secondary dark:bg-surface-secondary z-51',
+        isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600',
+        isTodayCell ? 'w-full self-auto md:self-start' : 'w-full',
+        isMobile && 'pl-1'
+      )}
+    >
       <p
         className={cn(
           'font-bold',
@@ -228,17 +234,17 @@ const MonthCalendarCell = ({
     >
       <div
         className={cn(
-          'bg-background group-hover/cell:bg-background-secondary relative flex-1 space-y-2 overflow-x-auto overflow-y-visible transition-colors',
+          'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 space-y-2 overflow-x-auto overflow-y-visible bg-white transition-colors dark:bg-black',
           isTodayCell &&
-            'bg-background-secondary group-hover/cell:bg-background-tertiary',
+            'bg-background group-hover/cell:bg-surface-secondary dark:group-hover/cell:bg-surface-secondary dark:bg-surface',
           isDrawerDate &&
             isDesktop &&
             isTodayCell &&
-            'bg-background-tertiary z-51',
+            'bg-background-secondary dark:bg-surface-secondary z-51',
           isDrawerDate &&
             isDesktop &&
             !isTodayCell &&
-            'bg-background-secondary z-51',
+            'bg-background dark:bg-surface z-51',
           position === 'top-left' && 'rounded-tl-3xl',
           position === 'top-right' && 'rounded-tr-3xl',
           position === 'bottom-left' && 'rounded-bl-3xl',

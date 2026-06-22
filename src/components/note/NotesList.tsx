@@ -75,18 +75,14 @@ const NotesList = () => {
 
     if (!hasMore && notes.length > 0) {
       return (
-        <p className="text-default-500 py-4 text-center text-sm">
+        <p className="text-muted py-4 text-center text-sm">
           You&apos;ve reached the end of your notes
         </p>
       );
     }
 
     if (!isLoading && notes.length === 0) {
-      return (
-        <p className="text-default-500 py-8 text-center">
-          No notes yet. Create notes from the calendar view!
-        </p>
-      );
+      return <p className="text-muted py-2 text-center">No notes yet</p>;
     }
 
     return null;
