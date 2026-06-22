@@ -35,7 +35,9 @@ const AuthModalButton = () => {
   };
 
   const handleTabChange = (key: React.Key) => {
-    setMode(key as 'login' | 'register');
+    if (key === 'login' || key === 'register') {
+      setMode(key);
+    }
   };
 
   const actions: Record<

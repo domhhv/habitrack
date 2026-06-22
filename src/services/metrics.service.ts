@@ -8,7 +8,11 @@ import type {
   OccurrenceMetricValue,
   OccurrenceMetricValueInsert,
 } from '@models';
-import { supabaseClient } from '@utils';
+import {
+  supabaseClient,
+  parseHabitMetric,
+  parseMetricValueHolder,
+} from '@utils';
 
 export const createHabitMetrics = async (
   metrics: HabitMetricInsert[]
@@ -26,7 +30,7 @@ export const createHabitMetrics = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return camelcaseKeys(data, { deep: true }).map(parseHabitMetric);
 };
 
 export const patchHabitMetric = async (
@@ -44,7 +48,7 @@ export const patchHabitMetric = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return parseHabitMetric(camelcaseKeys(data, { deep: true }));
 };
 
 export const destroyHabitMetrics = async (ids: string[]) => {
@@ -85,7 +89,7 @@ export const upsertMetricValues = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return camelcaseKeys(data, { deep: true }).map(parseMetricValueHolder);
 };
 
 export const destroyMetricValue = async (

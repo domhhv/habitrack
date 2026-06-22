@@ -51,15 +51,15 @@ const OccurrenceUpdateFormContainer = () => {
     userId: string
   ): OccurrenceMetricValueInsert[] => {
     return Object.entries(metricValues)
-      .filter(([, val]) => {
-        return val !== undefined;
+      .filter((entry): entry is [string, MetricValue] => {
+        return entry[1] !== undefined;
       })
-      .map(([metricId, val]) => {
+      .map(([metricId, value]) => {
         return {
           habitMetricId: metricId,
           occurrenceId,
           userId,
-          value: val as MetricValue,
+          value,
         };
       });
   };
@@ -99,8 +99,8 @@ const OccurrenceUpdateFormContainer = () => {
       // Determine stock usage cost
       const habitStocks = habits[selectedHabitId]?.stocks ?? [];
       const stocksById = new Map(
-        habitStocks.map((s) => {
-          return [s.id, s] as const;
+        habitStocks.map((stock) => {
+          return [stock.id, stock];
         })
       );
 
@@ -124,7 +124,7 @@ const OccurrenceUpdateFormContainer = () => {
         })
         .filter((entry) => {
           return entry !== null;
-        }) as { amount: number; currency: string }[];
+        });
 
       let cost: number | null = null;
       let currency: string | null = null;
@@ -148,7 +148,7 @@ const OccurrenceUpdateFormContainer = () => {
       // so the occurrence refetch includes the latest stock_usages
       const existingUsagesByStockId = new Map(
         occurrenceToEdit.stockUsages.map((usage) => {
-          return [usage.habitStockId, usage] as const;
+          return [usage.habitStockId, usage];
         })
       );
 

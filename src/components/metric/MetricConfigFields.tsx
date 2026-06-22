@@ -18,6 +18,7 @@ import type {
   BooleanMetricConfig,
   DurationMetricConfig,
 } from '@models';
+import { isMetricConfigForType } from '@utils';
 
 type MetricConfigFieldsProps = {
   config: MetricConfig;
@@ -382,60 +383,39 @@ const MetricConfigFields = ({
 }: MetricConfigFieldsProps) => {
   switch (type) {
     case 'number':
-      return (
-        <NumberConfigFields
-          onChange={onChange}
-          config={config as NumberMetricConfig}
-        />
-      );
+      return isMetricConfigForType(type, config) ? (
+        <NumberConfigFields config={config} onChange={onChange} />
+      ) : null;
 
     case 'duration':
-      return (
-        <DurationConfigFields
-          onChange={onChange}
-          config={config as DurationMetricConfig}
-        />
-      );
+      return isMetricConfigForType(type, config) ? (
+        <DurationConfigFields config={config} onChange={onChange} />
+      ) : null;
 
     case 'scale':
-      return (
-        <ScaleConfigFields
-          onChange={onChange}
-          config={config as ScaleMetricConfig}
-        />
-      );
+      return isMetricConfigForType(type, config) ? (
+        <ScaleConfigFields config={config} onChange={onChange} />
+      ) : null;
 
     case 'range':
-      return (
-        <RangeConfigFields
-          onChange={onChange}
-          config={config as RangeMetricConfig}
-        />
-      );
+      return isMetricConfigForType(type, config) ? (
+        <RangeConfigFields config={config} onChange={onChange} />
+      ) : null;
 
     case 'choice':
-      return (
-        <ChoiceConfigFields
-          onChange={onChange}
-          config={config as ChoiceMetricConfig}
-        />
-      );
+      return isMetricConfigForType(type, config) ? (
+        <ChoiceConfigFields config={config} onChange={onChange} />
+      ) : null;
 
     case 'boolean':
-      return (
-        <BooleanConfigFields
-          onChange={onChange}
-          config={config as BooleanMetricConfig}
-        />
-      );
+      return isMetricConfigForType(type, config) ? (
+        <BooleanConfigFields config={config} onChange={onChange} />
+      ) : null;
 
     case 'text':
-      return (
-        <TextConfigFields
-          onChange={onChange}
-          config={config as TextMetricConfig}
-        />
-      );
+      return isMetricConfigForType(type, config) ? (
+        <TextConfigFields config={config} onChange={onChange} />
+      ) : null;
 
     case 'percentage':
       return null;

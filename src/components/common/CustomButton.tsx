@@ -106,17 +106,10 @@ const CustomButton = (props: CustomButtonProps) => {
       }}
     >
       {(renderProps) => {
-        const content =
-          typeof children === 'function'
-            ? (children as (props: typeof renderProps) => React.ReactNode)(
-                renderProps
-              )
-            : children;
-
         return (
           <>
             {renderProps.isPending && <InfinityLoader />}
-            {content}
+            {typeof children === 'function' ? children(renderProps) : children}
           </>
         );
       }}

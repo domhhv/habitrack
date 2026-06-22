@@ -46,7 +46,7 @@ export const updateOccurrenceStockUsage = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys([data])[0];
+  return camelcaseKeys(data);
 };
 
 export const deleteOccurrenceStockUsages = async (

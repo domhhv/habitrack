@@ -124,16 +124,16 @@ export const createStocksSlice: SliceCreator<keyof StocksSlice> = (set) => {
         const inserts: HabitStockMetricDefaultInsert[] = Object.entries(
           metricDefaults
         )
-          .filter(([, val]) => {
-            return val !== undefined;
+          .filter((entry): entry is [string, MetricValue] => {
+            return entry[1] !== undefined;
           })
-          .map(([metricId, val]) => {
+          .map(([metricId, value]) => {
             return {
               habitMetricId: metricId,
               habitStockId: stockId,
               shouldCompound: compoundDefaults[metricId] ?? false,
               userId,
-              value: val as MetricValue,
+              value,
             };
           });
 

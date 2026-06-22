@@ -29,6 +29,11 @@ import type {
   MultiChoiceMetricValue,
   SingleChoiceMetricValue,
 } from '@models';
+import {
+  isRangeValue,
+  isMetricValueForType,
+  isMetricConfigForType,
+} from '@utils';
 
 type MetricValueInputProps = {
   config: MetricConfig;
@@ -104,9 +109,9 @@ const PercentageValueInput = ({
       minValue={0}
       maxValue={100}
       value={value?.numericValue ?? 50}
-      onChange={(v) => {
-        const numVal = typeof v === 'number' ? v : (v as number[])[0];
-        onChange({ numericValue: numVal });
+      onChange={(value) => {
+        const numericValue = typeof value === 'number' ? value : value[0];
+        onChange({ numericValue });
       }}
     >
       <Label>{name}</Label>
@@ -276,9 +281,9 @@ const ScaleValueInput = ({
       value={currentVal}
       minValue={config.min}
       maxValue={config.max}
-      onChange={(v) => {
-        const numVal = typeof v === 'number' ? v : (v as number[])[0];
-        onChange({ numericValue: numVal });
+      onChange={(value) => {
+        const numericValue = typeof value === 'number' ? value : value[0];
+        onChange({ numericValue });
       }}
     >
       <Label>{label}</Label>
@@ -551,6 +556,15 @@ const TextValueInput = ({
   );
 };
 
+const narrowValue = <T extends MetricType>(
+  type: T,
+  value: MetricValue | undefined
+) => {
+  return value !== undefined && isMetricValueForType(type, value)
+    ? value
+    : undefined;
+};
+
 const MetricValueInput = ({
   config,
   name,
@@ -561,89 +575,88 @@ const MetricValueInput = ({
 }: MetricValueInputProps) => {
   switch (type) {
     case 'number':
-      return (
+      return isMetricConfigForType(type, config) ? (
         <NumberValueInput
           name={name}
+          config={config}
           onChange={onChange}
-          config={config as NumberMetricConfig}
-          value={value as NumericMetricValue | undefined}
+          value={narrowValue(type, value)}
         />
-      );
+      ) : null;
 
     case 'percentage':
       return (
         <PercentageValueInput
           name={name}
           onChange={onChange}
-          value={value as NumericMetricValue | undefined}
+          value={narrowValue(type, value)}
         />
       );
 
     case 'duration':
-      return (
+      return isMetricConfigForType(type, config) ? (
         <DurationValueInput
           name={name}
+          config={config}
           onChange={onChange}
-          config={config as DurationMetricConfig}
-          value={value as DurationMetricValue | undefined}
+          value={narrowValue(type, value)}
         />
-      );
+      ) : null;
 
     case 'scale':
-      return (
+      return isMetricConfigForType(type, config) ? (
         <ScaleValueInput
           name={name}
+          config={config}
           onChange={onChange}
-          config={config as ScaleMetricConfig}
-          value={value as NumericMetricValue | undefined}
+          value={narrowValue(type, value)}
         />
-      );
+      ) : null;
 
     case 'range':
-      return (
+      return isMetricConfigForType(type, config) ? (
         <RangeValueInput
           name={name}
+          config={config}
           onChange={onChange}
-          config={config as RangeMetricConfig}
-          value={value as RangeMetricValue | undefined}
-          previousValue={previousValue as RangeMetricValue | undefined}
-        />
-      );
-
-    case 'choice':
-      return (
-        <ChoiceValueInput
-          name={name}
-          onChange={onChange}
-          config={config as ChoiceMetricConfig}
-          value={
-            value as
-              | SingleChoiceMetricValue
-              | MultiChoiceMetricValue
-              | undefined
+          value={narrowValue(type, value)}
+          previousValue={
+            previousValue && isRangeValue(previousValue)
+              ? previousValue
+              : undefined
           }
         />
-      );
+      ) : null;
+
+    case 'choice':
+      return isMetricConfigForType(type, config) ? (
+        <ChoiceValueInput
+          name={name}
+          config={config}
+          onChange={onChange}
+          value={narrowValue(type, value)}
+        />
+      ) : null;
 
     case 'boolean':
-      return (
+      return isMetricConfigForType(type, config) ? (
         <BooleanValueInput
           name={name}
+          config={config}
           onChange={onChange}
-          config={config as BooleanMetricConfig}
-          value={value as BooleanMetricValue | undefined}
+          value={narrowValue(type, value)}
         />
-      );
+      ) : null;
 
     case 'text':
-      return (
+      return isMetricConfigForType(type, config) ? (
         <TextValueInput
           name={name}
+          config={config}
           onChange={onChange}
-          config={config as TextMetricConfig}
-          value={value as TextMetricValue | undefined}
+          value={narrowValue(type, value)}
         />
-      );
+      ) : null;
 
     default:
       return null;

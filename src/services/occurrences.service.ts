@@ -10,7 +10,11 @@ import type {
   OccurrencesUpdate,
 } from '@models';
 import { StorageBuckets } from '@models';
-import { supabaseClient } from '@utils';
+import {
+  supabaseClient,
+  parseHabitMetric,
+  parseMetricValueHolder,
+} from '@utils';
 
 import { deleteFile } from './storage.service';
 
@@ -21,6 +25,41 @@ const OCCURRENCE_SELECT = `
   metric_values:occurrence_metric_values(id, value, created_at, updated_at, habit_metric_id),
   stock_usages:occurrence_stock_usages(id, habit_stock_id, quantity, created_at, updated_at)
 `;
+
+type RawOccurrenceRow = Omit<RawOccurrence, 'habit' | 'metricValues'> & {
+  habit: Omit<RawOccurrence['habit'], 'metricDefinitions'> & {
+    metricDefinitions: (Omit<
+      RawOccurrence['habit']['metricDefinitions'][number],
+      'config'
+    > & {
+      config: unknown;
+    })[];
+  };
+  metricValues: (Omit<RawOccurrence['metricValues'][number], 'value'> & {
+    value: unknown;
+  })[];
+};
+
+/**
+ * DB-read boundary for occurrences. Camel-cased rows carry each metric value's `value` and the
+ * habit's metric-definition `config` as `Json`; the metric-shape predicates validate and narrow
+ * them cast-free (throwing on malformed data; defended at write-time by the database's
+ * `habit_metrics_config_shape_check` constraint and the `validate_metric_value` trigger).
+ */
+const toRawOccurrence = ({
+  habit,
+  metricValues,
+  ...occurrence
+}: RawOccurrenceRow): RawOccurrence => {
+  return {
+    ...occurrence,
+    metricValues: metricValues.map(parseMetricValueHolder),
+    habit: {
+      ...habit,
+      metricDefinitions: habit.metricDefinitions.map(parseHabitMetric),
+    },
+  };
+};
 
 export const createOccurrence = async (
   occurrence: OccurrencesInsert
@@ -35,7 +74,7 @@ export const createOccurrence = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return toRawOccurrence(camelcaseKeys(data, { deep: true }));
 };
 
 export const listOccurrences = async ([rangeStart, rangeEnd]: [
@@ -53,7 +92,7 @@ export const listOccurrences = async ([rangeStart, rangeEnd]: [
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return camelcaseKeys(data, { deep: true }).map(toRawOccurrence);
 };
 
 export const patchOccurrence = async (
@@ -71,7 +110,7 @@ export const patchOccurrence = async (
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true });
+  return toRawOccurrence(camelcaseKeys(data, { deep: true }));
 };
 
 export const destroyOccurrence = async ({
@@ -113,7 +152,7 @@ export const getLatestHabitOccurrence = async (habitId: Habit['id']) => {
     return null;
   }
 
-  return camelcaseKeys(data[0], { deep: true });
+  return toRawOccurrence(camelcaseKeys(data[0], { deep: true }));
 };
 
 // TODO: Remove unused Supabase RPC and this function

@@ -4,12 +4,17 @@ import decamelizeKeys from 'decamelize-keys';
 import {
   type Habit,
   StorageBuckets,
+  type HabitMetric,
   type HabitsInsert,
   type HabitsUpdate,
   type HabitStockWithDefaults,
 } from '@models';
 import { uploadFile } from '@services';
-import { supabaseClient } from '@utils';
+import {
+  supabaseClient,
+  parseHabitMetric,
+  parseMetricValueHolder,
+} from '@utils';
 
 const HABIT_SELECT = `
   *,
@@ -22,18 +27,39 @@ const HABIT_SELECT = `
   )
 `;
 
-type RawHabit = Omit<Habit, 'stocks'> & {
-  stocks: (Omit<HabitStockWithDefaults, 'usageCount'> & {
+type RawHabit = Omit<Habit, 'metricDefinitions' | 'stocks'> & {
+  metricDefinitions: (Omit<HabitMetric, 'config' | 'habitId' | 'userId'> & {
+    config: unknown;
+  })[];
+  stocks: (Omit<HabitStockWithDefaults, 'metricDefaults' | 'usageCount'> & {
     usages: { count: number }[];
+    metricDefaults: (Omit<
+      HabitStockWithDefaults['metricDefaults'][number],
+      'value'
+    > & {
+      value: unknown;
+    })[];
   })[];
 };
 
-const transformHabit = ({ stocks, ...habit }: RawHabit): Habit => {
+/**
+ * DB-read boundary for habits. Camel-cased rows carry metric `config` and stock-default `value` as
+ * `Json`; the metric-shape predicates validate and narrow them cast-free (throwing on malformed
+ * data; defended at write-time by the database's `habit_metrics_config_shape_check` constraint and the
+ * `validate_metric_value` trigger).
+ */
+const transformHabit = ({
+  metricDefinitions,
+  stocks,
+  ...habit
+}: RawHabit): Habit => {
   return {
     ...habit,
-    stocks: stocks.map(({ usages, ...stock }) => {
+    metricDefinitions: metricDefinitions.map(parseHabitMetric),
+    stocks: stocks.map(({ metricDefaults, usages, ...stock }) => {
       return {
         ...stock,
+        metricDefaults: metricDefaults.map(parseMetricValueHolder),
         usageCount: usages?.[0]?.count ?? 0,
       };
     }),
@@ -64,9 +90,7 @@ export const listHabits = async (): Promise<Habit[]> => {
     throw new Error(error.message);
   }
 
-  return camelcaseKeys(data, { deep: true }).map((habit) => {
-    return transformHabit(habit);
-  });
+  return camelcaseKeys(data, { deep: true }).map(transformHabit);
 };
 
 export const patchHabit = async (

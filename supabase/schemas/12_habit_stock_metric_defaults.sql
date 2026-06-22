@@ -57,6 +57,10 @@ CREATE INDEX "idx_habit_stock_metric_defaults_habit_metric_id" ON "public"."habi
 CREATE OR REPLACE TRIGGER "set_updated_at" BEFORE UPDATE ON "public"."habit_stock_metric_defaults"
 FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
+-- Validate value shape against the metric type
+CREATE OR REPLACE TRIGGER "validate_metric_value" BEFORE INSERT OR UPDATE ON "public"."habit_stock_metric_defaults"
+FOR EACH ROW EXECUTE FUNCTION "public"."validate_metric_value"();
+
 -- Row level security policies
 ALTER TABLE "public"."habit_stock_metric_defaults" ENABLE ROW LEVEL SECURITY;
 
