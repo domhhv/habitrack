@@ -1,7 +1,6 @@
 import type { Selection, TimeValue } from '@heroui/react';
 import {
   Form,
-  Link,
   Label,
   Header,
   Switch,
@@ -1018,16 +1017,15 @@ const OccurrenceFormView = ({
             {occurrenceToEdit ? 'Update' : 'Add'}
           </CustomButton>
         ) : (
-          <Link href="/habits" className="w-full">
-            <CustomButton
-              fullWidth
-              variant="primary"
-              onPress={handleClose}
-              isDisabled={isSubmitButtonDisabled}
-            >
-              Go to Habits
-            </CustomButton>
-          </Link>
+          <CustomButton
+            href="/habits"
+            variant="primary"
+            className="w-full"
+            onPress={handleClose}
+            isDisabled={isSubmitButtonDisabled}
+          >
+            Go to Habits
+          </CustomButton>
         )}
       </div>
     </Form>
