@@ -124,6 +124,8 @@ const HabitsTable = () => {
 
   const totalPages = Math.ceil(habitsList.length / ROWS_PER_PAGE);
 
+  console.log({ totalPages });
+
   const pages = Array.from({ length: totalPages }, (_, i) => {
     return i + 1;
   });
@@ -145,15 +147,13 @@ const HabitsTable = () => {
             Your habits
           </h1>
 
-          <AddHabitDialogButton />
+          {!!habits.length && <AddHabitDialogButton />}
         </div>
 
-        {habitsList.length ? (
+        {!!habitsList.length && (
           <p className="text- text-sm">
             You&apos;re tracking {pluralize('habit', habitsList.length, true)}
           </p>
-        ) : (
-          <p>Add a habit to start tracking</p>
         )}
       </div>
 
@@ -183,9 +183,15 @@ const HabitsTable = () => {
               aria-label="Habits data"
               renderEmptyState={() => {
                 return (
-                  <EmptyState className="flex h-full w-full flex-col items-center justify-center gap-4 pt-12 text-center">
-                    <ArrowsClockwiseIcon className="text-muted size-6" />
-                    <span className="text-muted text-sm">No habits yet</span>
+                  <EmptyState className="flex h-full w-full flex-col items-center justify-center gap-4 py-8 text-center">
+                    <div className="flex items-center gap-2">
+                      <ArrowsClockwiseIcon className="text-muted size-4" />
+                      <span className="text-muted text-xs">No habits yet</span>
+                    </div>
+                    <p className="text-foreground text-sm">
+                      Add your first habit to get started!
+                    </p>
+                    <AddHabitDialogButton />
                   </EmptyState>
                 );
               }}
@@ -283,56 +289,58 @@ const HabitsTable = () => {
             </Table.Body>
           </Table.Content>
         </Table.ScrollContainer>
-        <Table.Footer>
-          <Pagination size="sm">
-            <Pagination.Summary>
-              {start} to {end} of {habitsList.length} results
-            </Pagination.Summary>
-            <Pagination.Content>
-              <Pagination.Item>
-                <Pagination.Previous
-                  isDisabled={page === 1}
-                  onPress={() => {
-                    return setPage((p) => {
-                      return Math.max(1, p - 1);
-                    });
-                  }}
-                >
-                  <Pagination.PreviousIcon />
-                  Prev
-                </Pagination.Previous>
-              </Pagination.Item>
-              {pages.map((p) => {
-                return (
-                  <Pagination.Item key={p}>
-                    <Pagination.Link
-                      isActive={p === page}
-                      className={cn(p === page && 'bg-accent text-white')}
-                      onPress={() => {
-                        return setPage(p);
-                      }}
-                    >
-                      {p}
-                    </Pagination.Link>
-                  </Pagination.Item>
-                );
-              })}
-              <Pagination.Item>
-                <Pagination.Next
-                  isDisabled={page === totalPages}
-                  onPress={() => {
-                    return setPage((p) => {
-                      return Math.min(totalPages, p + 1);
-                    });
-                  }}
-                >
-                  Next
-                  <Pagination.NextIcon />
-                </Pagination.Next>
-              </Pagination.Item>
-            </Pagination.Content>
-          </Pagination>
-        </Table.Footer>
+        {!!totalPages && (
+          <Table.Footer>
+            <Pagination size="sm">
+              <Pagination.Summary>
+                {start} to {end} of {habitsList.length} results
+              </Pagination.Summary>
+              <Pagination.Content>
+                <Pagination.Item>
+                  <Pagination.Previous
+                    isDisabled={page === 1}
+                    onPress={() => {
+                      return setPage((p) => {
+                        return Math.max(1, p - 1);
+                      });
+                    }}
+                  >
+                    <Pagination.PreviousIcon />
+                    Prev
+                  </Pagination.Previous>
+                </Pagination.Item>
+                {pages.map((p) => {
+                  return (
+                    <Pagination.Item key={p}>
+                      <Pagination.Link
+                        isActive={p === page}
+                        className={cn(p === page && 'bg-accent text-white')}
+                        onPress={() => {
+                          return setPage(p);
+                        }}
+                      >
+                        {p}
+                      </Pagination.Link>
+                    </Pagination.Item>
+                  );
+                })}
+                <Pagination.Item>
+                  <Pagination.Next
+                    isDisabled={page === totalPages}
+                    onPress={() => {
+                      return setPage((p) => {
+                        return Math.min(totalPages, p + 1);
+                      });
+                    }}
+                  >
+                    Next
+                    <Pagination.NextIcon />
+                  </Pagination.Next>
+                </Pagination.Item>
+              </Pagination.Content>
+            </Pagination>
+          </Table.Footer>
+        )}
       </Table>
     </div>
   );

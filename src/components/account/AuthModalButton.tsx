@@ -154,13 +154,14 @@ const AuthModalButton = () => {
         </ButtonGroup>
       ) : (
         <CustomButton
+          size="sm"
           variant="primary"
           data-testid="auth-button"
           onPress={overlayState.open}
         >
           Log In
           <CustomKbd
-            size="md"
+            size="sm"
             variant="default"
             shortcutParams={[
               'i',
