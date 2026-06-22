@@ -1,6 +1,6 @@
-import { cn, Table, Tooltip, Pagination } from '@heroui/react';
+import { cn, Table, Tooltip, Pagination, EmptyState } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
-import { TrashSimpleIcon } from '@phosphor-icons/react';
+import { TrashSimpleIcon, ArrowsClockwiseIcon } from '@phosphor-icons/react';
 import { useRollbar } from '@rollbar/react';
 import pluralize from 'pluralize';
 import React from 'react';
@@ -178,7 +178,18 @@ const HabitsTable = () => {
                 );
               }}
             </Table.Header>
-            <Table.Body items={paginatedHabits} aria-label="Habits data">
+            <Table.Body
+              items={paginatedHabits}
+              aria-label="Habits data"
+              renderEmptyState={() => {
+                return (
+                  <EmptyState className="flex h-full w-full flex-col items-center justify-center gap-4 pt-12 text-center">
+                    <ArrowsClockwiseIcon className="text-muted size-6" />
+                    <span className="text-muted text-sm">No habits yet</span>
+                  </EmptyState>
+                );
+              }}
+            >
               {paginatedHabits.map((habit) => {
                 const habitStats = habitsStats[habit.id] || {};
 

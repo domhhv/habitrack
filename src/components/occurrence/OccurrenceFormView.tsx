@@ -35,7 +35,7 @@ import {
   SignedImageViewer,
   MetricValuesSection,
 } from '@components';
-import { useTextField, useScreenWidth } from '@hooks';
+import { useTextField } from '@hooks';
 import type { Habit, Occurrence, MetricValue } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl, getLatestHabitOccurrence } from '@services';
@@ -93,7 +93,6 @@ const OccurrenceFormView = ({
   const [previousMetricValues, setPreviousMetricValues] = React.useState<
     Record<string, MetricValue | undefined>
   >({});
-  const { isDesktop, isMobile: _isMobile } = useScreenWidth();
   const [metricValues, setMetricValues] = React.useState<
     Record<string, MetricValue | undefined>
   >({});
@@ -737,7 +736,7 @@ const OccurrenceFormView = ({
   };
 
   return (
-    <Form className="space-y-3">
+    <Form className="space-y-3 pb-10">
       {occurrenceToEdit ? (
         <OccurrenceChip
           isHabitNameShown
@@ -836,7 +835,6 @@ const OccurrenceFormView = ({
                     <Checkbox
                       variant="secondary"
                       isSelected={isSelected}
-                      className="flex-row items-center gap-2"
                       onChange={(nextSelected: boolean) => {
                         return handleStockSelectionChange(
                           stock.id,
@@ -845,13 +843,11 @@ const OccurrenceFormView = ({
                         );
                       }}
                     >
-                      <Checkbox.Control>
-                        <Checkbox.Indicator />
-                      </Checkbox.Control>
                       <Checkbox.Content>
-                        <Label className="max-w-40 text-sm text-wrap">
-                          {stock.name}
-                        </Label>
+                        <Checkbox.Control>
+                          <Checkbox.Indicator />
+                        </Checkbox.Control>
+                        <Label className="text-sm">{stock.name}</Label>
                       </Checkbox.Content>
                     </Checkbox>
                     {isQuantifiable && (
@@ -965,23 +961,18 @@ const OccurrenceFormView = ({
       />
       <TextField value={note} variant="secondary" onChange={handleNoteChange}>
         <Label>Note</Label>
-        <TextArea
-          fullWidth
-          placeholder="Note"
-          className={!isDesktop ? 'text-base' : undefined}
-        />
+        <TextArea fullWidth placeholder="Note" className="max-lg:text-base" />
       </TextField>
       <div className="w-full space-y-2">
         <Switch
-          // size="sm"
           className="basis-full"
           isSelected={hasSpecificTime}
           onChange={setHasSpecificTime}
         >
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
           <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
             <Label>Specify time</Label>
           </Switch.Content>
         </Switch>
@@ -1015,28 +1006,30 @@ const OccurrenceFormView = ({
           paths={occurrenceToEdit?.photoPaths || null}
         />
       )}
-      {hasHabits ? (
-        <CustomButton
-          fullWidth
-          variant="primary"
-          isPending={isSaving}
-          onPress={handleSubmit}
-          isDisabled={isSubmitButtonDisabled}
-        >
-          {occurrenceToEdit ? 'Update' : 'Add'}
-        </CustomButton>
-      ) : (
-        <Link href="/habits" className="w-full">
+      <div className="bg-background fixed right-0 bottom-0 flex w-full items-center justify-between gap-2 p-4">
+        {hasHabits ? (
           <CustomButton
             fullWidth
             variant="primary"
-            onPress={handleClose}
+            isPending={isSaving}
+            onPress={handleSubmit}
             isDisabled={isSubmitButtonDisabled}
           >
-            Go to Habits
+            {occurrenceToEdit ? 'Update' : 'Add'}
           </CustomButton>
-        </Link>
-      )}
+        ) : (
+          <Link href="/habits" className="w-full">
+            <CustomButton
+              fullWidth
+              variant="primary"
+              onPress={handleClose}
+              isDisabled={isSubmitButtonDisabled}
+            >
+              Go to Habits
+            </CustomButton>
+          </Link>
+        )}
+      </div>
     </Form>
   );
 };

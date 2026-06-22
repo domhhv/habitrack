@@ -87,7 +87,7 @@ const NumberValueInput = ({
       <Label className="text-sm">{label}</Label>
       <NumberField.Group>
         <NumberField.DecrementButton />
-        <NumberField.Input />
+        <NumberField.Input className="max-lg:text-base" />
         <NumberField.IncrementButton />
       </NumberField.Group>
     </NumberField>
@@ -170,7 +170,7 @@ const DurationValueInput = ({
         <Label className="text-sm">{`${name} (min)`}</Label>
         <NumberField.Group>
           <NumberField.DecrementButton />
-          <NumberField.Input />
+          <NumberField.Input className="max-lg:text-base" />
           <NumberField.IncrementButton />
         </NumberField.Group>
       </NumberField>
@@ -196,7 +196,7 @@ const DurationValueInput = ({
         <Label className="text-sm">{`${name} (sec)`}</Label>
         <NumberField.Group>
           <NumberField.DecrementButton />
-          <NumberField.Input />
+          <NumberField.Input className="max-lg:text-base" />
           <NumberField.IncrementButton />
         </NumberField.Group>
       </NumberField>
@@ -216,7 +216,7 @@ const DurationValueInput = ({
         <Label className="text-sm">Hours</Label>
         <NumberField.Group>
           <NumberField.DecrementButton />
-          <NumberField.Input />
+          <NumberField.Input className="max-lg:text-base" />
           <NumberField.IncrementButton />
         </NumberField.Group>
       </NumberField>
@@ -232,7 +232,7 @@ const DurationValueInput = ({
         <Label className="text-sm">Min</Label>
         <NumberField.Group>
           <NumberField.DecrementButton />
-          <NumberField.Input />
+          <NumberField.Input className="max-lg:text-base" />
           <NumberField.IncrementButton />
         </NumberField.Group>
       </NumberField>
@@ -249,7 +249,7 @@ const DurationValueInput = ({
           <Label className="text-sm">Sec</Label>
           <NumberField.Group>
             <NumberField.DecrementButton />
-            <NumberField.Input />
+            <NumberField.Input className="max-lg:text-base" />
             <NumberField.IncrementButton />
           </NumberField.Group>
         </NumberField>
@@ -386,7 +386,7 @@ const RangeValueInput = ({
           {config.unit && <Label className="text-sm">{config.unit} from</Label>}
           <NumberField.Group>
             <NumberField.DecrementButton />
-            <NumberField.Input />
+            <NumberField.Input className="max-lg:text-base" />
             <NumberField.IncrementButton />
           </NumberField.Group>
         </NumberField>
@@ -406,7 +406,7 @@ const RangeValueInput = ({
           {config.unit && <Label className="text-sm">{config.unit} to</Label>}
           <NumberField.Group>
             <NumberField.DecrementButton />
-            <NumberField.Input />
+            <NumberField.Input className="max-lg:text-base" />
             <NumberField.IncrementButton />
           </NumberField.Group>
         </NumberField>
@@ -530,8 +530,9 @@ const TextValueInput = ({
           onChange({ textValue });
         }}
       >
-        <Label className="text-sm">{name}</Label>
+        <Label>{name}</Label>
         <TextArea
+          className="max-lg:text-base"
           maxLength={config.maxLength}
           placeholder={config.placeholder || ''}
         />
@@ -549,6 +550,7 @@ const TextValueInput = ({
     >
       <Label className="text-sm">{name}</Label>
       <Input
+        className="max-lg:text-base"
         maxLength={config.maxLength}
         placeholder={config.placeholder || ''}
       />
