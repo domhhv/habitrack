@@ -33,14 +33,14 @@ Schema: [`supabase/schemas/12_habit_stock_metric_defaults.sql`](../supabase/sche
 
 Stores predefined metric values per stock. When a stock is selected during occurrence logging, these defaults auto-populate the metric value inputs.
 
-| Column            | Type    | Notes                                                                 |
-| ----------------- | ------- | --------------------------------------------------------------------- |
-| `id`              | UUID    | PK                                                                    |
-| `user_id`         | UUID    | FK `auth.users`                                                       |
-| `habit_stock_id`  | UUID    | FK `habit_stocks` (CASCADE DELETE)                                    |
-| `habit_metric_id` | UUID    | FK `habit_metrics` (CASCADE DELETE)                                   |
-| `value`           | JSONB   | The default metric value (same shape as occurrence metric values)     |
-| `should_compound` | BOOLEAN | Default `false`. When true, numeric values sum across selected stocks |
+| Column            | Type    | Notes                                                                                                                                                                                                                                |
+| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`              | UUID    | PK                                                                                                                                                                                                                                   |
+| `user_id`         | UUID    | FK `auth.users`                                                                                                                                                                                                                      |
+| `habit_stock_id`  | UUID    | FK `habit_stocks` (CASCADE DELETE)                                                                                                                                                                                                   |
+| `habit_metric_id` | UUID    | FK `habit_metrics` (CASCADE DELETE)                                                                                                                                                                                                  |
+| `value`           | JSONB   | The default metric value (same shape as occurrence metric values). Validated against the metric's `type` by the shared `validate_metric_value` BEFORE INSERT/UPDATE trigger (see [METRICS.md › Validation](./METRICS.md#validation)) |
+| `should_compound` | BOOLEAN | Default `false`. When true, numeric values sum across selected stocks                                                                                                                                                                |
 
 **Unique constraint**: `(habit_stock_id, habit_metric_id)` - one default per metric per stock.
 
@@ -98,15 +98,15 @@ The distinction is determined by whether `total_items` is set:
 
 File: [`src/models/stock.model.ts`](../src/models/stock.model.ts)
 
-| Type                            | Purpose                                                                |
-| ------------------------------- | ---------------------------------------------------------------------- |
-| `HabitStock`                    | CamelCased row from `habit_stocks`                                     |
-| `HabitStockInsert`              | Insert type                                                            |
-| `HabitStockUpdate`              | Update type                                                            |
-| `HabitStockMetricDefault`       | CamelCased row from `habit_stock_metric_defaults`                      |
-| `HabitStockMetricDefaultInsert` | Insert type                                                            |
-| `HabitStockWithDefaults`        | `HabitStock` extended with `metricDefaults[]` and `usageCount: number` |
-| `StockFormValues`               | Client-side form state for stock creation/editing                      |
+| Type                            | Purpose                                                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `HabitStock`                    | CamelCased row from `habit_stocks`                                                                  |
+| `HabitStockInsert`              | Insert type                                                                                         |
+| `HabitStockUpdate`              | Update type                                                                                         |
+| `HabitStockMetricDefault`       | CamelCased row from `habit_stock_metric_defaults`, with `value` typed as `MetricValue` (not `Json`) |
+| `HabitStockMetricDefaultInsert` | Insert type, `value: MetricValue`                                                                   |
+| `HabitStockWithDefaults`        | `HabitStock` extended with `metricDefaults[]` and `usageCount: number`                              |
+| `StockFormValues`               | Client-side form state for stock creation/editing                                                   |
 
 ### Stock usage types
 

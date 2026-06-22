@@ -276,9 +276,13 @@ BEGIN
         WHEN 'choice' THEN
             IF NOT (
                 ("new"."value" ? 'selectedOption' AND jsonb_typeof("new"."value" -> 'selectedOption') = 'string')
-                OR ("new"."value" ? 'selectedOptions' AND jsonb_typeof("new"."value" -> 'selectedOptions') = 'array')
+                OR (
+                    "new"."value" ? 'selectedOptions'
+                    AND jsonb_typeof("new"."value" -> 'selectedOptions') = 'array'
+                    AND NOT jsonb_path_exists("new"."value", '$.selectedOptions[*] ? (@.type() != "string")')
+                )
             ) THEN
-                RAISE EXCEPTION 'choice metric value requires "selectedOption" or "selectedOptions"';
+                RAISE EXCEPTION 'choice metric value requires "selectedOption" or string-array "selectedOptions"';
             END IF;
         WHEN 'boolean' THEN
             IF NOT ("new"."value" ? 'booleanValue' AND jsonb_typeof("new"."value" -> 'booleanValue') = 'boolean') THEN

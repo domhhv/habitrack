@@ -35,7 +35,9 @@ ADD CONSTRAINT "habit_metrics_config_shape_check" CHECK (
             AND jsonb_typeof(config -> 'step') = 'number'
         )
         WHEN 'choice' THEN (
-            config ? 'options' AND jsonb_typeof(config -> 'options') = 'array'
+            config ? 'options'
+            AND jsonb_typeof(config -> 'options') = 'array'
+            AND NOT jsonb_path_exists(config, '$.options[*] ? (@.type() != "string")')
         )
         WHEN 'percentage' THEN (config = '{}'::jsonb)
         ELSE TRUE
