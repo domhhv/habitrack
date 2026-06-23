@@ -17,6 +17,7 @@ import { CustomButton } from '@components';
 import { useFirstDayOfWeek } from '@hooks';
 import type { NotePeriodKind } from '@models';
 import {
+  useUser,
   useDayNotes,
   useWeekNotes,
   useMonthNotes,
@@ -57,6 +58,7 @@ const CalendarSidebar = ({
   const occurrences = useFlatOccurrences();
   const [focusedCalendarMonth, setFocusedCalendarMonth] =
     React.useState(focusedDate);
+  const user = useUser();
 
   React.useEffect(() => {
     setFocusedCalendarMonth(focusedDate);
@@ -64,6 +66,14 @@ const CalendarSidebar = ({
 
   const viewPaths = React.useMemo(() => {
     const todayDate = today(timeZone);
+    const visibleMonthStart = startOfMonth(focusedDate);
+    const visibleWeekStart = startOfWeek(focusedDate, locale, firstDayOfWeek);
+    const currentWeekStart = startOfWeek(todayDate, locale, firstDayOfWeek);
+    const isVisibleMonthCurrent =
+      focusedDate.year === todayDate.year &&
+      focusedDate.month === todayDate.month;
+    const isVisibleWeekCurrent =
+      visibleWeekStart.compare(currentWeekStart) === 0;
 
     const weekAnchor = (date: CalendarDate) => {
       return startOfWeek(date, locale, firstDayOfWeek).add({
@@ -71,11 +81,22 @@ const CalendarSidebar = ({
       });
     };
 
-    const weekDate = kind === 'month' ? todayDate : focusedDate;
+    const weekDate =
+      kind === 'month' && !isVisibleMonthCurrent
+        ? visibleMonthStart
+        : kind === 'month'
+          ? todayDate
+          : focusedDate;
     const anchor = weekAnchor(weekDate);
+    const dayDate =
+      kind === 'month' && !isVisibleMonthCurrent
+        ? visibleMonthStart
+        : kind === 'week' && !isVisibleWeekCurrent
+          ? visibleWeekStart
+          : todayDate;
 
     return {
-      day: `/calendar/day/${todayDate.year}/${todayDate.month}/${todayDate.day}`,
+      day: `/calendar/day/${dayDate.year}/${dayDate.month}/${dayDate.day}`,
       month: `/calendar/month/${focusedDate.year}/${focusedDate.month}/1`,
       week: `/calendar/week/${anchor.year}/${anchor.month}/${anchor.day}`,
     };
@@ -162,7 +183,7 @@ const CalendarSidebar = ({
               key={view.id}
               className="flex-1"
               href={viewPaths[view.id]}
-              aria-label={`Switch to ${kind} view`}
+              aria-label={`Switch to ${view.label} view`}
               variant={kind === view.id ? 'primary' : 'tertiary'}
             >
               {index > 0 && <ButtonGroup.Separator />}
@@ -200,15 +221,19 @@ const CalendarSidebar = ({
           </Calendar.Grid>
         </Calendar>
       )}
-      <CalendarFilters />
-      <CalendarPeriodSummary
-        kind={kind}
-        note={note}
-        startDate={startDate}
-        metricTotals={metricTotals}
-        className={summaryClassName}
-        occurrenceSummary={occurrenceSummary}
-      />
+      {user && (
+        <>
+          <CalendarFilters />
+          <CalendarPeriodSummary
+            kind={kind}
+            note={note}
+            startDate={startDate}
+            metricTotals={metricTotals}
+            className={summaryClassName}
+            occurrenceSummary={occurrenceSummary}
+          />
+        </>
+      )}
     </aside>
   );
 };

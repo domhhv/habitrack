@@ -156,7 +156,7 @@ const DayCalendar = () => {
           kind="day"
           summaryClassName="pt-2"
           focusedDate={focusedDate}
-          className="sticky top-0 z-20 flex gap-2 bg-inherit py-2 lg:hidden"
+          className="sticky top-0 z-20 flex gap-2 bg-inherit py-2 max-lg:py-0 lg:hidden"
         />
         <SwipeableContainer
           direction={swipeDirection}
@@ -286,7 +286,7 @@ const DayCalendar = () => {
       <CalendarSidebar
         kind="day"
         focusedDate={focusedDate}
-        className="hidden gap-4 py-4 pl-1 lg:flex lg:w-84"
+        className="hidden gap-2 py-4 lg:flex lg:w-84"
       />
     </div>
   );

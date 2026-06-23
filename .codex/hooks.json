@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".codex/hooks/doc-reminder.sh'",
+            "command": ".codex/hooks/doc-reminder.sh",
             "timeout": 10
           }
         ]

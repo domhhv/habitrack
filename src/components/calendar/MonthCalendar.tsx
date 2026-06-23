@@ -89,7 +89,7 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
       <CalendarSidebar
         kind="month"
         focusedDate={state.focusedDate}
-        className="flex gap-4 pt-4 pb-2 lg:w-84 lg:py-8"
+        className="flex gap-2 pt-4 pb-2 lg:w-84 lg:py-8"
       />
       <MonthCalendarGrid state={state} />
     </div>

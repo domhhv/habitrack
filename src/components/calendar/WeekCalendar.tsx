@@ -160,7 +160,7 @@ const WeekCalendar = () => {
   );
 
   return (
-    <div className="flex w-full flex-1 flex-col gap-0 md:gap-6 lg:flex-row-reverse">
+    <div className="flex w-full flex-1 flex-col gap-0 pt-4 md:gap-6 lg:flex-row-reverse">
       <CalendarSidebar
         kind="week"
         focusedDate={state.focusedDate}
@@ -174,7 +174,7 @@ const WeekCalendar = () => {
           kind="week"
           summaryClassName="pt-2"
           focusedDate={state.focusedDate}
-          className="sticky left-0 z-20 flex gap-2 py-4 max-lg:px-8 max-lg:py-4 lg:hidden"
+          className="sticky left-0 z-20 flex gap-2 py-4 max-lg:px-8 max-lg:py-0 lg:hidden"
         />
         <div
           {...gridProps}
