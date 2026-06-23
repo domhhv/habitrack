@@ -1005,7 +1005,7 @@ const OccurrenceFormView = ({
           paths={occurrenceToEdit?.photoPaths || null}
         />
       )}
-      <div className="bg-background fixed right-0 bottom-0 flex w-full items-center justify-between gap-2 p-4">
+      <div className="bg-background dark:bg-surface-tertiary fixed right-0 bottom-0 flex w-full items-center justify-between gap-2 p-4">
         {hasHabits ? (
           <CustomButton
             fullWidth

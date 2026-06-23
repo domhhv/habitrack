@@ -1,4 +1,4 @@
-import { cn, Tooltip, Accordion, ScrollShadow } from '@heroui/react';
+import { cn, Tooltip, ScrollShadow } from '@heroui/react';
 import {
   today,
   isToday,
@@ -13,20 +13,13 @@ import {
 import {
   NoteIcon,
   NoteBlankIcon,
-  ArrowsOutIcon,
-  CaretDownIcon,
   CalendarBlankIcon,
   ArrowSquareRightIcon,
 } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
-import {
-  useLocale,
-  useCalendar,
-  useCalendarGrid,
-  useDateFormatter,
-} from 'react-aria';
+import { useLocale, useCalendar, useCalendarGrid } from 'react-aria';
 import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
@@ -34,28 +27,19 @@ import { CustomButton, OccurrenceChip } from '@components';
 import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
   useDayNotes,
-  useWeekNotes,
   useFlatOccurrences,
   useNoteDrawerActions,
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
 } from '@stores';
-import {
-  buildMetricTotals,
-  isDstTransitionDay,
-  findDstTransitionHour,
-  buildOccurrenceSummary,
-} from '@utils';
+import { isDstTransitionDay, findDstTransitionHour } from '@utils';
 
-import CalendarFilters from './CalendarFilters';
-import CalendarNavigation from './CalendarNavigation';
-import CalendarPeriodSummary from './CalendarPeriodSummary';
+import CalendarSidebar from './CalendarSidebar';
 
 const WeekCalendar = () => {
   const now = useCurrentTime();
   const changeCalendarRange = useCalendarRangeChange();
   const dayNotes = useDayNotes();
-  const weekNotes = useWeekNotes();
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
   const { isDesktop, screenWidth } = useScreenWidth();
@@ -82,16 +66,6 @@ const WeekCalendar = () => {
       return weekStart.add({ days: i });
     });
   }, [weekStart]);
-
-  const weekNote = React.useMemo(() => {
-    if (!weekStart) {
-      return;
-    }
-
-    return weekNotes.find((note) => {
-      return note.periodDate === weekStart.toString();
-    });
-  }, [weekNotes, weekStart]);
 
   const { gridProps, weekDays } = useCalendarGrid(
     {
@@ -185,123 +159,23 @@ const WeekCalendar = () => {
     [occurrences]
   );
 
-  const occurrenceSummary = React.useMemo(() => {
-    const weekStart = startOfWeek(state.focusedDate, locale, firstDayOfWeek);
-    const weekEnd = endOfWeek(state.focusedDate, locale, firstDayOfWeek);
-
-    const weekOccurrences = occurrences.filter((occurrence) => {
-      const date = toCalendarDate(occurrence.occurredAt);
-
-      return date.compare(weekStart) >= 0 && date.compare(weekEnd) <= 0;
-    });
-
-    return buildOccurrenceSummary(weekOccurrences);
-  }, [occurrences, state.focusedDate, locale, firstDayOfWeek]);
-
-  const metricTotals = React.useMemo(() => {
-    return buildMetricTotals(occurrenceSummary);
-  }, [occurrenceSummary]);
-
-  const timeZone = getLocalTimeZone();
-  const monthFormatter = useDateFormatter({ month: 'long' });
-  const dayFormatter = useDateFormatter({ day: 'numeric', month: 'short' });
-
-  const monthInfo = React.useMemo(() => {
-    const weekStart = startOfWeek(state.focusedDate, locale, firstDayOfWeek);
-    const thursday = weekStart.add({
-      days: firstDayOfWeek === 'sun' ? 4 : 3,
-    });
-
-    const monthStart = new CalendarDate(thursday.year, thursday.month, 1);
-    const lastDay = new Date(thursday.year, thursday.month, 0).getDate();
-    const monthEnd = new CalendarDate(thursday.year, thursday.month, lastDay);
-
-    const monthName = monthFormatter.format(thursday.toDate(timeZone));
-    const rangeStart = dayFormatter.format(monthStart.toDate(timeZone));
-    const rangeEnd = dayFormatter.format(monthEnd.toDate(timeZone));
-
-    return {
-      label: `${capitalize(monthName)} (${rangeStart} - ${rangeEnd})`,
-      path: `/calendar/month/${thursday.year}/${thursday.month}/1`,
-    };
-  }, [
-    state.focusedDate,
-    locale,
-    firstDayOfWeek,
-    timeZone,
-    monthFormatter,
-    dayFormatter,
-  ]);
-
-  const calendarControls = (
-    <>
-      <Tooltip closeDelay={0}>
-        <Tooltip.Trigger>
-          <CustomButton
-            variant="tertiary"
-            href={monthInfo.path}
-            size={isDesktop ? 'md' : 'sm'}
-            aria-label={`Go to month view: ${monthInfo.label}`}
-          >
-            <ArrowsOutIcon weight="bold" />
-            <span>{monthInfo.label}</span>
-          </CustomButton>
-        </Tooltip.Trigger>
-        <Tooltip.Content>
-          Go to the month view of {monthInfo.label}
-        </Tooltip.Content>
-      </Tooltip>
-      <div className="flex flex-col items-center justify-center gap-2">
-        <CalendarNavigation focusedDate={state.focusedDate} />
-      </div>
-      <div className="w-10/12 md:w-auto">
-        <CalendarFilters />
-      </div>
-    </>
-  );
-
   return (
     <div className="flex w-full flex-1 flex-col gap-0 md:gap-6 lg:flex-row-reverse">
-      <aside className="flex shrink-0 flex-col gap-2 overflow-y-auto pt-4 pb-2 max-lg:hidden max-lg:px-8 lg:w-86">
-        {calendarControls}
-        <CalendarPeriodSummary
-          kind="week"
-          note={weekNote}
-          startDate={weekStart}
-          className="max-lg:pb-2"
-          metricTotals={metricTotals}
-          occurrenceSummary={occurrenceSummary}
-        />
-      </aside>
+      <CalendarSidebar
+        kind="week"
+        focusedDate={state.focusedDate}
+        className="hidden gap-2 pt-4 pb-2 lg:flex lg:w-84"
+      />
       <ScrollShadow
         orientation="horizontal"
         className="relative w-full overflow-y-scroll"
       >
-        <div className="sticky left-0 flex flex-col items-start justify-center gap-2 px-8 pt-2 lg:hidden lg:items-center">
-          <Accordion>
-            <Accordion.Item key="summary">
-              <Accordion.Heading>
-                <Accordion.Trigger className="bg-background-secondary flex w-full items-center gap-2 rounded-3xl py-2">
-                  Summary
-                  <Accordion.Indicator>
-                    <CaretDownIcon />
-                  </Accordion.Indicator>
-                </Accordion.Trigger>
-              </Accordion.Heading>
-              <Accordion.Panel>
-                <CalendarPeriodSummary
-                  kind="week"
-                  note={weekNote}
-                  className="pt-2"
-                  startDate={weekStart}
-                  metricTotals={metricTotals}
-                  occurrenceSummary={occurrenceSummary}
-                />
-              </Accordion.Panel>
-            </Accordion.Item>
-          </Accordion>
-          {calendarControls}
-        </div>
+        <CalendarSidebar
+          kind="week"
+          summaryClassName="pt-2"
+          focusedDate={state.focusedDate}
+          className="sticky left-0 z-20 flex gap-2 py-4 max-lg:px-8 max-lg:py-4 lg:hidden"
+        />
         <div
           {...gridProps}
           className="flex min-w-lg justify-around py-4 max-lg:px-8 xl:pr-2"
@@ -423,7 +297,7 @@ const WeekCalendar = () => {
                         className="group/minutes-cell relative flex gap-4"
                       >
                         {dayIndex === 0 && (
-                          <p className="text-foreground absolute -top-3.25 -left-5.75 w-3 basis-0 translate-0 self-start text-right md:static md:-translate-y-3 md:pl-2 md:text-base">
+                          <p className="text-foreground absolute -top-3.25 -left-6 w-3 basis-0 translate-0 self-start text-right md:static md:-translate-y-3 md:text-base">
                             {hour !== 0 && hour}
                           </p>
                         )}

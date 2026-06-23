@@ -89,7 +89,7 @@ const Header = () => {
 
   return (
     <nav className="bg-background border-border sticky top-0 z-50 h-16 w-full border-b">
-      <header className="flex h-full w-full items-center justify-between px-8 lg:px-16">
+      <header className="flex h-full w-full items-center justify-between px-8 lg:px-8">
         <div className="flex items-center gap-2">
           <Dropdown>
             <CustomButton
