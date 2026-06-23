@@ -1,9 +1,7 @@
-import { cn, Tooltip, Calendar, ScrollShadow } from '@heroui/react';
+import { cn, Tooltip, ScrollShadow } from '@heroui/react';
 import {
   today,
   isToday,
-  endOfWeek,
-  startOfWeek,
   CalendarDate,
   toCalendarDate,
   getLocalTimeZone,
@@ -12,16 +10,16 @@ import {
 import {
   NoteIcon,
   NoteBlankIcon,
-  ArrowsOutIcon,
   CalendarBlankIcon,
 } from '@phosphor-icons/react';
+import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
 import React from 'react';
-import { useLocale, useDateFormatter } from 'react-aria';
+import { useDateFormatter } from 'react-aria';
 import { useParams, useNavigate } from 'react-router';
 
 import { CustomButton, OccurrenceChip, SwipeableContainer } from '@components';
-import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
+import { useCurrentTime, useScreenWidth } from '@hooks';
 import {
   useDayNotes,
   useFlatOccurrences,
@@ -29,16 +27,9 @@ import {
   useCalendarRangeChange,
   useOccurrenceDrawerActions,
 } from '@stores';
-import {
-  getISOWeek,
-  buildMetricTotals,
-  isDstTransitionDay,
-  findDstTransitionHour,
-  buildOccurrenceSummary,
-} from '@utils';
+import { isDstTransitionDay, findDstTransitionHour } from '@utils';
 
-import CalendarNavigationButtons from './CalendarNavigationButtons';
-import CalendarPeriodSummary from './CalendarPeriodSummary';
+import CalendarSidebar from './CalendarSidebar';
 
 const DayCalendar = () => {
   const now = useCurrentTime();
@@ -50,18 +41,13 @@ const DayCalendar = () => {
   const occurrences = useFlatOccurrences();
   const params = useParams();
   const navigate = useNavigate();
-  const { locale } = useLocale();
   const timeZone = getLocalTimeZone();
   const [focusedDate, setFocusedDate] = React.useState(() => {
-    return today(timeZone);
-  });
-  const [focusedCalendarMonth, setFocusedCalendarMonth] = React.useState(() => {
     return today(timeZone);
   });
   const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
     React.useState(false);
   const [swipeDirection, setSwipeDirection] = React.useState(0);
-  const firstDayOfWeek = useFirstDayOfWeek();
 
   const formatter = useDateFormatter({
     dateStyle: 'full',
@@ -122,14 +108,6 @@ const DayCalendar = () => {
     });
   }, [occurrences, focusedDate]);
 
-  const occurrenceSummary = React.useMemo(() => {
-    return buildOccurrenceSummary(dayOccurrences);
-  }, [dayOccurrences]);
-
-  const metricTotals = React.useMemo(() => {
-    return buildMetricTotals(occurrenceSummary);
-  }, [occurrenceSummary]);
-
   const groupOccurrences = React.useCallback(
     (hour: number) => {
       const relatedOccurrences = dayOccurrences.filter(
@@ -159,29 +137,6 @@ const DayCalendar = () => {
     return formatter.format(focusedDate.toDate(timeZone));
   }, [formatter, focusedDate, timeZone]);
 
-  const weekInfo = React.useMemo(() => {
-    const weekStart = startOfWeek(focusedDate, locale, firstDayOfWeek);
-    const weekEnd = endOfWeek(focusedDate, locale, firstDayOfWeek);
-    const thursday = weekStart.add({
-      days: firstDayOfWeek === 'sun' ? 4 : 3,
-    });
-    const weekNumber = getISOWeek(thursday.toDate(timeZone));
-
-    const formatDay = (date: CalendarDate) => {
-      return `${date.toDate(timeZone).toLocaleDateString(locale, { month: 'short' })} ${date.day}`;
-    };
-
-    return {
-      label: `W${weekNumber}: ${formatDay(weekStart)} – ${formatDay(weekEnd)}`,
-      path: `/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`,
-    };
-  }, [focusedDate, locale, firstDayOfWeek, timeZone]);
-
-  const handleCalendarChange = (value: CalendarDate) => {
-    navigate(`/calendar/day/${value.year}/${value.month}/${value.day}`);
-    setFocusedCalendarMonth(value);
-  };
-
   const handleSwipeLeft = () => {
     const nextDay = focusedDate.add({ days: 1 });
     setSwipeDirection(1);
@@ -195,44 +150,30 @@ const DayCalendar = () => {
   };
 
   return (
-    <div className="flex w-full flex-1 gap-0 md:gap-6">
+    <div className="flex w-full flex-1 flex-col gap-0 px-8 md:gap-2 lg:flex-row">
       <ScrollShadow className="relative flex-1 overflow-y-scroll">
+        <CalendarSidebar
+          kind="day"
+          summaryClassName="pt-2"
+          focusedDate={focusedDate}
+          className="sticky top-0 z-20 flex gap-2 bg-inherit py-2 max-lg:py-0 lg:hidden"
+        />
         <SwipeableContainer
           direction={swipeDirection}
           onSwipeLeft={handleSwipeLeft}
           onSwipeRight={handleSwipeRight}
           swipeKey={focusedDate.toString()}
         >
-          <div className="sticky top-0 z-20 flex items-center justify-center gap-4 bg-inherit px-8 py-2 md:hidden">
-            <CalendarNavigationButtons focusedDate={focusedDate} />
-          </div>
-          <div className="flex items-center justify-center gap-2 px-8 py-2">
-            <Tooltip delay={0} closeDelay={0}>
-              <Tooltip.Trigger>
-                <CustomButton
-                  size="lg"
-                  variant="light"
-                  href={weekInfo.path}
-                  className="min-w-fit gap-2 px-2"
-                  aria-label={`Go to week view: ${weekInfo.label}`}
-                >
-                  <ArrowsOutIcon weight="bold" className="h-5 w-5" />
-                  <span className="hidden sm:inline">{weekInfo.label}</span>
-                </CustomButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content>
-                Go to the week view of {weekInfo.label}
-              </Tooltip.Content>
-            </Tooltip>
+          <div className="flex items-center justify-center gap-2 py-2">
             <div className="flex items-center gap-3">
               <h2
                 className={cn(
-                  'text-center text-base text-stone-600 dark:text-stone-300',
+                  'text-muted text-center text-base',
                   isFocusedToday &&
                     'text-primary-600 dark:text-primary-400 font-bold'
                 )}
               >
-                {formattedDate}
+                {capitalize(formattedDate)}
               </h2>
               <div className="flex items-center gap-2">
                 <Tooltip closeDelay={0}>
@@ -280,7 +221,7 @@ const DayCalendar = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col px-8 py-4 lg:px-16">
+          <div className="flex flex-col py-4 pr-8">
             {[...Array(24).keys()].map((hour) => {
               const isSkippedHour = dstType === 'spring' && hour === dstHour;
               const isDuplicatedHour =
@@ -342,44 +283,11 @@ const DayCalendar = () => {
           </div>
         </SwipeableContainer>
       </ScrollShadow>
-      <aside className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-8 pl-1 md:flex">
-        <Calendar
-          value={focusedDate}
-          onChange={handleCalendarChange}
-          aria-label="Focused date calendar"
-          focusedValue={focusedCalendarMonth}
-          onFocusChange={setFocusedCalendarMonth}
-          defaultValue={today(getLocalTimeZone())}
-        >
-          <Calendar.Header>
-            <Calendar.Heading />
-            <Calendar.NavButton slot="previous" />
-            <Calendar.NavButton slot="next" />
-          </Calendar.Header>
-          <Calendar.Grid>
-            <Calendar.GridHeader>
-              {(day) => {
-                return <Calendar.HeaderCell>{day}</Calendar.HeaderCell>;
-              }}
-            </Calendar.GridHeader>
-            <Calendar.GridBody>
-              {(date) => {
-                return <Calendar.Cell date={date} />;
-              }}
-            </Calendar.GridBody>
-          </Calendar.Grid>
-        </Calendar>
-        <div className="flex items-center justify-center gap-2">
-          <CalendarNavigationButtons focusedDate={focusedDate} />
-        </div>
-        <CalendarPeriodSummary
-          kind="day"
-          note={dayNote}
-          startDate={focusedDate}
-          metricTotals={metricTotals}
-          occurrenceSummary={occurrenceSummary}
-        />
-      </aside>
+      <CalendarSidebar
+        kind="day"
+        focusedDate={focusedDate}
+        className="hidden gap-2 py-4 lg:flex lg:w-84"
+      />
     </div>
   );
 };

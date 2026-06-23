@@ -221,8 +221,8 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
       </div>
       {calendarMode === 'week' && (
         <Select
+          fullWidth
           variant="secondary"
-          className="md:w-62.5"
           isOpen={weekSelectState.isOpen}
           value={selectedWeek?.key ?? null}
           onOpenChange={weekSelectState.setOpen}
@@ -245,7 +245,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
           <Select.Popover className="w-62.5">
             <ListBox>
               <ListBox.Section>
-                <Header className="bg-background shadow-small rounded-small sticky top-1 z-20 flex w-auto rounded-2xl px-2 py-1.5">
+                <Header className="bg-background text-background-inverse shadow-small rounded-small sticky top-1 z-20 flex w-full rounded-3xl px-2 py-1.5 pl-4">
                   Week
                 </Header>
                 {weeks.map((week) => {

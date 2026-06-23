@@ -125,93 +125,96 @@ const CalendarPeriodSummary = ({
           Add a note about this {kind}
         </CustomButton>
       )}
-      {occurrenceSummary.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-            Summary
-          </h4>
-          <div className="space-y-1.5">
-            {occurrenceSummary.map(
-              ({
-                costByCurrency,
-                count,
-                habitId,
-                iconPath,
-                name,
-                traitColor,
-              }) => {
-                const totals = metricTotals[habitId];
-                const costEntries = Object.entries(costByCurrency);
-                const stockCosts = stockCostsByHabit[habitId];
-                const hasDetails =
-                  totals ||
-                  costEntries.length > 0 ||
-                  (stockCosts && stockCosts.length > 0);
+      <div className="space-y-2">
+        <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+          Summary
+        </h4>
+        <div className="space-y-1.5">
+          {!occurrenceSummary.length && (
+            <p className="text-sm text-stone-500 dark:text-stone-400">
+              No habits logged for this {kind} yet.
+            </p>
+          )}
+          {occurrenceSummary.map(
+            ({
+              costByCurrency,
+              count,
+              habitId,
+              iconPath,
+              name,
+              traitColor,
+            }) => {
+              const totals = metricTotals[habitId];
+              const costEntries = Object.entries(costByCurrency);
+              const stockCosts = stockCostsByHabit[habitId];
+              const hasDetails =
+                totals ||
+                costEntries.length > 0 ||
+                (stockCosts && stockCosts.length > 0);
 
-                return (
-                  <div key={habitId}>
-                    <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
-                      <img
-                        alt={name}
-                        className="h-4 w-4"
-                        style={{ borderColor: traitColor }}
-                        src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
-                      />
-                      <span>
-                        {name}: {count}
-                      </span>
-                    </div>
-                    {hasDetails && (
-                      <div className="mt-0.5 ml-6 space-y-0.5">
-                        {totals?.map(({ formattedTotal, name: metricName }) => {
-                          return (
-                            <p
-                              key={metricName}
-                              className="text-xs text-stone-400 dark:text-stone-500"
-                            >
-                              {metricName}: {formattedTotal}
-                            </p>
-                          );
-                        })}
-                        {costEntries.map(([currency, total]) => {
-                          return (
-                            <p
-                              key={currency}
-                              className="text-xs text-stone-400 dark:text-stone-500"
-                            >
-                              Cost:{' '}
-                              {new Intl.NumberFormat(undefined, {
-                                currency,
-                                style: 'currency',
-                              }).format(total)}
-                            </p>
-                          );
-                        })}
-                        {stockCosts?.map((entry) => {
-                          const formatter = new Intl.NumberFormat(undefined, {
-                            currency: entry.currency,
-                            style: 'currency',
-                          });
-
-                          return (
-                            <p
-                              key={entry.name}
-                              className="text-xs text-stone-400 dark:text-stone-500"
-                            >
-                              {entry.name}: {formatter.format(entry.totalCost)}{' '}
-                              (avg {formatter.format(entry.avgCost)}/occurrence)
-                            </p>
-                          );
-                        })}
-                      </div>
-                    )}
+              return (
+                <div key={habitId}>
+                  <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
+                    <img
+                      alt={name}
+                      className="h-4 w-4"
+                      style={{ borderColor: traitColor }}
+                      src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
+                    />
+                    <span>
+                      {name}: {count}
+                    </span>
                   </div>
-                );
-              }
-            )}
-          </div>
+                  {hasDetails && (
+                    <div className="mt-0.5 ml-6 space-y-0.5">
+                      {totals?.map(({ formattedTotal, name: metricName }) => {
+                        return (
+                          <p
+                            key={metricName}
+                            className="text-xs text-stone-400 dark:text-stone-500"
+                          >
+                            {metricName}: {formattedTotal}
+                          </p>
+                        );
+                      })}
+                      {costEntries.map(([currency, total]) => {
+                        return (
+                          <p
+                            key={currency}
+                            className="text-xs text-stone-400 dark:text-stone-500"
+                          >
+                            Cost:{' '}
+                            {new Intl.NumberFormat(undefined, {
+                              currency,
+                              style: 'currency',
+                            }).format(total)}
+                          </p>
+                        );
+                      })}
+                      {stockCosts?.map((entry) => {
+                        const formatter = new Intl.NumberFormat(undefined, {
+                          currency: entry.currency,
+                          style: 'currency',
+                        });
+
+                        return (
+                          <p
+                            key={entry.name}
+                            className="text-xs text-stone-400 dark:text-stone-500"
+                          >
+                            {entry.name}: {formatter.format(entry.totalCost)}{' '}
+                            (avg {formatter.format(entry.avgCost)}/occurrence)
+                          </p>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

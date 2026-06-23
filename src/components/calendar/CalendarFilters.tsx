@@ -120,6 +120,10 @@ const CalendarFilters = () => {
 
   const isVisible = (isDesktop || filters.isShownOnMobile) && !!user;
 
+  if (!Object.keys(habits).length) {
+    return null;
+  }
+
   return (
     <div
       className={cn(
@@ -253,92 +257,96 @@ const CalendarFilters = () => {
           </ListBox>
         </Select.Popover>
       </Select>
-      <Select
-        fullWidth
-        variant="secondary"
-        value={filters.traitIds}
-        selectionMode="multiple"
-        placeholder="Filter by traits"
-        onChange={handleTraitsFilterChange}
-        isOpen={traitsFilterSelectState.isOpen}
-        onOpenChange={traitsFilterSelectState.setOpen}
-      >
-        <Label>Filter by traits</Label>
-        <Select.Trigger>
-          <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-1 overflow-x-auto">
-            {({ defaultChildren, isPlaceholder, state }) => {
-              if (isPlaceholder || state.selectedItems.length === 0) {
-                return defaultChildren;
-              }
+      {Object.values(habits).some((habit) => {
+        return habit.trait;
+      }) && (
+        <Select
+          fullWidth
+          variant="secondary"
+          value={filters.traitIds}
+          selectionMode="multiple"
+          placeholder="Filter by traits"
+          onChange={handleTraitsFilterChange}
+          isOpen={traitsFilterSelectState.isOpen}
+          onOpenChange={traitsFilterSelectState.setOpen}
+        >
+          <Label>Filter by traits</Label>
+          <Select.Trigger>
+            <Select.Value className="scrollbar-hide flex min-w-0 items-center gap-1 overflow-x-auto">
+              {({ defaultChildren, isPlaceholder, state }) => {
+                if (isPlaceholder || state.selectedItems.length === 0) {
+                  return defaultChildren;
+                }
 
-              return (
-                <>
-                  {state.selectedItems.map(({ key }) => {
-                    if (typeof key !== 'string' || !traits[key]) {
-                      return null;
-                    }
-
-                    const { color, id, name } = traits[key];
-
-                    return (
-                      <TraitChip
-                        key={id}
-                        color="accent"
-                        variant="soft"
-                        trait={{ color, name }}
-                      />
-                    );
-                  })}
-                </>
-              );
-            }}
-          </Select.Value>
-          <Select.Indicator />
-        </Select.Trigger>
-        <Select.Popover>
-          <ListBox>
-            {!!Object.keys(traits).length && (
-              <ListBox.Item
-                id="toggle-all"
-                className="mb-0.5"
-                textValue="Toggle all"
-              >
-                <Checkbox
-                  variant="secondary"
-                  isSelected={areAllTraitsSelected}
-                  isIndeterminate={
-                    !areAllTraitsSelected && filters.traitIds.some(Boolean)
-                  }
-                >
-                  <Checkbox.Content>
-                    <Checkbox.Control>
-                      <Checkbox.Indicator />
-                    </Checkbox.Control>
-                    <Label>
-                      {areAllTraitsSelected ? 'Unselect' : 'Select'} all
-                    </Label>
-                  </Checkbox.Content>
-                </Checkbox>
-              </ListBox.Item>
-            )}
-            <ListBox.Section>
-              <Header>Filter by traits</Header>
-              {Object.values(traits).map((trait) => {
                 return (
-                  <ListBox.Item
-                    id={trait.id}
-                    key={trait.id}
-                    textValue={trait.name}
-                  >
-                    {trait.name}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
+                  <>
+                    {state.selectedItems.map(({ key }) => {
+                      if (typeof key !== 'string' || !traits[key]) {
+                        return null;
+                      }
+
+                      const { color, id, name } = traits[key];
+
+                      return (
+                        <TraitChip
+                          key={id}
+                          color="accent"
+                          variant="soft"
+                          trait={{ color, name }}
+                        />
+                      );
+                    })}
+                  </>
                 );
-              })}
-            </ListBox.Section>
-          </ListBox>
-        </Select.Popover>
-      </Select>
+              }}
+            </Select.Value>
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              {!!Object.keys(traits).length && (
+                <ListBox.Item
+                  id="toggle-all"
+                  className="mb-0.5"
+                  textValue="Toggle all"
+                >
+                  <Checkbox
+                    variant="secondary"
+                    isSelected={areAllTraitsSelected}
+                    isIndeterminate={
+                      !areAllTraitsSelected && filters.traitIds.some(Boolean)
+                    }
+                  >
+                    <Checkbox.Content>
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      <Label>
+                        {areAllTraitsSelected ? 'Unselect' : 'Select'} all
+                      </Label>
+                    </Checkbox.Content>
+                  </Checkbox>
+                </ListBox.Item>
+              )}
+              <ListBox.Section>
+                <Header>Filter by traits</Header>
+                {Object.values(traits).map((trait) => {
+                  return (
+                    <ListBox.Item
+                      id={trait.id}
+                      key={trait.id}
+                      textValue={trait.name}
+                    >
+                      {trait.name}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  );
+                })}
+              </ListBox.Section>
+            </ListBox>
+          </Select.Popover>
+        </Select>
+      )}
     </div>
   );
 };
