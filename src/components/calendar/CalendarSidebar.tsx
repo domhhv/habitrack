@@ -180,6 +180,7 @@ const CalendarSidebar = ({
         {VIEWS.map((view, index) => {
           return (
             <CustomButton
+              size="sm"
               key={view.id}
               className="flex-1"
               href={viewPaths[view.id]}

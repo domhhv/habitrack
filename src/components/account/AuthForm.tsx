@@ -45,13 +45,11 @@ const AuthForm = ({
     onCancel();
   };
 
-  const formClassName = cn(mode === 'reset-password' && 'py-3');
-
   return (
     <form
       onSubmit={handleSubmit}
       data-testid="submit-form"
-      className={formClassName}
+      className={cn(mode === 'reset-password' && 'py-3')}
     >
       <div className="flex flex-col gap-4">
         {mode === 'reset-password' && (

@@ -14,7 +14,7 @@ import { tv } from 'tailwind-variants';
 import InfinityLoader from './InfinityLoader';
 
 const customButtonVariants = tv({
-  base: 'text-md relative overflow-hidden font-semibold has-[kbd]:pr-2 data-[pending=true]:opacity-40',
+  base: 'text-md relative overflow-hidden font-semibold has-[kbd]:gap-1.5 has-[kbd]:pr-2 data-[pending=true]:opacity-40',
   extend: buttonVariants,
   variants: {
     variant: {

@@ -10,7 +10,6 @@ import { useHasKeyboard, useKeyboardShortcut } from '@hooks';
 import { noop } from '@utils';
 
 const customKbdVariants = tv({
-  base: 'hidden',
   extend: coreKbdVariants,
   defaultVariants: {
     size: 'sm',
@@ -50,6 +49,10 @@ const CustomKbd = ({
   const hasKeyboard = useHasKeyboard();
 
   useKeyboardShortcut(...shortcutParams);
+
+  if (!hasKeyboard) {
+    return null;
+  }
 
   const { base } = customKbdVariants({ size, variant });
 
