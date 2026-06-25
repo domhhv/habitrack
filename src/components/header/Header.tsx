@@ -93,8 +93,8 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <Dropdown>
             <CustomButton
+              size="sm"
               variant="outline"
-              size={isMobile ? 'sm' : 'md'}
               aria-label="Open navigation menu"
             >
               <ListIcon size={isMobile ? 16 : 18} />
@@ -126,7 +126,7 @@ const Header = () => {
                     );
                   })}
                 </Dropdown.Section>
-                <Separator className="bg-muted" />
+                <Separator className="bg-muted/25" />
                 <Dropdown.Section>
                   <Dropdown.Item
                     id="roadmap"
@@ -140,7 +140,7 @@ const Header = () => {
                       <RoadHorizonIcon className="size-4 shrink-0" />
                       <Label>Roadmap</Label>
                     </div>
-                    <ArrowSquareOutIcon className="text-muted size-4 shrink-0" />
+                    <ArrowSquareOutIcon className="text-muted/50 size-4 shrink-0" />
                   </Dropdown.Item>
                   <Dropdown.Item
                     target="_blank"
@@ -154,12 +154,12 @@ const Header = () => {
                       <GithubLogoIcon className="size-4 shrink-0" />
                       <Label>Source Code on GitHub</Label>
                     </div>
-                    <ArrowSquareOutIcon className="text-muted size-4 shrink-0 justify-self-end" />
+                    <ArrowSquareOutIcon className="text-muted/50 size-4 shrink-0 justify-self-end" />
                   </Dropdown.Item>
                 </Dropdown.Section>
                 {!!user && (
                   <>
-                    <Separator className="bg-muted" />
+                    <Separator className="bg-muted/25" />
                     <Dropdown.Section>
                       <Dropdown.Item
                         id="logout"

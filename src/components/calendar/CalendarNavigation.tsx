@@ -108,8 +108,8 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
           <Select
             variant="secondary"
             value={monthSelectValue}
-            className="w-17.5 md:w-28"
             isOpen={monthSelectState.isOpen}
+            className="select--sm w-17.5 md:w-28"
             onOpenChange={monthSelectState.setOpen}
           >
             <Label className="sr-only">Month</Label>

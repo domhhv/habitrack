@@ -119,6 +119,17 @@
     @apply text-xs leading-3;
   }
 
+  .select--sm .select__trigger {
+    font-size: var(--text-xs);
+    line-height: calc(var(--spacing) * 3);
+    height: calc(var(--spacing) * 9);
+    padding-block: calc(var(--spacing));
+
+    @media (width >= 48rem) {
+      height: calc(var(--spacing) * 6);
+    }
+  }
+
   .switch--sm,
   .switch--md,
   .switch--lg {

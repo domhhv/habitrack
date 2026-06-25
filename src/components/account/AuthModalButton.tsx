@@ -1,19 +1,10 @@
-import {
-  Tabs,
-  Modal,
-  Toast,
-  Tooltip,
-  ButtonGroup,
-  useOverlayState,
-} from '@heroui/react';
-import { UserIcon, SignOutIcon } from '@phosphor-icons/react';
+import { Tabs, Modal, Toast, useOverlayState } from '@heroui/react';
 import React from 'react';
-import { VisuallyHidden } from 'react-aria';
 
 import { CustomKbd, CustomButton } from '@components';
-import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
+import { useFirstDayOfWeek } from '@hooks';
 import type { DaysOfWeek } from '@models';
-import { signIn, signUp, signOut, sendPasswordResetEmail } from '@services';
+import { signIn, signUp, sendPasswordResetEmail } from '@services';
 import { useUser } from '@stores';
 import { getErrorMessage } from '@utils';
 
@@ -23,7 +14,6 @@ type AuthMode = 'login' | 'register' | 'reset-password';
 
 const AuthModalButton = () => {
   const user = useUser();
-  const { isDesktop, isMobile } = useScreenWidth();
   const overlayState = useOverlayState();
   const [isAuthenticating, setIsAuthenticating] = React.useState(false);
   const [mode, setMode] = React.useState<AuthMode>('login');
@@ -121,61 +111,28 @@ const AuthModalButton = () => {
 
   return (
     <>
-      {user?.id ? (
-        <ButtonGroup>
-          <CustomButton
-            href="/account"
-            variant="bordered"
-            isIconOnly={!isDesktop}
-            data-testid="auth-button"
-            size={isMobile ? 'sm' : 'md'}
-            aria-label='Go to "Account" page'
-            className="rounded-r-none border-r-0"
-          >
-            <UserIcon weight="bold" data-testid="user-icon" />
-            <span className="max-sm:hidden">Account</span>
-          </CustomButton>
-          <Tooltip delay={0} closeDelay={0}>
-            <Tooltip.Trigger>
-              <CustomButton
-                isIconOnly
-                onPress={signOut}
-                variant="bordered"
-                aria-label="Log out"
-                size={isMobile ? 'sm' : 'md'}
-                className="rounded-l-none rounded-r-3xl"
-              >
-                <SignOutIcon weight="bold" data-testid="sign-out-icon" />
-                <VisuallyHidden>Log Out</VisuallyHidden>
-              </CustomButton>
-            </Tooltip.Trigger>
-            <Tooltip.Content>Log out</Tooltip.Content>
-          </Tooltip>
-        </ButtonGroup>
-      ) : (
-        <CustomButton
+      <CustomButton
+        size="sm"
+        variant="primary"
+        data-testid="auth-button"
+        onPress={overlayState.open}
+      >
+        Log In
+        <CustomKbd
           size="sm"
-          variant="primary"
-          data-testid="auth-button"
-          onPress={overlayState.open}
+          variant="default"
+          shortcutParams={[
+            'i',
+            () => {
+              if (!user?.id) {
+                overlayState.open();
+              }
+            },
+          ]}
         >
-          Log In
-          <CustomKbd
-            size="sm"
-            variant="default"
-            shortcutParams={[
-              'i',
-              () => {
-                if (!user?.id) {
-                  overlayState.open();
-                }
-              },
-            ]}
-          >
-            I
-          </CustomKbd>
-        </CustomButton>
-      )}
+          I
+        </CustomKbd>
+      </CustomButton>
       <Modal state={overlayState}>
         <Modal.Backdrop
           onOpenChange={(open) => {

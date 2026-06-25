@@ -26,8 +26,8 @@ const ThemeToggle = () => {
             {index > 0 && (
               <ButtonGroup.Separator
                 className={cn(
-                  index === 1 && 'left-7.75',
-                  index === 2 && 'left-15.75'
+                  index === 1 && 'left-8.75 md:left-7.75',
+                  index === 2 && 'left-17.75 md:left-15.75'
                 )}
               />
             )}
@@ -35,7 +35,7 @@ const ThemeToggle = () => {
               size="sm"
               isIconOnly
               variant={'outline'}
-              className={cn('size-8', isSelected && 'text-accent')}
+              className={cn('md:size-8', isSelected && 'text-accent')}
               onPress={() => {
                 setThemeMode(mode);
               }}
