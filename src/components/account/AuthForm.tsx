@@ -1,5 +1,5 @@
-import { cn, Input, Label, TextField } from '@heroui/react';
-import { type SubmitEventHandler } from 'react';
+import { Input, Label, TextField } from '@heroui/react';
+import { type ReactNode, type SubmitEventHandler } from 'react';
 
 import { CustomButton } from '@components';
 import { useTextField } from '@hooks';
@@ -7,128 +7,75 @@ import { useTextField } from '@hooks';
 import PasswordInput from './PasswordInput';
 
 type AuthFormProps = {
+  canReset?: boolean;
+  description?: ReactNode;
+  footer?: ReactNode;
   isAuthenticating: boolean;
-  mode: 'login' | 'register' | 'reset-password';
-  submitButtonLabel: string;
-  goBackToLogin: () => void;
-  onCancel: () => void;
-  onModeChange: (mode: 'login' | 'register' | 'reset-password') => void;
-  onSubmit: (email: string, password: string, name: string) => void;
+  passwordAutoComplete?: string;
+  submitLabel: string;
+  withPassword?: boolean;
+  onSubmit: (email: string, password: string) => void;
 };
 
 const AuthForm = ({
-  goBackToLogin,
+  canReset,
+  description,
+  footer,
   isAuthenticating,
-  mode,
-  onCancel,
-  onModeChange,
   onSubmit,
-  submitButtonLabel,
+  passwordAutoComplete,
+  submitLabel,
+  withPassword = true,
 }: AuthFormProps) => {
-  const [email, handleEmailChange, clearEmail] = useTextField();
-  const [name, handleNameChange, clearName] = useTextField();
-  const [password, handlePasswordChange, clearPassword] = useTextField();
+  const [email, handleEmailChange] = useTextField();
+  const [password, handlePasswordChange] = useTextField();
 
-  const handleSubmit: SubmitEventHandler = async (event) => {
+  const handleSubmit: SubmitEventHandler = (event) => {
     event.preventDefault();
-    onSubmit(email, password, name);
-  };
-
-  const clearValues = () => {
-    clearEmail();
-    clearPassword();
-    clearName();
-  };
-
-  const handleCancel = () => {
-    clearValues();
-    onCancel();
+    onSubmit(email, password);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      data-testid="submit-form"
-      className={cn(mode === 'reset-password' && 'py-3')}
-    >
+    <form className="w-full" onSubmit={handleSubmit} data-testid="submit-form">
       <div className="flex flex-col gap-4">
-        {mode === 'reset-password' && (
-          <p>
-            Enter your email address below and we will send you a link to reset
-            your password.
-          </p>
-        )}
-        <div>
-          <TextField
-            fullWidth
-            name="email"
-            type="email"
-            value={email}
-            variant="secondary"
-            onChange={handleEmailChange}
-            isDisabled={isAuthenticating}
-          >
-            <Label>Email</Label>
-            <Input placeholder="me@email.com" />
-          </TextField>
-          {mode === 'reset-password' && (
-            <div className="text-right">
-              <CustomButton
-                onPress={goBackToLogin}
-                className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
-              >
-                Back to login
-              </CustomButton>
-            </div>
-          )}
-        </div>
-        {mode === 'register' && (
-          <TextField
-            fullWidth
-            name="name"
-            value={name}
-            variant="secondary"
-            onChange={handleNameChange}
-            isDisabled={isAuthenticating}
-          >
-            <Label>Name</Label>
-            <Input placeholder="Optional" />
-          </TextField>
-        )}
-        {['login', 'register'].includes(mode) && (
+        {!!description && <p className="text-muted text-sm">{description}</p>}
+        <TextField
+          fullWidth
+          name="email"
+          type="email"
+          value={email}
+          variant="secondary"
+          onChange={handleEmailChange}
+          isDisabled={isAuthenticating}
+        >
+          <Label className="h-6">Email</Label>
+          <Input autoComplete="email" placeholder="me@email.com" />
+        </TextField>
+        {withPassword && (
           <PasswordInput
             value={password}
             label="Password"
             variant="secondary"
+            canReset={canReset}
             isDisabled={isAuthenticating}
             onChange={handlePasswordChange}
-            onReset={
-              mode === 'login'
-                ? () => {
-                    return onModeChange('reset-password');
-                  }
-                : undefined
-            }
+            autoComplete={passwordAutoComplete}
           />
         )}
       </div>
-      <div className="mt-4 flex justify-end gap-2">
-        <CustomButton
-          variant="secondary"
-          onPress={handleCancel}
-          isDisabled={isAuthenticating}
-        >
-          Cancel
-        </CustomButton>
-        <CustomButton
-          type="submit"
-          variant="primary"
-          data-testid="submit-button"
-          isPending={isAuthenticating}
-        >
-          {submitButtonLabel}
-        </CustomButton>
-      </div>
+      <CustomButton
+        fullWidth
+        type="submit"
+        className="mt-6"
+        variant="primary"
+        data-testid="submit-button"
+        isPending={isAuthenticating}
+      >
+        {submitLabel}
+      </CustomButton>
+      {!!footer && (
+        <div className="text-muted mt-4 text-center text-sm">{footer}</div>
+      )}
     </form>
   );
 };

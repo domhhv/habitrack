@@ -1,2 +1,2 @@
-export { default as AuthModalButton } from './AuthModalButton';
+export { default as AuthForm } from './AuthForm';
 export { default as PasswordInput } from './PasswordInput';

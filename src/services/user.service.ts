@@ -8,7 +8,6 @@ import { supabaseClient } from '@utils';
 export const signUp = async (
   email: string,
   password: string,
-  name: string,
   firstDayOfWeek: DaysOfWeek
 ) => {
   const { error } = await supabaseClient.auth.signUp({
@@ -18,7 +17,6 @@ export const signUp = async (
       emailRedirectTo: `${window.location.origin}/account?emailConfirmed=true`,
       data: decamelizeKeys({
         firstDayOfWeek,
-        name,
       }),
     },
   });

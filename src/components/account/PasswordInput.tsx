@@ -1,24 +1,28 @@
-import { Label, Button, TextField, InputGroup } from '@heroui/react';
+import { Link, Label, TextField, InputGroup } from '@heroui/react';
 import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import React, { type ChangeEventHandler } from 'react';
 
 import { CustomButton } from '@components';
 
 type PasswordInputProps = {
+  autoComplete?: string;
+  canReset?: boolean;
+  className?: string;
   isDisabled: boolean;
   label: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
   testId?: string;
   value: string;
   variant?: 'primary' | 'secondary';
-  onReset?: () => void;
 };
 
 const PasswordInput = ({
+  autoComplete = 'current-password',
+  canReset = false,
+  className,
   isDisabled,
   label,
   onChange,
-  onReset,
   testId = '',
   value,
   variant,
@@ -32,8 +36,20 @@ const PasswordInput = ({
   };
 
   return (
-    <TextField fullWidth name="password">
-      <Label>Password</Label>
+    <TextField fullWidth name="password" className={className}>
+      <div className="flex items-center justify-between">
+        <Label className="h-6">Password</Label>
+        {canReset && (
+          <div className="text-right">
+            <Link
+              href="/reset-password"
+              className="text-accent-soft-foreground text-sm"
+            >
+              Forgot password?
+            </Link>
+          </div>
+        )}
+      </div>
       <InputGroup variant={variant}>
         <InputGroup.Input
           value={value}
@@ -41,9 +57,10 @@ const PasswordInput = ({
           onChange={onChange}
           data-testid={testId}
           disabled={isDisabled}
+          autoComplete={autoComplete}
           type={isVisible ? 'text' : 'password'}
         />
-        <InputGroup.Suffix className="pr-0.5">
+        <InputGroup.Suffix className="pr-0.5 pl-0">
           <CustomButton
             size="sm"
             isIconOnly
@@ -59,16 +76,6 @@ const PasswordInput = ({
           </CustomButton>
         </InputGroup.Suffix>
       </InputGroup>
-      {onReset && (
-        <div className="text-right">
-          <Button
-            onPress={onReset}
-            className="h-auto bg-transparent p-0 text-gray-400 hover:text-gray-700"
-          >
-            Forgot password?
-          </Button>
-        </div>
-      )}
     </TextField>
   );
 };

@@ -14,9 +14,9 @@ import {
   CalendarCheckIcon,
   ArrowSquareOutIcon,
 } from '@phosphor-icons/react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
-import { CustomKbd, CustomButton, AuthModalButton } from '@components';
+import { CustomKbd, CustomButton } from '@components';
 import { useScreenWidth } from '@hooks';
 import { signOut } from '@services';
 import {
@@ -32,6 +32,7 @@ const GITHUB_URL = 'https://github.com/domhhv/habitrack';
 
 const Header = () => {
   const user = useUser();
+  const navigate = useNavigate();
   const { isMobile } = useScreenWidth();
   const { pathname } = useLocation();
   const { openNoteDrawer } = useNoteDrawerActions();
@@ -218,7 +219,50 @@ const Header = () => {
               </CustomButton>
             </div>
           )}
-          {!user && <AuthModalButton />}
+          {!user && (
+            <>
+              <CustomButton
+                size="sm"
+                href="/login"
+                variant="bordered"
+                data-testid="login-button"
+              >
+                Log In
+                <CustomKbd
+                  size="sm"
+                  variant="default"
+                  shortcutParams={[
+                    'i',
+                    () => {
+                      navigate('/login');
+                    },
+                  ]}
+                >
+                  I
+                </CustomKbd>
+              </CustomButton>
+              <CustomButton
+                size="sm"
+                href="/register"
+                variant="primary"
+                data-testid="register-button"
+              >
+                Join
+                <CustomKbd
+                  size="sm"
+                  variant="default"
+                  shortcutParams={[
+                    'j',
+                    () => {
+                      navigate('/register');
+                    },
+                  ]}
+                >
+                  J
+                </CustomKbd>
+              </CustomButton>
+            </>
+          )}
         </div>
       </header>
     </nav>
