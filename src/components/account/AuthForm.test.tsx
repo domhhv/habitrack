@@ -2,25 +2,16 @@ import { act, render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { it, vi, expect, describe } from 'vitest';
 
-import { noop } from '@utils';
-
 import AuthForm from './AuthForm';
 
 describe(AuthForm.name, () => {
   it('should call onSubmit with email and password', async () => {
     const onSubmit = vi.fn();
-    const onCancel = vi.fn();
-    const disabled = false;
-    const submitButtonLabel = 'Submit';
     const { getByPlaceholderText, getByTestId } = render(
       <AuthForm
-        mode="login"
         onSubmit={onSubmit}
-        onCancel={onCancel}
-        onModeChange={noop}
-        goBackToLogin={noop}
-        isAuthenticating={disabled}
-        submitButtonLabel={submitButtonLabel}
+        submitLabel="Submit"
+        isAuthenticating={false}
       />
     );
 
@@ -35,35 +26,20 @@ describe(AuthForm.name, () => {
     });
 
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith('email', 'password', '');
+      expect(onSubmit).toHaveBeenCalledWith('email', 'password');
     });
   });
 
-  it('should call onCancel when cancel button is clicked', async () => {
-    const onSubmit = vi.fn();
-    const onCancel = vi.fn();
-    const disabled = false;
-    const submitButtonLabel = 'Submit';
-    const { getByText } = render(
+  it('should not render a password field when withPassword is false', () => {
+    const { queryByPlaceholderText } = render(
       <AuthForm
-        mode="login"
-        onSubmit={onSubmit}
-        onCancel={onCancel}
-        onModeChange={noop}
-        goBackToLogin={noop}
-        isAuthenticating={disabled}
-        submitButtonLabel={submitButtonLabel}
+        onSubmit={vi.fn()}
+        withPassword={false}
+        submitLabel="Submit"
+        isAuthenticating={false}
       />
     );
 
-    const cancelButton = getByText('Cancel');
-
-    act(() => {
-      fireEvent.click(cancelButton);
-    });
-
-    await waitFor(() => {
-      expect(onCancel).toHaveBeenCalled();
-    });
+    expect(queryByPlaceholderText('Password')).toBeNull();
   });
 });
