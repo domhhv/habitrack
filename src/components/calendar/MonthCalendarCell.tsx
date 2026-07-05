@@ -8,17 +8,20 @@ import {
   CalendarPlusIcon,
   ArrowSquareRightIcon,
 } from '@phosphor-icons/react';
+import type { BorderBeamProps } from 'border-beam';
+import BorderBeam from 'border-beam';
 import groupBy from 'lodash.groupby';
 import React from 'react';
 import { useCalendarCell } from 'react-aria';
 import type { CalendarState } from 'react-stately';
 
 import { CustomButton, OccurrenceChip } from '@components';
-import { useScreenWidth } from '@hooks';
+import { useThemeMode, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import {
   useUser,
   useDayNotes,
+  useNoteDrawerState,
   useNoteDrawerActions,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
@@ -53,6 +56,11 @@ const MonthCalendarCell = ({
     isOpen: isOccurrenceDrawerOpen,
     occurrenceToEdit,
   } = useOccurrenceDrawerState();
+  const {
+    isOpen: isNoteDrawerOpen,
+    periodDate: noteDrawerPeriodDate,
+    periodKind: noteDrawerPeriodKind,
+  } = useNoteDrawerState();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { isDesktop, isMobile, screenWidth } = useScreenWidth();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
@@ -62,6 +70,7 @@ const MonthCalendarCell = ({
     state,
     calendarCellRef
   );
+  const { themeMode } = useThemeMode();
 
   const isTodayCell = isToday(date, state.timeZone);
 
@@ -91,9 +100,15 @@ const MonthCalendarCell = ({
     }
   );
 
-  const drawerDate = occurrenceToEdit?.occurredAt || dayToLog || dayToDisplay;
+  const occurrenceDrawerDate =
+    occurrenceToEdit?.occurredAt || dayToLog || dayToDisplay;
   const isDrawerDate =
-    drawerDate && isOccurrenceDrawerOpen && isEqualDay(drawerDate, date);
+    (occurrenceDrawerDate &&
+      isOccurrenceDrawerOpen &&
+      isEqualDay(occurrenceDrawerDate, date)) ||
+    (isNoteDrawerOpen &&
+      noteDrawerPeriodKind === 'day' &&
+      isEqualDay(noteDrawerPeriodDate, date));
 
   const openLoggingDrawer = () => {
     if (!user) {
@@ -115,11 +130,11 @@ const MonthCalendarCell = ({
         isDrawerDate &&
           isDesktop &&
           !isTodayCell &&
-          'bg-background dark:bg-surface z-51',
+          'bg-background dark:bg-surface',
         isDrawerDate &&
           isDesktop &&
           isTodayCell &&
-          'bg-background-secondary dark:bg-surface-secondary z-51',
+          'bg-background-secondary dark:bg-surface-secondary',
         isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600',
         isTodayCell ? 'w-full self-auto md:self-start' : 'w-full',
         isMobile && 'pl-1'
@@ -226,13 +241,24 @@ const MonthCalendarCell = ({
     </div>
   );
 
+  const Component = isDrawerDate ? BorderBeam : 'div';
+
+  const borderBeamProps: Omit<BorderBeamProps, 'children'> = {
+    active: isDrawerDate,
+    borderRadius: 0,
+    size: 'pulse-inner',
+    strength: 0.6,
+    theme: themeMode === 'system' ? 'auto' : themeMode,
+  };
+
   return (
     <div
       ref={calendarCellRef}
       {...cellProps}
-      className="group/cell border-border flex h-auto flex-1 flex-col gap-2 border-r-2 last-of-type:border-r-0 lg:h-36"
+      className="group/cell border-border flex h-auto flex-1 flex-col gap-2 rounded-none border-r-2 last-of-type:border-r-0 lg:h-36"
     >
-      <div
+      <Component
+        {...(isDrawerDate && borderBeamProps)}
         className={cn(
           'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 space-y-2 overflow-x-auto overflow-y-visible bg-white transition-colors dark:bg-black',
           isTodayCell &&
@@ -240,15 +266,15 @@ const MonthCalendarCell = ({
           isDrawerDate &&
             isDesktop &&
             isTodayCell &&
-            'bg-background-secondary dark:bg-surface-secondary z-51',
+            'bg-background-secondary dark:bg-surface-secondary z-52',
           isDrawerDate &&
             isDesktop &&
             !isTodayCell &&
-            'bg-background dark:bg-surface z-51',
-          position === 'top-left' && 'rounded-tl-3xl',
-          position === 'top-right' && 'rounded-tr-3xl',
-          position === 'bottom-left' && 'rounded-bl-3xl',
-          position === 'bottom-right' && 'rounded-br-3xl'
+            'bg-background dark:bg-surface z-52',
+          position === 'top-left' && 'rounded-tl-[10px]!',
+          position === 'top-right' && 'rounded-tr-[10px]!',
+          position === 'bottom-left' && 'rounded-bl-[10px]!',
+          position === 'bottom-right' && 'rounded-br-[10px]!'
         )}
       >
         {screenWidth < 1360 && user ? (
@@ -331,7 +357,7 @@ const MonthCalendarCell = ({
             }
           )}
         </div>
-      </div>
+      </Component>
     </div>
   );
 };

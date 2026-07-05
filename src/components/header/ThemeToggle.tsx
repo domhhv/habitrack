@@ -34,7 +34,7 @@ const ThemeToggle = () => {
             <CustomButton
               size="sm"
               isIconOnly
-              variant={'outline'}
+              variant="outline"
               className={cn('md:size-8', isSelected && 'text-accent')}
               onPress={() => {
                 setThemeMode(mode);
