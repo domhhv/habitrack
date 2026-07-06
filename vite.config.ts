@@ -33,6 +33,10 @@ export default defineConfig(({ mode }) => {
 
           warn(warning);
         },
+        input: {
+          landing: resolve(__dirname, 'landing.html'),
+          main: resolve(__dirname, 'index.html'),
+        },
         output: {
           assetFileNames: 'assets/[name].[hash][extname]',
           chunkFileNames: 'assets/[name].[hash].js',

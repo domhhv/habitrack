@@ -27,7 +27,7 @@
     "prepare": "husky install",
     "prebuild": "yarn typecheck && yarn eslint:check && yarn prettier:check",
     "dev": "vite --open",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview --open",
     "typecheck": "tsc --noEmit",
     "eslint:check": "eslint .",
