@@ -13,6 +13,7 @@ import {
   WeekCalendarPage,
   MonthCalendarPage,
   ResetPasswordPage,
+  AnonymousLoginPage,
 } from '@pages';
 
 const AppRoutes = () => {
@@ -35,6 +36,7 @@ const AppRoutes = () => {
       <Route path="/notes" element={<NotesPage />} />
       <Route path="/account" element={<AccountPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/anonymous-login" element={<AnonymousLoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/oauth/consent" element={<OAuthConsentPage />} />

@@ -15,6 +15,22 @@ $$;
 
 ALTER FUNCTION "public"."create_profile"() OWNER TO "postgres";
 
+-- Function to keep the profile email in sync when the auth user email changes,
+-- e.g. when an anonymous user converts to a permanent account --
+CREATE FUNCTION "public"."sync_profile_email"() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'pg_temp'
+    AS $$
+BEGIN
+    UPDATE "public"."profiles"
+    SET email = new.email
+    WHERE id = new.id AND email IS DISTINCT FROM new.email;
+    RETURN new;
+END;
+$$;
+
+ALTER FUNCTION "public"."sync_profile_email"() OWNER TO "postgres";
+
 -- Function to track the longest streak for a habit
 CREATE FUNCTION "public"."get_longest_streak"(
     "p_habit_id" UUID,
@@ -316,6 +332,10 @@ GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."create_profile"() TO "anon";
 GRANT ALL ON FUNCTION "public"."create_profile"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."create_profile"() TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."sync_profile_email"() TO "anon";
+GRANT ALL ON FUNCTION "public"."sync_profile_email"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."sync_profile_email"() TO "service_role";
 
 GRANT ALL ON FUNCTION "public"."update_stock_on_usage_insert"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_stock_on_usage_insert"() TO "authenticated";

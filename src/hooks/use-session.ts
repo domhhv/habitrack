@@ -46,7 +46,7 @@ const useSession = () => {
         session &&
         ['TOKEN_REFRESHED', 'SIGNED_IN', 'USER_UPDATED'].includes(event)
       ) {
-        const { email, id } = session.user;
+        const { email, id, is_anonymous: isAnonymous } = session.user;
         const fetchedAt = new Date().toISOString();
 
         if (!isLoading) {
@@ -59,6 +59,7 @@ const useSession = () => {
           email,
           fetchedAt,
           id,
+          isAnonymous,
         });
       }
 

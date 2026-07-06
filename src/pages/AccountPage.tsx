@@ -1,5 +1,6 @@
 import {
   cn,
+  Link,
   Alert,
   Input,
   Label,
@@ -15,12 +16,13 @@ import React from 'react';
 import { CustomButton, PasswordInput } from '@components';
 import { useTextField, useAuthSearchParams } from '@hooks';
 import type { DaysOfWeek, ProfilesUpdate } from '@models';
-import { useProfile, useUserActions } from '@stores';
+import { useUser, useProfile, useUserActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 const AccountPage = () => {
   useAuthSearchParams();
 
+  const user = useUser();
   const profile = useProfile();
   const { updateProfile, updateUser } = useUserActions();
   const [isUpdating, setIsUpdating] = React.useState(false);
@@ -111,6 +113,23 @@ const AccountPage = () => {
       {title}
       <div data-testid="account-page" className={containerClassName}>
         <h1 className="text-xl font-semibold">Your Account Settings</h1>
+        {!!user?.isAnonymous && (
+          <Alert status="warning" className="mt-4 w-full md:w-96">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title className="font-bold">
+                You are browsing anonymously
+              </Alert.Title>
+              <Alert.Description>
+                Your data is saved to a temporary account tied to this browser.{' '}
+                <Link href="/register" className="text-accent font-medium">
+                  Add an email and password
+                </Link>{' '}
+                to keep it forever and log in from any device.
+              </Alert.Description>
+            </Alert.Content>
+          </Alert>
+        )}
         <form
           onSubmit={handleSubmit}
           data-testid="account-form"

@@ -6,7 +6,7 @@ import { getProfile, updateUser, patchProfile } from '@services';
 
 import { useBoundStore, type SliceCreator } from './bound.store';
 
-type User = Pick<SupabaseUser, 'id' | 'email'> & {
+type User = Pick<SupabaseUser, 'id' | 'email' | 'is_anonymous'> & {
   fetchedAt: string;
 };
 

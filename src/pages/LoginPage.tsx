@@ -61,6 +61,19 @@ const LoginPage = () => {
             }
           />
         </div>
+        <div className="border-secondary mt-6 w-full border-t pt-6 text-center">
+          <p className="text-muted text-sm">
+            Just want to look around?{' '}
+            <Link
+              href="/anonymous-login"
+              data-testid="anonymous-login-link"
+              className="text-accent font-medium"
+            >
+              Try Habitrack instantly
+            </Link>{' '}
+            — no email or sign-up needed.
+          </p>
+        </div>
       </div>
     </div>
   );

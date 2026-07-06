@@ -65,7 +65,7 @@ openai_api_key = "env(OPENAI_API_KEY)"
 
 # Email testing server. Emails sent with the local dev setup are not actually sent - rather, they
 # are monitored, and you can view the emails that would have been sent from the web interface.
-[inbucket]
+[local_smtp]
 enabled = true
 # Port to use for the email testing server web interface.
 port = 54324
@@ -110,7 +110,7 @@ refresh_token_reuse_interval = 10
 # Allow/disallow new user signups to your project.
 enable_signup = true
 # Allow/disallow anonymous sign-ins to your project.
-enable_anonymous_sign_ins = false
+enable_anonymous_sign_ins = true
 # Allow/disallow testing manual linking of accounts
 enable_manual_linking = false
 

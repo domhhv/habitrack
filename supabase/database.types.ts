@@ -1502,7 +1502,7 @@ export type Database = {
         Row: {
           created_at: string
           default_currency: string
-          email: string
+          email: string | null
           first_day_of_week: Database["public"]["Enums"]["days_of_week"]
           id: string
           name: string | null
@@ -1512,7 +1512,7 @@ export type Database = {
         Insert: {
           created_at?: string
           default_currency?: string
-          email: string
+          email?: string | null
           first_day_of_week?: Database["public"]["Enums"]["days_of_week"]
           id: string
           name?: string | null
@@ -1522,7 +1522,7 @@ export type Database = {
         Update: {
           created_at?: string
           default_currency?: string
-          email?: string
+          email?: string | null
           first_day_of_week?: Database["public"]["Enums"]["days_of_week"]
           id?: string
           name?: string | null
