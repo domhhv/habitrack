@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Habitrack — habit tracking down to the last detail</title>
+    <meta
+      name="description"
+      content="A calendar-first habit tracker with month, week, and day views. Log habits, scope notes to any period, measure with custom metrics, keep stock of the items habits consume, and track what every habit costs. Try it anonymously in one click."
+    />
+    <link rel="canonical" href="https://www.habitrack.io/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.habitrack.io/" />
+    <meta
+      property="og:title"
+      content="Habitrack — habit tracking down to the last detail"
+    />
+    <meta
+      property="og:description"
+      content="Calendar-based habit tracking with custom metrics, stock keeping, expense tracking, scoped notes, and a built-in MCP server for AI assistants. Log in anonymously to look around."
+    />
+    <meta
+      property="og:image"
+      content="https://www.habitrack.io/android-chrome-512x512.png"
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="Habitrack — habit tracking down to the last detail"
+    />
+    <meta
+      name="twitter:description"
+      content="Calendar-based habit tracking with custom metrics, stock keeping, expense tracking, scoped notes, and a built-in MCP server for AI assistants."
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Habitrack",
+        "url": "https://www.habitrack.io/",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Web",
+        "description": "A calendar-first habit tracker with custom metrics, stock keeping, per-habit expense tracking, scoped notes, and a built-in MCP server for AI assistants.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+    <style>
+      @font-face {
+        font-display: swap;
+        font-family: 'Nunito';
+        font-style: normal;
+        font-weight: 500;
+        src: url('/fonts/nunito-v32-cyrillic_latin-500.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-display: swap;
+        font-family: 'Nunito';
+        font-style: normal;
+        font-weight: 600;
+        src: url('/fonts/nunito-v32-cyrillic_latin-600.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-display: swap;
+        font-family: 'Nunito';
+        font-style: normal;
+        font-weight: 700;
+        src: url('/fonts/nunito-v32-cyrillic_latin-700.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-display: swap;
+        font-family: 'Nunito';
+        font-style: normal;
+        font-weight: 800;
+        src: url('/fonts/nunito-v32-cyrillic_latin-800.woff2') format('woff2');
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Nunito', sans-serif;
+        font-weight: 600;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+
+        * {
+          box-sizing: border-box;
+        }
+      }
+    </style>
+    <script>
+      const { theme = 'system' } = localStorage;
+      const isSystemDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      document.documentElement.classList.toggle(
+        'dark',
+        theme === 'dark' || (theme === 'system' && isSystemDark)
+      );
+    </script>
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script>
+      try {
+        const hasSession = Object.keys(localStorage).some(function (key) {
+          return key.startsWith('sb-') && key.endsWith('-auth-token');
+        });
+        const joinCta = document.getElementById('hero-join-cta');
+        const openCta = document.getElementById('hero-open-cta');
+
+        if (hasSession && joinCta && openCta) {
+          joinCta.hidden = true;
+          openCta.hidden = false;
+        }
+      } catch (_error) {
+        /* localStorage unavailable — keep default CTAs */
+      }
+    </script>
+    <script type="module" src="/src/landing/entry-client.tsx"></script>
+  </body>
+</html>
