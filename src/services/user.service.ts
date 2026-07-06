@@ -26,6 +26,33 @@ export const signUp = async (
   }
 };
 
+export const signInAnonymously = async (firstDayOfWeek: DaysOfWeek) => {
+  const { error } = await supabaseClient.auth.signInAnonymously({
+    options: {
+      data: decamelizeKeys({
+        firstDayOfWeek,
+      }),
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const convertAnonymousUser = async (email: string, password: string) => {
+  const { error } = await supabaseClient.auth.updateUser(
+    { email, password },
+    {
+      emailRedirectTo: `${window.location.origin}/account?emailConfirmed=true`,
+    }
+  );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
 export const signIn = async (email: string, password: string) => {
   const { error } = await supabaseClient.auth.signInWithPassword({
     email,

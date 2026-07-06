@@ -1,4 +1,5 @@
 export { default as AccountPage } from './AccountPage';
+export { default as AnonymousLoginPage } from './AnonymousLoginPage';
 export { default as DayCalendarPage } from './DayCalendarPage';
 export { default as ErrorFallbackPage } from './ErrorFallbackPage';
 export { default as HabitDetailsPage } from './HabitDetailsPage';

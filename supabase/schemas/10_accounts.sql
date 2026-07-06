@@ -1,6 +1,6 @@
 CREATE TABLE "public"."profiles" (
     "id" UUID REFERENCES "auth"."users" ("id") ON DELETE CASCADE PRIMARY KEY,
-    "email" TEXT UNIQUE NOT NULL,
+    "email" TEXT UNIQUE,
     "name" TEXT,
     "plan" "public"."user_plans" NOT NULL DEFAULT 'free', -- noqa: disable=convention.quoted_literals
     "first_day_of_week" "public"."days_of_week" NOT NULL DEFAULT 'mon',
@@ -37,3 +37,6 @@ CREATE POLICY "Enable delete for users based on id" ON "public"."profiles" FOR D
 
 CREATE TRIGGER "on_auth_user_created" AFTER INSERT ON "auth"."users"
 FOR EACH ROW EXECUTE FUNCTION "public"."create_profile"();
+
+CREATE TRIGGER "on_auth_user_email_updated" AFTER UPDATE OF "email" ON "auth"."users"
+FOR EACH ROW EXECUTE FUNCTION "public"."sync_profile_email"();

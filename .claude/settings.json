@@ -37,7 +37,16 @@
       "mcp__chrome-devtools__fill",
       "mcp__chrome-devtools__click",
       "mcp__chrome-devtools__list_network_requests",
-      "mcp__chrome-devtools__get_network_request"
+      "mcp__chrome-devtools__get_network_request",
+      "Bash(yarn db:diff -f anonymous_login)",
+      "Bash(yarn db:gen-types)",
+      "Bash(yarn prettier:write)",
+      "Bash(yarn dev *)",
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__fill_form",
+      "mcp__chrome-devtools__wait_for",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__close_page"
     ]
   },
   "hooks": {
