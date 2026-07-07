@@ -20,7 +20,7 @@ jobs:
 
       - uses: supabase/setup-cli@v2.1.1
         with:
-          version: 2.107.0
+          version: 2.109.1
 
       - run: supabase link --project-ref $SUPABASE_PROJECT_ID
       - run: supabase db push

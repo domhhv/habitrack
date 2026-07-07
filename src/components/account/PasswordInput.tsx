@@ -9,8 +9,8 @@ type PasswordInputProps = {
   canReset?: boolean;
   className?: string;
   isDisabled: boolean;
-  label: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
+  placeholder?: string;
   testId?: string;
   value: string;
   variant?: 'primary' | 'secondary';
@@ -21,8 +21,8 @@ const PasswordInput = ({
   canReset = false,
   className,
   isDisabled,
-  label,
   onChange,
+  placeholder = 'Password',
   testId = '',
   value,
   variant,
@@ -53,10 +53,10 @@ const PasswordInput = ({
       <InputGroup variant={variant}>
         <InputGroup.Input
           value={value}
-          placeholder={label}
           onChange={onChange}
           data-testid={testId}
           disabled={isDisabled}
+          placeholder={placeholder}
           autoComplete={autoComplete}
           type={isVisible ? 'text' : 'password'}
         />

@@ -2,9 +2,7 @@ import React, { type ChangeEvent } from 'react';
 
 type TextFieldHandler = (
   value:
-    | string
-    | ChangeEvent<HTMLInputElement>
-    | ChangeEvent<HTMLTextAreaElement>
+    string | ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
 ) => void;
 
 type ReturnValue = [string, TextFieldHandler, () => void];

@@ -28,11 +28,7 @@ import {
 } from '@stores';
 
 export type CellPosition =
-  | 'top-left'
-  | 'top-right'
-  | 'bottom-left'
-  | 'bottom-right'
-  | '';
+  'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | '';
 
 type MonthCalendarCellProps = {
   date: CalendarDate;

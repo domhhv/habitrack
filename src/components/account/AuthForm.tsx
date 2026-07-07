@@ -1,4 +1,5 @@
 import { Input, Label, TextField } from '@heroui/react';
+import { GoogleLogoIcon } from '@phosphor-icons/react';
 import { type ReactNode, type SubmitEventHandler } from 'react';
 
 import { CustomButton } from '@components';
@@ -55,7 +56,6 @@ const AuthForm = ({
         {withPassword && (
           <PasswordInput
             value={password}
-            label="Password"
             variant="secondary"
             canReset={canReset}
             isDisabled={isAuthenticating}
@@ -71,12 +71,13 @@ const AuthForm = ({
         onClick={signInWithGoogle}
         data-testid="submit-button"
       >
+        <GoogleLogoIcon size={20} weight="bold" className="mr-1" />
         Sign in with Google
       </CustomButton>
       <CustomButton
         fullWidth
         type="submit"
-        className="mt-6"
+        className="mt-4"
         variant="primary"
         data-testid="submit-button"
         isPending={isAuthenticating}

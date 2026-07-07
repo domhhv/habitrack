@@ -28,8 +28,7 @@ export type NoteWithHabit = Note & {
 export type NotePeriodKind = Tables<'notes'>['period_kind'];
 
 type NoteCheck<T extends Partial<Tables<'notes'>>> =
-  | NoteOfPeriod<T>
-  | NoteOfOccurrence<T>;
+  NoteOfPeriod<T> | NoteOfOccurrence<T>;
 
 export type NotesInsert = CamelCasedPropertiesDeep<
   NoteCheck<TablesInsert<'notes'>>
