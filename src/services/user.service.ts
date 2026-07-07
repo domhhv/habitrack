@@ -1,4 +1,4 @@
-import { type UserAttributes } from '@supabase/supabase-js';
+import { type UserIdentity, type UserAttributes } from '@supabase/supabase-js';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
@@ -47,6 +47,37 @@ export const signInWithGoogle = async () => {
       redirectTo: `${window.location.origin}/calendar`,
     },
   });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const getUserIdentities = async () => {
+  const { data, error } = await supabaseClient.auth.getUserIdentities();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data.identities;
+};
+
+export const linkGoogleIdentity = async () => {
+  const { error } = await supabaseClient.auth.linkIdentity({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/account`,
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const unlinkIdentity = async (identity: UserIdentity) => {
+  const { error } = await supabaseClient.auth.unlinkIdentity(identity);
 
   if (error) {
     throw new Error(error.message);

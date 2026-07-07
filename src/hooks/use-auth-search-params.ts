@@ -3,13 +3,14 @@ import { useRollbar } from '@rollbar/react';
 import React from 'react';
 import { useLocation, useSearchParams } from 'react-router';
 
-import { useProfile, useUserActions } from '@stores';
-import { supabaseClient } from '@utils';
+import { useUser, useProfile, useUserActions } from '@stores';
+import { supabaseClient, getErrorMessage } from '@utils';
 
 const useAuthSearchParams = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { hash } = useLocation();
   const profile = useProfile();
+  const user = useUser();
   const { updateProfile } = useUserActions();
   const rollbar = useRollbar();
 
@@ -41,25 +42,32 @@ const useAuthSearchParams = () => {
         });
     }
 
+    console.log('useAuthSearchParams, ', {
+      profileEmail: profile?.email,
+      userEmail: user?.email,
+    });
+
     if (
       profile?.id &&
-      searchParams.get('emailChangeConfirmed') &&
-      searchParams.get('newEmail')
+      user?.email &&
+      searchParams.get('emailChangeConfirmed')
     ) {
-      const newEmail = searchParams.get('newEmail');
-      updateProfile(profile.id, { email: newEmail })
+      updateProfile(profile.id, { email: user.email })
         .then(() => {
           Toast.toast.success(`Your email change has been confirmed`, {
-            description: `Your email has been set as ${newEmail}`,
+            description: `Your email has been set as ${user.email}`,
           });
         })
-        .catch((err) => {
-          rollbar.error('Failed to update profile with new email', err);
+        .catch((error) => {
+          Toast.toast.danger(`Something went wrong when updating your email`, {
+            description: `Details: ${getErrorMessage(error)}`,
+          });
+          rollbar.error('Failed to update profile with new email', error);
         });
     }
 
     setSearchParams({});
-  }, [searchParams, setSearchParams, profile?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchParams, setSearchParams, profile?.id, profile?.email, user?.email]); // eslint-disable-line react-hooks/exhaustive-deps
 };
 
 export default useAuthSearchParams;
