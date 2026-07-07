@@ -4,10 +4,10 @@ import {
   Alert,
   Input,
   Label,
+  Toast,
   Select,
   ListBox,
   TextField,
-  Description,
 } from '@heroui/react';
 import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
@@ -17,7 +17,7 @@ import { CustomButton, PasswordInput } from '@components';
 import { useTextField, useAuthSearchParams } from '@hooks';
 import type { DaysOfWeek, ProfilesUpdate } from '@models';
 import { useUser, useProfile, useUserActions } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { getErrorMessage } from '@utils';
 
 const AccountPage = () => {
   useAuthSearchParams();
@@ -60,8 +60,9 @@ const AccountPage = () => {
     );
   }
 
-  const handleSubmit: SubmitEventHandler = (e) => {
+  const handleSubmit: SubmitEventHandler = async (e) => {
     e.preventDefault();
+    let hasUpdatedEmail = false;
 
     const updateUserData = async () => {
       const promises = [];
@@ -77,7 +78,7 @@ const AccountPage = () => {
 
       if (email !== profile.email) {
         userAttributes.email = email;
-        profileUpdatePayload.email = email;
+        hasUpdatedEmail = true;
       }
 
       if (firstDayOfWeek !== profile.firstDayOfWeek) {
@@ -103,9 +104,23 @@ const AccountPage = () => {
       await Promise.all(promises);
     };
 
-    handleAsyncAction(updateUserData(), 'update_account', setIsUpdating).then(
-      clearPassword
-    );
+    try {
+      setIsUpdating(true);
+      await updateUserData();
+      clearPassword();
+      handleEmailChange(profile.email || '');
+      Toast.toast.success('Account updated', {
+        description: hasUpdatedEmail
+          ? 'Email change requested. Please check your inbox for a confirmation email.'
+          : undefined,
+      });
+    } catch (error) {
+      Toast.toast.danger('Failed to update account', {
+        description: getErrorMessage(error) || 'Please try again later',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -133,11 +148,10 @@ const AccountPage = () => {
         <form
           onSubmit={handleSubmit}
           data-testid="account-form"
-          className="mt-4 w-full md:w-96"
+          className="mt-4 w-full md:w-lg"
         >
           <div className="flex flex-col gap-2">
             <TextField
-              isDisabled
               value={email}
               variant="secondary"
               data-testid="email-input"
@@ -145,7 +159,6 @@ const AccountPage = () => {
             >
               <Label>Email</Label>
               <Input placeholder="Email" />
-              <Description>Email updates coming soon</Description>
             </TextField>
             <PasswordInput
               label="Password"

@@ -86,13 +86,32 @@ export const signOut = async () => {
 };
 
 export const updateUser = async (attributes: UserAttributes) => {
-  const { data, error } = await supabaseClient.auth.updateUser(attributes);
+  const { data, error } = await supabaseClient.auth.updateUser(attributes, {
+    emailRedirectTo: `${window.location.origin}/account?emailChangeConfirmed=true&newEmail=${attributes.email}&userId=${attributes}`,
+  });
 
   if (error) {
     throw new Error(error.message);
   }
 
   return camelcaseKeys(data.user, { deep: true });
+};
+
+export const getUser = async () => {
+  const {
+    data: { user },
+    error,
+  } = await supabaseClient.auth.getUser();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return camelcaseKeys(user, { deep: true });
 };
 
 export const sendPasswordResetEmail = async (email: string) => {
