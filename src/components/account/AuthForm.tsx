@@ -3,6 +3,7 @@ import { type ReactNode, type SubmitEventHandler } from 'react';
 
 import { CustomButton } from '@components';
 import { useTextField } from '@hooks';
+import { signInWithGoogle } from '@services';
 
 import PasswordInput from './PasswordInput';
 
@@ -63,6 +64,15 @@ const AuthForm = ({
           />
         )}
       </div>
+      <CustomButton
+        fullWidth
+        className="mt-6"
+        variant="primary"
+        onClick={signInWithGoogle}
+        data-testid="submit-button"
+      >
+        Sign in with Google
+      </CustomButton>
       <CustomButton
         fullWidth
         type="submit"

@@ -112,22 +112,6 @@
   </head>
   <body>
     <div id="root"><!--app-html--></div>
-    <script>
-      try {
-        const hasSession = Object.keys(localStorage).some(function (key) {
-          return key.startsWith('sb-') && key.endsWith('-auth-token');
-        });
-        const joinCta = document.getElementById('hero-join-cta');
-        const openCta = document.getElementById('hero-open-cta');
-
-        if (hasSession && joinCta && openCta) {
-          joinCta.hidden = true;
-          openCta.hidden = false;
-        }
-      } catch (_error) {
-        /* localStorage unavailable — keep default CTAs */
-      }
-    </script>
     <script type="module" src="/src/landing/entry-client.tsx"></script>
   </body>
 </html>

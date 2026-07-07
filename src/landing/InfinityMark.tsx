@@ -8,8 +8,12 @@ const INFINITY_PATH =
 const InfinityMark = ({ className }: InfinityMarkProps) => {
   return (
     <svg
+      x="0px"
+      y="0px"
+      width="55"
       aria-hidden
       fill="none"
+      height="23.1"
       className={className}
       viewBox="0 0 55 23.1"
       preserveAspectRatio="xMidYMid meet"

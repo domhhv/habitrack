@@ -167,6 +167,8 @@ Supabase storage buckets:
 - Test files located alongside components or in dedicated test directories
 - Coverage reports available with `yarn test:coverage`
 
+Please do not proceed with verifying your changes in the browser unless explicitly instructed to do so.
+
 ### Build Configuration
 
 - **Vite** with optimized chunk splitting for major dependencies
