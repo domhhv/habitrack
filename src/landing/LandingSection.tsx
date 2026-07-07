@@ -20,7 +20,7 @@ const LandingSection = ({
   return (
     <section
       id={id}
-      className={`scroll-mt-20 py-16 sm:py-20 ${muted ? 'bg-(--surface-secondary)/60' : ''}`}
+      className={`scroll-mt-20 py-8 sm:py-20 ${muted ? 'bg-(--surface-secondary)/60' : ''}`}
     >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <p className="text-xs font-extrabold tracking-[0.2em] text-(--accent) uppercase">

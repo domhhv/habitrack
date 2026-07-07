@@ -127,6 +127,12 @@ secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
 max_frequency = "5s"
 
+[auth.external.google]
+enabled = true
+client_id = "172560223428-sb93r94iv8md7e4ct4n02va89gil1im2.apps.googleusercontent.com"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET)"
+skip_nonce_check = false
+
 # Use a production-ready SMTP server
 # [auth.email.smtp]
 # host = "smtp.sendgrid.net"

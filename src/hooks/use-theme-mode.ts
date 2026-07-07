@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ThemeModes } from '@const';
 
-const MEDIA_QUERY = '(prefers-color-scheme: dark)';
+export const MEDIA_QUERY = '(prefers-color-scheme: dark)';
 
 const useThemeMode = () => {
   const [themeMode, setThemeMode] = React.useState<ThemeModes>(() => {

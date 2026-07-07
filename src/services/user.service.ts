@@ -40,6 +40,19 @@ export const signInAnonymously = async (firstDayOfWeek: DaysOfWeek) => {
   }
 };
 
+export const signInWithGoogle = async () => {
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/calendar`,
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
 export const convertAnonymousUser = async (email: string, password: string) => {
   const { error } = await supabaseClient.auth.updateUser(
     { email, password },
