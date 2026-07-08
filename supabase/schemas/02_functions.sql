@@ -316,6 +316,13 @@ $function$;
 
 ALTER FUNCTION "public"."validate_metric_value"() OWNER TO "postgres";
 
+create or replace function delete_user() 
+returns void as $$
+begin
+  delete from auth.users where id = auth.uid();
+end;
+$$ language plpgsql security definer;
+
 -- Grant permissions on functions
 GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "anon";
 GRANT ALL ON FUNCTION "public"."get_longest_streak"("p_habit_id" UUID, "p_time_zone" TEXT) TO "authenticated";
