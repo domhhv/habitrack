@@ -42,11 +42,6 @@ const useAuthSearchParams = () => {
         });
     }
 
-    console.log('useAuthSearchParams, ', {
-      profileEmail: profile?.email,
-      userEmail: user?.email,
-    });
-
     if (
       profile?.id &&
       user?.email &&

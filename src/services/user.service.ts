@@ -116,6 +116,24 @@ export const signOut = async () => {
   }
 };
 
+export const deleteUser = async () => {
+  const { data, error } = await supabaseClient.rpc('delete_user');
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const { error: signOutError } = await supabaseClient.auth.signOut({
+    scope: 'local',
+  });
+
+  if (signOutError) {
+    throw new Error(signOutError.message);
+  }
+
+  return data;
+};
+
 export const updateUser = async (attributes: UserAttributes) => {
   const { data, error } = await supabaseClient.auth.updateUser(attributes, {
     emailRedirectTo: `${window.location.origin}/account?emailChangeConfirmed=true&newEmail=${attributes.email}&userId=${attributes}`,

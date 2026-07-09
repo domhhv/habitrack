@@ -2,7 +2,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 import type { Profile, ProfilesUpdate } from '@models';
-import { getProfile, updateUser, patchProfile } from '@services';
+import { getProfile, updateUser, deleteUser, patchProfile } from '@services';
 
 import { useBoundStore, type SliceCreator } from './bound.store';
 
@@ -15,6 +15,7 @@ export type UserSlice = {
   user: null | CamelCasedPropertiesDeep<User>;
   userActions: {
     clearProfile: () => void;
+    deleteUser: () => Promise<void>;
     fetchProfile: (userId: string) => Promise<void>;
     setUser: (user: null | CamelCasedPropertiesDeep<User>) => void;
     updateProfile: (
@@ -40,6 +41,18 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
           },
           undefined,
           'userActions.clearProfile'
+        );
+      },
+      deleteUser: async () => {
+        await deleteUser();
+
+        set(
+          (state) => {
+            state.profile = null;
+            state.user = null;
+          },
+          undefined,
+          'userActions.deleteUser'
         );
       },
       fetchProfile: async (userId) => {

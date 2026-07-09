@@ -14,19 +14,27 @@ import { PlugsIcon, ShieldIcon, UserCircleIcon } from '@phosphor-icons/react';
 import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
 import React from 'react';
+import { useNavigate } from 'react-router';
 
 import { CustomButton, PasswordInput, ConnectedAccounts } from '@components';
 import { useTextField, useAuthSearchParams } from '@hooks';
 import type { DaysOfWeek, ProfilesUpdate } from '@models';
-import { useUser, useProfile, useUserActions } from '@stores';
+import {
+  useUser,
+  useProfile,
+  useUserActions,
+  useConfirmationActions,
+} from '@stores';
 import { getErrorMessage } from '@utils';
 
 const AccountPage = () => {
   useAuthSearchParams();
 
+  const navigate = useNavigate();
   const user = useUser();
   const profile = useProfile();
-  const { updateProfile, updateUser } = useUserActions();
+  const { deleteUser, updateProfile, updateUser } = useUserActions();
+  const { askConfirmation } = useConfirmationActions();
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [email, handleEmailChange] = useTextField();
   const [password, handlePasswordChange, clearPassword] = useTextField();
@@ -129,6 +137,36 @@ const AccountPage = () => {
       });
     } catch (error) {
       Toast.toast.danger('Failed to update account', {
+        description: getErrorMessage(error) || 'Please try again later',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) {
+      return;
+    }
+
+    const confirmed = await askConfirmation({
+      confirmText: 'Delete account',
+      title: 'Delete your account?',
+      description:
+        'This will permanently delete your account and all data connected to it. This action cannot be undone.',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      await deleteUser();
+      Toast.toast.success('Account deleted');
+      navigate('/login');
+    } catch (error) {
+      Toast.toast.danger('Failed to delete account', {
         description: getErrorMessage(error) || 'Please try again later',
       });
     } finally {
@@ -324,6 +362,22 @@ const AccountPage = () => {
                 Save
               </CustomButton>
             </form>
+            <div className="border-danger/30 mt-8 flex w-full flex-col gap-3 border-t pt-6">
+              <h2 className="text-danger text-base font-semibold">
+                Delete account
+              </h2>
+              <p className="text-foreground-500 text-sm">
+                Permanently delete your account and all associated data.
+              </p>
+              <CustomButton
+                fullWidth
+                variant="danger"
+                isDisabled={isUpdating}
+                onPress={handleDeleteAccount}
+              >
+                Delete account
+              </CustomButton>
+            </div>
           </Tabs.Panel>
           <Tabs.Panel id="connected-accounts" className="w-full py-0 pl-6">
             <ConnectedAccounts />
