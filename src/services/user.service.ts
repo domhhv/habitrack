@@ -116,11 +116,19 @@ export const signOut = async () => {
   }
 };
 
-export const deleteUser = async (userId: string) => {
+export const deleteUser = async () => {
   const { data, error } = await supabaseClient.rpc('delete_user');
 
   if (error) {
     throw new Error(error.message);
+  }
+
+  const { error: signOutError } = await supabaseClient.auth.signOut({
+    scope: 'local',
+  });
+
+  if (signOutError) {
+    throw new Error(signOutError.message);
   }
 
   return data;

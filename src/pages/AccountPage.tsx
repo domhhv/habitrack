@@ -162,7 +162,7 @@ const AccountPage = () => {
 
     try {
       setIsUpdating(true);
-      await deleteUser(user.id);
+      await deleteUser();
       Toast.toast.success('Account deleted');
       navigate('/login');
     } catch (error) {

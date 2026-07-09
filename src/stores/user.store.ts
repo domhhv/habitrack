@@ -15,7 +15,7 @@ export type UserSlice = {
   user: null | CamelCasedPropertiesDeep<User>;
   userActions: {
     clearProfile: () => void;
-    deleteUser: (userId: string) => Promise<void>;
+    deleteUser: () => Promise<void>;
     fetchProfile: (userId: string) => Promise<void>;
     setUser: (user: null | CamelCasedPropertiesDeep<User>) => void;
     updateProfile: (
@@ -43,8 +43,8 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
           'userActions.clearProfile'
         );
       },
-      deleteUser: async (userId) => {
-        await deleteUser(userId);
+      deleteUser: async () => {
+        await deleteUser();
 
         set(
           (state) => {

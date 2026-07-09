@@ -1566,6 +1566,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user: { Args: never; Returns: undefined }
       get_habits_stats: {
         Args: { p_habit_ids: string[]; p_time_zone?: string }
         Returns: Database["public"]["CompositeTypes"]["habit_stats"][]
@@ -2325,4 +2326,3 @@ export const Constants = {
     },
   },
 } as const
-
