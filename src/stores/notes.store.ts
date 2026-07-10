@@ -5,7 +5,13 @@ import { useShallow } from 'zustand/react/shallow';
 
 import type { Note, Occurrence, NotesInsert, NotesUpdate } from '@models';
 import { listNotes, createNote, updateNote, destroyNote } from '@services';
-import { isNoteOfPeriod, isNoteOfOccurrence } from '@utils';
+import {
+  isNoteOfPeriod,
+  type CalendarRange,
+  isNoteOfOccurrence,
+  createCalendarRangeCache,
+  getSiblingPrefetchRanges,
+} from '@utils';
 
 import { useBoundStore, type SliceCreator } from './bound.store';
 
@@ -26,6 +32,31 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
   set,
   getState
 ) => {
+  const cache = createCalendarRangeCache<Note[]>();
+  let cacheVersion = 0;
+
+  const clearCache = () => {
+    cache.clear();
+    cacheVersion += 1;
+  };
+
+  const loadRange = (range: CalendarRange) => {
+    return cache.load(range, () => {
+      return listNotes([
+        toZoned(range[0], getLocalTimeZone()),
+        toZoned(range[1], getLocalTimeZone()),
+      ]);
+    });
+  };
+
+  const prefetchSiblingRanges = (range: CalendarRange) => {
+    getSiblingPrefetchRanges(range).forEach((siblingRange) => {
+      void loadRange(siblingRange).catch(() => {
+        return undefined;
+      });
+    });
+  };
+
   return {
     notes: {},
     notesByOccurrenceId: {},
@@ -34,6 +65,8 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
     noteActions: {
       addNote: async (note: NotesInsert) => {
         const newNote = await createNote(note);
+
+        clearCache();
 
         set(
           (state) => {
@@ -52,6 +85,8 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
       },
 
       clearNotes: () => {
+        clearCache();
+
         set(
           (state) => {
             state.notes = {};
@@ -65,6 +100,8 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
 
       deleteNote: async (id: Note['id']) => {
         await destroyNote(id);
+
+        clearCache();
 
         set(
           (state) => {
@@ -84,7 +121,6 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
       fetchNotes: async () => {
         const {
           calendarRange: [rangeStart, rangeEnd],
-          notesFetchedRange,
           user,
         } = getState();
 
@@ -92,19 +128,24 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
           return;
         }
 
-        const isCached =
-          notesFetchedRange &&
-          notesFetchedRange[0].compare(rangeStart) <= 0 &&
-          notesFetchedRange[1].compare(rangeEnd) >= 0;
+        const range: CalendarRange = [rangeStart, rangeEnd];
+        const cachedNotes = cache.get(range);
+        const currentRequest = cachedNotes ? null : loadRange(range);
 
-        if (isCached) {
+        prefetchSiblingRanges(range);
+
+        const requestVersion = cacheVersion;
+        const notes = cachedNotes ?? (await currentRequest!);
+        const currentState = getState();
+
+        if (
+          requestVersion !== cacheVersion ||
+          currentState.user?.id !== user.id ||
+          currentState.calendarRange[0].compare(rangeStart) !== 0 ||
+          currentState.calendarRange[1].compare(rangeEnd) !== 0
+        ) {
           return;
         }
-
-        const notes = await listNotes([
-          toZoned(rangeStart, getLocalTimeZone()),
-          toZoned(rangeEnd, getLocalTimeZone()),
-        ]);
 
         set(
           (state) => {
@@ -116,12 +157,16 @@ export const createNotesSlice: SliceCreator<keyof NotesSlice> = (
             state.notesFetchedRange = [rangeStart, rangeEnd];
           },
           undefined,
-          'noteActions.fetchNotes'
+          cachedNotes
+            ? 'noteActions.fetchNotes.cacheHit'
+            : 'noteActions.fetchNotes.cacheMiss'
         );
       },
 
       updateNote: async (id: Note['id'], note: NotesUpdate) => {
         const updatedNote = await updateNote(id, note);
+
+        clearCache();
 
         set(
           (state) => {
