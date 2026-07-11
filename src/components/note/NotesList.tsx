@@ -1,53 +1,24 @@
 import { ScrollShadow } from '@heroui/react';
+import { useRollbar } from '@rollbar/react';
 import React from 'react';
 
 import { NoteListItem, InfinityLoader } from '@components';
-import type { NoteWithHabit } from '@models';
-import { listAllNotes } from '@services';
-
-const PAGE_SIZE = 20;
+import { useNotesList, useNoteActions, useNotesListState } from '@stores';
+import { getErrorMessage } from '@utils';
 
 const NotesList = () => {
-  const [notes, setNotes] = React.useState<NoteWithHabit[]>([]);
-  const [page, setPage] = React.useState(0);
-  const [hasMore, setHasMore] = React.useState(true);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const notes = useNotesList();
+  const { fetchNextNotesPage, initializeNotesList } = useNoteActions();
+  const { hasMore, isLoading } = useNotesListState();
   const containerRef = React.useRef<HTMLDivElement>(null);
-
-  const fetchNotes = React.useCallback(
-    async (pageToFetch: number) => {
-      if (isLoading) {
-        return;
-      }
-
-      setIsLoading(true);
-
-      try {
-        const fetchedNotes = await listAllNotes({
-          limit: PAGE_SIZE,
-          page: pageToFetch,
-        });
-
-        if (fetchedNotes.length < PAGE_SIZE) {
-          setHasMore(false);
-        }
-
-        setNotes((prev) => {
-          return pageToFetch === 0 ? fetchedNotes : [...prev, ...fetchedNotes];
-        });
-      } catch (error) {
-        console.error('Failed to fetch notes:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [isLoading]
-  );
+  const rollbar = useRollbar();
 
   React.useEffect(() => {
-    void fetchNotes(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    void initializeNotesList().catch((error: unknown) => {
+      rollbar.error('Failed to initialize notes list', getErrorMessage(error));
+      console.error('Failed to fetch notes:', error);
+    });
+  }, [initializeNotesList, rollbar]);
 
   const handleScroll = React.useCallback(
     (event: React.UIEvent<HTMLDivElement>) => {
@@ -56,12 +27,13 @@ const NotesList = () => {
         target.scrollHeight - target.scrollTop <= target.clientHeight + 50;
 
       if (scrolledToBottom && hasMore && !isLoading) {
-        const nextPage = page + 1;
-        setPage(nextPage);
-        void fetchNotes(nextPage);
+        void fetchNextNotesPage().catch((error: unknown) => {
+          rollbar.error('Failed to fetch notes', getErrorMessage(error));
+          console.error('Failed to fetch notes:', error);
+        });
       }
     },
-    [hasMore, isLoading, page, fetchNotes]
+    [fetchNextNotesPage, hasMore, isLoading, rollbar]
   );
 
   const renderEndMessage = () => {

@@ -107,5 +107,10 @@ export const createCalendarRangeCache = <T>() => {
       generation += 1;
       pending.clear();
     },
+    values: () => {
+      return entries.map((entry) => {
+        return entry.value;
+      });
+    },
   };
 };
