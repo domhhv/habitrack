@@ -65,6 +65,19 @@ describe('createCalendarRangeCache', () => {
     expect(loader).toHaveBeenCalledOnce();
   });
 
+  it('exposes cached values for consumers that span multiple ranges', async () => {
+    const cache = createCalendarRangeCache<string[]>();
+
+    await cache.load(range(1, 5), async () => {
+      return ['first'];
+    });
+    await cache.load(range(10, 15), async () => {
+      return ['second'];
+    });
+
+    expect(cache.values()).toEqual([['first'], ['second']]);
+  });
+
   it('does not cache a request completed after the cache is cleared', async () => {
     const cache = createCalendarRangeCache<string[]>();
     let resolveRequest: ((value: string[]) => void) | undefined;
