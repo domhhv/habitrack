@@ -1,4 +1,4 @@
-import { hydrateRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 
 import './landing.css';
 import LandingPage from './LandingPage';
@@ -6,5 +6,9 @@ import LandingPage from './LandingPage';
 const container = document.getElementById('root');
 
 if (container) {
-  hydrateRoot(container, <LandingPage />);
+  if (container.childElementCount > 0) {
+    hydrateRoot(container, <LandingPage />);
+  } else {
+    createRoot(container).render(<LandingPage />);
+  }
 }

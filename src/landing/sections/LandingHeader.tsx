@@ -1,3 +1,5 @@
+import { CustomButton } from '@components';
+
 import CtaLink from '../CtaLink';
 import InfinityMark from '../InfinityMark';
 import ThemeToggle from '../ThemeToggle';
@@ -40,9 +42,9 @@ const LandingHeader = ({ hasSession }: LandingHeaderProps) => {
           <ThemeToggle className="max-[372px]:hidden" />
           {hasSession ? (
             <div className="hero-logged-in-ctas-container flex items-center gap-2">
-              <CtaLink size="sm" href="/calendar">
+              <CustomButton size="sm" href="/calendar">
                 Calendar
-              </CtaLink>
+              </CustomButton>
             </div>
           ) : (
             <div className="hero-logged-out-ctas-container flex items-center gap-2">
