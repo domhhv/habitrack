@@ -1,4 +1,5 @@
 export { default as ExpenseSummaryMockup } from './ExpenseSummaryMockup';
+export { default as LiveMonthCalendar } from './LiveMonthCalendar';
 export { default as McpTerminalMockup } from './McpTerminalMockup';
 export { default as MetricInputsMockup } from './MetricInputsMockup';
 export { default as MiniDayView } from './MiniDayView';
