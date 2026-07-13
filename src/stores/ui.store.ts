@@ -42,12 +42,17 @@ export type UiSlice = {
   calendarFilters: CalendarFilters;
   calendarRange: [CalendarDateTime, CalendarDateTime];
   confirmation: ConfirmationState;
+  isMobileSidebarOpen: boolean;
   changeCalendarFilters: (filters: CalendarFilters) => void;
   changeCalendarRange: (range: [CalendarDateTime, CalendarDateTime]) => void;
   confirmationActions: {
     approveConfirmation: () => void;
     askConfirmation: (options?: ConfirmationOptions) => Promise<boolean>;
     rejectConfirmation: () => void;
+  };
+  mobileSidebarActions: {
+    closeMobileSidebar: () => void;
+    openMobileSidebar: () => void;
   };
   noteDrawer: {
     isOpen: boolean;
@@ -95,6 +100,7 @@ const initialConfirmationState = {
 export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
   return {
     confirmation: initialConfirmationState,
+    isMobileSidebarOpen: false,
     changeCalendarFilters: (filters) => {
       set(
         (state) => {
@@ -167,6 +173,26 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
           },
           undefined,
           'uiActions.rejectConfirmation'
+        );
+      },
+    },
+    mobileSidebarActions: {
+      closeMobileSidebar: () => {
+        set(
+          (state) => {
+            state.isMobileSidebarOpen = false;
+          },
+          undefined,
+          'uiActions.closeMobileSidebar'
+        );
+      },
+      openMobileSidebar: () => {
+        set(
+          (state) => {
+            state.isMobileSidebarOpen = true;
+          },
+          undefined,
+          'uiActions.openMobileSidebar'
         );
       },
     },
@@ -309,6 +335,18 @@ export const useNoteDrawerState = () => {
 export const useNoteDrawerActions = () => {
   return useBoundStore((state) => {
     return state.noteDrawerActions;
+  });
+};
+
+export const useMobileSidebarState = () => {
+  return useBoundStore((state) => {
+    return state.isMobileSidebarOpen;
+  });
+};
+
+export const useMobileSidebarActions = () => {
+  return useBoundStore((state) => {
+    return state.mobileSidebarActions;
   });
 };
 

@@ -7,5 +7,9 @@ export { default as useKeyboardShortcut } from './use-keyboard-shortcut';
 export { default as useModifierKeys } from './use-modifier-keys';
 export { default as useScreenWidth } from './use-screen-width';
 export { default as useSession } from './use-session';
+export {
+  default as useSidebarMode,
+  type SidebarMode,
+} from './use-sidebar-mode';
 export { default as useTextField } from './use-text-field';
 export { default as useThemeMode } from './use-theme-mode';

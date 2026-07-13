@@ -27,7 +27,7 @@ import {
 } from '@stores';
 import { getErrorMessage } from '@utils';
 
-const AccountPage = () => {
+const SettingsPage = () => {
   useAuthSearchParams();
 
   const navigate = useNavigate();
@@ -49,7 +49,7 @@ const AccountPage = () => {
     setDefaultCurrency(profile?.defaultCurrency || 'EUR');
   }, [profile, handleEmailChange, handleNameChange]);
 
-  const title = <title>My Account | Habitrack</title>;
+  const title = <title>Settings | Habitrack</title>;
 
   const containerClassName = 'w-3xl mt-8 mx-auto flex flex-col';
 
@@ -178,10 +178,10 @@ const AccountPage = () => {
     <div className="flex h-lvh w-full flex-col items-start self-start px-8 py-2 lg:px-16 lg:py-4">
       {title}
       <div
-        data-testid="account-page"
+        data-testid="settings-page"
         className={cn(containerClassName, 'justify-self-start')}
       >
-        <h1 className="text-xl font-semibold">Your Account Settings</h1>
+        <h1 className="text-xl font-semibold">Settings</h1>
         {!!user?.isAnonymous && (
           <Alert status="warning" className="mt-4 w-full md:w-96">
             <Alert.Indicator />
@@ -347,6 +347,7 @@ const AccountPage = () => {
                 variant="secondary"
                 isDisabled={isUpdating}
                 testId="password-input"
+                autoComplete="new-password"
                 onChange={handlePasswordChange}
                 placeholder="Enter new password"
               />
@@ -388,4 +389,4 @@ const AccountPage = () => {
   );
 };
 
-export default AccountPage;
+export default SettingsPage;

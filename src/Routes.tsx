@@ -1,12 +1,12 @@
 import React from 'react';
-import { Route, Routes, Navigate } from 'react-router';
+import { Route, Routes, Navigate, useLocation } from 'react-router';
 
 import {
   LoginPage,
   NotesPage,
   HabitsPage,
-  AccountPage,
   RegisterPage,
+  SettingsPage,
   DayCalendarPage,
   OAuthConsentPage,
   HabitDetailsPage,
@@ -15,6 +15,12 @@ import {
   ResetPasswordPage,
   AnonymousLoginPage,
 } from '@pages';
+
+const AccountRedirect = () => {
+  const { hash, search } = useLocation();
+
+  return <Navigate replace to={`/settings${search}${hash}`} />;
+};
 
 const AppRoutes = () => {
   return (
@@ -34,7 +40,8 @@ const AppRoutes = () => {
       <Route path="/habits" element={<HabitsPage />} />
       <Route path="/habits/:habitId" element={<HabitDetailsPage />} />
       <Route path="/notes" element={<NotesPage />} />
-      <Route path="/account" element={<AccountPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/account" element={<AccountRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/anonymous-login" element={<AnonymousLoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
