@@ -3,6 +3,7 @@ import React from 'react';
 
 import {
   AppHeader,
+  AppSidebar,
   NoteDrawer,
   InfinityLoader,
   OccurrenceDrawer,
@@ -47,9 +48,12 @@ const App = () => {
       <NoteDrawer />
       <OccurrenceDrawer />
       <ConfirmationDialog />
-      <main className="flex h-full flex-1 flex-col items-start bg-white max-md:pb-11.25 dark:bg-black">
-        <AppRoutes />
-      </main>
+      <div className="flex w-full flex-1 items-stretch">
+        <AppSidebar />
+        <main className="flex h-full min-w-0 flex-1 flex-col items-start bg-white max-md:pb-11.25 dark:bg-black">
+          <AppRoutes />
+        </main>
+      </div>
     </>
   );
 };

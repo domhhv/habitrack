@@ -56,7 +56,7 @@ const OAuthConsentPage = () => {
         const returnTo = encodeURIComponent(
           window.location.pathname + window.location.search
         );
-        window.location.href = `/account?returnTo=${returnTo}`;
+        window.location.href = `/settings?returnTo=${returnTo}`;
 
         return;
       }

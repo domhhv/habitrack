@@ -1,4 +1,3 @@
-export { default as AccountPage } from './AccountPage';
 export { default as AnonymousLoginPage } from './AnonymousLoginPage';
 export { default as DayCalendarPage } from './DayCalendarPage';
 export { default as ErrorFallbackPage } from './ErrorFallbackPage';
@@ -10,4 +9,5 @@ export { default as NotesPage } from './NotesPage';
 export { default as OAuthConsentPage } from './OAuthConsentPage';
 export { default as RegisterPage } from './RegisterPage';
 export { default as ResetPasswordPage } from './ResetPasswordPage';
+export { default as SettingsPage } from './SettingsPage';
 export { default as WeekCalendarPage } from './WeekCalendarPage';

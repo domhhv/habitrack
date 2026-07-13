@@ -14,7 +14,7 @@ export const signUp = async (
     email,
     password,
     options: {
-      emailRedirectTo: `${window.location.origin}/account?emailConfirmed=true`,
+      emailRedirectTo: `${window.location.origin}/settings?emailConfirmed=true`,
       data: decamelizeKeys({
         firstDayOfWeek,
       }),
@@ -67,7 +67,7 @@ export const linkGoogleIdentity = async () => {
   const { error } = await supabaseClient.auth.linkIdentity({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/account`,
+      redirectTo: `${window.location.origin}/settings`,
     },
   });
 
@@ -88,7 +88,7 @@ export const convertAnonymousUser = async (email: string, password: string) => {
   const { error } = await supabaseClient.auth.updateUser(
     { email, password },
     {
-      emailRedirectTo: `${window.location.origin}/account?emailConfirmed=true`,
+      emailRedirectTo: `${window.location.origin}/settings?emailConfirmed=true`,
     }
   );
 
@@ -136,7 +136,7 @@ export const deleteUser = async () => {
 
 export const updateUser = async (attributes: UserAttributes) => {
   const { data, error } = await supabaseClient.auth.updateUser(attributes, {
-    emailRedirectTo: `${window.location.origin}/account?emailChangeConfirmed=true&newEmail=${attributes.email}&userId=${attributes}`,
+    emailRedirectTo: `${window.location.origin}/settings?emailChangeConfirmed=true&newEmail=${attributes.email}&userId=${attributes}`,
   });
 
   if (error) {
@@ -165,7 +165,7 @@ export const getUser = async () => {
 
 export const sendPasswordResetEmail = async (email: string) => {
   const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/account?passwordReset=true`,
+    redirectTo: `${window.location.origin}/settings?passwordReset=true`,
   });
 
   if (error) {
