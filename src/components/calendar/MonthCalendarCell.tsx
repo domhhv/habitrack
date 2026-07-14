@@ -16,11 +16,12 @@ import { useCalendarCell } from 'react-aria';
 import type { CalendarState } from 'react-stately';
 
 import { CustomButton, OccurrenceChip } from '@components';
-import { useThemeMode, useScreenWidth } from '@hooks';
+import { useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import {
   useUser,
   useDayNotes,
+  useThemeMode,
   useNoteDrawerState,
   useNoteDrawerActions,
   useOccurrenceDrawerState,
@@ -58,7 +59,7 @@ const MonthCalendarCell = ({
     periodKind: noteDrawerPeriodKind,
   } = useNoteDrawerState();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
-  const { isDesktop, isMobile, screenWidth } = useScreenWidth();
+  const { isDesktop, screenWidth } = useScreenWidth();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const calendarCellRef = React.useRef<HTMLDivElement | null>(null);
   const { cellProps, formattedDate, isOutsideVisibleRange } = useCalendarCell(
@@ -66,7 +67,7 @@ const MonthCalendarCell = ({
     state,
     calendarCellRef
   );
-  const { themeMode } = useThemeMode();
+  const { isLightTheme, themeMode } = useThemeMode();
 
   const isTodayCell = isToday(date, state.timeZone);
 
@@ -116,124 +117,100 @@ const MonthCalendarCell = ({
     });
   };
 
-  const cellHeader = (
+  const cellActions = (
     <div
       className={cn(
-        'border-border sticky top-0 flex w-full items-center justify-between border-b py-0.5 pr-0.5 pl-1.5 text-sm',
-        'group-hover/cell:bg-background dark:group-hover/cell:bg-surface bg-white transition-colors dark:bg-black',
-        isTodayCell &&
-          'bg-background dark:bg-surface dark:group-hover/cell:bg-surface-secondary group-hover/cell:bg-background-secondary',
-        isDrawerDate &&
-          isDesktop &&
-          !isTodayCell &&
-          'bg-background dark:bg-surface',
-        isDrawerDate &&
-          isDesktop &&
-          isTodayCell &&
-          'bg-background-secondary dark:bg-surface-secondary',
-        isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600',
-        isTodayCell ? 'w-full self-auto md:self-start' : 'w-full',
-        isMobile && 'pl-1'
+        'flex w-fit flex-col items-center p-1.5 px-0.5 text-sm',
+        isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600'
       )}
     >
-      <p
-        className={cn(
-          'font-bold',
-          isMobile && 'text-sm',
-          isTodayCell && 'font-extrabold'
-        )}
-      >
+      <p className={cn('font-bold', isTodayCell && 'font-extrabold')}>
         {formattedDate}
       </p>
-      <div className="flex items-center justify-between">
-        {isMobile && screenWidth > 360 && hasNote && (
-          <NoteIcon size={12} weight="bold" />
-        )}
-        {screenWidth >= 1360 && (
-          <div className="flex items-center">
-            <Tooltip delay={0} closeDelay={0}>
-              <Tooltip.Trigger className="flex">
-                <CustomButton
-                  variant="light"
-                  aria-label="Open day"
-                  href={`/calendar/day/${date.year}/${date.month}/${date.day}`}
-                  className={cn(
-                    'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                    (isTodayCell || isDrawerDate) && 'opacity-100'
-                  )}
-                >
-                  <ArrowSquareRightIcon size={18} weight="bold" />
-                </CustomButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content>Open day</Tooltip.Content>
-            </Tooltip>
-            <Tooltip delay={0} closeDelay={0}>
-              <Tooltip.Trigger className="flex">
-                <CustomButton
-                  variant="light"
-                  isDisabled={!user}
-                  aria-label="Show habit log"
-                  onPress={() => {
-                    openOccurrenceDrawer({
-                      dayToDisplay: date,
-                    });
-                  }}
-                  className={cn(
-                    'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                    (isTodayCell || isDrawerDate) && 'opacity-100'
-                  )}
-                >
-                  <SquareHalfIcon size={18} weight="bold" />
-                </CustomButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content>Show habit log</Tooltip.Content>
-            </Tooltip>
-            <Tooltip delay={0} closeDelay={0}>
-              <Tooltip.Trigger className="flex">
-                <CustomButton
-                  variant="light"
-                  isDisabled={!user}
-                  aria-label="Log habit"
-                  onPress={openLoggingDrawer}
-                  className={cn(
-                    'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                    (isTodayCell || isDrawerDate) && 'opacity-100'
-                  )}
-                >
-                  <CalendarPlusIcon size={18} weight="bold" />
-                </CustomButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content>Log habit</Tooltip.Content>
-            </Tooltip>
-            <Tooltip delay={0} closeDelay={0}>
-              <Tooltip.Trigger className="flex">
-                <CustomButton
-                  variant="light"
-                  isDisabled={!user}
-                  aria-label={hasNote ? 'Edit note' : 'Add note'}
-                  onPress={() => {
-                    openNoteDrawer(date, 'day');
-                  }}
-                  className={cn(
-                    'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
-                    (isTodayCell || isDrawerDate) && 'opacity-100',
-                    hasNote && 'text-accent opacity-100'
-                  )}
-                >
-                  {hasNote ? (
-                    <NoteIcon size={18} weight="bold" />
-                  ) : (
-                    <NoteBlankIcon size={18} weight="bold" />
-                  )}
-                </CustomButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content>
-                {hasNote ? 'Edit note' : 'Add note'}
-              </Tooltip.Content>
-            </Tooltip>
-          </div>
-        )}
-      </div>
+      {screenWidth >= 1360 && (
+        <div className="flex flex-col items-center">
+          <Tooltip delay={0} closeDelay={0}>
+            <Tooltip.Trigger className="flex">
+              <CustomButton
+                variant="light"
+                isDisabled={!user}
+                aria-label={hasNote ? 'Edit note' : 'Add note'}
+                onPress={() => {
+                  openNoteDrawer(date, 'day');
+                }}
+                className={cn(
+                  'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                  (isTodayCell || isDrawerDate) && 'opacity-100',
+                  hasNote && 'text-accent opacity-100'
+                )}
+              >
+                {hasNote ? (
+                  <NoteIcon size={18} weight="bold" />
+                ) : (
+                  <NoteBlankIcon size={18} weight="bold" />
+                )}
+              </CustomButton>
+            </Tooltip.Trigger>
+            <Tooltip.Content>
+              {hasNote ? 'Edit note' : 'Add note'}
+            </Tooltip.Content>
+          </Tooltip>
+          <Tooltip delay={0} closeDelay={0}>
+            <Tooltip.Trigger className="flex">
+              <CustomButton
+                variant="light"
+                isDisabled={!user}
+                aria-label="Log habit"
+                onPress={openLoggingDrawer}
+                className={cn(
+                  'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                  (isTodayCell || isDrawerDate) && 'opacity-100'
+                )}
+              >
+                <CalendarPlusIcon size={18} weight="bold" />
+              </CustomButton>
+            </Tooltip.Trigger>
+            <Tooltip.Content>Log habit</Tooltip.Content>
+          </Tooltip>
+          <Tooltip delay={0} closeDelay={0}>
+            <Tooltip.Trigger className="flex">
+              <CustomButton
+                variant="light"
+                isDisabled={!user}
+                aria-label="Show habit log"
+                onPress={() => {
+                  openOccurrenceDrawer({
+                    dayToDisplay: date,
+                  });
+                }}
+                className={cn(
+                  'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                  (isTodayCell || isDrawerDate) && 'opacity-100'
+                )}
+              >
+                <SquareHalfIcon size={18} weight="bold" />
+              </CustomButton>
+            </Tooltip.Trigger>
+            <Tooltip.Content>Show habit log</Tooltip.Content>
+          </Tooltip>
+          <Tooltip delay={0} closeDelay={0}>
+            <Tooltip.Trigger className="flex">
+              <CustomButton
+                variant="light"
+                aria-label="Open day"
+                href={`/calendar/day/${date.year}/${date.month}/${date.day}`}
+                className={cn(
+                  'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
+                  (isTodayCell || isDrawerDate) && 'opacity-100'
+                )}
+              >
+                <ArrowSquareRightIcon size={18} weight="bold" />
+              </CustomButton>
+            </Tooltip.Trigger>
+            <Tooltip.Content>Open day</Tooltip.Content>
+          </Tooltip>
+        </div>
+      )}
     </div>
   );
 
@@ -243,7 +220,7 @@ const MonthCalendarCell = ({
     active: isDrawerDate,
     borderRadius: 0,
     size: 'pulse-inner',
-    strength: 0.6,
+    strength: isLightTheme ? 1 : 0.6,
     theme: themeMode === 'system' ? 'auto' : themeMode,
   };
 
@@ -256,7 +233,7 @@ const MonthCalendarCell = ({
       <Component
         {...(isDrawerDate && borderBeamProps)}
         className={cn(
-          'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 space-y-2 overflow-x-auto overflow-y-visible bg-white transition-colors dark:bg-black',
+          'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 overflow-x-auto overflow-y-visible bg-white transition-colors dark:bg-black',
           isTodayCell &&
             'bg-background group-hover/cell:bg-surface-secondary dark:group-hover/cell:bg-surface-secondary dark:bg-surface',
           isDrawerDate &&
@@ -275,8 +252,8 @@ const MonthCalendarCell = ({
       >
         {screenWidth < 1360 && user ? (
           <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-            <Popover.Trigger className="sticky top-0 z-10 w-full">
-              {cellHeader}
+            <Popover.Trigger className="absolute top-0 right-0 z-10">
+              {cellActions}
             </Popover.Trigger>
             <Popover.Content offset={12} placement="bottom">
               <Popover.Dialog className="p-0">
@@ -338,9 +315,13 @@ const MonthCalendarCell = ({
             </Popover.Content>
           </Popover>
         ) : (
-          cellHeader
+          <div className="absolute top-0 right-0 z-10">{cellActions}</div>
         )}
-        <div className="flex flex-wrap justify-center gap-2 px-0 py-0.5 pb-2 md:px-2 xl:justify-start">
+        <div
+          className={cn(
+            'flex flex-wrap justify-center gap-3 p-3 pr-6 xl:justify-start'
+          )}
+        >
           {Object.entries(groupedOccurrences).map(
             ([habitId, habitOccurrences]) => {
               if (!habitOccurrences) {

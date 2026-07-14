@@ -960,7 +960,11 @@ const OccurrenceFormView = ({
       />
       <TextField value={note} variant="secondary" onChange={handleNoteChange}>
         <Label>Note</Label>
-        <TextArea fullWidth placeholder="Note" className="max-lg:text-base" />
+        <TextArea
+          fullWidth
+          placeholder="Note"
+          className="field-sizing-content max-h-32 min-h-16 max-lg:text-base"
+        />
       </TextField>
       <div className="w-full space-y-2">
         <Switch

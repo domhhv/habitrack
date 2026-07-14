@@ -8,9 +8,9 @@ import {
   getLocalTimeZone,
 } from '@internationalized/date';
 import {
+  CalendarDotIcon,
   ArrowFatLeftIcon,
   ArrowFatRightIcon,
-  ArrowsClockwiseIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
 import { useLocale } from 'react-aria';
@@ -136,17 +136,15 @@ const CalendarNavigationButtons = ({
       >
         <ArrowFatLeftIcon size={20} />
       </CustomButton>
-      {!isSameRange && (
-        <CustomButton
-          className="px-3"
-          variant="tertiary"
-          href={todayRangePath}
-          size={isDesktop ? 'md' : 'sm'}
-          aria-label={`Current ${calendarMode}`}
-        >
-          <ArrowsClockwiseIcon size={20} />
-        </CustomButton>
-      )}
+      <CustomButton
+        className="px-3"
+        href={todayRangePath}
+        size={isDesktop ? 'md' : 'sm'}
+        aria-label={`Current ${calendarMode}`}
+        variant={isSameRange ? 'secondary' : 'tertiary'}
+      >
+        <CalendarDotIcon size={20} />
+      </CustomButton>
       <CustomButton
         className="px-3"
         variant="tertiary"

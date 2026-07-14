@@ -67,7 +67,7 @@ const CustomKbd = ({
       })}
       {...props}
     >
-      <CoreKbd.Content>{props.children}</CoreKbd.Content>
+      <CoreKbd.Content className="font-sans">{props.children}</CoreKbd.Content>
     </CoreKbd>
   );
 };
