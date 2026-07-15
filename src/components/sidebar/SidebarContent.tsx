@@ -68,7 +68,7 @@ const SidebarTooltip = ({
   }
 
   return (
-    <Tooltip closeDelay={0} {...props} delay={0}>
+    <Tooltip {...props} delay={0} closeDelay={0}>
       <Tooltip.Trigger className={className}>{children}</Tooltip.Trigger>
       <Tooltip.Content offset={offset} placement={placement}>
         {content}
@@ -164,7 +164,7 @@ const SidebarContent = ({
       'text-foreground flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium',
       !isExpanded && 'justify-center px-0',
       isActive && 'bg-accent-soft text-accent hover:bg-accent-soft-hover',
-      isInternal && 'hover:bg-background-secondary no-underline'
+      isInternal && !isActive && 'hover:bg-background-secondary no-underline'
     );
   };
 
@@ -243,7 +243,7 @@ const SidebarContent = ({
                           'flex size-7 shrink-0 items-center justify-center rounded-full',
                           variant === 'primary'
                             ? 'bg-accent text-accent-foreground'
-                            : 'bg-default text-accent border-border border'
+                            : 'bg-surface-tertiary text-accent border-border border'
                         )}
                       >
                         <ItemIcon size={14} />
@@ -315,6 +315,7 @@ const SidebarContent = ({
                     href={href}
                     variant="ghost"
                     target="_blank"
+                    aria-label={label}
                     rel="noopener noreferrer"
                     className="text-muted h-6 w-7 rounded-md"
                   >

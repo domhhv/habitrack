@@ -82,6 +82,6 @@ html.dark span.ripple {
   cursor: pointer;
 }
 
-textarea::-webkit-resizer {
+.occurrence-note-textarea::-webkit-resizer {
   display: none;
 }

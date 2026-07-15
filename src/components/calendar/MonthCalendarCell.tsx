@@ -38,6 +38,8 @@ type MonthCalendarCellProps = {
   state: CalendarState;
 };
 
+const CELL_ACTIONS_BREAKPOINT = 1360;
+
 const MonthCalendarCell = ({
   date,
   occurrences,
@@ -127,7 +129,7 @@ const MonthCalendarCell = ({
       <p className={cn('font-bold', isTodayCell && 'font-extrabold')}>
         {formattedDate}
       </p>
-      {screenWidth >= 1360 && (
+      {screenWidth >= CELL_ACTIONS_BREAKPOINT && (
         <div className="flex flex-col items-center">
           <Tooltip delay={0} closeDelay={0}>
             <Tooltip.Trigger className="flex">
@@ -233,7 +235,7 @@ const MonthCalendarCell = ({
       <Component
         {...(isDrawerDate && borderBeamProps)}
         className={cn(
-          'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 overflow-x-auto overflow-y-visible bg-white transition-colors dark:bg-black',
+          'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 overflow-visible bg-white transition-colors dark:bg-black',
           isTodayCell &&
             'bg-background group-hover/cell:bg-surface-secondary dark:group-hover/cell:bg-surface-secondary dark:bg-surface',
           isDrawerDate &&
@@ -250,7 +252,7 @@ const MonthCalendarCell = ({
           position === 'bottom-right' && 'rounded-br-[10px]!'
         )}
       >
-        {screenWidth < 1360 && user ? (
+        {screenWidth < CELL_ACTIONS_BREAKPOINT ? (
           <Popover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             <Popover.Trigger className="absolute top-0 right-0 z-10">
               {cellActions}
@@ -271,6 +273,7 @@ const MonthCalendarCell = ({
                   <CustomButton
                     size="sm"
                     variant="ghost"
+                    isDisabled={!user}
                     className="justify-start"
                     onPress={() => {
                       setIsPopoverOpen(false);
@@ -285,6 +288,7 @@ const MonthCalendarCell = ({
                   <CustomButton
                     size="sm"
                     variant="ghost"
+                    isDisabled={!user}
                     className="justify-start"
                     onPress={() => {
                       setIsPopoverOpen(false);
@@ -297,6 +301,7 @@ const MonthCalendarCell = ({
                   <CustomButton
                     size="sm"
                     variant="ghost"
+                    isDisabled={!user}
                     className={cn('justify-start', hasNote && 'text-accent')}
                     onPress={() => {
                       setIsPopoverOpen(false);
@@ -319,7 +324,7 @@ const MonthCalendarCell = ({
         )}
         <div
           className={cn(
-            'flex flex-wrap justify-center gap-3 p-3 pr-6 xl:justify-start'
+            'flex flex-wrap justify-center gap-3 overflow-x-auto p-3 pr-6 xl:justify-start'
           )}
         >
           {Object.entries(groupedOccurrences).map(

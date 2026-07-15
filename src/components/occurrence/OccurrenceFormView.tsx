@@ -963,7 +963,7 @@ const OccurrenceFormView = ({
         <TextArea
           fullWidth
           placeholder="Note"
-          className="field-sizing-content max-h-32 min-h-16 max-lg:text-base"
+          className="occurrence-note-textarea field-sizing-content max-h-32 min-h-16 max-lg:text-base"
         />
       </TextField>
       <div className="w-full space-y-2">
