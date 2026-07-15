@@ -12,4 +12,3 @@ export {
   type SidebarMode,
 } from './use-sidebar-mode';
 export { default as useTextField } from './use-text-field';
-export { default as useThemeMode } from './use-theme-mode';

@@ -17,11 +17,15 @@ const MODE_OPTIONS: { icon: Icon; id: SidebarMode; label: string }[] = [
   { icon: CursorIcon, id: 'hover', label: 'Expand on hover' },
 ];
 
-const SidebarModeSelect = () => {
+type SidebarModeSelectProps = {
+  onOpenChange?: (isOpen: boolean) => void;
+};
+
+const SidebarModeSelect = ({ onOpenChange }: SidebarModeSelectProps) => {
   const { setSidebarMode, sidebarMode } = useSidebarMode();
 
   return (
-    <Dropdown>
+    <Dropdown onOpenChange={onOpenChange}>
       <CustomButton
         size="sm"
         isIconOnly

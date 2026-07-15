@@ -14,6 +14,7 @@ import {
   createOccurrencesSlice,
 } from './occurrences.store';
 import { type StocksSlice, createStocksSlice } from './stocks.store';
+import { type ThemeSlice, createThemeSlice } from './theme.store';
 import { type TraitsSlice, createTraitsSlice } from './traits.store';
 import { type UiSlice, createUiSlice } from './ui.store';
 import { type UserSlice, createUserSlice } from './user.store';
@@ -30,6 +31,7 @@ export type ImmerStateCreator<
 
 export type BoundStore = UserSlice &
   UiSlice &
+  ThemeSlice &
   MetricsSlice &
   NotesSlice &
   StocksSlice &
@@ -47,6 +49,7 @@ export const useBoundStore = create<BoundStore>()(
       immer((set, get, store) => {
         return {
           ...createUiSlice(set, get, store),
+          ...createThemeSlice(set, get, store),
           ...createUserSlice(set, get, store),
           ...createNotesSlice(set, get, store),
           ...createTraitsSlice(set, get, store),

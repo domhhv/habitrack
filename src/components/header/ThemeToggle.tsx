@@ -4,7 +4,7 @@ import React from 'react';
 
 import { CustomButton } from '@components';
 import { ThemeModes } from '@const';
-import { useThemeMode } from '@hooks';
+import { useThemeMode, useThemeActions } from '@stores';
 
 const modesToIcons = {
   [ThemeModes.DARK]: MoonIcon,
@@ -13,7 +13,8 @@ const modesToIcons = {
 };
 
 const ThemeToggle = () => {
-  const { setThemeMode, themeMode } = useThemeMode();
+  const { themeMode } = useThemeMode();
+  const { setThemeMode } = useThemeActions();
 
   return (
     <ButtonGroup variant="outline" className="relative">

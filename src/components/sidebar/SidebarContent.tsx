@@ -1,8 +1,8 @@
+import type { TooltipProps, TooltipContentProps } from '@heroui/react';
 import { cn, Link, Tooltip } from '@heroui/react';
 import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
-  GearIcon,
   RepeatIcon,
   SignInIcon,
   UserPlusIcon,
@@ -10,8 +10,8 @@ import {
   NotePencilIcon,
   RoadHorizonIcon,
   CalendarDotsIcon,
+  ArrowUpRightIcon,
   CalendarCheckIcon,
-  ArrowSquareOutIcon,
 } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router';
@@ -47,23 +47,32 @@ const EXTERNAL_LINKS = [
 
 type SidebarTooltipProps = {
   children: ReactNode;
+  className?: string;
   content: ReactNode;
   isEnabled: boolean;
-};
+  offset?: TooltipContentProps['offset'];
+  placement?: TooltipContentProps['placement'];
+} & TooltipProps;
 
 const SidebarTooltip = ({
   children,
+  className,
   content,
   isEnabled,
+  offset = 8,
+  placement = 'right',
+  ...props
 }: SidebarTooltipProps) => {
   if (!isEnabled) {
     return children;
   }
 
   return (
-    <Tooltip closeDelay={0}>
-      <Tooltip.Trigger>{children}</Tooltip.Trigger>
-      <Tooltip.Content placement="right">{content}</Tooltip.Content>
+    <Tooltip {...props} delay={0} closeDelay={0}>
+      <Tooltip.Trigger className={className}>{children}</Tooltip.Trigger>
+      <Tooltip.Content offset={offset} placement={placement}>
+        {content}
+      </Tooltip.Content>
     </Tooltip>
   );
 };
@@ -73,6 +82,10 @@ type SidebarContentProps = {
   isExpanded: boolean;
   isOverlay?: boolean;
   onClose?: () => void;
+  onDropdownOpenChange?: (
+    dropdown: 'sidebar' | 'user',
+    isOpen: boolean
+  ) => void;
 };
 
 const SidebarContent = ({
@@ -80,6 +93,7 @@ const SidebarContent = ({
   isExpanded,
   isOverlay = false,
   onClose,
+  onDropdownOpenChange,
 }: SidebarContentProps) => {
   const user = useUser();
   const { pathname } = useLocation();
@@ -122,22 +136,35 @@ const SidebarContent = ({
             isActive: pathname === '/notes',
             label: 'Notes',
           },
-          {
-            href: '/settings',
-            icon: GearIcon,
-            id: 'settings',
-            isActive: pathname === '/settings',
-            label: 'Settings',
-          },
         ] as const)
       : []),
   ] as const;
 
-  const getNavLinkClassName = (isActive: boolean) => {
+  const actionItems = [
+    {
+      icon: CalendarCheckIcon,
+      id: 'occurrence',
+      keyboardShortcut: 'L',
+      label: 'Log',
+      onPress: dispatchOccurrenceDrawerOpen,
+      variant: 'primary',
+    },
+    {
+      icon: NotePencilIcon,
+      id: 'note',
+      keyboardShortcut: 'N',
+      label: 'Note',
+      onPress: dispatchNoteDrawerOpen,
+      variant: 'secondary',
+    },
+  ];
+
+  const getLinkClassName = (isActive: boolean, isInternal: boolean) => {
     return cn(
-      'text-foreground hover:bg-background-secondary flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium',
+      'text-foreground flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium',
       !isExpanded && 'justify-center px-0',
-      isActive && 'bg-accent-soft text-accent hover:bg-accent-soft-hover'
+      isActive && 'bg-accent-soft text-accent hover:bg-accent-soft-hover',
+      isInternal && !isActive && 'hover:bg-background-secondary no-underline'
     );
   };
 
@@ -156,48 +183,77 @@ const SidebarContent = ({
         isOverlay && 'pt-12'
       )}
     >
+      <div className="flex items-center justify-between gap-2">
+        {isExpanded && <h1>Habitrack</h1>}
+        <SidebarModeSelect
+          onOpenChange={(isOpen) => {
+            onDropdownOpenChange?.('sidebar', isOpen);
+          }}
+        />
+      </div>
       {!!user && !isOverlay && (
         <div className="border-border flex w-full flex-col gap-1 border-b pb-3">
-          <SidebarTooltip content="Log (L)" isEnabled={hasTooltips}>
-            <CustomButton
-              variant="ghost"
-              aria-label="Log an occurrence"
-              className={getActionClassName()}
-              onPress={dispatchOccurrenceDrawerOpen}
-            >
-              <span className="bg-accent text-accent-foreground flex size-6 shrink-0 items-center justify-center rounded-full">
-                <CalendarCheckIcon size={14} />
-              </span>
-              {isExpanded && (
-                <>
-                  <span className="truncate">Log</span>
-                  <CustomKbd size="sm" variant="default" className="ms-auto">
-                    L
-                  </CustomKbd>
-                </>
-              )}
-            </CustomButton>
-          </SidebarTooltip>
-          <SidebarTooltip content="Note (N)" isEnabled={hasTooltips}>
-            <CustomButton
-              variant="ghost"
-              aria-label="Write a note"
-              className={getActionClassName()}
-              onPress={dispatchNoteDrawerOpen}
-            >
-              <span className="bg-accent-soft text-accent flex size-6 shrink-0 items-center justify-center rounded-full">
-                <NotePencilIcon size={14} />
-              </span>
-              {isExpanded && (
-                <>
-                  <span className="truncate">Note</span>
-                  <CustomKbd size="sm" variant="default" className="ms-auto">
-                    N
-                  </CustomKbd>
-                </>
-              )}
-            </CustomButton>
-          </SidebarTooltip>
+          {actionItems.map(
+            ({
+              icon: ItemIcon,
+              id,
+              keyboardShortcut,
+              label,
+              onPress,
+              variant,
+            }) => {
+              return (
+                <SidebarTooltip
+                  key={id}
+                  isEnabled={hasTooltips}
+                  content={`${label} (${keyboardShortcut})`}
+                >
+                  <CustomButton
+                    variant="ghost"
+                    onPress={onPress}
+                    aria-label={label}
+                    className={getActionClassName()}
+                  >
+                    {isExpanded ? (
+                      <div className="flex w-full items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className={cn(
+                              'flex size-7 shrink-0 items-center justify-center rounded-full',
+                              variant === 'primary'
+                                ? 'bg-accent text-accent-foreground'
+                                : 'bg-surface-tertiary text-accent border-border border'
+                            )}
+                          >
+                            <ItemIcon size={14} />
+                          </span>
+                          <span className="truncate">{label}</span>
+                        </div>
+                        <CustomKbd
+                          size="md"
+                          variant="default"
+                          className="border-border box-content! w-3 border"
+                        >
+                          {keyboardShortcut}
+                        </CustomKbd>
+                      </div>
+                    ) : (
+                      <span
+                        className={cn(
+                          'flex size-7 shrink-0 items-center justify-center rounded-full',
+                          variant === 'primary'
+                            ? 'bg-accent text-accent-foreground'
+                            : 'bg-surface-tertiary text-accent border-border border'
+                        )}
+                      >
+                        <ItemIcon size={14} />
+                      </span>
+                    )}
+                  </CustomButton>
+                </SidebarTooltip>
+              );
+            }
+          )}
         </div>
       )}
       <nav aria-label="Main navigation" className="flex w-full flex-col gap-1">
@@ -207,7 +263,7 @@ const SidebarContent = ({
               <Link
                 href={href}
                 onPress={onClose}
-                className={getNavLinkClassName(isActive)}
+                className={getLinkClassName(isActive, true)}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <ItemIcon size={18} className="shrink-0" />
@@ -217,54 +273,74 @@ const SidebarContent = ({
           );
         })}
       </nav>
-      <div className="border-border flex w-full flex-col gap-1 border-t pt-3">
-        {EXTERNAL_LINKS.map(({ href, icon: ItemIcon, id, label }) => {
-          return (
-            <SidebarTooltip key={id} content={label} isEnabled={hasTooltips}>
-              <Link
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(getNavLinkClassName(false), 'text-muted')}
-              >
-                <ItemIcon size={18} className="shrink-0" />
-                {isExpanded && (
-                  <>
-                    <span className="truncate">{label}</span>
-                    <ArrowSquareOutIcon className="text-muted/50 ms-auto size-4 shrink-0" />
-                  </>
-                )}
-              </Link>
-            </SidebarTooltip>
-          );
-        })}
-      </div>
       <div
         className={cn(
           'border-border mt-auto flex w-full flex-col gap-2 border-t pt-3',
           !isExpanded && 'items-center'
         )}
       >
-        {!isOverlay && (
-          <div
-            className={cn(
-              'flex items-center',
-              isExpanded ? 'justify-between' : 'flex-col justify-center gap-1'
-            )}
-          >
-            {isExpanded ? <ThemeToggle /> : <ThemeMenu />}
-            <SidebarModeSelect />
+        <div
+          className={cn(
+            'flex w-full items-center justify-between gap-2',
+            !isExpanded && 'flex-col'
+          )}
+        >
+          {!isOverlay && (
+            <div
+              className={cn(
+                'flex items-center',
+                isExpanded ? 'justify-between' : 'flex-col justify-center gap-1'
+              )}
+            >
+              {isExpanded ? <ThemeToggle /> : <ThemeMenu />}
+            </div>
+          )}
+          <div className={cn('flex gap-2', !isExpanded && 'hidden')}>
+            {EXTERNAL_LINKS.map(({ href, icon: ItemIcon, id, label }) => {
+              return (
+                <SidebarTooltip
+                  key={id}
+                  isEnabled
+                  className="h-5"
+                  placement={isExpanded ? 'top' : 'right'}
+                  content={
+                    <div className="flex items-center gap-2">
+                      {label}
+                      <ArrowUpRightIcon />
+                    </div>
+                  }
+                >
+                  <CustomButton
+                    size="sm"
+                    href={href}
+                    variant="ghost"
+                    target="_blank"
+                    aria-label={label}
+                    rel="noopener noreferrer"
+                    className="text-muted h-6 w-7 rounded-md"
+                  >
+                    <ItemIcon size={20} className="shrink-0" />
+                  </CustomButton>
+                </SidebarTooltip>
+              );
+            })}
           </div>
-        )}
+        </div>
         {user ? (
-          <UserMenu isExpanded={isExpanded} />
+          <UserMenu
+            isExpanded={isExpanded}
+            onOpenChange={(isOpen) => {
+              onDropdownOpenChange?.('user', isOpen);
+            }}
+          />
         ) : isExpanded ? (
-          <div className="flex w-full gap-2 lg:flex-col">
+          <div className="flex w-full gap-2">
             <CustomButton
               size="sm"
               href="/login"
               onPress={onClose}
               variant="bordered"
+              className="flex-1"
               data-testid="login-button"
             >
               Log In
@@ -277,6 +353,7 @@ const SidebarContent = ({
               href="/register"
               variant="primary"
               onPress={onClose}
+              className="flex-1"
               data-testid="register-button"
             >
               Join

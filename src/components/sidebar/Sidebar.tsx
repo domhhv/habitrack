@@ -18,7 +18,12 @@ const Sidebar = () => {
   const user = useUser();
   const navigate = useNavigate();
   const { sidebarMode } = useSidebarMode();
+  const sidebarRef = React.useRef<HTMLElement>(null);
   const [isHovered, setIsHovered] = React.useState(false);
+  const [openDropdowns, setOpenDropdowns] = React.useState({
+    sidebar: false,
+    user: false,
+  });
   const isMobileSidebarOpen = useMobileSidebarState();
   const { closeMobileSidebar } = useMobileSidebarActions();
   const { openNoteDrawer } = useNoteDrawerActions();
@@ -51,8 +56,10 @@ const Sidebar = () => {
     { enabled: !user }
   );
 
+  const hasOpenDropdown = openDropdowns.sidebar || openDropdowns.user;
   const isExpanded =
-    sidebarMode === 'expanded' || (sidebarMode === 'hover' && isHovered);
+    sidebarMode === 'expanded' ||
+    (sidebarMode === 'hover' && (isHovered || hasOpenDropdown));
 
   return (
     <>
@@ -63,6 +70,7 @@ const Sidebar = () => {
         )}
       >
         <aside
+          ref={sidebarRef}
           onMouseLeave={() => {
             setIsHovered(false);
           }}
@@ -80,6 +88,20 @@ const Sidebar = () => {
           <SidebarContent
             isExpanded={isExpanded}
             hasTooltips={sidebarMode === 'collapsed'}
+            onDropdownOpenChange={(dropdown, isOpen) => {
+              if (!isOpen && sidebarMode === 'hover') {
+                setIsHovered(sidebarRef.current?.matches(':hover') ?? false);
+              }
+
+              setTimeout(() => {
+                setOpenDropdowns((current) => {
+                  return {
+                    ...current,
+                    [dropdown]: isOpen,
+                  };
+                });
+              }, 0);
+            }}
           />
         </aside>
       </div>

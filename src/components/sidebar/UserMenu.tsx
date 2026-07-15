@@ -7,9 +7,10 @@ import { useUser, useProfile, useMobileSidebarActions } from '@stores';
 
 type UserMenuProps = {
   isExpanded?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
 };
 
-const UserMenu = ({ isExpanded = false }: UserMenuProps) => {
+const UserMenu = ({ isExpanded = false, onOpenChange }: UserMenuProps) => {
   const user = useUser();
   const profile = useProfile();
   const { closeMobileSidebar } = useMobileSidebarActions();
@@ -17,7 +18,7 @@ const UserMenu = ({ isExpanded = false }: UserMenuProps) => {
   const email = profile?.email || user?.email || 'Anonymous account';
 
   return (
-    <Dropdown>
+    <Dropdown onOpenChange={onOpenChange}>
       {isExpanded ? (
         <CustomButton
           variant="ghost"

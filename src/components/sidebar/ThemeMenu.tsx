@@ -8,7 +8,7 @@ import {
 
 import { CustomButton } from '@components';
 import { ThemeModes } from '@const';
-import { useThemeMode } from '@hooks';
+import { useThemeMode, useThemeActions } from '@stores';
 
 const MODE_ICONS = {
   [ThemeModes.DARK]: MoonIcon,
@@ -23,7 +23,8 @@ const MODE_LABELS = {
 };
 
 const ThemeMenu = () => {
-  const { setThemeMode, themeMode } = useThemeMode();
+  const { themeMode } = useThemeMode();
+  const { setThemeMode } = useThemeActions();
   const CurrentIcon = MODE_ICONS[themeMode];
 
   return (

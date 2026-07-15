@@ -81,3 +81,7 @@ html.dark span.ripple {
 [role='button'] {
   cursor: pointer;
 }
+
+.occurrence-note-textarea::-webkit-resizer {
+  display: none;
+}

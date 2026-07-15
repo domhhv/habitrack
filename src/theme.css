@@ -36,6 +36,7 @@
   --warning-foreground: oklch(21.03% 0.0059 60.92);
   --radius: 0.25rem;
   --field-radius: 0.75rem;
+  --font-sans: 'Nunito', sans-serif;
 }
 
 .dark,

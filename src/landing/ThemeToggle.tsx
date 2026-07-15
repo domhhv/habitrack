@@ -1,7 +1,7 @@
 import { MoonIcon, SunDimIcon, DesktopIcon } from '@phosphor-icons/react';
 import React from 'react';
 
-import { MEDIA_QUERY } from '../hooks/use-theme-mode';
+const MEDIA_QUERY = '(prefers-color-scheme: dark)';
 
 const THEME_MODES = ['light', 'system', 'dark'] as const;
 
