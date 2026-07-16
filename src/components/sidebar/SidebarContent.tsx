@@ -1,5 +1,4 @@
-import type { TooltipProps, TooltipContentProps } from '@heroui/react';
-import { cn, Link, Tooltip } from '@heroui/react';
+import { cn, Link } from '@heroui/react';
 import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
@@ -13,7 +12,6 @@ import {
   ArrowUpRightIcon,
   CalendarCheckIcon,
 } from '@phosphor-icons/react';
-import type { ReactNode } from 'react';
 import { useLocation } from 'react-router';
 
 import { CustomKbd, ThemeToggle, CustomButton } from '@components';
@@ -24,6 +22,7 @@ import {
 } from '@stores';
 
 import SidebarModeSelect from './SidebarModeSelect';
+import SidebarTooltip from './SidebarTooltip';
 import ThemeMenu from './ThemeMenu';
 import UserMenu from './UserMenu';
 
@@ -45,41 +44,10 @@ const EXTERNAL_LINKS = [
   },
 ] as const;
 
-type SidebarTooltipProps = {
-  children: ReactNode;
-  className?: string;
-  content: ReactNode;
-  isEnabled: boolean;
-  offset?: TooltipContentProps['offset'];
-  placement?: TooltipContentProps['placement'];
-} & TooltipProps;
-
-const SidebarTooltip = ({
-  children,
-  className,
-  content,
-  isEnabled,
-  offset = 8,
-  placement = 'right',
-  ...props
-}: SidebarTooltipProps) => {
-  if (!isEnabled) {
-    return children;
-  }
-
-  return (
-    <Tooltip {...props} delay={0} closeDelay={0}>
-      <Tooltip.Trigger className={className}>{children}</Tooltip.Trigger>
-      <Tooltip.Content offset={offset} placement={placement}>
-        {content}
-      </Tooltip.Content>
-    </Tooltip>
-  );
-};
-
 type SidebarContentProps = {
   hasTooltips?: boolean;
   isExpanded: boolean;
+  isExpandedContentVisible?: boolean;
   isOverlay?: boolean;
   onClose?: () => void;
   onDropdownOpenChange?: (
@@ -91,6 +59,7 @@ type SidebarContentProps = {
 const SidebarContent = ({
   hasTooltips = false,
   isExpanded,
+  isExpandedContentVisible,
   isOverlay = false,
   onClose,
   onDropdownOpenChange,
@@ -99,6 +68,7 @@ const SidebarContent = ({
   const { pathname } = useLocation();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
+  const isContentVisible = isExpandedContentVisible ?? isExpanded;
 
   const dispatchNoteDrawerOpen = () => {
     onClose?.();
@@ -161,17 +131,17 @@ const SidebarContent = ({
 
   const getLinkClassName = (isActive: boolean, isInternal: boolean) => {
     return cn(
-      'text-foreground flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium',
+      'text-foreground flex h-9 w-full items-center gap-2.5 rounded-lg px-2 text-sm font-medium no-underline',
       !isExpanded && 'justify-center px-0',
       isActive && 'bg-accent-soft text-accent hover:bg-accent-soft-hover',
-      isInternal && !isActive && 'hover:bg-background-secondary no-underline'
+      isInternal && !isActive && 'hover:bg-background-secondary'
     );
   };
 
   const getActionClassName = () => {
     return cn(
-      'text-foreground hover:bg-background-secondary h-9 w-full justify-start gap-2.5 rounded-lg px-2.5 text-sm font-medium has-[kbd]:gap-2.5 has-[kbd]:pr-2.5',
-      !isExpanded && 'justify-center px-0'
+      'text-foreground hover:bg-background-secondary h-9 w-full justify-start gap-2.5 rounded-lg px-1 text-sm font-medium has-[kbd]:gap-2.5 has-[kbd]:pr-2.5',
+      !isExpanded && 'justify-center px-2'
     );
   };
 
@@ -179,12 +149,23 @@ const SidebarContent = ({
     <div
       className={cn(
         'flex h-full w-full flex-col gap-4 overflow-x-hidden overflow-y-auto p-3',
-        !isExpanded && 'items-center px-2',
+        !isExpanded && 'items-center',
         isOverlay && 'pt-12'
       )}
     >
-      <div className="flex items-center justify-between gap-2">
-        {isExpanded && <h1>Habitrack</h1>}
+      <div className="flex items-center justify-between gap-2 px-2">
+        {isExpanded && (
+          <h1
+            className={cn(
+              'transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
+              isContentVisible
+                ? 'translate-x-0 opacity-100'
+                : '-translate-x-1 opacity-0'
+            )}
+          >
+            Habitrack
+          </h1>
+        )}
         <SidebarModeSelect
           onOpenChange={(isOpen) => {
             onDropdownOpenChange?.('sidebar', isOpen);
@@ -227,12 +208,26 @@ const SidebarContent = ({
                           >
                             <ItemIcon size={14} />
                           </span>
-                          <span className="truncate">{label}</span>
+                          <span
+                            className={cn(
+                              'truncate transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
+                              isContentVisible
+                                ? 'translate-x-0 opacity-100'
+                                : '-translate-x-1 opacity-0'
+                            )}
+                          >
+                            {label}
+                          </span>
                         </div>
                         <CustomKbd
                           size="md"
                           variant="default"
-                          className="border-border box-content! w-3 border"
+                          className={cn(
+                            'border-border box-content! w-3 border transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
+                            isContentVisible
+                              ? 'translate-x-0 opacity-100'
+                              : '-translate-x-1 opacity-0'
+                          )}
                         >
                           {keyboardShortcut}
                         </CustomKbd>
@@ -267,7 +262,18 @@ const SidebarContent = ({
                 aria-current={isActive ? 'page' : undefined}
               >
                 <ItemIcon size={18} className="shrink-0" />
-                {isExpanded && <span className="truncate">{label}</span>}
+                {isExpanded && (
+                  <span
+                    className={cn(
+                      'truncate transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
+                      isContentVisible
+                        ? 'translate-x-0 opacity-100'
+                        : '-translate-x-1 opacity-0'
+                    )}
+                  >
+                    {label}
+                  </span>
+                )}
               </Link>
             </SidebarTooltip>
           );
@@ -275,7 +281,8 @@ const SidebarContent = ({
       </nav>
       <div
         className={cn(
-          'border-border mt-auto flex w-full flex-col gap-2 border-t pt-3',
+          'border-border mt-auto flex w-full flex-col gap-2 border-t',
+          isExpanded ? 'pt-3' : 'gap-4 pt-2',
           !isExpanded && 'items-center'
         )}
       >
@@ -292,10 +299,24 @@ const SidebarContent = ({
                 isExpanded ? 'justify-between' : 'flex-col justify-center gap-1'
               )}
             >
-              {isExpanded ? <ThemeToggle /> : <ThemeMenu />}
+              {isExpanded ? (
+                <ThemeToggle />
+              ) : (
+                <SidebarTooltip isEnabled content="Theme mode">
+                  <ThemeMenu />
+                </SidebarTooltip>
+              )}
             </div>
           )}
-          <div className={cn('flex gap-2', !isExpanded && 'hidden')}>
+          <div
+            className={cn(
+              'flex gap-2 transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
+              !isExpanded && 'hidden',
+              isContentVisible
+                ? 'translate-x-0 opacity-100'
+                : '-translate-x-1 opacity-0'
+            )}
+          >
             {EXTERNAL_LINKS.map(({ href, icon: ItemIcon, id, label }) => {
               return (
                 <SidebarTooltip
@@ -329,12 +350,20 @@ const SidebarContent = ({
         {user ? (
           <UserMenu
             isExpanded={isExpanded}
+            isExpandedContentVisible={isContentVisible}
             onOpenChange={(isOpen) => {
               onDropdownOpenChange?.('user', isOpen);
             }}
           />
         ) : isExpanded ? (
-          <div className="flex w-full gap-2">
+          <div
+            className={cn(
+              'flex w-full gap-2 transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
+              isContentVisible
+                ? 'translate-x-0 opacity-100'
+                : '-translate-x-1 opacity-0'
+            )}
+          >
             <CustomButton
               size="sm"
               href="/login"

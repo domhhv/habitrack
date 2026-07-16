@@ -11,6 +11,8 @@ import {
 import { CustomButton } from '@components';
 import { useSidebarMode, type SidebarMode } from '@hooks';
 
+import SidebarTooltip from './SidebarTooltip';
+
 const MODE_OPTIONS: { icon: Icon; id: SidebarMode; label: string }[] = [
   { icon: ArrowsOutLineHorizontalIcon, id: 'expanded', label: 'Expanded' },
   { icon: ArrowsInLineHorizontalIcon, id: 'collapsed', label: 'Collapsed' },
@@ -26,14 +28,16 @@ const SidebarModeSelect = ({ onOpenChange }: SidebarModeSelectProps) => {
 
   return (
     <Dropdown onOpenChange={onOpenChange}>
-      <CustomButton
-        size="sm"
-        isIconOnly
-        variant="ghost"
-        aria-label="Sidebar display options"
-      >
-        <SidebarIcon size={16} />
-      </CustomButton>
+      <SidebarTooltip isEnabled content="Sidebar display options">
+        <CustomButton
+          size="sm"
+          isIconOnly
+          variant="ghost"
+          aria-label="Sidebar display options"
+        >
+          <SidebarIcon size={16} />
+        </CustomButton>
+      </SidebarTooltip>
       <Dropdown.Popover className="min-w-[210px]">
         <Dropdown.Menu aria-label="Sidebar display">
           {MODE_OPTIONS.map(({ icon: ModeIcon, id, label }) => {

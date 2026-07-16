@@ -60,12 +60,34 @@ const Sidebar = () => {
   const isExpanded =
     sidebarMode === 'expanded' ||
     (sidebarMode === 'hover' && (isHovered || hasOpenDropdown));
+  const [isContentExpanded, setIsContentExpanded] = React.useState(isExpanded);
+
+  React.useEffect(() => {
+    if (isExpanded) {
+      setIsContentExpanded(true);
+
+      return;
+    }
+
+    const timeoutId = window.setTimeout(
+      () => {
+        setIsContentExpanded(false);
+      },
+      sidebarMode === 'hover' ? 180 : 220
+    );
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isExpanded, sidebarMode]);
+
+  const shouldRenderExpandedContent = isExpanded || isContentExpanded;
 
   return (
     <>
       <div
         className={cn(
-          'shrink-0 transition-[width] duration-300 max-lg:hidden',
+          'shrink-0 transition-[width] duration-[220ms] ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-none max-lg:hidden',
           sidebarMode === 'expanded' ? 'w-64' : 'w-16'
         )}
       >
@@ -80,13 +102,15 @@ const Sidebar = () => {
             }
           }}
           className={cn(
-            'bg-background border-border sticky top-0 z-40 flex h-dvh flex-col border-r transition-[width] duration-300',
+            'bg-background border-border sticky top-0 z-40 flex h-dvh flex-col border-r px-0.5 transition-[width] ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-none',
+            sidebarMode === 'hover' ? 'duration-[180ms]' : 'duration-[220ms]',
             isExpanded ? 'w-64' : 'w-16',
             sidebarMode === 'hover' && isExpanded && 'shadow-xl'
           )}
         >
           <SidebarContent
-            isExpanded={isExpanded}
+            isExpandedContentVisible={isExpanded}
+            isExpanded={shouldRenderExpandedContent}
             hasTooltips={sidebarMode === 'collapsed'}
             onDropdownOpenChange={(dropdown, isOpen) => {
               if (!isOpen && sidebarMode === 'hover') {
