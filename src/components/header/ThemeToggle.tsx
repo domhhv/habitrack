@@ -41,7 +41,7 @@ const ThemeToggle = () => {
                 setThemeMode(mode);
               }}
             >
-              <Icon size={14} />
+              <Icon size={16} />
             </CustomButton>
           </React.Fragment>
         );
