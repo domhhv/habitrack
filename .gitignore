@@ -25,6 +25,7 @@ supabase/.temp/
 .DS_Store
 yarn-debug.log*
 yarn-error.log*
+.react-router/
 
 # Yarn 4
 .yarn/install-state.gz

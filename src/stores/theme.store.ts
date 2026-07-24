@@ -16,7 +16,8 @@ export type ThemeSlice = {
 };
 
 const getInitialThemeMode = (): ThemeModes => {
-  return (localStorage.theme as ThemeModes) || ThemeModes.SYSTEM;
+  // return (localStorage.theme as ThemeModes) || ThemeModes.SYSTEM;
+  return ThemeModes.SYSTEM;
 };
 
 const resolveIsLightTheme = (mode: ThemeModes, isSystemDark: boolean) => {
@@ -34,12 +35,13 @@ const applyDomTheme = (mode: ThemeModes, isSystemDark: boolean) => {
 
 export const createThemeSlice: SliceCreator<keyof ThemeSlice> = (set) => {
   const initialThemeMode = getInitialThemeMode();
-  const initialIsSystemDark = window.matchMedia(MEDIA_QUERY).matches;
+  // const initialIsSystemDark = window.matchMedia(MEDIA_QUERY).matches;
 
-  applyDomTheme(initialThemeMode, initialIsSystemDark);
+  // applyDomTheme(initialThemeMode, initialIsSystemDark);
 
   return {
-    isLightTheme: resolveIsLightTheme(initialThemeMode, initialIsSystemDark),
+    // isLightTheme: resolveIsLightTheme(initialThemeMode, initialIsSystemDark),
+    isLightTheme: true,
     themeMode: initialThemeMode,
     themeActions: {
       applyMediaQueryChange: (isSystemDark) => {

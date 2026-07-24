@@ -1,8 +1,8 @@
 /// <reference types="vitest/config" />
 import { resolve } from 'path';
 
+import { reactRouter } from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import webpackStatsPlugin from 'rollup-plugin-webpack-stats';
 import { loadEnv, defineConfig, type UserConfig } from 'vite';
@@ -87,7 +87,7 @@ export default defineConfig(({ mode }) => {
       ),
     },
     plugins: [
-      react(),
+      reactRouter(),
       tailwindcss(),
       viteRollbar(ROLLBAR_CONFIG),
       ...(isProduction
@@ -112,10 +112,6 @@ export default defineConfig(({ mode }) => {
         '@stores': resolve(__dirname, './src/stores'),
         '@tests': resolve(__dirname, './tests'),
         '@utils': resolve(__dirname, './src/utils'),
-        '@supabase/supabase-js': resolve(
-          __dirname,
-          './node_modules/@supabase/supabase-js/dist/index.cjs'
-        ),
       },
     },
     test: {

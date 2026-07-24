@@ -13,7 +13,7 @@ import { useSession } from '@hooks';
 import { ErrorFallbackPage } from '@pages';
 import { MEDIA_QUERY, useThemeActions } from '@stores';
 
-import AppRoutes from './Routes';
+import AppRoutes from './OldRoutes';
 
 const App = () => {
   const { error, isLoading } = useSession();

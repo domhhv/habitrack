@@ -1,6 +1,7 @@
 dist/
 dist-ssr/
 supabase/
+.react-router/
 tests/coverage/
 .yarn/releases/
 vercel.json

@@ -39,7 +39,7 @@ const LandingHeader = ({ hasSession }: LandingHeaderProps) => {
           })}
         </nav>
         <div className="flex items-center gap-3">
-          <ThemeToggle className="max-[372px]:hidden" />
+          <ThemeToggle />
           {hasSession ? (
             <div className="hero-logged-in-ctas-container flex items-center gap-2">
               <CustomButton size="sm" href="/calendar">
