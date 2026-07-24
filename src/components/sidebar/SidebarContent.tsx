@@ -163,7 +163,7 @@ const SidebarContent = ({
                 : '-translate-x-1 opacity-0'
             )}
           >
-            Habitrack
+            <a href="/">Habitrack</a>
           </h1>
         )}
         <SidebarModeSelect

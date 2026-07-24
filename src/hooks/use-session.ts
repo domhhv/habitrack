@@ -71,7 +71,7 @@ const useSession = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser, fetchProfile, rollbar, isLoading]);
+  }, [setUser, fetchProfile, isLoading, rollbar]);
 
   return { error, isLoading };
 };
