@@ -1,5 +1,6 @@
 import { Button, ButtonGroup } from '@heroui/react';
 import { MoonIcon, SunDimIcon, DesktopIcon } from '@phosphor-icons/react';
+import React from 'react';
 import { useFetcher, useLoaderData } from 'react-router';
 
 const THEME_MODES = ['light', 'system', 'dark'] as const;
@@ -18,11 +19,20 @@ const MODE_LABELS = {
 
 const ThemeToggle = () => {
   const fetcher = useFetcher();
-  const { themeMode } = useLoaderData();
+  const loaderData = useLoaderData();
 
   const isSystemDark =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  React.useEffect(() => {
+    if (!loaderData?.themeMode) {
+      fetcher.submit(
+        { isSystemDark: isSystemDark.toString(), themeMode: 'system' },
+        { method: 'post' }
+      );
+    }
+  }, [loaderData?.themeMode, isSystemDark, fetcher]);
 
   return (
     <fetcher.Form method="post" className="max-[372px]:hidden">
@@ -34,7 +44,7 @@ const ThemeToggle = () => {
       <ButtonGroup size="sm" variant="outline" className="rounded-3xl border">
         {THEME_MODES.map((mode, index) => {
           const Icon = MODE_ICONS[mode];
-          const isSelected = themeMode === mode;
+          const isSelected = loaderData?.themeMode === mode;
 
           return (
             <Button

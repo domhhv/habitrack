@@ -17,7 +17,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         <p>{error.data}</p>
       </>
     );
-  } else if (error instanceof Error) {
+  }
+
+  if (error instanceof Error) {
     return (
       <div>
         <h1>Error</h1>
@@ -26,9 +28,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         <pre>{error.stack}</pre>
       </div>
     );
-  } else {
-    return <h1>Unknown Error</h1>;
   }
+
+  return <h1>Unknown Error</h1>;
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -37,7 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>My App</title>
+        <title>Habitrack</title>
         <Meta />
         <Links />
       </head>

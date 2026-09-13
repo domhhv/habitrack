@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS "public"."occurrences" (
     "user_id" UUID NOT NULL,
     "occurred_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT "now"(),
     "time_zone" TEXT NOT NULL DEFAULT 'UTC', -- noqa: disable=convention.quoted_literals
-    "photo_paths" TEXT [],
+    "photo_paths" TEXT[],
     "id" UUID DEFAULT "gen_random_uuid"() NOT NULL,
     "habit_id" UUID NOT NULL,
     "has_specific_time" BOOLEAN DEFAULT true NOT NULL,

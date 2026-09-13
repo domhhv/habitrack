@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
 import React from 'react';
+import { data } from 'react-router';
 
 import {
   AppHeader,
@@ -11,11 +12,43 @@ import {
 } from '@components';
 import { useSession } from '@hooks';
 import { ErrorFallbackPage } from '@pages';
-import { MEDIA_QUERY, useThemeActions } from '@stores';
+import { useThemeActions } from '@stores';
+import { preferences } from '@utils';
 
-import AppRoutes from './OldRoutes';
+import type { Route } from './+types/App';
+import AppRoutes from './AppRoutes';
 
-const App = () => {
+export async function loader({ request }: Route.LoaderArgs) {
+  const cookieHeader = request.headers.get('Cookie');
+  const cookie = (await preferences.parse(cookieHeader)) || {};
+
+  return data({
+    isSystemDark: cookie.isSystemDark,
+    themeMode: cookie.themeMode,
+  });
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const cookieHeader = request.headers.get('Cookie');
+  const cookie = (await preferences.parse(cookieHeader)) || {};
+  const formData = await request.formData();
+
+  const themeMode = formData.get('themeMode');
+  const isSystemDark = formData.get('isSystemDark');
+  cookie.themeMode = themeMode;
+  cookie.isSystemDark = isSystemDark;
+
+  return data(
+    { isSystemDark, themeMode },
+    {
+      headers: {
+        'Set-Cookie': await preferences.serialize(cookie),
+      },
+    }
+  );
+}
+
+const App = ({ loaderData }: Route.ComponentProps) => {
   const { error, isLoading } = useSession();
   const { applyMediaQueryChange } = useThemeActions();
 
@@ -23,19 +56,44 @@ const App = () => {
     document.getElementById('root')?.classList.add('initialized');
   }, []);
 
-  React.useEffect(() => {
-    const mediaQueryList = window.matchMedia(MEDIA_QUERY);
+  const resolvedThemeMode = React.useMemo(() => {
+    if (loaderData.themeMode === 'system') {
+      return loaderData.isSystemDark === 'true' ? 'dark' : 'light';
+    }
 
-    const handleMediaQueryListChange = (e: MediaQueryListEvent) => {
-      applyMediaQueryChange(e.matches);
+    return loaderData.themeMode;
+  }, [loaderData.themeMode, loaderData.isSystemDark]);
+
+  React.useEffect(() => {
+    document.documentElement.classList.toggle(
+      'dark',
+      resolvedThemeMode === 'dark'
+    );
+  }, [resolvedThemeMode]);
+
+  React.useEffect(() => {
+    const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleMediaQueryListChange = (
+      e: MediaQueryListEvent | MediaQueryList = mediaQueryList
+    ) => {
+      if (!loaderData.themeMode || loaderData.themeMode === 'system') {
+        const newTheme = e.matches ? 'dark' : 'light';
+        document.documentElement.classList.toggle('dark', newTheme === 'dark');
+        cookieStore.set('isSystemDark', e.matches.toString());
+        cookieStore.set('themeMode', 'system');
+        applyMediaQueryChange(e.matches);
+      }
     };
 
     mediaQueryList.addEventListener('change', handleMediaQueryListChange);
 
+    handleMediaQueryListChange();
+
     return () => {
       mediaQueryList.removeEventListener('change', handleMediaQueryListChange);
     };
-  }, [applyMediaQueryChange]);
+  }, [loaderData.themeMode, applyMediaQueryChange]);
 
   if (isLoading) {
     return (

@@ -5,4 +5,5 @@ export { default as ImageCarousel } from './ImageCarousel';
 export { default as InfinityLoader } from './InfinityLoader';
 export { default as SignedImageViewer } from './SignedImageViewer';
 export { default as SwipeableContainer } from './SwipeableContainer';
+export { default as ThemeToggle } from './ThemeToggle';
 export { default as VisuallyHiddenInput } from './VisuallyHiddenInput';

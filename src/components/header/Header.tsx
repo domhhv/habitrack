@@ -5,7 +5,7 @@ import {
   CalendarCheckIcon,
 } from '@phosphor-icons/react';
 
-import { UserMenu, CustomKbd, CustomButton } from '@components';
+import { UserMenu, CustomKbd, ThemeToggle, CustomButton } from '@components';
 import { useScreenWidth } from '@hooks';
 import {
   useUser,
@@ -13,8 +13,6 @@ import {
   useMobileSidebarActions,
   useOccurrenceDrawerActions,
 } from '@stores';
-
-import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   const user = useUser();

@@ -1,14 +1,16 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 
 # testing
-/tests/coverage/
+tests/coverage/
 
-# production
-/dist
-dist-ssr/
+# build
+dist/
+build/
+.react-router/
+.vercel/
 
 # Supabase
 supabase/.branches/
@@ -21,11 +23,12 @@ supabase/.temp/
 # IDE
 .idea
 
-# misc
-.DS_Store
+# logs
 yarn-debug.log*
 yarn-error.log*
-.react-router/
 
 # Yarn 4
 .yarn/install-state.gz
+
+# misc
+.DS_Store

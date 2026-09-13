@@ -1,8 +1,8 @@
 import { CustomButton } from '@components';
 
+import ThemeToggle from '../../components/common/ThemeToggle';
 import CtaLink from '../CtaLink';
 import InfinityMark from '../InfinityMark';
-import ThemeToggle from '../ThemeToggle';
 
 const NAV_LINKS = [
   { href: '#views', label: 'Calendar' },

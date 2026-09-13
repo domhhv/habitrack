@@ -5,3 +5,4 @@ supabase/
 tests/coverage/
 .yarn/releases/
 vercel.json
+.agents/
