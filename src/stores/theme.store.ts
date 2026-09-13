@@ -16,6 +16,10 @@ export type ThemeSlice = {
 };
 
 const getInitialThemeMode = (): ThemeModes => {
+  if (typeof window === 'undefined') {
+    return ThemeModes.SYSTEM;
+  }
+
   return (localStorage.theme as ThemeModes) || ThemeModes.SYSTEM;
 };
 
@@ -26,6 +30,10 @@ const resolveIsLightTheme = (mode: ThemeModes, isSystemDark: boolean) => {
 };
 
 const applyDomTheme = (mode: ThemeModes, isSystemDark: boolean) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   document.documentElement.classList.toggle(
     'dark',
     mode === ThemeModes.DARK || (mode === ThemeModes.SYSTEM && isSystemDark)
@@ -34,7 +42,10 @@ const applyDomTheme = (mode: ThemeModes, isSystemDark: boolean) => {
 
 export const createThemeSlice: SliceCreator<keyof ThemeSlice> = (set) => {
   const initialThemeMode = getInitialThemeMode();
-  const initialIsSystemDark = window.matchMedia(MEDIA_QUERY).matches;
+  const initialIsSystemDark =
+    typeof window !== 'undefined'
+      ? window.matchMedia(MEDIA_QUERY).matches
+      : false;
 
   applyDomTheme(initialThemeMode, initialIsSystemDark);
 

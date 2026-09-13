@@ -17,6 +17,7 @@
     "noEmit": true,
     "sourceMap": true,
     "noErrorTruncation": true,
+    "rootDirs": [".", "./.react-router/types"],
     "paths": {
       "@pages": ["./src/pages"],
       "@services": ["./src/services"],
@@ -35,6 +36,7 @@
     "tests",
     "./supabase/database.types.ts",
     "./vite.config.ts",
-    "./vite.prerender.config.ts"
+    "./react-router.config.ts",
+    ".react-router/types/**/*"
   ]
 }

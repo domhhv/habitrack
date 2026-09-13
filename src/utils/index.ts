@@ -7,6 +7,7 @@ export { default as getErrorMessage } from './get-error-message';
 export { default as handleAsyncAction } from './handle-async-action';
 export * from './metric-value';
 export { default as noop } from './noop';
+export { preferences } from './preferences-cookie';
 export { default as rollbar } from './rollbar';
 export { default as supabaseClient } from './supabase-client';
 export * from './type-guards';
