@@ -4,6 +4,92 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-display: swap;
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/fonts/nunito-v32-cyrillic_latin-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/fonts/nunito-v32-cyrillic_latin-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Nunito';
+  font-style: italic;
+  font-weight: 600;
+  src: url('/fonts/nunito-v32-cyrillic_latin-600italic.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/nunito-v32-cyrillic_latin-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  src: url('/fonts/nunito-v32-cyrillic_latin-800.woff2') format('woff2');
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+.infinity-loader {
+  height: calc(var(--uib-size) * (2.1 / 5));
+  width: var(--uib-size);
+  transform-origin: center;
+  overflow: visible;
+
+  .car {
+    fill: none;
+    stroke: var(--uib-color);
+    stroke-dasharray: 15, 85;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+    animation: travel var(--uib-speed) linear infinite;
+    will-change: stroke-dasharray, stroke-dashoffset;
+    transition: stroke 0.5s ease;
+  }
+
+  .track {
+    stroke: var(--uib-color);
+    opacity: var(--uib-bg-opacity);
+  }
+}
+
+@keyframes travel {
+  0% {
+    stroke-dashoffset: 0;
+  }
+
+  100% {
+    stroke-dashoffset: 100;
+  }
+}
+
 @layer components {
   .kbd {
     @apply rounded-2xl;
