@@ -35,7 +35,7 @@ Habitrack is a simple and intuitive web app designed for logging habits and v is
 This app showcases the use of the following tools and technologies:
 
 - React 19.2 with TypeScript 6, bundled with [Vite 8](https://vite.dev/)
-- [React Router](https://reactrouter.com) v7 for routing (declarative mode)
+- [React Router](https://reactrouter.com) v7 for routing (framework mode)
 - [Zustand](https://zustand.docs.pmnd.rs/) v5 for global state management
 - [Tailwind CSS](https://tailwindcss.com) v4 for styling
 - [HeroUI](https://www.heroui.com/) for the UI components
@@ -88,7 +88,7 @@ There's also a public roadmap on Featurebase where you can upvote and suggest ne
 ### Prerequisites
 
 - [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en/) (24.18.0)
+- [Node.js](https://nodejs.org/en/) (24.21.0)
 - [Docker](https://docs.docker.com/get-started/get-docker/)
 - Yarn is used as a package manager and is automatically available via Corepack (bundled with Node.js)
 

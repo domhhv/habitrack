@@ -10,11 +10,13 @@ describe(ImageCarousel.name, () => {
       error: null,
       path: 'path1.jpg',
       signedUrl: 'https://example.com/image1.jpg',
+      signedURL: 'https://example.com/image1.jpg',
     },
     {
       error: null,
       path: 'path2.jpg',
       signedUrl: 'https://example.com/image2.jpg',
+      signedURL: 'https://example.com/image2.jpg',
     },
   ];
 
