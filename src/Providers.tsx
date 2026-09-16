@@ -9,11 +9,13 @@ import { I18nProvider } from 'react-aria';
 import { RouterProvider } from 'react-aria-components';
 import { useHref, useNavigate } from 'react-router';
 
+import { useInitializeTheme } from '@hooks';
 import { ErrorFallbackPage } from '@pages';
 import { rollbar } from '@utils';
 
 const Providers = ({ children }: PropsWithChildren) => {
   const navigate = useNavigate();
+  useInitializeTheme();
 
   const useHrefWrapper = (href: string) => {
     return /^(?:[a-zA-Z][a-zA-Z\d+.-]*:|\/\/)/.test(href)

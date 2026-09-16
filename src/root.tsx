@@ -2,6 +2,7 @@ import { useNavigation, isRouteErrorResponse } from 'react-router';
 import { Meta, Links, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import { InfinityLoader } from '@components';
+import { initializeTheme } from '@utils';
 
 import type { Route } from './+types/root';
 import './index.css';
@@ -35,10 +36,16 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `(${initializeTheme.toString()})()`,
+          }}
+        />
         <title>Habitrack</title>
         <Meta />
         <Links />
