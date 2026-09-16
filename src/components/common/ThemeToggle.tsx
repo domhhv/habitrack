@@ -1,9 +1,11 @@
 import { Button, ButtonGroup } from '@heroui/react';
 import { MoonIcon, SunDimIcon, DesktopIcon } from '@phosphor-icons/react';
 import React from 'react';
-import { useFetcher, useLoaderData } from 'react-router';
 
-const THEME_MODES = ['light', 'system', 'dark'] as const;
+import { ThemeModes } from '@const';
+import { useThemeMode, useThemeActions } from '@stores';
+
+const THEME_MODES = [ThemeModes.LIGHT, ThemeModes.SYSTEM, ThemeModes.DARK];
 
 const MODE_ICONS = {
   dark: MoonIcon,
@@ -18,43 +20,26 @@ const MODE_LABELS = {
 };
 
 const ThemeToggle = () => {
-  const fetcher = useFetcher();
-  const loaderData = useLoaderData();
-
-  const isSystemDark =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  React.useEffect(() => {
-    if (!loaderData?.themeMode) {
-      fetcher.submit(
-        { isSystemDark: isSystemDark.toString(), themeMode: 'system' },
-        { method: 'post' }
-      );
-    }
-  }, [loaderData?.themeMode, isSystemDark, fetcher]);
+  const { themeMode } = useThemeMode();
+  const { setThemeMode } = useThemeActions();
 
   return (
-    <fetcher.Form method="post" className="max-[372px]:hidden">
-      <input
-        type="hidden"
-        name="isSystemDark"
-        value={isSystemDark.toString()}
-      />
+    <div className="max-[372px]:hidden">
       <ButtonGroup size="sm" variant="outline" className="rounded-3xl border">
         {THEME_MODES.map((mode, index) => {
           const Icon = MODE_ICONS[mode];
-          const isSelected = loaderData?.themeMode === mode;
+          const isSelected = themeMode === mode;
 
           return (
             <Button
               key={mode}
-              value={mode}
-              type="submit"
-              name="themeMode"
+              type="button"
               aria-pressed={isSelected}
               aria-label={MODE_LABELS[mode]}
               variant={isSelected ? 'secondary' : 'tertiary'}
+              onPress={() => {
+                setThemeMode(mode);
+              }}
             >
               {index > 0 && <ButtonGroup.Separator />}
               <Icon size={14} />
@@ -62,7 +47,7 @@ const ThemeToggle = () => {
           );
         })}
       </ButtonGroup>
-    </fetcher.Form>
+    </div>
   );
 };
 
