@@ -15,14 +15,6 @@ export type ThemeSlice = {
   };
 };
 
-const getInitialThemeMode = (): ThemeModes => {
-  if (typeof window === 'undefined') {
-    return ThemeModes.SYSTEM;
-  }
-
-  return (localStorage.theme as ThemeModes) || ThemeModes.SYSTEM;
-};
-
 const resolveIsLightTheme = (mode: ThemeModes, isSystemDark: boolean) => {
   return (
     mode === ThemeModes.LIGHT || (mode === ThemeModes.SYSTEM && !isSystemDark)
@@ -41,17 +33,9 @@ const applyDomTheme = (mode: ThemeModes, isSystemDark: boolean) => {
 };
 
 export const createThemeSlice: SliceCreator<keyof ThemeSlice> = (set) => {
-  const initialThemeMode = getInitialThemeMode();
-  const initialIsSystemDark =
-    typeof window !== 'undefined'
-      ? window.matchMedia(MEDIA_QUERY).matches
-      : false;
-
-  applyDomTheme(initialThemeMode, initialIsSystemDark);
-
   return {
-    isLightTheme: resolveIsLightTheme(initialThemeMode, initialIsSystemDark),
-    themeMode: initialThemeMode,
+    isLightTheme: true,
+    themeMode: ThemeModes.SYSTEM,
     themeActions: {
       applyMediaQueryChange: (isSystemDark) => {
         set(
@@ -66,8 +50,6 @@ export const createThemeSlice: SliceCreator<keyof ThemeSlice> = (set) => {
         );
       },
       setThemeMode: (mode) => {
-        localStorage.theme = mode;
-
         const isSystemDark = window.matchMedia(MEDIA_QUERY).matches;
 
         applyDomTheme(mode, isSystemDark);
@@ -80,6 +62,12 @@ export const createThemeSlice: SliceCreator<keyof ThemeSlice> = (set) => {
           undefined,
           'themeActions.setThemeMode'
         );
+
+        try {
+          localStorage.setItem('theme', mode);
+        } catch {
+          return;
+        }
       },
     },
   };

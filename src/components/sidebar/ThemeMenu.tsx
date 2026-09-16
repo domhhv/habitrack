@@ -6,10 +6,10 @@ import {
   DesktopIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
-import { useFetcher, useLoaderData } from 'react-router';
 
 import { CustomButton } from '@components';
 import { ThemeModes } from '@const';
+import { useThemeMode, useThemeActions } from '@stores';
 
 const MODE_ICONS = {
   [ThemeModes.DARK]: MoonIcon,
@@ -24,23 +24,9 @@ const MODE_LABELS = {
 };
 
 const ThemeMenu = () => {
-  const fetcher = useFetcher();
-  const loaderData = useLoaderData();
-  const themeMode = loaderData?.themeMode;
-  const CurrentIcon = MODE_ICONS[themeMode as keyof typeof MODE_ICONS];
-
-  const isSystemDark =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  React.useEffect(() => {
-    if (!loaderData?.themeMode) {
-      fetcher.submit(
-        { isSystemDark: isSystemDark.toString(), themeMode: 'system' },
-        { method: 'post' }
-      );
-    }
-  }, [loaderData?.themeMode, isSystemDark, fetcher]);
+  const { themeMode } = useThemeMode();
+  const { setThemeMode } = useThemeActions();
+  const CurrentIcon = MODE_ICONS[themeMode];
 
   return (
     <Dropdown>
@@ -59,17 +45,14 @@ const ThemeMenu = () => {
                 className="justify-between"
                 textValue={MODE_LABELS[mode]}
                 onAction={() => {
-                  fetcher.submit(
-                    { isSystemDark: isSystemDark.toString(), themeMode: mode },
-                    { method: 'post' }
-                  );
+                  setThemeMode(mode);
                 }}
               >
                 <div className="flex items-center gap-2">
                   <ModeIcon className="size-4 shrink-0" />
                   <Label>{MODE_LABELS[mode]}</Label>
                 </div>
-                {loaderData?.themeMode === mode && (
+                {themeMode === mode && (
                   <CheckIcon className="text-accent size-4 shrink-0" />
                 )}
               </Dropdown.Item>
