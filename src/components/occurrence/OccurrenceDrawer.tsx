@@ -196,7 +196,7 @@ const OccurrenceDrawer = () => {
     <Drawer isOpen={isOpen} onOpenChange={changeOpen}>
       <Drawer.Backdrop>
         <Drawer.Content placement={isMobile ? 'bottom' : 'right'}>
-          <Drawer.Dialog>
+          <Drawer.Dialog className="relative overflow-visible pb-0">
             <Drawer.CloseTrigger />
             <Drawer.Header className="flex-col">
               {canNavigateDays ? (
@@ -254,7 +254,7 @@ const OccurrenceDrawer = () => {
                 </p>
               )}
             </Drawer.Header>
-            <Drawer.Body>
+            <Drawer.Body className="overflow-x-visible pb-8">
               {occurrencesData && (
                 <OccurrenceList
                   onRemove={dispatchOccurrenceRemoval}

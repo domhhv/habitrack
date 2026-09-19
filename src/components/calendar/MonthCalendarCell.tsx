@@ -241,11 +241,11 @@ const MonthCalendarCell = ({
           isDrawerDate &&
             isDesktop &&
             isTodayCell &&
-            'bg-background-secondary dark:bg-surface-secondary z-52',
+            'bg-background-secondary dark:bg-surface-secondary z-1000000',
           isDrawerDate &&
             isDesktop &&
             !isTodayCell &&
-            'bg-background dark:bg-surface z-52',
+            'bg-background dark:bg-surface z-1000000',
           position === 'top-left' && 'rounded-tl-[10px]!',
           position === 'top-right' && 'rounded-tr-[10px]!',
           position === 'bottom-left' && 'rounded-bl-[10px]!',

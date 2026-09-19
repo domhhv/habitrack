@@ -50,7 +50,7 @@ const App = () => {
       <ConfirmationDialog />
       <div className="flex w-full flex-1 items-stretch">
         <AppSidebar />
-        <main className="flex h-fit min-w-0 flex-1 flex-col items-start bg-white max-md:pb-11.25 dark:bg-black">
+        <main className="flex h-dvh min-w-0 flex-1 flex-col items-start bg-white max-md:pb-11.25 dark:bg-black">
           <AppRoutes />
         </main>
       </div>
