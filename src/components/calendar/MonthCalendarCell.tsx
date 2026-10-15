@@ -235,7 +235,7 @@ const MonthCalendarCell = ({
       <Component
         {...(isDrawerDate && borderBeamProps)}
         className={cn(
-          'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 overflow-visible bg-white transition-colors dark:bg-black',
+          'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 overflow-scroll bg-white transition-colors dark:bg-black',
           isTodayCell &&
             'bg-background group-hover/cell:bg-surface-secondary dark:group-hover/cell:bg-surface-secondary dark:bg-surface',
           isDrawerDate &&
@@ -324,7 +324,7 @@ const MonthCalendarCell = ({
         )}
         <div
           className={cn(
-            'flex flex-wrap justify-center gap-3 overflow-x-auto p-3 pr-6 xl:justify-start'
+            'flex flex-wrap justify-center gap-3 overflow-scroll overflow-x-auto p-3 pr-6 xl:justify-start'
           )}
         >
           {Object.entries(groupedOccurrences).map(

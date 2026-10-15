@@ -1,4 +1,4 @@
-import { cn, Link } from '@heroui/react';
+import { cn, Spinner } from '@heroui/react';
 import { today, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
@@ -12,7 +12,7 @@ import {
   ArrowUpRightIcon,
   CalendarCheckIcon,
 } from '@phosphor-icons/react';
-import { useLocation } from 'react-router';
+import { NavLink, useLocation } from 'react-router';
 
 import { CustomKbd, ThemeToggle, CustomButton } from '@components';
 import {
@@ -131,7 +131,7 @@ const SidebarContent = ({
 
   const getLinkClassName = (isActive: boolean, isInternal: boolean) => {
     return cn(
-      'text-foreground flex h-9 w-full items-center gap-2.5 rounded-lg px-2 text-sm font-medium no-underline',
+      'text-foreground flex h-9 w-full items-center justify-between gap-2.5 rounded-lg px-2 text-sm font-medium no-underline',
       !isExpanded && 'justify-center px-0',
       isActive && 'bg-accent-soft text-accent hover:bg-accent-soft-hover',
       isInternal && !isActive && 'hover:bg-background-secondary'
@@ -255,26 +255,34 @@ const SidebarContent = ({
         {navItems.map(({ href, icon: ItemIcon, id, isActive, label }) => {
           return (
             <SidebarTooltip key={id} content={label} isEnabled={hasTooltips}>
-              <Link
-                href={href}
-                onPress={onClose}
-                className={getLinkClassName(isActive, true)}
+              <NavLink
+                to={href}
+                onClick={onClose}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <ItemIcon size={18} className="shrink-0" />
-                {isExpanded && (
-                  <span
-                    className={cn(
-                      'truncate transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
-                      isContentVisible
-                        ? 'translate-x-0 opacity-100'
-                        : '-translate-x-1 opacity-0'
-                    )}
-                  >
-                    {label}
-                  </span>
-                )}
-              </Link>
+                {({ isPending }) => {
+                  return (
+                    <div className={getLinkClassName(isActive, true)}>
+                      <div className="flex items-center gap-2.5">
+                        <ItemIcon size={18} className="shrink-0" />
+                        {isExpanded && (
+                          <span
+                            className={cn(
+                              'truncate transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
+                              isContentVisible
+                                ? 'translate-x-0 opacity-100'
+                                : '-translate-x-1 opacity-0'
+                            )}
+                          >
+                            {label}
+                          </span>
+                        )}
+                      </div>
+                      {isExpanded && isPending && <Spinner size="sm" />}
+                    </div>
+                  );
+                }}
+              </NavLink>
             </SidebarTooltip>
           );
         })}
