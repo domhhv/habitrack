@@ -33,13 +33,8 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const typesPath = join(__dirname, '..', 'supabase', 'database.types.ts');
 
-const GENERATED_JSON = `export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]`;
+const GENERATED_JSON =
+  'export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]';
 
 const PATCHED_JSON = `/**
 * NOTE: This Json type is patched by scripts/patch-json-type.mjs after every

@@ -33,6 +33,7 @@ const SidebarModeSelect = ({ onOpenChange }: SidebarModeSelectProps) => {
           size="sm"
           isIconOnly
           variant="ghost"
+          className="max-lg:hidden"
           aria-label="Sidebar display options"
         >
           <SidebarIcon size={16} />
