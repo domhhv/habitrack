@@ -33,7 +33,10 @@ ADD CONSTRAINT "public_occurrences_user_id_fkey" FOREIGN KEY ("user_id") REFEREN
 ) ON UPDATE CASCADE ON DELETE CASCADE;
 
 -- Indexes
-CREATE INDEX "idx_occurrences_user_id" ON "public"."occurrences" USING "btree" ("user_id");
+CREATE INDEX "idx_occurrences_user_id_occurred_at" ON "public"."occurrences" USING "btree" (
+    "user_id", "occurred_at"
+);
+CREATE INDEX "idx_occurrences_occurred_at" ON "public"."occurrences" USING "btree" ("occurred_at");
 
 -- Updated at trigger
 CREATE OR REPLACE TRIGGER "set_updated_at" BEFORE UPDATE ON "public"."occurrences"

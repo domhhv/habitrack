@@ -35,10 +35,10 @@ export const listNotes = async ([rangeStart, rangeEnd]: [
     .lte('period_date', endDateString);
 
   const occurrenceNotesPromise = supabaseClient
-    .from('notes')
-    .select('*, occurrence:occurrences!inner(occurred_at)')
-    .gte('occurrences.occurred_at', startDateString)
-    .lte('occurrences.occurred_at', endDateString);
+    .from('occurrences')
+    .select('note:notes!inner(*)')
+    .gte('occurred_at', startDateString)
+    .lte('occurred_at', endDateString);
 
   const [periodResult, occurrenceResult] = await Promise.all([
     periodNotesPromise,
@@ -55,7 +55,11 @@ export const listNotes = async ([rangeStart, rangeEnd]: [
 
   const notesMap = new Map<string, Tables<'notes'>>();
 
-  for (const note of [...periodResult.data, ...occurrenceResult.data]) {
+  const occurrenceNotes = occurrenceResult.data.map(({ note }) => {
+    return note;
+  });
+
+  for (const note of [...periodResult.data, ...occurrenceNotes]) {
     notesMap.set(note.id, note);
   }
 

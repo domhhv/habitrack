@@ -52,9 +52,6 @@ ADD CONSTRAINT "notes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."u
 
 -- Indexes
 CREATE INDEX "idx_notes_user_id" ON "public"."notes" USING "btree" ("user_id");
-CREATE INDEX "notes_occurrence_id_idx" ON "public"."notes" USING "btree" ("occurrence_id") WHERE (
-    "occurrence_id" IS NOT NULL
-);
 CREATE INDEX "notes_period_kind_period_date_idx" ON "public"."notes" USING "btree" (
     "period_kind", "period_date"
 ) WHERE ("period_kind" IS NOT NULL);
