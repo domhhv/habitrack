@@ -94,7 +94,7 @@ export default defineConfig(({ isSsrBuild, mode }) => {
         ? [
             webpackStatsPlugin(),
             visualizer({
-              filename: 'dist/stats.html',
+              filename: 'build/stats.html',
             }),
           ]
         : []),
