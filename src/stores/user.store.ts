@@ -2,7 +2,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
 import type { Profile, ProfilesUpdate } from '@models';
-import { getProfile, updateUser, deleteUser, patchProfile } from '@services';
+import { updateUser, deleteUser, patchProfile } from '@services';
 
 import { useBoundStore, type SliceCreator } from './bound.store';
 
@@ -16,7 +16,6 @@ export type UserSlice = {
   userActions: {
     clearProfile: () => void;
     deleteUser: () => Promise<void>;
-    fetchProfile: (userId: string) => Promise<void>;
     setUser: (user: null | CamelCasedPropertiesDeep<User>) => void;
     updateProfile: (
       userId: string,
@@ -53,21 +52,6 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
           },
           undefined,
           'userActions.deleteUser'
-        );
-      },
-      fetchProfile: async (userId) => {
-        if (getState().profile?.id === userId) {
-          return;
-        }
-
-        const profile = await getProfile(userId);
-
-        set(
-          (state) => {
-            state.profile = profile;
-          },
-          undefined,
-          'userActions.fetchProfile'
         );
       },
       setUser: (user) => {
@@ -110,18 +94,6 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
       },
     },
   };
-};
-
-export const useUser = () => {
-  return useBoundStore((state) => {
-    return state.user;
-  });
-};
-
-export const useProfile = () => {
-  return useBoundStore((state) => {
-    return state.profile;
-  });
 };
 
 export const useUserActions = () => {

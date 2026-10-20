@@ -2,8 +2,9 @@ import { cn, Label, Dropdown } from '@heroui/react';
 import { GearIcon, UserIcon, SignOutIcon } from '@phosphor-icons/react';
 
 import { CustomButton } from '@components';
+import { useUser, useProfile } from '@hooks';
 import { signOut } from '@services';
-import { useUser, useProfile, useMobileSidebarActions } from '@stores';
+import { useMobileSidebarActions } from '@stores';
 
 import SidebarTooltip from './SidebarTooltip';
 

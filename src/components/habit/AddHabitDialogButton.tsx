@@ -16,15 +16,10 @@ import {
   VisuallyHiddenInput,
   MetricDefinitionForm,
 } from '@components';
-import { useTextField, useFileField } from '@hooks';
+import { useUser, useTextField, useFileField } from '@hooks';
 import type { FormMetricDefinitions } from '@models';
 import { uploadHabitIcon } from '@services';
-import {
-  useUser,
-  useTraits,
-  useHabitActions,
-  useMetricsActions,
-} from '@stores';
+import { useTraits, useHabitActions, useMetricsActions } from '@stores';
 import { handleAsyncAction, buildHabitMetricInsert } from '@utils';
 
 const AddHabitDialogButton = () => {

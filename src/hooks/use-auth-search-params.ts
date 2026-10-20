@@ -1,10 +1,13 @@
 import { Toast } from '@heroui/react';
 import { useRollbar } from '@rollbar/react';
 import React from 'react';
-import { useLocation, useSearchParams } from 'react-router';
+import { useLocation, useRevalidator, useSearchParams } from 'react-router';
 
-import { useUser, useProfile, useUserActions } from '@stores';
+import { useUserActions } from '@stores';
 import { supabaseClient, getErrorMessage } from '@utils';
+
+import useProfile from './use-profile';
+import useUser from './use-user';
 
 const useAuthSearchParams = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -12,6 +15,7 @@ const useAuthSearchParams = () => {
   const profile = useProfile();
   const user = useUser();
   const { updateProfile } = useUserActions();
+  const { revalidate } = useRevalidator();
   const rollbar = useRollbar();
 
   const accessToken = hash?.split('access_token=')[1]?.split('&')[0];
@@ -48,6 +52,8 @@ const useAuthSearchParams = () => {
       searchParams.get('emailChangeConfirmed')
     ) {
       updateProfile(profile.id, { email: user.email })
+        /* Bridge: remove when profile updates move to the settings clientAction. */
+        .then(revalidate)
         .then(() => {
           Toast.toast.success(`Your email change has been confirmed`, {
             description: `Your email has been set as ${user.email}`,

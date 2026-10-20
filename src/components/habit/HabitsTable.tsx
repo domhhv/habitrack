@@ -8,15 +8,11 @@ import { useDateFormatter } from 'react-aria';
 import { Link } from 'react-router';
 
 import { TraitChip, CustomButton, AddHabitDialogButton } from '@components';
+import { useUser } from '@hooks';
 import type { Habit, HabitStats } from '@models';
 import { StorageBuckets } from '@models';
 import { listFiles, deleteFile, getHabitsStats } from '@services';
-import {
-  useUser,
-  useHabits,
-  useHabitActions,
-  useConfirmationActions,
-} from '@stores';
+import { useHabits, useHabitActions, useConfirmationActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 import habitColumns from './habit-columns';

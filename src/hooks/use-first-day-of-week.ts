@@ -3,8 +3,9 @@ import { useLocale } from 'react-aria';
 import { useCalendarState } from 'react-stately';
 
 import { DAYS_OF_WEEK } from '@const';
-import { useProfile } from '@stores';
 import { createCalendar } from '@utils';
+
+import useProfile from './use-profile';
 
 const useFirstDayOfWeek = () => {
   const profile = useProfile();

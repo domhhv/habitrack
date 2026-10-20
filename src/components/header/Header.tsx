@@ -6,9 +6,8 @@ import {
 } from '@phosphor-icons/react';
 
 import { UserMenu, CustomKbd, ThemeToggle, CustomButton } from '@components';
-import { useScreenWidth } from '@hooks';
+import { useUser, useScreenWidth } from '@hooks';
 import {
-  useUser,
   useNoteDrawerActions,
   useMobileSidebarActions,
   useOccurrenceDrawerActions,

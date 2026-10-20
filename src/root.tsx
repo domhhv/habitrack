@@ -1,4 +1,4 @@
-import { useNavigation, isRouteErrorResponse } from 'react-router';
+import { useMatches, useNavigation, isRouteErrorResponse } from 'react-router';
 import { Meta, Links, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import { InfinityLoader } from '@components';
@@ -63,12 +63,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function Root() {
   const navigation = useNavigation();
-  const isNavigating = Boolean(navigation.location);
+  const matches = useMatches();
+  const isEnteringApp =
+    Boolean(navigation.location) &&
+    !matches.some((match) => {
+      return match.id === 'app';
+    });
 
   return (
     <>
       <Outlet />
-      {isNavigating && (
+      {isEnteringApp && (
         <div className="loader-container">
           <InfinityLoader color="var(--accent)" />
           <span>We're preparing the app...</span>

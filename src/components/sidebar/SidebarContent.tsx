@@ -15,11 +15,8 @@ import {
 import { NavLink, useLocation } from 'react-router';
 
 import { CustomKbd, ThemeToggle, CustomButton } from '@components';
-import {
-  useUser,
-  useNoteDrawerActions,
-  useOccurrenceDrawerActions,
-} from '@stores';
+import { useUser } from '@hooks';
+import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
 
 import SidebarModeSelect from './SidebarModeSelect';
 import SidebarTooltip from './SidebarTooltip';

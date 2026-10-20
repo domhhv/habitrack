@@ -9,5 +9,6 @@ export { default as initializeTheme } from './initialize-theme';
 export * from './metric-value';
 export { default as noop } from './noop';
 export { default as rollbar } from './rollbar';
+export * from './route-context';
 export { default as supabaseClient } from './supabase-client';
 export * from './type-guards';

@@ -10,13 +10,13 @@ import { useLocale, useDateFormatter } from 'react-aria';
 
 import { CustomKbd, CustomButton } from '@components';
 import {
+  useUser,
   useTextField,
   useScreenWidth,
   useModifierKeys,
   useFirstDayOfWeek,
 } from '@hooks';
 import {
-  useUser,
   usePeriodNotes,
   useNoteActions,
   useNoteDrawerState,

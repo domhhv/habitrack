@@ -8,13 +8,9 @@ import {
   HabitStockManager,
   MetricDefinitionForm,
 } from '@components';
+import { useUser } from '@hooks';
 import type { Habit, FormMetricDefinitions } from '@models';
-import {
-  useUser,
-  useTraits,
-  useHabitActions,
-  useMetricsActions,
-} from '@stores';
+import { useTraits, useHabitActions, useMetricsActions } from '@stores';
 import { handleAsyncAction, buildHabitMetricInsert } from '@utils';
 
 import HabitIcon from './HabitIcon';

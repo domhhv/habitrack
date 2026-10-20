@@ -1,6 +1,7 @@
 import { getLocalTimeZone } from '@internationalized/date';
 import React from 'react';
 
+import { useUser } from '@hooks';
 import type {
   MetricValue,
   OccurrenceStockUsageInsert,
@@ -9,7 +10,6 @@ import type {
 import { StorageBuckets } from '@models';
 import { uploadImages, createOccurrenceStockUsages } from '@services';
 import {
-  useUser,
   useHabits,
   useNoteActions,
   useStockActions,

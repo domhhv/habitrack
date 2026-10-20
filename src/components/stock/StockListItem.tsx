@@ -16,8 +16,9 @@ import {
 import React from 'react';
 
 import { CustomButton } from '@components';
+import { useUser } from '@hooks';
 import type { Habit, MetricValue, HabitStockWithDefaults } from '@models';
-import { useUser, useStockActions, useConfirmationActions } from '@stores';
+import { useStockActions, useConfirmationActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 import StockMetricDefaults from './StockMetricDefaults';

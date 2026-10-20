@@ -61,13 +61,27 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 
 ### Phase 1 – Session and auth
 
-**PR 2 – Session in the app layout**
+**PR 2 – Session in the app layout** – done on `refactor/session-loader`
 
-- `src/utils/route-context.ts`: `userContext` and `profileContext` via `createContext`.
-- `App.tsx`: a `clientMiddleware` that calls `getSession()` and sets the contexts. A `clientLoader` that returns `{ user, profile }`. `HydrateFallback` replaces the `isLoading` branch, and `ErrorBoundary` replaces the `error` branch, both currently from `useSession`. The `onAuthStateChange` subscription stays in a slim hook that calls `useRevalidator().revalidate()` and, on sign-out, `clearUserCaches()`. The Rollbar person effect stays. Add `shouldRevalidate` as described in Conventions.
-- `useUser`/`useProfile` move to `src/hooks/` and read `'app'` loader data. `useFirstDayOfWeek` uses the new `useProfile`.
-- Bridge: the layout component calls `setUser` whenever loader data changes. The remaining slices and the bound-store subscription still read `state.user`.
-- Root `Root` overlay: show the full-screen loader only for the first navigation, not every loader-driven navigation. The sidebar link pending UI from #482 already covers in-app navigation.
+- `src/utils/route-context.ts`: `userContext` (typed from `getSession`).
+- `App.tsx` exports:
+  - `clientMiddleware`, which calls `getSession()` and sets `userContext`.
+  - `clientLoader`, which returns `{ user, profile }`.
+  - `HydrateFallback`, the "We're preparing the app" screen.
+  - `ErrorBoundary`, which renders `ErrorFallbackPage` with its generic title. It now also catches render errors from child pages, so the old session-specific title would be misleading.
+  - `shouldRevalidate`, as described in Conventions.
+- `useSession` is replaced by `useAuthSubscription(user)`. It keeps the Rollbar person effect and calls `revalidate()` only when the session's user id differs from the loader's, or on `USER_UPDATED`. Token refreshes and tab-focus `SIGNED_IN` events for the same user do nothing.
+- `useUser`/`useProfile` live in `src/hooks/` and read `'app'` loader data through `useAppLoaderData`. `fetchProfile`, `useUser` and `useProfile` are removed from `user.store.ts`.
+- Bridges:
+  - `App` calls `setUser(user)` in an effect, for the store subscription and the data slices.
+  - `SettingsPage` and `useAuthSearchParams` call `revalidate()` after the store's `updateProfile`.
+- The `Root` overlay shows only while navigating into the app, i.e. while the `app` route is not yet matched.
+- Changed from the plan:
+  - `profileContext` and `clearUserCaches()` are deferred to the PRs that need them (PR 9 and PR 7). Until then the store subscription still clears the slices on sign-out.
+- Verified with the framework client router and stub modules:
+  - The middleware runs during hydration, and both the app `clientLoader` and child loaders see `userContext`.
+  - A plain navigation runs the middleware but skips the app loader.
+  - `revalidate()` and fetcher submissions re-run the app loader.
 
 **PR 3 – Auth pages use `clientAction`s**
 
@@ -131,6 +145,7 @@ Optional later work, not planned here: server loaders through `@supabase/ssr` co
 
 - Component-less client resource routes: verified by the PR 1 spike, except in a real browser. Recheck when PR 7 adds the first one.
 - Revalidation load on the app layout. Every submission re-runs the habits, traits and profile queries. Expect three small queries; if that is too much, also skip `/resources/notes` submissions in `shouldRevalidate`.
+- `react-router:split-route-modules` logs `SOURCEMAP_BROKEN` warnings for route modules with split client exports (seen since PR 2). Check that Rollbar stack traces for those chunks still map back to the source.
 - `HydrateFallback` on every hard load of an app route. This is the same experience as the current `useSession` loader, so it is not a regression.
 - Moving the filter representation (PR 6) resets every user's current selection once. That is acceptable, because filters are not persisted today.
 
