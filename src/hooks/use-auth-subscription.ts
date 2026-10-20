@@ -2,7 +2,7 @@ import { useRollbar } from '@rollbar/react';
 import React from 'react';
 import { useRevalidator } from 'react-router';
 
-import { supabaseClient, type SessionUser } from '@utils';
+import { supabaseClient, markAppDataStale, type SessionUser } from '@utils';
 
 const useAuthSubscription = (user: SessionUser) => {
   const { revalidate } = useRevalidator();
@@ -29,6 +29,7 @@ const useAuthSubscription = (user: SessionUser) => {
       const hasUserChanged = (session?.user.id ?? null) !== userId;
 
       if (hasUserChanged || event === 'USER_UPDATED') {
+        markAppDataStale();
         void revalidate();
       }
     });

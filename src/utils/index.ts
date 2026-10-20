@@ -1,3 +1,4 @@
+export * from './app-revalidation';
 export { default as buildMetricTotals } from './build-metric-totals';
 export { default as buildOccurrenceSummary } from './build-occurrence-summary';
 export * from './calendar-range-cache';

@@ -14,7 +14,12 @@ import { useAuthSubscription } from '@hooks';
 import { ErrorFallbackPage } from '@pages';
 import { getProfile, getSession } from '@services';
 import { useUserActions } from '@stores';
-import { userContext } from '@utils';
+import {
+  userContext,
+  isAppDataStale,
+  markAppDataStale,
+  trackAppDataLoad,
+} from '@utils';
 
 import type { Route } from './+types/App';
 
@@ -26,9 +31,15 @@ const sessionMiddleware: Route.ClientMiddlewareFunction = async ({
 
 export const clientMiddleware = [sessionMiddleware];
 
-export const clientLoader = async ({ context }: Route.ClientLoaderArgs) => {
+export const clientLoader = async ({
+  context,
+  request,
+}: Route.ClientLoaderArgs) => {
+  const finishAppDataLoad = trackAppDataLoad(request.signal);
   const user = context.get(userContext);
   const profile = user ? await getProfile(user.id) : null;
+
+  finishAppDataLoad();
 
   return { profile, user };
 };
@@ -40,7 +51,11 @@ export const shouldRevalidate = ({
   nextUrl,
 }: ShouldRevalidateFunctionArgs) => {
   if (!formMethod && currentUrl.href !== nextUrl.href) {
-    return false;
+    return isAppDataStale();
+  }
+
+  if (defaultShouldRevalidate) {
+    markAppDataStale();
   }
 
   return defaultShouldRevalidate;
