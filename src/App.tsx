@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
 import React from 'react';
+import { Outlet } from 'react-router';
 
 import {
   AppHeader,
@@ -11,8 +12,6 @@ import {
 } from '@components';
 import { useSession } from '@hooks';
 import { ErrorFallbackPage } from '@pages';
-
-import AppRoutes from './AppRoutes';
 
 const App = () => {
   const { error, isLoading } = useSession();
@@ -51,7 +50,7 @@ const App = () => {
       <div className="flex w-full flex-1 items-stretch">
         <AppSidebar />
         <main className="flex min-h-[calc(100dvh-4rem)] min-w-0 flex-1 flex-col items-start bg-white max-md:pb-11.25 lg:min-h-dvh dark:bg-black">
-          <AppRoutes />
+          <Outlet />
         </main>
       </div>
     </>
