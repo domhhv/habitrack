@@ -14,23 +14,19 @@ import { PlugsIcon, ShieldIcon, UserCircleIcon } from '@phosphor-icons/react';
 import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
 import React from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useRevalidator } from 'react-router';
 
 import { CustomButton, PasswordInput, ConnectedAccounts } from '@components';
-import { useTextField, useAuthSearchParams } from '@hooks';
+import { useUser, useProfile, useTextField, useAuthSearchParams } from '@hooks';
 import type { DaysOfWeek, ProfilesUpdate } from '@models';
-import {
-  useUser,
-  useProfile,
-  useUserActions,
-  useConfirmationActions,
-} from '@stores';
+import { useUserActions, useConfirmationActions } from '@stores';
 import { getErrorMessage } from '@utils';
 
 const SettingsPage = () => {
   useAuthSearchParams();
 
   const navigate = useNavigate();
+  const { revalidate } = useRevalidator();
   const user = useUser();
   const profile = useProfile();
   const { deleteUser, updateProfile, updateUser } = useUserActions();
@@ -96,6 +92,8 @@ const SettingsPage = () => {
     try {
       setIsUpdating(true);
       await updateProfile(profile.id, profileUpdatePayload);
+      /* Bridge: remove when profile updates move to the settings clientAction. */
+      await revalidate();
       Toast.toast.success('Account updated');
     } catch (error) {
       Toast.toast.danger('Failed to update account', {

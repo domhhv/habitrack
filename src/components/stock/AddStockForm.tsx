@@ -3,12 +3,13 @@ import { XIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { CustomButton } from '@components';
+import { useUser, useProfile } from '@hooks';
 import type {
   Habit,
   MetricValue,
   HabitStockMetricDefaultInsert,
 } from '@models';
-import { useUser, useProfile, useStockActions } from '@stores';
+import { useStockActions } from '@stores';
 import { handleAsyncAction } from '@utils';
 
 import StockMetricDefaults from './StockMetricDefaults';

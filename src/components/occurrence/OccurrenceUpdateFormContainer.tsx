@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useUser } from '@hooks';
 import type {
   MetricValue,
   OccurrenceStockUsageInsert,
@@ -13,7 +14,6 @@ import {
   deleteOccurrenceStockUsages,
 } from '@services';
 import {
-  useUser,
   useHabits,
   useNoteActions,
   useStockActions,

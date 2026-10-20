@@ -14,10 +14,9 @@ import { useLocale } from 'react-aria';
 import { useNavigate } from 'react-router';
 
 import { CustomButton } from '@components';
-import { useFirstDayOfWeek } from '@hooks';
+import { useUser, useFirstDayOfWeek } from '@hooks';
 import type { NotePeriodKind } from '@models';
 import {
-  useUser,
   useDayNotes,
   useWeekNotes,
   useMonthNotes,

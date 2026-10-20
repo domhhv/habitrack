@@ -3,8 +3,8 @@ import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
 import { CustomButton, OccurrenceChip } from '@components';
-import { useTextField } from '@hooks';
-import { useUser, useTraitActions } from '@stores';
+import { useUser, useTextField } from '@hooks';
+import { useTraitActions } from '@stores';
 import { makeTestOccurrence } from '@tests';
 import { handleAsyncAction } from '@utils';
 

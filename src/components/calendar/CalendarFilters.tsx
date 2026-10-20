@@ -13,11 +13,10 @@ import groupBy from 'lodash.groupby';
 import React from 'react';
 
 import { TraitChip } from '@components';
-import { useScreenWidth } from '@hooks';
+import { useUser, useScreenWidth } from '@hooks';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import {
-  useUser,
   useHabits,
   useTraits,
   useCalendarFilters,

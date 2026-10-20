@@ -3,9 +3,8 @@ import { today, getLocalTimeZone } from '@internationalized/date';
 import React from 'react';
 import { useNavigate } from 'react-router';
 
-import { useSidebarMode, useKeyboardShortcut } from '@hooks';
+import { useUser, useSidebarMode, useKeyboardShortcut } from '@hooks';
 import {
-  useUser,
   useNoteDrawerActions,
   useMobileSidebarState,
   useMobileSidebarActions,

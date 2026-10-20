@@ -16,10 +16,9 @@ import { useCalendarCell } from 'react-aria';
 import type { CalendarState } from 'react-stately';
 
 import { CustomButton, OccurrenceChip } from '@components';
-import { useScreenWidth } from '@hooks';
+import { useUser, useScreenWidth } from '@hooks';
 import type { Occurrence } from '@models';
 import {
-  useUser,
   useDayNotes,
   useThemeMode,
   useNoteDrawerState,

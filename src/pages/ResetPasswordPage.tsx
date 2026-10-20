@@ -3,8 +3,8 @@ import React from 'react';
 import { Navigate, useNavigate } from 'react-router';
 
 import { AuthForm } from '@components';
+import { useUser } from '@hooks';
 import { sendPasswordResetEmail } from '@services';
-import { useUser } from '@stores';
 import { getErrorMessage } from '@utils';
 
 const ResetPasswordPage = () => {

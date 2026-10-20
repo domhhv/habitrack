@@ -3,9 +3,8 @@ import React from 'react';
 import { Navigate, useNavigate } from 'react-router';
 
 import { CustomButton } from '@components';
-import { useFirstDayOfWeek } from '@hooks';
+import { useUser, useFirstDayOfWeek } from '@hooks';
 import { signInAnonymously } from '@services';
-import { useUser } from '@stores';
 import { getErrorMessage } from '@utils';
 
 const AnonymousLoginPage = () => {

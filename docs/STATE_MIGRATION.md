@@ -37,7 +37,7 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 - **Where mutations live.** A mutation whose UI belongs to one page goes on that page's `clientAction`. Branch on an `intent` field. A mutation whose UI is global (drawers, header) goes on a component-less resource route, `src/routes/resources/<domain>.ts` (`/resources/occurrences`, `/resources/notes`). That route can also have a `clientLoader` that fetchers call for drawer data.
 - **Action result shape.** A new `src/utils/run-action.ts` wraps the existing `handleAsyncAction`, which keeps showing the toasts. It returns `{ ok: true, data } | { ok: false, error }` instead of rethrowing, so a failed mutation does not trigger the `ErrorBoundary`. Complex payloads go through `fetcher.submit(json, { method: 'post', encType: 'application/json' })`. Photo uploads use `FormData`.
 - **Cache invalidation happens in `clientAction`s.** This follows the docs' "Client-Side Caching" pattern. The range caches live in a module, e.g. `src/utils/data-cache.ts`, with `occurrencesCache` and `notesCache`. A `clearUserCaches()` function runs on sign-out.
-- **Revalidation.** The app layout exports `shouldRevalidate`. It returns `false` for plain GET navigations to a different URL (`formMethod == null && currentUrl.href !== nextUrl.href`). In every other case it returns `defaultShouldRevalidate`: submissions, same-URL navigations, and explicit `revalidate()`. Calendar routes keep the default behaviour, and cache hits keep it cheap. Pass `request.signal` into the Supabase queries (`.abortSignal()`). This replaces the hand-written `requestVersion`/`calendarRange` comparisons.
+- **Revalidation.** By default, the router re-runs the app layout loader on every navigation. To avoid that, the app layout exports `shouldRevalidate`. For plain GET navigations to a different URL it revalidates only while the app data is stale (`src/utils/app-revalidation.ts`). Submissions, same-URL navigations and explicit `revalidate()` calls mark the data stale and return `defaultShouldRevalidate`. The auth subscription also marks it stale before calling `revalidate()`. The `clientLoader` clears the mark only when a load finishes without being aborted. A revalidation that a navigation interrupts is therefore retried on the next navigation, not dropped. Mark the data stale wherever something else needs the app loader to refresh. Calendar routes keep the default behaviour, and cache hits keep it cheap. Pass `request.signal` into the Supabase queries (`.abortSignal()`). This replaces the hand-written `requestVersion`/`calendarRange` comparisons.
 - **Temporary bridges.** Migrate writes first and reads second within each domain. While a domain's reads are still in Zustand, its new `clientAction` refreshes the old slice through `useBoundStore.getState()`, for example `getState().habitActions.fetchHabits()`. The PR that moves the reads deletes those lines and the slice. Mark every bridge with a block comment `/* Bridge: remove with <slice> */` so the remaining ones are easy to grep.
 
 ## PR sequence
@@ -61,13 +61,29 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 
 ### Phase 1 – Session and auth
 
-**PR 2 – Session in the app layout**
+**PR 2 – Session in the app layout** – done on `refactor/session-loader`
 
-- `src/utils/route-context.ts`: `userContext` and `profileContext` via `createContext`.
-- `App.tsx`: a `clientMiddleware` that calls `getSession()` and sets the contexts. A `clientLoader` that returns `{ user, profile }`. `HydrateFallback` replaces the `isLoading` branch, and `ErrorBoundary` replaces the `error` branch, both currently from `useSession`. The `onAuthStateChange` subscription stays in a slim hook that calls `useRevalidator().revalidate()` and, on sign-out, `clearUserCaches()`. The Rollbar person effect stays. Add `shouldRevalidate` as described in Conventions.
-- `useUser`/`useProfile` move to `src/hooks/` and read `'app'` loader data. `useFirstDayOfWeek` uses the new `useProfile`.
-- Bridge: the layout component calls `setUser` whenever loader data changes. The remaining slices and the bound-store subscription still read `state.user`.
-- Root `Root` overlay: show the full-screen loader only for the first navigation, not every loader-driven navigation. The sidebar link pending UI from #482 already covers in-app navigation.
+- `src/utils/route-context.ts`: `userContext` (typed from `getSession`).
+- `App.tsx` exports:
+  - `clientMiddleware`, which calls `getSession()` and sets `userContext`.
+  - `clientLoader`, which returns `{ user, profile }`.
+  - `HydrateFallback`, the "We're preparing the app" screen.
+  - `ErrorBoundary`, which renders `ErrorFallbackPage` with its generic title. It now also catches render errors from child pages, so the old session-specific title would be misleading.
+  - `shouldRevalidate`, as described in Conventions.
+- `useSession` is replaced by `useAuthSubscription(user)`. It keeps the Rollbar person effect and calls `revalidate()` only when the session's user id differs from the loader's, or on `USER_UPDATED`. Token refreshes and tab-focus `SIGNED_IN` events for the same user do nothing.
+- `useUser`/`useProfile` live in `src/hooks/` and read `'app'` loader data through `useAppLoaderData`. `fetchProfile`, `useUser` and `useProfile` are removed from `user.store.ts`.
+- Bridges:
+  - `App` calls `setUser(user)` in an effect, for the store subscription and the data slices.
+  - `SettingsPage` and `useAuthSearchParams` call `revalidate()` after the store's `updateProfile`.
+- The `Root` overlay shows only while navigating into the app, i.e. while the `app` route is not yet matched.
+- Changed from the plan:
+  - `profileContext` and `clearUserCaches()` are deferred to the PRs that need them (PR 9 and PR 7). Until then the store subscription still clears the slices on sign-out.
+- Verified with the framework client router and stub modules:
+  - The middleware runs during hydration, and both the app `clientLoader` and child loaders see `userContext`.
+  - A plain navigation runs the middleware but skips the app loader.
+  - `revalidate()` and fetcher submissions re-run the app loader.
+  - A sign-out revalidation or post-submit revalidation that a navigation interrupts still refreshes the app loader. This was a review finding on #488: the first version of `shouldRevalidate` dropped these.
+- `entry.client.tsx` passes `onError` to `HydratedRouter` and reports errors caught by route boundaries to Rollbar. Route error responses, such as thrown 404s, are not reported. Before this, route render errors stopped at the router's boundaries and never reached `RollbarErrorBoundary`. That gap dates back to the switch to framework mode.
 
 **PR 3 – Auth pages use `clientAction`s**
 
@@ -131,6 +147,7 @@ Optional later work, not planned here: server loaders through `@supabase/ssr` co
 
 - Component-less client resource routes: verified by the PR 1 spike, except in a real browser. Recheck when PR 7 adds the first one.
 - Revalidation load on the app layout. Every submission re-runs the habits, traits and profile queries. Expect three small queries; if that is too much, also skip `/resources/notes` submissions in `shouldRevalidate`.
+- `react-router:split-route-modules` logs `SOURCEMAP_BROKEN` warnings for route modules with split client exports (seen since PR 2). Check that Rollbar stack traces for those chunks still map back to the source.
 - `HydrateFallback` on every hard load of an app route. This is the same experience as the current `useSession` loader, so it is not a regression.
 - Moving the filter representation (PR 6) resets every user's current selection once. That is acceptable, because filters are not persisted today.
 
