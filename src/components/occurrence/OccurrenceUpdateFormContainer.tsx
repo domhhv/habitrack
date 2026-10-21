@@ -14,11 +14,17 @@ import OccurrenceFormView from './OccurrenceFormView';
 
 const OccurrenceUpdateFormContainer = () => {
   const { closeOccurrenceDrawer } = useOccurrenceDrawerActions();
-  const occurrenceToEdit = useOccurrenceToEdit();
+  const liveOccurrence = useOccurrenceToEdit();
+  const [occurrenceToEdit, setOccurrenceToEdit] =
+    React.useState(liveOccurrence);
   const habits = useHabits();
   const notes = useNotesByOccurrenceId();
   const fetcher = useActionFetcher(closeOccurrenceDrawer);
   const submit = useSubmit();
+
+  if (liveOccurrence && liveOccurrence.id !== occurrenceToEdit?.id) {
+    setOccurrenceToEdit(liveOccurrence);
+  }
 
   const occurrenceNote = React.useMemo(() => {
     return notes[occurrenceToEdit?.id || ''];
@@ -77,6 +83,7 @@ const OccurrenceUpdateFormContainer = () => {
       onPhotoDelete={handlePhotoDelete}
       isSaving={fetcher.state !== 'idle'}
       occurrenceToEdit={occurrenceToEdit}
+      photoPaths={liveOccurrence?.photoPaths ?? null}
     />
   );
 };

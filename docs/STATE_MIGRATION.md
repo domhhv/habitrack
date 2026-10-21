@@ -159,10 +159,13 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
   - Photo removal uses `useSubmit` with a `fetcherKey` per photo, so quick successive removals don't interrupt each other. It has no success toast, because `SignedImageViewer` already shows one.
   - The drawer's delete and `OccurrenceListItem`'s metric-value removal each use a fetcher. They ignore a new request while one is pending.
 - `occurrenceDrawer.occurrenceToEdit` is now `occurrenceIdToEdit`. `useOccurrenceToEdit()` resolves it from the store occurrences until PR 9.
+  - The update container keeps the occurrence it first loaded as the draft source until the edited id changes, so refreshes after a photo removal don't wipe unsaved edits. Only the live `photoPaths` reach the form, through a `photoPaths` prop.
+- Writes to `photo_paths` (remove-photo, and the update's own patch) go through `writePhotoPaths`. It re-reads the row and queues the writes per occurrence, so concurrent removals can't restore a deleted file's path.
+- Photo uploads keep the old lenient behaviour: `uploadImages` toasts any failed files and the entry saves with the photos that did upload.
 - Habit stock counts refresh through app-loader revalidation after every occurrence action. That now includes deletes, which used to leave the counts stale.
 - Store: `metrics.store.ts` is deleted, because metric values go through the services. `addOccurrence`, `updateOccurrence` and `removeOccurrence` are removed from the occurrences slice.
 - Bridges:
-  - `refreshStoreOccurrences()` (in `occurrences.store.ts`, shared with `HabitDetailsPage`) invalidates the slice's cache and refetches the current range. The calendar is not emptied first, and failures go to Rollbar.
+  - `refreshStoreOccurrences()` (in `occurrences.store.ts`, shared with `HabitDetailsPage`) invalidates the slice's cache and refetches the current range. The calendar is not emptied first, and failures go to Rollbar. It runs in `finally`, so an action that fails after some of its writes still refreshes the calendar.
   - The occurrence note is still saved through `useBoundStore.getState().noteActions` until PR 8.
 - Changed from the plan:
   - The range caches stay inside the slices.

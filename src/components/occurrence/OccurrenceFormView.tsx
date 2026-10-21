@@ -56,6 +56,7 @@ type OccurrenceFormViewProps = {
   isSaving: boolean;
   occurrenceNote?: { content: string; id: string };
   occurrenceToEdit?: Occurrence;
+  photoPaths?: string[] | null;
   onClose: () => void;
   onPhotoDelete?: (path: string) => void;
   onSubmit: (values: OccurrenceFormValues) => void;
@@ -70,6 +71,7 @@ const OccurrenceFormView = ({
   onClose,
   onPhotoDelete,
   onSubmit,
+  photoPaths = null,
 }: OccurrenceFormViewProps) => {
   const timeZone = getLocalTimeZone();
   const [note, handleNoteChange, clearNote] = useTextField();
@@ -992,14 +994,14 @@ const OccurrenceFormView = ({
       </div>
       <OccurrencePhotosUploader
         files={uploadedFiles}
+        photoPaths={photoPaths}
         onFilesChange={setUploadedFiles}
-        photoPaths={occurrenceToEdit?.photoPaths || null}
       />
       {onPhotoDelete && (
         <SignedImageViewer
+          paths={photoPaths}
           onDelete={onPhotoDelete}
           bucket={StorageBuckets.OCCURRENCE_PHOTOS}
-          paths={occurrenceToEdit?.photoPaths || null}
         />
       )}
       <div className="bg-background dark:bg-surface-tertiary border-border-tertiary fixed right-0 bottom-0 flex w-full items-center justify-between gap-2 border-t p-4">

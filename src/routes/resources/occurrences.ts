@@ -38,6 +38,42 @@ const readValues = (formData: FormData) => {
   ) as OccurrenceValuesSubmission;
 };
 
+const photoPathsWrites = new Map<RawOccurrence['id'], Promise<void>>();
+
+/**
+ * Serializes read-modify-write updates of an occurrence's `photo_paths`, so concurrent photo
+ * removals and entry updates in this tab never overwrite each other's changes.
+ */
+const writePhotoPaths = (
+  occurrenceId: RawOccurrence['id'],
+  getNextPhotoPaths: (photoPaths: string[]) => string[],
+  changes: Parameters<typeof patchOccurrence>[1] = {}
+) => {
+  const write = (photoPathsWrites.get(occurrenceId) ?? Promise.resolve()).then(
+    async () => {
+      const occurrence = await getOccurrence(occurrenceId);
+      const photoPaths = getNextPhotoPaths(occurrence?.photoPaths ?? []);
+
+      await patchOccurrence(occurrenceId, {
+        ...changes,
+        photoPaths: photoPaths.length > 0 ? photoPaths : null,
+      });
+    }
+  );
+  const settled = write.catch(() => {
+    return undefined;
+  });
+
+  photoPathsWrites.set(occurrenceId, settled);
+  void settled.then(() => {
+    if (photoPathsWrites.get(occurrenceId) === settled) {
+      photoPathsWrites.delete(occurrenceId);
+    }
+  });
+
+  return write;
+};
+
 const uploadPhotos = (formData: FormData, userId: string, habitId: string) => {
   const photos = formData.getAll('photos').filter((photo): photo is File => {
     return typeof photo !== 'string';
@@ -189,22 +225,29 @@ const updateOccurrence = async (formData: FormData, userId: string) => {
 
   const values = readValues(formData);
   const noteId = formData.get('noteId');
-  const photoPaths = (occurrence.photoPaths ?? []).concat(
-    await uploadPhotos(formData, userId, values.selectedHabitId)
+  const uploadedPhotoPaths = await uploadPhotos(
+    formData,
+    userId,
+    values.selectedHabitId
   );
   const { cost, currency } = await getCost(values);
 
   await syncStockUsages(occurrence, values, userId);
   await markStocksDepleted(values);
-  await patchOccurrence(occurrence.id, {
-    cost,
-    currency,
-    habitId: values.selectedHabitId,
-    hasSpecificTime: values.hasSpecificTime,
-    occurredAt: values.occurredAt,
-    photoPaths: photoPaths.length > 0 ? photoPaths : null,
-    userId,
-  });
+  await writePhotoPaths(
+    occurrence.id,
+    (photoPaths) => {
+      return photoPaths.concat(uploadedPhotoPaths);
+    },
+    {
+      cost,
+      currency,
+      habitId: values.selectedHabitId,
+      hasSpecificTime: values.hasSpecificTime,
+      occurredAt: values.occurredAt,
+      userId,
+    }
+  );
   await saveOccurrenceNote(
     occurrence.id,
     values.note,
@@ -222,13 +265,11 @@ const deleteOccurrence = async (occurrenceId: string) => {
   }
 };
 
-const removePhoto = async (occurrenceId: string, photoPath: string) => {
-  const occurrence = await getOccurrence(occurrenceId);
-
-  await patchOccurrence(occurrenceId, {
-    photoPaths: (occurrence?.photoPaths ?? []).filter((path) => {
+const removePhoto = (occurrenceId: string, photoPath: string) => {
+  return writePhotoPaths(occurrenceId, (photoPaths) => {
+    return photoPaths.filter((path) => {
       return path !== photoPath;
-    }),
+    });
   });
 };
 
@@ -250,11 +291,11 @@ export const clientAction = async ({
 
     return formData.get('intent') === 'update'
       ? runAction(
-          updateOccurrence(formData, user.id).then(refreshStoreOccurrences),
+          updateOccurrence(formData, user.id).finally(refreshStoreOccurrences),
           'update_occurrence'
         )
       : runAction(
-          addOccurrence(formData, user.id).then(refreshStoreOccurrences),
+          addOccurrence(formData, user.id).finally(refreshStoreOccurrences),
           'add_occurrence'
         );
   }
@@ -264,7 +305,9 @@ export const clientAction = async ({
   switch (submission.intent) {
     case 'delete':
       return runAction(
-        deleteOccurrence(submission.occurrenceId).then(refreshStoreOccurrences),
+        deleteOccurrence(submission.occurrenceId).finally(
+          refreshStoreOccurrences
+        ),
         'remove_occurrence'
       );
 
@@ -273,14 +316,13 @@ export const clientAction = async ({
         destroyMetricValue(
           submission.occurrenceId,
           submission.habitMetricId
-        ).then(refreshStoreOccurrences),
+        ).finally(refreshStoreOccurrences),
         'remove_metric-value'
       );
 
     case 'remove-photo':
       try {
         await removePhoto(submission.occurrenceId, submission.photoPath);
-        await refreshStoreOccurrences();
 
         return { ok: true as const };
       } catch (error) {
@@ -289,6 +331,8 @@ export const clientAction = async ({
         );
 
         return { error: getErrorMessage(error), ok: false as const };
+      } finally {
+        await refreshStoreOccurrences();
       }
   }
 };

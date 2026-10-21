@@ -17,6 +17,7 @@ import {
   createOccurrenceStockUsages,
   deleteOccurrenceStockUsages,
 } from '@services';
+import { refreshStoreOccurrences } from '@stores';
 import { makeRouteArgs } from '@tests';
 import type { SessionUser } from '@utils';
 
@@ -40,6 +41,13 @@ vi.mock('@services', async (importOriginal) => {
     updateOccurrenceStockUsage: vi.fn(),
     uploadImages: vi.fn(),
     upsertMetricValues: vi.fn(),
+  };
+});
+
+vi.mock('@stores', async (importOriginal) => {
+  return {
+    ...(await importOriginal<object>()),
+    refreshStoreOccurrences: vi.fn().mockResolvedValue(undefined),
   };
 });
 
@@ -214,6 +222,54 @@ describe('occurrences resource clientAction', () => {
     });
 
     expect(destroyMetricValue).toHaveBeenCalledWith('occurrence-1', 'metric-1');
+  });
+
+  it('refreshes the store occurrences even when a later step fails', async () => {
+    vi.mocked(createOccurrence).mockResolvedValue({
+      id: 'occurrence-1',
+    } as Awaited<ReturnType<typeof createOccurrence>>);
+    vi.mocked(upsertMetricValues).mockRejectedValue(new Error('Bad metric'));
+
+    await expect(submitForm({ intent: 'create' })).resolves.toEqual({
+      error: 'Bad metric',
+      ok: false,
+    });
+    expect(refreshStoreOccurrences).toHaveBeenCalledOnce();
+  });
+
+  it('serializes concurrent photo removals of the same occurrence', async () => {
+    let storedPhotoPaths: string[] | null = ['a.jpg', 'b.jpg'];
+
+    vi.mocked(getOccurrence).mockImplementation(async () => {
+      await Promise.resolve();
+
+      return { photoPaths: storedPhotoPaths } as Awaited<
+        ReturnType<typeof getOccurrence>
+      >;
+    });
+    vi.mocked(patchOccurrence).mockImplementation(async (_, { photoPaths }) => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      storedPhotoPaths = photoPaths ?? null;
+
+      return {} as Awaited<ReturnType<typeof patchOccurrence>>;
+    });
+
+    await Promise.all([
+      submitJson({
+        intent: 'remove-photo',
+        occurrenceId: 'occurrence-1',
+        photoPath: 'a.jpg',
+      }),
+      submitJson({
+        intent: 'remove-photo',
+        occurrenceId: 'occurrence-1',
+        photoPath: 'b.jpg',
+      }),
+    ]);
+
+    expect(storedPhotoPaths).toBeNull();
   });
 
   it('drops a deleted photo from the occurrence', async () => {
