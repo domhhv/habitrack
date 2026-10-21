@@ -101,10 +101,21 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
   - Pre-existing gap: nothing reads `returnTo` yet.
 - Tests: `AuthForm` runs through `createRoutesStub` and checks that the fields reach the route action. The loader and action branches are covered for login, register and consent (`tests/makeRouteArgs.ts` builds the arguments).
 
-**PR 4 – Settings route**
+**PR 4 – Settings route** – done on `refactor/settings-action`
 
-- `SettingsPage` `clientAction` with intents `update-profile`, `update-user`, `delete-account`, `link-identity`/`unlink-identity` (from `ConnectedAccounts`). `isUpdating` comes from `useNavigation`/`useFetcher`. `useAuthSearchParams` stays an effect for now. Its `updateProfile` call moves to `useFetcher().submit`.
-- Delete `profile` and `userActions` from `user.store.ts`. Keep only the bridged `user` field.
+- `SettingsPage` `clientAction` handles the intents `update-profile`, `update-user`, `delete-account`, `link-identity`, `unlink-identity` and `sync-email`.
+  - The user comes from `userContext`. Each intent keeps its previous toasts. Failures return `data({ error, intent, ok: false }, { status: 400 })`.
+  - `update-profile` and `update-user` patch only the fields that were submitted, and the page still submits only the fields that changed.
+  - `delete-account` redirects to `/login`.
+  - Unknown intents and signed-out requests get a 400.
+- The page submits through one `useFetcher`, so it stays put and `isUpdating` is `fetcher.state !== 'idle'`. After every submission the app loader returns a fresh profile, so the existing `[profile]` effect resets the general and security fields. The password is cleared after a successful `update-user`.
+- `ConnectedAccounts`:
+  - Its identities now come from the settings `clientLoader` as props, instead of an effect with a spinner.
+  - A failed load renders inline, not as a toast, so the page stays usable.
+  - Link and unlink use its own fetcher. Unlink sends the `identity_id`, and the action finds that identity again before unlinking. Revalidation refreshes the list afterwards.
+- `useAuthSearchParams` stays an effect. Its email-change sync is now `fetcher.submit({ intent: 'sync-email' })`, and the PR 2 `revalidate()` bridges are gone.
+- `user.store.ts` keeps only `user` and `setUser`, for the PR 2 bridge in `App`. `profile`, `updateProfile`, `updateUser`, `deleteUser` and `clearProfile` are removed.
+- Tests cover the settings loader and action branches, and check that `ConnectedAccounts` link/unlink submit to `/settings`.
 
 ### Phase 2 – Habits and traits
 

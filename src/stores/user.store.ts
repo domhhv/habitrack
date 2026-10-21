@@ -1,9 +1,6 @@
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
-import type { Profile, ProfilesUpdate } from '@models';
-import { updateUser, deleteUser, patchProfile } from '@services';
-
 import { useBoundStore, type SliceCreator } from './bound.store';
 
 type User = Pick<SupabaseUser, 'id' | 'email' | 'is_anonymous'> & {
@@ -11,17 +8,9 @@ type User = Pick<SupabaseUser, 'id' | 'email' | 'is_anonymous'> & {
 };
 
 export type UserSlice = {
-  profile: Profile | null;
   user: null | CamelCasedPropertiesDeep<User>;
   userActions: {
-    clearProfile: () => void;
-    deleteUser: () => Promise<void>;
     setUser: (user: null | CamelCasedPropertiesDeep<User>) => void;
-    updateProfile: (
-      userId: string,
-      profile: Pick<ProfilesUpdate, 'email' | 'name' | 'firstDayOfWeek'>
-    ) => Promise<void>;
-    updateUser: (opts: { email?: string; password?: string }) => Promise<void>;
   };
 };
 
@@ -30,30 +19,8 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
   getState
 ) => {
   return {
-    profile: null,
     user: null,
     userActions: {
-      clearProfile: () => {
-        set(
-          (state) => {
-            state.profile = null;
-          },
-          undefined,
-          'userActions.clearProfile'
-        );
-      },
-      deleteUser: async () => {
-        await deleteUser();
-
-        set(
-          (state) => {
-            state.profile = null;
-            state.user = null;
-          },
-          undefined,
-          'userActions.deleteUser'
-        );
-      },
       setUser: (user) => {
         if (getState().user?.id === user?.id) {
           return;
@@ -65,31 +32,6 @@ export const createUserSlice: SliceCreator<keyof UserSlice> = (
           },
           undefined,
           'userActions.setUser'
-        );
-      },
-      updateProfile: async (userId, profile) => {
-        const newProfile = await patchProfile(userId, profile);
-
-        set(
-          (state) => {
-            state.profile = newProfile;
-          },
-          undefined,
-          'userActions.updateProfile'
-        );
-      },
-      updateUser: async (opts) => {
-        const updatedSupabaseUser = await updateUser(opts);
-
-        set(
-          (state) => {
-            state.user = {
-              ...updatedSupabaseUser,
-              fetchedAt: new Date().toISOString(),
-            };
-          },
-          undefined,
-          'userActions.updateUser'
         );
       },
     },
