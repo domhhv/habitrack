@@ -7,6 +7,7 @@ import {
 import { CaretDownIcon } from '@phosphor-icons/react';
 import React, { type SyntheticEvent } from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
+import { useFetcher } from 'react-router';
 
 import { CustomKbd, CustomButton } from '@components';
 import {
@@ -14,30 +15,26 @@ import {
   useTextField,
   useScreenWidth,
   useModifierKeys,
+  useActionFetcher,
   useFirstDayOfWeek,
 } from '@hooks';
+import type { Note, NoteSubmission } from '@models';
 import {
-  usePeriodNotes,
-  useNoteActions,
   useNoteDrawerState,
   useNoteDrawerActions,
   useConfirmationActions,
 } from '@stores';
-import { getISOWeek, handleAsyncAction } from '@utils';
+import { getISOWeek, isNoteOfPeriod } from '@utils';
 
 import NotePeriodPicker from './NotePeriodPicker';
 
 const NoteDrawer = () => {
   const timeZone = getLocalTimeZone();
-  const notes = usePeriodNotes();
-  const { addNote, deleteNote, updateNote } = useNoteActions();
   const { locale } = useLocale();
   const user = useUser();
   const [content, changeContent, clearContent] = useTextField();
   const { isDesktop, isMobile } = useScreenWidth();
   const [isPeriodPickerShown, setIsPeriodPickerShown] = React.useState(false);
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [isRemoving, setIsRemoving] = React.useState(false);
   const { enter, mod } = useModifierKeys();
   const { isOpen, periodDate, periodKind } = useNoteDrawerState();
   const { closeNoteDrawer } = useNoteDrawerActions();
@@ -65,11 +62,25 @@ const NoteDrawer = () => {
       : periodDate.toString();
   }, [periodKind, periodDate, firstDayOfWeek]);
 
-  const existingNote = React.useMemo(() => {
-    return notes.find((n) => {
-      return n.periodKind === periodKind && n.periodDate === alignPeriodDate();
-    });
-  }, [notes, periodKind, alignPeriodDate]);
+  const noteFetcher = useFetcher<{ note: Note | null }>();
+  const { load: loadNote } = noteFetcher;
+  const loadedNote = noteFetcher.data?.note;
+  const isLoadingNote = noteFetcher.state !== 'idle';
+  const existingNote =
+    loadedNote &&
+    isNoteOfPeriod(loadedNote) &&
+    loadedNote.periodKind === periodKind &&
+    loadedNote.periodDate === alignPeriodDate()
+      ? loadedNote
+      : undefined;
+
+  React.useEffect(() => {
+    if (isOpen && user) {
+      void loadNote(
+        `/resources/notes?kind=${periodKind}&date=${alignPeriodDate()}`
+      );
+    }
+  }, [isOpen, user, periodKind, alignPeriodDate, loadNote]);
 
   React.useEffect(() => {
     if (isOpen && existingNote?.content) {
@@ -97,10 +108,24 @@ const NoteDrawer = () => {
   }, [hasUnsavedChanges, askConfirmation]);
 
   const closeDrawer = () => {
-    setIsRemoving(false);
-    setIsSaving(false);
     closeNoteDrawer();
     clearContent();
+  };
+
+  const saveFetcher = useActionFetcher(closeDrawer);
+  const removeFetcher = useActionFetcher(closeDrawer);
+  const isSaving = saveFetcher.state !== 'idle';
+  const isRemoving = removeFetcher.state !== 'idle';
+
+  const submitNoteChange = (
+    fetcher: typeof saveFetcher,
+    submission: NoteSubmission
+  ) => {
+    void fetcher.submit(submission, {
+      action: '/resources/notes',
+      encType: 'application/json',
+      method: 'post',
+    });
   };
 
   const closeDrawerWithConfirmation = async () => {
@@ -109,49 +134,37 @@ const NoteDrawer = () => {
     }
   };
 
-  const submitNote = async (e?: SyntheticEvent<HTMLFormElement>) => {
+  const submitNote = (e?: SyntheticEvent<HTMLFormElement>) => {
     e?.preventDefault();
 
-    if (!user || !periodDate || !content || existingNote?.content === content) {
-      return null;
-    }
-
-    if (!existingNote) {
-      return handleAsyncAction(
-        addNote({
-          content,
-          periodDate: alignPeriodDate(),
-          periodKind,
-          userId: user.id,
-        }),
-        'add_note',
-        setIsSaving
-      ).then(closeDrawer);
-    }
-
-    if (existingNote.content !== content) {
-      return handleAsyncAction(
-        updateNote(existingNote.id, {
-          content,
-          periodDate: alignPeriodDate(),
-          periodKind,
-        }),
-        'update_note',
-        setIsSaving
-      ).then(closeDrawer);
-    }
-  };
-
-  const removeNote = async () => {
-    if (!existingNote) {
+    if (
+      !user ||
+      !periodDate ||
+      !content ||
+      isSaving ||
+      isLoadingNote ||
+      existingNote?.content === content
+    ) {
       return;
     }
 
-    void handleAsyncAction(
-      deleteNote(existingNote.id),
-      'remove_note',
-      setIsRemoving
-    ).then(closeDrawer);
+    const note = { content, periodDate: alignPeriodDate(), periodKind };
+
+    submitNoteChange(
+      saveFetcher,
+      existingNote
+        ? { intent: 'update', note, noteId: existingNote.id }
+        : { intent: 'create', note }
+    );
+  };
+
+  const removeNote = () => {
+    if (existingNote && !isRemoving) {
+      submitNoteChange(removeFetcher, {
+        intent: 'delete',
+        noteId: existingNote.id,
+      });
+    }
   };
 
   const formatPeriod = () => {
@@ -313,6 +326,7 @@ const NoteDrawer = () => {
                     isSaving ||
                     !user ||
                     isRemoving ||
+                    isLoadingNote ||
                     !content ||
                     existingNote?.content === content
                   }

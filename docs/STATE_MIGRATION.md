@@ -172,17 +172,34 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
   - `clearUserCaches()` waits for PR 9, when the caches move out with the reads.
 - Tests cover every intent of the resource action, and `calculateOccurrenceCost` has its own tests.
 
-**PR 8 – Note mutations and the drawer's note lookup → `/resources/notes`**
+**PRs 8 + 9 – Notes resource route and calendar loaders** – done together on `refactor/calendar-loaders`
 
-- `clientAction` intents `create`/`update`/`delete` for `NoteDrawer`. A `clientLoader` takes `?kind=&date=` and returns the note for that period. `NoteDrawer` calls `useFetcher().load(...)` when its period changes. This fixes a current gap: opening the drawer from the header on a non-calendar page can miss an existing note.
-- Bridge: the actions clear `notesCache` and call `getState().noteActions.fetchNotes()`.
-
-**PR 9 – Calendar reads → calendar route loaders; delete the occurrences and notes range slices**
-
-- `src/utils/calendar-range.ts`: a pure `getCalendarRange(view, params, locale, firstDayOfWeek)` built from the effects now in `MonthCalendar`/`WeekCalendar`/`DayCalendar`. The locale comes from `navigator.language`, which is what `I18nProvider` falls back to. The first day of the week comes from `profileContext`.
-- Each calendar route's `clientLoader` computes the range, calls `occurrencesCache.load`/`notesCache.load` with `request.signal`, starts the sibling prefetch, and returns `{ range, occurrences, occurrencesByDate, notes, notesByOccurrenceId }`.
-- Re-create the calendar data hooks in `src/hooks/use-calendar-data.ts`. They read the data of whichever calendar route is matched. `OccurrenceDrawer` reads the same data. It is only opened with `dayToDisplay` from calendar cells. If the drawer is open without calendar data, fall back to `fetcher.load('/resources/occurrences?date=')`.
-- Delete `calendarRange`, `changeCalendarRange`, the `isFocusedDateInitialized` dance in the three calendar components, the occurrences slice, the range half of the notes slice, and the bound-store subscription. Remove the PR 7–8 bridges.
+- **Calendar loader.** The three calendar routes now sit under a parent `calendar` route (`src/pages/CalendarLayout.tsx`, id `calendar`) with one `clientLoader`. This replaces the planned loader per view.
+  - The loader reads the view from the URL and the date from the child params. Parent loaders receive child params, which was checked with the framework client router.
+  - It computes the range with `getFocusedCalendarDate`/`getCalendarRange` (`src/utils/calendar-range.ts`). The locale is `navigator.language`, and the first day of the week comes from `profileContext`, falling back to the locale.
+  - `/calendar` without a view redirects to `/calendar/month`. The route keeps a pass-through component, so a direct document request to `/calendar` (the OAuth and post-login target) still renders.
+  - Its `shouldRevalidate` also re-runs on any path change, and an `ErrorBoundary` keeps a calendar load failure inside the app shell.
+  - This fixes an old bug: the day and week views without date params never pushed a range, so they never loaded data.
+- **Calendar data.** The range caches moved out of the slices into `src/services/calendar-data.service.ts`.
+  - `loadCalendarData(range)` loads occurrences and notes through the caches and prefetches the sibling ranges.
+  - `createCalendarData` returns `occurrences`, `occurrencesByDate`, `periodNotes`/`dayNotes`/`weekNotes`/`monthNotes` and `notesByOccurrenceId`, computed once per load.
+  - `request.signal` is not passed down, because cached requests are shared with prefetches.
+- **Hooks.**
+  - Components read `useCalendarData()` (`src/hooks/use-calendar-data.ts`). It returns empty data outside the calendar, so the drawers, chips and trait preview work on any page.
+  - `useOccurrenceToEdit()` moved to `@hooks` and resolves the edited id from that data.
+  - No fallback `fetcher.load` was added for the occurrence drawer, because its day view only opens from calendar cells.
+- **Profile.** The app layout middleware sets `profileContext` from a per-user memo. It refetches the profile while the app data is stale (`isAppDataStale()`), so profile edits still show up. The app `clientLoader` reads the profile from that context instead of fetching it again.
+- **`/resources/notes`** (`src/routes/resources/notes.ts`).
+  - The `clientLoader` returns the note of `?kind=&date=` through the new `getPeriodNote`.
+  - The `clientAction` takes the JSON `NoteSubmission` (`create`/`update`/`delete`) and invalidates the notes cache in `finally`.
+  - `NoteDrawer` loads its note with `useFetcher().load()` whenever the period changes, so a note opened from the header on any page is found. It only trusts loaded data that matches the current period, and blocks saving while the note is loading. It saves and deletes through `useActionFetcher`.
+- **Occurrence and habit actions.** They save occurrence notes through the note services, and `clearCalendarData()` in `finally` replaces the `refreshStoreOccurrences` bridge.
+- **Store.**
+  - `occurrences.store.ts` is deleted, along with `calendarRange`/`changeCalendarRange`, the bound-store subscription and `subscribeWithSelector`.
+  - `user.store.ts` and the `setUser` bridge in `App` are deleted early, since nothing reads them any more (planned for PR 11).
+  - `useAuthSubscription` now does the per-user cleanup when the signed-in user changes: `clearCalendarData()` plus clearing the notes list (the planned `clearUserCaches()`).
+  - `notes.store.ts` keeps only the notes-list half until PR 10. Note-changing actions call the `refreshStoreNotesList()` bridge, which refetches page 0 if the list was loaded.
+- **Tests** cover the range util, the calendar loader, the notes resource loader and action, and the calendar data service. The other tests were updated to the new hooks.
 
 **PR 10 – Notes page**
 

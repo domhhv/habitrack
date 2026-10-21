@@ -1,13 +1,14 @@
 import React from 'react';
 import { useSubmit } from 'react-router';
 
-import { useHabits, useActionFetcher } from '@hooks';
-import type { OccurrenceFormValues, OccurrenceSubmission } from '@models';
 import {
+  useHabits,
+  useCalendarData,
+  useActionFetcher,
   useOccurrenceToEdit,
-  useNotesByOccurrenceId,
-  useOccurrenceDrawerActions,
-} from '@stores';
+} from '@hooks';
+import type { OccurrenceFormValues, OccurrenceSubmission } from '@models';
+import { useOccurrenceDrawerActions } from '@stores';
 import { toOccurrenceFormData } from '@utils';
 
 import OccurrenceFormView from './OccurrenceFormView';
@@ -18,7 +19,7 @@ const OccurrenceUpdateFormContainer = () => {
   const [occurrenceToEdit, setOccurrenceToEdit] =
     React.useState(liveOccurrence);
   const habits = useHabits();
-  const notes = useNotesByOccurrenceId();
+  const { notesByOccurrenceId: notes } = useCalendarData();
   const fetcher = useActionFetcher(closeOccurrenceDrawer);
   const submit = useSubmit();
 

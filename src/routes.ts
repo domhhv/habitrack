@@ -8,19 +8,17 @@ import {
 export default [
   index('landing/LandingPage.tsx'),
   layout('App.tsx', { id: 'app' }, [
-    route(
-      'calendar/month/:year?/:month?/:day?',
-      'pages/MonthCalendarPage.tsx',
-      {
+    route('calendar', 'pages/CalendarLayout.tsx', { id: 'calendar' }, [
+      route('month/:year?/:month?/:day?', 'pages/MonthCalendarPage.tsx', {
         id: 'calendar-month',
-      }
-    ),
-    route('calendar/week/:year?/:month?/:day?', 'pages/WeekCalendarPage.tsx', {
-      id: 'calendar-week',
-    }),
-    route('calendar/day/:year?/:month?/:day?', 'pages/DayCalendarPage.tsx', {
-      id: 'calendar-day',
-    }),
+      }),
+      route('week/:year?/:month?/:day?', 'pages/WeekCalendarPage.tsx', {
+        id: 'calendar-week',
+      }),
+      route('day/:year?/:month?/:day?', 'pages/DayCalendarPage.tsx', {
+        id: 'calendar-day',
+      }),
+    ]),
     route('habits', 'pages/HabitsPage.tsx', { id: 'habits' }),
     route('habits/:habitId', 'pages/HabitDetailsPage.tsx', {
       id: 'habit-details',
@@ -38,6 +36,9 @@ export default [
     }),
     route('oauth/consent', 'pages/OAuthConsentPage.tsx', {
       id: 'oauth-consent',
+    }),
+    route('resources/notes', 'routes/resources/notes.ts', {
+      id: 'resources-notes',
     }),
     route('resources/occurrences', 'routes/resources/occurrences.ts', {
       id: 'resources-occurrences',

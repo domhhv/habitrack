@@ -12,11 +12,12 @@ import {
   ConfirmationDialog,
 } from '@components';
 import { useAuthSubscription } from '@hooks';
+import type { Profile } from '@models';
 import { ErrorFallbackPage } from '@pages';
 import { listHabits, getProfile, getSession, listTraits } from '@services';
-import { useUserActions } from '@stores';
 import {
   userContext,
+  profileContext,
   isAppDataStale,
   markAppDataStale,
   trackAppDataLoad,
@@ -24,10 +25,30 @@ import {
 
 import type { Route } from './+types/App';
 
+let profileRequest: { promise: Promise<Profile>; userId: string } | null = null;
+
+const loadProfile = (userId: string) => {
+  if (profileRequest?.userId !== userId || isAppDataStale()) {
+    const promise = getProfile(userId);
+
+    profileRequest = { promise, userId };
+    promise.catch(() => {
+      if (profileRequest?.promise === promise) {
+        profileRequest = null;
+      }
+    });
+  }
+
+  return profileRequest.promise;
+};
+
 const sessionMiddleware: Route.ClientMiddlewareFunction = async ({
   context,
 }) => {
-  context.set(userContext, await getSession());
+  const user = await getSession();
+
+  context.set(userContext, user);
+  context.set(profileContext, user ? await loadProfile(user.id) : null);
 };
 
 export const clientMiddleware = [sessionMiddleware];
@@ -38,15 +59,15 @@ export const clientLoader = async ({
 }: Route.ClientLoaderArgs) => {
   const finishAppDataLoad = trackAppDataLoad(request.signal);
   const user = context.get(userContext);
-  const [profile, habits, traits] = user
-    ? await Promise.all([getProfile(user.id), listHabits(), listTraits()])
-    : [null, [], []];
+  const [habits, traits] = user
+    ? await Promise.all([listHabits(), listTraits()])
+    : [[], []];
 
   finishAppDataLoad();
 
   return {
     habits: keyBy(habits, 'id'),
-    profile,
+    profile: context.get(profileContext),
     traits: keyBy(traits, 'id'),
     user,
   };
@@ -85,17 +106,11 @@ export const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => {
 };
 
 const App = ({ loaderData: { user } }: Route.ComponentProps) => {
-  const { setUser } = useUserActions();
   useAuthSubscription(user);
 
   React.useEffect(() => {
     document.getElementById('root')?.classList.add('initialized');
   }, []);
-
-  /* Bridge: remove with the user slice, which still feeds the store subscription and data slices. */
-  React.useEffect(() => {
-    setUser(user);
-  }, [setUser, user]);
 
   return (
     <>

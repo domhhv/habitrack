@@ -9,19 +9,23 @@ import {
 } from '@models';
 import {
   getHabit,
+  createNote,
+  updateNote,
   patchStock,
+  destroyNote,
   uploadImages,
   getOccurrence,
   patchOccurrence,
   createOccurrence,
   destroyOccurrence,
+  clearCalendarData,
   destroyMetricValue,
   upsertMetricValues,
   updateOccurrenceStockUsage,
   createOccurrenceStockUsages,
   deleteOccurrenceStockUsages,
 } from '@services';
-import { useBoundStore, refreshStoreOccurrences } from '@stores';
+import { refreshStoreNotesList } from '@stores';
 import {
   rollbar,
   runAction,
@@ -115,22 +119,24 @@ const markStocksDepleted = ({
   );
 };
 
-/* Bridge: remove when note mutations move to /resources/notes. */
 const saveOccurrenceNote = async (
   occurrenceId: string,
   content: string,
   noteId: string | null,
   userId: string
 ) => {
-  const { noteActions } = useBoundStore.getState();
-
   if (content && noteId) {
-    await noteActions.updateNote(noteId, { content, occurrenceId });
+    await updateNote(noteId, { content, occurrenceId });
   } else if (content) {
-    await noteActions.addNote({ content, occurrenceId, userId });
+    await createNote({ content, occurrenceId, userId });
   } else if (noteId) {
-    await noteActions.deleteNote(noteId);
+    await destroyNote(noteId);
   }
+};
+
+const invalidateCalendar = () => {
+  clearCalendarData();
+  refreshStoreNotesList();
 };
 
 const syncStockUsages = async (
@@ -291,11 +297,11 @@ export const clientAction = async ({
 
     return formData.get('intent') === 'update'
       ? runAction(
-          updateOccurrence(formData, user.id).finally(refreshStoreOccurrences),
+          updateOccurrence(formData, user.id).finally(invalidateCalendar),
           'update_occurrence'
         )
       : runAction(
-          addOccurrence(formData, user.id).finally(refreshStoreOccurrences),
+          addOccurrence(formData, user.id).finally(invalidateCalendar),
           'add_occurrence'
         );
   }
@@ -305,9 +311,7 @@ export const clientAction = async ({
   switch (submission.intent) {
     case 'delete':
       return runAction(
-        deleteOccurrence(submission.occurrenceId).finally(
-          refreshStoreOccurrences
-        ),
+        deleteOccurrence(submission.occurrenceId).finally(invalidateCalendar),
         'remove_occurrence'
       );
 
@@ -316,7 +320,7 @@ export const clientAction = async ({
         destroyMetricValue(
           submission.occurrenceId,
           submission.habitMetricId
-        ).finally(refreshStoreOccurrences),
+        ).finally(invalidateCalendar),
         'remove_metric-value'
       );
 
@@ -332,7 +336,7 @@ export const clientAction = async ({
 
         return { error: getErrorMessage(error), ok: false as const };
       } finally {
-        await refreshStoreOccurrences();
+        invalidateCalendar();
       }
   }
 };

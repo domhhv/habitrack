@@ -2,13 +2,11 @@ import { cn, Tooltip, ScrollShadow } from '@heroui/react';
 import {
   today,
   isToday,
-  endOfWeek,
   startOfWeek,
   CalendarDate,
   createCalendar,
   toCalendarDate,
   getLocalTimeZone,
-  toCalendarDateTime,
 } from '@internationalized/date';
 import {
   NoteIcon,
@@ -24,28 +22,23 @@ import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { CustomButton, OccurrenceChip } from '@components';
-import { useCurrentTime, useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import {
-  useDayNotes,
-  useFlatOccurrences,
-  useNoteDrawerActions,
-  useCalendarRangeChange,
-  useOccurrenceDrawerActions,
-} from '@stores';
+  useCurrentTime,
+  useScreenWidth,
+  useCalendarData,
+  useFirstDayOfWeek,
+} from '@hooks';
+import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
 import { isDstTransitionDay, findDstTransitionHour } from '@utils';
 
 import CalendarSidebar from './CalendarSidebar';
 
 const WeekCalendar = () => {
   const now = useCurrentTime();
-  const changeCalendarRange = useCalendarRangeChange();
-  const dayNotes = useDayNotes();
-  const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
-    React.useState(false);
+  const { dayNotes, occurrences } = useCalendarData();
   const { isDesktop, screenWidth } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
-  const occurrences = useFlatOccurrences();
   const { locale } = useLocale();
   const params = useParams();
   const firstDayOfWeek = useFirstDayOfWeek();
@@ -76,30 +69,6 @@ const WeekCalendar = () => {
   );
 
   React.useEffect(() => {
-    if (!isFocusedDateInitialized) {
-      return;
-    }
-
-    const focusedDateTime = toCalendarDateTime(state.focusedDate);
-
-    const rangeStart = startOfWeek(focusedDateTime, locale, firstDayOfWeek);
-    const rangeEnd = endOfWeek(focusedDateTime, locale, firstDayOfWeek).set({
-      hour: 23,
-      millisecond: 999,
-      minute: 59,
-      second: 59,
-    });
-
-    changeCalendarRange([rangeStart, rangeEnd]);
-  }, [
-    state.focusedDate,
-    firstDayOfWeek,
-    changeCalendarRange,
-    locale,
-    isFocusedDateInitialized,
-  ]);
-
-  React.useEffect(() => {
     const currentWeek = startOfWeek(
       today(getLocalTimeZone()),
       locale,
@@ -120,7 +89,6 @@ const WeekCalendar = () => {
 
     if (state.focusedDate.toString() !== paramsDate.toString()) {
       state.setFocusedDate(toCalendarDate(paramsDate));
-      setIsFocusedDateInitialized(true);
     }
   }, [state, params, locale, firstDayOfWeek]);
 

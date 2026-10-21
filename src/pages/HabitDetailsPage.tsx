@@ -20,12 +20,13 @@ import {
   destroyStock,
   uploadHabitIcon,
   patchHabitMetric,
+  clearCalendarData,
   createHabitMetrics,
   destroyHabitMetrics,
   createStockMetricDefaults,
   destroyStockMetricDefaults,
 } from '@services';
-import { refreshStoreOccurrences } from '@stores';
+import { refreshStoreNotesList } from '@stores';
 import {
   runAction,
   userContext,
@@ -34,6 +35,11 @@ import {
 } from '@utils';
 
 import type { Route } from './+types/HabitDetailsPage';
+
+const invalidateCalendar = () => {
+  clearCalendarData();
+  refreshStoreNotesList();
+};
 
 const buildStockMetricDefaultInserts = (
   habitStockId: string,
@@ -213,7 +219,7 @@ export const clientAction = async ({
     }
 
     return runAction(
-      replaceHabitIcon(habitId, icon, user.id).finally(refreshStoreOccurrences),
+      replaceHabitIcon(habitId, icon, user.id).finally(invalidateCalendar),
       'upload_icon'
     );
   }
@@ -226,7 +232,7 @@ export const clientAction = async ({
 
     case 'delete-habit':
       return runAction(
-        deleteHabit(habitId, user.id).finally(refreshStoreOccurrences),
+        deleteHabit(habitId, user.id).finally(invalidateCalendar),
         'remove_habit'
       );
 
@@ -236,14 +242,14 @@ export const clientAction = async ({
     case 'save-metrics':
       return runAction(
         saveMetrics(habitId, submission.metricDefinitions, user.id).finally(
-          refreshStoreOccurrences
+          invalidateCalendar
         ),
         'update_habit'
       );
 
     case 'update-habit':
       return runAction(
-        patchHabit(habitId, submission.habit).finally(refreshStoreOccurrences),
+        patchHabit(habitId, submission.habit).finally(invalidateCalendar),
         'update_habit'
       );
 

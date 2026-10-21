@@ -2,6 +2,7 @@ export * from './app-revalidation';
 export { default as buildMetricTotals } from './build-metric-totals';
 export { default as buildOccurrenceSummary } from './build-occurrence-summary';
 export { default as calculateOccurrenceCost } from './calculate-occurrence-cost';
+export * from './calendar-range';
 export * from './calendar-range-cache';
 export { default as createCalendar } from './create-calendar';
 export * from './date';

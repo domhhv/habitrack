@@ -1,20 +1,12 @@
 import {
   today,
-  endOfWeek,
-  endOfMonth,
-  startOfWeek,
   CalendarDate,
   startOfMonth,
   toCalendarDate,
-  toCalendarDateTime,
 } from '@internationalized/date';
 import React from 'react';
-import { useLocale } from 'react-aria';
 import { useParams } from 'react-router';
 import type { CalendarState } from 'react-stately';
-
-import { useFirstDayOfWeek } from '@hooks';
-import { useCalendarRangeChange } from '@stores';
 
 import CalendarSidebar from './CalendarSidebar';
 import MonthCalendarGrid from './MonthCalendarGrid';
@@ -24,44 +16,7 @@ type MonthCalendarProps = {
 };
 
 const MonthCalendar = ({ state }: MonthCalendarProps) => {
-  const changeCalendarRange = useCalendarRangeChange();
   const params = useParams();
-  const { locale } = useLocale();
-  const firstDayOfWeek = useFirstDayOfWeek();
-  const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
-    React.useState(false);
-
-  React.useEffect(() => {
-    if (!isFocusedDateInitialized && state.focusedDate.day !== 1) {
-      return;
-    }
-
-    const focusedDateTime = toCalendarDateTime(state.focusedDate);
-
-    const rangeStart = startOfWeek(
-      startOfMonth(focusedDateTime),
-      locale,
-      firstDayOfWeek
-    );
-    const rangeEnd = endOfWeek(
-      endOfMonth(focusedDateTime),
-      locale,
-      firstDayOfWeek
-    ).set({
-      hour: 23,
-      millisecond: 999,
-      minute: 59,
-      second: 59,
-    });
-
-    changeCalendarRange([rangeStart, rangeEnd]);
-  }, [
-    state.focusedDate,
-    firstDayOfWeek,
-    changeCalendarRange,
-    locale,
-    isFocusedDateInitialized,
-  ]);
 
   React.useEffect(() => {
     const currentMonth = startOfMonth(today(state.timeZone));
@@ -80,7 +35,6 @@ const MonthCalendar = ({ state }: MonthCalendarProps) => {
 
     if (state.focusedDate.toString() !== paramsDate.toString()) {
       state.setFocusedDate(toCalendarDate(paramsDate));
-      setIsFocusedDateInitialized(true);
     }
   }, [params, state]);
 

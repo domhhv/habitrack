@@ -10,6 +10,7 @@ import {
   getOccurrence,
   patchOccurrence,
   createOccurrence,
+  clearCalendarData,
   destroyOccurrence,
   destroyMetricValue,
   upsertMetricValues,
@@ -17,7 +18,6 @@ import {
   createOccurrenceStockUsages,
   deleteOccurrenceStockUsages,
 } from '@services';
-import { refreshStoreOccurrences } from '@stores';
 import { makeRouteArgs } from '@tests';
 import type { SessionUser } from '@utils';
 
@@ -27,6 +27,7 @@ import { clientAction } from './occurrences';
 vi.mock('@services', async (importOriginal) => {
   return {
     ...(await importOriginal<object>()),
+    clearCalendarData: vi.fn(),
     createNote: vi.fn(),
     createOccurrence: vi.fn(),
     createOccurrenceStockUsages: vi.fn(),
@@ -47,7 +48,7 @@ vi.mock('@services', async (importOriginal) => {
 vi.mock('@stores', async (importOriginal) => {
   return {
     ...(await importOriginal<object>()),
-    refreshStoreOccurrences: vi.fn().mockResolvedValue(undefined),
+    refreshStoreNotesList: vi.fn(),
   };
 });
 
@@ -224,7 +225,7 @@ describe('occurrences resource clientAction', () => {
     expect(destroyMetricValue).toHaveBeenCalledWith('occurrence-1', 'metric-1');
   });
 
-  it('refreshes the store occurrences even when a later step fails', async () => {
+  it('invalidates the calendar data even when a later step fails', async () => {
     vi.mocked(createOccurrence).mockResolvedValue({
       id: 'occurrence-1',
     } as Awaited<ReturnType<typeof createOccurrence>>);
@@ -234,7 +235,7 @@ describe('occurrences resource clientAction', () => {
       error: 'Bad metric',
       ok: false,
     });
-    expect(refreshStoreOccurrences).toHaveBeenCalledOnce();
+    expect(clearCalendarData).toHaveBeenCalledOnce();
   });
 
   it('serializes concurrent photo removals of the same occurrence', async () => {

@@ -2,6 +2,8 @@ import { useRollbar } from '@rollbar/react';
 import React from 'react';
 import { useRevalidator } from 'react-router';
 
+import { clearCalendarData } from '@services';
+import { useBoundStore } from '@stores';
 import { supabaseClient, markAppDataStale, type SessionUser } from '@utils';
 
 const useAuthSubscription = (user: SessionUser) => {
@@ -27,6 +29,11 @@ const useAuthSubscription = (user: SessionUser) => {
       data: { subscription },
     } = supabaseClient.auth.onAuthStateChange((event, session) => {
       const hasUserChanged = (session?.user.id ?? null) !== userId;
+
+      if (hasUserChanged) {
+        clearCalendarData();
+        useBoundStore.getState().noteActions.clearNotes();
+      }
 
       if (hasUserChanged || event === 'USER_UPDATED') {
         markAppDataStale();

@@ -1,3 +1,4 @@
+export * from './calendar-data.service';
 export * from './habits.service';
 export * from './metrics.service';
 export * from './notes.service';
