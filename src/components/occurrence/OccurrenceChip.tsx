@@ -3,11 +3,11 @@ import { toCalendarDate } from '@internationalized/date';
 import { NoteIcon, CameraIcon } from '@phosphor-icons/react';
 import React from 'react';
 
-import { useScreenWidth, useKeyboardShortcut } from '@hooks';
+import { useScreenWidth, useCalendarData, useKeyboardShortcut } from '@hooks';
 import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
-import { useNotesByOccurrenceId, useOccurrenceDrawerActions } from '@stores';
+import { useOccurrenceDrawerActions } from '@stores';
 
 export type OccurrenceChipProps = {
   colorOverride?: string;
@@ -28,7 +28,7 @@ const OccurrenceChip = ({
   isHabitNameShown = false,
   occurrences,
 }: OccurrenceChipProps) => {
-  const notes = useNotesByOccurrenceId();
+  const { notesByOccurrenceId: notes } = useCalendarData();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const [occurrence] = occurrences;
   const { habit, habitId } = occurrence;

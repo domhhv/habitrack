@@ -1,11 +1,6 @@
 import type { ButtonProps } from '@heroui/react';
-import type { CalendarDate, CalendarDateTime } from '@internationalized/date';
-import {
-  now,
-  today,
-  getLocalTimeZone,
-  toCalendarDateTime,
-} from '@internationalized/date';
+import type { CalendarDate } from '@internationalized/date';
+import { today, getLocalTimeZone } from '@internationalized/date';
 import type { ReactNode } from 'react';
 import type { RequireAtLeastOne } from 'type-fest';
 
@@ -40,11 +35,9 @@ type ConfirmationState = ConfirmationOptions & {
 
 export type UiSlice = {
   calendarFilters: CalendarFilters;
-  calendarRange: [CalendarDateTime, CalendarDateTime];
   confirmation: ConfirmationState;
   isMobileSidebarOpen: boolean;
   changeCalendarFilters: (filters: CalendarFilters) => void;
-  changeCalendarRange: (range: [CalendarDateTime, CalendarDateTime]) => void;
   confirmationActions: {
     approveConfirmation: () => void;
     askConfirmation: (options?: ConfirmationOptions) => Promise<boolean>;
@@ -110,24 +103,11 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
         'uiActions.changeCalendarFilters'
       );
     },
-    changeCalendarRange: (range) => {
-      set(
-        (state) => {
-          state.calendarRange = range;
-        },
-        undefined,
-        'uiActions.changeCalendarRange'
-      );
-    },
     calendarFilters: {
       hiddenHabitIds: [],
       hiddenTraitIds: [],
       isShownOnMobile: false,
     },
-    calendarRange: [
-      toCalendarDateTime(now(getLocalTimeZone())),
-      toCalendarDateTime(now(getLocalTimeZone())),
-    ],
     confirmationActions: {
       approveConfirmation: () => {
         if (resolveConfirm) {
@@ -305,12 +285,6 @@ export const useCalendarFilters = () => {
 export const useCalendarFiltersChange = () => {
   return useBoundStore((state) => {
     return state.changeCalendarFilters;
-  });
-};
-
-export const useCalendarRangeChange = () => {
-  return useBoundStore((state) => {
-    return state.changeCalendarRange;
   });
 };
 

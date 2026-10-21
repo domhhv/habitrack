@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import type { NoteWithHabit } from '@models';
@@ -52,36 +52,14 @@ describe('NotesList', () => {
     useBoundStore.getState().noteActions.clearNotes();
   });
 
-  it('renders calendar notes from the store before the first page resolves', async () => {
-    let resolvePage: ((notes: NoteWithHabit[]) => void) | undefined;
-    listAllNotes.mockReturnValue(
-      new Promise((resolve) => {
-        resolvePage = resolve;
-      })
-    );
-    const cachedNote = makeNote('cached', '2026-07-10T10:00:00.000Z');
-
-    useBoundStore.setState({ notes: { [cachedNote.id]: cachedNote } });
-    render(<NotesList />);
-
-    expect(screen.getByText('Content cached')).toBeInTheDocument();
-    expect(listAllNotes).toHaveBeenCalledWith({ limit: 20, page: 0 });
-
-    resolvePage?.([]);
-
-    await waitFor(() => {
-      expect(useBoundStore.getState().notesListIsLoading).toBe(false);
-    });
-  });
-
-  it('populates the Zustand store when the page is opened directly', async () => {
+  it('loads the first page when the page is opened', async () => {
     const fetchedNote = makeNote('fetched', '2026-07-10T10:00:00.000Z');
     listAllNotes.mockResolvedValue([fetchedNote]);
 
     render(<NotesList />);
 
     expect(await screen.findByText('Content fetched')).toBeInTheDocument();
-    expect(useBoundStore.getState().notes[fetchedNote.id]).toEqual(fetchedNote);
+    expect(useBoundStore.getState().notesList).toEqual([fetchedNote]);
   });
 
   it('fetches and caches subsequent pages while scrolling', async () => {
@@ -112,8 +90,6 @@ describe('NotesList', () => {
 
     expect(await screen.findByText('Content page-1-0')).toBeInTheDocument();
     expect(listAllNotes).toHaveBeenLastCalledWith({ limit: 20, page: 1 });
-    expect(useBoundStore.getState().notes[nextPageNote.id]).toEqual(
-      nextPageNote
-    );
+    expect(useBoundStore.getState().notesList).toContainEqual(nextPageNote);
   });
 });

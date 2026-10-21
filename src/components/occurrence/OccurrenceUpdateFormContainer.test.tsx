@@ -4,11 +4,34 @@ import { createRoutesStub } from 'react-router';
 import { it, vi, expect, describe } from 'vitest';
 
 import type { Occurrence } from '@models';
-import { useBoundStore } from '@stores';
 
 import OccurrenceUpdateFormContainer from './OccurrenceUpdateFormContainer';
 
 const formViewProps = vi.fn();
+
+const editedOccurrence = vi.hoisted(() => {
+  const listeners = new Set<() => void>();
+  let current: Occurrence | undefined;
+
+  return {
+    get: () => {
+      return current;
+    },
+    set: (next: Occurrence) => {
+      current = next;
+      listeners.forEach((listener) => {
+        listener();
+      });
+    },
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+});
 
 vi.mock('./OccurrenceFormView', () => {
   return {
@@ -16,6 +39,21 @@ vi.mock('./OccurrenceFormView', () => {
       formViewProps(props);
 
       return null;
+    },
+  };
+});
+
+vi.mock('@hooks', async (importOriginal) => {
+  return {
+    ...(await importOriginal<object>()),
+    useCalendarData: () => {
+      return { notesByOccurrenceId: {} };
+    },
+    useOccurrenceToEdit: () => {
+      return React.useSyncExternalStore(
+        editedOccurrence.subscribe,
+        editedOccurrence.get
+      );
     },
   };
 });
@@ -31,24 +69,16 @@ const lastProps = () => {
   };
 };
 
-const showOccurrences = (
-  occurrenceIdToEdit: string,
-  ...occurrences: Occurrence[]
-) => {
+const showOccurrence = (next: Occurrence) => {
   act(() => {
-    useBoundStore.setState((state) => {
-      return {
-        occurrenceDrawer: { ...state.occurrenceDrawer, occurrenceIdToEdit },
-        occurrences,
-      };
-    });
+    editedOccurrence.set(next);
   });
 };
 
 describe(OccurrenceUpdateFormContainer.name, () => {
   it('keeps the draft source when only the photos change', async () => {
     const original = occurrence('occurrence-1', ['a.jpg', 'b.jpg']);
-    showOccurrences('occurrence-1', original);
+    showOccurrence(original);
 
     const Stub = createRoutesStub([
       { Component: OccurrenceUpdateFormContainer, path: '/' },
@@ -59,13 +89,13 @@ describe(OccurrenceUpdateFormContainer.name, () => {
       expect(lastProps()?.occurrenceToEdit).toBe(original);
     });
 
-    showOccurrences('occurrence-1', occurrence('occurrence-1', ['b.jpg']));
+    showOccurrence(occurrence('occurrence-1', ['b.jpg']));
 
     expect(lastProps().occurrenceToEdit).toBe(original);
     expect(lastProps().photoPaths).toEqual(['b.jpg']);
 
     const next = occurrence('occurrence-2', []);
-    showOccurrences('occurrence-2', next);
+    showOccurrence(next);
 
     expect(lastProps().occurrenceToEdit).toBe(next);
   });

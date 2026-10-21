@@ -1,0 +1,154 @@
+import {
+  toZoned,
+  parseAbsolute,
+  toCalendarDate,
+  getLocalTimeZone,
+} from '@internationalized/date';
+import keyBy from 'lodash.keyby';
+
+import type { Note, Occurrence, RawOccurrence } from '@models';
+import {
+  isNoteOfPeriod,
+  type CalendarRange,
+  isNoteOfOccurrence,
+  createCalendarRangeCache,
+  getSiblingPrefetchRanges,
+} from '@utils';
+
+import { listNotes } from './notes.service';
+import { listOccurrences } from './occurrences.service';
+
+const occurrencesCache = createCalendarRangeCache<Occurrence[]>();
+const notesCache = createCalendarRangeCache<Note[]>();
+
+const toClientOccurrence = (occurrence: RawOccurrence): Occurrence => {
+  return {
+    ...occurrence,
+    createdAt: parseAbsolute(occurrence.createdAt, occurrence.timeZone),
+    occurredAt: parseAbsolute(occurrence.occurredAt, occurrence.timeZone),
+    updatedAt: occurrence.updatedAt
+      ? parseAbsolute(occurrence.updatedAt, occurrence.timeZone)
+      : null,
+  };
+};
+
+const toZonedRange = ([rangeStart, rangeEnd]: CalendarRange) => {
+  return [
+    toZoned(rangeStart, getLocalTimeZone()),
+    toZoned(rangeEnd, getLocalTimeZone()),
+  ] as const;
+};
+
+const loadOccurrences = (range: CalendarRange) => {
+  return occurrencesCache.load(range, async () => {
+    const [rangeStart, rangeEnd] = toZonedRange(range);
+    const occurrences = await listOccurrences([rangeStart, rangeEnd]);
+
+    return occurrences.map(toClientOccurrence);
+  });
+};
+
+const loadNotes = (range: CalendarRange) => {
+  return notesCache.load(range, () => {
+    const [rangeStart, rangeEnd] = toZonedRange(range);
+
+    return listNotes([rangeStart, rangeEnd]);
+  });
+};
+
+const prefetchSiblingRanges = (range: CalendarRange) => {
+  getSiblingPrefetchRanges(range).forEach((siblingRange) => {
+    void Promise.all([
+      loadOccurrences(siblingRange),
+      loadNotes(siblingRange),
+    ]).catch(() => {
+      return undefined;
+    });
+  });
+};
+
+const buildOccurrencesByDate = (
+  occurrences: Occurrence[],
+  [rangeStart, rangeEnd]: CalendarRange
+) => {
+  const occurrencesByDate: Record<
+    string,
+    Record<Occurrence['id'], Occurrence>
+  > = {};
+
+  for (
+    let date = toCalendarDate(rangeStart);
+    date.compare(toCalendarDate(rangeEnd)) <= 0;
+    date = date.add({ days: 1 })
+  ) {
+    occurrencesByDate[date.toString()] = {};
+  }
+
+  occurrences.forEach((occurrence) => {
+    const dateKey = toCalendarDate(occurrence.occurredAt).toString();
+
+    if (occurrencesByDate[dateKey]) {
+      occurrencesByDate[dateKey][occurrence.id] = occurrence;
+    }
+  });
+
+  return occurrencesByDate;
+};
+
+export const createCalendarData = (
+  rangeOccurrences: Occurrence[],
+  notes: Note[],
+  range: CalendarRange
+) => {
+  const [rangeStart, rangeEnd] = toZonedRange(range);
+  const occurrences = rangeOccurrences.filter(({ occurredAt }) => {
+    return (
+      occurredAt.compare(rangeStart) >= 0 && occurredAt.compare(rangeEnd) <= 0
+    );
+  });
+  const periodNotes = notes.filter(isNoteOfPeriod);
+
+  const notesOfKind = (kind: (typeof periodNotes)[number]['periodKind']) => {
+    return periodNotes.filter(({ periodKind }) => {
+      return periodKind === kind;
+    });
+  };
+
+  return {
+    dayNotes: notesOfKind('day'),
+    monthNotes: notesOfKind('month'),
+    occurrences,
+    occurrencesByDate: buildOccurrencesByDate(occurrences, range),
+    periodNotes,
+    weekNotes: notesOfKind('week'),
+    notesByOccurrenceId: keyBy(
+      notes.filter(isNoteOfOccurrence),
+      'occurrenceId'
+    ),
+  };
+};
+
+export type CalendarData = ReturnType<typeof createCalendarData>;
+
+export const loadCalendarData = async (range: CalendarRange) => {
+  const currentRange = Promise.all([loadOccurrences(range), loadNotes(range)]);
+
+  prefetchSiblingRanges(range);
+
+  const [occurrences, notes] = await currentRange;
+
+  return createCalendarData(occurrences, notes, range);
+};
+
+export const invalidateCalendarOccurrences = () => {
+  occurrencesCache.clear();
+};
+
+export const invalidateCalendarNotes = () => {
+  notesCache.clear();
+};
+
+export const clearCalendarData = () => {
+  occurrencesCache.clear();
+  notesCache.clear();
+};

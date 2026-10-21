@@ -3,7 +3,13 @@ import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
 import type { Tables, TablesInsert } from '@db-types';
-import type { Note, NotesUpdate, NotesInsert, NoteWithHabit } from '@models';
+import type {
+  Note,
+  NotesUpdate,
+  NotesInsert,
+  NoteWithHabit,
+  NotePeriodKind,
+} from '@models';
 import { supabaseClient } from '@utils';
 
 export const createNote = async (note: NotesInsert): Promise<Note> => {
@@ -64,6 +70,26 @@ export const listNotes = async ([rangeStart, rangeEnd]: [
   }
 
   return camelcaseKeys([...notesMap.values()], { deep: true });
+};
+
+export const getPeriodNote = async (
+  periodKind: NonNullable<NotePeriodKind>,
+  periodDate: string
+): Promise<Note | null> => {
+  const { data, error } = await supabaseClient
+    .from('notes')
+    .select()
+    .eq('period_kind', periodKind)
+    .eq('period_date', periodDate)
+    .order('created_at')
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data && camelcaseKeys(data);
 };
 
 export const updateNote = async (

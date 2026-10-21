@@ -11,6 +11,7 @@ vi.mock('@hooks', async (importOriginal) => {
 
   return {
     ...original,
+    useCalendarData: vi.fn().mockReturnValue({ notesByOccurrenceId: {} }),
     useScreenWidth: vi.fn().mockReturnValue({ screenWidth: 1000 }),
     useUser: vi.fn().mockReturnValue({
       user: null,

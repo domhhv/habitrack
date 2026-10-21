@@ -14,14 +14,8 @@ import { useLocale } from 'react-aria';
 import { useNavigate } from 'react-router';
 
 import { CustomButton } from '@components';
-import { useUser, useFirstDayOfWeek } from '@hooks';
+import { useUser, useCalendarData, useFirstDayOfWeek } from '@hooks';
 import type { NotePeriodKind } from '@models';
-import {
-  useDayNotes,
-  useWeekNotes,
-  useMonthNotes,
-  useFlatOccurrences,
-} from '@stores';
 import { buildMetricTotals, buildOccurrenceSummary } from '@utils';
 
 import CalendarFilters from './CalendarFilters';
@@ -51,10 +45,7 @@ const CalendarSidebar = ({
   const { locale } = useLocale();
   const firstDayOfWeek = useFirstDayOfWeek();
   const timeZone = getLocalTimeZone();
-  const dayNotes = useDayNotes();
-  const weekNotes = useWeekNotes();
-  const monthNotes = useMonthNotes();
-  const occurrences = useFlatOccurrences();
+  const { dayNotes, monthNotes, occurrences, weekNotes } = useCalendarData();
   const [focusedCalendarMonth, setFocusedCalendarMonth] =
     React.useState(focusedDate);
   const user = useUser();

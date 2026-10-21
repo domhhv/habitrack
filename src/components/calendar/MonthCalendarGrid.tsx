@@ -8,13 +8,8 @@ import { useLocale, useCalendarGrid } from 'react-aria';
 import type { CalendarState } from 'react-stately';
 
 import { CustomButton } from '@components';
-import { useScreenWidth, useFirstDayOfWeek } from '@hooks';
-import {
-  useWeekNotes,
-  useOccurrences,
-  useCalendarFilters,
-  useNoteDrawerActions,
-} from '@stores';
+import { useScreenWidth, useCalendarData, useFirstDayOfWeek } from '@hooks';
+import { useCalendarFilters, useNoteDrawerActions } from '@stores';
 import { getISOWeek } from '@utils';
 
 import type { CellPosition } from './MonthCalendarCell';
@@ -26,7 +21,7 @@ type MonthCalendarGridProps = {
 
 const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
   const filters = useCalendarFilters();
-  const occurrences = useOccurrences();
+  const { occurrencesByDate: occurrences, weekNotes } = useCalendarData();
   const firstDayOfWeek = useFirstDayOfWeek();
   const { gridProps, weekDays } = useCalendarGrid(
     {
@@ -43,7 +38,6 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
     firstDayOfWeek
   );
   const weekIndexes = [...new Array(weeksInMonthCount).keys()];
-  const weekNotes = useWeekNotes();
   const { openNoteDrawer } = useNoteDrawerActions();
 
   const getCellPosition = (

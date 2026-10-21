@@ -6,7 +6,7 @@ import { useDateFormatter } from 'react-aria';
 import { useFetcher } from 'react-router';
 
 import { CustomButton, InfinityLoader } from '@components';
-import { useHabits } from '@hooks';
+import { useHabits, useCalendarData } from '@hooks';
 import type {
   Habit,
   Occurrence,
@@ -14,7 +14,7 @@ import type {
   OccurrenceSubmission,
   HabitStockWithDefaults,
 } from '@models';
-import { useConfirmationActions, useNotesByOccurrenceId } from '@stores';
+import { useConfirmationActions } from '@stores';
 import { matchMetricValue } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
@@ -122,7 +122,7 @@ const OccurrenceListItem = ({
   onEdit,
   onRemove,
 }: OccurrenceListItemProps) => {
-  const notes = useNotesByOccurrenceId();
+  const { notesByOccurrenceId: notes } = useCalendarData();
   const habits = useHabits();
   const stocksById = React.useMemo(() => {
     const habit = habits[occurrence.habitId];

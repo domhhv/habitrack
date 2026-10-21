@@ -5,7 +5,6 @@ import {
   CalendarDate,
   toCalendarDate,
   getLocalTimeZone,
-  toCalendarDateTime,
 } from '@internationalized/date';
 import {
   NoteIcon,
@@ -19,57 +18,29 @@ import { useDateFormatter } from 'react-aria';
 import { useParams, useNavigate } from 'react-router';
 
 import { CustomButton, OccurrenceChip, SwipeableContainer } from '@components';
-import { useCurrentTime, useScreenWidth } from '@hooks';
-import {
-  useDayNotes,
-  useFlatOccurrences,
-  useNoteDrawerActions,
-  useCalendarRangeChange,
-  useOccurrenceDrawerActions,
-} from '@stores';
+import { useCurrentTime, useScreenWidth, useCalendarData } from '@hooks';
+import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
 import { isDstTransitionDay, findDstTransitionHour } from '@utils';
 
 import CalendarSidebar from './CalendarSidebar';
 
 const DayCalendar = () => {
   const now = useCurrentTime();
-  const changeCalendarRange = useCalendarRangeChange();
-  const dayNotes = useDayNotes();
+  const { dayNotes, occurrences } = useCalendarData();
   const { isDesktop } = useScreenWidth();
   const { openNoteDrawer } = useNoteDrawerActions();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
-  const occurrences = useFlatOccurrences();
   const params = useParams();
   const navigate = useNavigate();
   const timeZone = getLocalTimeZone();
   const [focusedDate, setFocusedDate] = React.useState(() => {
     return today(timeZone);
   });
-  const [isFocusedDateInitialized, setIsFocusedDateInitialized] =
-    React.useState(false);
   const [swipeDirection, setSwipeDirection] = React.useState(0);
 
   const formatter = useDateFormatter({
     dateStyle: 'full',
   });
-
-  React.useEffect(() => {
-    if (!isFocusedDateInitialized && focusedDate.day !== 1) {
-      return;
-    }
-
-    const focusedDateTime = toCalendarDateTime(focusedDate);
-
-    const rangeStart = focusedDateTime;
-    const rangeEnd = focusedDateTime.set({
-      hour: 23,
-      millisecond: 999,
-      minute: 59,
-      second: 59,
-    });
-
-    changeCalendarRange([rangeStart, rangeEnd]);
-  }, [focusedDate, changeCalendarRange, isFocusedDateInitialized]);
 
   React.useEffect(() => {
     const currentDay = today(timeZone);
@@ -88,7 +59,6 @@ const DayCalendar = () => {
 
     if (focusedDate.toString() !== paramsDate.toString()) {
       setFocusedDate(toCalendarDate(paramsDate));
-      setIsFocusedDateInitialized(true);
     }
   }, [params, timeZone, focusedDate]);
 

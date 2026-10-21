@@ -16,13 +16,16 @@ import { useCalendarCell } from 'react-aria';
 import type { CalendarState } from 'react-stately';
 
 import { CustomButton, OccurrenceChip } from '@components';
-import { useUser, useScreenWidth } from '@hooks';
+import {
+  useUser,
+  useScreenWidth,
+  useCalendarData,
+  useOccurrenceToEdit,
+} from '@hooks';
 import type { Occurrence } from '@models';
 import {
-  useDayNotes,
   useThemeMode,
   useNoteDrawerState,
-  useOccurrenceToEdit,
   useNoteDrawerActions,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
@@ -47,7 +50,7 @@ const MonthCalendarCell = ({
   state,
 }: MonthCalendarCellProps) => {
   const user = useUser();
-  const dayNotes = useDayNotes();
+  const { dayNotes } = useCalendarData();
   const { openNoteDrawer } = useNoteDrawerActions();
   const {
     dayToDisplay,

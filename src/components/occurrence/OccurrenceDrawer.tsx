@@ -15,11 +15,9 @@ import { useDateFormatter } from 'react-aria';
 import { useFetcher } from 'react-router';
 
 import { CustomButton } from '@components';
-import { useScreenWidth } from '@hooks';
+import { useScreenWidth, useCalendarData, useOccurrenceToEdit } from '@hooks';
 import type { Occurrence, OccurrenceSubmission } from '@models';
 import {
-  useOccurrences,
-  useOccurrenceToEdit,
   useConfirmationActions,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
@@ -32,7 +30,7 @@ import OccurrenceUpdateFormContainer from './OccurrenceUpdateFormContainer';
 
 const OccurrenceDrawer = () => {
   const timeZone = getLocalTimeZone();
-  const occurrences = useOccurrences();
+  const { occurrencesByDate: occurrences } = useCalendarData();
   const deleteFetcher = useFetcher();
   const [removalTargetId, setRemovalTargetId] = React.useState('');
   const occurrenceIdBeingRemoved =
