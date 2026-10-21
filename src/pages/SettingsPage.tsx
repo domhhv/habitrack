@@ -14,29 +14,206 @@ import { PlugsIcon, ShieldIcon, UserCircleIcon } from '@phosphor-icons/react';
 import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
 import React from 'react';
-import { useNavigate, useRevalidator } from 'react-router';
+import { data, redirect, useFetcher } from 'react-router';
 
 import { CustomButton, PasswordInput, ConnectedAccounts } from '@components';
 import { useUser, useProfile, useTextField, useAuthSearchParams } from '@hooks';
 import type { DaysOfWeek, ProfilesUpdate } from '@models';
-import { useUserActions, useConfirmationActions } from '@stores';
-import { getErrorMessage } from '@utils';
+import {
+  deleteUser,
+  updateUser,
+  patchProfile,
+  unlinkIdentity,
+  getUserIdentities,
+  linkGoogleIdentity,
+} from '@services';
+import { useConfirmationActions } from '@stores';
+import {
+  rollbar,
+  userContext,
+  parseDayOfWeek,
+  getErrorMessage,
+  type SessionUser,
+} from '@utils';
 
-const SettingsPage = () => {
+import type { Route } from './+types/SettingsPage';
+
+const FAILURE_TITLES = {
+  'delete-account': 'Failed to delete account',
+  'link-identity': 'Failed to link Google account',
+  'sync-email': 'Something went wrong when updating your email',
+  'unlink-identity': 'Failed to unlink Google account',
+  'update-profile': 'Failed to update account',
+  'update-user': 'Failed to update account',
+};
+
+type SettingsIntent = keyof typeof FAILURE_TITLES;
+
+const isSettingsIntent = (
+  value: FormDataEntryValue | null
+): value is SettingsIntent => {
+  return typeof value === 'string' && Object.hasOwn(FAILURE_TITLES, value);
+};
+
+const getProfileUpdate = (formData: FormData) => {
+  const profileUpdate: Pick<
+    ProfilesUpdate,
+    'name' | 'firstDayOfWeek' | 'defaultCurrency'
+  > = {};
+  const name = formData.get('name');
+  const defaultCurrency = formData.get('defaultCurrency');
+
+  if (typeof name === 'string') {
+    profileUpdate.name = name;
+  }
+
+  if (formData.has('firstDayOfWeek')) {
+    profileUpdate.firstDayOfWeek = parseDayOfWeek(
+      formData.get('firstDayOfWeek')
+    );
+  }
+
+  if (typeof defaultCurrency === 'string') {
+    profileUpdate.defaultCurrency = defaultCurrency;
+  }
+
+  return profileUpdate;
+};
+
+const getUserAttributes = (formData: FormData) => {
+  const userAttributes: UserAttributes = {};
+  const email = formData.get('email');
+  const password = formData.get('password');
+
+  if (typeof email === 'string') {
+    userAttributes.email = email;
+  }
+
+  if (typeof password === 'string') {
+    userAttributes.password = password;
+  }
+
+  return userAttributes;
+};
+
+const runIntent = async (
+  intent: SettingsIntent,
+  formData: FormData,
+  user: NonNullable<SessionUser>
+) => {
+  switch (intent) {
+    case 'delete-account':
+      await deleteUser();
+      Toast.toast.success('Account deleted');
+
+      return redirect('/login');
+
+    case 'link-identity':
+      await linkGoogleIdentity();
+      break;
+
+    case 'sync-email':
+      await patchProfile(user.id, { email: user.email });
+      Toast.toast.success('Your email change has been confirmed', {
+        description: `Your email has been set as ${user.email}`,
+      });
+      break;
+
+    case 'unlink-identity': {
+      const identity = (await getUserIdentities()).find(({ identity_id }) => {
+        return identity_id === formData.get('identityId');
+      });
+
+      if (!identity) {
+        throw new Error('This account is no longer connected');
+      }
+
+      await unlinkIdentity(identity);
+      Toast.toast.success('Google account unlinked');
+      break;
+    }
+
+    case 'update-profile':
+      await patchProfile(user.id, getProfileUpdate(formData));
+      Toast.toast.success('Account updated');
+      break;
+
+    case 'update-user':
+      await updateUser(getUserAttributes(formData));
+      Toast.toast.success('Account updated', {
+        description: formData.has('email')
+          ? 'Email change requested. Please check your inbox for a confirmation email.'
+          : undefined,
+      });
+      break;
+  }
+
+  return { intent, ok: true as const };
+};
+
+export const clientLoader = async ({ context }: Route.ClientLoaderArgs) => {
+  if (!context.get(userContext)) {
+    return { identities: [], identitiesError: null };
+  }
+
+  try {
+    return { identities: await getUserIdentities(), identitiesError: null };
+  } catch (error) {
+    return { identities: [], identitiesError: getErrorMessage(error) };
+  }
+};
+
+export const clientAction = async ({
+  context,
+  request,
+}: Route.ClientActionArgs) => {
+  const user = context.get(userContext);
+  const formData = await request.formData();
+  const intent = formData.get('intent');
+
+  if (!user || !isSettingsIntent(intent)) {
+    return data(
+      { error: 'Unsupported settings request', intent: null, ok: false },
+      { status: 400 }
+    );
+  }
+
+  try {
+    return await runIntent(intent, formData, user);
+  } catch (error) {
+    if (intent === 'sync-email') {
+      rollbar.error(
+        'Failed to update profile with new email',
+        error instanceof Error ? error : new Error(getErrorMessage(error))
+      );
+    }
+
+    Toast.toast.danger(FAILURE_TITLES[intent], {
+      description: getErrorMessage(error) || 'Please try again later',
+    });
+
+    return data(
+      { error: getErrorMessage(error), intent, ok: false },
+      { status: 400 }
+    );
+  }
+};
+
+const SettingsPage = ({
+  loaderData: { identities, identitiesError },
+}: Route.ComponentProps) => {
   useAuthSearchParams();
 
-  const navigate = useNavigate();
-  const { revalidate } = useRevalidator();
   const user = useUser();
   const profile = useProfile();
-  const { deleteUser, updateProfile, updateUser } = useUserActions();
+  const fetcher = useFetcher<typeof clientAction>();
   const { askConfirmation } = useConfirmationActions();
-  const [isUpdating, setIsUpdating] = React.useState(false);
   const [email, handleEmailChange] = useTextField();
   const [password, handlePasswordChange, clearPassword] = useTextField();
   const [name, handleNameChange] = useTextField();
   const [defaultCurrency, setDefaultCurrency] = React.useState('EUR');
   const [firstDayOfWeek, setFirstDayOfWeek] = React.useState<DaysOfWeek>('mon');
+  const isUpdating = fetcher.state !== 'idle';
 
   React.useEffect(() => {
     handleEmailChange(profile?.email || '');
@@ -44,6 +221,16 @@ const SettingsPage = () => {
     setFirstDayOfWeek(profile?.firstDayOfWeek || 'mon');
     setDefaultCurrency(profile?.defaultCurrency || 'EUR');
   }, [profile, handleEmailChange, handleNameChange]);
+
+  React.useEffect(() => {
+    if (
+      fetcher.state === 'idle' &&
+      fetcher.data?.ok &&
+      fetcher.data.intent === 'update-user'
+    ) {
+      clearPassword();
+    }
+  }, [fetcher.state, fetcher.data, clearPassword]);
 
   const title = <title>Settings | Habitrack</title>;
 
@@ -65,13 +252,10 @@ const SettingsPage = () => {
     );
   }
 
-  const handleGeneralSubmit: SubmitEventHandler = async (e) => {
+  const handleGeneralSubmit: SubmitEventHandler = (e) => {
     e.preventDefault();
 
-    const profileUpdatePayload: Pick<
-      ProfilesUpdate,
-      'name' | 'firstDayOfWeek' | 'defaultCurrency'
-    > = {};
+    const profileUpdatePayload: Record<string, string> = {};
 
     if (firstDayOfWeek !== profile.firstDayOfWeek) {
       profileUpdatePayload.firstDayOfWeek = firstDayOfWeek;
@@ -89,57 +273,33 @@ const SettingsPage = () => {
       return;
     }
 
-    try {
-      setIsUpdating(true);
-      await updateProfile(profile.id, profileUpdatePayload);
-      /* Bridge: remove when profile updates move to the settings clientAction. */
-      await revalidate();
-      Toast.toast.success('Account updated');
-    } catch (error) {
-      Toast.toast.danger('Failed to update account', {
-        description: getErrorMessage(error) || 'Please try again later',
-      });
-    } finally {
-      setIsUpdating(false);
-    }
+    void fetcher.submit(
+      { intent: 'update-profile', ...profileUpdatePayload },
+      { method: 'post' }
+    );
   };
 
-  const handleSecuritySubmit: SubmitEventHandler = async (e) => {
+  const handleSecuritySubmit: SubmitEventHandler = (e) => {
     e.preventDefault();
 
-    const userAttributes: UserAttributes = {};
-    let hasUpdatedEmail = false;
+    const userAttributesPayload: Record<string, string> = {};
 
     if (password) {
-      userAttributes.password = password;
+      userAttributesPayload.password = password;
     }
 
     if (email !== profile.email) {
-      userAttributes.email = email;
-      hasUpdatedEmail = true;
+      userAttributesPayload.email = email;
     }
 
-    if (!Object.keys(userAttributes).length) {
+    if (!Object.keys(userAttributesPayload).length) {
       return;
     }
 
-    try {
-      setIsUpdating(true);
-      await updateUser(userAttributes);
-      clearPassword();
-      handleEmailChange(profile.email || '');
-      Toast.toast.success('Account updated', {
-        description: hasUpdatedEmail
-          ? 'Email change requested. Please check your inbox for a confirmation email.'
-          : undefined,
-      });
-    } catch (error) {
-      Toast.toast.danger('Failed to update account', {
-        description: getErrorMessage(error) || 'Please try again later',
-      });
-    } finally {
-      setIsUpdating(false);
-    }
+    void fetcher.submit(
+      { intent: 'update-user', ...userAttributesPayload },
+      { method: 'post' }
+    );
   };
 
   const handleDeleteAccount = async () => {
@@ -154,21 +314,8 @@ const SettingsPage = () => {
         'This will permanently delete your account and all data connected to it. This action cannot be undone.',
     });
 
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      setIsUpdating(true);
-      await deleteUser();
-      Toast.toast.success('Account deleted');
-      navigate('/login');
-    } catch (error) {
-      Toast.toast.danger('Failed to delete account', {
-        description: getErrorMessage(error) || 'Please try again later',
-      });
-    } finally {
-      setIsUpdating(false);
+    if (confirmed) {
+      void fetcher.submit({ intent: 'delete-account' }, { method: 'post' });
     }
   };
 
@@ -379,7 +526,10 @@ const SettingsPage = () => {
             </div>
           </Tabs.Panel>
           <Tabs.Panel id="connected-accounts" className="w-full py-0 pl-6">
-            <ConnectedAccounts />
+            <ConnectedAccounts
+              identities={identities}
+              loadError={identitiesError}
+            />
           </Tabs.Panel>
         </Tabs>
       </div>

@@ -1,10 +1,8 @@
 import { Toast } from '@heroui/react';
-import { useRollbar } from '@rollbar/react';
 import React from 'react';
-import { useLocation, useRevalidator, useSearchParams } from 'react-router';
+import { useFetcher, useLocation, useSearchParams } from 'react-router';
 
-import { useUserActions } from '@stores';
-import { supabaseClient, getErrorMessage } from '@utils';
+import { supabaseClient } from '@utils';
 
 import useProfile from './use-profile';
 import useUser from './use-user';
@@ -14,9 +12,7 @@ const useAuthSearchParams = () => {
   const { hash } = useLocation();
   const profile = useProfile();
   const user = useUser();
-  const { updateProfile } = useUserActions();
-  const { revalidate } = useRevalidator();
-  const rollbar = useRollbar();
+  const fetcher = useFetcher();
 
   const accessToken = hash?.split('access_token=')[1]?.split('&')[0];
   const refreshToken = hash?.split('refresh_token=')[1]?.split('&')[0];
@@ -51,20 +47,10 @@ const useAuthSearchParams = () => {
       user?.email &&
       searchParams.get('emailChangeConfirmed')
     ) {
-      updateProfile(profile.id, { email: user.email })
-        /* Bridge: remove when profile updates move to the settings clientAction. */
-        .then(revalidate)
-        .then(() => {
-          Toast.toast.success(`Your email change has been confirmed`, {
-            description: `Your email has been set as ${user.email}`,
-          });
-        })
-        .catch((error) => {
-          Toast.toast.danger(`Something went wrong when updating your email`, {
-            description: `Details: ${getErrorMessage(error)}`,
-          });
-          rollbar.error('Failed to update profile with new email', error);
-        });
+      void fetcher.submit(
+        { intent: 'sync-email' },
+        { action: '/settings', method: 'post' }
+      );
     }
 
     setSearchParams({});
