@@ -16,7 +16,7 @@ type EntityNoun =
   | 'metric-value'
   | 'icon';
 
-type ActionType = `${ActionVerb}_${EntityNoun}`;
+export type ActionType = `${ActionVerb}_${EntityNoun}`;
 
 const tenses: Record<'continuous' | 'past', Record<string, string>> = {
   continuous: {

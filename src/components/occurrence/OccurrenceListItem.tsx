@@ -5,6 +5,7 @@ import React from 'react';
 import { useDateFormatter } from 'react-aria';
 
 import { CustomButton, InfinityLoader } from '@components';
+import { useHabits } from '@hooks';
 import type {
   Habit,
   Occurrence,
@@ -12,7 +13,6 @@ import type {
   HabitStockWithDefaults,
 } from '@models';
 import {
-  useHabits,
   useMetricsActions,
   useConfirmationActions,
   useNotesByOccurrenceId,

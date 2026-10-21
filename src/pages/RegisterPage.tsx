@@ -13,7 +13,7 @@ export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
   const user = context.get(userContext);
 
   if (user && !user.isAnonymous) {
-    throw replace('/');
+    throw replace('/calendar');
   }
 
   return { isAnonymousUser: !!user?.isAnonymous };
@@ -54,7 +54,7 @@ export const clientAction = async ({
       'Almost there! Check your inbox to confirm your email. All your habits and notes stay with your account.'
     );
 
-    return redirect('/');
+    return redirect('/calendar');
   }
 
   Toast.toast.success(

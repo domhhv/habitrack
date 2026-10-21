@@ -3,14 +3,9 @@ import { XIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { CustomButton } from '@components';
-import { useUser, useProfile } from '@hooks';
-import type {
-  Habit,
-  MetricValue,
-  HabitStockMetricDefaultInsert,
-} from '@models';
-import { useStockActions } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { useUser, useProfile, useActionFetcher } from '@hooks';
+import type { Habit, MetricValue, HabitDetailsSubmission } from '@models';
+import { pickDefinedValues } from '@utils';
 
 import StockMetricDefaults from './StockMetricDefaults';
 
@@ -22,7 +17,8 @@ type AddStockFormProps = {
 const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
   const user = useUser();
   const profile = useProfile();
-  const { addStock } = useStockActions();
+  const fetcher = useActionFetcher(onClose);
+  const isSaving = fetcher.state !== 'idle';
 
   const [name, setName] = React.useState('');
   const [cost, setCost] = React.useState<number | undefined>(undefined);
@@ -39,9 +35,8 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
   const [compoundDefaults, setCompoundDefaults] = React.useState<
     Record<string, boolean>
   >({});
-  const [isSaving, setIsSaving] = React.useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!user || !name.trim()) {
       return;
     }
@@ -50,39 +45,28 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
       return;
     }
 
-    const stockInsert = {
-      cost: cost ?? null,
-      currency,
-      habitId: habit.id,
-      isDepleted: false,
-      name: name.trim(),
-      remainingItems: isQuantifiable && totalItems ? totalItems : null,
-      totalItems: isQuantifiable && totalItems ? totalItems : null,
-      userId: user.id,
-    };
-
-    const metricDefaultInserts: HabitStockMetricDefaultInsert[] =
-      Object.entries(metricDefaults)
-        .filter((entry): entry is [string, MetricValue] => {
-          return entry[1] !== undefined;
-        })
-        .map(([metricId, value]) => {
-          return {
-            habitMetricId: metricId,
-            habitStockId: '',
-            shouldCompound: compoundDefaults[metricId] ?? false,
-            userId: user.id,
-            value,
-          };
-        });
-
-    await handleAsyncAction(
-      addStock(stockInsert, metricDefaultInserts),
-      'add_stock',
-      setIsSaving
+    void fetcher.submit(
+      {
+        intent: 'add-stock',
+        metricDefaults: {
+          compound: compoundDefaults,
+          values: pickDefinedValues(metricDefaults),
+        },
+        stock: {
+          cost: cost ?? null,
+          currency,
+          isDepleted: false,
+          name: name.trim(),
+          remainingItems: isQuantifiable && totalItems ? totalItems : null,
+          totalItems: isQuantifiable && totalItems ? totalItems : null,
+        },
+      } satisfies HabitDetailsSubmission,
+      {
+        action: `/habits/${habit.id}`,
+        encType: 'application/json',
+        method: 'post',
+      }
     );
-
-    onClose();
   };
 
   return (

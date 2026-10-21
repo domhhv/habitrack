@@ -111,18 +111,30 @@ export const patchHabit = async (
   return transformHabit(camelcaseKeys(data, { deep: true }));
 };
 
-export const getHabit = async (id: Habit['id']): Promise<Habit> => {
-  const { data, error } = await supabaseClient
-    .from('habits')
-    .select(HABIT_SELECT)
-    .eq('id', id)
-    .single();
+export const listHabitIds = async () => {
+  const { data, error } = await supabaseClient.from('habits').select('id');
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return transformHabit(camelcaseKeys(data, { deep: true }));
+  return data.map(({ id }) => {
+    return id;
+  });
+};
+
+export const getHabit = async (id: Habit['id']): Promise<Habit | null> => {
+  const { data, error } = await supabaseClient
+    .from('habits')
+    .select(HABIT_SELECT)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data && transformHabit(camelcaseKeys(data, { deep: true }));
 };
 
 export const destroyHabit = async (id: Habit['id']) => {

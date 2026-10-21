@@ -11,7 +11,7 @@ import type { Route } from './+types/AnonymousLoginPage';
 
 export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
   if (context.get(userContext)) {
-    throw replace('/');
+    throw replace('/calendar');
   }
 
   return null;
@@ -35,7 +35,7 @@ export const clientAction = async ({ request }: Route.ClientActionArgs) => {
 
   Toast.toast.success('Welcome to Habitrack! You are browsing anonymously');
 
-  return redirect('/');
+  return redirect('/calendar');
 };
 
 const AnonymousLoginPage = () => {

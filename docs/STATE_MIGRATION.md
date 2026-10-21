@@ -35,7 +35,7 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 - **Same hook names, new source.** Each store read hook is re-created in `src/hooks/` with the same name and return shape, but reads loader data instead: `useUser`, `useProfile`, `useHabits`, `useTraits`, `useOccurrences`, `useFlatOccurrences`, `useDayNotes`, `useWeekNotes`, `useMonthNotes`, `usePeriodNotes`, `useNotesByOccurrenceId`. The hook calls `useRouteLoaderData<typeof clientLoader>('<id>')`. In components, only the import moves from `@stores` to `@hooks`. Each hook is exported from `src/hooks/index.ts`, as CLAUDE.md requires for new hooks.
 - **Derivations become pure utils.** `buildOccurrencesByDate` and `getOccurrencesInRange` (from `occurrences.store.ts`), `mergeNotes`, and the notes-by-occurrence and period filters (from `notes.store.ts`) move to `src/utils/` and are computed inside the `clientLoader`. Note: loader data can hold `ZonedDateTime` only while it comes from a client loader. A future server loader would have to return ISO strings.
 - **Where mutations live.** A mutation whose UI belongs to one page goes on that page's `clientAction`. Branch on an `intent` field. A mutation whose UI is global (drawers, header) goes on a component-less resource route, `src/routes/resources/<domain>.ts` (`/resources/occurrences`, `/resources/notes`). That route can also have a `clientLoader` that fetchers call for drawer data.
-- **Action result shape.** A new `src/utils/run-action.ts` wraps the existing `handleAsyncAction`, which keeps showing the toasts. It returns `{ ok: true, data } | { ok: false, error }` instead of rethrowing, so a failed mutation does not trigger the `ErrorBoundary`. Complex payloads go through `fetcher.submit(json, { method: 'post', encType: 'application/json' })`. Photo uploads use `FormData`.
+- **Action result shape.** A new `src/utils/run-action.ts` wraps the existing `handleAsyncAction`, which keeps showing the toasts. It returns `{ ok: true } | { ok: false, error }` instead of rethrowing, so a failed mutation does not trigger the `ErrorBoundary`. The failure result has no 4xx status, so loaders still revalidate: a multi-step action can fail after some of its writes went through. Actions with a single write, or none, such as auth, can keep `data(…, { status: 400 })`. Complex payloads go through `fetcher.submit(json, { method: 'post', encType: 'application/json' })`. Photo uploads use `FormData`.
 - **Cache invalidation happens in `clientAction`s.** This follows the docs' "Client-Side Caching" pattern. The range caches live in a module, e.g. `src/utils/data-cache.ts`, with `occurrencesCache` and `notesCache`. A `clearUserCaches()` function runs on sign-out.
 - **Revalidation.** By default, the router re-runs the app layout loader on every navigation. To avoid that, the app layout exports `shouldRevalidate`. For plain GET navigations to a different URL it revalidates only while the app data is stale (`src/utils/app-revalidation.ts`). Submissions, same-URL navigations and explicit `revalidate()` calls mark the data stale and return `defaultShouldRevalidate`. The auth subscription also marks it stale before calling `revalidate()`. The `clientLoader` clears the mark only when a load finishes without being aborted. A revalidation that a navigation interrupts is therefore retried on the next navigation, not dropped. Mark the data stale wherever something else needs the app loader to refresh. Calendar routes keep the default behaviour, and cache hits keep it cheap. Pass `request.signal` into the Supabase queries (`.abortSignal()`). This replaces the hand-written `requestVersion`/`calendarRange` comparisons.
 - **Temporary bridges.** Migrate writes first and reads second within each domain. While a domain's reads are still in Zustand, its new `clientAction` refreshes the old slice through `useBoundStore.getState()`, for example `getState().habitActions.fetchHabits()`. The PR that moves the reads deletes those lines and the slice. Mark every bridge with a block comment `/* Bridge: remove with <slice> */` so the remaining ones are easy to grep.
@@ -90,7 +90,8 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 - `LoginPage`, `RegisterPage`, `AnonymousLoginPage`, `ResetPasswordPage`:
   - Each has a `clientAction` that reads the submitted `FormData` and calls the existing service: `signIn`, `signUp`/`convertAnonymousUser`, `signInAnonymously` or `sendPasswordResetEmail`. On success it shows the same toast as before and `redirect()`s to the same place.
   - On failure the action shows the error toast and returns `data({ error }, { status: 400 })`, so nothing revalidates.
-  - The `if (user) <Navigate replace>` checks became `clientLoader`s that read `userContext` and `throw replace('/')`. `RegisterPage` returns `{ isAnonymousUser }` instead.
+  - The `if (user) <Navigate replace>` checks became `clientLoader`s that read `userContext` and `throw replace('/calendar')`. `RegisterPage` returns `{ isAnonymousUser }` instead.
+  - Since #491, a successful login, anonymous login or anonymous-account conversion redirects to `/calendar`, not the landing page. So do signed-in visits to the auth pages.
   - The first day of the week still comes from `useFirstDayOfWeek`. It is posted as a hidden field and validated with `parseDayOfWeek`.
 - `AuthForm` renders `<Form method="post">` and accepts extra hidden fields as `children`. Its `onSubmit` prop is gone, and the Google button stays a plain `type="button"`.
 - `useIsSubmitting()` (in `@hooks`) compares `useNavigation().formAction` with `useFormAction()`. It stays `true` while the redirect after a successful action loads.
@@ -119,17 +120,30 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 
 ### Phase 2 – Habits and traits
 
-**PR 5 – Habit, trait, metric-definition and stock mutations → `clientAction`s**
+**PRs 5 + 6 – Habits and traits through loaders and actions** – done together on `refactor/habits-loaders`
 
-- `/habits` `clientAction`: `create-habit` (`AddHabitDialogButton`: `createHabit`, `uploadHabitIcon`, `createHabitMetrics`), `create-trait` (`AddTraitModal`), `delete-habit` (`HabitsTable`, including the photo cleanup it does today).
-- `/habits/:habitId` `clientAction`: `update-habit` (`HabitDetails` fields), `update-icon` (`HabitIcon`), `add-metrics`, `update-metric`, `remove-metrics`, `add-stock`, `update-stock`, `remove-stock`, `update-stock-defaults` (`AddStockForm`, `StockListItem`).
-- Bridge: each action calls `getState().habitActions.fetchHabits()` (and `traitActions.fetchTraits()` where relevant). Metric-definition intents also invalidate and refetch occurrences, which replaces the hand-written patching in `metrics.store.ts`.
-
-**PR 6 – Habits and traits reads → loaders; delete their slices**
-
-- The app layout `clientLoader` also returns `habits` and `traits` (keyed by id, as today). Re-create `useHabits`/`useTraits` in `src/hooks/`. `/habits` `clientLoader` returns `getHabitsStats`, which removes the `useEffect` in `HabitsTable`. `/habits/:habitId` uses the layout habits and throws a 404 for an unknown id. The "Habit not found" alert moves into that route's `ErrorBoundary`. `useIsFetchingHabits` goes away.
-- Calendar filters change to `hiddenHabitIds`/`hiddenTraitIds`. A new habit is then visible by default, and nothing has to sync filters with fetched data. That removes the filter writes in `habits.store.ts`/`traits.store.ts` and the `['']` sentinel. `CalendarFilters`/`MonthCalendarGrid` compute the selected ids as all ids minus the hidden ones.
-- Delete `habits.store.ts`, `traits.store.ts`, `stocks.store.ts`, and the habit-definition half of `metrics.store.ts`. Remove the PR 5 bridges.
+- **Reads**
+  - The app layout `clientLoader` also returns `habits` and `traits`, keyed by id, loaded in parallel with the profile.
+  - `useHabits`/`useTraits` live in `src/hooks/` and read that data. They return a stable empty object when signed out.
+  - `/habits` `clientLoader` returns `habitsStats`: `listHabitIds()` then `getHabitsStats()`. A failure is reported to Rollbar and the table renders without stats, as before. `HabitsTable` takes `habitsStats` as a prop, and its effect is gone.
+  - `/habits/:habitId` `clientLoader` uses `getHabit`, which now returns `null` when there is no row. It throws a 404, and the route `ErrorBoundary` renders the "Habit not found" alert. `HabitDetails` is keyed by habit id, so its local edit state resets when you switch habits.
+- **Mutations.** They go through `useActionFetcher(onSuccess)` (`src/hooks/use-action-fetcher.ts`), a `useFetcher` that runs `onSuccess` once an action returns `{ ok: true }`. Components use it to close modals or editors. Actions wrap their work in `runAction(promise, actionType)` (`src/utils/run-action.ts`), which keeps the `handleAsyncAction` toasts and returns `{ ok: true }` or `{ error, ok: false }`. The failure has no 4xx status, so partial writes still revalidate.
+  - Shared fetchers block a new submission while one is pending. Otherwise a second submission interrupts the first, and the first one's writes are never revalidated. For example, `HabitsTable` disables the delete buttons while a delete is running.
+  - `/habits` `clientAction`:
+    - `create-habit` is multipart `FormData`, because of the icon file. Metric definitions travel as a JSON field.
+    - `create-trait` is JSON.
+  - `/habits/:habitId` `clientAction` takes the JSON `HabitDetailsSubmission` union (`src/models/habit-submission.model.ts`): `update-habit`, `delete-habit` (with photo and icon cleanup), `save-metrics` (remove/add/update from the form flags), `add-stock`, `update-stock` (optionally replacing the metric defaults) and `remove-stock`. The icon upload is multipart `FormData`.
+  - Habit-scoped UI on any page submits with an explicit `action: /habits/<id>`. That covers `HabitsTable`'s delete and `HabitIcon` in the table.
+  - Stock metric-default values go through `pickDefinedValues`, because JSON submissions can't contain `undefined` record values.
+  - Files are detected with `typeof value !== 'string'`, not `instanceof File`, which also holds across realms in tests.
+- **Calendar filters.** They store `hiddenHabitIds`/`hiddenTraitIds`. `CalendarFilters` computes the selected ids as all ids minus the hidden ones, and `MonthCalendarGrid` filters out the hidden ones. The `['']` sentinel and the filter writes from the store slices are gone.
+- **Store.** `habits.store.ts`, `traits.store.ts` and `stocks.store.ts` are deleted. `metrics.store.ts` keeps only the occurrence metric-value actions. The store subscription no longer fetches or clears habits and traits.
+- **Bridges until Phase 3**
+  - `HabitDetailsPage` invalidates the store occurrences cache and refetches after a habit update, icon change, deletion or metric-definition save. It does not empty the calendar first, and a failed refetch is reported to Rollbar while the previous occurrences stay visible. This replaces the in-place patching in `metrics.store.ts`, and also refreshes chips after renames and deletes, which the old code did not.
+  - `OccurrenceCreate/UpdateFormContainer` call `patchStock` directly and then `markAppDataStale()` + `revalidate()`, in place of `updateStock`/`refreshHabitStocks`.
+- **Tests**
+  - Loader and action tests for `/habits` and `/habits/:habitId`.
+  - `HabitsTable.test.tsx` renders through `createRoutesStub` and runs again. It had been skipped since the HeroUI v3 migration.
 
 ### Phase 3 – Calendar, drawers, notes
 

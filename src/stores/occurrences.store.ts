@@ -34,6 +34,7 @@ export type OccurrencesSlice = {
     addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
     clearOccurrences: () => void;
     fetchOccurrences: () => Promise<void>;
+    invalidateOccurrences: () => void;
     removeOccurrence: (occurrence: Occurrence) => Promise<void>;
     updateOccurrence: (
       occurrence: Occurrence,
@@ -247,6 +248,18 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
           },
           undefined,
           'occurrencesActions.fetchOccurrences.cacheMiss'
+        );
+      },
+
+      invalidateOccurrences: () => {
+        clearCache();
+
+        set(
+          (state) => {
+            state.occurrencesFetchedRange = null;
+          },
+          undefined,
+          'occurrencesActions.invalidateOccurrences'
         );
       },
 

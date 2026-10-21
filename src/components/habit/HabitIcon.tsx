@@ -1,43 +1,38 @@
 import { Button, Tooltip } from '@heroui/react';
 import React from 'react';
+import { useFetcher } from 'react-router';
 
 import { InfinityLoader, VisuallyHiddenInput } from '@components';
 import { useUser } from '@hooks';
 import { type Habit, StorageBuckets } from '@models';
-import { deleteFile, getPublicUrl, uploadHabitIcon } from '@services';
-import { useHabitActions } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { getPublicUrl } from '@services';
 
 type HabitIconCellProps = {
   habit: Habit;
 };
 
 const HabitIcon = ({ habit }: HabitIconCellProps) => {
-  const { updateHabit } = useHabitActions();
   const user = useUser();
-  const [isUploading, setIsUploading] = React.useState(false);
+  const fetcher = useFetcher();
+  const isUploading = fetcher.state !== 'idle';
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async ({
+  const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = ({
     target: { files },
   }) => {
-    if (!user || !files || isUploading) {
-      return null;
+    if (!user || !files?.length || isUploading) {
+      return;
     }
 
-    const [icon] = files;
+    const formData = new FormData();
 
-    const upload = async () => {
-      const iconPath = await uploadHabitIcon(user.id, icon);
+    formData.set('icon', files[0]);
 
-      if (habit.iconPath) {
-        await deleteFile(StorageBuckets.HABIT_ICONS, habit.iconPath);
-      }
-
-      return updateHabit(habit.id, { iconPath });
-    };
-
-    void handleAsyncAction(upload(), 'upload_icon', setIsUploading);
+    void fetcher.submit(formData, {
+      action: `/habits/${habit.id}`,
+      encType: 'multipart/form-data',
+      method: 'post',
+    });
   };
 
   return (

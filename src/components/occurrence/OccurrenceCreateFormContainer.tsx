@@ -1,24 +1,27 @@
 import { getLocalTimeZone } from '@internationalized/date';
 import React from 'react';
+import { useRevalidator } from 'react-router';
 
-import { useUser } from '@hooks';
+import { useUser, useHabits } from '@hooks';
 import type {
   MetricValue,
   OccurrenceStockUsageInsert,
   OccurrenceMetricValueInsert,
 } from '@models';
 import { StorageBuckets } from '@models';
-import { uploadImages, createOccurrenceStockUsages } from '@services';
 import {
-  useHabits,
+  patchStock,
+  uploadImages,
+  createOccurrenceStockUsages,
+} from '@services';
+import {
   useNoteActions,
-  useStockActions,
   useMetricsActions,
   useOccurrenceActions,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
 } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { markAppDataStale, handleAsyncAction } from '@utils';
 
 import OccurrenceFormView, {
   type OccurrenceFormValues,
@@ -32,7 +35,15 @@ const OccurrenceCreateFormContainer = () => {
   const habits = useHabits();
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote } = useNoteActions();
-  const { refreshHabitStocks, updateStock } = useStockActions();
+  const { revalidate } = useRevalidator();
+
+  /* Bridge: remove when occurrence mutations move to /resources/occurrences. */
+  const refreshHabits = () => {
+    markAppDataStale();
+
+    return revalidate();
+  };
+
   const { addOccurrence, updateOccurrence } = useOccurrenceActions();
   const { saveMetricValues } = useMetricsActions();
 
@@ -185,13 +196,13 @@ const OccurrenceCreateFormContainer = () => {
       if (depletedStockIds.length > 0) {
         await Promise.all(
           depletedStockIds.map((stockId) => {
-            return updateStock(stockId, { isDepleted: true }, selectedHabitId);
+            return patchStock(stockId, { isDepleted: true });
           })
         );
       }
 
-      if (stockUsageInserts.length > 0 && depletedStockIds.length === 0) {
-        await refreshHabitStocks(selectedHabitId);
+      if (stockUsageInserts.length > 0 || depletedStockIds.length > 0) {
+        await refreshHabits();
       }
     };
 

@@ -8,10 +8,12 @@ import {
   HabitStockManager,
   MetricDefinitionForm,
 } from '@components';
-import { useUser } from '@hooks';
-import type { Habit, FormMetricDefinitions } from '@models';
-import { useTraits, useHabitActions, useMetricsActions } from '@stores';
-import { handleAsyncAction, buildHabitMetricInsert } from '@utils';
+import { useUser, useTraits, useActionFetcher } from '@hooks';
+import type {
+  Habit,
+  FormMetricDefinitions,
+  HabitDetailsSubmission,
+} from '@models';
 
 import HabitIcon from './HabitIcon';
 
@@ -30,13 +32,30 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
   const [metricDefinitions, setMetricDefinitions] = React.useState<
     FormMetricDefinitions[]
   >([]);
-  const [isSavingMetrics, setIsSavingMetrics] = React.useState(false);
-  const [isUpdatingTrait, setIsUpdatingTrait] = React.useState(false);
   const traits = useTraits();
   const user = useUser();
-  const { updateHabit } = useHabitActions();
-  const { addHabitMetrics, removeHabitMetrics, updateHabitMetric } =
-    useMetricsActions();
+  const habitFetcher = useActionFetcher(() => {
+    setIsEditingName(false);
+    setIsEditingDescription(false);
+    setIsEditingMotivation(false);
+  });
+  const traitFetcher = useActionFetcher();
+  const metricsFetcher = useActionFetcher(() => {
+    setIsEditingMetrics(false);
+  });
+  const isUpdatingTrait = traitFetcher.state !== 'idle';
+  const isSavingMetrics = metricsFetcher.state !== 'idle';
+
+  const submitHabitChange = (
+    fetcher: typeof habitFetcher,
+    submission: HabitDetailsSubmission
+  ) => {
+    void fetcher.submit(submission, {
+      action: `/habits/${habit.id}`,
+      encType: 'application/json',
+      method: 'post',
+    });
+  };
 
   const isEditing = React.useMemo(() => {
     return isEditingName || isEditingDescription || isEditingMotivation;
@@ -83,86 +102,50 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
     });
   };
 
-  const saveMetrics = async () => {
-    if (!user) {
-      return;
-    }
-
-    const submit = async () => {
-      const metricsToRemove = metricDefinitions
-        .filter((md) => {
-          return md.isToBeRemoved;
-        })
-        .map((md) => {
-          return md.id;
-        });
-
-      if (metricsToRemove.length > 0) {
-        await removeHabitMetrics(metricsToRemove, habit.id);
-      }
-
-      const metricsToAdd = metricDefinitions
-        .filter((md) => {
-          return md.isToBeAdded && !md.isToBeRemoved;
-        })
-        .map((metric) => {
-          return buildHabitMetricInsert(metric, habit.id, user.id);
-        });
-
-      const metricsToUpdate = metricDefinitions.filter((md) => {
-        return md.isToBeUpdated && !md.isToBeRemoved;
-      });
-
-      if (metricsToAdd.length > 0) {
-        await addHabitMetrics(metricsToAdd);
-      }
-
-      if (metricsToUpdate.length > 0) {
-        await Promise.all(
-          metricsToUpdate.map((metric) => {
-            return updateHabitMetric(metric.id, {
-              config: metric.config,
-              isRequired: metric.isRequired,
-              name: metric.name,
-              sortOrder: metric.sortOrder,
-              type: metric.type,
-            });
-          })
-        );
-      }
-    };
-
-    void handleAsyncAction(submit(), 'update_habit', setIsSavingMetrics).then(
-      () => {
-        setIsEditingMetrics(false);
-      }
-    );
+  const saveMetrics = () => {
+    submitHabitChange(metricsFetcher, {
+      intent: 'save-metrics',
+      metricDefinitions,
+    });
   };
 
-  const saveHabit = async () => {
+  const saveHabit = () => {
     const trimmedName = name.trim();
     const trimmedDescription = description.trim();
     const trimmedMotivation = motivation.trim();
+    const habitUpdate: Extract<
+      HabitDetailsSubmission,
+      { intent: 'update-habit' }
+    >['habit'] = {};
 
-    if (isEditingName && !trimmedName) {
+    if ((isEditingName && !trimmedName) || habitFetcher.state !== 'idle') {
       return;
     }
 
     if (trimmedName !== habit.name) {
-      await updateHabit(habit.id, { name: trimmedName });
+      habitUpdate.name = trimmedName;
     }
 
     if (trimmedDescription !== (habit.description || '')) {
-      await updateHabit(habit.id, { description: trimmedDescription || null });
+      habitUpdate.description = trimmedDescription || null;
     }
 
     if (trimmedMotivation !== (habit.motivation || '')) {
-      await updateHabit(habit.id, { motivation: trimmedMotivation || null });
+      habitUpdate.motivation = trimmedMotivation || null;
     }
 
-    setIsEditingName(false);
-    setIsEditingDescription(false);
-    setIsEditingMotivation(false);
+    if (Object.keys(habitUpdate).length === 0) {
+      setIsEditingName(false);
+      setIsEditingDescription(false);
+      setIsEditingMotivation(false);
+
+      return;
+    }
+
+    submitHabitChange(habitFetcher, {
+      habit: habitUpdate,
+      intent: 'update-habit',
+    });
   };
 
   const cancelEditing = () => {
@@ -180,7 +163,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
         return;
       }
 
-      void saveHabit();
+      saveHabit();
     }
 
     if (e.key === 'Escape') {
@@ -207,7 +190,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 selectionMode="single"
                 aria-label="Select trait"
                 selectedKeys={new Set([habit.traitId || 'no-trait'])}
-                onAction={async (key) => {
+                onAction={(key) => {
                   const nextTraitId = key === 'no-trait' ? null : String(key);
                   const currentTraitId = habit.traitId ?? null;
 
@@ -215,15 +198,10 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                     return;
                   }
 
-                  setIsUpdatingTrait(true);
-
-                  try {
-                    await updateHabit(habit.id, {
-                      traitId: nextTraitId,
-                    });
-                  } finally {
-                    setIsUpdatingTrait(false);
-                  }
+                  submitHabitChange(traitFetcher, {
+                    habit: { traitId: nextTraitId },
+                    intent: 'update-habit',
+                  });
                 }}
               >
                 {[

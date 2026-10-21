@@ -16,23 +16,24 @@ import {
   VisuallyHiddenInput,
   MetricDefinitionForm,
 } from '@components';
-import { useUser, useTextField, useFileField } from '@hooks';
+import {
+  useUser,
+  useTraits,
+  useTextField,
+  useFileField,
+  useActionFetcher,
+} from '@hooks';
 import type { FormMetricDefinitions } from '@models';
-import { uploadHabitIcon } from '@services';
-import { useTraits, useHabitActions, useMetricsActions } from '@stores';
-import { handleAsyncAction, buildHabitMetricInsert } from '@utils';
 
 const AddHabitDialogButton = () => {
   const [traitId, setTraitId] = React.useState('');
-  const [isAdding, setIsAdding] = React.useState(false);
   const [metricDefinitions, setMetricDefinitions] = React.useState<
     FormMetricDefinitions[]
   >([]);
 
   const traits = useTraits();
   const user = useUser();
-  const { addHabit } = useHabitActions();
-  const { addHabitMetrics } = useMetricsActions();
+  const iconInputRef = React.useRef<HTMLInputElement | null>(null);
   const [icon, handleIconChange, clearIcon] = useFileField();
   const [name, handleNameChange, clearName] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
@@ -49,40 +50,35 @@ const AddHabitDialogButton = () => {
     setMetricDefinitions([]);
   }, [clearName, clearDescription, clearIcon]);
 
+  const fetcher = useActionFetcher(() => {
+    addDialogState.close();
+    clearFields();
+  });
+  const isAdding = fetcher.state !== 'idle';
+
   React.useEffect(() => {
     if (!addDialogState.isOpen) {
       clearFields();
     }
   }, [addDialogState.isOpen, clearFields]);
 
-  const handleAdd = async () => {
-    if (!user) {
-      return null;
+  const handleAdd = () => {
+    const formData = new FormData();
+
+    formData.set('name', name);
+    formData.set('description', description);
+    formData.set('traitId', traitId);
+    formData.set('metricDefinitions', JSON.stringify(metricDefinitions));
+
+    if (icon) {
+      formData.set('icon', icon);
     }
 
-    const add = async () => {
-      const iconPath = icon ? await uploadHabitIcon(user.id, icon) : '';
-
-      const habit = await addHabit({
-        description,
-        iconPath,
-        name,
-        traitId: traitId || null,
-        userId: user.id,
-      });
-
-      if (metricDefinitions.length > 0) {
-        await addHabitMetrics(
-          metricDefinitions.map((metric) => {
-            return buildHabitMetricInsert(metric, habit.id, user.id);
-          })
-        );
-      }
-    };
-
-    void handleAsyncAction(add(), 'add_habit', setIsAdding)
-      .then(addDialogState.close)
-      .then(clearFields);
+    void fetcher.submit(formData, {
+      action: '/habits',
+      encType: 'multipart/form-data',
+      method: 'post',
+    });
   };
 
   const addMetric = () => {
@@ -201,11 +197,23 @@ const AddHabitDialogButton = () => {
                   <PlusIcon />
                   Or add a new trait
                 </CustomButton>
-                <CustomButton fullWidth size="sm" variant="tertiary">
+                <CustomButton
+                  fullWidth
+                  size="sm"
+                  variant="tertiary"
+                  isDisabled={isAdding}
+                  onPress={() => {
+                    iconInputRef.current?.click();
+                  }}
+                >
                   <CloudArrowUpIcon />
                   Upload habit icon
                 </CustomButton>
-                <VisuallyHiddenInput onChange={handleIconChange} />
+                <VisuallyHiddenInput
+                  ref={iconInputRef}
+                  isDisabled={isAdding}
+                  onChange={handleIconChange}
+                />
                 {icon && <p>{icon.name}</p>}
 
                 {metricDefinitions.map((md) => {

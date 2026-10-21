@@ -11,7 +11,7 @@ import type { Route } from './+types/LoginPage';
 
 export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
   if (context.get(userContext)) {
-    throw replace('/');
+    throw replace('/calendar');
   }
 
   return null;
@@ -38,7 +38,7 @@ export const clientAction = async ({ request }: Route.ClientActionArgs) => {
 
   Toast.toast.success('Welcome back!');
 
-  return redirect('/');
+  return redirect('/calendar');
 };
 
 const LoginPage = () => {

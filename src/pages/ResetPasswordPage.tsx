@@ -11,7 +11,7 @@ import type { Route } from './+types/ResetPasswordPage';
 
 export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
   if (context.get(userContext)) {
-    throw replace('/');
+    throw replace('/calendar');
   }
 
   return null;

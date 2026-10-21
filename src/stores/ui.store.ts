@@ -29,9 +29,9 @@ export type ConfirmationOptions = {
 };
 
 export type CalendarFilters = {
-  habitIds: string[];
+  hiddenHabitIds: string[];
+  hiddenTraitIds: string[];
   isShownOnMobile: boolean;
-  traitIds: string[];
 };
 
 type ConfirmationState = ConfirmationOptions & {
@@ -120,9 +120,9 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
       );
     },
     calendarFilters: {
-      habitIds: [],
+      hiddenHabitIds: [],
+      hiddenTraitIds: [],
       isShownOnMobile: false,
-      traitIds: [],
     },
     calendarRange: [
       toCalendarDateTime(now(getLocalTimeZone())),

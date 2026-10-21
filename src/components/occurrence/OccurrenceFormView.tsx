@@ -34,11 +34,10 @@ import {
   SignedImageViewer,
   MetricValuesSection,
 } from '@components';
-import { useTextField } from '@hooks';
+import { useHabits, useTextField } from '@hooks';
 import type { Habit, Occurrence, MetricValue } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl, getLatestHabitOccurrence } from '@services';
-import { useHabits } from '@stores';
 import { isNumericValue } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';

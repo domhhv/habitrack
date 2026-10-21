@@ -1,6 +1,7 @@
 import React from 'react';
+import { useRevalidator } from 'react-router';
 
-import { useUser } from '@hooks';
+import { useUser, useHabits } from '@hooks';
 import type {
   MetricValue,
   OccurrenceStockUsageInsert,
@@ -8,22 +9,21 @@ import type {
 } from '@models';
 import { StorageBuckets } from '@models';
 import {
+  patchStock,
   uploadImages,
   updateOccurrenceStockUsage,
   createOccurrenceStockUsages,
   deleteOccurrenceStockUsages,
 } from '@services';
 import {
-  useHabits,
   useNoteActions,
-  useStockActions,
   useMetricsActions,
   useOccurrenceActions,
   useNotesByOccurrenceId,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
 } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { markAppDataStale, handleAsyncAction } from '@utils';
 
 import OccurrenceFormView, {
   type OccurrenceFormValues,
@@ -37,7 +37,15 @@ const OccurrenceUpdateFormContainer = () => {
   const notes = useNotesByOccurrenceId();
   const [isSaving, setIsSaving] = React.useState(false);
   const { addNote, deleteNote, updateNote } = useNoteActions();
-  const { refreshHabitStocks, updateStock } = useStockActions();
+  const { revalidate } = useRevalidator();
+
+  /* Bridge: remove when occurrence mutations move to /resources/occurrences. */
+  const refreshHabits = () => {
+    markAppDataStale();
+
+    return revalidate();
+  };
+
   const { updateOccurrence } = useOccurrenceActions();
   const { saveMetricValues } = useMetricsActions();
 
@@ -214,7 +222,7 @@ const OccurrenceUpdateFormContainer = () => {
       if (depletedStockIds.length > 0) {
         await Promise.all(
           depletedStockIds.map((stockId) => {
-            return updateStock(stockId, { isDepleted: true }, selectedHabitId);
+            return patchStock(stockId, { isDepleted: true });
           })
         );
       }
@@ -257,8 +265,7 @@ const OccurrenceUpdateFormContainer = () => {
         await saveMetricValues(metricInserts);
       }
 
-      // Refresh stocks to reflect updated remaining_items from DB triggers
-      await refreshHabitStocks(selectedHabitId);
+      await refreshHabits();
     };
 
     void handleAsyncAction(
