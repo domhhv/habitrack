@@ -8,17 +8,11 @@ import {
   getPeriodNote,
   invalidateCalendarNotes,
 } from '@services';
-import { refreshStoreNotesList } from '@stores';
 import { runAction, userContext } from '@utils';
 
 import type { Route } from './+types/notes';
 
 const PERIOD_KINDS: NonNullable<NotePeriodKind>[] = ['day', 'week', 'month'];
-
-const invalidateNotes = () => {
-  invalidateCalendarNotes();
-  refreshStoreNotesList();
-};
 
 export const clientLoader = async ({
   context,
@@ -56,20 +50,22 @@ export const clientAction = async ({
     case 'create':
       return runAction(
         createNote({ ...submission.note, userId: user.id }).finally(
-          invalidateNotes
+          invalidateCalendarNotes
         ),
         'add_note'
       );
 
     case 'delete':
       return runAction(
-        destroyNote(submission.noteId).finally(invalidateNotes),
+        destroyNote(submission.noteId).finally(invalidateCalendarNotes),
         'remove_note'
       );
 
     case 'update':
       return runAction(
-        updateNote(submission.noteId, submission.note).finally(invalidateNotes),
+        updateNote(submission.noteId, submission.note).finally(
+          invalidateCalendarNotes
+        ),
         'update_note'
       );
   }

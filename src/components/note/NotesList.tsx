@@ -1,40 +1,34 @@
 import { ScrollShadow } from '@heroui/react';
-import { useRollbar } from '@rollbar/react';
 import React from 'react';
+import { useNavigation, useSearchParams } from 'react-router';
 
 import { NoteListItem, InfinityLoader } from '@components';
-import { useNotesList, useNoteActions, useNotesListState } from '@stores';
-import { getErrorMessage } from '@utils';
+import type { NoteWithHabit } from '@models';
 
-const NotesList = () => {
-  const notes = useNotesList();
-  const { fetchNextNotesPage, initializeNotesList } = useNoteActions();
-  const { hasMore, isLoading } = useNotesListState();
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const rollbar = useRollbar();
+type NotesListProps = {
+  hasMore: boolean;
+  notes: NoteWithHabit[];
+  pageCount: number;
+};
 
-  React.useEffect(() => {
-    void initializeNotesList().catch((error: unknown) => {
-      rollbar.error('Failed to initialize notes list', getErrorMessage(error));
-      console.error('Failed to fetch notes:', error);
-    });
-  }, [initializeNotesList, rollbar]);
+const NotesList = ({ hasMore, notes, pageCount }: NotesListProps) => {
+  const navigation = useNavigation();
+  const [, setSearchParams] = useSearchParams();
+  const isLoading =
+    navigation.state === 'loading' && navigation.location.pathname === '/notes';
 
-  const handleScroll = React.useCallback(
-    (event: React.UIEvent<HTMLDivElement>) => {
-      const target = event.currentTarget;
-      const scrolledToBottom =
-        target.scrollHeight - target.scrollTop <= target.clientHeight + 50;
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const scrolledToBottom =
+      target.scrollHeight - target.scrollTop <= target.clientHeight + 50;
 
-      if (scrolledToBottom && hasMore && !isLoading) {
-        void fetchNextNotesPage().catch((error: unknown) => {
-          rollbar.error('Failed to fetch notes', getErrorMessage(error));
-          console.error('Failed to fetch notes:', error);
-        });
-      }
-    },
-    [fetchNextNotesPage, hasMore, isLoading, rollbar]
-  );
+    if (scrolledToBottom && hasMore && !isLoading) {
+      setSearchParams(
+        { pages: String(pageCount + 1) },
+        { preventScrollReset: true, replace: true }
+      );
+    }
+  };
 
   const renderEndMessage = () => {
     if (isLoading) {
@@ -62,7 +56,6 @@ const NotesList = () => {
 
   return (
     <ScrollShadow
-      ref={containerRef}
       onScroll={handleScroll}
       className="h-full w-full overflow-y-auto px-4 pt-2 pb-4 min-[373px]:px-8 lg:px-16"
     >

@@ -8,7 +8,6 @@ import {
   getPeriodNote,
   invalidateCalendarNotes,
 } from '@services';
-import { refreshStoreNotesList } from '@stores';
 import { makeRouteArgs } from '@tests';
 import type { SessionUser } from '@utils';
 
@@ -23,13 +22,6 @@ vi.mock('@services', async (importOriginal) => {
     getPeriodNote: vi.fn(),
     invalidateCalendarNotes: vi.fn(),
     updateNote: vi.fn().mockResolvedValue({}),
-  };
-});
-
-vi.mock('@stores', async (importOriginal) => {
-  return {
-    ...(await importOriginal<object>()),
-    refreshStoreNotesList: vi.fn(),
   };
 });
 
@@ -103,7 +95,6 @@ describe('notes resource clientAction', () => {
     });
     expect(createNote).toHaveBeenCalledWith({ ...note, userId: 'user-1' });
     expect(invalidateCalendarNotes).toHaveBeenCalledOnce();
-    expect(refreshStoreNotesList).toHaveBeenCalledOnce();
   });
 
   it('updates and deletes notes', async () => {

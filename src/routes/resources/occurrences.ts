@@ -25,7 +25,6 @@ import {
   createOccurrenceStockUsages,
   deleteOccurrenceStockUsages,
 } from '@services';
-import { refreshStoreNotesList } from '@stores';
 import {
   rollbar,
   runAction,
@@ -132,11 +131,6 @@ const saveOccurrenceNote = async (
   } else if (noteId) {
     await destroyNote(noteId);
   }
-};
-
-const invalidateCalendar = () => {
-  clearCalendarData();
-  refreshStoreNotesList();
 };
 
 const syncStockUsages = async (
@@ -297,11 +291,11 @@ export const clientAction = async ({
 
     return formData.get('intent') === 'update'
       ? runAction(
-          updateOccurrence(formData, user.id).finally(invalidateCalendar),
+          updateOccurrence(formData, user.id).finally(clearCalendarData),
           'update_occurrence'
         )
       : runAction(
-          addOccurrence(formData, user.id).finally(invalidateCalendar),
+          addOccurrence(formData, user.id).finally(clearCalendarData),
           'add_occurrence'
         );
   }
@@ -311,7 +305,7 @@ export const clientAction = async ({
   switch (submission.intent) {
     case 'delete':
       return runAction(
-        deleteOccurrence(submission.occurrenceId).finally(invalidateCalendar),
+        deleteOccurrence(submission.occurrenceId).finally(clearCalendarData),
         'remove_occurrence'
       );
 
@@ -320,7 +314,7 @@ export const clientAction = async ({
         destroyMetricValue(
           submission.occurrenceId,
           submission.habitMetricId
-        ).finally(invalidateCalendar),
+        ).finally(clearCalendarData),
         'remove_metric-value'
       );
 
@@ -336,7 +330,7 @@ export const clientAction = async ({
 
         return { error: getErrorMessage(error), ok: false as const };
       } finally {
-        invalidateCalendar();
+        clearCalendarData();
       }
   }
 };

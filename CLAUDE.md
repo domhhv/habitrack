@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Habitrack is a modern habit tracking web application built as a progressive web app (PWA) with calendar-based visualization for habit logging. The stack includes React 19 + TypeScript, Vite, Zustand state management, HeroUI components, Tailwind CSS v4, and Supabase as the backend.
+Habitrack is a modern habit tracking web application built as a progressive web app (PWA) with calendar-based visualization for habit logging. The stack includes React 19 + TypeScript, React Router v8 in framework mode (route loaders and actions own all server data), Vite, Zustand for client-only UI state, HeroUI components, Tailwind CSS v4, and Supabase as the backend.
 
 ## Essential Commands
 
@@ -46,8 +46,9 @@ yarn fix:sql           # Fix SQL formatting
 
 ### Technology Stack
 
-- **Frontend**: React 19, TypeScript 5.9, Vite 7, React Router v7
-- **State Management**: Zustand v5 with Immer middleware
+- **Frontend**: React 19, TypeScript 6, Vite 8, React Router v8 (framework mode, SSR enabled, data loaded in `clientLoader`s)
+- **Server data**: React Router `clientMiddleware`/`clientLoader`/`clientAction`, fetchers and revalidation
+- **Client UI state**: Zustand v5 with Immer middleware (drawers, confirmation dialog, calendar filters, mobile sidebar, theme)
 - **UI**: HeroUI (React Aria-based), Tailwind CSS v4, Framer Motion
 - **Backend**: Supabase (PostgreSQL, Auth, Storage, Real-time)
 - **Testing**: Vitest, React Testing Library
@@ -68,16 +69,39 @@ Use these aliases throughout the codebase:
 
 ### Key Directories
 
+- **`src/routes.ts`**: Route config. Every route has an explicit `id`; app routes are nested under the `app` layout (`src/App.tsx`), calendar views under the `calendar` layout (`src/pages/CalendarLayout.tsx`)
+- **`src/pages/`**: Route modules (page component plus `clientLoader`/`clientAction`/`ErrorBoundary` exports), typed via `./+types/<File>`
+- **`src/routes/resources/`**: Component-less resource routes used only by fetchers (`/resources/occurrences`, `/resources/notes`)
 - **`src/components/`**: Domain-organized components (calendar, habit, trait, account, common)
-- **`src/stores/`**: Zustand stores for each domain (habits, occurrences, traits, notes)
-- **`src/services/`**: Supabase API service layer
+- **`src/services/`**: Supabase API service layer, plus the calendar range caches (`calendar-data.service.ts`)
+- **`src/stores/`**: Zustand client UI state only (`ui.store.ts`, `theme.store.ts`)
 - **`supabase/`**: Database migrations, schema, and generated types
 
-### State Management Pattern
+### Data and State Pattern
 
-- **Zustand with Immer**: Each domain has its own store with state + actions
-- **Custom Hooks**: Separate hooks for accessing state vs actions
-- **Data Flow**: UI → Store Actions → Services → Supabase → Real-time updates
+Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MIGRATION.md) for the full history and rationale.
+
+- **Loading**:
+  - The `app` layout `clientMiddleware` puts the session user and profile into `userContext`/`profileContext`.
+  - The `app` layout `clientLoader` returns `{ user, profile, habits, traits }`, read via `useUser`/`useProfile`/`useHabits`/`useTraits`.
+  - The `calendar` layout `clientLoader` computes the range from the URL and returns the occurrences and notes, read via `useCalendarData()`.
+  - Pages load their own data in their `clientLoader` (habit stats, a habit, the notes list, connected identities).
+- **Mutations**:
+  - Every write goes through a route `clientAction`. Branch on an `intent` and type the payloads in `src/models/*-submission.model.ts`.
+  - UI that belongs to one page submits to that page's route. Global UI (drawers) submits to a `/resources/*` route.
+  - Send JSON (`encType: 'application/json'`), or multipart `FormData` when files are involved.
+- **Submitting**:
+  - Components submit with `useActionFetcher(onSuccess)` (a `useFetcher` that calls `onSuccess` once the action returns `{ ok: true }`), or `<Form>`/`useFetcher` directly. Pending UI comes from `fetcher.state`/`useNavigation()`/`useIsSubmitting()`, not `useState`.
+  - Block a new submission on a shared fetcher while one is pending.
+- **Results**:
+  - Wrap action work in `runAction(promise, actionType)`. It keeps the standard toasts and returns `{ ok: true }` or `{ ok: false, error }` without a 4xx status, so partial writes still revalidate.
+  - Return `data(…, { status: 400 })` only for failures that wrote nothing.
+- **Revalidation**:
+  - React Router revalidates active loaders after each action.
+  - The `app` layout `shouldRevalidate` skips plain navigations unless the app data was marked stale (`markAppDataStale`).
+  - Actions that change calendar data call `clearCalendarData()` (or `invalidateCalendarOccurrences`/`invalidateCalendarNotes`) in `finally`.
+- **URL state**: Prefer search params for shareable UI state (e.g. `/notes?pages=N`).
+- **Zustand**: Only for client UI state that has no server source.
 
 ### Database Development
 
@@ -164,6 +188,8 @@ Supabase storage buckets:
 
 - **Vitest** with jsdom environment for unit tests
 - **React Testing Library** for component testing
+- Route `clientLoader`/`clientAction` functions are tested directly with `makeRouteArgs()` from `@tests` (builds the request plus a `RouterContextProvider` carrying `userContext`), with `@services` mocked
+- Components that use loader data, fetchers or `<Form>` render inside `createRoutesStub` from `react-router`
 - Test files located alongside components or in dedicated test directories
 - Coverage reports available with `yarn test:coverage`
 
@@ -178,11 +204,12 @@ Please do not proceed with verifying your changes in the browser unless explicit
 
 ### Feature Documentation
 
-End-to-end documentation for complex features (database → models → services → stores → UI):
+End-to-end documentation for complex features (database → models → services → route loaders/actions → UI):
 
 - **[docs/METRICS.md](docs/METRICS.md)** - Habit metric definitions and occurrence metric values
 - **[docs/STOCKS.md](docs/STOCKS.md)** - Habit stocks, stock metric defaults, occurrence stock usages, auto-depletion
 - **[docs/COSTS.md](docs/COSTS.md)** - Occurrence cost calculation, period summaries, multi-currency handling
+- **[docs/STATE_MIGRATION.md](docs/STATE_MIGRATION.md)** - Zustand → React Router data APIs migration record and the roadmap for full-stack React Router features
 
 ### Important Conventions
 
