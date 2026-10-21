@@ -16,10 +16,15 @@ import {
 import React from 'react';
 
 import { CustomButton } from '@components';
-import { useUser } from '@hooks';
-import type { Habit, MetricValue, HabitStockWithDefaults } from '@models';
-import { useStockActions, useConfirmationActions } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { useUser, useActionFetcher } from '@hooks';
+import type {
+  Habit,
+  MetricValue,
+  HabitDetailsSubmission,
+  HabitStockWithDefaults,
+} from '@models';
+import { useConfirmationActions } from '@stores';
+import { pickDefinedValues } from '@utils';
 
 import StockMetricDefaults from './StockMetricDefaults';
 
@@ -44,8 +49,6 @@ const formatCost = (cost: number | null, currency: string) => {
 };
 
 const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
-  const { removeStock, updateStock, updateStockMetricDefaults } =
-    useStockActions();
   const { askConfirmation } = useConfirmationActions();
   const user = useUser();
   const [isEditing, setIsEditing] = React.useState(false);
@@ -69,7 +72,18 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
   const [compoundDefaults, setCompoundDefaults] = React.useState<
     Record<string, boolean>
   >({});
-  const [isSaving, setIsSaving] = React.useState(false);
+  const fetcher = useActionFetcher(() => {
+    setIsEditing(false);
+  });
+  const isSaving = fetcher.state !== 'idle';
+
+  const submitStockChange = (submission: HabitDetailsSubmission) => {
+    void fetcher.submit(submission, {
+      action: `/habits/${stock.habitId}`,
+      encType: 'application/json',
+      method: 'post',
+    });
+  };
 
   const costPerItem =
     stock.cost !== null && stock.totalItems !== null
@@ -93,18 +107,16 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
         variant: 'danger',
       })
     ) {
-      void handleAsyncAction(
-        removeStock(stock.id, stock.habitId),
-        'remove_stock'
-      );
+      submitStockChange({ intent: 'remove-stock', stockId: stock.id });
     }
   };
 
   const handleToggleDepleted = () => {
-    void handleAsyncAction(
-      updateStock(stock.id, { isDepleted: !stock.isDepleted }, stock.habitId),
-      'update_stock'
-    );
+    submitStockChange({
+      intent: 'update-stock',
+      stock: { isDepleted: !stock.isDepleted },
+      stockId: stock.id,
+    });
   };
 
   const startEditing = () => {
@@ -128,7 +140,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
     setIsEditing(true);
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     const trimmedName = name.trim();
 
     if (!trimmedName || !user) {
@@ -145,35 +157,24 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
         ? Math.min(remainingItems ?? nextTotalItems, nextTotalItems)
         : null;
 
-    await handleAsyncAction(
-      (async () => {
-        await updateStock(
-          stock.id,
-          {
-            cost: cost ?? null,
-            currency,
-            name: trimmedName,
-            remainingItems: nextRemainingItems,
-            totalItems: nextTotalItems,
-          },
-          stock.habitId
-        );
-
-        if (metricDefinitions.length > 0) {
-          await updateStockMetricDefaults(
-            stock.habitId,
-            stock.id,
-            metricDefaults,
-            compoundDefaults,
-            user.id
-          );
-        }
-      })(),
-      'update_stock',
-      setIsSaving
-    );
-
-    setIsEditing(false);
+    submitStockChange({
+      intent: 'update-stock',
+      stockId: stock.id,
+      metricDefaults:
+        metricDefinitions.length > 0
+          ? {
+              compound: compoundDefaults,
+              values: pickDefinedValues(metricDefaults),
+            }
+          : undefined,
+      stock: {
+        cost: cost ?? null,
+        currency,
+        name: trimmedName,
+        remainingItems: nextRemainingItems,
+        totalItems: nextTotalItems,
+      },
+    });
   };
 
   const handleCancel = () => {

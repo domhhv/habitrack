@@ -6,16 +6,13 @@ import {
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { type HabitsSlice, createHabitsSlice } from './habits.store';
 import { type MetricsSlice, createMetricsSlice } from './metrics.store';
 import { type NotesSlice, createNotesSlice } from './notes.store';
 import {
   type OccurrencesSlice,
   createOccurrencesSlice,
 } from './occurrences.store';
-import { type StocksSlice, createStocksSlice } from './stocks.store';
 import { type ThemeSlice, createThemeSlice } from './theme.store';
-import { type TraitsSlice, createTraitsSlice } from './traits.store';
 import { type UiSlice, createUiSlice } from './ui.store';
 import { type UserSlice, createUserSlice } from './user.store';
 
@@ -34,9 +31,6 @@ export type BoundStore = UserSlice &
   ThemeSlice &
   MetricsSlice &
   NotesSlice &
-  StocksSlice &
-  TraitsSlice &
-  HabitsSlice &
   OccurrencesSlice;
 
 export type SliceCreator<TSlice extends keyof BoundStore> = (
@@ -52,10 +46,7 @@ export const useBoundStore = create<BoundStore>()(
           ...createThemeSlice(set, get, store),
           ...createUserSlice(set, get, store),
           ...createNotesSlice(set, get, store),
-          ...createTraitsSlice(set, get, store),
-          ...createHabitsSlice(set, get, store),
           ...createMetricsSlice(set, get, store),
-          ...createStocksSlice(set, get, store),
           ...createOccurrencesSlice(set, get, store),
         };
       })
@@ -73,12 +64,9 @@ useBoundStore.subscribe(
     };
   },
   (newState, prevState) => {
-    const { habitActions, noteActions, occurrencesActions, traitActions } =
-      useBoundStore.getState();
+    const { noteActions, occurrencesActions } = useBoundStore.getState();
 
     if (!newState.userId && prevState.userId) {
-      habitActions.clearHabits();
-      traitActions.clearTraits();
       occurrencesActions.clearOccurrences();
       noteActions.clearNotes();
 
@@ -86,8 +74,6 @@ useBoundStore.subscribe(
     }
 
     if (newState.userId && newState.userId !== prevState.userId) {
-      void habitActions.fetchHabits();
-      void traitActions.fetchTraits();
       void occurrencesActions.fetchOccurrences();
       void noteActions.fetchNotes();
 

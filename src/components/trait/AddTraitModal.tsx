@@ -3,10 +3,9 @@ import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 
 import { CustomButton, OccurrenceChip } from '@components';
-import { useUser, useTextField } from '@hooks';
-import { useTraitActions } from '@stores';
+import { useUser, useTextField, useActionFetcher } from '@hooks';
+import type { HabitsSubmission } from '@models';
 import { makeTestOccurrence } from '@tests';
-import { handleAsyncAction } from '@utils';
 
 type AddCustomTraitModalProps = {
   isOpen: boolean;
@@ -15,10 +14,8 @@ type AddCustomTraitModalProps = {
 
 const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
   const [color, setTraitColor] = React.useState('#94a3b8');
-  const [isAdding, setIsAdding] = React.useState(false);
 
   const user = useUser();
-  const { addTrait } = useTraitActions();
   const [label, handleLabelChange, clearLabel] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
     useTextField();
@@ -29,29 +26,26 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
     setTraitColor('#94a3b8');
   }, [clearLabel, clearDescription]);
 
+  const fetcher = useActionFetcher(() => {
+    onClose();
+    clearFields();
+  });
+  const isAdding = fetcher.state !== 'idle';
+
   React.useEffect(() => {
     if (!isOpen) {
       clearFields();
     }
   }, [isOpen, clearFields]);
 
-  const handleAdd = async () => {
-    if (!user) {
-      return null;
-    }
-
-    void handleAsyncAction(
-      addTrait({
-        color,
-        description,
-        name: label,
-        userId: user.id,
-      }),
-      'add_trait',
-      setIsAdding
-    )
-      .then(onClose)
-      .then(clearFields);
+  const handleAdd = () => {
+    void fetcher.submit(
+      {
+        intent: 'create-trait',
+        trait: { color, description, name: label },
+      } satisfies HabitsSubmission,
+      { action: '/habits', encType: 'application/json', method: 'post' }
+    );
   };
 
   const handleTraitColorChange = (color: string) => {

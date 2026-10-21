@@ -119,17 +119,29 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 
 ### Phase 2 – Habits and traits
 
-**PR 5 – Habit, trait, metric-definition and stock mutations → `clientAction`s**
+**PRs 5 + 6 – Habits and traits through loaders and actions** – done together on `refactor/habits-loaders`
 
-- `/habits` `clientAction`: `create-habit` (`AddHabitDialogButton`: `createHabit`, `uploadHabitIcon`, `createHabitMetrics`), `create-trait` (`AddTraitModal`), `delete-habit` (`HabitsTable`, including the photo cleanup it does today).
-- `/habits/:habitId` `clientAction`: `update-habit` (`HabitDetails` fields), `update-icon` (`HabitIcon`), `add-metrics`, `update-metric`, `remove-metrics`, `add-stock`, `update-stock`, `remove-stock`, `update-stock-defaults` (`AddStockForm`, `StockListItem`).
-- Bridge: each action calls `getState().habitActions.fetchHabits()` (and `traitActions.fetchTraits()` where relevant). Metric-definition intents also invalidate and refetch occurrences, which replaces the hand-written patching in `metrics.store.ts`.
-
-**PR 6 – Habits and traits reads → loaders; delete their slices**
-
-- The app layout `clientLoader` also returns `habits` and `traits` (keyed by id, as today). Re-create `useHabits`/`useTraits` in `src/hooks/`. `/habits` `clientLoader` returns `getHabitsStats`, which removes the `useEffect` in `HabitsTable`. `/habits/:habitId` uses the layout habits and throws a 404 for an unknown id. The "Habit not found" alert moves into that route's `ErrorBoundary`. `useIsFetchingHabits` goes away.
-- Calendar filters change to `hiddenHabitIds`/`hiddenTraitIds`. A new habit is then visible by default, and nothing has to sync filters with fetched data. That removes the filter writes in `habits.store.ts`/`traits.store.ts` and the `['']` sentinel. `CalendarFilters`/`MonthCalendarGrid` compute the selected ids as all ids minus the hidden ones.
-- Delete `habits.store.ts`, `traits.store.ts`, `stocks.store.ts`, and the habit-definition half of `metrics.store.ts`. Remove the PR 5 bridges.
+- **Reads**
+  - The app layout `clientLoader` also returns `habits` and `traits`, keyed by id, loaded in parallel with the profile.
+  - `useHabits`/`useTraits` live in `src/hooks/` and read that data. They return a stable empty object when signed out.
+  - `/habits` `clientLoader` returns `habitsStats`: `listHabitIds()` then `getHabitsStats()`. A failure is reported to Rollbar and the table renders without stats, as before. `HabitsTable` takes `habitsStats` as a prop, and its effect is gone.
+  - `/habits/:habitId` `clientLoader` uses `getHabit`, which now returns `null` when there is no row. It throws a 404, and the route `ErrorBoundary` renders the "Habit not found" alert. `HabitDetails` is keyed by habit id, so its local edit state resets when you switch habits.
+- **Mutations.** They go through `useActionFetcher(onSuccess)` (`src/hooks/use-action-fetcher.ts`), a `useFetcher` that runs `onSuccess` once an action returns `{ ok: true }`. Components use it to close modals or editors. Actions wrap their work in `runAction(promise, actionType)` (`src/utils/run-action.ts`), which keeps the `handleAsyncAction` toasts and returns `{ ok: true }` or `data({ error, ok: false }, { status: 400 })`.
+  - `/habits` `clientAction`:
+    - `create-habit` is multipart `FormData`, because of the icon file. Metric definitions travel as a JSON field.
+    - `create-trait` is JSON.
+  - `/habits/:habitId` `clientAction` takes the JSON `HabitDetailsSubmission` union (`src/models/habit-submission.model.ts`): `update-habit`, `delete-habit` (with photo and icon cleanup), `save-metrics` (remove/add/update from the form flags), `add-stock`, `update-stock` (optionally replacing the metric defaults) and `remove-stock`. The icon upload is multipart `FormData`.
+  - Habit-scoped UI on any page submits with an explicit `action: /habits/<id>`. That covers `HabitsTable`'s delete and `HabitIcon` in the table.
+  - Stock metric-default values go through `pickDefinedValues`, because JSON submissions can't contain `undefined` record values.
+  - Files are detected with `typeof value !== 'string'`, not `instanceof File`, which also holds across realms in tests.
+- **Calendar filters.** They store `hiddenHabitIds`/`hiddenTraitIds`. `CalendarFilters` computes the selected ids as all ids minus the hidden ones, and `MonthCalendarGrid` filters out the hidden ones. The `['']` sentinel and the filter writes from the store slices are gone.
+- **Store.** `habits.store.ts`, `traits.store.ts` and `stocks.store.ts` are deleted. `metrics.store.ts` keeps only the occurrence metric-value actions. The store subscription no longer fetches or clears habits and traits.
+- **Bridges until Phase 3**
+  - `HabitDetailsPage` clears and refetches the store occurrences after a habit update, icon change, deletion or metric-definition save. This replaces the in-place patching in `metrics.store.ts`, and also refreshes chips after renames and deletes, which the old code did not.
+  - `OccurrenceCreate/UpdateFormContainer` call `patchStock` directly and then `markAppDataStale()` + `revalidate()`, in place of `updateStock`/`refreshHabitStocks`.
+- **Tests**
+  - Loader and action tests for `/habits` and `/habits/:habitId`.
+  - `HabitsTable.test.tsx` renders through `createRoutesStub` and runs again. It had been skipped since the HeroUI v3 migration.
 
 ### Phase 3 – Calendar, drawers, notes
 

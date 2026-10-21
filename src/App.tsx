@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
+import keyBy from 'lodash.keyby';
 import React from 'react';
 import { Outlet, type ShouldRevalidateFunctionArgs } from 'react-router';
 
@@ -12,7 +13,7 @@ import {
 } from '@components';
 import { useAuthSubscription } from '@hooks';
 import { ErrorFallbackPage } from '@pages';
-import { getProfile, getSession } from '@services';
+import { listHabits, getProfile, getSession, listTraits } from '@services';
 import { useUserActions } from '@stores';
 import {
   userContext,
@@ -37,11 +38,18 @@ export const clientLoader = async ({
 }: Route.ClientLoaderArgs) => {
   const finishAppDataLoad = trackAppDataLoad(request.signal);
   const user = context.get(userContext);
-  const profile = user ? await getProfile(user.id) : null;
+  const [profile, habits, traits] = user
+    ? await Promise.all([getProfile(user.id), listHabits(), listTraits()])
+    : [null, [], []];
 
   finishAppDataLoad();
 
-  return { profile, user };
+  return {
+    habits: keyBy(habits, 'id'),
+    profile,
+    traits: keyBy(traits, 'id'),
+    user,
+  };
 };
 
 export const shouldRevalidate = ({

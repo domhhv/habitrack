@@ -1,19 +1,15 @@
 import { cn, Table, Tooltip, Pagination, EmptyState } from '@heroui/react';
 import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, ArrowsClockwiseIcon } from '@phosphor-icons/react';
-import { useRollbar } from '@rollbar/react';
 import pluralize from 'pluralize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
-import { Link } from 'react-router';
+import { Link, useFetcher } from 'react-router';
 
 import { TraitChip, CustomButton, AddHabitDialogButton } from '@components';
-import { useUser } from '@hooks';
-import type { Habit, HabitStats } from '@models';
-import { StorageBuckets } from '@models';
-import { listFiles, deleteFile, getHabitsStats } from '@services';
-import { useHabits, useHabitActions, useConfirmationActions } from '@stores';
-import { handleAsyncAction } from '@utils';
+import { useHabits } from '@hooks';
+import type { Habit, HabitStats, HabitDetailsSubmission } from '@models';
+import { useConfirmationActions } from '@stores';
 
 import habitColumns from './habit-columns';
 import HabitIcon from './HabitIcon';
@@ -23,12 +19,12 @@ import HabitTotalEntries from './HabitTotalEntries';
 
 const ROWS_PER_PAGE = 10;
 
-const HabitsTable = () => {
-  const rollbar = useRollbar();
+type HabitsTableProps = {
+  habitsStats: Record<Habit['id'], HabitStats>;
+};
+
+const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
   const [page, setPage] = React.useState(1);
-  const [habitsStats, setHabitsStats] = React.useState<
-    Record<Habit['id'], HabitStats>
-  >({});
   const dateFormatter = useDateFormatter({
     day: 'numeric',
     month: 'short',
@@ -36,41 +32,9 @@ const HabitsTable = () => {
     year: 'numeric',
   });
 
-  const user = useUser();
   const habits = useHabits();
-  const { removeHabit } = useHabitActions();
+  const deleteFetcher = useFetcher();
   const { askConfirmation } = useConfirmationActions();
-
-  React.useEffect(() => {
-    const habitIds = Object.keys(habits);
-
-    if (habitIds.length === 0) {
-      setHabitsStats({});
-
-      return;
-    }
-
-    setHabitsStats({});
-
-    getHabitsStats(habitIds)
-      .then((stats) => {
-        setHabitsStats(
-          stats.reduce((statsMap, stat) => {
-            if (!stat.habitId) {
-              return statsMap;
-            }
-
-            return {
-              ...statsMap,
-              [stat.habitId]: stat,
-            };
-          }, {})
-        );
-      })
-      .catch((error) => {
-        rollbar.error(error);
-      });
-  }, [habits, rollbar]);
 
   const handleDelete = async (habit: Habit) => {
     const confirmed = await askConfirmation({
@@ -89,31 +53,16 @@ const HabitsTable = () => {
       ),
     });
 
-    if (!confirmed || !user) {
-      return;
-    }
-
-    const remove = async () => {
-      const habitOccurrencePhotos = await listFiles(
-        StorageBuckets.OCCURRENCE_PHOTOS,
-        `${user.id}/${habit.id}/`
+    if (confirmed) {
+      void deleteFetcher.submit(
+        { intent: 'delete-habit' } satisfies HabitDetailsSubmission,
+        {
+          action: `/habits/${habit.id}`,
+          encType: 'application/json',
+          method: 'post',
+        }
       );
-
-      if (habitOccurrencePhotos.length > 0) {
-        await Promise.all(
-          habitOccurrencePhotos.map((photo) => {
-            return deleteFile(
-              StorageBuckets.OCCURRENCE_PHOTOS,
-              `${user.id}/${habit.id}/${photo.name}`
-            );
-          })
-        );
-      }
-
-      return removeHabit(habit);
-    };
-
-    void handleAsyncAction(remove(), 'remove_habit');
+    }
   };
 
   const habitsList = Object.values(habits);

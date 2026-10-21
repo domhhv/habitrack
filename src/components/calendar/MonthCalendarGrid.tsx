@@ -214,12 +214,10 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
                             return (
                               o.occurredAt.compare(startDate) >= 0 &&
                               o.occurredAt.compare(endDate) <= 0 &&
-                              filters.habitIds.includes(o.habitId) &&
-                              (o.habit.trait
-                                ? filters.traitIds.includes(
-                                    o.habit.trait?.id || ''
-                                  )
-                                : true)
+                              !filters.hiddenHabitIds.includes(o.habitId) &&
+                              !filters.hiddenTraitIds.includes(
+                                o.habit.trait?.id || ''
+                              )
                             );
                           }
                         )}

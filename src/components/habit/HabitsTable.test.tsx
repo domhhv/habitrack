@@ -1,10 +1,10 @@
 import { Provider as RollbarProvider } from '@rollbar/react';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { BrowserRouter } from 'react-router';
+import { createRoutesStub } from 'react-router';
 import { it, vi, expect, describe } from 'vitest';
 
-import { useHabits } from '@stores';
+import { useHabits } from '@hooks';
 import { makeTestHabit } from '@tests';
 
 import HabitsTable from './HabitsTable';
@@ -20,11 +20,7 @@ vi.mock(import('@rollbar/react'), async (importOriginal) => {
 
 vi.mock('@services', () => {
   return {
-    getHabitsStats: vi.fn().mockResolvedValue([]),
     getPublicUrl: vi.fn(),
-    listHabits: vi.fn().mockReturnValue(() => {
-      return [];
-    }),
     StorageBuckets: {
       HABIT_ICONS: 'habit-icons',
     },
@@ -33,29 +29,19 @@ vi.mock('@services', () => {
 
 vi.mock('@stores', () => {
   return {
-    useHabits: vi.fn(),
-    useMetricsActions: vi.fn().mockReturnValue({}),
-    useTraits: vi.fn().mockReturnValue({}),
     useConfirmationActions: vi.fn().mockReturnValue({
-      confirm: vi.fn().mockResolvedValue(false),
-    }),
-    useHabitActions: vi.fn().mockReturnValue({
-      removeHabit: vi.fn(),
-      updateHabit: vi.fn(),
-    }),
-    useNoteActions: vi.fn().mockReturnValue({
-      addNote: vi.fn(),
-    }),
-    useTraitActions: vi.fn().mockReturnValue({
-      addTrait: vi.fn(),
+      askConfirmation: vi.fn().mockResolvedValue(false),
     }),
   };
 });
 
-vi.mock('@hooks', () => {
+vi.mock('@hooks', async (importOriginal) => {
   return {
+    ...(await importOriginal<object>()),
     useFileField: vi.fn().mockReturnValue([null, vi.fn(), vi.fn()]),
+    useHabits: vi.fn(),
     useTextField: vi.fn().mockReturnValue(['', vi.fn(), vi.fn(), vi.fn()]),
+    useTraits: vi.fn().mockReturnValue({}),
     ThemeMode: {
       DARK: 'dark',
       LIGHT: 'light',
@@ -73,7 +59,7 @@ vi.mock('@hooks', () => {
 });
 
 describe(HabitsTable.name, () => {
-  it.skip('should display habits', async () => {
+  it('should display habits', async () => {
     (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       '4c6b7c3b-ec2f-45fb-8c3a-df16f7a4b3aa': makeTestHabit({
         description: 'Habit description #1',
@@ -86,12 +72,20 @@ describe(HabitsTable.name, () => {
         name: 'Habit name #2',
       }),
     });
+    const Stub = createRoutesStub([
+      {
+        path: '/habits',
+        Component: () => {
+          return (
+            <RollbarProvider config={{}}>
+              <HabitsTable habitsStats={{}} />
+            </RollbarProvider>
+          );
+        },
+      },
+    ]);
     const { getAllByLabelText, getByText } = render(
-      <BrowserRouter>
-        <RollbarProvider config={{}}>
-          <HabitsTable />
-        </RollbarProvider>
-      </BrowserRouter>
+      <Stub initialEntries={['/habits']} />
     );
     await waitFor(() => {
       expect(getByText('Habit name #1'));

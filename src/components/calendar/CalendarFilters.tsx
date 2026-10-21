@@ -13,15 +13,10 @@ import groupBy from 'lodash.groupby';
 import React from 'react';
 
 import { TraitChip } from '@components';
-import { useUser, useScreenWidth } from '@hooks';
+import { useUser, useHabits, useTraits, useScreenWidth } from '@hooks';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
-import {
-  useHabits,
-  useTraits,
-  useCalendarFilters,
-  useCalendarFiltersChange,
-} from '@stores';
+import { useCalendarFilters, useCalendarFiltersChange } from '@stores';
 
 const CalendarFilters = () => {
   const habits = useHabits();
@@ -33,21 +28,28 @@ const CalendarFilters = () => {
   const habitsFilterSelectState = useOverlayState();
   const traitsFilterSelectState = useOverlayState();
 
-  const areAllHabitsSelected = React.useMemo(() => {
-    if (filters.habitIds.length === 1 && filters.habitIds.includes('')) {
-      return false;
-    }
+  const habitIds = React.useMemo(() => {
+    return Object.keys(habits);
+  }, [habits]);
 
-    return filters.habitIds.length === Object.keys(habits).length;
-  }, [filters.habitIds, habits]);
+  const traitIds = React.useMemo(() => {
+    return Object.keys(traits);
+  }, [traits]);
 
-  const areAllTraitsSelected = React.useMemo(() => {
-    if (filters.traitIds.length === 1 && filters.traitIds.includes('')) {
-      return false;
-    }
+  const selectedHabitIds = React.useMemo(() => {
+    return habitIds.filter((id) => {
+      return !filters.hiddenHabitIds.includes(id);
+    });
+  }, [habitIds, filters.hiddenHabitIds]);
 
-    return filters.traitIds.length === Object.keys(traits).length;
-  }, [filters.traitIds, traits]);
+  const selectedTraitIds = React.useMemo(() => {
+    return traitIds.filter((id) => {
+      return !filters.hiddenTraitIds.includes(id);
+    });
+  }, [traitIds, filters.hiddenTraitIds]);
+
+  const areAllHabitsSelected = selectedHabitIds.length === habitIds.length;
+  const areAllTraitsSelected = selectedTraitIds.length === traitIds.length;
 
   const habitsByTraitName = React.useMemo(() => {
     return groupBy(Object.values(habits), (habit) => {
@@ -58,62 +60,30 @@ const CalendarFilters = () => {
   const handleHabitsFilterChange = (value: React.Key[]) => {
     const values = value.map(String);
 
-    if (values.includes('toggle-all')) {
-      if (areAllHabitsSelected) {
-        changeCalendarFilters({
-          ...filters,
-          habitIds: [''],
-        });
-
-        return;
-      }
-
-      const allHabitIds = Object.keys(habits).filter((id) => {
-        return id !== '';
-      });
-
-      changeCalendarFilters({
-        ...filters,
-        habitIds: allHabitIds,
-      });
-
-      return;
-    }
-
     changeCalendarFilters({
       ...filters,
-      habitIds: values,
+      hiddenHabitIds: values.includes('toggle-all')
+        ? areAllHabitsSelected
+          ? habitIds
+          : []
+        : habitIds.filter((id) => {
+            return !values.includes(id);
+          }),
     });
   };
 
   const handleTraitsFilterChange = (value: React.Key[]) => {
     const values = value.map(String);
 
-    if (values.includes('toggle-all')) {
-      if (areAllTraitsSelected) {
-        changeCalendarFilters({
-          ...filters,
-          traitIds: [''],
-        });
-
-        return;
-      }
-
-      const allTraitIds = Object.keys(traits).filter((id) => {
-        return id !== '';
-      });
-
-      changeCalendarFilters({
-        ...filters,
-        traitIds: allTraitIds,
-      });
-
-      return;
-    }
-
     changeCalendarFilters({
       ...filters,
-      traitIds: values,
+      hiddenTraitIds: values.includes('toggle-all')
+        ? areAllTraitsSelected
+          ? traitIds
+          : []
+        : traitIds.filter((id) => {
+            return !values.includes(id);
+          }),
     });
   };
 
@@ -133,7 +103,7 @@ const CalendarFilters = () => {
       <Select
         fullWidth
         variant="secondary"
-        value={filters.habitIds}
+        value={selectedHabitIds}
         selectionMode="multiple"
         placeholder="Filter by habits"
         onChange={handleHabitsFilterChange}
@@ -199,7 +169,7 @@ const CalendarFilters = () => {
                   variant="secondary"
                   isSelected={areAllHabitsSelected}
                   isIndeterminate={
-                    !areAllHabitsSelected && filters.habitIds.some(Boolean)
+                    !areAllHabitsSelected && selectedHabitIds.length > 0
                   }
                 >
                   <Checkbox.Content>
@@ -262,7 +232,7 @@ const CalendarFilters = () => {
         <Select
           fullWidth
           variant="secondary"
-          value={filters.traitIds}
+          value={selectedTraitIds}
           selectionMode="multiple"
           placeholder="Filter by traits"
           onChange={handleTraitsFilterChange}
@@ -313,7 +283,7 @@ const CalendarFilters = () => {
                     variant="secondary"
                     isSelected={areAllTraitsSelected}
                     isIndeterminate={
-                      !areAllTraitsSelected && filters.traitIds.some(Boolean)
+                      !areAllTraitsSelected && selectedTraitIds.length > 0
                     }
                   >
                     <Checkbox.Content>

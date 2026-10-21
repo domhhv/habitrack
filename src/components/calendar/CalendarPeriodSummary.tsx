@@ -4,6 +4,7 @@ import { NotePencilIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { CustomButton } from '@components';
+import { useHabits } from '@hooks';
 import type {
   NoteOfPeriod,
   NotePeriodKind,
@@ -11,7 +12,7 @@ import type {
 } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
-import { useHabits, useNoteDrawerActions } from '@stores';
+import { useNoteDrawerActions } from '@stores';
 
 type CalendarPeriodSummaryProps = {
   className?: string;
