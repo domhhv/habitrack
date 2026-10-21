@@ -1,42 +1,46 @@
 import { Link, Toast } from '@heroui/react';
 import React from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { data, Form, replace, redirect } from 'react-router';
 
 import { CustomButton } from '@components';
-import { useUser, useFirstDayOfWeek } from '@hooks';
+import { useIsSubmitting, useFirstDayOfWeek } from '@hooks';
 import { signInAnonymously } from '@services';
-import { getErrorMessage } from '@utils';
+import { userContext, parseDayOfWeek, getErrorMessage } from '@utils';
 
-const AnonymousLoginPage = () => {
-  const user = useUser();
-  const navigate = useNavigate();
-  const firstDayOfWeek = useFirstDayOfWeek();
-  const [isAuthenticating, setIsAuthenticating] = React.useState(false);
+import type { Route } from './+types/AnonymousLoginPage';
 
-  if (user) {
-    return <Navigate to="/" replace />;
+export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
+  if (context.get(userContext)) {
+    throw replace('/');
   }
 
-  const handleContinue = async () => {
-    try {
-      setIsAuthenticating(true);
+  return null;
+};
 
-      await signInAnonymously(firstDayOfWeek);
+export const clientAction = async ({ request }: Route.ClientActionArgs) => {
+  const formData = await request.formData();
 
-      Toast.toast.success('Welcome to Habitrack! You are browsing anonymously');
+  try {
+    await signInAnonymously(parseDayOfWeek(formData.get('firstDayOfWeek')));
+  } catch (error) {
+    Toast.toast.danger(
+      'Something went wrong while logging in anonymously. Please try again.',
+      {
+        description: `Error details: ${getErrorMessage(error)}`,
+      }
+    );
 
-      navigate('/');
-    } catch (error) {
-      Toast.toast.danger(
-        'Something went wrong while logging in anonymously. Please try again.',
-        {
-          description: `Error details: ${getErrorMessage(error)}`,
-        }
-      );
-    } finally {
-      setIsAuthenticating(false);
-    }
-  };
+    return data({ error: getErrorMessage(error) }, { status: 400 });
+  }
+
+  Toast.toast.success('Welcome to Habitrack! You are browsing anonymously');
+
+  return redirect('/');
+};
+
+const AnonymousLoginPage = () => {
+  const firstDayOfWeek = useFirstDayOfWeek();
+  const isAuthenticating = useIsSubmitting();
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">
@@ -70,15 +74,18 @@ const AnonymousLoginPage = () => {
               </li>
             </ul>
           </div>
-          <CustomButton
-            fullWidth
-            variant="primary"
-            onPress={handleContinue}
-            isPending={isAuthenticating}
-            data-testid="anonymous-login-button"
-          >
-            Continue without an account
-          </CustomButton>
+          <Form method="post">
+            <input type="hidden" name="firstDayOfWeek" value={firstDayOfWeek} />
+            <CustomButton
+              fullWidth
+              type="submit"
+              variant="primary"
+              isPending={isAuthenticating}
+              data-testid="anonymous-login-button"
+            >
+              Continue without an account
+            </CustomButton>
+          </Form>
           <div className="text-muted text-center text-sm">
             Prefer a permanent account?{' '}
             <Link href="/register" className="text-accent font-medium">

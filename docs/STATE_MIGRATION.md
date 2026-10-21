@@ -85,10 +85,21 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
   - A sign-out revalidation or post-submit revalidation that a navigation interrupts still refreshes the app loader. This was a review finding on #488: the first version of `shouldRevalidate` dropped these.
 - `entry.client.tsx` passes `onError` to `HydratedRouter` and reports errors caught by route boundaries to Rollbar. Route error responses, such as thrown 404s, are not reported. Before this, route render errors stopped at the router's boundaries and never reached `RollbarErrorBoundary`. That gap dates back to the switch to framework mode.
 
-**PR 3 – Auth pages use `clientAction`s**
+**PR 3 – Auth pages use `clientAction`s** – done on `refactor/auth-actions`
 
-- `LoginPage`, `RegisterPage`, `AnonymousLoginPage`, `ResetPasswordPage`: a `clientAction` calls the existing `signIn`, `signUp`, `convertAnonymousUser`, `signInAnonymously` or `sendPasswordResetEmail` service and then `redirect()`s. The page renders `<Form method="post">`, and `useNavigation().state` drives `isAuthenticating`. The `if (user) <Navigate>` checks become a `clientLoader` that reads `userContext` and redirects. `AuthForm` takes the pending state as a prop and keeps working outside `<Form>` for Google sign-in.
-- `OAuthConsentPage`: same pattern if it submits; otherwise leave it alone.
+- `LoginPage`, `RegisterPage`, `AnonymousLoginPage`, `ResetPasswordPage`:
+  - Each has a `clientAction` that reads the submitted `FormData` and calls the existing service: `signIn`, `signUp`/`convertAnonymousUser`, `signInAnonymously` or `sendPasswordResetEmail`. On success it shows the same toast as before and `redirect()`s to the same place.
+  - On failure the action shows the error toast and returns `data({ error }, { status: 400 })`, so nothing revalidates.
+  - The `if (user) <Navigate replace>` checks became `clientLoader`s that read `userContext` and `throw replace('/')`. `RegisterPage` returns `{ isAnonymousUser }` instead.
+  - The first day of the week still comes from `useFirstDayOfWeek`. It is posted as a hidden field and validated with `parseDayOfWeek`.
+- `AuthForm` renders `<Form method="post">` and accepts extra hidden fields as `children`. Its `onSubmit` prop is gone, and the Google button stays a plain `type="button"`.
+- `useIsSubmitting()` (in `@hooks`) compares `useNavigation().formAction` with `useFormAction()`. It stays `true` while the redirect after a successful action loads.
+- `OAuthConsentPage`:
+  - It used to load the authorization details in an effect. Now a `clientLoader` handles three cases: a missing `authorization_id` throws a 400, a signed-out user is redirected to `/settings?returnTo=…`, and an existing consent is sent to the client with `redirectDocument`.
+  - Approve and deny are a `<Form>` with two `decision` submit buttons, handled by a `clientAction` that `redirectDocument`s to the client. Failures come back as `actionData.error` and render inline. Load errors render in the route's `ErrorBoundary`.
+  - The Supabase calls moved to `src/services/oauth.service.ts`.
+  - Pre-existing gap: nothing reads `returnTo` yet.
+- Tests: `AuthForm` runs through `createRoutesStub` and checks that the fields reach the route action. The loader and action branches are covered for login, register and consent (`tests/makeRouteArgs.ts` builds the arguments).
 
 **PR 4 – Settings route**
 

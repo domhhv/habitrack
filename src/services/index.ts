@@ -1,6 +1,7 @@
 export * from './habits.service';
 export * from './metrics.service';
 export * from './notes.service';
+export * from './oauth.service';
 export * from './occurrence-stock-usages.service';
 export * from './occurrences.service';
 export * from './profile.service';

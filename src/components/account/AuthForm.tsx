@@ -1,6 +1,7 @@
 import { Input, Label, TextField } from '@heroui/react';
 import { GoogleLogoIcon } from '@phosphor-icons/react';
-import { type ReactNode, type SubmitEventHandler } from 'react';
+import { type ReactNode } from 'react';
+import { Form } from 'react-router';
 
 import { CustomButton } from '@components';
 import { useTextField } from '@hooks';
@@ -10,21 +11,21 @@ import PasswordInput from './PasswordInput';
 
 type AuthFormProps = {
   canReset?: boolean;
+  children?: ReactNode;
   description?: ReactNode;
   footer?: ReactNode;
   isAuthenticating: boolean;
   passwordAutoComplete?: string;
   submitLabel: string;
   withPassword?: boolean;
-  onSubmit: (email: string, password: string) => void;
 };
 
 const AuthForm = ({
   canReset,
+  children,
   description,
   footer,
   isAuthenticating,
-  onSubmit,
   passwordAutoComplete,
   submitLabel,
   withPassword = true,
@@ -32,13 +33,9 @@ const AuthForm = ({
   const [email, handleEmailChange] = useTextField();
   const [password, handlePasswordChange] = useTextField();
 
-  const handleSubmit: SubmitEventHandler = (event) => {
-    event.preventDefault();
-    onSubmit(email, password);
-  };
-
   return (
-    <form className="w-full" onSubmit={handleSubmit} data-testid="submit-form">
+    <Form method="post" className="w-full" data-testid="submit-form">
+      {children}
       <div className="flex flex-col gap-4">
         {!!description && <p className="text-muted text-sm">{description}</p>}
         <TextField
@@ -87,7 +84,7 @@ const AuthForm = ({
       {!!footer && (
         <div className="text-muted mt-4 text-center text-sm">{footer}</div>
       )}
-    </form>
+    </Form>
   );
 };
 

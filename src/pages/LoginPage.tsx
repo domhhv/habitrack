@@ -1,41 +1,48 @@
 import { Link, Toast } from '@heroui/react';
 import React from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { data, replace, redirect } from 'react-router';
 
 import { AuthForm } from '@components';
-import { useUser } from '@hooks';
+import { useIsSubmitting } from '@hooks';
 import { signIn } from '@services';
-import { getErrorMessage } from '@utils';
+import { userContext, getErrorMessage } from '@utils';
 
-const LoginPage = () => {
-  const user = useUser();
-  const navigate = useNavigate();
-  const [isAuthenticating, setIsAuthenticating] = React.useState(false);
+import type { Route } from './+types/LoginPage';
 
-  if (user) {
-    return <Navigate to="/" replace />;
+export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
+  if (context.get(userContext)) {
+    throw replace('/');
   }
 
-  const handleSubmit = async (email: string, password: string) => {
-    try {
-      setIsAuthenticating(true);
+  return null;
+};
 
-      await signIn(email, password);
+export const clientAction = async ({ request }: Route.ClientActionArgs) => {
+  const formData = await request.formData();
 
-      Toast.toast.success('Welcome back!');
+  try {
+    await signIn(
+      String(formData.get('email') ?? ''),
+      String(formData.get('password') ?? '')
+    );
+  } catch (error) {
+    Toast.toast.danger(
+      'Something went wrong while logging in. Please try again.',
+      {
+        description: `Error details: ${getErrorMessage(error)}`,
+      }
+    );
 
-      navigate('/');
-    } catch (error) {
-      Toast.toast.danger(
-        'Something went wrong while logging in. Please try again.',
-        {
-          description: `Error details: ${getErrorMessage(error)}`,
-        }
-      );
-    } finally {
-      setIsAuthenticating(false);
-    }
-  };
+    return data({ error: getErrorMessage(error) }, { status: 400 });
+  }
+
+  Toast.toast.success('Welcome back!');
+
+  return redirect('/');
+};
+
+const LoginPage = () => {
+  const isAuthenticating = useIsSubmitting();
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">
@@ -49,7 +56,6 @@ const LoginPage = () => {
           <AuthForm
             canReset
             submitLabel="Log in"
-            onSubmit={handleSubmit}
             isAuthenticating={isAuthenticating}
             footer={
               <>
