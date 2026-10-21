@@ -3,6 +3,7 @@ export * from './habit.model';
 export * from './metric.model';
 export * from './note.model';
 export * from './occurrence-stock-usage.model';
+export * from './occurrence-submission.model';
 export * from './occurrence.model';
 export * from './profile.model';
 export * from './stock.model';

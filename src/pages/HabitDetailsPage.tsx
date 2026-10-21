@@ -25,9 +25,8 @@ import {
   createStockMetricDefaults,
   destroyStockMetricDefaults,
 } from '@services';
-import { useBoundStore } from '@stores';
+import { refreshStoreOccurrences } from '@stores';
 import {
-  rollbar,
   runAction,
   userContext,
   getErrorMessage,
@@ -35,18 +34,6 @@ import {
 } from '@utils';
 
 import type { Route } from './+types/HabitDetailsPage';
-
-/* Bridge: remove when occurrences load in calendar route loaders. */
-const refreshStoreOccurrences = () => {
-  const { occurrencesActions } = useBoundStore.getState();
-
-  occurrencesActions.invalidateOccurrences();
-  occurrencesActions.fetchOccurrences().catch((error: unknown) => {
-    rollbar.error(
-      error instanceof Error ? error : new Error(getErrorMessage(error))
-    );
-  });
-};
 
 const buildStockMetricDefaultInserts = (
   habitStockId: string,
@@ -226,7 +213,7 @@ export const clientAction = async ({
     }
 
     return runAction(
-      replaceHabitIcon(habitId, icon, user.id).then(refreshStoreOccurrences),
+      replaceHabitIcon(habitId, icon, user.id).finally(refreshStoreOccurrences),
       'upload_icon'
     );
   }
@@ -239,7 +226,7 @@ export const clientAction = async ({
 
     case 'delete-habit':
       return runAction(
-        deleteHabit(habitId, user.id).then(refreshStoreOccurrences),
+        deleteHabit(habitId, user.id).finally(refreshStoreOccurrences),
         'remove_habit'
       );
 
@@ -248,7 +235,7 @@ export const clientAction = async ({
 
     case 'save-metrics':
       return runAction(
-        saveMetrics(habitId, submission.metricDefinitions, user.id).then(
+        saveMetrics(habitId, submission.metricDefinitions, user.id).finally(
           refreshStoreOccurrences
         ),
         'update_habit'
@@ -256,7 +243,7 @@ export const clientAction = async ({
 
     case 'update-habit':
       return runAction(
-        patchHabit(habitId, submission.habit).then(refreshStoreOccurrences),
+        patchHabit(habitId, submission.habit).finally(refreshStoreOccurrences),
         'update_habit'
       );
 

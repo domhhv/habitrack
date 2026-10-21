@@ -95,6 +95,22 @@ export const listOccurrences = async ([rangeStart, rangeEnd]: [
   return camelcaseKeys(data, { deep: true }).map(toRawOccurrence);
 };
 
+export const getOccurrence = async (
+  id: RawOccurrence['id']
+): Promise<RawOccurrence | null> => {
+  const { data, error } = await supabaseClient
+    .from('occurrences')
+    .select(OCCURRENCE_SELECT)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data && toRawOccurrence(camelcaseKeys(data, { deep: true }));
+};
+
 export const patchOccurrence = async (
   id: RawOccurrence['id'],
   occurrence: OccurrencesUpdate

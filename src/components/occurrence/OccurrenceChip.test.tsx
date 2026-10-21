@@ -6,17 +6,6 @@ import { makeTestOccurrence } from '@tests';
 
 import OccurrenceChip, { type OccurrenceChipProps } from './OccurrenceChip';
 
-vi.mock('@stores', async (importOriginal) => {
-  const original = (await importOriginal()) as object;
-
-  return {
-    ...original,
-    useOccurrenceActions: vi.fn().mockReturnValue({
-      removeOccurrence: vi.fn(),
-    }),
-  };
-});
-
 vi.mock('@hooks', async (importOriginal) => {
   const original = (await importOriginal()) as object;
 

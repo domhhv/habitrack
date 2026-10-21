@@ -3,6 +3,7 @@ import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
+import { useFetcher } from 'react-router';
 
 import { CustomButton, InfinityLoader } from '@components';
 import { useHabits } from '@hooks';
@@ -10,14 +11,11 @@ import type {
   Habit,
   Occurrence,
   MetricValue,
+  OccurrenceSubmission,
   HabitStockWithDefaults,
 } from '@models';
-import {
-  useMetricsActions,
-  useConfirmationActions,
-  useNotesByOccurrenceId,
-} from '@stores';
-import { matchMetricValue, handleAsyncAction } from '@utils';
+import { useConfirmationActions, useNotesByOccurrenceId } from '@stores';
+import { matchMetricValue } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
 
@@ -139,11 +137,13 @@ const OccurrenceListItem = ({
       })
     );
   }, [habits, occurrence.habitId]);
-  const { removeMetricValue } = useMetricsActions();
+  const metricValueFetcher = useFetcher();
   const { askConfirmation } = useConfirmationActions();
-  const [removingMetricId, setRemovingMetricId] = React.useState<string | null>(
-    null
-  );
+  const [removalTargetMetricId, setRemovalTargetMetricId] = React.useState<
+    string | null
+  >(null);
+  const removingMetricId =
+    metricValueFetcher.state === 'idle' ? null : removalTargetMetricId;
   const timeFormatter = useDateFormatter({
     hour: 'numeric',
     minute: 'numeric',
@@ -152,22 +152,30 @@ const OccurrenceListItem = ({
 
   const handleRemoveMetricValue = async (habitMetricId: string) => {
     if (
-      await askConfirmation({
+      metricValueFetcher.state !== 'idle' ||
+      !(await askConfirmation({
         confirmText: 'Delete',
         description: 'Are you sure you want to delete this metric value?',
         title: 'Delete metric value',
         variant: 'danger',
-      })
+      }))
     ) {
-      setRemovingMetricId(habitMetricId);
-
-      handleAsyncAction(
-        removeMetricValue(occurrence.id, habitMetricId),
-        'remove_metric-value'
-      ).finally(() => {
-        setRemovingMetricId(null);
-      });
+      return;
     }
+
+    setRemovalTargetMetricId(habitMetricId);
+    void metricValueFetcher.submit(
+      {
+        habitMetricId,
+        intent: 'remove-metric-value',
+        occurrenceId: occurrence.id,
+      } satisfies OccurrenceSubmission,
+      {
+        action: '/resources/occurrences',
+        encType: 'application/json',
+        method: 'post',
+      }
+    );
   };
 
   const metricChips = React.useMemo(() => {

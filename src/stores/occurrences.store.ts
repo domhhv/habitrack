@@ -6,19 +6,11 @@ import {
   getLocalTimeZone,
 } from '@internationalized/date';
 
-import type {
-  Occurrence,
-  RawOccurrence,
-  OccurrencesInsert,
-  OccurrencesUpdate,
-} from '@models';
+import type { Occurrence, RawOccurrence } from '@models';
+import { listOccurrences } from '@services';
 import {
-  listOccurrences,
-  patchOccurrence,
-  createOccurrence,
-  destroyOccurrence,
-} from '@services';
-import {
+  rollbar,
+  getErrorMessage,
   type CalendarRange,
   createCalendarRangeCache,
   getSiblingPrefetchRanges,
@@ -31,15 +23,9 @@ export type OccurrencesSlice = {
   occurrencesByDate: Record<string, Record<Occurrence['id'], Occurrence>>;
   occurrencesFetchedRange: [CalendarDateTime, CalendarDateTime] | null;
   occurrencesActions: {
-    addOccurrence: (occurrence: OccurrencesInsert) => Promise<Occurrence>;
     clearOccurrences: () => void;
     fetchOccurrences: () => Promise<void>;
     invalidateOccurrences: () => void;
-    removeOccurrence: (occurrence: Occurrence) => Promise<void>;
-    updateOccurrence: (
-      occurrence: Occurrence,
-      body: OccurrencesUpdate
-    ) => Promise<void>;
   };
 };
 
@@ -134,37 +120,6 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
     occurrencesFetchedRange: null,
 
     occurrencesActions: {
-      addOccurrence: async (occurrence) => {
-        const nextOccurrence = await createOccurrence(occurrence);
-
-        const clientOccurrence = toClientOccurrence(nextOccurrence);
-
-        clearCache();
-
-        set(
-          (state) => {
-            state.occurrencesFetchedRange = null;
-            state.occurrences.push(clientOccurrence);
-            const dateKey = toCalendarDate(
-              clientOccurrence.occurredAt
-            ).toString();
-
-            if (state.occurrencesByDate[dateKey]) {
-              state.occurrencesByDate[dateKey][nextOccurrence.id] =
-                clientOccurrence;
-            } else {
-              state.occurrencesByDate[dateKey] = {
-                [nextOccurrence.id]: clientOccurrence,
-              };
-            }
-          },
-          undefined,
-          'occurrencesActions.addOccurrence'
-        );
-
-        return clientOccurrence;
-      },
-
       clearOccurrences: () => {
         clearCache();
 
@@ -262,60 +217,6 @@ export const createOccurrencesSlice: SliceCreator<keyof OccurrencesSlice> = (
           'occurrencesActions.invalidateOccurrences'
         );
       },
-
-      removeOccurrence: async ({ id, occurredAt, photoPaths }) => {
-        await destroyOccurrence({ id, photoPaths });
-
-        clearCache();
-
-        set(
-          (state) => {
-            state.occurrencesFetchedRange = null;
-            delete state.occurrencesByDate[
-              toCalendarDate(occurredAt).toString()
-            ]?.[id];
-            state.occurrences = state.occurrences.filter((occ) => {
-              return occ.id !== id;
-            });
-          },
-          undefined,
-          'occurrencesActions.removeOccurrence'
-        );
-      },
-
-      updateOccurrence: async ({ id, occurredAt }, body) => {
-        const updatedOccurrence = await patchOccurrence(id, body);
-        const updatedClientOccurrence = toClientOccurrence(updatedOccurrence);
-
-        clearCache();
-
-        set(
-          (state) => {
-            state.occurrencesFetchedRange = null;
-            state.occurrences = state.occurrences.map((occurrence) => {
-              return occurrence.id === id
-                ? updatedClientOccurrence
-                : occurrence;
-            });
-            const prevDateKey = toCalendarDate(occurredAt).toString();
-            const nextDateKey = toCalendarDate(
-              updatedClientOccurrence.occurredAt
-            ).toString();
-
-            if (state.occurrencesByDate[prevDateKey]) {
-              delete state.occurrencesByDate[prevDateKey][id];
-            }
-
-            if (!state.occurrencesByDate[nextDateKey]) {
-              state.occurrencesByDate[nextDateKey] = {};
-            }
-
-            state.occurrencesByDate[nextDateKey][id] = updatedClientOccurrence;
-          },
-          undefined,
-          'occurrencesActions.updateOccurrence'
-        );
-      },
     },
   };
 };
@@ -332,8 +233,25 @@ export const useOccurrences = () => {
   });
 };
 
-export const useOccurrenceActions = () => {
+export const useOccurrenceToEdit = () => {
   return useBoundStore((state) => {
-    return state.occurrencesActions;
+    return state.occurrences.find(({ id }) => {
+      return id === state.occurrenceDrawer.occurrenceIdToEdit;
+    });
   });
+};
+
+/* Bridge: remove when occurrences load in calendar route loaders. */
+export const refreshStoreOccurrences = async () => {
+  const { occurrencesActions } = useBoundStore.getState();
+
+  occurrencesActions.invalidateOccurrences();
+
+  try {
+    await occurrencesActions.fetchOccurrences();
+  } catch (error) {
+    rollbar.error(
+      error instanceof Error ? error : new Error(getErrorMessage(error))
+    );
+  }
 };

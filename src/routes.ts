@@ -39,6 +39,9 @@ export default [
     route('oauth/consent', 'pages/OAuthConsentPage.tsx', {
       id: 'oauth-consent',
     }),
+    route('resources/occurrences', 'routes/resources/occurrences.ts', {
+      id: 'resources-occurrences',
+    }),
     route('*', 'pages/FallbackRedirect.tsx', { id: 'fallback' }),
   ]),
 ] satisfies RouteConfig;

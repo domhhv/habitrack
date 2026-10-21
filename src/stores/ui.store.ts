@@ -17,7 +17,7 @@ type OccurrenceDrawerOptions = {
   dayToDisplay?: CalendarDate;
   dayToLog?: CalendarDate;
   habitIdToDisplay?: Habit['id'];
-  occurrenceToEdit?: Occurrence;
+  occurrenceIdToEdit?: Occurrence['id'];
 };
 
 export type ConfirmationOptions = {
@@ -72,14 +72,14 @@ export type UiSlice = {
     isOpen: boolean;
   } & RequireAtLeastOne<
     OccurrenceDrawerOptions,
-    'dayToLog' | 'dayToDisplay' | 'occurrenceToEdit'
+    'dayToLog' | 'dayToDisplay' | 'occurrenceIdToEdit'
   >;
   occurrenceDrawerActions: {
     closeOccurrenceDrawer: () => void;
     openOccurrenceDrawer: (
       opts: RequireAtLeastOne<
         OccurrenceDrawerOptions,
-        'dayToLog' | 'dayToDisplay' | 'occurrenceToEdit'
+        'dayToLog' | 'dayToDisplay' | 'occurrenceIdToEdit'
       >
     ) => void;
     setDayToDisplay: (date: CalendarDate) => void;
@@ -275,7 +275,7 @@ export const createUiSlice: SliceCreator<keyof UiSlice> = (set) => {
             state.occurrenceDrawer.isOpen = true;
             state.occurrenceDrawer.dayToDisplay = undefined;
             state.occurrenceDrawer.dayToLog = undefined;
-            state.occurrenceDrawer.occurrenceToEdit = undefined;
+            state.occurrenceDrawer.occurrenceIdToEdit = undefined;
             state.occurrenceDrawer.habitIdToDisplay = undefined;
             Object.assign(state.occurrenceDrawer, opts);
           },
