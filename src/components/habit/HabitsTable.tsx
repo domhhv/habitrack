@@ -34,9 +34,14 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
 
   const habits = useHabits();
   const deleteFetcher = useFetcher();
+  const isDeleting = deleteFetcher.state !== 'idle';
   const { askConfirmation } = useConfirmationActions();
 
   const handleDelete = async (habit: Habit) => {
+    if (isDeleting) {
+      return;
+    }
+
     const confirmed = await askConfirmation({
       title: 'Delete habit',
       variant: 'danger',
@@ -206,6 +211,7 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
                                 size="sm"
                                 isIconOnly
                                 variant="ghost"
+                                isDisabled={isDeleting}
                                 className="group text-danger"
                                 aria-label={`Delete habit: ${habit.name}`}
                                 aria-describedby={`delete-tooltip-${habit.id}`}

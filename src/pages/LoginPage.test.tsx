@@ -47,11 +47,11 @@ describe('LoginPage', () => {
     ).toBeNull();
   });
 
-  it('signs in with the submitted credentials and goes home', async () => {
+  it('signs in with the submitted credentials and goes to the calendar', async () => {
     const result = (await submit()) as Response;
 
     expect(signIn).toHaveBeenCalledWith('me@email.com', 'password');
-    expect(result.headers.get('Location')).toBe('/');
+    expect(result.headers.get('Location')).toBe('/calendar');
   });
 
   it('stays on the page when signing in fails', async () => {

@@ -153,7 +153,7 @@ describe('HabitsPage clientAction', () => {
     });
   });
 
-  it('returns a 400 when creating the habit fails', async () => {
+  it('reports the failure without a 4xx so loaders still revalidate', async () => {
     vi.mocked(createHabit).mockRejectedValue(new Error('Duplicate'));
 
     await expect(
@@ -163,9 +163,6 @@ describe('HabitsPage clientAction', () => {
           method: 'POST',
         })
       )
-    ).resolves.toMatchObject({
-      data: { error: 'Duplicate', ok: false },
-      init: { status: 400 },
-    });
+    ).resolves.toEqual({ error: 'Duplicate', ok: false });
   });
 });

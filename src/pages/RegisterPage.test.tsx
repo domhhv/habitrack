@@ -47,7 +47,7 @@ describe('RegisterPage clientLoader', () => {
     }
 
     expect(thrown).toBeInstanceOf(Response);
-    expect((thrown as Response).headers.get('Location')).toBe('/');
+    expect((thrown as Response).headers.get('Location')).toBe('/calendar');
     expect((thrown as Response).headers.has('X-Remix-Replace')).toBe(true);
   });
 
@@ -68,7 +68,7 @@ describe('RegisterPage clientAction', () => {
     vi.clearAllMocks();
   });
 
-  it('converts an anonymous user and goes home', async () => {
+  it('converts an anonymous user and goes to the calendar', async () => {
     const result = (await submit(anonymousUser)) as Response;
 
     expect(convertAnonymousUser).toHaveBeenCalledWith(
@@ -76,7 +76,7 @@ describe('RegisterPage clientAction', () => {
       'password'
     );
     expect(signUp).not.toHaveBeenCalled();
-    expect(result.headers.get('Location')).toBe('/');
+    expect(result.headers.get('Location')).toBe('/calendar');
   });
 
   it('signs up a new user with the submitted first day of week', async () => {

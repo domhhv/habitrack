@@ -33,6 +33,7 @@ const AddHabitDialogButton = () => {
 
   const traits = useTraits();
   const user = useUser();
+  const iconInputRef = React.useRef<HTMLInputElement | null>(null);
   const [icon, handleIconChange, clearIcon] = useFileField();
   const [name, handleNameChange, clearName] = useTextField();
   const [description, handleDescriptionChange, clearDescription] =
@@ -196,11 +197,23 @@ const AddHabitDialogButton = () => {
                   <PlusIcon />
                   Or add a new trait
                 </CustomButton>
-                <CustomButton fullWidth size="sm" variant="tertiary">
+                <CustomButton
+                  fullWidth
+                  size="sm"
+                  variant="tertiary"
+                  isDisabled={isAdding}
+                  onPress={() => {
+                    iconInputRef.current?.click();
+                  }}
+                >
                   <CloudArrowUpIcon />
                   Upload habit icon
                 </CustomButton>
-                <VisuallyHiddenInput onChange={handleIconChange} />
+                <VisuallyHiddenInput
+                  ref={iconInputRef}
+                  isDisabled={isAdding}
+                  onChange={handleIconChange}
+                />
                 {icon && <p>{icon.name}</p>}
 
                 {metricDefinitions.map((md) => {

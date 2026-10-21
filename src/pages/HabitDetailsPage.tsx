@@ -27,6 +27,7 @@ import {
 } from '@services';
 import { useBoundStore } from '@stores';
 import {
+  rollbar,
   runAction,
   userContext,
   getErrorMessage,
@@ -39,8 +40,12 @@ import type { Route } from './+types/HabitDetailsPage';
 const refreshStoreOccurrences = () => {
   const { occurrencesActions } = useBoundStore.getState();
 
-  occurrencesActions.clearOccurrences();
-  void occurrencesActions.fetchOccurrences();
+  occurrencesActions.invalidateOccurrences();
+  occurrencesActions.fetchOccurrences().catch((error: unknown) => {
+    rollbar.error(
+      error instanceof Error ? error : new Error(getErrorMessage(error))
+    );
+  });
 };
 
 const buildStockMetricDefaultInserts = (

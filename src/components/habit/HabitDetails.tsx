@@ -118,7 +118,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
       { intent: 'update-habit' }
     >['habit'] = {};
 
-    if (isEditingName && !trimmedName) {
+    if ((isEditingName && !trimmedName) || habitFetcher.state !== 'idle') {
       return;
     }
 
