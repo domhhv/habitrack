@@ -172,21 +172,25 @@ These guarantee the runtime invariant the TypeScript discriminated types assume,
 
 Supabase generates a self-referential `Json` type whose deep recursion makes `camelcase-keys`' type inference exceed TypeScript's instantiation depth limit (`TS2589`). [`scripts/patch-json-type.mjs`](../scripts/patch-json-type.mjs) rewrites it to a non-recursive form after every `yarn db:gen-types` (the script is chained into that command). Metric `config`/`value` are narrowed from this `Json` to their concrete types by the helpers above.
 
-## State Management
+## Data Loading and Mutations
 
-File: [`src/stores/metrics.store.ts`](../src/stores/metrics.store.ts)
+Metric definitions and values are server data, so React Router routes load and change them. No client store is involved.
 
-Hook: `useMetricsActions()` returns all actions.
+**Reads**
 
-| Action                                           | What it does                                                                                          |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `addHabitMetrics(metrics)`                       | Creates metrics, pushes to `habits[habitId].metricDefinitions`, propagates to all related occurrences |
-| `removeHabitMetrics(ids, habitId)`               | Deletes metrics, removes from habit and cleans up metric values from all related occurrences          |
-| `updateHabitMetric(id, metric)`                  | Patches metric definition across habit and all occurrences                                            |
-| `saveMetricValues(values)`                       | Upserts metric values, updates both `occurrences` and `occurrencesByDate`                             |
-| `removeMetricValue(occurrenceId, habitMetricId)` | Removes a specific metric value from occurrence                                                       |
+- Habit metric definitions come with each habit: `habits[habitId].metricDefinitions` from the app layout `clientLoader` (read with `useHabits()`), and the habit details `clientLoader`.
+- Occurrences carry `occurrence.habit.metricDefinitions` and `occurrence.metricValues`, loaded by the calendar layout `clientLoader` (read with `useCalendarData()`).
 
-Actions update the store's `habits`, `occurrences` (array), and `occurrencesByDate` (date-indexed map). Note: `saveMetricValues` and `removeMetricValue` only update `occurrences` and `occurrencesByDate`, as metric values are stored per occurrence, not in habit definitions.
+**Mutations**
+
+| Intent                | Route action             | What it does                                                                                             |
+| --------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `create-habit`        | `/habits`                | Creates the habit, then `createHabitMetrics()` from the submitted `metricDefinitions` JSON field         |
+| `save-metrics`        | `/habits/:habitId`       | Processes the form flags in order: `destroyHabitMetrics()`, `createHabitMetrics()`, `patchHabitMetric()` |
+| `create` / `update`   | `/resources/occurrences` | `upsertMetricValues()` with the submitted `metricValues`                                                 |
+| `remove-metric-value` | `/resources/occurrences` | `destroyMetricValue(occurrenceId, habitMetricId)`                                                        |
+
+After each action, React Router revalidates the active loaders. Habit actions and occurrence actions also call `clearCalendarData()` in `finally`, so the calendar refetches occurrences that embed the changed definitions or values.
 
 ## UI Components
 
@@ -196,7 +200,7 @@ All in [`src/components/metric/`](../src/components/metric/):
 
 File: [`MetricDefinitionForm.tsx`](../src/components/metric/MetricDefinitionForm.tsx)
 
-Used inside `EditHabitDialog` to create/edit/remove metric definitions for a habit.
+Used inside `AddHabitDialogButton` (new habits) and `HabitDetails` (existing habits) to create, edit, and remove metric definitions.
 
 - Preset selection via Autocomplete (from `METRIC_PRESETS`)
 - Metric name, type, and type-specific config fields
@@ -226,7 +230,7 @@ Container that renders all `MetricValueInput` components for a given occurrence.
 
 ## Form State Flags
 
-The `FormMetricDefinitions` type adds client-side state flags to metric definitions for managing pending changes in the `EditHabitDialog`:
+The `FormMetricDefinitions` type adds client-side state flags to metric definitions for managing pending changes in `HabitDetails`:
 
 | Flag            | Meaning                                                 |
 | --------------- | ------------------------------------------------------- |
@@ -240,16 +244,19 @@ On submit, the dialog processes these flags in order: remove marked metrics, cre
 
 ## Data Flows
 
-### Defining metrics (Edit Habit Dialog)
+### Defining metrics (Habit Details)
 
 ```
-EditHabitDialog loads habit.metricDefinitions
+HabitDetails loads habit.metricDefinitions
   → converts to FormMetricDefinitions[] with state flags
   → user adds/edits/removes via MetricDefinitionForm
-  → on submit:
-    1. removeHabitMetrics(idsToRemove, habitId)
-    2. addHabitMetrics(metricsToAdd)
-    3. updateHabitMetric(id, changes) for each updated metric
+  → on save: useActionFetcher submits { intent: 'save-metrics', metricDefinitions } to /habits/:habitId
+  → clientAction:
+    1. destroyHabitMetrics(idsToRemove)
+    2. createHabitMetrics(metricsToAdd)
+    3. patchHabitMetric(id, changes) for each updated metric
+    4. clearCalendarData() (finally)
+  → loaders revalidate, the editor closes on { ok: true }
 ```
 
 ### Logging occurrence with metric values
@@ -262,8 +269,8 @@ User selects habit in OccurrenceFormView
   → render MetricValuesSection with MetricValueInput per metric
   → user enters values → metricValues: Record<metricId, MetricValue | undefined>
   → on submit:
-    → OccurrenceCreateFormContainer builds OccurrenceMetricValueInsert[]
-    → saveMetricValues() upserts to occurrence_metric_values
+    → OccurrenceCreateFormContainer submits toOccurrenceFormData(values) to /resources/occurrences
+    → the clientAction upserts the values via upsertMetricValues()
 ```
 
 ### Updating occurrence metric values

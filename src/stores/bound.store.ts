@@ -6,7 +6,6 @@ import {
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { type NotesSlice, createNotesSlice } from './notes.store';
 import { type ThemeSlice, createThemeSlice } from './theme.store';
 import { type UiSlice, createUiSlice } from './ui.store';
 
@@ -20,7 +19,7 @@ export type ImmerStateCreator<
   Mcs
 >;
 
-export type BoundStore = UiSlice & ThemeSlice & NotesSlice;
+export type BoundStore = UiSlice & ThemeSlice;
 
 export type SliceCreator<TSlice extends keyof BoundStore> = (
   ...params: Parameters<ImmerStateCreator<BoundStore>>
@@ -32,9 +31,8 @@ export const useBoundStore = create<BoundStore>()(
       return {
         ...createUiSlice(set, get, store),
         ...createThemeSlice(set, get, store),
-        ...createNotesSlice(set, get, store),
       };
     }),
-    { enabled: true }
+    { enabled: process.env.NODE_ENV === 'development' }
   )
 );

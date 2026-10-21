@@ -176,21 +176,25 @@ File: [`src/services/occurrence-stock-usages.service.ts`](../src/services/occurr
 - [`src/services/habits.service.ts`](../src/services/habits.service.ts): `getHabit()` includes `stocks:habit_stocks(*, metric_defaults:..., usages:...)`
 - [`src/services/occurrences.service.ts`](../src/services/occurrences.service.ts): Occurrence queries include `stock_usages:occurrence_stock_usages(id, habit_stock_id, quantity, ...)`
 
-## State Management
+## Data Loading and Mutations
 
-File: [`src/stores/stocks.store.ts`](../src/stores/stocks.store.ts)
+Stocks are server data and go through React Router routes. No client store is involved.
 
-Hook: `useStockActions()` returns all actions.
+**Reads**
 
-| Action                                                                                  | What it does                                                                                                  |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `addStock(stock, metricDefaults?)`                                                      | Creates stock, then creates metric defaults (with the new stock ID), then refreshes the parent habit in store |
-| `removeStock(id, habitId)`                                                              | Deletes stock, refreshes habit                                                                                |
-| `updateStock(id, stock, habitId)`                                                       | Patches stock fields, refreshes habit                                                                         |
-| `updateStockMetricDefaults(habitId, stockId, metricDefaults, compoundDefaults, userId)` | Destroys all existing defaults, creates new ones, refreshes habit                                             |
-| `refreshHabitStocks(habitId)`                                                           | Re-fetches the entire habit (including stocks) via `getHabit()` and replaces it in `habits` store             |
+- Stocks (with metric defaults and usage counts) come with each habit, from the app layout `clientLoader` (`useHabits()`) and the habit details `clientLoader` (`getHabit()`).
 
-All stock mutations use a `refreshHabitInStore()` helper that re-fetches the entire habit via `getHabit()`, ensuring the store always has fresh data with correct usage counts.
+**Mutations**: the `/habits/:habitId` `clientAction` takes the JSON `HabitDetailsSubmission` (`src/models/habit-submission.model.ts`).
+
+| Intent         | What it does                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `add-stock`    | `createStock()`, then `createStockMetricDefaults()` with the new stock ID                                          |
+| `update-stock` | `patchStock()`. When `metricDefaults` is submitted, also `destroyStockMetricDefaults()` and recreates the defaults |
+| `remove-stock` | `destroyStock()`                                                                                                   |
+
+Occurrence actions (`/resources/occurrences`) create, update or delete stock usages and mark depleted stocks with `patchStock()`. The DB triggers adjust `remaining_items`.
+
+There is no manual refresh: after every action, React Router revalidates the app layout loader, so the habits come back with fresh `remainingItems`, `isDepleted` and `usageCount`.
 
 ## UI Components
 
@@ -256,12 +260,12 @@ The `autoCompoundedMetricIds` set tracks which metrics were auto-filled by compo
 
 ### Stock usage submission
 
-On form submit, stock selections are converted to `OccurrenceStockUsageInsert[]` and passed to `OccurrenceCreateFormContainer` or `OccurrenceUpdateFormContainer`:
+On form submit, `OccurrenceCreateFormContainer`/`OccurrenceUpdateFormContainer` send the stock selections to the `/resources/occurrences` `clientAction`:
 
 - **Create**: `createOccurrenceStockUsages()` batch inserts, triggers decrement stock
-- **Update**: Compares existing vs new usages, deletes removed ones, creates new ones, updates changed quantities
+- **Update**: Compares the current DB usages with the submitted ones, deletes removed ones, creates new ones, updates changed quantities
 
-After stock usages are saved, `refreshHabitStocks(habitId)` is called to sync the store with the latest `remaining_items` and `usageCount` values.
+After the action finishes, loader revalidation brings back the latest `remaining_items` and `usageCount` values.
 
 ## Data Flows
 
@@ -270,11 +274,10 @@ After stock usages are saved, `refreshHabitStocks(habitId)` is called to sync th
 ```
 User opens HabitStockManager → clicks "Add stock"
   → AddStockForm: enter name, cost, currency, quantifiable toggle, metric defaults
-  → on submit:
-    1. stockActions.addStock(stockInsert, metricDefaultInserts)
-    2. createStock() → DB insert → returns HabitStockWithDefaults
-    3. createStockMetricDefaults() with new stock ID
-    4. refreshHabitInStore() → getHabit() re-fetches habit with all stocks
+  → on submit: useActionFetcher submits { intent: 'add-stock', stock, metricDefaults } to /habits/:habitId
+    1. createStock() → DB insert → returns HabitStockWithDefaults
+    2. createStockMetricDefaults() with new stock ID
+    3. loaders revalidate → habits come back with the new stock
 ```
 
 ### Using a stock when logging an occurrence
@@ -285,11 +288,12 @@ User selects habit → habit.stocks loaded
   → user selects stock(s), sets quantity
   → metric defaults auto-populate form
   → user submits
-  → OccurrenceCreateFormContainer:
+  → /resources/occurrences clientAction (intent 'create'):
     1. Creates occurrence (with cost if quantifiable — see COSTS.md)
     2. createOccurrenceStockUsages(usages)
     3. DB triggers decrement remaining_items, may set is_depleted
-    4. refreshHabitStocks() syncs store
+    4. patchStock(id, { isDepleted: true }) for stocks the user marked depleted
+    5. loaders revalidate → habit stocks refresh
 ```
 
 ### Editing stock metric defaults
@@ -298,11 +302,11 @@ User selects habit → habit.stocks loaded
 User opens StockListItem → enters edit mode
   → StockMetricDefaults renders MetricValuesSection
   → user changes defaults and compound toggles
-  → on save:
-    1. stockActions.updateStockMetricDefaults()
+  → on save: { intent: 'update-stock', stock, metricDefaults } to /habits/:habitId
+    1. patchStock(stockId, stock)
     2. destroyStockMetricDefaults(stockId) — clears all existing
     3. createStockMetricDefaults(newDefaults) — inserts fresh
-    4. refreshHabitInStore()
+    4. loaders revalidate
 ```
 
 ## Key Design Decisions

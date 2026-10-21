@@ -35,7 +35,7 @@ occurrence_cost = cost_per_item * usage.quantity
 
 **Example**: Stock costs EUR 10 for 20 pouches, user uses 2 pouches → EUR 1.00
 
-- Calculated in [`OccurrenceCreateFormContainer.tsx`](../src/components/occurrence/OccurrenceCreateFormContainer.tsx) at lines 104-143
+- Calculated by [`calculateOccurrenceCost()`](../src/utils/calculate-occurrence-cost.ts), which the `/resources/occurrences` `clientAction` calls with the habit's current stocks (via `getHabit()`) on create and update
 - Result stored in `occurrence.cost` and `occurrence.currency`
 - Only stored if all stock costs share the **same currency** (see [Multi-Currency](#multi-currency-handling))
 
@@ -64,20 +64,22 @@ Cost is null/not displayed when:
 
 ## Multi-Currency Handling
 
-File: [`OccurrenceCreateFormContainer.tsx`](../src/components/occurrence/OccurrenceCreateFormContainer.tsx) (lines 130-143)
+File: [`calculate-occurrence-cost.ts`](../src/utils/calculate-occurrence-cost.ts)
 
 When an occurrence uses multiple stocks:
 
 ```typescript
-const currencies = new Set(costEntries.map((entry) => entry.currency));
-
-if (currencies.size === 1) {
-  // Single currency: sum all costs, store in occurrence
-  cost = costEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  currency = costEntries[0].currency;
+if (costEntries.length === 0 || currencies.size !== 1) {
+  return { cost: null, currency: null }; // Multi-currency or nothing to price
 }
-// Multi-currency: occurrence.cost stays null
+
+return {
+  cost: costEntries.reduce((sum, { amount }) => sum + amount, 0),
+  currency: costEntries[0].currency,
+};
 ```
+
+Usages without a quantity, and stocks without a cost or with zero `totalItems`, are skipped.
 
 - If all quantifiable stocks share the same currency → costs are summed and stored
 - If stocks use different currencies → `occurrence.cost` is left null
@@ -145,7 +147,7 @@ This only aggregates stored costs (from quantifiable stocks). Depleted stock ave
 
 ```
 User submits occurrence form with stock selections
-  → OccurrenceCreateFormContainer:
+  → /resources/occurrences clientAction (calculateOccurrenceCost):
     1. For each quantifiable stock usage:
        cost_entry = (stock.cost / stock.totalItems) * quantity
     2. If all entries share same currency:
@@ -154,7 +156,7 @@ User submits occurrence form with stock selections
     3. Else: occurrence.cost = null
     4. Create occurrence with cost/currency
     5. Create stock usages (triggers update remaining_items)
-    6. Refresh habit stocks in store
+    6. Loaders revalidate (habit stocks refresh)
 ```
 
 ### Viewing occurrence cost

@@ -13,6 +13,10 @@ Decisions already made:
 
 Goal: a sequence of small PRs that can each ship on their own. Every PR leaves the app working.
 
+## Status
+
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features.
+
 ## Target end state
 
 | Concern                                     | Final home                                                                                                                                                                  |
@@ -201,30 +205,112 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
   - `notes.store.ts` keeps only the notes-list half until PR 10. Note-changing actions call the `refreshStoreNotesList()` bridge, which refetches page 0 if the list was loaded.
 - **Tests** cover the range util, the calendar loader, the notes resource loader and action, and the calendar data service. The other tests were updated to the new hooks.
 
-**PR 10 – Notes page**
+**PR 10 – Notes page** – done with PR 11 on `refactor/notes-loader-cleanup`
 
-- `/notes` `clientLoader` returns page 0 through `listAllNotes`. `NotesList` adds later pages from `useFetcher().load('/notes?page=n')` into local state, and resets that state when `loaderData` changes after revalidation. Delete the rest of `notes.store.ts`. Rewrite `NotesList.test.tsx` with `createRoutesStub`.
+- The loaded page count lives in the URL. `/notes?pages=N` makes the `clientLoader` fetch the first `N × 20` notes (`listAllNotes({ limit: 20 * N, page: 0 })`) and return `{ notes, hasMore, pageCount }`.
+- When the list is scrolled to the bottom, `NotesList` calls `setSearchParams({ pages: N + 1 }, { replace: true, preventScrollReset: true })`. Its pending state comes from `useNavigation()`.
+- This replaces the planned fetcher-plus-local-state pagination. Revalidation after a note change reloads exactly what is on screen, with no merge logic and no jump back to page one, and the URL keeps the position on reload or back. The cost is that "load more" re-fetches earlier pages; see Future work.
+- The route has an `ErrorBoundary`. `notes.store.ts` and the `refreshStoreNotesList` bridge are deleted.
+- `NotesList.test.tsx` renders through `createRoutesStub`, and `NotesPage.test.tsx` covers the loader.
 
 ### Phase 4 – Cleanup
 
-**PR 11 – Shrink the store and update docs**
+**PR 11 – Shrink the store and update docs** – done with PR 10
 
-- `bound.store.ts` keeps only the `ui` and `theme` slices. Drop `subscribeWithSelector`. Turn off `devtools` in production. Remove the `user` bridge from PR 2. Grep for `Bridge:` and expect no results.
-- Move the remaining store-dependent tests (`ThemeToggle`, `ConfirmationDialog`, `SignedImageViewer`, `OccurrenceChip`, `HabitsTable`) to `createRoutesStub` or to UI-only store setup.
-- Update the "State Management Pattern" section in `CLAUDE.md`/`AGENTS.md`, and the data-flow sections in `docs/METRICS.md`, `docs/STOCKS.md` and `docs/COSTS.md` (UI → `clientAction` → service → revalidation → `clientLoader`).
-
-Optional later work, not planned here: server loaders through `@supabase/ssr` cookies, optimistic UI through `useFetchers()` for month cells, `fetcher.load` for `getLatestHabitOccurrence` in `OccurrenceFormView`.
+- `bound.store.ts` composes only the `ui` and `theme` slices, and `devtools` is enabled only in development. `subscribeWithSelector`, the store subscription and the `user` bridge were already gone in PR 9. Nothing in `src/` matches `Bridge:` any more.
+- The remaining store-dependent tests (`ThemeToggle`, `ConfirmationDialog`, `SignedImageViewer`, `HabitsTable`) only touch UI slices, so they keep their UI-only store setup.
+- `CLAUDE.md`/`AGENTS.md` describe the new data and state pattern, the route and resource directories, and the route testing approach. `docs/METRICS.md`, `docs/STOCKS.md` and `docs/COSTS.md` describe the loader/action data flows. The README describes what React Router and Zustand each do.
 
 ## Risks to watch
 
-- Component-less client resource routes: verified by the PR 1 spike, except in a real browser. Recheck when PR 7 adds the first one.
-- Revalidation load on the app layout. Every submission re-runs the habits, traits and profile queries. Expect three small queries; if that is too much, also skip `/resources/notes` submissions in `shouldRevalidate`.
+- Component-less client resource routes: verified by the PR 1 spike, and in production since PR 7.
+- Revalidation load on the app layout. Every submission re-runs the habits and traits queries (the profile is memoized in the middleware since PR 9). If that becomes too much, also skip `/resources/notes` submissions in `shouldRevalidate`.
 - `react-router:split-route-modules` logs `SOURCEMAP_BROKEN` warnings for route modules with split client exports (seen since PR 2). Check that Rollbar stack traces for those chunks still map back to the source.
-- `HydrateFallback` on every hard load of an app route. This is the same experience as the current `useSession` loader, so it is not a regression.
-- Moving the filter representation (PR 6) resets every user's current selection once. That is acceptable, because filters are not persisted today.
+- `HydrateFallback` on every hard load of an app route. This is the same experience as the old `useSession` loader, and it goes away once routes load on the server (Future work §1).
+- Moving the filter representation (PR 6) reset every user's current selection once. That was accepted, because filters were not persisted.
 
 ## Verification (every PR)
 
 - `yarn typecheck` (runs `react-router typegen`), `yarn eslint:check`, `yarn prettier:check`, `yarn test`, `yarn build`.
 - Manual check by the user in `yarn dev` / the Vercel preview, for the flows the PR touches: sign in and out, including anonymous; month/week/day navigation (instant on cache hits, sibling prefetch visible in the network tab); creating, editing and deleting an occurrence with photos, metrics and stocks; adding, editing and deleting a note from the calendar and the header; habit CRUD, metric definitions and stocks; notes infinite scroll; settings updates. Browser verification is not run by Claude unless you ask.
 - After PR 9: grep confirms no `@stores` import remains outside `ui`/`theme` hooks.
+
+## Future work: full-stack React Router
+
+Everything below is follow-up work beyond the 11 planned PRs, roughly in priority order. §1 unlocks most of the rest. Each bullet should fit in one PR unless noted otherwise.
+
+### 1. Move data loading and mutations to the server
+
+The app already runs React Router with `ssr: true` on Vercel, but every app route only server-renders a `HydrateFallback`, because the Supabase session lives in `localStorage`. Moving the session into cookies unlocks real SSR, progressive enhancement, prefetching and streaming.
+
+- **Cookie sessions.** Switch to `@supabase/ssr`:
+  - Use `createBrowserClient` in the browser, which keeps the session in cookies.
+  - Create a `createServerClient` per request in a server `middleware`, reading the `Cookie` header and writing refreshed tokens through `Set-Cookie` on the response.
+  - Replace the `supabaseClient` singleton in services with a client passed in, or read from a `supabaseContext`.
+- **Auth callback route.** Add a `/auth/callback` route whose `loader` runs `exchangeCodeForSession` (PKCE) and redirects. It replaces:
+  - the hash-token handling in `useAuthSearchParams`, which is still an effect;
+  - `AccountRedirect`'s hash forwarding;
+  - the email-confirmation, password-reset and email-change redirects to `/settings`.
+- **Server auth middleware.** Add a server `middleware` on a pathless `authenticated` layout. It sets `userContext`/`profileContext` on the server and redirects signed-out visitors to `/login?returnTo=…`. Make the login and OAuth flows honour `returnTo`, which also closes the consent-page gap from PR 3.
+- **Server loaders, route by route.** Convert `clientLoader` → `loader`: the app layout first, then habits, habit details, notes, settings and the calendar.
+  - For the calendar, use the docs' "Client-Side Caching" pattern: a server `loader` for the document request, plus a `clientLoader` (`hydrate = true`) that serves later navigations from the range cache and falls back to `serverLoader()`.
+  - Drop `HydrateFallback` on converted routes.
+- **Server actions.** Convert `clientAction` → `action`. Toasts move to the component (from `fetcher.data`), because actions no longer run in the browser. `runAction` becomes a server helper that returns `{ ok, error }`.
+- **Simplify revalidation.** Revisit `shouldRevalidate` and the `markAppDataStale` machinery once server loaders use the default revalidation. Keep explicit `shouldRevalidate` only where a loader is expensive.
+- **Decision point.** If the app stays client-only instead, switch to `ssr: false` (SPA mode) with the landing page pre-rendered. Today the server render produces nothing but the loading shell for app routes, so it is pure cost.
+
+### 2. Progressive enhancement and forms
+
+- Replace `fetcher.submit(json)` with `<Form>`/`<fetcher.Form>` and named inputs wherever a form maps to flat fields: the settings general and security forms, the trait modal, the note drawer, inline habit edits and the stock forms. With server actions (§1) these work before JavaScript loads.
+- Validate in actions and return field errors with `data({ errors }, { status: 400 })`, rendered from `actionData`/`fetcher.data`. That makes the duplicated client checks unnecessary, such as the required habit name and stock quantity rules.
+- Build action URLs and links with the type-safe `href()` instead of strings such as `` `/habits/${id}` ``, `/resources/occurrences` and `/calendar/month/${y}/${m}/${d}`.
+
+### 3. Optimistic and pending UI
+
+- **Optimistic UI** from `useFetchers()`: show a just-logged occurrence chip in its month cell, flip stock depletion, show edited habit names and note content immediately, and hide deleted rows while the deletion is pending.
+- **Progress bar.** Replace the root "We're preparing the app" overlay with a slim global bar driven by `useNavigation()` and `useFetchers()`.
+- **View transitions** (`viewTransition` on calendar navigation links, `useViewTransitionState`) for month, week and day switches.
+
+### 4. Data loading performance
+
+- **Link prefetch.** Add `<Link prefetch="intent">` to the sidebar and calendar navigation. With server loaders it prefetches the `.data` request as well as the modules, and could replace the custom sibling-range prefetch in `calendar-data.service.ts`.
+- **Streaming.** Return promises from server loaders for slow, non-critical data (habit stats, period summaries, the notes list after the first page) and render them with `<Await>` or `React.use` under `Suspense`.
+- **Abort signals.** Pass `request.signal` to Supabase (`.abortSignal()`) in loaders that don't share cached requests: habit details, the notes page, settings identities and the period-note lookup.
+- **Cache headers.** Add `headers` exports with `Cache-Control` on server loaders for rarely changing data, such as traits. Use this sparingly, as the React Router docs advise.
+- **Notes pagination.** Switch the notes page to keyset pagination on `created_at`, so "load more" stops re-fetching earlier pages.
+- **Atomic writes.** Turn multi-step writes into Postgres RPCs, so each action makes one transactional call: habit plus metric definitions, the occurrence create/update orchestration, stock-default replacement, and `array_remove` for photo paths. This fixes partial writes (duplicate habits on retry) and the photo-path race across tabs and devices at the source. Today `writePhotoPaths` only serializes within one tab.
+
+### 5. Move the remaining UI state to the URL and cookies
+
+- **Drawers → search params.** `?log=YYYY-MM-DD`, `?entry=<id>` and `?note=day:YYYY-MM-DD`: the back button closes a drawer, links can be shared, and the drawer survives a reload. This removes `occurrenceDrawer`/`noteDrawer` from Zustand.
+- **Calendar filters → search params or a cookie.** For example `?hide=<habitIds>`, giving shareable filtered views. A cookie (§ next bullet) would persist them per device instead.
+- **Theme and sidebar mode → a cookie.** Read it in the root `loader` (the docs' "Persistent UI State" cookie pattern), so the server renders the right theme. This deletes the inline theme script, `theme.store.ts` and the `localStorage` sidebar mode.
+- **What would still be Zustand:** the promise-based confirmation dialog and the mobile sidebar flag. Both could become small React contexts, which would let you remove `zustand`, `immer` and `@redux-devtools/extension` entirely.
+
+### 6. Routing structure and metadata
+
+- Use `meta` exports instead of inline `<title>` elements, with titles built from `loaderData` (for example the habit name) and one title template.
+- Group the app routes under pathless layouts: `authenticated` (with the server middleware from §1) and `public` (login, register, reset, anonymous login).
+- Move route modules from `src/pages/` to `src/routes/`, optionally using file-based `flatRoutes()`, so `src/components/` stays presentational. The pages barrel would then export nothing.
+
+### 7. Observability
+
+- Add a server `handleError` in `entry.server.tsx` that reports server loader and action errors to Rollbar. This needs a token with the `post_server_item` scope; the server build currently only has a client token.
+- Verify the `SOURCEMAP_BROKEN` warnings against real Rollbar stack traces. If traces are broken, disable route module splitting or fix the plugin's sourcemaps.
+- Consider React Router's instrumentation API (`how-to/instrumentation` in the docs) for loader and action timings.
+
+### 8. Testing
+
+- Add end-to-end tests (for example Playwright against `yarn dev` with local Supabase) for the manual checks listed under Verification: auth flows, calendar navigation, occurrence and note CRUD, habit, metric and stock management, and settings.
+- Add route integration tests with `createRoutesStub` that cover loader → component → fetcher → action → revalidation for the calendar and the drawers.
+
+### 9. Known issues found during the migration
+
+- `updateUser` builds its email redirect with `userId=${attributes}`, so the URL contains `[object Object]`.
+- Nothing consumes the `returnTo` that the OAuth consent page sends signed-out users to (§1).
+- `NoteDrawer` overwrites text typed before the period note finishes loading.
+- A habit whose metric creation fails after the habit row was written can be duplicated by retrying (§4, atomic writes).
+- `/habits/:habitId` with a non-UUID id shows "Couldn't load this habit" instead of "Habit not found".
+- The occurrence drawer's day navigation shows no entries outside the loaded calendar range. Fix it with a `fetcher.load` fallback to a day-range loader, or with the URL-driven drawers from §5.
+- `getLongestHabitStreak` and its RPC are unused (existing TODO in `occurrences.service.ts`).
+- After a successful login the user lands on `/calendar`, which redirects once more through the calendar layout loader to `/calendar/month`. Redirect straight to `/calendar/month` if the extra hop is noticeable.
