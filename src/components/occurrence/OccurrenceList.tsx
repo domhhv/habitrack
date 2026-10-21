@@ -53,7 +53,7 @@ const OccurrenceList = ({
                     void onRemove(o);
                   }}
                   onEdit={() => {
-                    openOccurrenceDrawer({ occurrenceToEdit: o });
+                    openOccurrenceDrawer({ occurrenceIdToEdit: o.id });
                   }}
                 />
               );
@@ -83,7 +83,7 @@ const OccurrenceList = ({
                       void onRemove(o);
                     }}
                     onEdit={() => {
-                      openOccurrenceDrawer({ occurrenceToEdit: o });
+                      openOccurrenceDrawer({ occurrenceIdToEdit: o.id });
                     }}
                   />
                 );

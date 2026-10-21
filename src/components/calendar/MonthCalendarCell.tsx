@@ -22,6 +22,7 @@ import {
   useDayNotes,
   useThemeMode,
   useNoteDrawerState,
+  useOccurrenceToEdit,
   useNoteDrawerActions,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
@@ -52,8 +53,8 @@ const MonthCalendarCell = ({
     dayToDisplay,
     dayToLog,
     isOpen: isOccurrenceDrawerOpen,
-    occurrenceToEdit,
   } = useOccurrenceDrawerState();
+  const occurrenceToEdit = useOccurrenceToEdit();
   const {
     isOpen: isNoteDrawerOpen,
     periodDate: noteDrawerPeriodDate,

@@ -1,6 +1,7 @@
 export * from './app-revalidation';
 export { default as buildMetricTotals } from './build-metric-totals';
 export { default as buildOccurrenceSummary } from './build-occurrence-summary';
+export { default as calculateOccurrenceCost } from './calculate-occurrence-cost';
 export * from './calendar-range-cache';
 export { default as createCalendar } from './create-calendar';
 export * from './date';
@@ -15,4 +16,5 @@ export { default as rollbar } from './rollbar';
 export * from './route-context';
 export { default as runAction } from './run-action';
 export { default as supabaseClient } from './supabase-client';
+export { default as toOccurrenceFormData } from './to-occurrence-form-data';
 export * from './type-guards';

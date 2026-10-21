@@ -35,7 +35,12 @@ import {
   MetricValuesSection,
 } from '@components';
 import { useHabits, useTextField } from '@hooks';
-import type { Habit, Occurrence, MetricValue } from '@models';
+import type {
+  Habit,
+  Occurrence,
+  MetricValue,
+  OccurrenceFormValues,
+} from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl, getLatestHabitOccurrence } from '@services';
 import { isNumericValue } from '@utils';
@@ -44,17 +49,6 @@ import OccurrenceChip from './OccurrenceChip';
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
 
 const ALL_DAY_TIME = { hour: 12, minute: 0 };
-
-export type OccurrenceFormValues = {
-  depletedStockIds: string[];
-  hasSpecificTime: boolean;
-  metricValues: Record<string, MetricValue | undefined>;
-  note: string;
-  occurredAt: string;
-  selectedHabitId: string;
-  stockUsages: { habitStockId: string; quantity: number | null }[];
-  uploadedFiles: File[];
-};
 
 type OccurrenceFormViewProps = {
   dayToLog?: CalendarDate;

@@ -147,11 +147,27 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 
 ### Phase 3 – Calendar, drawers, notes
 
-**PR 7 – Occurrence mutations → `/resources/occurrences`**
+**PR 7 – Occurrence mutations → `/resources/occurrences`** – done on `refactor/occurrence-actions`
 
-- Intents: `create` (the orchestration now in `OccurrenceCreateFormContainer.handleSubmit`: photos, occurrence, note, metric values, stock usages, cost, depletion), `update` (`OccurrenceUpdateFormContainer`), `delete` (`OccurrenceDrawer`), `remove-metric-value` (`OccurrenceListItem`). The forms submit through `useFetcher`. `isSaving` comes from `fetcher.state`, and the drawer closes when `fetcher.data?.ok`.
-- Bridge: each action calls `occurrencesCache.clear()` and `getState().occurrencesActions.fetchOccurrences()`. The habits stock counts refresh through layout revalidation, so `refreshHabitStocks` disappears.
-- `occurrenceDrawer.occurrenceToEdit` changes to `occurrenceIdToEdit`.
+- `src/routes/resources/occurrences.ts` is a component-less route under the app layout, so its action gets `userContext` from the layout middleware.
+  - `create` and `update` are multipart. The form values go as a `values` JSON field, built by `toOccurrenceFormData`, and the photos as `photos` files.
+  - `delete`, `remove-metric-value` and `remove-photo` are JSON (`OccurrenceSubmission` in `src/models/occurrence-submission.model.ts`). `OccurrenceFormValues` moved there too.
+  - All the orchestration moved out of the containers: photo upload, cost, the occurrence row, note, metric values, the stock-usage diff and depletion.
+  - The action loads the habit's stocks (for the cost) and, for update/delete/remove-photo, the current occurrence with the new `getOccurrence`. It no longer trusts the drawer's snapshot.
+  - The cost lives in `calculateOccurrenceCost`. Stocks with zero `totalItems` are skipped on update as well; before, only create skipped them.
+- The create/update containers use `useActionFetcher(closeOccurrenceDrawer)`, and `isSaving` comes from the fetcher.
+  - Photo removal uses `useSubmit` with a `fetcherKey` per photo, so quick successive removals don't interrupt each other. It has no success toast, because `SignedImageViewer` already shows one.
+  - The drawer's delete and `OccurrenceListItem`'s metric-value removal each use a fetcher. They ignore a new request while one is pending.
+- `occurrenceDrawer.occurrenceToEdit` is now `occurrenceIdToEdit`. `useOccurrenceToEdit()` resolves it from the store occurrences until PR 9.
+- Habit stock counts refresh through app-loader revalidation after every occurrence action. That now includes deletes, which used to leave the counts stale.
+- Store: `metrics.store.ts` is deleted, because metric values go through the services. `addOccurrence`, `updateOccurrence` and `removeOccurrence` are removed from the occurrences slice.
+- Bridges:
+  - `refreshStoreOccurrences()` (in `occurrences.store.ts`, shared with `HabitDetailsPage`) invalidates the slice's cache and refetches the current range. The calendar is not emptied first, and failures go to Rollbar.
+  - The occurrence note is still saved through `useBoundStore.getState().noteActions` until PR 8.
+- Changed from the plan:
+  - The range caches stay inside the slices.
+  - `clearUserCaches()` waits for PR 9, when the caches move out with the reads.
+- Tests cover every intent of the resource action, and `calculateOccurrenceCost` has its own tests.
 
 **PR 8 – Note mutations and the drawer's note lookup → `/resources/notes`**
 

@@ -6,7 +6,6 @@ import {
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { type MetricsSlice, createMetricsSlice } from './metrics.store';
 import { type NotesSlice, createNotesSlice } from './notes.store';
 import {
   type OccurrencesSlice,
@@ -29,7 +28,6 @@ export type ImmerStateCreator<
 export type BoundStore = UserSlice &
   UiSlice &
   ThemeSlice &
-  MetricsSlice &
   NotesSlice &
   OccurrencesSlice;
 
@@ -46,7 +44,6 @@ export const useBoundStore = create<BoundStore>()(
           ...createThemeSlice(set, get, store),
           ...createUserSlice(set, get, store),
           ...createNotesSlice(set, get, store),
-          ...createMetricsSlice(set, get, store),
           ...createOccurrencesSlice(set, get, store),
         };
       })

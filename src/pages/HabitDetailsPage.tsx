@@ -25,9 +25,8 @@ import {
   createStockMetricDefaults,
   destroyStockMetricDefaults,
 } from '@services';
-import { useBoundStore } from '@stores';
+import { refreshStoreOccurrences } from '@stores';
 import {
-  rollbar,
   runAction,
   userContext,
   getErrorMessage,
@@ -35,18 +34,6 @@ import {
 } from '@utils';
 
 import type { Route } from './+types/HabitDetailsPage';
-
-/* Bridge: remove when occurrences load in calendar route loaders. */
-const refreshStoreOccurrences = () => {
-  const { occurrencesActions } = useBoundStore.getState();
-
-  occurrencesActions.invalidateOccurrences();
-  occurrencesActions.fetchOccurrences().catch((error: unknown) => {
-    rollbar.error(
-      error instanceof Error ? error : new Error(getErrorMessage(error))
-    );
-  });
-};
 
 const buildStockMetricDefaultInserts = (
   habitStockId: string,

@@ -12,18 +12,18 @@ import {
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
+import { useFetcher } from 'react-router';
 
 import { CustomButton } from '@components';
 import { useScreenWidth } from '@hooks';
-import { type Occurrence } from '@models';
+import type { Occurrence, OccurrenceSubmission } from '@models';
 import {
   useOccurrences,
-  useOccurrenceActions,
+  useOccurrenceToEdit,
   useConfirmationActions,
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
 } from '@stores';
-import { handleAsyncAction } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
 import OccurrenceCreateFormContainer from './OccurrenceCreateFormContainer';
@@ -33,13 +33,20 @@ import OccurrenceUpdateFormContainer from './OccurrenceUpdateFormContainer';
 const OccurrenceDrawer = () => {
   const timeZone = getLocalTimeZone();
   const occurrences = useOccurrences();
-  const [occurrenceIdBeingRemoved, setOccurrenceIdBeingRemoved] =
-    React.useState('');
+  const deleteFetcher = useFetcher();
+  const [removalTargetId, setRemovalTargetId] = React.useState('');
+  const occurrenceIdBeingRemoved =
+    deleteFetcher.state === 'idle' ? '' : removalTargetId;
   const { askConfirmation } = useConfirmationActions();
-  const { removeOccurrence } = useOccurrenceActions();
   const { isMobile } = useScreenWidth();
-  const { dayToDisplay, dayToLog, habitIdToDisplay, isOpen, occurrenceToEdit } =
-    useOccurrenceDrawerState();
+  const {
+    dayToDisplay,
+    dayToLog,
+    habitIdToDisplay,
+    isOpen,
+    occurrenceIdToEdit,
+  } = useOccurrenceDrawerState();
+  const occurrenceToEdit = useOccurrenceToEdit();
   const { closeOccurrenceDrawer, setDayToDisplay } =
     useOccurrenceDrawerActions();
   const dateFormatter = useDateFormatter({
@@ -90,15 +97,22 @@ const OccurrenceDrawer = () => {
   }, [dayToDisplay, habitIdToDisplay, occurrences, timeZone]);
 
   const dispatchOccurrenceRemoval = async (occurrence: Occurrence) => {
-    if (await askConfirmation()) {
-      setOccurrenceIdBeingRemoved(occurrence.id);
-      handleAsyncAction(
-        removeOccurrence(occurrence),
-        'remove_occurrence'
-      ).finally(() => {
-        setOccurrenceIdBeingRemoved('');
-      });
+    if (deleteFetcher.state !== 'idle' || !(await askConfirmation())) {
+      return;
     }
+
+    setRemovalTargetId(occurrence.id);
+    void deleteFetcher.submit(
+      {
+        intent: 'delete',
+        occurrenceId: occurrence.id,
+      } satisfies OccurrenceSubmission,
+      {
+        action: '/resources/occurrences',
+        encType: 'application/json',
+        method: 'post',
+      }
+    );
   };
 
   const changeOpen = (isOpen: boolean) => {
@@ -119,7 +133,7 @@ const OccurrenceDrawer = () => {
     return dateFormatter.format(date.toDate());
   };
 
-  const canNavigateDays = !!dayToDisplay && !dayToLog && !occurrenceToEdit;
+  const canNavigateDays = !!dayToDisplay && !dayToLog && !occurrenceIdToEdit;
 
   const navigateDay = (direction: -1 | 1) => {
     if (!dayToDisplay) {
@@ -135,10 +149,10 @@ const OccurrenceDrawer = () => {
   };
 
   const getMainTitle = () => {
-    if (dayToLog || occurrenceToEdit) {
+    if (dayToLog || occurrenceIdToEdit) {
       return (
         <>
-          {occurrenceToEdit ? 'Edit' : 'Add'} habit entry for{' '}
+          {occurrenceIdToEdit ? 'Edit' : 'Add'} habit entry for{' '}
           {formatDate(
             (dayToLog && toZoned(dayToLog, timeZone)) ||
               occurrenceToEdit?.occurredAt
@@ -276,7 +290,7 @@ const OccurrenceDrawer = () => {
                 />
               )}
               {dayToLog && <OccurrenceCreateFormContainer />}
-              {occurrenceToEdit && <OccurrenceUpdateFormContainer />}
+              {occurrenceIdToEdit && <OccurrenceUpdateFormContainer />}
             </Drawer.Body>
           </Drawer.Dialog>
         </Drawer.Content>
