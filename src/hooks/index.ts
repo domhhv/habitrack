@@ -6,6 +6,7 @@ export { default as useFileField } from './use-file-field';
 export { default as useFirstDayOfWeek } from './use-first-day-of-week';
 export { default as useHasKeyboard } from './use-has-keyboard';
 export { default as useInitializeTheme } from './use-initialize-theme';
+export { default as useIsSubmitting } from './use-is-submitting';
 export { default as useKeyboardShortcut } from './use-keyboard-shortcut';
 export { default as useModifierKeys } from './use-modifier-keys';
 export { default as useProfile } from './use-profile';

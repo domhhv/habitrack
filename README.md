@@ -34,8 +34,8 @@ Habitrack is a simple and intuitive web app designed for logging habits and v is
 
 This app showcases the use of the following tools and technologies:
 
-- React 19.2 with TypeScript 6, bundled with [Vite 8](https://vite.dev/)
-- [React Router](https://reactrouter.com) v7 for routing (framework mode)
+- React 19.3 with TypeScript 6, bundled with [Vite 8](https://vite.dev/)
+- [React Router](https://reactrouter.com) v8 for routing (framework mode)
 - [Zustand](https://zustand.docs.pmnd.rs/) v5 for global state management
 - [Tailwind CSS](https://tailwindcss.com) v4 for styling
 - [HeroUI](https://www.heroui.com/) for the UI components
@@ -51,6 +51,9 @@ This app showcases the use of the following tools and technologies:
 - **Customizable Habits**: Add, remove, and customize habits to fit your routine. Associate your habits with traits and icons.
 - **Calendar View**: Visualize your habits on a monthly calendar.
 - **Daily Tracking**: Easily add daily entries of your habits.
+- **Habit Streaks**: Track your habit streaks and stay motivated.
+- **Habit Stocks**: Maintain a stock count for habits that require consumable resources.
+- **Habit Spending**: Track spending related to habits.
 - **User Authentication**: Sign up and log in to your account to retain your habits and entries.'
 - **Responsive Design**: Enjoy a seamless experience on any device.
 - **PWA**: Install the app on your device for quick access.

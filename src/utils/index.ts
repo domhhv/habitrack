@@ -9,6 +9,7 @@ export { default as handleAsyncAction } from './handle-async-action';
 export { default as initializeTheme } from './initialize-theme';
 export * from './metric-value';
 export { default as noop } from './noop';
+export { default as parseDayOfWeek } from './parse-day-of-week';
 export { default as rollbar } from './rollbar';
 export * from './route-context';
 export { default as supabaseClient } from './supabase-client';

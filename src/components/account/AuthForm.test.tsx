@@ -1,44 +1,69 @@
 import { act, render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { createRoutesStub } from 'react-router';
 import { it, vi, expect, describe } from 'vitest';
 
 import AuthForm from './AuthForm';
 
 describe(AuthForm.name, () => {
-  it('should call onSubmit with email and password', async () => {
-    const onSubmit = vi.fn();
-    const { getByPlaceholderText, getByTestId } = render(
-      <AuthForm
-        onSubmit={onSubmit}
-        submitLabel="Submit"
-        isAuthenticating={false}
-      />
-    );
+  it('should submit email, password, and extra fields to the route action', async () => {
+    const action = vi.fn().mockResolvedValue(null);
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        action: async ({ request }) => {
+          return action(Object.fromEntries(await request.formData()));
+        },
+        Component: () => {
+          return (
+            <AuthForm submitLabel="Submit" isAuthenticating={false}>
+              <input value="mon" type="hidden" name="firstDayOfWeek" />
+            </AuthForm>
+          );
+        },
+      },
+    ]);
+    const { findByTestId, getByPlaceholderText } = render(<Stub />);
 
-    const email = getByPlaceholderText('me@email.com');
-    const password = getByPlaceholderText('Password');
-    const submitForm = getByTestId('submit-form');
+    const submitForm = await findByTestId('submit-form');
 
     act(() => {
-      fireEvent.change(email, { target: { value: 'email' } });
-      fireEvent.change(password, { target: { value: 'password' } });
+      fireEvent.change(getByPlaceholderText('me@email.com'), {
+        target: { value: 'me@email.com' },
+      });
+      fireEvent.change(getByPlaceholderText('Password'), {
+        target: { value: 'password' },
+      });
       fireEvent.submit(submitForm);
     });
 
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith('email', 'password');
+      expect(action).toHaveBeenCalledWith({
+        email: 'me@email.com',
+        firstDayOfWeek: 'mon',
+        password: 'password',
+      });
     });
   });
 
-  it('should not render a password field when withPassword is false', () => {
-    const { queryByPlaceholderText } = render(
-      <AuthForm
-        onSubmit={vi.fn()}
-        withPassword={false}
-        submitLabel="Submit"
-        isAuthenticating={false}
-      />
-    );
+  it('should not render a password field when withPassword is false', async () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        Component: () => {
+          return (
+            <AuthForm
+              withPassword={false}
+              submitLabel="Submit"
+              isAuthenticating={false}
+            />
+          );
+        },
+      },
+    ]);
+    const { findByTestId, queryByPlaceholderText } = render(<Stub />);
+
+    await findByTestId('submit-form');
 
     expect(queryByPlaceholderText('Password')).toBeNull();
   });

@@ -1,56 +1,74 @@
 import { Link, Toast } from '@heroui/react';
 import React from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { data, replace, redirect } from 'react-router';
 
 import { AuthForm } from '@components';
-import { useUser, useFirstDayOfWeek } from '@hooks';
+import { useIsSubmitting, useFirstDayOfWeek } from '@hooks';
 import { signUp, convertAnonymousUser } from '@services';
-import { getErrorMessage } from '@utils';
+import { userContext, parseDayOfWeek, getErrorMessage } from '@utils';
 
-const RegisterPage = () => {
-  const user = useUser();
-  const navigate = useNavigate();
-  const firstDayOfWeek = useFirstDayOfWeek();
-  const [isAuthenticating, setIsAuthenticating] = React.useState(false);
+import type { Route } from './+types/RegisterPage';
 
-  const isAnonymousUser = !!user?.isAnonymous;
+export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
+  const user = context.get(userContext);
 
-  if (user && !isAnonymousUser) {
-    return <Navigate to="/" replace />;
+  if (user && !user.isAnonymous) {
+    throw replace('/');
   }
 
-  const handleSubmit = async (email: string, password: string) => {
-    try {
-      setIsAuthenticating(true);
+  return { isAnonymousUser: !!user?.isAnonymous };
+};
 
-      if (isAnonymousUser) {
-        await convertAnonymousUser(email, password);
+export const clientAction = async ({
+  context,
+  request,
+}: Route.ClientActionArgs) => {
+  const formData = await request.formData();
+  const email = String(formData.get('email') ?? '');
+  const password = String(formData.get('password') ?? '');
+  const isAnonymousUser = !!context.get(userContext)?.isAnonymous;
 
-        Toast.toast.success(
-          'Almost there! Check your inbox to confirm your email. All your habits and notes stay with your account.'
-        );
-
-        navigate('/');
-      } else {
-        await signUp(email, password, firstDayOfWeek);
-
-        Toast.toast.success(
-          'Account created! Please check your email to confirm your account before logging in.'
-        );
-
-        navigate('/login');
-      }
-    } catch (error) {
-      Toast.toast.danger(
-        'Something went wrong while creating your account. Please try again.',
-        {
-          description: `Error details: ${getErrorMessage(error)}`,
-        }
+  try {
+    if (isAnonymousUser) {
+      await convertAnonymousUser(email, password);
+    } else {
+      await signUp(
+        email,
+        password,
+        parseDayOfWeek(formData.get('firstDayOfWeek'))
       );
-    } finally {
-      setIsAuthenticating(false);
     }
-  };
+  } catch (error) {
+    Toast.toast.danger(
+      'Something went wrong while creating your account. Please try again.',
+      {
+        description: `Error details: ${getErrorMessage(error)}`,
+      }
+    );
+
+    return data({ error: getErrorMessage(error) }, { status: 400 });
+  }
+
+  if (isAnonymousUser) {
+    Toast.toast.success(
+      'Almost there! Check your inbox to confirm your email. All your habits and notes stay with your account.'
+    );
+
+    return redirect('/');
+  }
+
+  Toast.toast.success(
+    'Account created! Please check your email to confirm your account before logging in.'
+  );
+
+  return redirect('/login');
+};
+
+const RegisterPage = ({
+  loaderData: { isAnonymousUser },
+}: Route.ComponentProps) => {
+  const firstDayOfWeek = useFirstDayOfWeek();
+  const isAuthenticating = useIsSubmitting();
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">
@@ -68,7 +86,6 @@ const RegisterPage = () => {
         </p>
         <div className="mt-6 w-full">
           <AuthForm
-            onSubmit={handleSubmit}
             passwordAutoComplete="new-password"
             isAuthenticating={isAuthenticating}
             submitLabel={isAnonymousUser ? 'Save my account' : 'Create account'}
@@ -87,7 +104,9 @@ const RegisterPage = () => {
                 </>
               )
             }
-          />
+          >
+            <input type="hidden" name="firstDayOfWeek" value={firstDayOfWeek} />
+          </AuthForm>
         </div>
       </div>
     </div>

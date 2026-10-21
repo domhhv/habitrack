@@ -1,3 +1,5 @@
+export { default as makeRouteArgs } from './makeRouteArgs';
+
 export * from './makeTestHabit';
 export { default as makeTestHabit } from './makeTestHabit';
 
