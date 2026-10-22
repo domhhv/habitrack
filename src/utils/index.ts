@@ -7,6 +7,7 @@ export * from './calendar-range-cache';
 export { default as createCalendar } from './create-calendar';
 export * from './date';
 export { default as getErrorMessage } from './get-error-message';
+export { default as getSafeRedirectPath } from './get-safe-redirect-path';
 export { default as handleAsyncAction } from './handle-async-action';
 export { default as initializeTheme } from './initialize-theme';
 export * from './metric-value';

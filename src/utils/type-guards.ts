@@ -42,3 +42,20 @@ export const isSuccessfulUpload = (
 ): input is PromiseFulfilledResult<SuccessfulUpload> => {
   return input.value.status === 'success';
 };
+
+const EMAIL_OTP_TYPES = [
+  'email',
+  'invite',
+  'signup',
+  'recovery',
+  'magiclink',
+  'email_change',
+] as const;
+
+export const isEmailOtpType = (
+  input: string | null
+): input is (typeof EMAIL_OTP_TYPES)[number] => {
+  return EMAIL_OTP_TYPES.some((type) => {
+    return type === input;
+  });
+};

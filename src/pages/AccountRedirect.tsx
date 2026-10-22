@@ -1,10 +1,7 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router';
+import { redirect } from 'react-router';
 
-const AccountRedirect = () => {
-  const { hash, search } = useLocation();
+import type { Route } from './+types/AccountRedirect';
 
-  return <Navigate replace to={`/settings${search}${hash}`} />;
+export const loader = ({ request }: Route.LoaderArgs) => {
+  throw redirect(`/settings${new URL(request.url).search}`);
 };
-
-export default AccountRedirect;

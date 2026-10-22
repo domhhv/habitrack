@@ -1,0 +1,12 @@
+<h2>Confirm your new email</h2>
+
+<p>
+  Follow this link to change your Habitrack email from {{ .Email }} to
+  {{ .NewEmail }}:
+</p>
+<p>
+  <a
+    href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email_change&next={{ .RedirectTo }}"
+    >Confirm your new email</a
+  >
+</p>
