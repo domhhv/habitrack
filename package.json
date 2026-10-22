@@ -26,7 +26,7 @@
   "scripts": {
     "prepare": "husky install",
     "prebuild": "yarn typecheck && yarn eslint:check && yarn prettier:check",
-    "dev": "react-router dev",
+    "dev": "react-router dev --open",
     "build": "react-router build",
     "preview": "vite preview --open",
     "typecheck": "react-router typegen && tsc --noEmit",
