@@ -8,7 +8,7 @@ import {
   getPeriodNote,
   invalidateCalendarNotes,
 } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/notes';
@@ -61,7 +61,11 @@ describe('notes resource clientLoader', () => {
         )
       )
     ).resolves.toEqual({ note: { id: 'note-1' } });
-    expect(getPeriodNote).toHaveBeenCalledWith('week', '2026-10-19');
+    expect(getPeriodNote).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'week',
+      '2026-10-19'
+    );
   });
 
   it('skips the lookup for invalid periods or signed-out visitors', async () => {
@@ -93,7 +97,10 @@ describe('notes resource clientAction', () => {
     await expect(submit({ intent: 'create', note })).resolves.toEqual({
       ok: true,
     });
-    expect(createNote).toHaveBeenCalledWith({ ...note, userId: 'user-1' });
+    expect(createNote).toHaveBeenCalledWith(testSupabaseClient, {
+      ...note,
+      userId: 'user-1',
+    });
     expect(invalidateCalendarNotes).toHaveBeenCalledOnce();
   });
 
@@ -101,8 +108,8 @@ describe('notes resource clientAction', () => {
     await submit({ intent: 'update', note, noteId: 'note-1' });
     await submit({ intent: 'delete', noteId: 'note-1' });
 
-    expect(updateNote).toHaveBeenCalledWith('note-1', note);
-    expect(destroyNote).toHaveBeenCalledWith('note-1');
+    expect(updateNote).toHaveBeenCalledWith(testSupabaseClient, 'note-1', note);
+    expect(destroyNote).toHaveBeenCalledWith(testSupabaseClient, 'note-1');
   });
 
   it('invalidates notes even when the write fails', async () => {

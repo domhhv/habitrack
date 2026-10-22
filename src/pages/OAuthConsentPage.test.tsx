@@ -1,7 +1,7 @@
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import { decideAuthorization, getAuthorizationDetails } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/OAuthConsentPage';
@@ -80,7 +80,10 @@ describe('OAuthConsentPage clientLoader', () => {
     await expect(
       clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(CONSENT_URL, user))
     ).resolves.toEqual({ details });
-    expect(getAuthorizationDetails).toHaveBeenCalledWith('auth-1');
+    expect(getAuthorizationDetails).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'auth-1'
+    );
   });
 });
 
@@ -106,7 +109,11 @@ describe('OAuthConsentPage clientAction', () => {
 
     const result = (await submit('approve')) as Response;
 
-    expect(decideAuthorization).toHaveBeenCalledWith('auth-1', true);
+    expect(decideAuthorization).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'auth-1',
+      true
+    );
     expect(result.headers.get('Location')).toBe('https://client/cb');
     expect(result.headers.has('X-Remix-Reload-Document')).toBe(true);
   });
@@ -116,7 +123,11 @@ describe('OAuthConsentPage clientAction', () => {
 
     await submit('deny');
 
-    expect(decideAuthorization).toHaveBeenCalledWith('auth-1', false);
+    expect(decideAuthorization).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'auth-1',
+      false
+    );
   });
 
   it('returns the error inline when the decision fails', async () => {

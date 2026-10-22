@@ -1,8 +1,11 @@
-import { supabaseClient } from '@utils';
+import type { TypedSupabaseClient } from '@models';
 
-export const getAuthorizationDetails = async (authorizationId: string) => {
+export const getAuthorizationDetails = async (
+  supabase: TypedSupabaseClient,
+  authorizationId: string
+) => {
   const { data, error } =
-    await supabaseClient.auth.oauth.getAuthorizationDetails(authorizationId);
+    await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
 
   if (error) {
     throw new Error(error.message);
@@ -12,19 +15,14 @@ export const getAuthorizationDetails = async (authorizationId: string) => {
 };
 
 export const decideAuthorization = async (
+  supabase: TypedSupabaseClient,
   authorizationId: string,
   isApproved: boolean
 ) => {
   const options = { skipBrowserRedirect: true };
   const { data, error } = isApproved
-    ? await supabaseClient.auth.oauth.approveAuthorization(
-        authorizationId,
-        options
-      )
-    : await supabaseClient.auth.oauth.denyAuthorization(
-        authorizationId,
-        options
-      );
+    ? await supabase.auth.oauth.approveAuthorization(authorizationId, options)
+    : await supabase.auth.oauth.denyAuthorization(authorizationId, options);
 
   if (error) {
     throw new Error(error.message);

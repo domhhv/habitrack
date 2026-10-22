@@ -16,6 +16,7 @@ export { default as pickDefinedValues } from './pick-defined-values';
 export { default as rollbar } from './rollbar';
 export * from './route-context';
 export { default as runAction } from './run-action';
-export { default as supabaseClient } from './supabase-client';
+export * from './supabase-client';
+export * from './supabase-middleware';
 export { default as toOccurrenceFormData } from './to-occurrence-form-data';
 export * from './type-guards';

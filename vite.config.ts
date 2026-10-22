@@ -8,10 +8,18 @@ import webpackStatsPlugin from 'rollup-plugin-webpack-stats';
 import { loadEnv, defineConfig, type UserConfig } from 'vite';
 import viteRollbar from 'vite-plugin-rollbar-sourcemap';
 
+const TEST_ENV = {
+  SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key',
+  SUPABASE_URL: 'https://test-project.supabase.co',
+};
+
 export default defineConfig(({ isSsrBuild, mode }) => {
   const isProduction = mode === 'production';
 
-  const env = loadEnv(mode, process.cwd(), '');
+  const env: Record<string, string> = {
+    ...loadEnv(mode, process.cwd(), ''),
+    ...(mode === 'test' ? TEST_ENV : {}),
+  };
 
   const ROLLBAR_CONFIG = {
     accessToken: env.ROLLBAR_SERVER_ACCESS_TOKEN,

@@ -8,7 +8,7 @@ import {
   getPeriodNote,
   invalidateCalendarNotes,
 } from '@services';
-import { runAction, userContext } from '@utils';
+import { runAction, userContext, supabaseContext } from '@utils';
 
 import type { Route } from './+types/notes';
 
@@ -28,13 +28,20 @@ export const clientLoader = async ({
     return { note: null };
   }
 
-  return { note: await getPeriodNote(periodKind, periodDate) };
+  return {
+    note: await getPeriodNote(
+      context.get(supabaseContext),
+      periodKind,
+      periodDate
+    ),
+  };
 };
 
 export const clientAction = async ({
   context,
   request,
 }: Route.ClientActionArgs) => {
+  const supabase = context.get(supabaseContext);
   const user = context.get(userContext);
 
   if (!user) {
@@ -49,7 +56,7 @@ export const clientAction = async ({
   switch (submission.intent) {
     case 'create':
       return runAction(
-        createNote({ ...submission.note, userId: user.id }).finally(
+        createNote(supabase, { ...submission.note, userId: user.id }).finally(
           invalidateCalendarNotes
         ),
         'add_note'
@@ -57,13 +64,15 @@ export const clientAction = async ({
 
     case 'delete':
       return runAction(
-        destroyNote(submission.noteId).finally(invalidateCalendarNotes),
+        destroyNote(supabase, submission.noteId).finally(
+          invalidateCalendarNotes
+        ),
         'remove_note'
       );
 
     case 'update':
       return runAction(
-        updateNote(submission.noteId, submission.note).finally(
+        updateNote(supabase, submission.noteId, submission.note).finally(
           invalidateCalendarNotes
         ),
         'update_note'

@@ -81,6 +81,9 @@ Use these aliases throughout the codebase:
 
 Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MIGRATION.md) for the full history and rationale.
 
+- **Supabase client**:
+  - The session lives in cookies (`@supabase/ssr`). The `app` layout puts the request's client into `supabaseContext`. Its `clientMiddleware` uses the browser client, and its server `middleware` (`supabaseMiddleware`) creates a server client per request and sends refreshed auth cookies back with the response.
+  - Every service takes the client (`TypedSupabaseClient`) as its first argument. Loaders and actions pass `context.get(supabaseContext)`. Components and hooks that must call Supabase directly use `getSupabaseBrowserClient()`.
 - **Loading**:
   - The `app` layout `clientMiddleware` puts the session user and profile into `userContext`/`profileContext`.
   - The `app` layout `clientLoader` returns `{ user, profile, habits, traits }`, read via `useUser`/`useProfile`/`useHabits`/`useTraits`.
@@ -193,7 +196,8 @@ Supabase storage buckets:
 
 - **Vitest** with jsdom environment for unit tests
 - **React Testing Library** for component testing
-- Route `clientLoader`/`clientAction` functions are tested directly with `makeRouteArgs()` from `@tests` (builds the request plus a `RouterContextProvider` carrying `userContext`), with `@services` mocked
+- Route `clientLoader`/`clientAction` functions are tested directly with `makeRouteArgs()` from `@tests` (builds the request plus a `RouterContextProvider` carrying `userContext` and `testSupabaseClient` in `supabaseContext`), with `@services` mocked. Service call assertions expect `testSupabaseClient` as the first argument
+- In test mode, Vite defines placeholder `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` values (`TEST_ENV` in `vite.config.ts`). `getSupabaseBrowserClient()` returns an empty stub under test, so mock it from `@utils` when a component's Supabase call is asserted
 - Components that use loader data, fetchers or `<Form>` render inside `createRoutesStub` from `react-router`
 - Test files located alongside components or in dedicated test directories
 - Coverage reports available with `yarn test:coverage`

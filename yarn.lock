@@ -1754,6 +1754,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@supabase/ssr@npm:^0.12.7":
+  version: 0.12.7
+  resolution: "@supabase/ssr@npm:0.12.7"
+  dependencies:
+    cookie: "npm:^1.0.2"
+  peerDependencies:
+    "@supabase/supabase-js": ^2.114.0
+  checksum: 10c0/d1c02a6a5bb49f138c10c13e465b3d35d0abac779702c234bbd0fb7c46af73ba792202c33a0d11875bb77cab8284da40c4c0d5cde6b4942bd262bcd8e163b635
+  languageName: node
+  linkType: hard
+
 "@supabase/storage-js@npm:2.118.0":
   version: 2.118.0
   resolution: "@supabase/storage-js@npm:2.118.0"
@@ -2993,6 +3004,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cookie@npm:^1.0.2":
+  version: 1.1.1
+  resolution: "cookie@npm:1.1.1"
+  checksum: 10c0/79c4ddc0fcad9c4f045f826f42edf54bcc921a29586a4558b0898277fa89fb47be95bc384c2253f493af7b29500c830da28341274527328f18eba9f58afa112c
+  languageName: node
+  linkType: hard
+
 "core-js@npm:3.41.0":
   version: 3.41.0
   resolution: "core-js@npm:3.41.0"
@@ -3815,6 +3833,7 @@ __metadata:
     "@relative-ci/agent": "npm:^4.3.1"
     "@rollbar/react": "npm:^1.2.0"
     "@stylistic/eslint-plugin": "npm:^5.10.0"
+    "@supabase/ssr": "npm:^0.12.7"
     "@supabase/supabase-js": "npm:^2.118.0"
     "@tailwindcss/vite": "npm:^4.3.3"
     "@testing-library/dom": "npm:^10.4.2"

@@ -6,7 +6,12 @@ import {
 } from '@internationalized/date';
 import keyBy from 'lodash.keyby';
 
-import type { Note, Occurrence, RawOccurrence } from '@models';
+import type {
+  Note,
+  Occurrence,
+  RawOccurrence,
+  TypedSupabaseClient,
+} from '@models';
 import {
   isNoteOfPeriod,
   type CalendarRange,
@@ -39,28 +44,34 @@ const toZonedRange = ([rangeStart, rangeEnd]: CalendarRange) => {
   ] as const;
 };
 
-const loadOccurrences = (range: CalendarRange) => {
+const loadOccurrences = (
+  supabase: TypedSupabaseClient,
+  range: CalendarRange
+) => {
   return occurrencesCache.load(range, async () => {
     const [rangeStart, rangeEnd] = toZonedRange(range);
-    const occurrences = await listOccurrences([rangeStart, rangeEnd]);
+    const occurrences = await listOccurrences(supabase, [rangeStart, rangeEnd]);
 
     return occurrences.map(toClientOccurrence);
   });
 };
 
-const loadNotes = (range: CalendarRange) => {
+const loadNotes = (supabase: TypedSupabaseClient, range: CalendarRange) => {
   return notesCache.load(range, () => {
     const [rangeStart, rangeEnd] = toZonedRange(range);
 
-    return listNotes([rangeStart, rangeEnd]);
+    return listNotes(supabase, [rangeStart, rangeEnd]);
   });
 };
 
-const prefetchSiblingRanges = (range: CalendarRange) => {
+const prefetchSiblingRanges = (
+  supabase: TypedSupabaseClient,
+  range: CalendarRange
+) => {
   getSiblingPrefetchRanges(range).forEach((siblingRange) => {
     void Promise.all([
-      loadOccurrences(siblingRange),
-      loadNotes(siblingRange),
+      loadOccurrences(supabase, siblingRange),
+      loadNotes(supabase, siblingRange),
     ]).catch(() => {
       return undefined;
     });
@@ -130,10 +141,16 @@ export const createCalendarData = (
 
 export type CalendarData = ReturnType<typeof createCalendarData>;
 
-export const loadCalendarData = async (range: CalendarRange) => {
-  const currentRange = Promise.all([loadOccurrences(range), loadNotes(range)]);
+export const loadCalendarData = async (
+  supabase: TypedSupabaseClient,
+  range: CalendarRange
+) => {
+  const currentRange = Promise.all([
+    loadOccurrences(supabase, range),
+    loadNotes(supabase, range),
+  ]);
 
-  prefetchSiblingRanges(range);
+  prefetchSiblingRanges(supabase, range);
 
   const [occurrences, notes] = await currentRange;
 

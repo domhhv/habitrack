@@ -17,7 +17,7 @@ import {
   createStockMetricDefaults,
   destroyStockMetricDefaults,
 } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/HabitDetailsPage';
@@ -108,7 +108,9 @@ describe('HabitDetailsPage clientAction', () => {
     await expect(
       submitJson({ habit: { name: 'Walking' }, intent: 'update-habit' })
     ).resolves.toEqual({ ok: true });
-    expect(patchHabit).toHaveBeenCalledWith('habit-1', { name: 'Walking' });
+    expect(patchHabit).toHaveBeenCalledWith(testSupabaseClient, 'habit-1', {
+      name: 'Walking',
+    });
   });
 
   it('replaces the habit icon and removes the previous one', async () => {
@@ -133,8 +135,12 @@ describe('HabitDetailsPage clientAction', () => {
         } as unknown as Request,
       })
     ).resolves.toEqual({ ok: true });
-    expect(deleteFile).toHaveBeenCalledWith('habit_icons', 'user-1/old.png');
-    expect(patchHabit).toHaveBeenCalledWith('habit-1', {
+    expect(deleteFile).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'habit_icons',
+      'user-1/old.png'
+    );
+    expect(patchHabit).toHaveBeenCalledWith(testSupabaseClient, 'habit-1', {
       iconPath: 'user-1/new.png',
     });
   });
@@ -150,11 +156,16 @@ describe('HabitDetailsPage clientAction', () => {
     await submitJson({ intent: 'delete-habit' });
 
     expect(deleteFile).toHaveBeenCalledWith(
+      testSupabaseClient,
       'occurrence_photos',
       'user-1/habit-1/photo.jpg'
     );
-    expect(destroyHabit).toHaveBeenCalledWith('habit-1');
-    expect(deleteFile).toHaveBeenCalledWith('habit_icons', 'user-1/icon.png');
+    expect(destroyHabit).toHaveBeenCalledWith(testSupabaseClient, 'habit-1');
+    expect(deleteFile).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'habit_icons',
+      'user-1/icon.png'
+    );
   });
 
   it('removes, adds, and updates metric definitions', async () => {
@@ -176,12 +187,15 @@ describe('HabitDetailsPage clientAction', () => {
       ],
     });
 
-    expect(destroyHabitMetrics).toHaveBeenCalledWith(['metric-1']);
-    expect(createHabitMetrics).toHaveBeenCalledWith([
+    expect(destroyHabitMetrics).toHaveBeenCalledWith(testSupabaseClient, [
+      'metric-1',
+    ]);
+    expect(createHabitMetrics).toHaveBeenCalledWith(testSupabaseClient, [
       expect.objectContaining({ habitId: 'habit-1', name: 'New' }),
     ]);
     expect(patchHabitMetric).toHaveBeenCalledOnce();
     expect(patchHabitMetric).toHaveBeenCalledWith(
+      testSupabaseClient,
       'metric-2',
       expect.objectContaining({ name: 'Edit' })
     );
@@ -201,13 +215,13 @@ describe('HabitDetailsPage clientAction', () => {
       },
     });
 
-    expect(createStock).toHaveBeenCalledWith({
+    expect(createStock).toHaveBeenCalledWith(testSupabaseClient, {
       currency: 'EUR',
       habitId: 'habit-1',
       name: 'Pack',
       userId: 'user-1',
     });
-    expect(createStockMetricDefaults).toHaveBeenCalledWith([
+    expect(createStockMetricDefaults).toHaveBeenCalledWith(testSupabaseClient, [
       {
         habitMetricId: 'metric-1',
         habitStockId: 'stock-1',
@@ -225,7 +239,9 @@ describe('HabitDetailsPage clientAction', () => {
       stockId: 'stock-1',
     });
 
-    expect(patchStock).toHaveBeenCalledWith('stock-1', { isDepleted: true });
+    expect(patchStock).toHaveBeenCalledWith(testSupabaseClient, 'stock-1', {
+      isDepleted: true,
+    });
     expect(destroyStockMetricDefaults).not.toHaveBeenCalled();
   });
 
@@ -240,8 +256,11 @@ describe('HabitDetailsPage clientAction', () => {
       },
     });
 
-    expect(destroyStockMetricDefaults).toHaveBeenCalledWith('stock-1');
-    expect(createStockMetricDefaults).toHaveBeenCalledWith([
+    expect(destroyStockMetricDefaults).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'stock-1'
+    );
+    expect(createStockMetricDefaults).toHaveBeenCalledWith(testSupabaseClient, [
       expect.objectContaining({
         habitStockId: 'stock-1',
         value: { numericValue: 2 },
@@ -252,6 +271,6 @@ describe('HabitDetailsPage clientAction', () => {
   it('removes a stock', async () => {
     await submitJson({ intent: 'remove-stock', stockId: 'stock-1' });
 
-    expect(destroyStock).toHaveBeenCalledWith('stock-1');
+    expect(destroyStock).toHaveBeenCalledWith(testSupabaseClient, 'stock-1');
   });
 });

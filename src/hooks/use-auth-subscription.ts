@@ -3,7 +3,11 @@ import React from 'react';
 import { useRevalidator } from 'react-router';
 
 import { clearCalendarData } from '@services';
-import { supabaseClient, markAppDataStale, type SessionUser } from '@utils';
+import {
+  markAppDataStale,
+  type SessionUser,
+  getSupabaseBrowserClient,
+} from '@utils';
 
 const useAuthSubscription = (user: SessionUser) => {
   const { revalidate } = useRevalidator();
@@ -26,7 +30,7 @@ const useAuthSubscription = (user: SessionUser) => {
   React.useEffect(() => {
     const {
       data: { subscription },
-    } = supabaseClient.auth.onAuthStateChange((event, session) => {
+    } = getSupabaseBrowserClient().auth.onAuthStateChange((event, session) => {
       const hasUserChanged = (session?.user.id ?? null) !== userId;
 
       if (hasUserChanged) {

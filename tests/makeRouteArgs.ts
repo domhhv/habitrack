@@ -1,6 +1,11 @@
 import { RouterContextProvider } from 'react-router';
 
-import { userContext, type SessionUser } from '@utils';
+import type { TypedSupabaseClient } from '@models';
+import { userContext, supabaseContext, type SessionUser } from '@utils';
+
+export const testSupabaseClient = {
+  isTestSupabaseClient: true,
+} as unknown as TypedSupabaseClient;
 
 const makeRouteArgs = <TArgs>(
   url: string,
@@ -8,6 +13,7 @@ const makeRouteArgs = <TArgs>(
   init?: RequestInit
 ) => {
   const context = new RouterContextProvider();
+  context.set(supabaseContext, testSupabaseClient);
   context.set(userContext, user);
 
   return {

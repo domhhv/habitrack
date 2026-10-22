@@ -6,6 +6,7 @@ import { Form } from 'react-router';
 import { CustomButton } from '@components';
 import { useTextField } from '@hooks';
 import { signInWithGoogle } from '@services';
+import { getSupabaseBrowserClient } from '@utils';
 
 import PasswordInput from './PasswordInput';
 
@@ -65,8 +66,10 @@ const AuthForm = ({
         fullWidth
         className="mt-6"
         variant="primary"
-        onClick={signInWithGoogle}
         data-testid="submit-button"
+        onClick={() => {
+          return signInWithGoogle(getSupabaseBrowserClient());
+        }}
       >
         <GoogleLogoIcon size={20} weight="bold" className="mr-1" />
         Sign in with Google

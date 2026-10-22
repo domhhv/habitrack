@@ -2,7 +2,7 @@ import { Toast } from '@heroui/react';
 import React from 'react';
 import { useFetcher, useLocation, useSearchParams } from 'react-router';
 
-import { supabaseClient } from '@utils';
+import { getSupabaseBrowserClient } from '@utils';
 
 import useProfile from './use-profile';
 import useUser from './use-user';
@@ -19,8 +19,8 @@ const useAuthSearchParams = () => {
 
   React.useEffect(() => {
     if (searchParams.get('emailConfirmed')) {
-      supabaseClient.auth
-        .setSession({
+      getSupabaseBrowserClient()
+        .auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken,
         })
@@ -30,8 +30,8 @@ const useAuthSearchParams = () => {
     }
 
     if (searchParams.get('passwordReset')) {
-      supabaseClient.auth
-        .setSession({
+      getSupabaseBrowserClient()
+        .auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken,
         })

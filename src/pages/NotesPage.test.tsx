@@ -1,7 +1,7 @@
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import { listAllNotes } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/NotesPage';
@@ -36,7 +36,10 @@ describe('NotesPage clientLoader', () => {
         )
       )
     ).resolves.toMatchObject({ hasMore: true, pageCount: 2 });
-    expect(listAllNotes).toHaveBeenCalledWith({ limit: 40, page: 0 });
+    expect(listAllNotes).toHaveBeenCalledWith(testSupabaseClient, {
+      limit: 40,
+      page: 0,
+    });
   });
 
   it('treats a missing or invalid page count as one page', async () => {
@@ -50,7 +53,10 @@ describe('NotesPage clientLoader', () => {
         )
       )
     ).resolves.toEqual({ hasMore: false, notes: [], pageCount: 1 });
-    expect(listAllNotes).toHaveBeenCalledWith({ limit: 20, page: 0 });
+    expect(listAllNotes).toHaveBeenCalledWith(testSupabaseClient, {
+      limit: 20,
+      page: 0,
+    });
   });
 
   it('skips the query for signed-out visitors', async () => {

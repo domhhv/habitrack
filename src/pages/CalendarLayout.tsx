@@ -12,6 +12,7 @@ import {
   userContext,
   isCalendarView,
   profileContext,
+  supabaseContext,
   getCalendarRange,
   getFocusedCalendarDate,
 } from '@utils';
@@ -45,7 +46,7 @@ export const clientLoader = async ({
   );
 
   return context.get(userContext)
-    ? loadCalendarData(range)
+    ? loadCalendarData(context.get(supabaseContext), range)
     : createCalendarData([], [], range);
 };
 

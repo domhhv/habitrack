@@ -2,15 +2,15 @@ import { type UserIdentity, type UserAttributes } from '@supabase/supabase-js';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-import type { DaysOfWeek } from '@models';
-import { supabaseClient } from '@utils';
+import type { DaysOfWeek, TypedSupabaseClient } from '@models';
 
 export const signUp = async (
+  supabase: TypedSupabaseClient,
   email: string,
   password: string,
   firstDayOfWeek: DaysOfWeek
 ) => {
-  const { error } = await supabaseClient.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -26,8 +26,11 @@ export const signUp = async (
   }
 };
 
-export const signInAnonymously = async (firstDayOfWeek: DaysOfWeek) => {
-  const { error } = await supabaseClient.auth.signInAnonymously({
+export const signInAnonymously = async (
+  supabase: TypedSupabaseClient,
+  firstDayOfWeek: DaysOfWeek
+) => {
+  const { error } = await supabase.auth.signInAnonymously({
     options: {
       data: decamelizeKeys({
         firstDayOfWeek,
@@ -40,8 +43,8 @@ export const signInAnonymously = async (firstDayOfWeek: DaysOfWeek) => {
   }
 };
 
-export const signInWithGoogle = async () => {
-  const { error } = await supabaseClient.auth.signInWithOAuth({
+export const signInWithGoogle = async (supabase: TypedSupabaseClient) => {
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: `${window.location.origin}/calendar`,
@@ -53,8 +56,8 @@ export const signInWithGoogle = async () => {
   }
 };
 
-export const getUserIdentities = async () => {
-  const { data, error } = await supabaseClient.auth.getUserIdentities();
+export const getUserIdentities = async (supabase: TypedSupabaseClient) => {
+  const { data, error } = await supabase.auth.getUserIdentities();
 
   if (error) {
     throw new Error(error.message);
@@ -63,8 +66,8 @@ export const getUserIdentities = async () => {
   return data.identities;
 };
 
-export const linkGoogleIdentity = async () => {
-  const { error } = await supabaseClient.auth.linkIdentity({
+export const linkGoogleIdentity = async (supabase: TypedSupabaseClient) => {
+  const { error } = await supabase.auth.linkIdentity({
     provider: 'google',
     options: {
       redirectTo: `${window.location.origin}/settings`,
@@ -76,16 +79,23 @@ export const linkGoogleIdentity = async () => {
   }
 };
 
-export const unlinkIdentity = async (identity: UserIdentity) => {
-  const { error } = await supabaseClient.auth.unlinkIdentity(identity);
+export const unlinkIdentity = async (
+  supabase: TypedSupabaseClient,
+  identity: UserIdentity
+) => {
+  const { error } = await supabase.auth.unlinkIdentity(identity);
 
   if (error) {
     throw new Error(error.message);
   }
 };
 
-export const convertAnonymousUser = async (email: string, password: string) => {
-  const { error } = await supabaseClient.auth.updateUser(
+export const convertAnonymousUser = async (
+  supabase: TypedSupabaseClient,
+  email: string,
+  password: string
+) => {
+  const { error } = await supabase.auth.updateUser(
     { email, password },
     {
       emailRedirectTo: `${window.location.origin}/settings?emailConfirmed=true`,
@@ -97,8 +107,12 @@ export const convertAnonymousUser = async (email: string, password: string) => {
   }
 };
 
-export const signIn = async (email: string, password: string) => {
-  const { error } = await supabaseClient.auth.signInWithPassword({
+export const signIn = async (
+  supabase: TypedSupabaseClient,
+  email: string,
+  password: string
+) => {
+  const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -108,22 +122,22 @@ export const signIn = async (email: string, password: string) => {
   }
 };
 
-export const signOut = async () => {
-  const { error } = await supabaseClient.auth.signOut();
+export const signOut = async (supabase: TypedSupabaseClient) => {
+  const { error } = await supabase.auth.signOut();
 
   if (error) {
     throw new Error(error.message);
   }
 };
 
-export const deleteUser = async () => {
-  const { data, error } = await supabaseClient.rpc('delete_user');
+export const deleteUser = async (supabase: TypedSupabaseClient) => {
+  const { data, error } = await supabase.rpc('delete_user');
 
   if (error) {
     throw new Error(error.message);
   }
 
-  const { error: signOutError } = await supabaseClient.auth.signOut({
+  const { error: signOutError } = await supabase.auth.signOut({
     scope: 'local',
   });
 
@@ -134,8 +148,11 @@ export const deleteUser = async () => {
   return data;
 };
 
-export const updateUser = async (attributes: UserAttributes) => {
-  const { data, error } = await supabaseClient.auth.updateUser(attributes, {
+export const updateUser = async (
+  supabase: TypedSupabaseClient,
+  attributes: UserAttributes
+) => {
+  const { data, error } = await supabase.auth.updateUser(attributes, {
     emailRedirectTo: `${window.location.origin}/settings?emailChangeConfirmed=true&newEmail=${attributes.email}&userId=${attributes}`,
   });
 
@@ -146,11 +163,11 @@ export const updateUser = async (attributes: UserAttributes) => {
   return camelcaseKeys(data.user, { deep: true });
 };
 
-export const getUser = async () => {
+export const getUser = async (supabase: TypedSupabaseClient) => {
   const {
     data: { user },
     error,
-  } = await supabaseClient.auth.getUser();
+  } = await supabase.auth.getUser();
 
   if (error) {
     throw new Error(error.message);
@@ -163,8 +180,11 @@ export const getUser = async () => {
   return camelcaseKeys(user, { deep: true });
 };
 
-export const sendPasswordResetEmail = async (email: string) => {
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+export const sendPasswordResetEmail = async (
+  supabase: TypedSupabaseClient,
+  email: string
+) => {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/settings?passwordReset=true`,
   });
 
@@ -173,11 +193,11 @@ export const sendPasswordResetEmail = async (email: string) => {
   }
 };
 
-export const getSession = async () => {
+export const getSession = async (supabase: TypedSupabaseClient) => {
   const {
     data: { session },
     error,
-  } = await supabaseClient.auth.getSession();
+  } = await supabase.auth.getSession();
 
   if (error) {
     throw new Error(error.message);

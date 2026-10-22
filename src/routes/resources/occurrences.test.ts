@@ -18,7 +18,7 @@ import {
   createOccurrenceStockUsages,
   deleteOccurrenceStockUsages,
 } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/occurrences';
@@ -129,6 +129,7 @@ describe('occurrences resource clientAction', () => {
       ok: true,
     });
     expect(createOccurrence).toHaveBeenCalledWith(
+      testSupabaseClient,
       expect.objectContaining({
         cost: 4,
         currency: 'EUR',
@@ -137,12 +138,12 @@ describe('occurrences resource clientAction', () => {
         userId: 'user-1',
       })
     );
-    expect(createNote).toHaveBeenCalledWith({
+    expect(createNote).toHaveBeenCalledWith(testSupabaseClient, {
       content: 'Felt great',
       occurrenceId: 'occurrence-1',
       userId: 'user-1',
     });
-    expect(upsertMetricValues).toHaveBeenCalledWith([
+    expect(upsertMetricValues).toHaveBeenCalledWith(testSupabaseClient, [
       {
         habitMetricId: 'metric-1',
         occurrenceId: 'occurrence-1',
@@ -150,11 +151,16 @@ describe('occurrences resource clientAction', () => {
         value: { numericValue: 3 },
       },
     ]);
-    expect(createOccurrenceStockUsages).toHaveBeenCalledWith([
-      expect.objectContaining({ habitStockId: 'stock-1', quantity: 2 }),
-      expect.objectContaining({ habitStockId: 'stock-3', quantity: 1 }),
-    ]);
-    expect(patchStock).toHaveBeenCalledWith('stock-1', { isDepleted: true });
+    expect(createOccurrenceStockUsages).toHaveBeenCalledWith(
+      testSupabaseClient,
+      [
+        expect.objectContaining({ habitStockId: 'stock-1', quantity: 2 }),
+        expect.objectContaining({ habitStockId: 'stock-3', quantity: 1 }),
+      ]
+    );
+    expect(patchStock).toHaveBeenCalledWith(testSupabaseClient, 'stock-1', {
+      isDepleted: true,
+    });
   });
 
   it('updates an occurrence and syncs its stock usages and note', async () => {
@@ -174,20 +180,29 @@ describe('occurrences resource clientAction', () => {
         occurrenceId: 'occurrence-1',
       })
     ).resolves.toEqual({ ok: true });
-    expect(deleteOccurrenceStockUsages).toHaveBeenCalledWith(['usage-2']);
-    expect(updateOccurrenceStockUsage).toHaveBeenCalledWith('usage-1', {
-      quantity: 2,
-    });
-    expect(createOccurrenceStockUsages).toHaveBeenCalledWith([
-      expect.objectContaining({ habitStockId: 'stock-3' }),
-    ]);
+    expect(deleteOccurrenceStockUsages).toHaveBeenCalledWith(
+      testSupabaseClient,
+      ['usage-2']
+    );
+    expect(updateOccurrenceStockUsage).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'usage-1',
+      {
+        quantity: 2,
+      }
+    );
+    expect(createOccurrenceStockUsages).toHaveBeenCalledWith(
+      testSupabaseClient,
+      [expect.objectContaining({ habitStockId: 'stock-3' })]
+    );
     expect(patchOccurrence).toHaveBeenCalledWith(
+      testSupabaseClient,
       'occurrence-1',
       expect.objectContaining({
         photoPaths: ['user-1/habit-1/old.jpg', 'user-1/habit-1/new.jpg'],
       })
     );
-    expect(updateNote).toHaveBeenCalledWith('note-1', {
+    expect(updateNote).toHaveBeenCalledWith(testSupabaseClient, 'note-1', {
       content: 'Felt great',
       occurrenceId: 'occurrence-1',
     });
@@ -210,7 +225,10 @@ describe('occurrences resource clientAction', () => {
 
     await submitJson({ intent: 'delete', occurrenceId: 'occurrence-1' });
 
-    expect(destroyOccurrence).toHaveBeenCalledWith(occurrence);
+    expect(destroyOccurrence).toHaveBeenCalledWith(
+      testSupabaseClient,
+      occurrence
+    );
   });
 
   it('removes a metric value', async () => {
@@ -222,7 +240,11 @@ describe('occurrences resource clientAction', () => {
       occurrenceId: 'occurrence-1',
     });
 
-    expect(destroyMetricValue).toHaveBeenCalledWith('occurrence-1', 'metric-1');
+    expect(destroyMetricValue).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'occurrence-1',
+      'metric-1'
+    );
   });
 
   it('invalidates the calendar data even when a later step fails', async () => {
@@ -248,14 +270,16 @@ describe('occurrences resource clientAction', () => {
         ReturnType<typeof getOccurrence>
       >;
     });
-    vi.mocked(patchOccurrence).mockImplementation(async (_, { photoPaths }) => {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 0);
-      });
-      storedPhotoPaths = photoPaths ?? null;
+    vi.mocked(patchOccurrence).mockImplementation(
+      async (_supabase, _id, { photoPaths }) => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        });
+        storedPhotoPaths = photoPaths ?? null;
 
-      return {} as Awaited<ReturnType<typeof patchOccurrence>>;
-    });
+        return {} as Awaited<ReturnType<typeof patchOccurrence>>;
+      }
+    );
 
     await Promise.all([
       submitJson({
@@ -285,8 +309,12 @@ describe('occurrences resource clientAction', () => {
         photoPath: 'drop.jpg',
       })
     ).resolves.toEqual({ ok: true });
-    expect(patchOccurrence).toHaveBeenCalledWith('occurrence-1', {
-      photoPaths: ['keep.jpg'],
-    });
+    expect(patchOccurrence).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'occurrence-1',
+      {
+        photoPaths: ['keep.jpg'],
+      }
+    );
   });
 });

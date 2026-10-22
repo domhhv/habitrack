@@ -8,7 +8,7 @@ import {
   uploadHabitIcon,
   createHabitMetrics,
 } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/HabitsPage';
@@ -45,7 +45,9 @@ describe('HabitsPage clientLoader', () => {
     await expect(
       clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(HABITS_URL, user))
     ).resolves.toEqual({ habitsStats: { 'habit-1': stat } });
-    expect(getHabitsStats).toHaveBeenCalledWith(['habit-1']);
+    expect(getHabitsStats).toHaveBeenCalledWith(testSupabaseClient, [
+      'habit-1',
+    ]);
   });
 
   it('skips the stats query without habits or a user', async () => {
@@ -114,17 +116,18 @@ describe('HabitsPage clientAction', () => {
       })
     ).resolves.toEqual({ ok: true });
     expect(uploadHabitIcon).toHaveBeenCalledWith(
+      testSupabaseClient,
       'user-1',
       expect.objectContaining({ name: 'icon.png' })
     );
-    expect(createHabit).toHaveBeenCalledWith({
+    expect(createHabit).toHaveBeenCalledWith(testSupabaseClient, {
       description: 'Morning runs',
       iconPath: 'user-1/icon.png',
       name: 'Running',
       traitId: 'trait-1',
       userId: 'user-1',
     });
-    expect(createHabitMetrics).toHaveBeenCalledWith([
+    expect(createHabitMetrics).toHaveBeenCalledWith(testSupabaseClient, [
       expect.objectContaining({
         habitId: 'habit-1',
         name: 'Distance',
@@ -145,7 +148,7 @@ describe('HabitsPage clientAction', () => {
       })
     );
 
-    expect(createTrait).toHaveBeenCalledWith({
+    expect(createTrait).toHaveBeenCalledWith(testSupabaseClient, {
       color: '#000000',
       description: '',
       name: 'Good',

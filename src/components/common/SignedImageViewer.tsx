@@ -4,7 +4,7 @@ import React from 'react';
 import type { SignedUrls, StorageBuckets } from '@models';
 import { deleteFile, createSignedUrls } from '@services';
 import { useConfirmationActions } from '@stores';
-import { getErrorMessage } from '@utils';
+import { getErrorMessage, getSupabaseBrowserClient } from '@utils';
 
 import { ImageCarousel } from './index';
 
@@ -36,6 +36,7 @@ const SignedImageViewer = ({
     const loadSignedUrls = async () => {
       try {
         const signedUrls = await createSignedUrls(
+          getSupabaseBrowserClient(),
           paths,
           SIGNED_URL_EXPIRY_SECONDS
         );
@@ -74,7 +75,7 @@ const SignedImageViewer = ({
     setImagePathBeingDeleted(path);
 
     try {
-      await deleteFile(bucket, path);
+      await deleteFile(getSupabaseBrowserClient(), bucket, path);
 
       Toast.toast.success('Successfully deleted photo');
 

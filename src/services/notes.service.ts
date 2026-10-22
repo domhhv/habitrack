@@ -9,11 +9,14 @@ import type {
   NotesInsert,
   NoteWithHabit,
   NotePeriodKind,
+  TypedSupabaseClient,
 } from '@models';
-import { supabaseClient } from '@utils';
 
-export const createNote = async (note: NotesInsert): Promise<Note> => {
-  const { data, error } = await supabaseClient
+export const createNote = async (
+  supabase: TypedSupabaseClient,
+  note: NotesInsert
+): Promise<Note> => {
+  const { data, error } = await supabase
     .from('notes')
     .insert(decamelizeKeys(note) as TablesInsert<'notes'>)
     .select()
@@ -26,21 +29,21 @@ export const createNote = async (note: NotesInsert): Promise<Note> => {
   return camelcaseKeys(data);
 };
 
-export const listNotes = async ([rangeStart, rangeEnd]: [
-  ZonedDateTime,
-  ZonedDateTime,
-]): Promise<Note[]> => {
+export const listNotes = async (
+  supabase: TypedSupabaseClient,
+  [rangeStart, rangeEnd]: [ZonedDateTime, ZonedDateTime]
+): Promise<Note[]> => {
   const startDateString = rangeStart.toAbsoluteString();
   const endDateString = rangeEnd.toAbsoluteString();
 
-  const periodNotesPromise = supabaseClient
+  const periodNotesPromise = supabase
     .from('notes')
     .select()
     .in('period_kind', ['day', 'week', 'month'])
     .gte('period_date', startDateString)
     .lte('period_date', endDateString);
 
-  const occurrenceNotesPromise = supabaseClient
+  const occurrenceNotesPromise = supabase
     .from('occurrences')
     .select('note:notes!inner(*)')
     .gte('occurred_at', startDateString)
@@ -73,10 +76,11 @@ export const listNotes = async ([rangeStart, rangeEnd]: [
 };
 
 export const getPeriodNote = async (
+  supabase: TypedSupabaseClient,
   periodKind: NonNullable<NotePeriodKind>,
   periodDate: string
 ): Promise<Note | null> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('notes')
     .select()
     .eq('period_kind', periodKind)
@@ -93,10 +97,11 @@ export const getPeriodNote = async (
 };
 
 export const updateNote = async (
+  supabase: TypedSupabaseClient,
   id: Note['id'],
   note: NotesUpdate
 ): Promise<Note> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('notes')
     .update(decamelizeKeys(note))
     .eq('id', id)
@@ -109,8 +114,11 @@ export const updateNote = async (
   return camelcaseKeys(data[0]);
 };
 
-export const destroyNote = async (id: Note['id']) => {
-  const { error } = await supabaseClient.from('notes').delete().eq('id', id);
+export const destroyNote = async (
+  supabase: TypedSupabaseClient,
+  id: Note['id']
+) => {
+  const { error } = await supabase.from('notes').delete().eq('id', id);
 
   if (error) {
     throw new Error(error.message);
@@ -122,13 +130,13 @@ export type ListAllNotesParams = {
   page: number;
 };
 
-export const listAllNotes = async ({
-  limit,
-  page,
-}: ListAllNotesParams): Promise<NoteWithHabit[]> => {
+export const listAllNotes = async (
+  supabase: TypedSupabaseClient,
+  { limit, page }: ListAllNotesParams
+): Promise<NoteWithHabit[]> => {
   const offset = page * limit;
 
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('notes')
     .select(
       `

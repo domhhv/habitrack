@@ -8,13 +8,10 @@ import type {
   RawOccurrence,
   OccurrencesInsert,
   OccurrencesUpdate,
+  TypedSupabaseClient,
 } from '@models';
 import { StorageBuckets } from '@models';
-import {
-  supabaseClient,
-  parseHabitMetric,
-  parseMetricValueHolder,
-} from '@utils';
+import { parseHabitMetric, parseMetricValueHolder } from '@utils';
 
 import { deleteFile } from './storage.service';
 
@@ -62,9 +59,10 @@ const toRawOccurrence = ({
 };
 
 export const createOccurrence = async (
+  supabase: TypedSupabaseClient,
   occurrence: OccurrencesInsert
 ): Promise<RawOccurrence> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('occurrences')
     .insert(decamelizeKeys(occurrence))
     .select(OCCURRENCE_SELECT)
@@ -77,11 +75,11 @@ export const createOccurrence = async (
   return toRawOccurrence(camelcaseKeys(data, { deep: true }));
 };
 
-export const listOccurrences = async ([rangeStart, rangeEnd]: [
-  ZonedDateTime,
-  ZonedDateTime,
-]): Promise<RawOccurrence[]> => {
-  const { data, error } = await supabaseClient
+export const listOccurrences = async (
+  supabase: TypedSupabaseClient,
+  [rangeStart, rangeEnd]: [ZonedDateTime, ZonedDateTime]
+): Promise<RawOccurrence[]> => {
+  const { data, error } = await supabase
     .from('occurrences')
     .select(OCCURRENCE_SELECT)
     .order('occurred_at')
@@ -96,9 +94,10 @@ export const listOccurrences = async ([rangeStart, rangeEnd]: [
 };
 
 export const getOccurrence = async (
+  supabase: TypedSupabaseClient,
   id: RawOccurrence['id']
 ): Promise<RawOccurrence | null> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('occurrences')
     .select(OCCURRENCE_SELECT)
     .eq('id', id)
@@ -112,10 +111,11 @@ export const getOccurrence = async (
 };
 
 export const patchOccurrence = async (
+  supabase: TypedSupabaseClient,
   id: RawOccurrence['id'],
   occurrence: OccurrencesUpdate
 ): Promise<RawOccurrence> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('occurrences')
     .update(decamelizeKeys(occurrence))
     .eq('id', id)
@@ -129,14 +129,11 @@ export const patchOccurrence = async (
   return toRawOccurrence(camelcaseKeys(data, { deep: true }));
 };
 
-export const destroyOccurrence = async ({
-  id,
-  photoPaths,
-}: Pick<RawOccurrence, 'id' | 'photoPaths'>) => {
-  const { error } = await supabaseClient
-    .from('occurrences')
-    .delete()
-    .eq('id', id);
+export const destroyOccurrence = async (
+  supabase: TypedSupabaseClient,
+  { id, photoPaths }: Pick<RawOccurrence, 'id' | 'photoPaths'>
+) => {
+  const { error } = await supabase.from('occurrences').delete().eq('id', id);
 
   if (error) {
     throw new Error(error.message);
@@ -145,14 +142,21 @@ export const destroyOccurrence = async ({
   if (photoPaths) {
     await Promise.allSettled(
       photoPaths.map((photoPath) => {
-        return deleteFile(StorageBuckets.OCCURRENCE_PHOTOS, photoPath);
+        return deleteFile(
+          supabase,
+          StorageBuckets.OCCURRENCE_PHOTOS,
+          photoPath
+        );
       })
     );
   }
 };
 
-export const getLatestHabitOccurrence = async (habitId: Habit['id']) => {
-  const { data, error } = await supabaseClient
+export const getLatestHabitOccurrence = async (
+  supabase: TypedSupabaseClient,
+  habitId: Habit['id']
+) => {
+  const { data, error } = await supabase
     .from('occurrences')
     .select(OCCURRENCE_SELECT)
     .eq('habit_id', habitId)
@@ -173,9 +177,10 @@ export const getLatestHabitOccurrence = async (habitId: Habit['id']) => {
 
 // TODO: Remove unused Supabase RPC and this function
 export const getLongestHabitStreak = async (
+  supabase: TypedSupabaseClient,
   habitId: Habit['id']
 ): Promise<Streak> => {
-  const { data, error } = await supabaseClient.rpc('get_longest_streak', {
+  const { data, error } = await supabase.rpc('get_longest_streak', {
     p_habit_id: habitId,
     p_time_zone: getLocalTimeZone(),
   });
@@ -187,8 +192,11 @@ export const getLongestHabitStreak = async (
   return camelcaseKeys(data, { deep: true });
 };
 
-export const getHabitsStats = async (habitIds: Habit['id'][]) => {
-  const { data, error } = await supabaseClient.rpc('get_habits_stats', {
+export const getHabitsStats = async (
+  supabase: TypedSupabaseClient,
+  habitIds: Habit['id'][]
+) => {
+  const { data, error } = await supabase.rpc('get_habits_stats', {
     p_habit_ids: habitIds,
     p_time_zone: getLocalTimeZone(), // TODO: replace with preferred timezone from to be created user settings table
   });
