@@ -84,6 +84,7 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
 - **Supabase client**:
   - The session lives in cookies (`@supabase/ssr`). The `app` layout puts the request's client into `supabaseContext`. Its `clientMiddleware` uses the browser client, and its server `middleware` (`supabaseMiddleware`) creates a server client per request and sends refreshed auth cookies back with the response.
   - Every service takes the client (`TypedSupabaseClient`) as its first argument. Loaders and actions pass `context.get(supabaseContext)`. Components and hooks that must call Supabase directly use `getSupabaseBrowserClient()`.
+  - Auth redirects land on `/auth/callback` (`src/pages/AuthCallbackPage.tsx`). Its server `loader` exchanges an OAuth or PKCE `code`, or verifies an email `token_hash`, then redirects to `next`, which `getSafeRedirectPath` keeps on the same origin. Email templates link to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=…&next={{ .RedirectTo }}` (local copies in `supabase/templates/`).
 - **Loading**:
   - The `app` layout `clientMiddleware` puts the session user and profile into `userContext`/`profileContext`.
   - The `app` layout `clientLoader` returns `{ user, profile, habits, traits }`, read via `useUser`/`useProfile`/`useHabits`/`useTraits`.

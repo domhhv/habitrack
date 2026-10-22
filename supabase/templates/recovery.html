@@ -1,0 +1,9 @@
+<h2>Reset your password</h2>
+
+<p>Follow this link to sign in to Habitrack and choose a new password:</p>
+<p>
+  <a
+    href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery&next={{ .RedirectTo }}"
+    >Reset your password</a
+  >
+</p>

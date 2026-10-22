@@ -37,6 +37,9 @@ export default [
     route('oauth/consent', 'pages/OAuthConsentPage.tsx', {
       id: 'oauth-consent',
     }),
+    route('auth/callback', 'pages/AuthCallbackPage.tsx', {
+      id: 'auth-callback',
+    }),
     route('resources/notes', 'routes/resources/notes.ts', {
       id: 'resources-notes',
     }),

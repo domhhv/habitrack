@@ -1,8 +1,19 @@
-import { type UserIdentity, type UserAttributes } from '@supabase/supabase-js';
+import {
+  type UserIdentity,
+  type EmailOtpType,
+  type UserAttributes,
+} from '@supabase/supabase-js';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
 import type { DaysOfWeek, TypedSupabaseClient } from '@models';
+
+const getAuthCallbackUrl = (next: string) => {
+  const url = new URL('/auth/callback', window.location.origin);
+  url.searchParams.set('next', next);
+
+  return url.href;
+};
 
 export const signUp = async (
   supabase: TypedSupabaseClient,
@@ -47,7 +58,7 @@ export const signInWithGoogle = async (supabase: TypedSupabaseClient) => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/calendar`,
+      redirectTo: getAuthCallbackUrl('/calendar'),
     },
   });
 
@@ -70,7 +81,7 @@ export const linkGoogleIdentity = async (supabase: TypedSupabaseClient) => {
   const { error } = await supabase.auth.linkIdentity({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/settings`,
+      redirectTo: getAuthCallbackUrl('/settings'),
     },
   });
 
@@ -153,7 +164,7 @@ export const updateUser = async (
   attributes: UserAttributes
 ) => {
   const { data, error } = await supabase.auth.updateUser(attributes, {
-    emailRedirectTo: `${window.location.origin}/settings?emailChangeConfirmed=true&newEmail=${attributes.email}&userId=${attributes}`,
+    emailRedirectTo: `${window.location.origin}/settings?emailChangeConfirmed=true`,
   });
 
   if (error) {
@@ -211,4 +222,30 @@ export const getSession = async (supabase: TypedSupabaseClient) => {
     { ...session.user, fetchedAt: new Date().toISOString() },
     { deep: true }
   );
+};
+
+export const exchangeCodeForSession = async (
+  supabase: TypedSupabaseClient,
+  code: string
+) => {
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const verifyEmailOtp = async (
+  supabase: TypedSupabaseClient,
+  tokenHash: string,
+  type: EmailOtpType
+) => {
+  const { error } = await supabase.auth.verifyOtp({
+    token_hash: tokenHash,
+    type,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 };
