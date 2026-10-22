@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, is done on `refactor/auth-callback`.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, is done on `refactor/server-auth-guard`, together with the landing page's auth-state reveal.
 
 ## Target end state
 
@@ -274,12 +274,12 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
       - On success it redirects to `next`, and the middleware attaches the session cookies. `getSafeRedirectPath` (`src/utils/get-safe-redirect-path.ts`) keeps `next` on the same origin and falls back to `/calendar`.
       - A provider error (`error_description`), a failed exchange or an incomplete link renders an error alert with status 400.
     - `signInWithGoogle` and `linkGoogleIdentity` redirect to `/auth/callback?next=…`.
-    - **Email redirects** (`emailRedirectTo`, the password-reset `redirectTo`) stay the final page, such as `/settings?emailConfirmed=true`. The template sends the email link to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=…&next={{ .RedirectTo }}`, so the server verifies it in any browser.
+    - **Email redirects** (`emailRedirectTo`, the password-reset `redirectTo`) stay the final page, such as `/settings?emailConfirmed=true`. The template sends the email link to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=…&next={{ .RedirectTo }}`, so the server verifies it in any browser. (Changed by the server auth guard below: email redirects now go through `/auth/callback` too.)
       - The local templates are in `supabase/templates/`: `email` for sign-up, `recovery`, and `email_change`. The anonymous-account conversion also uses `email_change`.
       - The local `site_url` lost its trailing slash so `{{ .SiteURL }}/auth/callback` has no double slash.
       - Until the production templates change, email links still arrive as `?code=` on the final page, and the browser client exchanges them in the same browser, as before.
     - The email-change redirect is now just `/settings?emailChangeConfirmed=true`. That fixes the `[object Object]` URL from Known issues.
-    - `useAuthSearchParams` no longer reads tokens from the hash. It only shows the toasts, now saying "logged in" only when a user is signed in, and keeps the `sync-email` submission.
+    - `useAuthSearchParams` no longer reads tokens from the hash. It only shows the toasts, now saying "logged in" only when a user is signed in, and keeps the `sync-email` submission. (Since the server auth guard, `/settings` always has a user, so the toasts always say "logged in" again.)
     - `/account` is a server `loader` that redirects to `/settings` with the same search. On an HTTP redirect, the browser keeps the hash.
     - **Tests** cover the callback `loader` (code, token hash, same-origin `next`, provider and exchange errors, incomplete links), `getSafeRedirectPath` and the `/account` redirect.
     - **Verified against local Supabase**, without a browser, through the production server build:
@@ -291,8 +291,39 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
     - **Rollout:**
       - Update the production email templates (Confirm signup, Reset password, Change email address) to the `token_hash` link above.
       - Allow `/auth/callback` as a redirect URL for every host that is not the Site URL host, for example Vercel previews.
-- **Server auth middleware.** Add a server `middleware` on a pathless `authenticated` layout. It sets `userContext`/`profileContext` on the server and redirects signed-out visitors to `/login?returnTo=…`. Make the login and OAuth flows honour `returnTo`, which also closes the consent-page gap from PR 3.
+- **Server auth middleware** – done on `refactor/server-auth-guard`. Add a server `middleware` on a pathless `authenticated` layout. It sets `userContext`/`profileContext` on the server and redirects signed-out visitors to `/login?returnTo=…`. Make the login and OAuth flows honour `returnTo`, which also closes the consent-page gap from PR 3.
+  - **As built:**
+    - `src/pages/AuthenticatedLayout.tsx` (id `authenticated`) wraps habits, habit details, notes, settings and OAuth consent. The calendar stays public, because the landing page offers it as a preview.
+    - Its server `middleware` checks the session with `getSessionClaims()` (`getClaims()`) and redirects a signed-out document request to `getLoginPath()`, which is `/login?returnTo=<path and search>`, before any HTML renders. When Supabase Auth can't be reached it lets the request through, and the client guard decides.
+    - Its `clientMiddleware` redirects a client-side navigation when `userContext` is empty. The layout has no server `loader`, so client navigations make no extra server request. The server middleware only runs for document requests.
+    - It does not set `userContext`/`profileContext` on the server yet, because no server `loader` reads them. Step 4 adds that together with the server loaders.
+    - **`returnTo`.** The login, register and anonymous-login pages go back to `returnTo` after a successful sign-in, and for visitors who are already signed in.
+      - `getReturnToPath` keeps it on the same origin and falls back to `/calendar`.
+      - Links between those pages keep it (`useAuthHref`), and a new sign-up's redirect to `/login` keeps the search.
+      - Google sign-in passes it as `next` to `/auth/callback`.
+      - The OAuth consent page's own redirect to `/settings?returnTo=…` is gone. Signed-out consent requests now go through `/login?returnTo=…`, which closes the PR 3 gap.
+    - **Email redirects go through `/auth/callback?next=…` now.** With `/settings` guarded on the server, an email link from the default templates (which arrives as `/settings?…&code=…`) would be redirected to `/login` before the browser could exchange the code.
+      - The callback exchanges the code on the server instead.
+      - With token-hash templates, `next` is the email redirect, so it points back at the callback. The callback then follows the inner `next`.
+    - **Landing page.**
+      - The session state starts as unknown (`null`), so the prerendered page shows no session-dependent controls.
+      - Once `hasBrowserSession()` resolves, the header's theme switcher and buttons fade in (`landing-fade-in`).
+      - The hero call-to-action block grows in and slides down with the right content (`LandingReveal`: grid rows from `0fr` to `1fr` plus a slide). So do the lower anonymous call-to-action and the footer's auth links.
+      - The header became a three-column grid, so the nav doesn't move when the controls appear.
+      - With reduced motion, nothing animates.
+    - **Tests** cover both guards, `getSessionClaims`, `getLoginPath`/`getReturnToPath`, `returnTo` on the auth pages, the nested callback `next`, and the landing page's three session states.
+    - **Verified against local Supabase** through the production server build:
+      - Signed-out `/habits`, `/settings?…` and `/oauth/consent?…` redirect to `/login?returnTo=…`, while `/calendar/month` and `/login` render.
+      - A token-hash recovery link whose `next` is the email redirect lands on `/settings?passwordReset=true` with a session.
+      - With that session's cookies, `/settings`, `/habits` and `/notes` render.
+    - **Found:** the root "We're preparing the app" overlay has no CSS (`.loader-container` is not defined anywhere). So nothing visible happens while the app loads after clicking a link on the landing page. Step 4 replaces it.
 - **Server loaders, route by route.** Convert `clientLoader` → `loader`: the app layout first, then habits, habit details, notes, settings and the calendar.
+  - **Goal:** going from the landing page to the calendar should show the calendar shell at once. Today the browser waits for route discovery, the module downloads, the session, the profile, habits and traits, the `/calendar` → `/calendar/month` redirect and the entries, with no visible feedback. Plan:
+    - one server round trip for the app data;
+    - prefetching on the landing page's calendar links, pointing them straight at `/calendar/month`;
+    - streamed calendar entries;
+    - an app-shell skeleton as the pending UI and the `HydrateFallback`.
+  - Rendering the app UI on the server needs a per-request time zone (for example a cookie) and locale first: about 20 calendar render paths call `getLocalTimeZone()`, and several hooks read `window` or `localStorage` while rendering.
   - For the calendar, use the docs' "Client-Side Caching" pattern: a server `loader` for the document request, plus a `clientLoader` (`hydrate = true`) that serves later navigations from the range cache and falls back to `serverLoader()`.
   - Drop `HydrateFallback` on converted routes.
 - **Server actions.** Convert `clientAction` → `action`. Toasts move to the component (from `fetcher.data`), because actions no longer run in the browser. `runAction` becomes a server helper that returns `{ ok, error }`.
@@ -347,7 +378,7 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
 ### 9. Known issues found during the migration
 
 - ~~`updateUser` builds its email redirect with `userId=${attributes}`, so the URL contains `[object Object]`.~~ Fixed with the auth callback route.
-- Nothing consumes the `returnTo` that the OAuth consent page sends signed-out users to (§1).
+- ~~Nothing consumes the `returnTo` that the OAuth consent page sends signed-out users to (§1).~~ Fixed with the server auth guard: consent requests go through `/login?returnTo=…`.
 - `NoteDrawer` overwrites text typed before the period note finishes loading.
 - A habit whose metric creation fails after the habit row was written can be duplicated by retrying (§4, atomic writes).
 - `/habits/:habitId` with a non-UUID id shows "Couldn't load this habit" instead of "Habit not found".

@@ -2,6 +2,7 @@ import {
   type UserIdentity,
   type EmailOtpType,
   type UserAttributes,
+  isAuthRetryableFetchError,
 } from '@supabase/supabase-js';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
@@ -25,7 +26,7 @@ export const signUp = async (
     email,
     password,
     options: {
-      emailRedirectTo: `${window.location.origin}/settings?emailConfirmed=true`,
+      emailRedirectTo: getAuthCallbackUrl('/settings?emailConfirmed=true'),
       data: decamelizeKeys({
         firstDayOfWeek,
       }),
@@ -54,11 +55,14 @@ export const signInAnonymously = async (
   }
 };
 
-export const signInWithGoogle = async (supabase: TypedSupabaseClient) => {
+export const signInWithGoogle = async (
+  supabase: TypedSupabaseClient,
+  next = '/calendar'
+) => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: getAuthCallbackUrl('/calendar'),
+      redirectTo: getAuthCallbackUrl(next),
     },
   });
 
@@ -109,7 +113,7 @@ export const convertAnonymousUser = async (
   const { error } = await supabase.auth.updateUser(
     { email, password },
     {
-      emailRedirectTo: `${window.location.origin}/settings?emailConfirmed=true`,
+      emailRedirectTo: getAuthCallbackUrl('/settings?emailConfirmed=true'),
     }
   );
 
@@ -164,7 +168,7 @@ export const updateUser = async (
   attributes: UserAttributes
 ) => {
   const { data, error } = await supabase.auth.updateUser(attributes, {
-    emailRedirectTo: `${window.location.origin}/settings?emailChangeConfirmed=true`,
+    emailRedirectTo: getAuthCallbackUrl('/settings?emailChangeConfirmed=true'),
   });
 
   if (error) {
@@ -196,7 +200,7 @@ export const sendPasswordResetEmail = async (
   email: string
 ) => {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/settings?passwordReset=true`,
+    redirectTo: getAuthCallbackUrl('/settings?passwordReset=true'),
   });
 
   if (error) {
@@ -248,4 +252,18 @@ export const verifyEmailOtp = async (
   if (error) {
     throw new Error(error.message);
   }
+};
+
+/**
+ * Verified claims of the request's session, or `null` when there is no valid session.
+ * Throws only when Supabase Auth can't be reached, so callers can tell an outage apart.
+ */
+export const getSessionClaims = async (supabase: TypedSupabaseClient) => {
+  const { data, error } = await supabase.auth.getClaims();
+
+  if (isAuthRetryableFetchError(error)) {
+    throw new Error(error.message);
+  }
+
+  return data?.claims ?? null;
 };

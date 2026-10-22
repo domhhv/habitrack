@@ -19,12 +19,17 @@ export default [
         id: 'calendar-day',
       }),
     ]),
-    route('habits', 'pages/HabitsPage.tsx', { id: 'habits' }),
-    route('habits/:habitId', 'pages/HabitDetailsPage.tsx', {
-      id: 'habit-details',
-    }),
-    route('notes', 'pages/NotesPage.tsx', { id: 'notes' }),
-    route('settings', 'pages/SettingsPage.tsx', { id: 'settings' }),
+    layout('pages/AuthenticatedLayout.tsx', { id: 'authenticated' }, [
+      route('habits', 'pages/HabitsPage.tsx', { id: 'habits' }),
+      route('habits/:habitId', 'pages/HabitDetailsPage.tsx', {
+        id: 'habit-details',
+      }),
+      route('notes', 'pages/NotesPage.tsx', { id: 'notes' }),
+      route('settings', 'pages/SettingsPage.tsx', { id: 'settings' }),
+      route('oauth/consent', 'pages/OAuthConsentPage.tsx', {
+        id: 'oauth-consent',
+      }),
+    ]),
     route('account', 'pages/AccountRedirect.tsx', { id: 'account' }),
     route('login', 'pages/LoginPage.tsx', { id: 'login' }),
     route('anonymous-login', 'pages/AnonymousLoginPage.tsx', {
@@ -33,9 +38,6 @@ export default [
     route('register', 'pages/RegisterPage.tsx', { id: 'register' }),
     route('reset-password', 'pages/ResetPasswordPage.tsx', {
       id: 'reset-password',
-    }),
-    route('oauth/consent', 'pages/OAuthConsentPage.tsx', {
-      id: 'oauth-consent',
     }),
     route('auth/callback', 'pages/AuthCallbackPage.tsx', {
       id: 'auth-callback',

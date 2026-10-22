@@ -14,14 +14,14 @@ const NAV_LINKS = [
 ];
 
 type LandingHeaderProps = {
-  hasSession: boolean;
+  hasSession: boolean | null;
 };
 
 const LandingHeader = ({ hasSession }: LandingHeaderProps) => {
   return (
     <header className="sticky top-0 z-50 border-b border-(--border) bg-(--background)/80 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <a href="/" className="flex items-center gap-2.5">
+      <div className="mx-auto grid h-16 w-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:px-8">
+        <a href="/" className="flex items-center gap-2.5 justify-self-start">
           <InfinityMark className="h-4 w-auto overflow-visible" />
           <span className="text-lg font-extrabold">Habitrack</span>
         </a>
@@ -38,25 +38,25 @@ const LandingHeader = ({ hasSession }: LandingHeaderProps) => {
             );
           })}
         </nav>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          {hasSession ? (
-            <div className="hero-logged-in-ctas-container flex items-center gap-2">
+        {hasSession !== null && (
+          <div className="landing-fade-in col-start-3 flex items-center gap-3 justify-self-end">
+            <ThemeToggle />
+            {hasSession ? (
               <CustomButton size="sm" href="/calendar">
                 Calendar
               </CustomButton>
-            </div>
-          ) : (
-            <div className="hero-logged-out-ctas-container flex items-center gap-2">
-              <CtaLink size="sm" href="/login" variant="ghost">
-                Log In
-              </CtaLink>
-              <CtaLink size="sm" href="/register">
-                Join
-              </CtaLink>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <CtaLink size="sm" href="/login" variant="ghost">
+                  Log In
+                </CtaLink>
+                <CtaLink size="sm" href="/register">
+                  Join
+                </CtaLink>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

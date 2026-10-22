@@ -1,3 +1,5 @@
+import { cn } from '@heroui/react';
+
 import InfinityMark from '../InfinityMark';
 
 const FOOTER_LINKS = [
@@ -8,7 +10,7 @@ const FOOTER_LINKS = [
 ];
 
 type LandingFooterProps = {
-  hasSession: boolean;
+  hasSession: boolean | null;
 };
 
 const LandingFooter = ({ hasSession }: LandingFooterProps) => {
@@ -24,10 +26,9 @@ const LandingFooter = ({ hasSession }: LandingFooterProps) => {
         </div>
         <nav className="flex flex-wrap items-center gap-5">
           {FOOTER_LINKS.map((link) => {
-            if (
-              (link.label === 'Log In' || link.label === 'Join') &&
-              hasSession
-            ) {
+            const isAuthLink = link.label === 'Log In' || link.label === 'Join';
+
+            if (isAuthLink && hasSession !== false) {
               return null;
             }
 
@@ -35,7 +36,10 @@ const LandingFooter = ({ hasSession }: LandingFooterProps) => {
               <a
                 key={link.label}
                 href={link.href}
-                className="text-sm font-bold text-(--muted) hover:text-(--foreground)"
+                className={cn(
+                  'text-sm font-bold text-(--muted) hover:text-(--foreground)',
+                  isAuthLink && 'landing-fade-in'
+                )}
               >
                 {link.label}
               </a>

@@ -1,4 +1,5 @@
 export * from './app-revalidation';
+export * from './auth-redirect';
 export { default as buildMetricTotals } from './build-metric-totals';
 export { default as buildOccurrenceSummary } from './build-occurrence-summary';
 export { default as calculateOccurrenceCost } from './calculate-occurrence-cost';

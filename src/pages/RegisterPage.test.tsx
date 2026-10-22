@@ -20,14 +20,14 @@ const REGISTER_URL = 'http://localhost/register';
 const anonymousUser = { id: 'user-1', isAnonymous: true } as SessionUser;
 const permanentUser = { id: 'user-2', isAnonymous: false } as SessionUser;
 
-const submit = (user: SessionUser) => {
+const submit = (user: SessionUser, url = REGISTER_URL) => {
   const body = new FormData();
   body.set('email', 'me@email.com');
   body.set('password', 'password');
   body.set('firstDayOfWeek', 'sun');
 
   return clientAction(
-    makeRouteArgs<Route.ClientActionArgs>(REGISTER_URL, user, {
+    makeRouteArgs<Route.ClientActionArgs>(url, user, {
       body,
       method: 'POST',
     })
@@ -90,6 +90,17 @@ describe('RegisterPage clientAction', () => {
       'sun'
     );
     expect(result.headers.get('Location')).toBe('/login');
+  });
+
+  it('keeps the return path for the anonymous user and the login page', async () => {
+    const url = `${REGISTER_URL}?returnTo=%2Fnotes`;
+
+    expect(
+      ((await submit(anonymousUser, url)) as Response).headers.get('Location')
+    ).toBe('/notes');
+    expect(
+      ((await submit(null, url)) as Response).headers.get('Location')
+    ).toBe('/login?returnTo=%2Fnotes');
   });
 
   it('stays on the page and shows a toast when sign-up fails', async () => {

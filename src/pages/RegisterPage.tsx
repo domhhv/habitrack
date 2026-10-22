@@ -3,22 +3,23 @@ import React from 'react';
 import { data, replace, redirect } from 'react-router';
 
 import { AuthForm } from '@components';
-import { useIsSubmitting, useFirstDayOfWeek } from '@hooks';
+import { useAuthHref, useIsSubmitting, useFirstDayOfWeek } from '@hooks';
 import { signUp, convertAnonymousUser } from '@services';
 import {
   userContext,
   parseDayOfWeek,
   getErrorMessage,
+  getReturnToPath,
   supabaseContext,
 } from '@utils';
 
 import type { Route } from './+types/RegisterPage';
 
-export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
+export const clientLoader = ({ context, request }: Route.ClientLoaderArgs) => {
   const user = context.get(userContext);
 
   if (user && !user.isAnonymous) {
-    throw replace('/calendar');
+    throw replace(getReturnToPath(request.url));
   }
 
   return { isAnonymousUser: !!user?.isAnonymous };
@@ -61,14 +62,14 @@ export const clientAction = async ({
       'Almost there! Check your inbox to confirm your email. All your habits and notes stay with your account.'
     );
 
-    return redirect('/calendar');
+    return redirect(getReturnToPath(request.url));
   }
 
   Toast.toast.success(
     'Account created! Please check your email to confirm your account before logging in.'
   );
 
-  return redirect('/login');
+  return redirect(`/login${new URL(request.url).search}`);
 };
 
 const RegisterPage = ({
@@ -76,6 +77,7 @@ const RegisterPage = ({
 }: Route.ComponentProps) => {
   const firstDayOfWeek = useFirstDayOfWeek();
   const isAuthenticating = useIsSubmitting();
+  const loginHref = useAuthHref('/login');
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">
@@ -105,7 +107,7 @@ const RegisterPage = ({
               ) : (
                 <>
                   Already have an account?{' '}
-                  <Link href="/login" className="text-accent font-medium">
+                  <Link href={loginHref} className="text-accent font-medium">
                     Log in
                   </Link>
                 </>

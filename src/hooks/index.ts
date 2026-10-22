@@ -1,5 +1,6 @@
 export { default as useActionFetcher } from './use-action-fetcher';
 export { default as useAppLoaderData } from './use-app-loader-data';
+export { default as useAuthHref } from './use-auth-href';
 export { default as useAuthSearchParams } from './use-auth-search-params';
 export { default as useAuthSubscription } from './use-auth-subscription';
 export { default as useCalendarData } from './use-calendar-data';

@@ -3,20 +3,21 @@ import React from 'react';
 import { data, Form, replace, redirect } from 'react-router';
 
 import { CustomButton } from '@components';
-import { useIsSubmitting, useFirstDayOfWeek } from '@hooks';
+import { useAuthHref, useIsSubmitting, useFirstDayOfWeek } from '@hooks';
 import { signInAnonymously } from '@services';
 import {
   userContext,
   parseDayOfWeek,
   getErrorMessage,
+  getReturnToPath,
   supabaseContext,
 } from '@utils';
 
 import type { Route } from './+types/AnonymousLoginPage';
 
-export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
+export const clientLoader = ({ context, request }: Route.ClientLoaderArgs) => {
   if (context.get(userContext)) {
-    throw replace('/calendar');
+    throw replace(getReturnToPath(request.url));
   }
 
   return null;
@@ -46,12 +47,14 @@ export const clientAction = async ({
 
   Toast.toast.success('Welcome to Habitrack! You are browsing anonymously');
 
-  return redirect('/calendar');
+  return redirect(getReturnToPath(request.url));
 };
 
 const AnonymousLoginPage = () => {
   const firstDayOfWeek = useFirstDayOfWeek();
   const isAuthenticating = useIsSubmitting();
+  const registerHref = useAuthHref('/register');
+  const loginHref = useAuthHref('/login');
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">
@@ -99,11 +102,11 @@ const AnonymousLoginPage = () => {
           </Form>
           <div className="text-muted text-center text-sm">
             Prefer a permanent account?{' '}
-            <Link href="/register" className="text-accent font-medium">
+            <Link href={registerHref} className="text-accent font-medium">
               Join
             </Link>{' '}
             or{' '}
-            <Link href="/login" className="text-accent font-medium">
+            <Link href={loginHref} className="text-accent font-medium">
               log in
             </Link>
           </div>

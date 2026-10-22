@@ -30,7 +30,11 @@ vi.mock('./sections', () => {
     AnonymousCtaSection: () => {
       return <p>Anonymous call to action</p>;
     },
-    LandingHeader: ({ hasSession }: { hasSession: boolean }) => {
+    LandingHeader: ({ hasSession }: { hasSession: boolean | null }) => {
+      if (hasSession === null) {
+        return <p>Session unknown</p>;
+      }
+
       return <p>{hasSession ? 'Signed in' : 'Signed out'}</p>;
     },
   };
@@ -41,27 +45,34 @@ describe('LandingPage', () => {
     vi.clearAllMocks();
   });
 
-  it('switches to the signed-in actions once the browser session is found', async () => {
+  it('renders no session-dependent actions until the session is known', () => {
+    vi.mocked(hasBrowserSession).mockReturnValue(new Promise(() => {}));
+
+    render(<LandingPage />);
+
+    expect(screen.getByText('Session unknown')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Anonymous call to action')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the signed-in actions once the browser session is found', async () => {
     vi.mocked(hasBrowserSession).mockResolvedValue(true);
 
     render(<LandingPage />);
 
-    expect(screen.getByText('Signed out')).toBeInTheDocument();
     expect(await screen.findByText('Signed in')).toBeInTheDocument();
     expect(
       screen.queryByText('Anonymous call to action')
     ).not.toBeInTheDocument();
   });
 
-  it('keeps the signed-out actions without a session', async () => {
+  it('shows the signed-out actions without a session', async () => {
     vi.mocked(hasBrowserSession).mockResolvedValue(false);
 
     render(<LandingPage />);
 
-    await vi.waitFor(() => {
-      expect(hasBrowserSession).toHaveBeenCalledOnce();
-    });
-    expect(screen.getByText('Signed out')).toBeInTheDocument();
+    expect(await screen.findByText('Signed out')).toBeInTheDocument();
     expect(screen.getByText('Anonymous call to action')).toBeInTheDocument();
   });
 });
