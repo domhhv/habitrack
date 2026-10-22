@@ -1,7 +1,7 @@
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import { signIn } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/LoginPage';
@@ -50,7 +50,11 @@ describe('LoginPage', () => {
   it('signs in with the submitted credentials and goes to the calendar', async () => {
     const result = (await submit()) as Response;
 
-    expect(signIn).toHaveBeenCalledWith('me@email.com', 'password');
+    expect(signIn).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'me@email.com',
+      'password'
+    );
     expect(result.headers.get('Location')).toBe('/calendar');
   });
 

@@ -4,6 +4,7 @@ import { data } from 'react-router';
 import {
   StorageBuckets,
   type RawOccurrence,
+  type TypedSupabaseClient,
   type OccurrenceSubmission,
   type OccurrenceValuesSubmission,
 } from '@models';
@@ -30,6 +31,7 @@ import {
   runAction,
   userContext,
   getErrorMessage,
+  supabaseContext,
   calculateOccurrenceCost,
 } from '@utils';
 
@@ -48,16 +50,17 @@ const photoPathsWrites = new Map<RawOccurrence['id'], Promise<void>>();
  * removals and entry updates in this tab never overwrite each other's changes.
  */
 const writePhotoPaths = (
+  supabase: TypedSupabaseClient,
   occurrenceId: RawOccurrence['id'],
   getNextPhotoPaths: (photoPaths: string[]) => string[],
-  changes: Parameters<typeof patchOccurrence>[1] = {}
+  changes: Parameters<typeof patchOccurrence>[2] = {}
 ) => {
   const write = (photoPathsWrites.get(occurrenceId) ?? Promise.resolve()).then(
     async () => {
-      const occurrence = await getOccurrence(occurrenceId);
+      const occurrence = await getOccurrence(supabase, occurrenceId);
       const photoPaths = getNextPhotoPaths(occurrence?.photoPaths ?? []);
 
-      await patchOccurrence(occurrenceId, {
+      await patchOccurrence(supabase, occurrenceId, {
         ...changes,
         photoPaths: photoPaths.length > 0 ? photoPaths : null,
       });
@@ -77,63 +80,79 @@ const writePhotoPaths = (
   return write;
 };
 
-const uploadPhotos = (formData: FormData, userId: string, habitId: string) => {
+const uploadPhotos = (
+  supabase: TypedSupabaseClient,
+  formData: FormData,
+  userId: string,
+  habitId: string
+) => {
   const photos = formData.getAll('photos').filter((photo): photo is File => {
     return typeof photo !== 'string';
   });
 
   return photos.length > 0
-    ? uploadImages(StorageBuckets.OCCURRENCE_PHOTOS, userId, photos, habitId)
+    ? uploadImages(
+        supabase,
+        StorageBuckets.OCCURRENCE_PHOTOS,
+        userId,
+        photos,
+        habitId
+      )
     : Promise.resolve([]);
 };
 
-const getCost = async ({
-  selectedHabitId,
-  stockUsages,
-}: OccurrenceValuesSubmission) => {
-  const habit = await getHabit(selectedHabitId);
+const getCost = async (
+  supabase: TypedSupabaseClient,
+  { selectedHabitId, stockUsages }: OccurrenceValuesSubmission
+) => {
+  const habit = await getHabit(supabase, selectedHabitId);
 
   return calculateOccurrenceCost(habit?.stocks ?? [], stockUsages);
 };
 
 const saveMetricValues = (
+  supabase: TypedSupabaseClient,
   { metricValues }: OccurrenceValuesSubmission,
   occurrenceId: string,
   userId: string
 ) => {
   return upsertMetricValues(
+    supabase,
     Object.entries(metricValues).map(([habitMetricId, value]) => {
       return { habitMetricId, occurrenceId, userId, value };
     })
   );
 };
 
-const markStocksDepleted = ({
-  depletedStockIds,
-}: OccurrenceValuesSubmission) => {
+const markStocksDepleted = (
+  supabase: TypedSupabaseClient,
+  { depletedStockIds }: OccurrenceValuesSubmission
+) => {
   return Promise.all(
     depletedStockIds.map((stockId) => {
-      return patchStock(stockId, { isDepleted: true });
+      return patchStock(supabase, stockId, { isDepleted: true });
     })
   );
 };
 
 const saveOccurrenceNote = async (
+  supabase: TypedSupabaseClient,
   occurrenceId: string,
   content: string,
   noteId: string | null,
   userId: string
 ) => {
   if (content && noteId) {
-    await updateNote(noteId, { content, occurrenceId });
+    await updateNote(supabase, noteId, { content, occurrenceId });
   } else if (content) {
-    await createNote({ content, occurrenceId, userId });
+    await createNote(supabase, { content, occurrenceId, userId });
   } else if (noteId) {
-    await destroyNote(noteId);
+    await destroyNote(supabase, noteId);
   }
 };
 
 const syncStockUsages = async (
+  supabase: TypedSupabaseClient,
   occurrence: RawOccurrence,
   { stockUsages }: OccurrenceValuesSubmission,
   userId: string
@@ -150,6 +169,7 @@ const syncStockUsages = async (
   );
 
   await deleteOccurrenceStockUsages(
+    supabase,
     occurrence.stockUsages
       .filter(({ habitStockId }) => {
         return !nextStockIds.has(habitStockId);
@@ -164,12 +184,13 @@ const syncStockUsages = async (
       const existing = existingUsagesByStockId.get(habitStockId);
 
       return existing && existing.quantity !== quantity
-        ? [updateOccurrenceStockUsage(existing.id, { quantity })]
+        ? [updateOccurrenceStockUsage(supabase, existing.id, { quantity })]
         : [];
     })
   );
 
   await createOccurrenceStockUsages(
+    supabase,
     stockUsages
       .filter(({ habitStockId }) => {
         return !existingUsagesByStockId.has(habitStockId);
@@ -185,15 +206,20 @@ const syncStockUsages = async (
   );
 };
 
-const addOccurrence = async (formData: FormData, userId: string) => {
+const addOccurrence = async (
+  supabase: TypedSupabaseClient,
+  formData: FormData,
+  userId: string
+) => {
   const values = readValues(formData);
   const photoPaths = await uploadPhotos(
+    supabase,
     formData,
     userId,
     values.selectedHabitId
   );
-  const { cost, currency } = await getCost(values);
-  const occurrence = await createOccurrence({
+  const { cost, currency } = await getCost(supabase, values);
+  const occurrence = await createOccurrence(supabase, {
     cost,
     currency,
     habitId: values.selectedHabitId,
@@ -204,18 +230,24 @@ const addOccurrence = async (formData: FormData, userId: string) => {
     userId,
   });
 
-  await saveOccurrenceNote(occurrence.id, values.note, null, userId);
-  await saveMetricValues(values, occurrence.id, userId);
+  await saveOccurrenceNote(supabase, occurrence.id, values.note, null, userId);
+  await saveMetricValues(supabase, values, occurrence.id, userId);
   await createOccurrenceStockUsages(
+    supabase,
     values.stockUsages.map(({ habitStockId, quantity }) => {
       return { habitStockId, occurrenceId: occurrence.id, quantity, userId };
     })
   );
-  await markStocksDepleted(values);
+  await markStocksDepleted(supabase, values);
 };
 
-const updateOccurrence = async (formData: FormData, userId: string) => {
+const updateOccurrence = async (
+  supabase: TypedSupabaseClient,
+  formData: FormData,
+  userId: string
+) => {
   const occurrence = await getOccurrence(
+    supabase,
     String(formData.get('occurrenceId') ?? '')
   );
 
@@ -226,15 +258,17 @@ const updateOccurrence = async (formData: FormData, userId: string) => {
   const values = readValues(formData);
   const noteId = formData.get('noteId');
   const uploadedPhotoPaths = await uploadPhotos(
+    supabase,
     formData,
     userId,
     values.selectedHabitId
   );
-  const { cost, currency } = await getCost(values);
+  const { cost, currency } = await getCost(supabase, values);
 
-  await syncStockUsages(occurrence, values, userId);
-  await markStocksDepleted(values);
+  await syncStockUsages(supabase, occurrence, values, userId);
+  await markStocksDepleted(supabase, values);
   await writePhotoPaths(
+    supabase,
     occurrence.id,
     (photoPaths) => {
       return photoPaths.concat(uploadedPhotoPaths);
@@ -249,24 +283,32 @@ const updateOccurrence = async (formData: FormData, userId: string) => {
     }
   );
   await saveOccurrenceNote(
+    supabase,
     occurrence.id,
     values.note,
     typeof noteId === 'string' && noteId ? noteId : null,
     userId
   );
-  await saveMetricValues(values, occurrence.id, userId);
+  await saveMetricValues(supabase, values, occurrence.id, userId);
 };
 
-const deleteOccurrence = async (occurrenceId: string) => {
-  const occurrence = await getOccurrence(occurrenceId);
+const deleteOccurrence = async (
+  supabase: TypedSupabaseClient,
+  occurrenceId: string
+) => {
+  const occurrence = await getOccurrence(supabase, occurrenceId);
 
   if (occurrence) {
-    await destroyOccurrence(occurrence);
+    await destroyOccurrence(supabase, occurrence);
   }
 };
 
-const removePhoto = (occurrenceId: string, photoPath: string) => {
-  return writePhotoPaths(occurrenceId, (photoPaths) => {
+const removePhoto = (
+  supabase: TypedSupabaseClient,
+  occurrenceId: string,
+  photoPath: string
+) => {
+  return writePhotoPaths(supabase, occurrenceId, (photoPaths) => {
     return photoPaths.filter((path) => {
       return path !== photoPath;
     });
@@ -277,6 +319,7 @@ export const clientAction = async ({
   context,
   request,
 }: Route.ClientActionArgs) => {
+  const supabase = context.get(supabaseContext);
   const user = context.get(userContext);
 
   if (!user) {
@@ -291,11 +334,13 @@ export const clientAction = async ({
 
     return formData.get('intent') === 'update'
       ? runAction(
-          updateOccurrence(formData, user.id).finally(clearCalendarData),
+          updateOccurrence(supabase, formData, user.id).finally(
+            clearCalendarData
+          ),
           'update_occurrence'
         )
       : runAction(
-          addOccurrence(formData, user.id).finally(clearCalendarData),
+          addOccurrence(supabase, formData, user.id).finally(clearCalendarData),
           'add_occurrence'
         );
   }
@@ -305,13 +350,16 @@ export const clientAction = async ({
   switch (submission.intent) {
     case 'delete':
       return runAction(
-        deleteOccurrence(submission.occurrenceId).finally(clearCalendarData),
+        deleteOccurrence(supabase, submission.occurrenceId).finally(
+          clearCalendarData
+        ),
         'remove_occurrence'
       );
 
     case 'remove-metric-value':
       return runAction(
         destroyMetricValue(
+          supabase,
           submission.occurrenceId,
           submission.habitMetricId
         ).finally(clearCalendarData),
@@ -320,7 +368,11 @@ export const clientAction = async ({
 
     case 'remove-photo':
       try {
-        await removePhoto(submission.occurrenceId, submission.photoPath);
+        await removePhoto(
+          supabase,
+          submission.occurrenceId,
+          submission.photoPath
+        );
 
         return { ok: true as const };
       } catch (error) {

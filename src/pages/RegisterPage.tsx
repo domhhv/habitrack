@@ -5,7 +5,12 @@ import { data, replace, redirect } from 'react-router';
 import { AuthForm } from '@components';
 import { useIsSubmitting, useFirstDayOfWeek } from '@hooks';
 import { signUp, convertAnonymousUser } from '@services';
-import { userContext, parseDayOfWeek, getErrorMessage } from '@utils';
+import {
+  userContext,
+  parseDayOfWeek,
+  getErrorMessage,
+  supabaseContext,
+} from '@utils';
 
 import type { Route } from './+types/RegisterPage';
 
@@ -26,13 +31,15 @@ export const clientAction = async ({
   const formData = await request.formData();
   const email = String(formData.get('email') ?? '');
   const password = String(formData.get('password') ?? '');
+  const supabase = context.get(supabaseContext);
   const isAnonymousUser = !!context.get(userContext)?.isAnonymous;
 
   try {
     if (isAnonymousUser) {
-      await convertAnonymousUser(email, password);
+      await convertAnonymousUser(supabase, email, password);
     } else {
       await signUp(
+        supabase,
         email,
         password,
         parseDayOfWeek(formData.get('firstDayOfWeek'))

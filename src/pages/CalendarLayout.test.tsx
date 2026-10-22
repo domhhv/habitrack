@@ -3,7 +3,7 @@ import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import type { Profile } from '@models';
 import { loadCalendarData } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import { profileContext, type SessionUser } from '@utils';
 
 import type { Route } from './+types/CalendarLayout';
@@ -60,7 +60,7 @@ describe('CalendarLayout clientLoader', () => {
       )
     );
 
-    expect(loadCalendarData).toHaveBeenCalledWith([
+    expect(loadCalendarData).toHaveBeenCalledWith(testSupabaseClient, [
       new CalendarDateTime(2026, 10, 18),
       new CalendarDateTime(2026, 10, 24, 23, 59, 59, 999),
     ]);

@@ -8,10 +8,18 @@ import webpackStatsPlugin from 'rollup-plugin-webpack-stats';
 import { loadEnv, defineConfig, type UserConfig } from 'vite';
 import viteRollbar from 'vite-plugin-rollbar-sourcemap';
 
+const TEST_ENV = {
+  SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key',
+  SUPABASE_URL: 'https://test-project.supabase.co',
+};
+
 export default defineConfig(({ isSsrBuild, mode }) => {
   const isProduction = mode === 'production';
 
-  const env = loadEnv(mode, process.cwd(), '');
+  const env: Record<string, string> = {
+    ...loadEnv(mode, process.cwd(), ''),
+    ...(mode === 'test' ? TEST_ENV : {}),
+  };
 
   const ROLLBAR_CONFIG = {
     accessToken: env.ROLLBAR_SERVER_ACCESS_TOKEN,
@@ -79,7 +87,7 @@ export default defineConfig(({ isSsrBuild, mode }) => {
     },
     define: {
       ROLLBAR_CLIENT_ENV: JSON.stringify(env.ROLLBAR_CLIENT_ENV),
-      SUPABASE_ANON_KEY: JSON.stringify(env.SUPABASE_ANON_KEY),
+      SUPABASE_PUBLISHABLE_KEY: JSON.stringify(env.SUPABASE_PUBLISHABLE_KEY),
       SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
       VERCEL_GIT_COMMIT_SHA: JSON.stringify(env.VERCEL_GIT_COMMIT_SHA),
       ROLLBAR_CLIENT_ACCESS_TOKEN: JSON.stringify(

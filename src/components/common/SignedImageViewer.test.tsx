@@ -3,6 +3,7 @@ import React from 'react';
 import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
 
 import { StorageBuckets } from '@models';
+import { testSupabaseClient } from '@tests';
 
 import SignedImageViewer from './SignedImageViewer';
 
@@ -28,6 +29,15 @@ vi.mock('@services', () => {
     },
     deleteFile: (...args: unknown[]) => {
       return mockDeleteFile(...args);
+    },
+  };
+});
+
+vi.mock('@utils', async (importOriginal) => {
+  return {
+    ...(await importOriginal<object>()),
+    getSupabaseBrowserClient: () => {
+      return testSupabaseClient;
     },
   };
 });
@@ -86,6 +96,7 @@ describe(SignedImageViewer.name, () => {
 
     await waitFor(() => {
       expect(mockCreateSignedUrls).toHaveBeenCalledWith(
+        testSupabaseClient,
         ['test-path-1.jpg'],
         300
       );
@@ -114,6 +125,7 @@ describe(SignedImageViewer.name, () => {
 
     await waitFor(() => {
       expect(mockCreateSignedUrls).toHaveBeenCalledWith(
+        testSupabaseClient,
         ['test-path-1.jpg'],
         300
       );
@@ -124,6 +136,7 @@ describe(SignedImageViewer.name, () => {
 
     await waitFor(() => {
       expect(mockDeleteFile).toHaveBeenCalledWith(
+        testSupabaseClient,
         StorageBuckets.OCCURRENCE_PHOTOS,
         'test-path-1.jpg'
       );
@@ -147,6 +160,7 @@ describe(SignedImageViewer.name, () => {
 
     await waitFor(() => {
       expect(mockCreateSignedUrls).toHaveBeenCalledWith(
+        testSupabaseClient,
         ['test-path-1.jpg'],
         300
       );

@@ -5,7 +5,7 @@ import { data, replace, redirect } from 'react-router';
 import { AuthForm } from '@components';
 import { useIsSubmitting } from '@hooks';
 import { sendPasswordResetEmail } from '@services';
-import { userContext, getErrorMessage } from '@utils';
+import { userContext, getErrorMessage, supabaseContext } from '@utils';
 
 import type { Route } from './+types/ResetPasswordPage';
 
@@ -17,11 +17,17 @@ export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
   return null;
 };
 
-export const clientAction = async ({ request }: Route.ClientActionArgs) => {
+export const clientAction = async ({
+  context,
+  request,
+}: Route.ClientActionArgs) => {
   const formData = await request.formData();
 
   try {
-    await sendPasswordResetEmail(String(formData.get('email') ?? ''));
+    await sendPasswordResetEmail(
+      context.get(supabaseContext),
+      String(formData.get('email') ?? '')
+    );
   } catch (error) {
     Toast.toast.danger(
       'Something went wrong while sending the reset password email. Please try again.',

@@ -7,14 +7,11 @@ import {
   type HabitMetric,
   type HabitsInsert,
   type HabitsUpdate,
+  type TypedSupabaseClient,
   type HabitStockWithDefaults,
 } from '@models';
 import { uploadFile } from '@services';
-import {
-  supabaseClient,
-  parseHabitMetric,
-  parseMetricValueHolder,
-} from '@utils';
+import { parseHabitMetric, parseMetricValueHolder } from '@utils';
 
 const HABIT_SELECT = `
   *,
@@ -66,8 +63,11 @@ const transformHabit = ({
   };
 };
 
-export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
-  const { data, error } = await supabaseClient
+export const createHabit = async (
+  supabase: TypedSupabaseClient,
+  body: HabitsInsert
+): Promise<Habit> => {
+  const { data, error } = await supabase
     .from('habits')
     .insert(decamelizeKeys(body))
     .select(HABIT_SELECT)
@@ -80,8 +80,10 @@ export const createHabit = async (body: HabitsInsert): Promise<Habit> => {
   return transformHabit(camelcaseKeys(data, { deep: true }));
 };
 
-export const listHabits = async (): Promise<Habit[]> => {
-  const { data, error } = await supabaseClient
+export const listHabits = async (
+  supabase: TypedSupabaseClient
+): Promise<Habit[]> => {
+  const { data, error } = await supabase
     .from('habits')
     .select(HABIT_SELECT)
     .order('name');
@@ -94,10 +96,11 @@ export const listHabits = async (): Promise<Habit[]> => {
 };
 
 export const patchHabit = async (
+  supabase: TypedSupabaseClient,
   id: Habit['id'],
   habit: HabitsUpdate
 ): Promise<Habit> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('habits')
     .update(decamelizeKeys(habit))
     .eq('id', id)
@@ -111,8 +114,8 @@ export const patchHabit = async (
   return transformHabit(camelcaseKeys(data, { deep: true }));
 };
 
-export const listHabitIds = async () => {
-  const { data, error } = await supabaseClient.from('habits').select('id');
+export const listHabitIds = async (supabase: TypedSupabaseClient) => {
+  const { data, error } = await supabase.from('habits').select('id');
 
   if (error) {
     throw new Error(error.message);
@@ -123,8 +126,11 @@ export const listHabitIds = async () => {
   });
 };
 
-export const getHabit = async (id: Habit['id']): Promise<Habit | null> => {
-  const { data, error } = await supabaseClient
+export const getHabit = async (
+  supabase: TypedSupabaseClient,
+  id: Habit['id']
+): Promise<Habit | null> => {
+  const { data, error } = await supabase
     .from('habits')
     .select(HABIT_SELECT)
     .eq('id', id)
@@ -137,8 +143,11 @@ export const getHabit = async (id: Habit['id']): Promise<Habit | null> => {
   return data && transformHabit(camelcaseKeys(data, { deep: true }));
 };
 
-export const destroyHabit = async (id: Habit['id']) => {
-  const { error } = await supabaseClient.from('habits').delete().eq('id', id);
+export const destroyHabit = async (
+  supabase: TypedSupabaseClient,
+  id: Habit['id']
+) => {
+  const { error } = await supabase.from('habits').delete().eq('id', id);
 
   if (error) {
     throw new Error(error.message);
@@ -146,11 +155,13 @@ export const destroyHabit = async (id: Habit['id']) => {
 };
 
 export const uploadHabitIcon = async (
+  supabase: TypedSupabaseClient,
   userId: string,
   icon: File,
   iconPath: string | null = ''
 ) => {
   return uploadFile(
+    supabase,
     StorageBuckets.HABIT_ICONS,
     iconPath || `${userId}/${Date.now()}-${icon.name}`,
     icon

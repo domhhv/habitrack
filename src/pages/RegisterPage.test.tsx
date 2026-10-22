@@ -2,7 +2,7 @@ import { Toast } from '@heroui/react';
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import { signUp, convertAnonymousUser } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/RegisterPage';
@@ -72,6 +72,7 @@ describe('RegisterPage clientAction', () => {
     const result = (await submit(anonymousUser)) as Response;
 
     expect(convertAnonymousUser).toHaveBeenCalledWith(
+      testSupabaseClient,
       'me@email.com',
       'password'
     );
@@ -82,7 +83,12 @@ describe('RegisterPage clientAction', () => {
   it('signs up a new user with the submitted first day of week', async () => {
     const result = (await submit(null)) as Response;
 
-    expect(signUp).toHaveBeenCalledWith('me@email.com', 'password', 'sun');
+    expect(signUp).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'me@email.com',
+      'password',
+      'sun'
+    );
     expect(result.headers.get('Location')).toBe('/login');
   });
 

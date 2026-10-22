@@ -6,6 +6,7 @@ import { CustomButton, HabitDetails } from '@components';
 import {
   type Habit,
   StorageBuckets,
+  type TypedSupabaseClient,
   type HabitDetailsSubmission,
   type StockMetricDefaultsSubmission,
 } from '@models';
@@ -30,6 +31,7 @@ import {
   runAction,
   userContext,
   getErrorMessage,
+  supabaseContext,
   buildHabitMetricInsert,
 } from '@utils';
 
@@ -52,42 +54,53 @@ const buildStockMetricDefaultInserts = (
 };
 
 const replaceHabitIcon = async (
+  supabase: TypedSupabaseClient,
   habitId: Habit['id'],
   icon: File,
   userId: string
 ) => {
-  const iconPath = await uploadHabitIcon(userId, icon);
-  const habit = await getHabit(habitId);
+  const iconPath = await uploadHabitIcon(supabase, userId, icon);
+  const habit = await getHabit(supabase, habitId);
 
   if (habit?.iconPath) {
-    await deleteFile(StorageBuckets.HABIT_ICONS, habit.iconPath);
+    await deleteFile(supabase, StorageBuckets.HABIT_ICONS, habit.iconPath);
   }
 
-  await patchHabit(habitId, { iconPath });
+  await patchHabit(supabase, habitId, { iconPath });
 };
 
-const deleteHabit = async (habitId: Habit['id'], userId: string) => {
-  const habit = await getHabit(habitId);
+const deleteHabit = async (
+  supabase: TypedSupabaseClient,
+  habitId: Habit['id'],
+  userId: string
+) => {
+  const habit = await getHabit(supabase, habitId);
   const photosPath = `${userId}/${habitId}/`;
-  const photos = await listFiles(StorageBuckets.OCCURRENCE_PHOTOS, photosPath);
+  const photos = await listFiles(
+    supabase,
+    StorageBuckets.OCCURRENCE_PHOTOS,
+    photosPath
+  );
 
   await Promise.all(
     photos.map((photo) => {
       return deleteFile(
+        supabase,
         StorageBuckets.OCCURRENCE_PHOTOS,
         `${photosPath}${photo.name}`
       );
     })
   );
 
-  await destroyHabit(habitId);
+  await destroyHabit(supabase, habitId);
 
   if (habit?.iconPath) {
-    await deleteFile(StorageBuckets.HABIT_ICONS, habit.iconPath);
+    await deleteFile(supabase, StorageBuckets.HABIT_ICONS, habit.iconPath);
   }
 };
 
 const saveMetrics = async (
+  supabase: TypedSupabaseClient,
   habitId: Habit['id'],
   metricDefinitions: Extract<
     HabitDetailsSubmission,
@@ -110,11 +123,12 @@ const saveMetrics = async (
   });
 
   if (idsToRemove.length > 0) {
-    await destroyHabitMetrics(idsToRemove);
+    await destroyHabitMetrics(supabase, idsToRemove);
   }
 
   if (metricsToAdd.length > 0) {
     await createHabitMetrics(
+      supabase,
       metricsToAdd.map((metric) => {
         return buildHabitMetricInsert(metric, habitId, userId);
       })
@@ -123,7 +137,7 @@ const saveMetrics = async (
 
   await Promise.all(
     metricsToUpdate.map(({ config, id, isRequired, name, sortOrder, type }) => {
-      return patchHabitMetric(id, {
+      return patchHabitMetric(supabase, id, {
         config,
         isRequired,
         name,
@@ -135,11 +149,16 @@ const saveMetrics = async (
 };
 
 const addStock = async (
+  supabase: TypedSupabaseClient,
   habitId: Habit['id'],
   submission: Extract<HabitDetailsSubmission, { intent: 'add-stock' }>,
   userId: string
 ) => {
-  const stock = await createStock({ ...submission.stock, habitId, userId });
+  const stock = await createStock(supabase, {
+    ...submission.stock,
+    habitId,
+    userId,
+  });
   const metricDefaultInserts = buildStockMetricDefaultInserts(
     stock.id,
     submission.metricDefaults,
@@ -147,11 +166,12 @@ const addStock = async (
   );
 
   if (metricDefaultInserts.length > 0) {
-    await createStockMetricDefaults(metricDefaultInserts);
+    await createStockMetricDefaults(supabase, metricDefaultInserts);
   }
 };
 
 const updateStock = async (
+  supabase: TypedSupabaseClient,
   {
     metricDefaults,
     stock,
@@ -159,13 +179,13 @@ const updateStock = async (
   }: Extract<HabitDetailsSubmission, { intent: 'update-stock' }>,
   userId: string
 ) => {
-  await patchStock(stockId, stock);
+  await patchStock(supabase, stockId, stock);
 
   if (!metricDefaults) {
     return;
   }
 
-  await destroyStockMetricDefaults(stockId);
+  await destroyStockMetricDefaults(supabase, stockId);
 
   const metricDefaultInserts = buildStockMetricDefaultInserts(
     stockId,
@@ -174,12 +194,15 @@ const updateStock = async (
   );
 
   if (metricDefaultInserts.length > 0) {
-    await createStockMetricDefaults(metricDefaultInserts);
+    await createStockMetricDefaults(supabase, metricDefaultInserts);
   }
 };
 
-export const clientLoader = async ({ params }: Route.ClientLoaderArgs) => {
-  const habit = await getHabit(params.habitId);
+export const clientLoader = async ({
+  context,
+  params,
+}: Route.ClientLoaderArgs) => {
+  const habit = await getHabit(context.get(supabaseContext), params.habitId);
 
   if (!habit) {
     throw data('Habit not found', { status: 404 });
@@ -193,6 +216,7 @@ export const clientAction = async ({
   params: { habitId },
   request,
 }: Route.ClientActionArgs) => {
+  const supabase = context.get(supabaseContext);
   const user = context.get(userContext);
 
   if (!user) {
@@ -213,7 +237,9 @@ export const clientAction = async ({
     }
 
     return runAction(
-      replaceHabitIcon(habitId, icon, user.id).finally(clearCalendarData),
+      replaceHabitIcon(supabase, habitId, icon, user.id).finally(
+        clearCalendarData
+      ),
       'upload_icon'
     );
   }
@@ -222,33 +248,47 @@ export const clientAction = async ({
 
   switch (submission.intent) {
     case 'add-stock':
-      return runAction(addStock(habitId, submission, user.id), 'add_stock');
+      return runAction(
+        addStock(supabase, habitId, submission, user.id),
+        'add_stock'
+      );
 
     case 'delete-habit':
       return runAction(
-        deleteHabit(habitId, user.id).finally(clearCalendarData),
+        deleteHabit(supabase, habitId, user.id).finally(clearCalendarData),
         'remove_habit'
       );
 
     case 'remove-stock':
-      return runAction(destroyStock(submission.stockId), 'remove_stock');
+      return runAction(
+        destroyStock(supabase, submission.stockId),
+        'remove_stock'
+      );
 
     case 'save-metrics':
       return runAction(
-        saveMetrics(habitId, submission.metricDefinitions, user.id).finally(
-          clearCalendarData
-        ),
+        saveMetrics(
+          supabase,
+          habitId,
+          submission.metricDefinitions,
+          user.id
+        ).finally(clearCalendarData),
         'update_habit'
       );
 
     case 'update-habit':
       return runAction(
-        patchHabit(habitId, submission.habit).finally(clearCalendarData),
+        patchHabit(supabase, habitId, submission.habit).finally(
+          clearCalendarData
+        ),
         'update_habit'
       );
 
     case 'update-stock':
-      return runAction(updateStock(submission, user.id), 'update_stock');
+      return runAction(
+        updateStock(supabase, submission, user.id),
+        'update_stock'
+      );
   }
 };
 

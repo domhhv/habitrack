@@ -11,7 +11,7 @@ import {
 import { CustomButton } from '@components';
 import { useIsSubmitting } from '@hooks';
 import { decideAuthorization, getAuthorizationDetails } from '@services';
-import { userContext, getErrorMessage } from '@utils';
+import { userContext, getErrorMessage, supabaseContext } from '@utils';
 
 import type { Route } from './+types/OAuthConsentPage';
 
@@ -42,7 +42,10 @@ export const clientLoader = async ({
     );
   }
 
-  const details = await getAuthorizationDetails(authorizationId);
+  const details = await getAuthorizationDetails(
+    context.get(supabaseContext),
+    authorizationId
+  );
 
   if ('redirect_url' in details) {
     throw redirectDocument(details.redirect_url);
@@ -51,7 +54,10 @@ export const clientLoader = async ({
   return { details };
 };
 
-export const clientAction = async ({ request }: Route.ClientActionArgs) => {
+export const clientAction = async ({
+  context,
+  request,
+}: Route.ClientActionArgs) => {
   const authorizationId = new URL(request.url).searchParams.get(
     'authorization_id'
   );
@@ -63,6 +69,7 @@ export const clientAction = async ({ request }: Route.ClientActionArgs) => {
 
   try {
     const redirectUrl = await decideAuthorization(
+      context.get(supabaseContext),
       authorizationId,
       formData.get('decision') === 'approve'
     );

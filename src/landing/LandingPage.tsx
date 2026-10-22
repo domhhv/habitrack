@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { hasBrowserSession } from '@utils';
+
 import './landing.css';
 import {
   McpSection,
@@ -18,11 +20,17 @@ const LandingPage = () => {
   const [hasSession, setHasSession] = React.useState(false);
 
   React.useEffect(() => {
-    setHasSession(
-      Object.keys(localStorage).some(function (key) {
-        return key.startsWith('sb-') && key.endsWith('-auth-token');
-      })
-    );
+    let isCurrent = true;
+
+    void hasBrowserSession().then((nextHasSession) => {
+      if (isCurrent) {
+        setHasSession(nextHasSession);
+      }
+    });
+
+    return () => {
+      isCurrent = false;
+    };
   }, []);
 
   return (

@@ -135,24 +135,27 @@ To set up a local Supabase instance, run the following commands (Docker required
 
    It should output the Studio URL, Database URL, and Project URL, among other info. Use the Studio URL to access the local Supabase dashboard in the browser, and the Database URL to connect to the local database directly if needed.
 
-2. **Retrieve API URL and anon key:**
+2. **Retrieve the API URL and keys:**
 
-   Run the following command to retrieve the API URL and anon key for the local Supabase instance:
+   Run the following command to retrieve the API URL and keys for the local Supabase instance:
 
    ```bash
    yarn db:status -o env
    ```
 
-   This command outputs the environment variables needed to connect to the local Supabase instance, including `API_URL` and `ANON_KEY`.
+   This command outputs the environment variables needed to connect to the local Supabase instance, including `API_URL`, `PUBLISHABLE_KEY` and `SECRET_KEY`.
 
 3. **Environment variables**
 
    Create a `.env.development` file in the root directory of the project and add the following environment variables:
 
    ```env
-   SUPABASE_URL=<API URL>
-   SUPABASE_ANON_KEY=<ANON_KEY>
+   SUPABASE_URL=<API_URL>
+   SUPABASE_PUBLISHABLE_KEY=<PUBLISHABLE_KEY>
+   SUPABASE_SECRET_KEY=<SECRET_KEY>
    ```
+
+   The publishable key ships to the browser, and Row Level Security protects the data. The secret key bypasses Row Level Security, so only server-only code reads it. Nothing uses it yet, so it's optional for now.
 
 4. **Apply migrations and seed the database:**
 

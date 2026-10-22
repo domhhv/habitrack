@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), is done on `refactor/cookie-sessions`.
 
 ## Target end state
 
@@ -228,6 +228,7 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 - `react-router:split-route-modules` logs `SOURCEMAP_BROKEN` warnings for route modules with split client exports (seen since PR 2). Check that Rollbar stack traces for those chunks still map back to the source.
 - `HydrateFallback` on every hard load of an app route. This is the same experience as the old `useSession` loader, and it goes away once routes load on the server (Future work §1).
 - Moving the filter representation (PR 6) reset every user's current selection once. That was accepted, because filters were not persisted.
+- Auth cookies (since cookie sessions). The session is split into cookie chunks of about 3 KB each, and they are sent with every request to the domain, static assets included. The `localStorage` migration in `supabase-client.ts` should be removed after a while. A user whose stored session is never migrated is signed out, and for an anonymous user that means losing their data.
 
 ## Verification (every PR)
 
@@ -241,16 +242,31 @@ Everything below is follow-up work beyond the 11 planned PRs, roughly in priorit
 
 ### 1. Move data loading and mutations to the server
 
-The app already runs React Router with `ssr: true` on Vercel, but every app route only server-renders a `HydrateFallback`, because the Supabase session lives in `localStorage`. Moving the session into cookies unlocks real SSR, progressive enhancement, prefetching and streaming.
+The app already runs React Router with `ssr: true` on Vercel, but every app route only server-renders a `HydrateFallback`, because all data still loads in `clientLoader`s. The session used to live in `localStorage`. It is in cookies now (first bullet), which unlocks real SSR, progressive enhancement, prefetching and streaming.
 
-- **Cookie sessions.** Switch to `@supabase/ssr`:
+- **Cookie sessions** – done on `refactor/cookie-sessions`. Switch to `@supabase/ssr`:
   - Use `createBrowserClient` in the browser, which keeps the session in cookies.
   - Create a `createServerClient` per request in a server `middleware`, reading the `Cookie` header and writing refreshed tokens through `Set-Cookie` on the response.
   - Replace the `supabaseClient` singleton in services with a client passed in, or read from a `supabaseContext`.
+  - Both clients use the publishable key, so Row Level Security applies to every request. The secret key belongs only to the server-only admin client (`getSupabaseAdminClient` in `src/utils/supabase-admin.server.ts`), never to the per-request client.
+  - **As built:**
+    - `supabaseContext` (`src/utils/route-context.ts`) holds the client for a request. The `app` layout sets it in both places: its `clientMiddleware` uses the browser client, and its server `middleware` (`supabaseMiddleware`, `src/utils/supabase-middleware.ts`) creates a server client per request.
+    - Every service takes the client (`TypedSupabaseClient`, `src/models/supabase.model.ts`) as its first argument. Loaders and actions pass `context.get(supabaseContext)`.
+    - Components and hooks that still call Supabase directly use `getSupabaseBrowserClient()` (`src/utils/supabase-client.ts`). That covers Google sign-in, sign-out, signed photo URLs, photo deletion, the latest-occurrence lookup and the auth subscription. `createBrowserClient` already returns one shared client per page.
+    - `getPublicUrl` builds the URL from `SUPABASE_URL` without a client, so it can render on the server. A test checks it against supabase-js.
+    - The server middleware does not call `getClaims()` up front. Nothing on the server reads the session yet, so a document request skips that Auth round trip. The first server code that asks for the user refreshes the token, and the middleware appends the cookies and no-cache headers that the refresh writes after `next()`. The server auth middleware step below should call `getClaims()`.
+    - **Session migration.** `loadSupabaseBrowserClient()` runs in the app `clientMiddleware`. Once per page load, it moves a session from the old `localStorage` entry into the cookies with `setSession`. Without it every user would be signed out, and anonymous users would lose their data. A network failure keeps the entry for the next page load; any other failure drops it. Delete this code once few unmigrated sessions remain.
+    - **Landing page.** It sits outside the app layout and decides between signed-in and signed-out actions with `hasBrowserSession()`, in an effect so prerendering never runs it. The helper migrates a legacy session first, then reads the cookie client's session. A legacy entry that could not be moved yet still counts as signed in.
+    - **PKCE.** `createBrowserClient` always uses the PKCE flow. Google sign-in and identity linking come back with `?code=`, and the browser client exchanges it on page load.
+    - **Email links** (sign-up confirmation, anonymous-account conversion, password reset, email change) now sign the user in only in the browser that requested them, because only that browser holds the code verifier. Opened anywhere else, the email is still confirmed, but the user has to log in. The hash-token branch of `useAuthSearchParams` stays for links sent before the switch.
+    - **Tests.** `makeRouteArgs()` puts `testSupabaseClient` into `supabaseContext`, and route tests expect it as the first service argument. New tests cover the server middleware, the session migration and `getPublicUrl`. In test mode, `vite.config.ts` defines placeholder `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` values (`TEST_ENV`).
+    - **Verified:** the production server build renders `/calendar/month`, `/settings` and `/login` with the new middleware (200, the `HydrateFallback`, no `Set-Cookie`). The client bundle grows by about 16 KB minified (`@supabase/ssr` and `cookie`).
+    - **Not verified:** a run in a real browser. That covers sign-in (password, anonymous, Google), sign-out, email links, and an existing `localStorage` session moving into cookies.
 - **Auth callback route.** Add a `/auth/callback` route whose `loader` runs `exchangeCodeForSession` (PKCE) and redirects. It replaces:
   - the hash-token handling in `useAuthSearchParams`, which is still an effect;
   - `AccountRedirect`'s hash forwarding;
   - the email-confirmation, password-reset and email-change redirects to `/settings`.
+  - To make email links work in any browser again, switch the Supabase email templates to `{{ .TokenHash }}` links and call `verifyOtp({ token_hash, type })` in the callback `loader`. A PKCE `code` can only be exchanged by the browser that holds the code verifier.
 - **Server auth middleware.** Add a server `middleware` on a pathless `authenticated` layout. It sets `userContext`/`profileContext` on the server and redirects signed-out visitors to `/login?returnTo=…`. Make the login and OAuth flows honour `returnTo`, which also closes the consent-page gap from PR 3.
 - **Server loaders, route by route.** Convert `clientLoader` → `loader`: the app layout first, then habits, habit details, notes, settings and the calendar.
   - For the calendar, use the docs' "Client-Side Caching" pattern: a server `loader` for the document request, plus a `clientLoader` (`hydrate = true`) that serves later navigations from the range cache and falls back to `serverLoader()`.

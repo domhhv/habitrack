@@ -9,4 +9,5 @@ export * from './occurrence.model';
 export * from './profile.model';
 export * from './stock.model';
 export * from './storage.model';
+export * from './supabase.model';
 export * from './trait.model';

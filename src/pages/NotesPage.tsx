@@ -3,7 +3,7 @@ import React from 'react';
 import { NotesList } from '@components';
 import { ErrorFallbackPage } from '@pages';
 import { listAllNotes } from '@services';
-import { userContext } from '@utils';
+import { userContext, supabaseContext } from '@utils';
 
 import type { Route } from './+types/NotesPage';
 
@@ -22,7 +22,7 @@ export const clientLoader = async ({
     return { hasMore: false, notes: [], pageCount };
   }
 
-  const notes = await listAllNotes({
+  const notes = await listAllNotes(context.get(supabaseContext), {
     limit: NOTES_PAGE_SIZE * pageCount,
     page: 0,
   });

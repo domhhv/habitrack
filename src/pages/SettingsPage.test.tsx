@@ -8,7 +8,7 @@ import {
   unlinkIdentity,
   getUserIdentities,
 } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/SettingsPage';
@@ -96,7 +96,7 @@ describe('SettingsPage clientAction', () => {
     await expect(
       submit({ firstDayOfWeek: 'sun', intent: 'update-profile', name: 'Dom' })
     ).resolves.toEqual({ intent: 'update-profile', ok: true });
-    expect(patchProfile).toHaveBeenCalledWith('user-1', {
+    expect(patchProfile).toHaveBeenCalledWith(testSupabaseClient, 'user-1', {
       firstDayOfWeek: 'sun',
       name: 'Dom',
     });
@@ -109,7 +109,7 @@ describe('SettingsPage clientAction', () => {
       password: 'secret',
     });
 
-    expect(updateUser).toHaveBeenCalledWith({
+    expect(updateUser).toHaveBeenCalledWith(testSupabaseClient, {
       email: 'me@email.com',
       password: 'secret',
     });
@@ -118,7 +118,7 @@ describe('SettingsPage clientAction', () => {
   it('syncs the confirmed email from the session to the profile', async () => {
     await submit({ intent: 'sync-email' });
 
-    expect(patchProfile).toHaveBeenCalledWith('user-1', {
+    expect(patchProfile).toHaveBeenCalledWith(testSupabaseClient, 'user-1', {
       email: 'new@email.com',
     });
   });
@@ -138,7 +138,10 @@ describe('SettingsPage clientAction', () => {
       intent: 'unlink-identity',
     });
 
-    expect(unlinkIdentity).toHaveBeenCalledWith(googleIdentity);
+    expect(unlinkIdentity).toHaveBeenCalledWith(
+      testSupabaseClient,
+      googleIdentity
+    );
   });
 
   it('returns the error when the identity is no longer connected', async () => {

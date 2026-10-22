@@ -3,30 +3,31 @@ import imageCompression from 'browser-image-compression';
 import pluralize from 'pluralize';
 
 import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
-import type { UploadResult } from '@models';
+import type { UploadResult, TypedSupabaseClient } from '@models';
 import { StorageBuckets } from '@models';
 import {
   isRejected,
   isFulfilled,
-  supabaseClient,
   isFailedUpload,
   getErrorMessage,
   isSuccessfulUpload,
 } from '@utils';
 
 export const getPublicUrl = (bucket: StorageBuckets, path?: string | null) => {
-  const { data } = supabaseClient.storage
-    .from(bucket)
-    .getPublicUrl(path || 'default.png');
+  const projectUrl = SUPABASE_URL.replace(/\/+$/, '');
+  const objectPath = (path || 'default.png').replace(/^\/+/, '');
 
-  return data.publicUrl;
+  return encodeURI(
+    `${projectUrl}/storage/v1/object/public/${bucket}/${objectPath}`
+  );
 };
 
 export const createSignedUrls = async (
+  supabase: TypedSupabaseClient,
   filePaths: string[],
   expiresIn = 60 * 5
 ) => {
-  const { data, error } = await supabaseClient.storage
+  const { data, error } = await supabase.storage
     .from(StorageBuckets.OCCURRENCE_PHOTOS)
     .createSignedUrls(filePaths, expiresIn);
 
@@ -37,8 +38,12 @@ export const createSignedUrls = async (
   return data;
 };
 
-export const listFiles = async (bucket: StorageBuckets, path: string) => {
-  const { data, error } = await supabaseClient.storage.from(bucket).list(path);
+export const listFiles = async (
+  supabase: TypedSupabaseClient,
+  bucket: StorageBuckets,
+  path: string
+) => {
+  const { data, error } = await supabase.storage.from(bucket).list(path);
 
   if (error) {
     throw new Error(error.message);
@@ -48,11 +53,12 @@ export const listFiles = async (bucket: StorageBuckets, path: string) => {
 };
 
 export const uploadFile = async (
+  supabase: TypedSupabaseClient,
   bucket: StorageBuckets,
   path: string,
   file: File
 ) => {
-  const { data, error } = await supabaseClient.storage
+  const { data, error } = await supabase.storage
     .from(bucket)
     .upload(path, file);
 
@@ -63,8 +69,12 @@ export const uploadFile = async (
   return data.path;
 };
 
-export const deleteFile = async (bucket: StorageBuckets, path: string) => {
-  const { error } = await supabaseClient.storage.from(bucket).remove([path]);
+export const deleteFile = async (
+  supabase: TypedSupabaseClient,
+  bucket: StorageBuckets,
+  path: string
+) => {
+  const { error } = await supabase.storage.from(bucket).remove([path]);
 
   if (error) {
     throw new Error(error.message);
@@ -74,6 +84,7 @@ export const deleteFile = async (bucket: StorageBuckets, path: string) => {
 };
 
 export const uploadImage = async (
+  supabase: TypedSupabaseClient,
   bucket: StorageBuckets,
   file: File,
   userId: string,
@@ -98,6 +109,7 @@ export const uploadImage = async (
 
   try {
     const path = await uploadFile(
+      supabase,
       StorageBuckets.OCCURRENCE_PHOTOS,
       `${userId}/${folder ? `${folder}/` : ''}${Date.now()}-${compressedFile.name}`,
       compressedFile
@@ -110,6 +122,7 @@ export const uploadImage = async (
 };
 
 export const uploadImages = async (
+  supabase: TypedSupabaseClient,
   bucket: StorageBuckets,
   userId: string,
   files: File[],
@@ -117,7 +130,7 @@ export const uploadImages = async (
 ) => {
   const results = await Promise.allSettled(
     files.map((file) => {
-      return uploadImage(bucket, file, userId, folder);
+      return uploadImage(supabase, bucket, file, userId, folder);
     })
   );
 

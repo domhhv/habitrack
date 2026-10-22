@@ -5,23 +5,21 @@ import type {
   HabitMetric,
   HabitMetricInsert,
   HabitMetricUpdate,
+  TypedSupabaseClient,
   OccurrenceMetricValue,
   OccurrenceMetricValueInsert,
 } from '@models';
-import {
-  supabaseClient,
-  parseHabitMetric,
-  parseMetricValueHolder,
-} from '@utils';
+import { parseHabitMetric, parseMetricValueHolder } from '@utils';
 
 export const createHabitMetrics = async (
+  supabase: TypedSupabaseClient,
   metrics: HabitMetricInsert[]
 ): Promise<HabitMetric[]> => {
   if (metrics.length === 0) {
     return [];
   }
 
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('habit_metrics')
     .insert(decamelizeKeys(metrics))
     .select();
@@ -34,10 +32,11 @@ export const createHabitMetrics = async (
 };
 
 export const patchHabitMetric = async (
+  supabase: TypedSupabaseClient,
   id: string,
   body: HabitMetricUpdate
 ): Promise<HabitMetric> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('habit_metrics')
     .update(decamelizeKeys(body))
     .eq('id', id)
@@ -51,15 +50,15 @@ export const patchHabitMetric = async (
   return parseHabitMetric(camelcaseKeys(data, { deep: true }));
 };
 
-export const destroyHabitMetrics = async (ids: string[]) => {
+export const destroyHabitMetrics = async (
+  supabase: TypedSupabaseClient,
+  ids: string[]
+) => {
   if (ids.length === 0) {
     return;
   }
 
-  const { error } = await supabaseClient
-    .from('habit_metrics')
-    .delete()
-    .in('id', ids);
+  const { error } = await supabase.from('habit_metrics').delete().in('id', ids);
 
   if (error) {
     throw new Error(error.message);
@@ -67,13 +66,14 @@ export const destroyHabitMetrics = async (ids: string[]) => {
 };
 
 export const upsertMetricValues = async (
+  supabase: TypedSupabaseClient,
   values: OccurrenceMetricValueInsert[]
 ): Promise<OccurrenceMetricValue[]> => {
   if (values.length === 0) {
     return [];
   }
 
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('occurrence_metric_values')
     .upsert(
       values.map((v) => {
@@ -93,10 +93,11 @@ export const upsertMetricValues = async (
 };
 
 export const destroyMetricValue = async (
+  supabase: TypedSupabaseClient,
   occurrenceId: string,
   habitMetricId: string
 ) => {
-  const { error } = await supabaseClient
+  const { error } = await supabase
     .from('occurrence_metric_values')
     .delete()
     .eq('occurrence_id', occurrenceId)

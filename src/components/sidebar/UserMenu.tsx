@@ -5,6 +5,7 @@ import { CustomButton } from '@components';
 import { useUser, useProfile } from '@hooks';
 import { signOut } from '@services';
 import { useMobileSidebarActions } from '@stores';
+import { getSupabaseBrowserClient } from '@utils';
 
 import SidebarTooltip from './SidebarTooltip';
 
@@ -97,7 +98,7 @@ const UserMenu = ({
             variant="danger"
             textValue="Log Out"
             onAction={() => {
-              signOut();
+              signOut(getSupabaseBrowserClient());
               closeMobileSidebar();
             }}
           >

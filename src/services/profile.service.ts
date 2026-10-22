@@ -1,11 +1,13 @@
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-import type { Profile, ProfilesUpdate } from '@models';
-import { supabaseClient } from '@utils';
+import type { Profile, ProfilesUpdate, TypedSupabaseClient } from '@models';
 
-export const getProfile = async (userId: string): Promise<Profile> => {
-  const { data, error } = await supabaseClient
+export const getProfile = async (
+  supabase: TypedSupabaseClient,
+  userId: string
+): Promise<Profile> => {
+  const { data, error } = await supabase
     .from('profiles')
     .select()
     .eq('id', userId)
@@ -19,10 +21,11 @@ export const getProfile = async (userId: string): Promise<Profile> => {
 };
 
 export const patchProfile = async (
+  supabase: TypedSupabaseClient,
   userId: string,
   body: ProfilesUpdate
 ): Promise<Profile> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('profiles')
     .update(decamelizeKeys(body))
     .eq('id', userId)

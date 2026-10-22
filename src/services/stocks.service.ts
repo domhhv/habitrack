@@ -5,11 +5,12 @@ import type {
   HabitStock,
   HabitStockInsert,
   HabitStockUpdate,
+  TypedSupabaseClient,
   HabitStockWithDefaults,
   HabitStockMetricDefault,
   HabitStockMetricDefaultInsert,
 } from '@models';
-import { supabaseClient, parseMetricValueHolder } from '@utils';
+import { parseMetricValueHolder } from '@utils';
 
 const STOCK_WITH_DEFAULTS_SELECT = `
   *,
@@ -48,9 +49,10 @@ const toStockWithDefaults = ({
 };
 
 export const createStock = async (
+  supabase: TypedSupabaseClient,
   body: HabitStockInsert
 ): Promise<HabitStockWithDefaults> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('habit_stocks')
     .insert(decamelizeKeys(body))
     .select(STOCK_WITH_DEFAULTS_SELECT)
@@ -64,10 +66,11 @@ export const createStock = async (
 };
 
 export const patchStock = async (
+  supabase: TypedSupabaseClient,
   id: HabitStock['id'],
   stock: HabitStockUpdate
 ): Promise<HabitStockWithDefaults> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('habit_stocks')
     .update(decamelizeKeys(stock))
     .eq('id', id)
@@ -81,11 +84,11 @@ export const patchStock = async (
   return toStockWithDefaults(camelcaseKeys(data, { deep: true }));
 };
 
-export const destroyStock = async (id: HabitStock['id']) => {
-  const { error } = await supabaseClient
-    .from('habit_stocks')
-    .delete()
-    .eq('id', id);
+export const destroyStock = async (
+  supabase: TypedSupabaseClient,
+  id: HabitStock['id']
+) => {
+  const { error } = await supabase.from('habit_stocks').delete().eq('id', id);
 
   if (error) {
     throw new Error(error.message);
@@ -93,9 +96,10 @@ export const destroyStock = async (id: HabitStock['id']) => {
 };
 
 export const createStockMetricDefaults = async (
+  supabase: TypedSupabaseClient,
   body: HabitStockMetricDefaultInsert[]
 ): Promise<HabitStockMetricDefault[]> => {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from('habit_stock_metric_defaults')
     .insert(
       body.map((b) => {
@@ -114,9 +118,10 @@ export const createStockMetricDefaults = async (
 };
 
 export const destroyStockMetricDefaults = async (
+  supabase: TypedSupabaseClient,
   habitStockId: HabitStock['id']
 ) => {
-  const { error } = await supabaseClient
+  const { error } = await supabase
     .from('habit_stock_metric_defaults')
     .delete()
     .eq('habit_stock_id', habitStockId);

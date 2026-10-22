@@ -5,7 +5,7 @@ import { data, replace, redirect } from 'react-router';
 import { AuthForm } from '@components';
 import { useIsSubmitting } from '@hooks';
 import { signIn } from '@services';
-import { userContext, getErrorMessage } from '@utils';
+import { userContext, getErrorMessage, supabaseContext } from '@utils';
 
 import type { Route } from './+types/LoginPage';
 
@@ -17,11 +17,15 @@ export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
   return null;
 };
 
-export const clientAction = async ({ request }: Route.ClientActionArgs) => {
+export const clientAction = async ({
+  context,
+  request,
+}: Route.ClientActionArgs) => {
   const formData = await request.formData();
 
   try {
     await signIn(
+      context.get(supabaseContext),
       String(formData.get('email') ?? ''),
       String(formData.get('password') ?? '')
     );

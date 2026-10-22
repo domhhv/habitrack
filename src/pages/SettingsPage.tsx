@@ -18,7 +18,7 @@ import { data, redirect, useFetcher } from 'react-router';
 
 import { CustomButton, PasswordInput, ConnectedAccounts } from '@components';
 import { useUser, useProfile, useTextField, useAuthSearchParams } from '@hooks';
-import type { DaysOfWeek, ProfilesUpdate } from '@models';
+import type { DaysOfWeek, ProfilesUpdate, TypedSupabaseClient } from '@models';
 import {
   deleteUser,
   updateUser,
@@ -33,6 +33,7 @@ import {
   userContext,
   parseDayOfWeek,
   getErrorMessage,
+  supabaseContext,
   type SessionUser,
 } from '@utils';
 
@@ -97,49 +98,52 @@ const getUserAttributes = (formData: FormData) => {
 };
 
 const runIntent = async (
+  supabase: TypedSupabaseClient,
   intent: SettingsIntent,
   formData: FormData,
   user: NonNullable<SessionUser>
 ) => {
   switch (intent) {
     case 'delete-account':
-      await deleteUser();
+      await deleteUser(supabase);
       Toast.toast.success('Account deleted');
 
       return redirect('/login');
 
     case 'link-identity':
-      await linkGoogleIdentity();
+      await linkGoogleIdentity(supabase);
       break;
 
     case 'sync-email':
-      await patchProfile(user.id, { email: user.email });
+      await patchProfile(supabase, user.id, { email: user.email });
       Toast.toast.success('Your email change has been confirmed', {
         description: `Your email has been set as ${user.email}`,
       });
       break;
 
     case 'unlink-identity': {
-      const identity = (await getUserIdentities()).find(({ identity_id }) => {
-        return identity_id === formData.get('identityId');
-      });
+      const identity = (await getUserIdentities(supabase)).find(
+        ({ identity_id }) => {
+          return identity_id === formData.get('identityId');
+        }
+      );
 
       if (!identity) {
         throw new Error('This account is no longer connected');
       }
 
-      await unlinkIdentity(identity);
+      await unlinkIdentity(supabase, identity);
       Toast.toast.success('Google account unlinked');
       break;
     }
 
     case 'update-profile':
-      await patchProfile(user.id, getProfileUpdate(formData));
+      await patchProfile(supabase, user.id, getProfileUpdate(formData));
       Toast.toast.success('Account updated');
       break;
 
     case 'update-user':
-      await updateUser(getUserAttributes(formData));
+      await updateUser(supabase, getUserAttributes(formData));
       Toast.toast.success('Account updated', {
         description: formData.has('email')
           ? 'Email change requested. Please check your inbox for a confirmation email.'
@@ -157,7 +161,10 @@ export const clientLoader = async ({ context }: Route.ClientLoaderArgs) => {
   }
 
   try {
-    return { identities: await getUserIdentities(), identitiesError: null };
+    return {
+      identities: await getUserIdentities(context.get(supabaseContext)),
+      identitiesError: null,
+    };
   } catch (error) {
     return { identities: [], identitiesError: getErrorMessage(error) };
   }
@@ -179,7 +186,12 @@ export const clientAction = async ({
   }
 
   try {
-    return await runIntent(intent, formData, user);
+    return await runIntent(
+      context.get(supabaseContext),
+      intent,
+      formData,
+      user
+    );
   } catch (error) {
     if (intent === 'sync-email') {
       rollbar.error(

@@ -1,7 +1,7 @@
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import { signInAnonymously } from '@services';
-import { makeRouteArgs } from '@tests';
+import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/AnonymousLoginPage';
@@ -48,7 +48,7 @@ describe('AnonymousLoginPage', () => {
       })
     )) as Response;
 
-    expect(signInAnonymously).toHaveBeenCalledWith('sun');
+    expect(signInAnonymously).toHaveBeenCalledWith(testSupabaseClient, 'sun');
     expect(result.headers.get('Location')).toBe('/calendar');
   });
 });

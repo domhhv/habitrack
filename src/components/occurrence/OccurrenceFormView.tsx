@@ -43,7 +43,7 @@ import type {
 } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl, getLatestHabitOccurrence } from '@services';
-import { isNumericValue } from '@utils';
+import { isNumericValue, getSupabaseBrowserClient } from '@utils';
 
 import OccurrenceChip from './OccurrenceChip';
 import OccurrencePhotosUploader from './OccurrencePhotosUploader';
@@ -396,7 +396,7 @@ const OccurrenceFormView = ({
       return;
     }
 
-    getLatestHabitOccurrence(selectedHabitId)
+    getLatestHabitOccurrence(getSupabaseBrowserClient(), selectedHabitId)
       .then((occurrence) => {
         if (!occurrence) {
           setLastOccurredAt(null);

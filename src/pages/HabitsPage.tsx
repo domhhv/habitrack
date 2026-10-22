@@ -5,6 +5,7 @@ import { HabitsTable } from '@components';
 import type {
   HabitStats,
   HabitsSubmission,
+  TypedSupabaseClient,
   FormMetricDefinitions,
 } from '@models';
 import {
@@ -20,19 +21,20 @@ import {
   runAction,
   userContext,
   getErrorMessage,
+  supabaseContext,
   buildHabitMetricInsert,
 } from '@utils';
 
 import type { Route } from './+types/HabitsPage';
 
-const loadHabitsStats = async () => {
-  const habitIds = await listHabitIds();
+const loadHabitsStats = async (supabase: TypedSupabaseClient) => {
+  const habitIds = await listHabitIds(supabase);
 
   if (habitIds.length === 0) {
     return {};
   }
 
-  const stats = await getHabitsStats(habitIds);
+  const stats = await getHabitsStats(supabase, habitIds);
 
   return Object.fromEntries(
     stats.flatMap((stat): [string, HabitStats][] => {
@@ -41,26 +43,31 @@ const loadHabitsStats = async () => {
   );
 };
 
-const addHabit = async (formData: FormData, userId: string) => {
+const addHabit = async (
+  supabase: TypedSupabaseClient,
+  formData: FormData,
+  userId: string
+) => {
   const icon = formData.get('icon');
   const traitId = formData.get('traitId');
   const metricDefinitions = JSON.parse(
     String(formData.get('metricDefinitions') ?? '[]')
   ) as FormMetricDefinitions[];
 
-  const habit = await createHabit({
+  const habit = await createHabit(supabase, {
     description: String(formData.get('description') ?? ''),
     name: String(formData.get('name') ?? ''),
     traitId: typeof traitId === 'string' && traitId ? traitId : null,
     userId,
     iconPath:
       icon && typeof icon !== 'string'
-        ? await uploadHabitIcon(userId, icon)
+        ? await uploadHabitIcon(supabase, userId, icon)
         : '',
   });
 
   if (metricDefinitions.length > 0) {
     await createHabitMetrics(
+      supabase,
       metricDefinitions.map((metric) => {
         return buildHabitMetricInsert(metric, habit.id, userId);
       })
@@ -74,7 +81,9 @@ export const clientLoader = async ({ context }: Route.ClientLoaderArgs) => {
   }
 
   try {
-    return { habitsStats: await loadHabitsStats() };
+    return {
+      habitsStats: await loadHabitsStats(context.get(supabaseContext)),
+    };
   } catch (error) {
     rollbar.error(
       error instanceof Error ? error : new Error(getErrorMessage(error))
@@ -88,6 +97,7 @@ export const clientAction = async ({
   context,
   request,
 }: Route.ClientActionArgs) => {
+  const supabase = context.get(supabaseContext);
   const user = context.get(userContext);
 
   if (!user) {
@@ -100,10 +110,16 @@ export const clientAction = async ({
   if (request.headers.get('Content-Type')?.includes('application/json')) {
     const { trait } = (await request.json()) as HabitsSubmission;
 
-    return runAction(createTrait({ ...trait, userId: user.id }), 'add_trait');
+    return runAction(
+      createTrait(supabase, { ...trait, userId: user.id }),
+      'add_trait'
+    );
   }
 
-  return runAction(addHabit(await request.formData(), user.id), 'add_habit');
+  return runAction(
+    addHabit(supabase, await request.formData(), user.id),
+    'add_habit'
+  );
 };
 
 const HabitsPage = ({ loaderData: { habitsStats } }: Route.ComponentProps) => {

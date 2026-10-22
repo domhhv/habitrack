@@ -1,6 +1,7 @@
 import { CalendarDateTime } from '@internationalized/date';
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
+import { testSupabaseClient } from '@tests';
 import type { CalendarRange } from '@utils';
 
 import {
@@ -76,24 +77,32 @@ describe('loadCalendarData', () => {
   });
 
   it('serves repeated loads of a range from the cache until it is invalidated', async () => {
-    const first = await loadCalendarData(range);
+    const first = await loadCalendarData(testSupabaseClient, range);
 
     expect(
       first.occurrences.map(({ id }) => {
         return id;
       })
     ).toEqual(['inside']);
+    expect(listOccurrences).toHaveBeenCalledWith(
+      testSupabaseClient,
+      expect.any(Array)
+    );
+    expect(listNotes).toHaveBeenCalledWith(
+      testSupabaseClient,
+      expect.any(Array)
+    );
 
     const callsAfterFirstLoad = vi.mocked(listOccurrences).mock.calls.length;
 
-    await loadCalendarData(range);
+    await loadCalendarData(testSupabaseClient, range);
 
     expect(vi.mocked(listOccurrences).mock.calls.length).toBe(
       callsAfterFirstLoad
     );
 
     invalidateCalendarOccurrences();
-    await loadCalendarData(range);
+    await loadCalendarData(testSupabaseClient, range);
 
     expect(vi.mocked(listOccurrences).mock.calls.length).toBeGreaterThan(
       callsAfterFirstLoad

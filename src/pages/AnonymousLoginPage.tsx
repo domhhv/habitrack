@@ -5,7 +5,12 @@ import { data, Form, replace, redirect } from 'react-router';
 import { CustomButton } from '@components';
 import { useIsSubmitting, useFirstDayOfWeek } from '@hooks';
 import { signInAnonymously } from '@services';
-import { userContext, parseDayOfWeek, getErrorMessage } from '@utils';
+import {
+  userContext,
+  parseDayOfWeek,
+  getErrorMessage,
+  supabaseContext,
+} from '@utils';
 
 import type { Route } from './+types/AnonymousLoginPage';
 
@@ -17,11 +22,17 @@ export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
   return null;
 };
 
-export const clientAction = async ({ request }: Route.ClientActionArgs) => {
+export const clientAction = async ({
+  context,
+  request,
+}: Route.ClientActionArgs) => {
   const formData = await request.formData();
 
   try {
-    await signInAnonymously(parseDayOfWeek(formData.get('firstDayOfWeek')));
+    await signInAnonymously(
+      context.get(supabaseContext),
+      parseDayOfWeek(formData.get('firstDayOfWeek'))
+    );
   } catch (error) {
     Toast.toast.danger(
       'Something went wrong while logging in anonymously. Please try again.',
