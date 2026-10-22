@@ -67,6 +67,29 @@ describe('AuthCallbackPage loader', () => {
     expectRedirectTo(result, '/settings?passwordReset=true');
   });
 
+  it('follows the inner next path when next points back at this route', async () => {
+    const emailRedirect = `https://habitrack.test/auth/callback?next=${encodeURIComponent('/settings?emailConfirmed=true')}`;
+    const result = await runLoader(
+      `?token_hash=hash-1&type=email&next=${encodeURIComponent(emailRedirect)}`
+    );
+
+    expect(verifyEmailOtp).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'hash-1',
+      'email'
+    );
+    expectRedirectTo(result, '/settings?emailConfirmed=true');
+  });
+
+  it('goes to the calendar when the inner next path points back at this route too', async () => {
+    const nested = `/auth/callback?next=${encodeURIComponent('/auth/callback')}`;
+
+    expectRedirectTo(
+      await runLoader(`?code=code-1&next=${encodeURIComponent(nested)}`),
+      '/calendar'
+    );
+  });
+
   it.each(['https://evil.test/settings', '//evil.test/settings'])(
     'ignores a next URL on another origin (%s)',
     async (next) => {

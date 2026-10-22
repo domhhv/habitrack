@@ -1,7 +1,7 @@
 import { Input, Label, TextField } from '@heroui/react';
 import { GoogleLogoIcon } from '@phosphor-icons/react';
 import { type ReactNode } from 'react';
-import { Form } from 'react-router';
+import { Form, useSearchParams } from 'react-router';
 
 import { CustomButton } from '@components';
 import { useTextField } from '@hooks';
@@ -33,6 +33,7 @@ const AuthForm = ({
 }: AuthFormProps) => {
   const [email, handleEmailChange] = useTextField();
   const [password, handlePasswordChange] = useTextField();
+  const [searchParams] = useSearchParams();
 
   return (
     <Form method="post" className="w-full" data-testid="submit-form">
@@ -68,7 +69,10 @@ const AuthForm = ({
         variant="primary"
         data-testid="submit-button"
         onClick={() => {
-          return signInWithGoogle(getSupabaseBrowserClient());
+          return signInWithGoogle(
+            getSupabaseBrowserClient(),
+            searchParams.get('returnTo') ?? undefined
+          );
         }}
       >
         <GoogleLogoIcon size={20} weight="bold" className="mr-1" />

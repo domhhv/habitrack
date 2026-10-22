@@ -16,13 +16,13 @@ vi.mock('@services', async (importOriginal) => {
 
 const LOGIN_URL = 'http://localhost/login';
 
-const submit = () => {
+const submit = (url = LOGIN_URL) => {
   const body = new FormData();
   body.set('email', 'me@email.com');
   body.set('password', 'password');
 
   return clientAction(
-    makeRouteArgs<Route.ClientActionArgs>(LOGIN_URL, null, {
+    makeRouteArgs<Route.ClientActionArgs>(url, null, {
       body,
       method: 'POST',
     })
@@ -56,6 +56,39 @@ describe('LoginPage', () => {
       'password'
     );
     expect(result.headers.get('Location')).toBe('/calendar');
+  });
+
+  it('goes back to the page that asked for a login', async () => {
+    const result = (await submit(
+      `${LOGIN_URL}?returnTo=${encodeURIComponent('/habits?view=table')}`
+    )) as Response;
+
+    expect(result.headers.get('Location')).toBe('/habits?view=table');
+  });
+
+  it('ignores a return path on another origin', async () => {
+    const result = (await submit(
+      `${LOGIN_URL}?returnTo=${encodeURIComponent('https://evil.test/habits')}`
+    )) as Response;
+
+    expect(result.headers.get('Location')).toBe('/calendar');
+  });
+
+  it('sends a signed-in user straight to the return path', () => {
+    let thrown: unknown;
+
+    try {
+      clientLoader(
+        makeRouteArgs<Route.ClientLoaderArgs>(
+          `${LOGIN_URL}?returnTo=%2Fnotes`,
+          { id: 'user-1' } as SessionUser
+        )
+      );
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect((thrown as Response).headers.get('Location')).toBe('/notes');
   });
 
   it('stays on the page when signing in fails', async () => {

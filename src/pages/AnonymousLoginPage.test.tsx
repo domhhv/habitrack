@@ -51,4 +51,19 @@ describe('AnonymousLoginPage', () => {
     expect(signInAnonymously).toHaveBeenCalledWith(testSupabaseClient, 'sun');
     expect(result.headers.get('Location')).toBe('/calendar');
   });
+
+  it('goes back to the page that asked for a login', async () => {
+    const body = new FormData();
+    body.set('firstDayOfWeek', 'sun');
+
+    const result = (await clientAction(
+      makeRouteArgs<Route.ClientActionArgs>(
+        `${ANONYMOUS_LOGIN_URL}?returnTo=%2Fhabits`,
+        null,
+        { body, method: 'POST' }
+      )
+    )) as Response;
+
+    expect(result.headers.get('Location')).toBe('/habits');
+  });
 });

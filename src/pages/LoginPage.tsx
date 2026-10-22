@@ -3,15 +3,20 @@ import React from 'react';
 import { data, replace, redirect } from 'react-router';
 
 import { AuthForm } from '@components';
-import { useIsSubmitting } from '@hooks';
+import { useAuthHref, useIsSubmitting } from '@hooks';
 import { signIn } from '@services';
-import { userContext, getErrorMessage, supabaseContext } from '@utils';
+import {
+  userContext,
+  getErrorMessage,
+  getReturnToPath,
+  supabaseContext,
+} from '@utils';
 
 import type { Route } from './+types/LoginPage';
 
-export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
+export const clientLoader = ({ context, request }: Route.ClientLoaderArgs) => {
   if (context.get(userContext)) {
-    throw replace('/calendar');
+    throw replace(getReturnToPath(request.url));
   }
 
   return null;
@@ -42,11 +47,13 @@ export const clientAction = async ({
 
   Toast.toast.success('Welcome back!');
 
-  return redirect('/calendar');
+  return redirect(getReturnToPath(request.url));
 };
 
 const LoginPage = () => {
   const isAuthenticating = useIsSubmitting();
+  const registerHref = useAuthHref('/register');
+  const anonymousLoginHref = useAuthHref('/anonymous-login');
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">
@@ -64,7 +71,7 @@ const LoginPage = () => {
             footer={
               <>
                 Don&apos;t have an account?{' '}
-                <Link href="/register" className="text-accent font-medium">
+                <Link href={registerHref} className="text-accent font-medium">
                   Join
                 </Link>
               </>
@@ -75,7 +82,7 @@ const LoginPage = () => {
           <p className="text-muted text-sm">
             Just want to look around?{' '}
             <Link
-              href="/anonymous-login"
+              href={anonymousLoginHref}
               data-testid="anonymous-login-link"
               className="text-accent font-medium"
             >

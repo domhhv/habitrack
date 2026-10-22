@@ -3,6 +3,7 @@ import React from 'react';
 import { hasBrowserSession } from '@utils';
 
 import './landing.css';
+import LandingReveal from './LandingReveal';
 import {
   McpSection,
   HeroSection,
@@ -17,7 +18,7 @@ import {
 } from './sections';
 
 const LandingPage = () => {
-  const [hasSession, setHasSession] = React.useState(false);
+  const [hasSession, setHasSession] = React.useState<boolean | null>(null);
 
   React.useEffect(() => {
     let isCurrent = true;
@@ -107,7 +108,11 @@ const LandingPage = () => {
           <StocksSection />
           <ExpensesSection />
           <McpSection />
-          {!hasSession && <AnonymousCtaSection />}
+          {hasSession === false && (
+            <LandingReveal>
+              <AnonymousCtaSection />
+            </LandingReveal>
+          )}
         </main>
         <LandingFooter hasSession={hasSession} />
       </div>

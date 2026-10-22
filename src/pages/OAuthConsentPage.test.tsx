@@ -47,17 +47,6 @@ describe('OAuthConsentPage clientLoader', () => {
     expect(getAuthorizationDetails).not.toHaveBeenCalled();
   });
 
-  it('sends signed-out users to settings with a return path', async () => {
-    const thrown = await catchThrown(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(CONSENT_URL))
-    );
-
-    expect(thrown).toBeInstanceOf(Response);
-    expect((thrown as Response).headers.get('Location')).toBe(
-      `/settings?returnTo=${encodeURIComponent('/oauth/consent?authorization_id=auth-1')}`
-    );
-  });
-
   it('reloads the document to the client when consent was already given', async () => {
     vi.mocked(getAuthorizationDetails).mockResolvedValue({
       redirect_url: 'cursor://callback?code=1',

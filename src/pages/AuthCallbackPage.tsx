@@ -10,11 +10,40 @@ import {
   getErrorMessage,
   supabaseContext,
   getSafeRedirectPath,
+  DEFAULT_SIGNED_IN_PATH,
 } from '@utils';
 
 import type { Route } from './+types/AuthCallbackPage';
 
-const DEFAULT_REDIRECT_PATH = '/calendar';
+const CALLBACK_PATH = '/auth/callback';
+
+/**
+ * Email redirects point at this route too, so with token-hash email templates `next` is this
+ * route's own URL. Following that would land here again without a token, so its inner `next`
+ * is used instead.
+ */
+const getNextPath = (requestUrl: string) => {
+  const getNext = (url: URL) => {
+    return getSafeRedirectPath(
+      url.searchParams.get('next'),
+      requestUrl,
+      DEFAULT_SIGNED_IN_PATH
+    );
+  };
+
+  const next = getNext(new URL(requestUrl));
+  const nextUrl = new URL(next, requestUrl);
+
+  if (nextUrl.pathname !== CALLBACK_PATH) {
+    return next;
+  }
+
+  const innerNext = getNext(nextUrl);
+
+  return new URL(innerNext, requestUrl).pathname === CALLBACK_PATH
+    ? DEFAULT_SIGNED_IN_PATH
+    : innerNext;
+};
 
 const completeSignIn = async (
   supabase: TypedSupabaseClient,
@@ -50,13 +79,7 @@ export const loader = async ({ context, request }: Route.LoaderArgs) => {
     return data({ error: getErrorMessage(error) }, { status: 400 });
   }
 
-  throw redirect(
-    getSafeRedirectPath(
-      searchParams.get('next'),
-      request.url,
-      DEFAULT_REDIRECT_PATH
-    )
-  );
+  throw redirect(getNextPath(request.url));
 };
 
 const AuthCallbackPage = ({ loaderData: { error } }: Route.ComponentProps) => {

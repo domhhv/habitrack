@@ -3,7 +3,6 @@ import React from 'react';
 import {
   data,
   Form,
-  redirect,
   redirectDocument,
   isRouteErrorResponse,
 } from 'react-router';
@@ -11,7 +10,7 @@ import {
 import { CustomButton } from '@components';
 import { useIsSubmitting } from '@hooks';
 import { decideAuthorization, getAuthorizationDetails } from '@services';
-import { userContext, getErrorMessage, supabaseContext } from '@utils';
+import { getErrorMessage, supabaseContext } from '@utils';
 
 import type { Route } from './+types/OAuthConsentPage';
 
@@ -29,17 +28,12 @@ export const clientLoader = async ({
   context,
   request,
 }: Route.ClientLoaderArgs) => {
-  const { pathname, search, searchParams } = new URL(request.url);
-  const authorizationId = searchParams.get('authorization_id');
+  const authorizationId = new URL(request.url).searchParams.get(
+    'authorization_id'
+  );
 
   if (!authorizationId) {
     throw data(MISSING_AUTHORIZATION_ID_MESSAGE, { status: 400 });
-  }
-
-  if (!context.get(userContext)) {
-    throw redirect(
-      `/settings?returnTo=${encodeURIComponent(pathname + search)}`
-    );
   }
 
   const details = await getAuthorizationDetails(
