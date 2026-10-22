@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), is done on `refactor/cookie-sessions`.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, is done on `refactor/auth-callback`.
 
 ## Target end state
 
@@ -262,11 +262,35 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
     - **Tests.** `makeRouteArgs()` puts `testSupabaseClient` into `supabaseContext`, and route tests expect it as the first service argument. New tests cover the server middleware, the session migration and `getPublicUrl`. In test mode, `vite.config.ts` defines placeholder `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` values (`TEST_ENV`).
     - **Verified:** the production server build renders `/calendar/month`, `/settings` and `/login` with the new middleware (200, the `HydrateFallback`, no `Set-Cookie`). The client bundle grows by about 16 KB minified (`@supabase/ssr` and `cookie`).
     - **Not verified:** a run in a real browser. That covers sign-in (password, anonymous, Google), sign-out, email links, and an existing `localStorage` session moving into cookies.
-- **Auth callback route.** Add a `/auth/callback` route whose `loader` runs `exchangeCodeForSession` (PKCE) and redirects. It replaces:
+- **Auth callback route** – done on `refactor/auth-callback`. Add a `/auth/callback` route whose `loader` runs `exchangeCodeForSession` (PKCE) and redirects. It replaces:
   - the hash-token handling in `useAuthSearchParams`, which is still an effect;
   - `AccountRedirect`'s hash forwarding;
   - the email-confirmation, password-reset and email-change redirects to `/settings`.
   - To make email links work in any browser again, switch the Supabase email templates to `{{ .TokenHash }}` links and call `verifyOtp({ token_hash, type })` in the callback `loader`. A PKCE `code` can only be exchanged by the browser that holds the code verifier.
+  - **As built:**
+    - `src/pages/AuthCallbackPage.tsx` sits under the `app` layout, so the layout's server `middleware` gives its `loader` the per-request server client.
+      - With a `code` (Google sign-in, Google linking, and email links from the default templates), the `loader` calls `exchangeCodeForSession`.
+      - With a `token_hash` and a known `type`, it calls `verifyOtp`.
+      - On success it redirects to `next`, and the middleware attaches the session cookies. `getSafeRedirectPath` (`src/utils/get-safe-redirect-path.ts`) keeps `next` on the same origin and falls back to `/calendar`.
+      - A provider error (`error_description`), a failed exchange or an incomplete link renders an error alert with status 400.
+    - `signInWithGoogle` and `linkGoogleIdentity` redirect to `/auth/callback?next=…`.
+    - **Email redirects** (`emailRedirectTo`, the password-reset `redirectTo`) stay the final page, such as `/settings?emailConfirmed=true`. The template sends the email link to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=…&next={{ .RedirectTo }}`, so the server verifies it in any browser.
+      - The local templates are in `supabase/templates/`: `email` for sign-up, `recovery`, and `email_change`. The anonymous-account conversion also uses `email_change`.
+      - The local `site_url` lost its trailing slash so `{{ .SiteURL }}/auth/callback` has no double slash.
+      - Until the production templates change, email links still arrive as `?code=` on the final page, and the browser client exchanges them in the same browser, as before.
+    - The email-change redirect is now just `/settings?emailChangeConfirmed=true`. That fixes the `[object Object]` URL from Known issues.
+    - `useAuthSearchParams` no longer reads tokens from the hash. It only shows the toasts, now saying "logged in" only when a user is signed in, and keeps the `sync-email` submission.
+    - `/account` is a server `loader` that redirects to `/settings` with the same search. On an HTTP redirect, the browser keeps the hash.
+    - **Tests** cover the callback `loader` (code, token hash, same-origin `next`, provider and exchange errors, incomplete links), `getSafeRedirectPath` and the `/account` redirect.
+    - **Verified against local Supabase**, without a browser, through the production server build:
+      - A `token_hash` recovery link from `auth.admin.generateLink` redirected to `/settings?passwordReset=true` with the user's session cookie and no-store headers.
+      - A PKCE recovery email read from Mailpit went through Supabase's `/verify` to `/auth/callback?…&code=`. The callback exchanged it, cleared the code-verifier cookie and redirected to `/settings` with the session cookie.
+      - A reused code and a provider error returned 400.
+      - `/account?emailConfirmed=true` returned a 302 to `/settings?emailConfirmed=true`.
+    - **Not verified:** Google sign-in and linking in a real browser, and the production email templates.
+    - **Rollout:**
+      - Update the production email templates (Confirm signup, Reset password, Change email address) to the `token_hash` link above.
+      - Allow `/auth/callback` as a redirect URL for every host that is not the Site URL host, for example Vercel previews.
 - **Server auth middleware.** Add a server `middleware` on a pathless `authenticated` layout. It sets `userContext`/`profileContext` on the server and redirects signed-out visitors to `/login?returnTo=…`. Make the login and OAuth flows honour `returnTo`, which also closes the consent-page gap from PR 3.
 - **Server loaders, route by route.** Convert `clientLoader` → `loader`: the app layout first, then habits, habit details, notes, settings and the calendar.
   - For the calendar, use the docs' "Client-Side Caching" pattern: a server `loader` for the document request, plus a `clientLoader` (`hydrate = true`) that serves later navigations from the range cache and falls back to `serverLoader()`.
@@ -322,7 +346,7 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
 
 ### 9. Known issues found during the migration
 
-- `updateUser` builds its email redirect with `userId=${attributes}`, so the URL contains `[object Object]`.
+- ~~`updateUser` builds its email redirect with `userId=${attributes}`, so the URL contains `[object Object]`.~~ Fixed with the auth callback route.
 - Nothing consumes the `returnTo` that the OAuth consent page sends signed-out users to (§1).
 - `NoteDrawer` overwrites text typed before the period note finishes loading.
 - A habit whose metric creation fails after the habit row was written can be duplicated by retrying (§4, atomic writes).
