@@ -17,24 +17,27 @@ import {
   createHabitMetrics,
 } from '@services';
 import {
-  rollbar,
   runAction,
   userContext,
   getErrorMessage,
   supabaseContext,
+  getRequestTimeZone,
   buildHabitMetricInsert,
 } from '@utils';
 
 import type { Route } from './+types/HabitsPage';
 
-const loadHabitsStats = async (supabase: TypedSupabaseClient) => {
+const loadHabitsStats = async (
+  supabase: TypedSupabaseClient,
+  timeZone: string
+) => {
   const habitIds = await listHabitIds(supabase);
 
   if (habitIds.length === 0) {
     return {};
   }
 
-  const stats = await getHabitsStats(supabase, habitIds);
+  const stats = await getHabitsStats(supabase, habitIds, timeZone);
 
   return Object.fromEntries(
     stats.flatMap((stat): [string, HabitStats][] => {
@@ -75,19 +78,20 @@ const addHabit = async (
   }
 };
 
-export const clientLoader = async ({ context }: Route.ClientLoaderArgs) => {
+export const loader = async ({ context, request }: Route.LoaderArgs) => {
   if (!context.get(userContext)) {
     return { habitsStats: {} };
   }
 
   try {
     return {
-      habitsStats: await loadHabitsStats(context.get(supabaseContext)),
+      habitsStats: await loadHabitsStats(
+        context.get(supabaseContext),
+        getRequestTimeZone(request)
+      ),
     };
   } catch (error) {
-    rollbar.error(
-      error instanceof Error ? error : new Error(getErrorMessage(error))
-    );
+    console.error('Failed to load habit stats', getErrorMessage(error));
 
     return { habitsStats: {} };
   }

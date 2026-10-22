@@ -194,11 +194,12 @@ export const getLongestHabitStreak = async (
 
 export const getHabitsStats = async (
   supabase: TypedSupabaseClient,
-  habitIds: Habit['id'][]
+  habitIds: Habit['id'][],
+  timeZone: string
 ) => {
   const { data, error } = await supabase.rpc('get_habits_stats', {
     p_habit_ids: habitIds,
-    p_time_zone: getLocalTimeZone(), // TODO: replace with preferred timezone from to be created user settings table
+    p_time_zone: timeZone, // TODO: replace with preferred timezone from to be created user settings table
   });
 
   if (error) {

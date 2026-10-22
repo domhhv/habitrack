@@ -6,6 +6,15 @@ import { hasBrowserSession } from '@utils';
 
 import LandingPage from './LandingPage';
 
+vi.mock('react-router', async (importOriginal) => {
+  return {
+    ...(await importOriginal<object>()),
+    PrefetchPageLinks: ({ page }: { page: string }) => {
+      return <link rel="prefetch" data-page={page} />;
+    },
+  };
+});
+
 vi.mock('@utils', async (importOriginal) => {
   return {
     ...(await importOriginal<object>()),
@@ -63,6 +72,9 @@ describe('LandingPage', () => {
 
     expect(await screen.findByText('Signed in')).toBeInTheDocument();
     expect(
+      document.querySelector('link[data-page="/calendar/month"]')
+    ).toBeInTheDocument();
+    expect(
       screen.queryByText('Anonymous call to action')
     ).not.toBeInTheDocument();
   });
@@ -73,6 +85,7 @@ describe('LandingPage', () => {
     render(<LandingPage />);
 
     expect(await screen.findByText('Signed out')).toBeInTheDocument();
+    expect(document.querySelector('link[data-page]')).not.toBeInTheDocument();
     expect(screen.getByText('Anonymous call to action')).toBeInTheDocument();
   });
 });

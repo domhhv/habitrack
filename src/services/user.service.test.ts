@@ -3,7 +3,7 @@ import { it, vi, expect, describe } from 'vitest';
 
 import type { TypedSupabaseClient } from '@models';
 
-import { getSessionClaims } from './user.service';
+import { getSession, getSessionUser, getSessionClaims } from './user.service';
 
 const makeClient = (result: { data: unknown; error: unknown }) => {
   return {
@@ -36,5 +36,52 @@ describe('getSessionClaims', () => {
         })
       )
     ).rejects.toThrow('Failed to fetch');
+  });
+});
+
+describe('getSession', () => {
+  it("keeps only the session user's id, email and anonymity", async () => {
+    const supabase = {
+      auth: {
+        getSession: vi.fn().mockResolvedValue({
+          error: null,
+          data: {
+            session: {
+              user: {
+                email: 'me@email.com',
+                id: 'user-1',
+                is_anonymous: false,
+                user_metadata: { name: 'Me' },
+              },
+            },
+          },
+        }),
+      },
+    } as unknown as TypedSupabaseClient;
+
+    await expect(getSession(supabase)).resolves.toEqual({
+      email: 'me@email.com',
+      id: 'user-1',
+      isAnonymous: false,
+    });
+  });
+});
+
+describe('getSessionUser', () => {
+  it('builds the same user shape from the verified claims', async () => {
+    await expect(
+      getSessionUser(
+        makeClient({
+          data: { claims: { is_anonymous: true, sub: 'user-1' } },
+          error: null,
+        })
+      )
+    ).resolves.toEqual({ email: undefined, id: 'user-1', isAnonymous: true });
+  });
+
+  it('is null without a session', async () => {
+    await expect(
+      getSessionUser(makeClient({ data: null, error: null }))
+    ).resolves.toBeNull();
   });
 });

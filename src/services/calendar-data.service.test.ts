@@ -7,8 +7,12 @@ import type { CalendarRange } from '@utils';
 import {
   loadCalendarData,
   clearCalendarData,
+  primeCalendarData,
   createCalendarData,
+  loadCalendarEntries,
+  getKnownFirstDayOfWeek,
   invalidateCalendarOccurrences,
+  rememberCalendarFirstDayOfWeek,
 } from './calendar-data.service';
 import { listNotes } from './notes.service';
 import { listOccurrences } from './occurrences.service';
@@ -107,5 +111,74 @@ describe('loadCalendarData', () => {
     expect(vi.mocked(listOccurrences).mock.calls.length).toBeGreaterThan(
       callsAfterFirstLoad
     );
+  });
+});
+
+describe('loadCalendarEntries', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(listNotes).mockResolvedValue([]);
+    vi.mocked(listOccurrences).mockResolvedValue([]);
+  });
+
+  it('queries a day past each end of the range in UTC', async () => {
+    await loadCalendarEntries(testSupabaseClient, range);
+
+    const [, [queryStart, queryEnd]] = vi.mocked(listOccurrences).mock.calls[0];
+
+    expect(queryStart.toAbsoluteString()).toBe('2026-10-18T00:00:00.000Z');
+    expect(queryEnd.toAbsoluteString()).toBe('2026-10-26T23:59:59.999Z');
+    expect(listNotes).toHaveBeenCalledWith(testSupabaseClient, [
+      queryStart,
+      queryEnd,
+    ]);
+  });
+});
+
+describe('primeCalendarData', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv('TZ', 'UTC');
+    clearCalendarData();
+    vi.mocked(listNotes).mockResolvedValue([]);
+    vi.mocked(listOccurrences).mockResolvedValue([]);
+  });
+
+  it('serves loads inside a primed range from the cache', async () => {
+    primeCalendarData(range, {
+      notes: [],
+      occurrences: [
+        rawOccurrence('inside', '2026-10-21T10:00:00Z'),
+        rawOccurrence('outside', '2026-10-26T10:00:00Z'),
+      ] as Parameters<typeof primeCalendarData>[1]['occurrences'],
+    });
+
+    const data = await loadCalendarData(testSupabaseClient, [
+      new CalendarDateTime(2026, 10, 20),
+      new CalendarDateTime(2026, 10, 21, 23, 59, 59, 999),
+    ]);
+
+    expect(
+      data.occurrences.map(({ id }) => {
+        return id;
+      })
+    ).toEqual(['inside']);
+    expect(
+      vi.mocked(listOccurrences).mock.calls.map(([, [queryStart]]) => {
+        return queryStart.toString();
+      })
+    ).not.toContainEqual(expect.stringContaining('2026-10-20'));
+  });
+});
+
+describe('getKnownFirstDayOfWeek', () => {
+  it('is known only for the user it was remembered for', () => {
+    rememberCalendarFirstDayOfWeek('user-1', 'mon');
+
+    expect(getKnownFirstDayOfWeek('user-1')).toEqual({
+      userId: 'user-1',
+      value: 'mon',
+    });
+    expect(getKnownFirstDayOfWeek('user-2')).toBeNull();
   });
 });

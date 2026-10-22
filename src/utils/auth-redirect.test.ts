@@ -21,6 +21,6 @@ describe('getReturnToPath', () => {
     'https://habitrack.test/login',
     `https://habitrack.test/login?returnTo=${encodeURIComponent('https://evil.test')}`,
   ])('falls back to the calendar for %s', (url) => {
-    expect(getReturnToPath(url)).toBe('/calendar');
+    expect(getReturnToPath(url)).toBe('/calendar/month');
   });
 });

@@ -9,4 +9,12 @@ export const supabaseContext = createContext<TypedSupabaseClient>();
 
 export const userContext = createContext<SessionUser>(null);
 
-export const profileContext = createContext<Profile | null>(null);
+/**
+ * Loads the signed-in user's profile on the server at most once per request, and only when a
+ * loader asks for it.
+ */
+export const profileContext = createContext<() => Promise<Profile | null>>(
+  () => {
+    return Promise.resolve(null);
+  }
+);

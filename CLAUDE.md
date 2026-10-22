@@ -46,8 +46,8 @@ yarn fix:sql           # Fix SQL formatting
 
 ### Technology Stack
 
-- **Frontend**: React 19, TypeScript 6, Vite 8, React Router v8 (framework mode, SSR enabled, data loaded in `clientLoader`s)
-- **Server data**: React Router `clientMiddleware`/`clientLoader`/`clientAction`, fetchers and revalidation
+- **Frontend**: React 19, TypeScript 6, Vite 8, React Router v8 (framework mode, SSR enabled, data loaded in server `loader`s, app UI rendered in the browser behind an app-shell `HydrateFallback`)
+- **Server data**: React Router `middleware`/`loader` on the server, `clientMiddleware`/`clientLoader`/`clientAction` in the browser, fetchers and revalidation
 - **Client UI state**: Zustand v5 with Immer middleware (drawers, confirmation dialog, calendar filters, mobile sidebar, theme)
 - **UI**: HeroUI (React Aria-based), Tailwind CSS v4, Framer Motion
 - **Backend**: Supabase (PostgreSQL, Auth, Storage, Real-time)
@@ -87,10 +87,11 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
   - Habits, habit details, notes, settings and OAuth consent sit under the pathless `authenticated` layout (`src/pages/AuthenticatedLayout.tsx`). Its server `middleware` redirects signed-out document requests, and its `clientMiddleware` signed-out navigations, to `/login?returnTo=…` (`getLoginPath`). The login, register and anonymous-login pages go back to `returnTo` (`getReturnToPath`). The calendar stays public.
   - Auth redirects land on `/auth/callback` (`src/pages/AuthCallbackPage.tsx`). Its server `loader` exchanges an OAuth or PKCE `code`, or verifies an email `token_hash`, then redirects to `next`, which `getSafeRedirectPath` keeps on the same origin. Email redirects go through it too, and a `next` that points back at the callback is unwrapped. Email templates link to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=…&next={{ .RedirectTo }}` (local copies in `supabase/templates/`).
 - **Loading**:
-  - The `app` layout `clientMiddleware` puts the session user and profile into `userContext`/`profileContext`.
-  - The `app` layout `clientLoader` returns `{ user, profile, habits, traits }`, read via `useUser`/`useProfile`/`useHabits`/`useTraits`.
-  - The `calendar` layout `clientLoader` computes the range from the URL and returns the occurrences and notes, read via `useCalendarData()`.
-  - Pages load their own data in their `clientLoader` (habit stats, a habit, the notes list, connected identities).
+  - The `app` layout's server `middleware` puts the verified session user into `userContext` and a once-per-request profile loader into `profileContext` (`await context.get(profileContext)()`). Its `clientMiddleware` sets the browser client and the session user for client actions.
+  - The `app` layout's server `loader` returns `{ appData }`, a streamed promise of `{ user, profile, habits, traits }`. Its `clientLoader` (`hydrate = true`) awaits it and records the first day of the week for the calendar. Read the data via `useUser`/`useProfile`/`useHabits`/`useTraits`.
+  - The `calendar` layout's server `loader` computes the range from the URL, profile, `Accept-Language` and the `tz` cookie (`getRequestLocale`/`getRequestTimeZone`) and streams the raw entries. Its `clientLoader` serves later ranges from the browser range cache and seeds the cache from `serverLoader()` on the first load. Read via `useCalendarData()`.
+  - Pages load their own data in server `loader`s (habit stats, a habit, the notes list, connected identities, OAuth consent). Server code that needs the visitor's time zone reads the `tz` cookie, never `getLocalTimeZone()`.
+  - `AppShellSkeleton` is the app layout's `HydrateFallback` and the pending UI while entering the app.
 - **Mutations**:
   - Every write goes through a route `clientAction`. Branch on an `intent` and type the payloads in `src/models/*-submission.model.ts`.
   - UI that belongs to one page submits to that page's route. Global UI (drawers) submits to a `/resources/*` route.
@@ -198,7 +199,7 @@ Supabase storage buckets:
 
 - **Vitest** with jsdom environment for unit tests
 - **React Testing Library** for component testing
-- Route `clientLoader`/`clientAction` functions are tested directly with `makeRouteArgs()` from `@tests` (builds the request plus a `RouterContextProvider` carrying `userContext` and `testSupabaseClient` in `supabaseContext`), with `@services` mocked. Service call assertions expect `testSupabaseClient` as the first argument
+- Route `loader`/`clientLoader`/`clientAction` functions and middleware are tested directly with `makeRouteArgs()` from `@tests` (builds the request plus a `RouterContextProvider` carrying `userContext` and `testSupabaseClient` in `supabaseContext`), with `@services` mocked. Service call assertions expect `testSupabaseClient` as the first argument
 - In test mode, Vite defines placeholder `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` values (`TEST_ENV` in `vite.config.ts`). `getSupabaseBrowserClient()` returns an empty stub under test, so mock it from `@utils` when a component's Supabase call is asserted
 - Components that use loader data, fetchers or `<Form>` render inside `createRoutesStub` from `react-router`
 - Test files located alongside components or in dedicated test directories

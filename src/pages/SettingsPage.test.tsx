@@ -12,7 +12,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/SettingsPage';
-import { clientAction, clientLoader } from './SettingsPage';
+import { loader, clientAction } from './SettingsPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -48,14 +48,14 @@ const submit = (fields: Record<string, string>, sessionUser = user) => {
   );
 };
 
-describe('SettingsPage clientLoader', () => {
+describe('SettingsPage loader', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('skips identities for signed-out users', async () => {
     await expect(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(SETTINGS_URL))
+      loader(makeRouteArgs<Route.LoaderArgs>(SETTINGS_URL))
     ).resolves.toEqual({ identities: [], identitiesError: null });
     expect(getUserIdentities).not.toHaveBeenCalled();
   });
@@ -64,7 +64,7 @@ describe('SettingsPage clientLoader', () => {
     vi.mocked(getUserIdentities).mockResolvedValue([googleIdentity]);
 
     await expect(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(SETTINGS_URL, user))
+      loader(makeRouteArgs<Route.LoaderArgs>(SETTINGS_URL, user))
     ).resolves.toEqual({ identities: [googleIdentity], identitiesError: null });
   });
 
@@ -72,7 +72,7 @@ describe('SettingsPage clientLoader', () => {
     vi.mocked(getUserIdentities).mockRejectedValue(new Error('Offline'));
 
     await expect(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(SETTINGS_URL, user))
+      loader(makeRouteArgs<Route.LoaderArgs>(SETTINGS_URL, user))
     ).resolves.toEqual({ identities: [], identitiesError: 'Offline' });
   });
 });

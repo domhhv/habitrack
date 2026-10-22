@@ -198,10 +198,7 @@ const updateStock = async (
   }
 };
 
-export const clientLoader = async ({
-  context,
-  params,
-}: Route.ClientLoaderArgs) => {
+export const loader = async ({ context, params }: Route.LoaderArgs) => {
   const habit = await getHabit(context.get(supabaseContext), params.habitId);
 
   if (!habit) {

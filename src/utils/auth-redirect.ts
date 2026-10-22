@@ -1,6 +1,6 @@
 import getSafeRedirectPath from './get-safe-redirect-path';
 
-export const DEFAULT_SIGNED_IN_PATH = '/calendar';
+export const DEFAULT_SIGNED_IN_PATH = '/calendar/month';
 
 export const getLoginPath = (requestUrl: string) => {
   const { pathname, search } = new URL(requestUrl);

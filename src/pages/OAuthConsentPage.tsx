@@ -24,10 +24,7 @@ const SCOPE_LABELS: Record<string, string> = {
 const MISSING_AUTHORIZATION_ID_MESSAGE =
   'Missing authorization_id. This page expects an OAuth request.';
 
-export const clientLoader = async ({
-  context,
-  request,
-}: Route.ClientLoaderArgs) => {
+export const loader = async ({ context, request }: Route.LoaderArgs) => {
   const authorizationId = new URL(request.url).searchParams.get(
     'authorization_id'
   );

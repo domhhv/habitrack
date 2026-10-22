@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, is done on `refactor/server-auth-guard`, together with the landing page's auth-state reveal.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, is done on `refactor/server-loaders`.
 
 ## Target end state
 
@@ -226,7 +226,7 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 - Component-less client resource routes: verified by the PR 1 spike, and in production since PR 7.
 - Revalidation load on the app layout. Every submission re-runs the habits and traits queries (the profile is memoized in the middleware since PR 9). If that becomes too much, also skip `/resources/notes` submissions in `shouldRevalidate`.
 - `react-router:split-route-modules` logs `SOURCEMAP_BROKEN` warnings for route modules with split client exports (seen since PR 2). Check that Rollbar stack traces for those chunks still map back to the source.
-- `HydrateFallback` on every hard load of an app route. This is the same experience as the old `useSession` loader, and it goes away once routes load on the server (Future work §1).
+- `HydrateFallback` on every hard load of an app route. Since server loaders, it is the app-shell skeleton and the data streams into the same response, but the UI still renders in the browser until the time-zone-safe server rendering (Future work §1) lands.
 - Moving the filter representation (PR 6) reset every user's current selection once. That was accepted, because filters were not persisted.
 - Auth cookies (since cookie sessions). The session is split into cookie chunks of about 3 KB each, and they are sent with every request to the domain, static assets included. The `localStorage` migration in `supabase-client.ts` should be removed after a while. A user whose stored session is never migrated is signed out, and for an anonymous user that means losing their data.
 
@@ -317,7 +317,7 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
       - A token-hash recovery link whose `next` is the email redirect lands on `/settings?passwordReset=true` with a session.
       - With that session's cookies, `/settings`, `/habits` and `/notes` render.
     - **Found:** the root "We're preparing the app" overlay has no CSS (`.loader-container` is not defined anywhere). So nothing visible happens while the app loads after clicking a link on the landing page. Step 4 replaces it.
-- **Server loaders, route by route.** Convert `clientLoader` → `loader`: the app layout first, then habits, habit details, notes, settings and the calendar.
+- **Server loaders, route by route** – done on `refactor/server-loaders`. Convert `clientLoader` → `loader`: the app layout first, then habits, habit details, notes, settings and the calendar.
   - **Goal:** going from the landing page to the calendar should show the calendar shell at once. Today the browser waits for route discovery, the module downloads, the session, the profile, habits and traits, the `/calendar` → `/calendar/month` redirect and the entries, with no visible feedback. Plan:
     - one server round trip for the app data;
     - prefetching on the landing page's calendar links, pointing them straight at `/calendar/month`;
@@ -326,9 +326,46 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
   - Rendering the app UI on the server needs a per-request time zone (for example a cookie) and locale first: about 20 calendar render paths call `getLocalTimeZone()`, and several hooks read `window` or `localStorage` while rendering.
   - For the calendar, use the docs' "Client-Side Caching" pattern: a server `loader` for the document request, plus a `clientLoader` (`hydrate = true`) that serves later navigations from the range cache and falls back to `serverLoader()`.
   - Drop `HydrateFallback` on converted routes.
+  - **As built:**
+    - **Session on the server.**
+      - The `app` layout's server `middleware` verifies the session with `getSessionUser()`. That builds the user from the `getClaims()` claims, so no Auth request is needed when the project signs JWTs with asymmetric keys.
+      - It sets `userContext`, plus a `profileContext` that loads the profile at most once per request, and only when a loader asks for it.
+      - `SessionUser` is now `{ email, id, isAnonymous }` on both sides, the only fields the UI reads.
+      - The authenticated layout's server guard reads that user instead of checking the session itself. It runs for document requests and for the guarded pages' data requests. A data request answers with React Router's encoded redirect (status 202).
+    - **App layout.**
+      - The server `loader` returns `{ appData }`, a promise of `{ user, profile, habits, traits }`, so a document request sends the HTML at once and streams the data after it.
+      - The `clientLoader` (`hydrate = true`) waits for that promise, records the user's first day of the week for the calendar (`rememberCalendarFirstDayOfWeek`) and keeps the stale-data tracking.
+      - The client middleware now only sets the browser client and the session user, which the client actions still need. Its per-user profile memo is gone.
+    - **Calendar.**
+      - The server `loader` computes the range from the URL, the profile's first day of the week, the `Accept-Language` locale and the `tz` cookie.
+      - It returns the entries as a promise. `loadCalendarEntries` queries a day past each end of the range in UTC, so the result covers the range in every time zone.
+      - The `clientLoader` serves the range from the browser's range cache once the first day of the week is known. Until then (on hydration, and when entering the app) it seeds the cache from `serverLoader()` with `primeCalendarData`, then reads the cache.
+      - Month switching and sibling prefetch stay in the browser, as before.
+      - The entries are not streamed to the UI separately, by request: the calendar still appears together with its entries, and the app-shell skeleton covers the wait.
+    - **`tz` cookie.** `rememberTimeZone` (an inline script in the root layout) writes the browser's time zone on every page load. `getRequestTimeZone` reads it and falls back to UTC; `getRequestLocale` reads `Accept-Language`.
+    - **Habits, habit details, notes, settings, OAuth consent** use server `loader`s. The habit stats RPC gets the request's time zone, where it used to take the browser's.
+      - A failed stats load is logged with `console.error`, because Rollbar can't report from the server yet.
+      - The login, register, anonymous-login and reset pages keep their `clientLoader`s, as do the `/resources/*` routes.
+    - **Instant shell.**
+      - `AppShellSkeleton` (a static header, sidebar and month grid with no dates or browser APIs) is the app layout's `HydrateFallback`.
+      - It is also the pending UI while navigating into the app. It replaces the root overlay, which had lost its CSS.
+      - The landing page's calendar links go straight to `/calendar/month` (no redirect hop) and carry `data-discover`. For signed-in visitors, the page renders `<PrefetchPageLinks page="/calendar/month" />` once the session is known, which preloads the app and calendar modules.
+      - Their data can't be prefetched: React Router skips data prefetch for routes with a `clientLoader`, and both layouts need one.
+    - **Still rendered in the browser.** The app layout keeps `HydrateFallback`. Server-rendering the UI still needs every `getLocalTimeZone()` render path to use the request's time zone (the cookie is there now), the request's locale, and SSR-safe sidebar and screen-size hooks.
+    - **Rollbar** is disabled on the server (`enabled: typeof window !== 'undefined'`). It only has the client token, so every server report was rejected.
+    - **Tests:**
+      - The app layout's middleware, `loader` and `clientLoader`.
+      - The calendar `loader` (range, profile week start, `tz` cookie, signed-out) and both `clientLoader` paths.
+      - `loadCalendarEntries`, `primeCalendarData` and cache priming, the remembered first day of the week, the request preferences, `getSession`/`getSessionUser`, and the guards.
+      - The converted pages' loader tests now call `loader`.
+    - **Verified against local Supabase** through the production server build, with a throwaway user that has one habit and one occurrence:
+      - A document request for `/calendar/month/2026/10/22` sends the skeleton with that habit and occurrence streamed into the HTML.
+      - The calendar and app data requests return the range and the data.
+      - `/habits` has its stats, and `/notes.data` loads.
+      - Signed-out `/habits` gets a 302 and `/notes.data` a 202 redirect, both to `/login?returnTo=…`.
 - **Server actions.** Convert `clientAction` → `action`. Toasts move to the component (from `fetcher.data`), because actions no longer run in the browser. `runAction` becomes a server helper that returns `{ ok, error }`.
 - **Simplify revalidation.** Revisit `shouldRevalidate` and the `markAppDataStale` machinery once server loaders use the default revalidation. Keep explicit `shouldRevalidate` only where a loader is expensive.
-- **Decision point.** If the app stays client-only instead, switch to `ssr: false` (SPA mode) with the landing page pre-rendered. Today the server render produces nothing but the loading shell for app routes, so it is pure cost.
+- ~~**Decision point.** If the app stays client-only instead, switch to `ssr: false` (SPA mode) with the landing page pre-rendered.~~ Settled by server loaders: the server now loads the data and streams it with the app shell.
 
 ### 2. Progressive enhancement and forms
 
@@ -384,4 +421,4 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
 - `/habits/:habitId` with a non-UUID id shows "Couldn't load this habit" instead of "Habit not found".
 - The occurrence drawer's day navigation shows no entries outside the loaded calendar range. Fix it with a `fetcher.load` fallback to a day-range loader, or with the URL-driven drawers from §5.
 - `getLongestHabitStreak` and its RPC are unused (existing TODO in `occurrences.service.ts`).
-- After a successful login the user lands on `/calendar`, which redirects once more through the calendar layout loader to `/calendar/month`. Redirect straight to `/calendar/month` if the extra hop is noticeable.
+- ~~After a successful login the user lands on `/calendar`, which redirects once more through the calendar layout loader to `/calendar/month`.~~ Fixed with server loaders: sign-ins and the landing page's links go straight to `/calendar/month`.

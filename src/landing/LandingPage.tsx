@@ -1,4 +1,5 @@
 import React from 'react';
+import { PrefetchPageLinks } from 'react-router';
 
 import { hasBrowserSession } from '@utils';
 
@@ -98,6 +99,7 @@ const LandingPage = () => {
       {/*    }*/}
       {/*  }*/}
       {/*</script>*/}
+      {hasSession && <PrefetchPageLinks page="/calendar/month" />}
       <div className="bg-background text-foreground min-h-screen antialiased">
         <LandingHeader hasSession={hasSession} />
         <main>
