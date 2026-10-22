@@ -50,7 +50,7 @@ describe('AuthCallbackPage loader', () => {
   });
 
   it('goes to the calendar without a next path', async () => {
-    expectRedirectTo(await runLoader('?code=code-1'), '/calendar');
+    expectRedirectTo(await runLoader('?code=code-1'), '/calendar/month');
   });
 
   it('verifies an email link and goes to its same-origin redirect URL', async () => {
@@ -86,7 +86,7 @@ describe('AuthCallbackPage loader', () => {
 
     expectRedirectTo(
       await runLoader(`?code=code-1&next=${encodeURIComponent(nested)}`),
-      '/calendar'
+      '/calendar/month'
     );
   });
 
@@ -97,7 +97,7 @@ describe('AuthCallbackPage loader', () => {
         `?code=code-1&next=${encodeURIComponent(next)}`
       );
 
-      expectRedirectTo(result, '/calendar');
+      expectRedirectTo(result, '/calendar/month');
     }
   );
 

@@ -5,7 +5,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/OAuthConsentPage';
-import { clientAction, clientLoader } from './OAuthConsentPage';
+import { loader, clientAction } from './OAuthConsentPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -28,18 +28,15 @@ const catchThrown = async (promise: Promise<unknown>) => {
   throw new Error('Expected the promise to throw');
 };
 
-describe('OAuthConsentPage clientLoader', () => {
+describe('OAuthConsentPage loader', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('rejects a request without authorization_id', async () => {
     const thrown = await catchThrown(
-      clientLoader(
-        makeRouteArgs<Route.ClientLoaderArgs>(
-          'http://localhost/oauth/consent',
-          user
-        )
+      loader(
+        makeRouteArgs<Route.LoaderArgs>('http://localhost/oauth/consent', user)
       )
     );
 
@@ -53,7 +50,7 @@ describe('OAuthConsentPage clientLoader', () => {
     } as Awaited<ReturnType<typeof getAuthorizationDetails>>);
 
     const thrown = (await catchThrown(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(CONSENT_URL, user))
+      loader(makeRouteArgs<Route.LoaderArgs>(CONSENT_URL, user))
     )) as Response;
 
     expect(thrown.headers.get('Location')).toBe('cursor://callback?code=1');
@@ -67,7 +64,7 @@ describe('OAuthConsentPage clientLoader', () => {
     );
 
     await expect(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(CONSENT_URL, user))
+      loader(makeRouteArgs<Route.LoaderArgs>(CONSENT_URL, user))
     ).resolves.toEqual({ details });
     expect(getAuthorizationDetails).toHaveBeenCalledWith(
       testSupabaseClient,

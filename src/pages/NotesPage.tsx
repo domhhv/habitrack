@@ -9,10 +9,7 @@ import type { Route } from './+types/NotesPage';
 
 const NOTES_PAGE_SIZE = 20;
 
-export const clientLoader = async ({
-  context,
-  request,
-}: Route.ClientLoaderArgs) => {
+export const loader = async ({ context, request }: Route.LoaderArgs) => {
   const pageCount = Math.max(
     1,
     Math.floor(Number(new URL(request.url).searchParams.get('pages')) || 1)

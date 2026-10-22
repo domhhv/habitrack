@@ -5,7 +5,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/NotesPage';
-import { clientLoader } from './NotesPage';
+import { loader } from './NotesPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -16,7 +16,7 @@ vi.mock('@services', async (importOriginal) => {
 
 const user = { id: 'user-1' } as SessionUser;
 
-describe('NotesPage clientLoader', () => {
+describe('NotesPage loader', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -29,11 +29,8 @@ describe('NotesPage clientLoader', () => {
     );
 
     await expect(
-      clientLoader(
-        makeRouteArgs<Route.ClientLoaderArgs>(
-          'http://localhost/notes?pages=2',
-          user
-        )
+      loader(
+        makeRouteArgs<Route.LoaderArgs>('http://localhost/notes?pages=2', user)
       )
     ).resolves.toMatchObject({ hasMore: true, pageCount: 2 });
     expect(listAllNotes).toHaveBeenCalledWith(testSupabaseClient, {
@@ -46,8 +43,8 @@ describe('NotesPage clientLoader', () => {
     vi.mocked(listAllNotes).mockResolvedValue([]);
 
     await expect(
-      clientLoader(
-        makeRouteArgs<Route.ClientLoaderArgs>(
+      loader(
+        makeRouteArgs<Route.LoaderArgs>(
           'http://localhost/notes?pages=abc',
           user
         )
@@ -61,9 +58,7 @@ describe('NotesPage clientLoader', () => {
 
   it('skips the query for signed-out visitors', async () => {
     await expect(
-      clientLoader(
-        makeRouteArgs<Route.ClientLoaderArgs>('http://localhost/notes')
-      )
+      loader(makeRouteArgs<Route.LoaderArgs>('http://localhost/notes'))
     ).resolves.toEqual({ hasMore: false, notes: [], pageCount: 1 });
     expect(listAllNotes).not.toHaveBeenCalled();
   });

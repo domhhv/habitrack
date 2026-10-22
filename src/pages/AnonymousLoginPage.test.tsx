@@ -34,7 +34,9 @@ describe('AnonymousLoginPage', () => {
       thrown = error;
     }
 
-    expect((thrown as Response).headers.get('Location')).toBe('/calendar');
+    expect((thrown as Response).headers.get('Location')).toBe(
+      '/calendar/month'
+    );
   });
 
   it('signs in anonymously and goes to the calendar', async () => {
@@ -49,7 +51,7 @@ describe('AnonymousLoginPage', () => {
     )) as Response;
 
     expect(signInAnonymously).toHaveBeenCalledWith(testSupabaseClient, 'sun');
-    expect(result.headers.get('Location')).toBe('/calendar');
+    expect(result.headers.get('Location')).toBe('/calendar/month');
   });
 
   it('goes back to the page that asked for a login', async () => {

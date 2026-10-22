@@ -1,28 +1,16 @@
 import React from 'react';
 import { Outlet, redirect } from 'react-router';
 
-import { getSessionClaims } from '@services';
-import { userContext, getLoginPath, supabaseContext } from '@utils';
+import { userContext, getLoginPath } from '@utils';
 
 import type { Route } from './+types/AuthenticatedLayout';
 
 /**
- * Sends signed-out document requests to the login page before any HTML renders. When Supabase Auth
- * can't be reached, the request goes through and the client guard below decides.
+ * Sends signed-out document requests and data requests to the login page before anything renders.
+ * The app layout's server middleware has already verified the session.
  */
-const requireSession: Route.MiddlewareFunction = async ({
-  context,
-  request,
-}) => {
-  let hasSession: boolean;
-
-  try {
-    hasSession = !!(await getSessionClaims(context.get(supabaseContext)));
-  } catch {
-    return;
-  }
-
-  if (!hasSession) {
+const requireSession: Route.MiddlewareFunction = ({ context, request }) => {
+  if (!context.get(userContext)) {
     throw redirect(getLoginPath(request.url));
   }
 };

@@ -53,6 +53,20 @@ describe('createCalendarRangeCache', () => {
     expect(cache.get(range(5, 11))).toEqual(['exact']);
   });
 
+  it('serves a primed range, and ranges inside it, without loading', async () => {
+    const cache = createCalendarRangeCache<string[]>();
+    const loader = vi.fn().mockResolvedValue(['loaded']);
+
+    cache.prime(range(1, 31), ['primed']);
+    cache.prime(range(1, 31), ['primed again']);
+
+    await expect(cache.load(range(5, 11), loader)).resolves.toEqual([
+      'primed again',
+    ]);
+    expect(cache.values()).toEqual([['primed again']]);
+    expect(loader).not.toHaveBeenCalled();
+  });
+
   it('deduplicates requests for the same range', async () => {
     const cache = createCalendarRangeCache<string[]>();
     const loader = vi.fn().mockResolvedValue(['current']);

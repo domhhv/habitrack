@@ -36,6 +36,7 @@ const CtaLink = ({
       id={id}
       href={href}
       hidden={hidden}
+      data-discover="true"
       className={`inline-flex items-center justify-center gap-2 rounded-(--field-radius) font-bold whitespace-nowrap outline-offset-2 transition-opacity focus-visible:outline-2 focus-visible:outline-(--focus) ${SIZE_CLASSES[size]} ${VARIANT_CLASSES[variant]}`}
     >
       {children}

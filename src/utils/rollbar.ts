@@ -4,6 +4,7 @@ export default new Rollbar({
   accessToken: ROLLBAR_CLIENT_ACCESS_TOKEN,
   captureUncaught: true,
   captureUnhandledRejections: true,
+  enabled: typeof window !== 'undefined',
   environment: ROLLBAR_CLIENT_ENV,
   payload: {
     client: {

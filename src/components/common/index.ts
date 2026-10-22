@@ -1,3 +1,4 @@
+export { default as AppShellSkeleton } from './AppShellSkeleton';
 export { default as ConfirmationDialog } from './ConfirmationDialog';
 export { default as CustomButton } from './CustomButton';
 export { default as CustomKbd } from './CustomKbd';

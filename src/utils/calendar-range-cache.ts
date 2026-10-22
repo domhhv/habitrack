@@ -99,9 +99,17 @@ export const createCalendarRangeCache = <T>() => {
     return request;
   };
 
+  const prime = (range: CalendarRange, value: T) => {
+    entries = entries.filter((entry) => {
+      return !isSameRange(entry.range, range);
+    });
+    entries.push({ range, value });
+  };
+
   return {
     get,
     load,
+    prime,
     clear: () => {
       entries = [];
       generation += 1;

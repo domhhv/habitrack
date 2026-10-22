@@ -42,7 +42,11 @@ const LandingHeader = ({ hasSession }: LandingHeaderProps) => {
           <div className="landing-fade-in col-start-3 flex items-center gap-3 justify-self-end">
             <ThemeToggle />
             {hasSession ? (
-              <CustomButton size="sm" href="/calendar">
+              <CustomButton
+                size="sm"
+                data-discover="true"
+                href="/calendar/month"
+              >
                 Calendar
               </CustomButton>
             ) : (

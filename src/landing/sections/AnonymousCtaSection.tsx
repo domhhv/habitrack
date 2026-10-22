@@ -15,7 +15,7 @@ const AnonymousCtaSection = () => {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <CtaLink href="/anonymous-login">Continue anonymously</CtaLink>
-            <CtaLink href="/calendar" variant="secondary">
+            <CtaLink variant="secondary" href="/calendar/month">
               Preview the calendar
             </CtaLink>
           </div>

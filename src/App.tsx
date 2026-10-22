@@ -1,21 +1,33 @@
 import { Analytics } from '@vercel/analytics/react';
 import keyBy from 'lodash.keyby';
 import React from 'react';
-import { Outlet, type ShouldRevalidateFunctionArgs } from 'react-router';
+import {
+  Outlet,
+  type RouterContextProvider,
+  type ShouldRevalidateFunctionArgs,
+} from 'react-router';
 
 import {
   AppHeader,
   AppSidebar,
   NoteDrawer,
-  InfinityLoader,
+  AppShellSkeleton,
   OccurrenceDrawer,
   ConfirmationDialog,
 } from '@components';
 import { useAuthSubscription } from '@hooks';
-import type { Profile, TypedSupabaseClient } from '@models';
+import type { Profile } from '@models';
 import { ErrorFallbackPage } from '@pages';
-import { listHabits, getProfile, getSession, listTraits } from '@services';
 import {
+  listHabits,
+  getProfile,
+  getSession,
+  listTraits,
+  getSessionUser,
+  rememberCalendarFirstDayOfWeek,
+} from '@services';
+import {
+  noop,
   userContext,
   profileContext,
   isAppDataStale,
@@ -28,24 +40,74 @@ import {
 
 import type { Route } from './+types/App';
 
-let profileRequest: { promise: Promise<Profile>; userId: string } | null = null;
+const sessionMiddleware: Route.MiddlewareFunction = async ({ context }) => {
+  const supabase = context.get(supabaseContext);
+  const user = await getSessionUser(supabase);
+  let profileRequest: Promise<Profile | null> | null = null;
 
-const loadProfile = (supabase: TypedSupabaseClient, userId: string) => {
-  if (profileRequest?.userId !== userId || isAppDataStale()) {
-    const promise = getProfile(supabase, userId);
+  context.set(userContext, user);
+  context.set(profileContext, () => {
+    profileRequest ??= user
+      ? getProfile(supabase, user.id)
+      : Promise.resolve(null);
 
-    profileRequest = { promise, userId };
-    promise.catch(() => {
-      if (profileRequest?.promise === promise) {
-        profileRequest = null;
-      }
-    });
-  }
-
-  return profileRequest.promise;
+    return profileRequest;
+  });
 };
 
-export const middleware: Route.MiddlewareFunction[] = [supabaseMiddleware];
+export const middleware: Route.MiddlewareFunction[] = [
+  supabaseMiddleware,
+  sessionMiddleware,
+];
+
+const loadAppData = async (context: Readonly<RouterContextProvider>) => {
+  const supabase = context.get(supabaseContext);
+  const user = context.get(userContext);
+  const [profile, habits, traits] = user
+    ? await Promise.all([
+        context.get(profileContext)(),
+        listHabits(supabase),
+        listTraits(supabase),
+      ])
+    : [null, [], []];
+
+  return {
+    habits: keyBy(habits, 'id'),
+    profile,
+    traits: keyBy(traits, 'id'),
+    user,
+  };
+};
+
+/**
+ * Returns the app data as a promise, so a document request sends the app shell right away and
+ * streams the data after it.
+ */
+export const loader = ({ context }: Route.LoaderArgs) => {
+  const appData = loadAppData(context);
+  appData.catch(noop);
+
+  return { appData };
+};
+
+export const clientLoader = async ({
+  request,
+  serverLoader,
+}: Route.ClientLoaderArgs) => {
+  const finishAppDataLoad = trackAppDataLoad(request.signal);
+  const { appData } = await serverLoader();
+  const data = await appData;
+
+  rememberCalendarFirstDayOfWeek(
+    data.user?.id ?? null,
+    data.profile?.firstDayOfWeek
+  );
+  finishAppDataLoad();
+
+  return data;
+};
+
+clientLoader.hydrate = true as const;
 
 const supabaseClientMiddleware: Route.ClientMiddlewareFunction = async ({
   context,
@@ -53,41 +115,16 @@ const supabaseClientMiddleware: Route.ClientMiddlewareFunction = async ({
   context.set(supabaseContext, await loadSupabaseBrowserClient());
 };
 
-const sessionMiddleware: Route.ClientMiddlewareFunction = async ({
+const clientSessionMiddleware: Route.ClientMiddlewareFunction = async ({
   context,
 }) => {
-  const supabase = context.get(supabaseContext);
-  const user = await getSession(supabase);
-
-  context.set(userContext, user);
-  context.set(
-    profileContext,
-    user ? await loadProfile(supabase, user.id) : null
-  );
+  context.set(userContext, await getSession(context.get(supabaseContext)));
 };
 
-export const clientMiddleware = [supabaseClientMiddleware, sessionMiddleware];
-
-export const clientLoader = async ({
-  context,
-  request,
-}: Route.ClientLoaderArgs) => {
-  const finishAppDataLoad = trackAppDataLoad(request.signal);
-  const supabase = context.get(supabaseContext);
-  const user = context.get(userContext);
-  const [habits, traits] = user
-    ? await Promise.all([listHabits(supabase), listTraits(supabase)])
-    : [[], []];
-
-  finishAppDataLoad();
-
-  return {
-    habits: keyBy(habits, 'id'),
-    profile: context.get(profileContext),
-    traits: keyBy(traits, 'id'),
-    user,
-  };
-};
+export const clientMiddleware = [
+  supabaseClientMiddleware,
+  clientSessionMiddleware,
+];
 
 export const shouldRevalidate = ({
   currentUrl,
@@ -107,14 +144,7 @@ export const shouldRevalidate = ({
 };
 
 export const HydrateFallback = () => {
-  return (
-    <main className="flex h-screen flex-1 items-center justify-center bg-white dark:bg-black">
-      <div className="flex flex-row items-center gap-4">
-        <InfinityLoader color="var(--accent)" />
-        <span>We're preparing the app...</span>
-      </div>
-    </main>
-  );
+  return <AppShellSkeleton />;
 };
 
 export const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => {

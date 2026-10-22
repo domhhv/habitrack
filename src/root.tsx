@@ -1,8 +1,8 @@
 import { useMatches, useNavigation, isRouteErrorResponse } from 'react-router';
 import { Meta, Links, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
-import { InfinityLoader } from '@components';
-import { initializeTheme } from '@utils';
+import { AppShellSkeleton } from '@components';
+import { initializeTheme, rememberTimeZone } from '@utils';
 
 import type { Route } from './+types/root';
 import './index.css';
@@ -46,6 +46,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             __html: `(${initializeTheme.toString()})()`,
           }}
         />
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `(${rememberTimeZone.toString()})()`,
+          }}
+        />
         <title>Habitrack</title>
         <Meta />
         <Links />
@@ -74,9 +80,8 @@ export default function Root() {
     <>
       <Outlet />
       {isEnteringApp && (
-        <div className="loader-container">
-          <InfinityLoader color="var(--accent)" />
-          <span>We're preparing the app...</span>
+        <div className="fixed inset-0 z-50">
+          <AppShellSkeleton />
         </div>
       )}
     </>

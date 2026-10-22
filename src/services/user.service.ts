@@ -57,7 +57,7 @@ export const signInAnonymously = async (
 
 export const signInWithGoogle = async (
   supabase: TypedSupabaseClient,
-  next = '/calendar'
+  next = '/calendar/month'
 ) => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -208,6 +208,18 @@ export const sendPasswordResetEmail = async (
   }
 };
 
+const toSessionUser = ({
+  email,
+  id,
+  isAnonymous,
+}: {
+  email: string | undefined;
+  id: string;
+  isAnonymous: boolean | undefined;
+}) => {
+  return { email, id, isAnonymous: !!isAnonymous };
+};
+
 export const getSession = async (supabase: TypedSupabaseClient) => {
   const {
     data: { session },
@@ -222,10 +234,11 @@ export const getSession = async (supabase: TypedSupabaseClient) => {
     return null;
   }
 
-  return camelcaseKeys(
-    { ...session.user, fetchedAt: new Date().toISOString() },
-    { deep: true }
-  );
+  return toSessionUser({
+    email: session.user.email,
+    id: session.user.id,
+    isAnonymous: session.user.is_anonymous,
+  });
 };
 
 export const exchangeCodeForSession = async (
@@ -266,4 +279,20 @@ export const getSessionClaims = async (supabase: TypedSupabaseClient) => {
   }
 
   return data?.claims ?? null;
+};
+
+/**
+ * The signed-in user of a server request, built from the verified JWT claims so it has the same
+ * shape as `getSession` in the browser. Throws only when Supabase Auth can't be reached.
+ */
+export const getSessionUser = async (supabase: TypedSupabaseClient) => {
+  const claims = await getSessionClaims(supabase);
+
+  return claims
+    ? toSessionUser({
+        email: claims.email,
+        id: claims.sub,
+        isAnonymous: claims.is_anonymous,
+      })
+    : null;
 };

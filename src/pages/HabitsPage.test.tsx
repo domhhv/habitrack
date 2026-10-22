@@ -12,7 +12,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/HabitsPage';
-import { clientAction, clientLoader } from './HabitsPage';
+import { loader, clientAction } from './HabitsPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -29,7 +29,7 @@ vi.mock('@services', async (importOriginal) => {
 const HABITS_URL = 'http://localhost/habits';
 const user = { id: 'user-1' } as SessionUser;
 
-describe('HabitsPage clientLoader', () => {
+describe('HabitsPage loader', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -43,21 +43,23 @@ describe('HabitsPage clientLoader', () => {
     ] as Awaited<ReturnType<typeof getHabitsStats>>);
 
     await expect(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(HABITS_URL, user))
+      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL, user))
     ).resolves.toEqual({ habitsStats: { 'habit-1': stat } });
-    expect(getHabitsStats).toHaveBeenCalledWith(testSupabaseClient, [
-      'habit-1',
-    ]);
+    expect(getHabitsStats).toHaveBeenCalledWith(
+      testSupabaseClient,
+      ['habit-1'],
+      'UTC'
+    );
   });
 
   it('skips the stats query without habits or a user', async () => {
     vi.mocked(listHabitIds).mockResolvedValue([]);
 
     await expect(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(HABITS_URL, user))
+      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL, user))
     ).resolves.toEqual({ habitsStats: {} });
     await expect(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(HABITS_URL))
+      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL))
     ).resolves.toEqual({ habitsStats: {} });
     expect(getHabitsStats).not.toHaveBeenCalled();
   });
@@ -66,7 +68,7 @@ describe('HabitsPage clientLoader', () => {
     vi.mocked(listHabitIds).mockRejectedValue(new Error('Offline'));
 
     await expect(
-      clientLoader(makeRouteArgs<Route.ClientLoaderArgs>(HABITS_URL, user))
+      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL, user))
     ).resolves.toEqual({ habitsStats: {} });
   });
 });

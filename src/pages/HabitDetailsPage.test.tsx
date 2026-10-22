@@ -21,7 +21,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/HabitDetailsPage';
-import { clientAction, clientLoader } from './HabitDetailsPage';
+import { loader, clientAction } from './HabitDetailsPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -57,7 +57,7 @@ const submitJson = (submission: HabitDetailsSubmission, sessionUser = user) => {
   });
 };
 
-describe('HabitDetailsPage clientLoader', () => {
+describe('HabitDetailsPage loader', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -69,8 +69,8 @@ describe('HabitDetailsPage clientLoader', () => {
     );
 
     await expect(
-      clientLoader({
-        ...makeRouteArgs<Route.ClientLoaderArgs>(HABIT_URL, user),
+      loader({
+        ...makeRouteArgs<Route.LoaderArgs>(HABIT_URL, user),
         params: { habitId: 'habit-1' },
       })
     ).resolves.toEqual({ habit });
@@ -80,8 +80,8 @@ describe('HabitDetailsPage clientLoader', () => {
     vi.mocked(getHabit).mockResolvedValue(null);
 
     await expect(
-      clientLoader({
-        ...makeRouteArgs<Route.ClientLoaderArgs>(HABIT_URL, user),
+      loader({
+        ...makeRouteArgs<Route.LoaderArgs>(HABIT_URL, user),
         params: { habitId: 'missing' },
       })
     ).rejects.toMatchObject({ init: { status: 404 } });

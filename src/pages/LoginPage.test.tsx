@@ -55,7 +55,7 @@ describe('LoginPage', () => {
       'me@email.com',
       'password'
     );
-    expect(result.headers.get('Location')).toBe('/calendar');
+    expect(result.headers.get('Location')).toBe('/calendar/month');
   });
 
   it('goes back to the page that asked for a login', async () => {
@@ -71,7 +71,7 @@ describe('LoginPage', () => {
       `${LOGIN_URL}?returnTo=${encodeURIComponent('https://evil.test/habits')}`
     )) as Response;
 
-    expect(result.headers.get('Location')).toBe('/calendar');
+    expect(result.headers.get('Location')).toBe('/calendar/month');
   });
 
   it('sends a signed-in user straight to the return path', () => {

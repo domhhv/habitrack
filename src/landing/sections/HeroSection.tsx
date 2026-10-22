@@ -38,7 +38,7 @@ const HeroSection = ({ hasSession }: HeroSectionProps) => {
                   know exactly what it uses and what it costs.
                 </p>
                 <div className="mt-4">
-                  <CtaLink href="/calendar">Open your calendar</CtaLink>
+                  <CtaLink href="/calendar/month">Open your calendar</CtaLink>
                 </div>
               </div>
             ) : (
@@ -55,7 +55,11 @@ const HeroSection = ({ hasSession }: HeroSectionProps) => {
                         <UserCirclePlusIcon className="size-5" />
                         Join — it&apos;s free
                       </CustomButton>
-                      <CustomButton href="/calendar" variant="outline">
+                      <CustomButton
+                        variant="outline"
+                        data-discover="true"
+                        href="/calendar/month"
+                      >
                         Preview the full calendar
                         <ArrowRightIcon className="size-5" />
                       </CustomButton>

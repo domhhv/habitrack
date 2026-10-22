@@ -47,7 +47,9 @@ describe('RegisterPage clientLoader', () => {
     }
 
     expect(thrown).toBeInstanceOf(Response);
-    expect((thrown as Response).headers.get('Location')).toBe('/calendar');
+    expect((thrown as Response).headers.get('Location')).toBe(
+      '/calendar/month'
+    );
     expect((thrown as Response).headers.has('X-Remix-Replace')).toBe(true);
   });
 
@@ -77,7 +79,7 @@ describe('RegisterPage clientAction', () => {
       'password'
     );
     expect(signUp).not.toHaveBeenCalled();
-    expect(result.headers.get('Location')).toBe('/calendar');
+    expect(result.headers.get('Location')).toBe('/calendar/month');
   });
 
   it('signs up a new user with the submitted first day of week', async () => {

@@ -3,11 +3,13 @@ import {
   parseAbsolute,
   toCalendarDate,
   getLocalTimeZone,
+  type ZonedDateTime,
 } from '@internationalized/date';
 import keyBy from 'lodash.keyby';
 
 import type {
   Note,
+  DaysOfWeek,
   Occurrence,
   RawOccurrence,
   TypedSupabaseClient,
@@ -25,6 +27,11 @@ import { listOccurrences } from './occurrences.service';
 
 const occurrencesCache = createCalendarRangeCache<Occurrence[]>();
 const notesCache = createCalendarRangeCache<Note[]>();
+
+let knownFirstDayOfWeek: {
+  userId: string | null;
+  value: DaysOfWeek | undefined;
+} | null = null;
 
 const toClientOccurrence = (occurrence: RawOccurrence): Occurrence => {
   return {
@@ -168,4 +175,49 @@ export const invalidateCalendarNotes = () => {
 export const clearCalendarData = () => {
   occurrencesCache.clear();
   notesCache.clear();
+};
+
+/**
+ * The app layout reports the signed-in user's first day of the week once its data loads, so the
+ * calendar can work out later ranges in the browser without asking the server.
+ */
+export const rememberCalendarFirstDayOfWeek = (
+  userId: string | null,
+  firstDayOfWeek: DaysOfWeek | undefined
+) => {
+  knownFirstDayOfWeek = { userId, value: firstDayOfWeek };
+};
+
+export const getKnownFirstDayOfWeek = (userId: string | null) => {
+  return knownFirstDayOfWeek?.userId === userId ? knownFirstDayOfWeek : null;
+};
+
+/**
+ * Server-side load of a range's raw entries. The query reaches one day past each end of the
+ * range in UTC, so it covers the range in every time zone, and the browser trims it to its own.
+ */
+export const loadCalendarEntries = async (
+  supabase: TypedSupabaseClient,
+  [rangeStart, rangeEnd]: CalendarRange
+) => {
+  const queryRange = [
+    toZoned(rangeStart.subtract({ days: 1 }), 'UTC'),
+    toZoned(rangeEnd.add({ days: 1 }), 'UTC'),
+  ] as [ZonedDateTime, ZonedDateTime];
+  const [occurrences, notes] = await Promise.all([
+    listOccurrences(supabase, queryRange),
+    listNotes(supabase, queryRange),
+  ]);
+
+  return { notes, occurrences };
+};
+
+export type CalendarEntries = Awaited<ReturnType<typeof loadCalendarEntries>>;
+
+export const primeCalendarData = (
+  range: CalendarRange,
+  { notes, occurrences }: CalendarEntries
+) => {
+  occurrencesCache.prime(range, occurrences.map(toClientOccurrence));
+  notesCache.prime(range, notes);
 };

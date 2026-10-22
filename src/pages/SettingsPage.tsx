@@ -155,7 +155,7 @@ const runIntent = async (
   return { intent, ok: true as const };
 };
 
-export const clientLoader = async ({ context }: Route.ClientLoaderArgs) => {
+export const loader = async ({ context }: Route.LoaderArgs) => {
   if (!context.get(userContext)) {
     return { identities: [], identitiesError: null };
   }
