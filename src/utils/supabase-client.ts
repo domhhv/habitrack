@@ -4,6 +4,7 @@ import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import type { Database } from '@db-types';
 import type { TypedSupabaseClient } from '@models';
 
+import getErrorMessage from './get-error-message';
 import rollbar from './rollbar';
 
 let legacySessionMigration: Promise<void> | null = null;
@@ -14,6 +15,10 @@ export const getSupabaseBrowserClient = (): TypedSupabaseClient => {
   }
 
   return createBrowserClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+};
+
+const getLegacySessionKey = () => {
+  return `sb-${new URL(SUPABASE_URL).hostname.split('.')[0]}-auth-token`;
 };
 
 const parseLegacySession = (storedSession: string) => {
@@ -35,7 +40,7 @@ const parseLegacySession = (storedSession: string) => {
  * A network failure keeps the old entry for the next page load.
  */
 const migrateLegacySession = async (supabase: TypedSupabaseClient) => {
-  const storageKey = `sb-${new URL(SUPABASE_URL).hostname.split('.')[0]}-auth-token`;
+  const storageKey = getLegacySessionKey();
   const storedSession = window.localStorage.getItem(storageKey);
 
   if (!storedSession) {
@@ -64,4 +69,28 @@ export const loadSupabaseBrowserClient = async () => {
   await legacySessionMigration;
 
   return supabase;
+};
+
+/**
+ * Whether this browser holds a session, for pages outside the app layout such as the landing page.
+ * A localStorage session that could not be moved into the cookies yet still counts.
+ */
+export const hasBrowserSession = async () => {
+  try {
+    const supabase = await loadSupabaseBrowserClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    return (
+      Boolean(session) ||
+      window.localStorage.getItem(getLegacySessionKey()) !== null
+    );
+  } catch (error) {
+    rollbar.error(
+      error instanceof Error ? error : new Error(getErrorMessage(error))
+    );
+
+    return false;
+  }
 };

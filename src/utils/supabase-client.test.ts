@@ -50,18 +50,18 @@ const importClientModule = () => {
   return import('./supabase-client');
 };
 
+beforeEach(() => {
+  vi.resetModules();
+  vi.clearAllMocks();
+  vi.stubEnv('NODE_ENV', 'production');
+  window.localStorage.clear();
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 describe('loadSupabaseBrowserClient', () => {
-  beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
-    vi.stubEnv('NODE_ENV', 'production');
-    window.localStorage.clear();
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
   it('creates the cookie client with the project URL and publishable key', async () => {
     const client = makeClient();
     const { loadSupabaseBrowserClient } = await importClientModule();
@@ -138,6 +138,58 @@ describe('loadSupabaseBrowserClient', () => {
     const { loadSupabaseBrowserClient } = await importClientModule();
 
     await expect(loadSupabaseBrowserClient()).resolves.toBe(client);
+    expect(rollbarError).toHaveBeenCalledWith(error);
+  });
+});
+
+describe('hasBrowserSession', () => {
+  it('is true when the cookies hold a session', async () => {
+    makeClient({ session: { user: { id: 'user-1' } } });
+    const { hasBrowserSession } = await importClientModule();
+
+    await expect(hasBrowserSession()).resolves.toBe(true);
+  });
+
+  it('moves a localStorage session into the cookies before checking', async () => {
+    window.localStorage.setItem(LEGACY_SESSION_KEY, storedSession);
+    const client = makeClient();
+    client.auth.getSession
+      .mockResolvedValueOnce({ data: { session: null }, error: null })
+      .mockResolvedValueOnce({
+        data: { session: { user: { id: 'user-1' } } },
+        error: null,
+      });
+    const { hasBrowserSession } = await importClientModule();
+
+    await expect(hasBrowserSession()).resolves.toBe(true);
+    expect(client.auth.setSession).toHaveBeenCalledOnce();
+    expect(window.localStorage.getItem(LEGACY_SESSION_KEY)).toBeNull();
+  });
+
+  it('still counts a localStorage session that could not be moved yet', async () => {
+    window.localStorage.setItem(LEGACY_SESSION_KEY, storedSession);
+    makeClient({
+      setSessionError: new AuthRetryableFetchError('Failed to fetch', 0),
+    });
+    const { hasBrowserSession } = await importClientModule();
+
+    await expect(hasBrowserSession()).resolves.toBe(true);
+  });
+
+  it('is false without a session', async () => {
+    makeClient();
+    const { hasBrowserSession } = await importClientModule();
+
+    await expect(hasBrowserSession()).resolves.toBe(false);
+  });
+
+  it('reports an unexpected failure and treats the visitor as signed out', async () => {
+    const client = makeClient();
+    const error = new Error('Storage is broken');
+    client.auth.getSession.mockRejectedValue(error);
+    const { hasBrowserSession } = await importClientModule();
+
+    await expect(hasBrowserSession()).resolves.toBe(false);
     expect(rollbarError).toHaveBeenCalledWith(error);
   });
 });
