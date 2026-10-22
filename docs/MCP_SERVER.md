@@ -117,9 +117,13 @@ supabase functions deploy mcp           # remote
 supabase functions serve mcp            # http://localhost:54321/functions/v1/mcp
 ```
 
-`SUPABASE_URL` and `SUPABASE_ANON_KEY` are injected automatically for deployed
-functions. For `supabase functions serve`, put them in `supabase/functions/.env`
-(or pass `--env-file`).
+`SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEYS` are injected automatically for
+deployed functions, once the project has publishable and secret API keys
+(**Settings > API Keys**). `SUPABASE_PUBLISHABLE_KEYS` is a JSON object keyed by
+key name, and the function reads the `default` key. For
+`supabase functions serve`, if the CLI doesn't inject them, put them in
+`supabase/functions/.env` (or pass `--env-file`), for example
+`SUPABASE_PUBLISHABLE_KEYS={"default":"sb_publishable_..."}`.
 
 The function's public URL is the MCP endpoint:
 

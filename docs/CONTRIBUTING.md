@@ -32,13 +32,13 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 3. Follow these steps from the readme to set up Supabase locally: [Local Database Setup](https://github.com/domhhv/habitrack?tab=readme-ov-file#local-database-setup)
 
-   _Alternatively, you can create your own Supabase project and connect to your remote Supabase instance by providing the `SUPABASE_URL` and `SUPABASE_ANON_KEY` in your environment variables._
+   _Alternatively, you can create your own Supabase project and connect to your remote Supabase instance by providing the `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in your environment variables._
 
 4. Set up environment variables
 
    ```bash
    cp .env.example .env.development
-   # Add your local or remote SUPABASE_URL and SUPABASE_ANON_KEY to .env.development
+   # Add your local or remote SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY to .env.development
    ```
 
 5. Start the local Supabase instance (if using local)

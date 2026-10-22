@@ -247,6 +247,7 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
   - Use `createBrowserClient` in the browser, which keeps the session in cookies.
   - Create a `createServerClient` per request in a server `middleware`, reading the `Cookie` header and writing refreshed tokens through `Set-Cookie` on the response.
   - Replace the `supabaseClient` singleton in services with a client passed in, or read from a `supabaseContext`.
+  - Both clients use the publishable key, so Row Level Security applies to every request. The secret key belongs only to the server-only admin client (`getSupabaseAdminClient` in `src/utils/supabase-admin.server.ts`), never to the per-request client.
 - **Auth callback route.** Add a `/auth/callback` route whose `loader` runs `exchangeCodeForSession` (PKCE) and redirects. It replaces:
   - the hash-token handling in `useAuthSearchParams`, which is still an effect;
   - `AccountRedirect`'s hash forwarding;

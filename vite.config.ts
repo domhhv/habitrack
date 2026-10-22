@@ -79,7 +79,7 @@ export default defineConfig(({ isSsrBuild, mode }) => {
     },
     define: {
       ROLLBAR_CLIENT_ENV: JSON.stringify(env.ROLLBAR_CLIENT_ENV),
-      SUPABASE_ANON_KEY: JSON.stringify(env.SUPABASE_ANON_KEY),
+      SUPABASE_PUBLISHABLE_KEY: JSON.stringify(env.SUPABASE_PUBLISHABLE_KEY),
       SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),
       VERCEL_GIT_COMMIT_SHA: JSON.stringify(env.VERCEL_GIT_COMMIT_SHA),
       ROLLBAR_CLIENT_ACCESS_TOKEN: JSON.stringify(

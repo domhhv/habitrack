@@ -21,11 +21,13 @@ import {
 } from './auth.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+const SUPABASE_PUBLISHABLE_KEY: string = JSON.parse(
+  Deno.env.get('SUPABASE_PUBLISHABLE_KEYS')!
+).default;
 
 // Per-request Supabase client bound to the user's token → RLS applies.
 const userClient = (user: AuthedUser): SupabaseClient =>
-  createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${user.token}` } },
     auth: { persistSession: false, autoRefreshToken: false },
   });

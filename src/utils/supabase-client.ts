@@ -14,11 +14,14 @@ class SupabaseClientSingleton {
       return;
     }
 
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      throw new Error('Supabase URL and ANON KEY must be provided');
+    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+      throw new Error('Supabase URL and publishable key must be provided');
     }
 
-    this.client = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+    this.client = createClient<Database>(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
   }
 
   public static getInstance(): SupabaseClient<Database> {

@@ -184,6 +184,11 @@ Supabase storage buckets:
 - Docker (for local Supabase)
 - Yarn is used as a package manager and is automatically available via Corepack (bundled with Node.js)
 
+### Supabase Keys
+
+- `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` are inlined into the client and server bundles through Vite `define` (declared in `src/globals.d.ts`). Every client that acts for a user uses the publishable key, so Row Level Security applies.
+- `SUPABASE_SECRET_KEY` bypasses Row Level Security. Only `getSupabaseAdminClient` in `src/utils/supabase-admin.server.ts` reads it, from `process.env` at runtime. Never add it to `define`, and import that module by its path, not through the `@utils` barrel, so it stays out of the client bundle.
+
 ### Testing Approach
 
 - **Vitest** with jsdom environment for unit tests
