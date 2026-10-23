@@ -36,15 +36,6 @@ export default defineConfig(({ isSsrBuild, mode }) => {
       rollupOptions: isSsrBuild
         ? undefined
         : {
-            onwarn(warning, warn) {
-              if (
-                warning.message.includes('Module "os" has been externalized')
-              ) {
-                return;
-              }
-
-              warn(warning);
-            },
             output: {
               assetFileNames: 'assets/[name].[hash][extname]',
               chunkFileNames: 'assets/[name].[hash].js',
