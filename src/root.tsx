@@ -8,6 +8,35 @@ import type { Route } from './+types/root';
 import './index.css';
 import Providers from './Providers';
 
+export const links: Route.LinksFunction = () => {
+  const manifest = { href: '/site.webmanifest', rel: 'manifest' };
+
+  if (APP_ENV !== 'production') {
+    return [
+      { href: `/favicons/${APP_ENV}.png`, rel: 'icon', type: 'image/png' },
+      manifest,
+    ];
+  }
+
+  return [
+    { href: '/favicon.ico', rel: 'icon' },
+    {
+      href: '/favicon-32x32.png',
+      rel: 'icon',
+      sizes: '32x32',
+      type: 'image/png',
+    },
+    {
+      href: '/favicon-16x16.png',
+      rel: 'icon',
+      sizes: '16x16',
+      type: 'image/png',
+    },
+    { href: '/apple-touch-icon.png', rel: 'apple-touch-icon' },
+    manifest,
+  ];
+};
+
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   if (isRouteErrorResponse(error)) {
     return (
