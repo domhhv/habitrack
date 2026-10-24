@@ -77,6 +77,7 @@ export default defineConfig(({ isSsrBuild, mode }) => {
           },
     },
     define: {
+      APP_ENV: JSON.stringify(env.VERCEL_ENV ?? 'local'),
       ROLLBAR_CLIENT_ENV: JSON.stringify(env.ROLLBAR_CLIENT_ENV),
       SUPABASE_PUBLISHABLE_KEY: JSON.stringify(env.SUPABASE_PUBLISHABLE_KEY),
       SUPABASE_URL: JSON.stringify(env.SUPABASE_URL),

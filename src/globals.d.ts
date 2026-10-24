@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 
+declare let APP_ENV: 'local' | 'preview' | 'production';
 declare let SUPABASE_URL: string;
 declare let SUPABASE_PUBLISHABLE_KEY: string;
 declare let ROLLBAR_CLIENT_ENV: string;
