@@ -14,11 +14,23 @@ import { PlugsIcon, ShieldIcon, UserCircleIcon } from '@phosphor-icons/react';
 import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
 import React from 'react';
-import { data, redirect, useFetcher } from 'react-router';
+import { data, redirect } from 'react-router';
 
 import { CustomButton, PasswordInput, ConnectedAccounts } from '@components';
-import { useUser, useProfile, useTextField, useAuthSearchParams } from '@hooks';
-import type { DaysOfWeek, ProfilesUpdate, TypedSupabaseClient } from '@models';
+import {
+  useUser,
+  useProfile,
+  useTextField,
+  useActionFetcher,
+  useAuthSearchParams,
+} from '@hooks';
+import type {
+  DaysOfWeek,
+  ActionToast,
+  ActionResult,
+  ProfilesUpdate,
+  TypedSupabaseClient,
+} from '@models';
 import {
   deleteUser,
   updateUser,
@@ -49,6 +61,8 @@ const FAILURE_TITLES = {
 };
 
 type SettingsIntent = keyof typeof FAILURE_TITLES;
+
+type SettingsActionResult = ActionResult & { intent: SettingsIntent | null };
 
 const isSettingsIntent = (
   value: FormDataEntryValue | null
@@ -102,7 +116,7 @@ const runIntent = async (
   intent: SettingsIntent,
   formData: FormData,
   user: NonNullable<SessionUser>
-) => {
+): Promise<ActionToast | Response | null> => {
   switch (intent) {
     case 'delete-account':
       await deleteUser(supabase);
@@ -112,14 +126,17 @@ const runIntent = async (
 
     case 'link-identity':
       await linkGoogleIdentity(supabase);
-      break;
+
+      return null;
 
     case 'sync-email':
       await patchProfile(supabase, user.id, { email: user.email });
-      Toast.toast.success('Your email change has been confirmed', {
+
+      return {
         description: `Your email has been set as ${user.email}`,
-      });
-      break;
+        title: 'Your email change has been confirmed',
+        variant: 'success',
+      };
 
     case 'unlink-identity': {
       const identity = (await getUserIdentities(supabase)).find(
@@ -133,26 +150,26 @@ const runIntent = async (
       }
 
       await unlinkIdentity(supabase, identity);
-      Toast.toast.success('Google account unlinked');
-      break;
+
+      return { title: 'Google account unlinked', variant: 'success' };
     }
 
     case 'update-profile':
       await patchProfile(supabase, user.id, getProfileUpdate(formData));
-      Toast.toast.success('Account updated');
-      break;
+
+      return { title: 'Account updated', variant: 'success' };
 
     case 'update-user':
       await updateUser(supabase, getUserAttributes(formData));
-      Toast.toast.success('Account updated', {
+
+      return {
+        title: 'Account updated',
+        variant: 'success',
         description: formData.has('email')
           ? 'Email change requested. Please check your inbox for a confirmation email.'
           : undefined,
-      });
-      break;
+      };
   }
-
-  return { intent, ok: true as const };
 };
 
 export const loader = async ({ context }: Route.LoaderArgs) => {
@@ -186,12 +203,22 @@ export const clientAction = async ({
   }
 
   try {
-    return await runIntent(
+    const result = await runIntent(
       context.get(supabaseContext),
       intent,
       formData,
       user
     );
+
+    if (result instanceof Response) {
+      return result;
+    }
+
+    return {
+      intent,
+      ok: true as const,
+      toasts: result ? [result] : [],
+    };
   } catch (error) {
     if (intent === 'sync-email') {
       rollbar.error(
@@ -200,12 +227,14 @@ export const clientAction = async ({
       );
     }
 
-    Toast.toast.danger(FAILURE_TITLES[intent], {
+    const toast: ActionToast = {
       description: getErrorMessage(error) || 'Please try again later',
-    });
+      title: FAILURE_TITLES[intent],
+      variant: 'danger',
+    };
 
     return data(
-      { error: getErrorMessage(error), intent, ok: false },
+      { error: getErrorMessage(error), intent, ok: false, toasts: [toast] },
       { status: 400 }
     );
   }
@@ -218,7 +247,7 @@ const SettingsPage = ({
 
   const user = useUser();
   const profile = useProfile();
-  const fetcher = useFetcher<typeof clientAction>();
+  const fetcher = useActionFetcher<SettingsActionResult>();
   const { askConfirmation } = useConfirmationActions();
   const [email, handleEmailChange] = useTextField();
   const [password, handlePasswordChange, clearPassword] = useTextField();

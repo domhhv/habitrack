@@ -1,4 +1,3 @@
-import { Toast } from '@heroui/react';
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import { signUp, convertAnonymousUser } from '@services';
@@ -105,14 +104,23 @@ describe('RegisterPage clientAction', () => {
     ).toBe('/login?returnTo=%2Fnotes');
   });
 
-  it('stays on the page and shows a toast when sign-up fails', async () => {
-    const danger = vi.spyOn(Toast.toast, 'danger');
+  it('stays on the page and returns a toast when sign-up fails', async () => {
     vi.mocked(signUp).mockRejectedValue(new Error('Email taken'));
 
     await expect(submit(null)).resolves.toMatchObject({
-      data: { error: 'Email taken' },
       init: { status: 400 },
+      data: {
+        error: 'Email taken',
+        ok: false,
+        toasts: [
+          {
+            description: 'Error details: Email taken',
+            variant: 'danger',
+            title:
+              'Something went wrong while creating your account. Please try again.',
+          },
+        ],
+      },
     });
-    expect(danger).toHaveBeenCalledOnce();
   });
 });

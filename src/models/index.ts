@@ -1,3 +1,4 @@
+export * from './action-result.model';
 export * from './habit-submission.model';
 export * from './habit.model';
 export * from './metric.model';

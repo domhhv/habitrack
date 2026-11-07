@@ -1,7 +1,8 @@
 import { Toast } from '@heroui/react';
 import React from 'react';
-import { useFetcher, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 
+import useActionFetcher from './use-action-fetcher';
 import useProfile from './use-profile';
 import useUser from './use-user';
 
@@ -9,7 +10,7 @@ const useAuthSearchParams = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const profile = useProfile();
   const user = useUser();
-  const fetcher = useFetcher();
+  const fetcher = useActionFetcher();
 
   React.useEffect(() => {
     if (searchParams.get('emailConfirmed')) {

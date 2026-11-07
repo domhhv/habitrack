@@ -1,11 +1,11 @@
 import { Link, Toast } from '@heroui/react';
 import React from 'react';
-import { data, replace, redirect } from 'react-router';
+import { replace, redirect } from 'react-router';
 
 import { AuthForm } from '@components';
-import { useIsSubmitting } from '@hooks';
+import { useIsSubmitting, useActionToasts } from '@hooks';
 import { sendPasswordResetEmail } from '@services';
-import { userContext, getErrorMessage, supabaseContext } from '@utils';
+import { failAction, userContext, supabaseContext } from '@utils';
 
 import type { Route } from './+types/ResetPasswordPage';
 
@@ -29,14 +29,10 @@ export const clientAction = async ({
       String(formData.get('email') ?? '')
     );
   } catch (error) {
-    Toast.toast.danger(
+    return failAction(
       'Something went wrong while sending the reset password email. Please try again.',
-      {
-        description: `Error details: ${getErrorMessage(error)}`,
-      }
+      error
     );
-
-    return data({ error: getErrorMessage(error) }, { status: 400 });
   }
 
   Toast.toast.success(
@@ -46,8 +42,9 @@ export const clientAction = async ({
   return redirect('/login');
 };
 
-const ResetPasswordPage = () => {
+const ResetPasswordPage = ({ actionData }: Route.ComponentProps) => {
   const isAuthenticating = useIsSubmitting();
+  useActionToasts(actionData);
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">

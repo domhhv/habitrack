@@ -1,8 +1,10 @@
 import { getLocalTimeZone } from '@internationalized/date';
+import pluralize from 'pluralize';
 import { data } from 'react-router';
 
 import {
   StorageBuckets,
+  type ActionToast,
   type RawOccurrence,
   type TypedSupabaseClient,
   type OccurrenceSubmission,
@@ -98,7 +100,19 @@ const uploadPhotos = (
         photos,
         habitId
       )
-    : Promise.resolve([]);
+    : Promise.resolve({ failedUploadErrors: [], paths: [] });
+};
+
+const getUploadFailureToasts = (failedUploadErrors: string[]) => {
+  return failedUploadErrors.length > 0
+    ? [
+        {
+          description: `Error details: ${failedUploadErrors.join(', ')}`,
+          title: `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
+          variant: 'danger',
+        } satisfies ActionToast,
+      ]
+    : [];
 };
 
 const getCost = async (
@@ -212,7 +226,7 @@ const addOccurrence = async (
   userId: string
 ) => {
   const values = readValues(formData);
-  const photoPaths = await uploadPhotos(
+  const { failedUploadErrors, paths: photoPaths } = await uploadPhotos(
     supabase,
     formData,
     userId,
@@ -239,6 +253,8 @@ const addOccurrence = async (
     })
   );
   await markStocksDepleted(supabase, values);
+
+  return failedUploadErrors;
 };
 
 const updateOccurrence = async (
@@ -257,7 +273,7 @@ const updateOccurrence = async (
 
   const values = readValues(formData);
   const noteId = formData.get('noteId');
-  const uploadedPhotoPaths = await uploadPhotos(
+  const { failedUploadErrors, paths: uploadedPhotoPaths } = await uploadPhotos(
     supabase,
     formData,
     userId,
@@ -290,6 +306,8 @@ const updateOccurrence = async (
     userId
   );
   await saveMetricValues(supabase, values, occurrence.id, userId);
+
+  return failedUploadErrors;
 };
 
 const deleteOccurrence = async (
@@ -337,11 +355,13 @@ export const clientAction = async ({
           updateOccurrence(supabase, formData, user.id).finally(
             clearCalendarData
           ),
-          'update_occurrence'
+          'update_occurrence',
+          getUploadFailureToasts
         )
       : runAction(
           addOccurrence(supabase, formData, user.id).finally(clearCalendarData),
-          'add_occurrence'
+          'add_occurrence',
+          getUploadFailureToasts
         );
   }
 

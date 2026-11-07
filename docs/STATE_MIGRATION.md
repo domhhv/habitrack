@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, is done on `refactor/server-loaders`.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is in progress: its first step, toasts returned in action results, is done on `refactor/action-toasts`.
 
 ## Target end state
 
@@ -364,6 +364,27 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
       - `/habits` has its stats, and `/notes.data` loads.
       - Signed-out `/habits` gets a 302 and `/notes.data` a 202 redirect, both to `/login?returnTo=…`.
 - **Server actions.** Convert `clientAction` → `action`. Toasts move to the component (from `fetcher.data`), because actions no longer run in the browser. `runAction` becomes a server helper that returns `{ ok, error }`.
+  - **Planned steps:**
+    1. Actions return their toasts instead of showing them (no behaviour change).
+    2. Flash messages for the toasts shown before a redirect, and thin `clientAction` wrappers that await `serverAction()` and then clear the browser's calendar caches. Convert the habits, settings, notes and auth actions.
+    3. Occurrences, once photos upload from the browser and `photo_paths` writes are atomic.
+  - **Found while planning**, all blocking a plain conversion:
+    - `clearCalendarData()`/`invalidateCalendarNotes()` run in the actions' `finally`. On the server they would clear a module cache shared by every request instead of the browser's cache.
+    - Vercel functions accept request bodies up to about 4.5 MB, and one occurrence photo may be 5 MB. `uploadImage` also compresses with `browser-image-compression`.
+    - `writePhotoPaths` serializes writes with a module-level `Map`. On the server it would be shared across users and still not order writes across instances. The `array_remove` RPC (§4 atomic writes) fixes it.
+    - `addOccurrence` stores `getLocalTimeZone()` as the entry's time zone; the server needs the `tz` cookie.
+    - `linkGoogleIdentity` redirects the browser to Google, so the `link-identity` intent has to stay in the browser.
+    - Signing in on the server doesn't fire the browser's `onAuthStateChange`, which `useAuthSubscription` uses to clear the calendar cache when the user changes.
+    - Rollbar is disabled on the server, so action errors only reach `console.error` until §7's `handleError`.
+  - **Step 1 as built** (`refactor/action-toasts`):
+    - `ActionResult` (`src/models/action-result.model.ts`) is `{ ok: true, toasts? }` or `{ ok: false, error, toasts? }`, with `ActionToast` as `{ title, description?, variant }`.
+    - `runAction(promise, actionType, getExtraToasts?)` returns the standard success or error toast in the result and still reports failures to Rollbar. It absorbed `handleAsyncAction`, which is deleted. `getExtraToasts` adds toasts derived from the result, shown before the success toast.
+    - `uploadImages` returns `{ paths, failedUploadErrors }` and no longer toasts. The occurrence action turns the failures into a "Failed to upload N photos" toast.
+    - The settings action returns its success and failure toasts. `failAction(title, error)` builds the 400 result with a toast for the auth pages.
+    - `useActionToasts(result)` shows a result's toasts once per new result. `useActionFetcher` calls it, so every fetcher that submits to an action now goes through `useActionFetcher`: `HabitsTable`, `HabitIcon`, `OccurrenceDrawer`, `OccurrenceListItem`, `ConnectedAccounts`, `useAuthSearchParams` and the settings page. The auth pages call it with `actionData`.
+    - Toasts appear when the action result arrives, before revalidation finishes, as before.
+    - **Still in actions:** the success toasts shown right before a `redirect()` (login, register, anonymous login, password reset, account deletion). They move with step 2's flash messages.
+    - Tests: `useActionFetcher` (toasts shown once, `onSuccess`), the upload-failure toast, and the toasts in the notes, settings and register results.
 - **Simplify revalidation.** Revisit `shouldRevalidate` and the `markAppDataStale` machinery once server loaders use the default revalidation. Keep explicit `shouldRevalidate` only where a loader is expensive.
 - ~~**Decision point.** If the app stays client-only instead, switch to `ssr: false` (SPA mode) with the landing page pre-rendered.~~ Settled by server loaders: the server now loads the data and streams it with the app shell.
 

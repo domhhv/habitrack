@@ -1,14 +1,19 @@
 import { Link, Toast } from '@heroui/react';
 import React from 'react';
-import { data, replace, redirect } from 'react-router';
+import { replace, redirect } from 'react-router';
 
 import { AuthForm } from '@components';
-import { useAuthHref, useIsSubmitting, useFirstDayOfWeek } from '@hooks';
+import {
+  useAuthHref,
+  useIsSubmitting,
+  useActionToasts,
+  useFirstDayOfWeek,
+} from '@hooks';
 import { signUp, convertAnonymousUser } from '@services';
 import {
+  failAction,
   userContext,
   parseDayOfWeek,
-  getErrorMessage,
   getReturnToPath,
   supabaseContext,
 } from '@utils';
@@ -47,14 +52,10 @@ export const clientAction = async ({
       );
     }
   } catch (error) {
-    Toast.toast.danger(
+    return failAction(
       'Something went wrong while creating your account. Please try again.',
-      {
-        description: `Error details: ${getErrorMessage(error)}`,
-      }
+      error
     );
-
-    return data({ error: getErrorMessage(error) }, { status: 400 });
   }
 
   if (isAnonymousUser) {
@@ -73,10 +74,12 @@ export const clientAction = async ({
 };
 
 const RegisterPage = ({
+  actionData,
   loaderData: { isAnonymousUser },
 }: Route.ComponentProps) => {
   const firstDayOfWeek = useFirstDayOfWeek();
   const isAuthenticating = useIsSubmitting();
+  useActionToasts(actionData);
   const loginHref = useAuthHref('/login');
 
   return (

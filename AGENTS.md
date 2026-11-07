@@ -103,11 +103,12 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
   - UI that belongs to one page submits to that page's route. Global UI (drawers) submits to a `/resources/*` route.
   - Send JSON (`encType: 'application/json'`), or multipart `FormData` when files are involved.
 - **Submitting**:
-  - Components submit with `useActionFetcher(onSuccess)` (a `useFetcher` that calls `onSuccess` once the action returns `{ ok: true }`), or `<Form>`/`useFetcher` directly. Pending UI comes from `fetcher.state`/`useNavigation()`/`useIsSubmitting()`, not `useState`.
+  - Components submit with `useActionFetcher(onSuccess)` (a `useFetcher` that shows the result's toasts and calls `onSuccess` once the action returns `{ ok: true }`), or `<Form>` with `useActionToasts(actionData)`. Pending UI comes from `fetcher.state`/`useNavigation()`/`useIsSubmitting()`, not `useState`.
   - Block a new submission on a shared fetcher while one is pending.
 - **Results**:
-  - Wrap action work in `runAction(promise, actionType)`. It keeps the standard toasts and returns `{ ok: true }` or `{ ok: false, error }` without a 4xx status, so partial writes still revalidate.
-  - Return `data(…, { status: 400 })` only for failures that wrote nothing.
+  - Actions never show toasts. They return them in the result (`ActionResult` in `src/models/action-result.model.ts`), and the submitting component shows them. The exception is a toast before a `redirect()`, which stays in the action until flash messages exist.
+  - Wrap action work in `runAction(promise, actionType)`. It returns `{ ok: true, toasts }` or `{ ok: false, error, toasts }` with the standard messages, without a 4xx status, so partial writes still revalidate.
+  - Return a 400 only for failures that wrote nothing, e.g. `failAction(title, error)`.
 - **Revalidation**:
   - React Router revalidates active loaders after each action.
   - The `app` layout `shouldRevalidate` skips plain navigations unless the app data was marked stale (`markAppDataStale`).

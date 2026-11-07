@@ -1,6 +1,4 @@
-import { Toast } from '@heroui/react';
 import imageCompression from 'browser-image-compression';
-import pluralize from 'pluralize';
 
 import { MAX_FILE_SIZE_MB, ALLOWED_IMAGE_TYPES } from '@const';
 import type { UploadResult, TypedSupabaseClient } from '@models';
@@ -148,14 +146,12 @@ export const uploadImages = async (
     })
     .concat(rejectedUploadReasons);
 
-  if (failedUploadErrors.length) {
-    Toast.toast.danger(
-      `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
-      { description: `Error details: ${failedUploadErrors.join(', ')}` }
-    );
-  }
-
-  return fulfilledUploadResults.filter(isSuccessfulUpload).map(({ value }) => {
-    return value.path;
-  });
+  return {
+    failedUploadErrors,
+    paths: fulfilledUploadResults
+      .filter(isSuccessfulUpload)
+      .map(({ value }) => {
+        return value.path;
+      }),
+  };
 };

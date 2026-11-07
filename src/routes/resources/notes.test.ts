@@ -96,6 +96,7 @@ describe('notes resource clientAction', () => {
   it('creates a period note for the user and invalidates notes', async () => {
     await expect(submit({ intent: 'create', note })).resolves.toEqual({
       ok: true,
+      toasts: [{ title: 'Note added', variant: 'success' }],
     });
     expect(createNote).toHaveBeenCalledWith(testSupabaseClient, {
       ...note,
@@ -118,6 +119,13 @@ describe('notes resource clientAction', () => {
     await expect(submit({ intent: 'create', note })).resolves.toEqual({
       error: 'Too long',
       ok: false,
+      toasts: [
+        {
+          description: 'Error details: Too long',
+          title: 'Something went wrong while adding your note',
+          variant: 'danger',
+        },
+      ],
     });
     expect(invalidateCalendarNotes).toHaveBeenCalledOnce();
   });

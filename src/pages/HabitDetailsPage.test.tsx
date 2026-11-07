@@ -107,7 +107,7 @@ describe('HabitDetailsPage clientAction', () => {
   it('patches the submitted habit fields', async () => {
     await expect(
       submitJson({ habit: { name: 'Walking' }, intent: 'update-habit' })
-    ).resolves.toEqual({ ok: true });
+    ).resolves.toMatchObject({ ok: true });
     expect(patchHabit).toHaveBeenCalledWith(testSupabaseClient, 'habit-1', {
       name: 'Walking',
     });
@@ -134,7 +134,7 @@ describe('HabitDetailsPage clientAction', () => {
           },
         } as unknown as Request,
       })
-    ).resolves.toEqual({ ok: true });
+    ).resolves.toMatchObject({ ok: true });
     expect(deleteFile).toHaveBeenCalledWith(
       testSupabaseClient,
       'habit_icons',

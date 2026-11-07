@@ -1,13 +1,13 @@
 import { Link, Toast } from '@heroui/react';
 import React from 'react';
-import { data, replace, redirect } from 'react-router';
+import { replace, redirect } from 'react-router';
 
 import { AuthForm } from '@components';
-import { useAuthHref, useIsSubmitting } from '@hooks';
+import { useAuthHref, useIsSubmitting, useActionToasts } from '@hooks';
 import { signIn } from '@services';
 import {
+  failAction,
   userContext,
-  getErrorMessage,
   getReturnToPath,
   supabaseContext,
 } from '@utils';
@@ -35,14 +35,10 @@ export const clientAction = async ({
       String(formData.get('password') ?? '')
     );
   } catch (error) {
-    Toast.toast.danger(
+    return failAction(
       'Something went wrong while logging in. Please try again.',
-      {
-        description: `Error details: ${getErrorMessage(error)}`,
-      }
+      error
     );
-
-    return data({ error: getErrorMessage(error) }, { status: 400 });
   }
 
   Toast.toast.success('Welcome back!');
@@ -50,8 +46,9 @@ export const clientAction = async ({
   return redirect(getReturnToPath(request.url));
 };
 
-const LoginPage = () => {
+const LoginPage = ({ actionData }: Route.ComponentProps) => {
   const isAuthenticating = useIsSubmitting();
+  useActionToasts(actionData);
   const registerHref = useAuthHref('/register');
   const anonymousLoginHref = useAuthHref('/anonymous-login');
 
