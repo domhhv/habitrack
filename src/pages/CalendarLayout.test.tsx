@@ -12,7 +12,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import { profileContext, type SessionUser } from '@utils';
 
 import type { Route } from './+types/CalendarLayout';
-import { loader, clientLoader } from './CalendarLayout';
+import { loader, clientLoader, shouldRevalidate } from './CalendarLayout';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -190,5 +190,41 @@ describe('CalendarLayout clientLoader', () => {
       occurrences: [],
       occurrencesByDate: { '2026-10-22': {} },
     });
+  });
+});
+
+describe('CalendarLayout shouldRevalidate', () => {
+  const revalidationArgs = (
+    currentPath: string,
+    nextPath: string,
+    defaultShouldRevalidate = false
+  ) => {
+    return {
+      currentUrl: new URL(currentPath, 'https://habitrack.test'),
+      defaultShouldRevalidate,
+      nextUrl: new URL(nextPath, 'https://habitrack.test'),
+    } as Parameters<typeof shouldRevalidate>[0];
+  };
+
+  it('reloads when the view or the date in the child path changes', () => {
+    expect(
+      shouldRevalidate(
+        revalidationArgs('/calendar/month/2026/10', '/calendar/month/2026/11')
+      )
+    ).toBe(true);
+    expect(
+      shouldRevalidate(revalidationArgs('/calendar/month', '/calendar/week'))
+    ).toBe(true);
+  });
+
+  it('follows the default for the same path', () => {
+    expect(
+      shouldRevalidate(revalidationArgs('/calendar/month', '/calendar/month'))
+    ).toBe(false);
+    expect(
+      shouldRevalidate(
+        revalidationArgs('/calendar/month', '/calendar/month', true)
+      )
+    ).toBe(true);
   });
 });
