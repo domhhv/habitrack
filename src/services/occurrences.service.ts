@@ -129,6 +129,36 @@ export const patchOccurrence = async (
   return toRawOccurrence(camelcaseKeys(data, { deep: true }));
 };
 
+export const addOccurrencePhotoPaths = async (
+  supabase: TypedSupabaseClient,
+  id: RawOccurrence['id'],
+  photoPaths: string[]
+) => {
+  const { error } = await supabase.rpc('add_occurrence_photo_paths', {
+    p_occurrence_id: id,
+    p_photo_paths: photoPaths,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const removeOccurrencePhotoPath = async (
+  supabase: TypedSupabaseClient,
+  id: RawOccurrence['id'],
+  photoPath: string
+) => {
+  const { error } = await supabase.rpc('remove_occurrence_photo_path', {
+    p_occurrence_id: id,
+    p_photo_path: photoPath,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
 export const destroyOccurrence = async (
   supabase: TypedSupabaseClient,
   { id, photoPaths }: Pick<RawOccurrence, 'id' | 'photoPaths'>

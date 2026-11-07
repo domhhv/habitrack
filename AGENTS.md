@@ -100,8 +100,8 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
   - `AppShellSkeleton` is the app layout's `HydrateFallback` and the pending UI while entering the app.
 - **Mutations**:
   - Every write goes through a route server `action`. Branch on an `intent` and type the payloads in `src/models/*-submission.model.ts`. Services that build URLs take the request's `origin` (`new URL(request.url).origin`), never `window.location`.
-  - A route whose writes change browser-cached calendar data also exports a `clientAction` that awaits `serverAction()` and clears the cache in `finally` (`/habits/:habitId`, `/resources/notes`).
-  - `/resources/occurrences` is still a `clientAction` (photo uploads and `photo_paths` writes have to move first). Google sign-in and identity linking call the browser client directly, because they leave the page.
+  - A route whose writes change browser-cached calendar data also exports a `clientAction` that awaits `serverAction()` and clears the cache in `finally` (`/habits/:habitId`, `/resources/notes`, `/resources/occurrences`).
+  - Files larger than a server function's request body limit (about 4.5 MB) never go to an action. Occurrence photos are compressed and uploaded from the browser by `useOccurrenceFetcher`, and the action receives their storage paths. Google sign-in and identity linking call the browser client directly, because they leave the page.
   - UI that belongs to one page submits to that page's route. Global UI (drawers) submits to a `/resources/*` route.
   - Send JSON (`encType: 'application/json'`), or multipart `FormData` when files are involved.
 - **Submitting**:
@@ -171,7 +171,7 @@ yarn db:gen-types
 Supabase storage buckets:
 
 - `habit_icons`: Public bucket (100KB limit per file)
-- `occurrence_photos`: Private bucket (5MB limit per file)
+- `occurrence_photos`: Private bucket (5MB limit per file), uploaded from the browser into `<userId>/<habitId>/`. `photo_paths` changes go through the `add_occurrence_photo_paths`/`remove_occurrence_photo_path` functions, one `UPDATE` each
 
 ### Environment Requirements
 

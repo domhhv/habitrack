@@ -51,19 +51,14 @@ const getMessages = (actionType: ActionType) => {
 
 /**
  * Runs an action's work and returns its result with the toasts the submitting component shows.
- * `getExtraToasts` adds toasts derived from a successful result, shown before the success toast.
  */
-const runAction = async <T>(
-  action: Promise<T>,
-  actionType: ActionType,
-  getExtraToasts?: (value: T) => ActionToast[]
-) => {
+const runAction = async (action: Promise<unknown>, actionType: ActionType) => {
   const messages = getMessages(actionType);
 
   try {
-    const value = await action;
+    await action;
+
     const toasts: ActionToast[] = [
-      ...(getExtraToasts?.(value) ?? []),
       { title: messages.success, variant: 'success' },
     ];
 
