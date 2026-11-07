@@ -124,11 +124,15 @@ describe('App clientLoader', () => {
         ...makeRouteArgs<Route.ClientLoaderArgs>(
           'https://habitrack.test/calendar/month'
         ),
-        serverLoader: vi
-          .fn()
-          .mockResolvedValue({ appData: Promise.resolve(appData) }),
+        serverLoader: vi.fn().mockResolvedValue({
+          appData: Promise.resolve(appData),
+          toasts: [{ title: 'Welcome back!', variant: 'success' }],
+        }),
       } as Route.ClientLoaderArgs)
-    ).resolves.toBe(appData);
+    ).resolves.toEqual({
+      ...appData,
+      toasts: [{ title: 'Welcome back!', variant: 'success' }],
+    });
     expect(getKnownFirstDayOfWeek('user-1')).toEqual({
       userId: 'user-1',
       value: 'mon',

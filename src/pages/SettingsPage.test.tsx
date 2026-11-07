@@ -12,7 +12,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/SettingsPage';
-import { loader, clientAction } from './SettingsPage';
+import { loader, action } from './SettingsPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -40,8 +40,8 @@ const submit = (fields: Record<string, string>, sessionUser = user) => {
     body.set(key, value);
   });
 
-  return clientAction(
-    makeRouteArgs<Route.ClientActionArgs>(SETTINGS_URL, sessionUser, {
+  return action(
+    makeRouteArgs<Route.ActionArgs>(SETTINGS_URL, sessionUser, {
       body,
       method: 'POST',
     })
@@ -77,7 +77,7 @@ describe('SettingsPage loader', () => {
   });
 });
 
-describe('SettingsPage clientAction', () => {
+describe('SettingsPage action', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -113,10 +113,11 @@ describe('SettingsPage clientAction', () => {
       password: 'secret',
     });
 
-    expect(updateUser).toHaveBeenCalledWith(testSupabaseClient, {
-      email: 'me@email.com',
-      password: 'secret',
-    });
+    expect(updateUser).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'http://localhost',
+      { email: 'me@email.com', password: 'secret' }
+    );
   });
 
   it('syncs the confirmed email from the session to the profile', async () => {
@@ -132,6 +133,7 @@ describe('SettingsPage clientAction', () => {
 
     expect(deleteUser).toHaveBeenCalledOnce();
     expect(result.headers.get('Location')).toBe('/login');
+    expect(result.headers.get('Set-Cookie')).toMatch(/^flash=/);
   });
 
   it('unlinks the submitted identity', async () => {

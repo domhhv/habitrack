@@ -184,7 +184,7 @@ Stocks are server data and go through React Router routes. No client store is in
 
 - Stocks (with metric defaults and usage counts) come with each habit, from the app layout `clientLoader` (`useHabits()`) and the habit details `clientLoader` (`getHabit()`).
 
-**Mutations**: the `/habits/:habitId` `clientAction` takes the JSON `HabitDetailsSubmission` (`src/models/habit-submission.model.ts`).
+**Mutations**: the `/habits/:habitId` server `action` takes the JSON `HabitDetailsSubmission` (`src/models/habit-submission.model.ts`).
 
 | Intent         | What it does                                                                                                       |
 | -------------- | ------------------------------------------------------------------------------------------------------------------ |

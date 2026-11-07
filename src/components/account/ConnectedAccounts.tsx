@@ -1,9 +1,12 @@
+import { Toast } from '@heroui/react';
 import { GoogleLogoIcon } from '@phosphor-icons/react';
 import type { UserIdentity } from '@supabase/supabase-js';
 import React from 'react';
 
 import { CustomButton } from '@components';
 import { useActionFetcher } from '@hooks';
+import { linkGoogleIdentity } from '@services';
+import { getErrorMessage, getSupabaseBrowserClient } from '@utils';
 
 type ConnectedAccountsProps = {
   identities: UserIdentity[];
@@ -15,18 +18,32 @@ const ConnectedAccounts = ({
   loadError,
 }: ConnectedAccountsProps) => {
   const fetcher = useActionFetcher();
-  const isProcessing = fetcher.state !== 'idle';
+  const [isLinking, setIsLinking] = React.useState(false);
+  const isProcessing = fetcher.state !== 'idle' || isLinking;
 
   const googleIdentity = identities.find((identity) => {
     return identity.provider === 'google';
   });
   const canUnlink = identities.length > 1;
 
-  const handleLink = () => {
-    void fetcher.submit(
-      { intent: 'link-identity' },
-      { action: '/settings', method: 'post' }
-    );
+  /**
+   * Linking leaves the page for Google's consent screen, so it runs in the browser and stays
+   * pending until the redirect.
+   */
+  const handleLink = async () => {
+    setIsLinking(true);
+
+    try {
+      await linkGoogleIdentity(
+        getSupabaseBrowserClient(),
+        window.location.origin
+      );
+    } catch (error) {
+      setIsLinking(false);
+      Toast.toast.danger('Failed to link Google account', {
+        description: getErrorMessage(error) || 'Please try again later',
+      });
+    }
   };
 
   const handleUnlink = () => {

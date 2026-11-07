@@ -5,7 +5,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/AnonymousLoginPage';
-import { clientAction, clientLoader } from './AnonymousLoginPage';
+import { action, clientLoader } from './AnonymousLoginPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -43,8 +43,8 @@ describe('AnonymousLoginPage', () => {
     const body = new FormData();
     body.set('firstDayOfWeek', 'sun');
 
-    const result = (await clientAction(
-      makeRouteArgs<Route.ClientActionArgs>(ANONYMOUS_LOGIN_URL, null, {
+    const result = (await action(
+      makeRouteArgs<Route.ActionArgs>(ANONYMOUS_LOGIN_URL, null, {
         body,
         method: 'POST',
       })
@@ -58,8 +58,8 @@ describe('AnonymousLoginPage', () => {
     const body = new FormData();
     body.set('firstDayOfWeek', 'sun');
 
-    const result = (await clientAction(
-      makeRouteArgs<Route.ClientActionArgs>(
+    const result = (await action(
+      makeRouteArgs<Route.ActionArgs>(
         `${ANONYMOUS_LOGIN_URL}?returnTo=%2Fhabits`,
         null,
         { body, method: 'POST' }

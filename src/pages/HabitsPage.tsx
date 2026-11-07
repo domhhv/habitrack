@@ -97,10 +97,7 @@ export const loader = async ({ context, request }: Route.LoaderArgs) => {
   }
 };
 
-export const clientAction = async ({
-  context,
-  request,
-}: Route.ClientActionArgs) => {
+export const action = async ({ context, request }: Route.ActionArgs) => {
   const supabase = context.get(supabaseContext);
   const user = context.get(userContext);
 

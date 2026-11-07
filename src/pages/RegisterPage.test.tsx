@@ -5,7 +5,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/RegisterPage';
-import { clientAction, clientLoader } from './RegisterPage';
+import { action, clientLoader } from './RegisterPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -25,8 +25,8 @@ const submit = (user: SessionUser, url = REGISTER_URL) => {
   body.set('password', 'password');
   body.set('firstDayOfWeek', 'sun');
 
-  return clientAction(
-    makeRouteArgs<Route.ClientActionArgs>(url, user, {
+  return action(
+    makeRouteArgs<Route.ActionArgs>(url, user, {
       body,
       method: 'POST',
     })
@@ -64,7 +64,7 @@ describe('RegisterPage clientLoader', () => {
   });
 });
 
-describe('RegisterPage clientAction', () => {
+describe('RegisterPage action', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -74,6 +74,7 @@ describe('RegisterPage clientAction', () => {
 
     expect(convertAnonymousUser).toHaveBeenCalledWith(
       testSupabaseClient,
+      'http://localhost',
       'me@email.com',
       'password'
     );
@@ -86,6 +87,7 @@ describe('RegisterPage clientAction', () => {
 
     expect(signUp).toHaveBeenCalledWith(
       testSupabaseClient,
+      'http://localhost',
       'me@email.com',
       'password',
       'sun'

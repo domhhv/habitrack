@@ -37,10 +37,7 @@ export const clientLoader = async ({
   };
 };
 
-export const clientAction = async ({
-  context,
-  request,
-}: Route.ClientActionArgs) => {
+export const action = async ({ context, request }: Route.ActionArgs) => {
   const supabase = context.get(supabaseContext);
   const user = context.get(userContext);
 
@@ -56,26 +53,27 @@ export const clientAction = async ({
   switch (submission.intent) {
     case 'create':
       return runAction(
-        createNote(supabase, { ...submission.note, userId: user.id }).finally(
-          invalidateCalendarNotes
-        ),
+        createNote(supabase, { ...submission.note, userId: user.id }),
         'add_note'
       );
 
     case 'delete':
-      return runAction(
-        destroyNote(supabase, submission.noteId).finally(
-          invalidateCalendarNotes
-        ),
-        'remove_note'
-      );
+      return runAction(destroyNote(supabase, submission.noteId), 'remove_note');
 
     case 'update':
       return runAction(
-        updateNote(supabase, submission.noteId, submission.note).finally(
-          invalidateCalendarNotes
-        ),
+        updateNote(supabase, submission.noteId, submission.note),
         'update_note'
       );
+  }
+};
+
+export const clientAction = async ({
+  serverAction,
+}: Route.ClientActionArgs) => {
+  try {
+    return await serverAction();
+  } finally {
+    invalidateCalendarNotes();
   }
 };

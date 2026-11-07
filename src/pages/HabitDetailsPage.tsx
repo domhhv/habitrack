@@ -208,11 +208,11 @@ export const loader = async ({ context, params }: Route.LoaderArgs) => {
   return { habit };
 };
 
-export const clientAction = async ({
+export const action = async ({
   context,
   params: { habitId },
   request,
-}: Route.ClientActionArgs) => {
+}: Route.ActionArgs) => {
   const supabase = context.get(supabaseContext);
   const user = context.get(userContext);
 
@@ -234,9 +234,7 @@ export const clientAction = async ({
     }
 
     return runAction(
-      replaceHabitIcon(supabase, habitId, icon, user.id).finally(
-        clearCalendarData
-      ),
+      replaceHabitIcon(supabase, habitId, icon, user.id),
       'upload_icon'
     );
   }
@@ -251,10 +249,7 @@ export const clientAction = async ({
       );
 
     case 'delete-habit':
-      return runAction(
-        deleteHabit(supabase, habitId, user.id).finally(clearCalendarData),
-        'remove_habit'
-      );
+      return runAction(deleteHabit(supabase, habitId, user.id), 'remove_habit');
 
     case 'remove-stock':
       return runAction(
@@ -264,20 +259,13 @@ export const clientAction = async ({
 
     case 'save-metrics':
       return runAction(
-        saveMetrics(
-          supabase,
-          habitId,
-          submission.metricDefinitions,
-          user.id
-        ).finally(clearCalendarData),
+        saveMetrics(supabase, habitId, submission.metricDefinitions, user.id),
         'update_habit'
       );
 
     case 'update-habit':
       return runAction(
-        patchHabit(supabase, habitId, submission.habit).finally(
-          clearCalendarData
-        ),
+        patchHabit(supabase, habitId, submission.habit),
         'update_habit'
       );
 
@@ -286,6 +274,20 @@ export const clientAction = async ({
         updateStock(supabase, submission, user.id),
         'update_stock'
       );
+  }
+};
+
+/**
+ * Habit changes show up in calendar chips, so the browser's calendar cache is cleared after every
+ * submission, including failed ones that may have written part of the change.
+ */
+export const clientAction = async ({
+  serverAction,
+}: Route.ClientActionArgs) => {
+  try {
+    return await serverAction();
+  } finally {
+    clearCalendarData();
   }
 };
 

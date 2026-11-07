@@ -1,6 +1,6 @@
-import { Link, Toast } from '@heroui/react';
+import { Link } from '@heroui/react';
 import React from 'react';
-import { Form, replace, redirect } from 'react-router';
+import { Form, replace } from 'react-router';
 
 import { CustomButton } from '@components';
 import {
@@ -16,6 +16,7 @@ import {
   parseDayOfWeek,
   getReturnToPath,
   supabaseContext,
+  redirectWithToasts,
 } from '@utils';
 
 import type { Route } from './+types/AnonymousLoginPage';
@@ -28,10 +29,7 @@ export const clientLoader = ({ context, request }: Route.ClientLoaderArgs) => {
   return null;
 };
 
-export const clientAction = async ({
-  context,
-  request,
-}: Route.ClientActionArgs) => {
+export const action = async ({ context, request }: Route.ActionArgs) => {
   const formData = await request.formData();
 
   try {
@@ -46,9 +44,12 @@ export const clientAction = async ({
     );
   }
 
-  Toast.toast.success('Welcome to Habitrack! You are browsing anonymously');
-
-  return redirect(getReturnToPath(request.url));
+  return redirectWithToasts(getReturnToPath(request.url), [
+    {
+      title: 'Welcome to Habitrack! You are browsing anonymously',
+      variant: 'success',
+    },
+  ]);
 };
 
 const AnonymousLoginPage = ({ actionData }: Route.ComponentProps) => {

@@ -251,11 +251,11 @@ HabitDetails loads habit.metricDefinitions
   → converts to FormMetricDefinitions[] with state flags
   → user adds/edits/removes via MetricDefinitionForm
   → on save: useActionFetcher submits { intent: 'save-metrics', metricDefinitions } to /habits/:habitId
-  → clientAction:
+  → server action:
     1. destroyHabitMetrics(idsToRemove)
     2. createHabitMetrics(metricsToAdd)
     3. patchHabitMetric(id, changes) for each updated metric
-    4. clearCalendarData() (finally)
+  → clientAction wrapper: clearCalendarData() (finally)
   → loaders revalidate, the editor closes on { ok: true }
 ```
 

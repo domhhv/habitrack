@@ -4,7 +4,16 @@ import React from 'react';
 import { createRoutesStub } from 'react-router';
 import { it, vi, expect, describe } from 'vitest';
 
+import { linkGoogleIdentity } from '@services';
+
 import ConnectedAccounts from './ConnectedAccounts';
+
+vi.mock('@services', async (importOriginal) => {
+  return {
+    ...(await importOriginal<object>()),
+    linkGoogleIdentity: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 const renderAccounts = (identities: UserIdentity[], loadError = null) => {
   const action = vi.fn().mockReturnValue(null);
@@ -42,13 +51,17 @@ describe(ConnectedAccounts.name, () => {
     });
   });
 
-  it('submits a link request when Google is not connected', async () => {
+  it('links Google in the browser without submitting to the action', async () => {
     const { action, findByTestId } = renderAccounts([]);
 
     fireEvent.click(await findByTestId('link-google-button'));
 
     await waitFor(() => {
-      expect(action).toHaveBeenCalledWith({ intent: 'link-identity' });
+      expect(linkGoogleIdentity).toHaveBeenCalledWith(
+        expect.anything(),
+        window.location.origin
+      );
     });
+    expect(action).not.toHaveBeenCalled();
   });
 });

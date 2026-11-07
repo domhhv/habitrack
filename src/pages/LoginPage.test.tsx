@@ -5,7 +5,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/LoginPage';
-import { clientAction, clientLoader } from './LoginPage';
+import { action, clientLoader } from './LoginPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -21,8 +21,8 @@ const submit = (url = LOGIN_URL) => {
   body.set('email', 'me@email.com');
   body.set('password', 'password');
 
-  return clientAction(
-    makeRouteArgs<Route.ClientActionArgs>(url, null, {
+  return action(
+    makeRouteArgs<Route.ActionArgs>(url, null, {
       body,
       method: 'POST',
     })

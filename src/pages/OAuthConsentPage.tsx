@@ -45,10 +45,7 @@ export const loader = async ({ context, request }: Route.LoaderArgs) => {
   return { details };
 };
 
-export const clientAction = async ({
-  context,
-  request,
-}: Route.ClientActionArgs) => {
+export const action = async ({ context, request }: Route.ActionArgs) => {
   const authorizationId = new URL(request.url).searchParams.get(
     'authorization_id'
   );

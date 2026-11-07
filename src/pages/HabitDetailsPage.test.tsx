@@ -12,6 +12,7 @@ import {
   destroyStock,
   uploadHabitIcon,
   patchHabitMetric,
+  clearCalendarData,
   createHabitMetrics,
   destroyHabitMetrics,
   createStockMetricDefaults,
@@ -21,11 +22,12 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/HabitDetailsPage';
-import { loader, clientAction } from './HabitDetailsPage';
+import { loader, action, clientAction } from './HabitDetailsPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
     ...(await importOriginal<object>()),
+    clearCalendarData: vi.fn(),
     createHabitMetrics: vi.fn(),
     createStock: vi.fn(),
     createStockMetricDefaults: vi.fn(),
@@ -47,8 +49,8 @@ const HABIT_URL = 'http://localhost/habits/habit-1';
 const user = { id: 'user-1' } as SessionUser;
 
 const submitJson = (submission: HabitDetailsSubmission, sessionUser = user) => {
-  return clientAction({
-    ...makeRouteArgs<Route.ClientActionArgs>(HABIT_URL, sessionUser, {
+  return action({
+    ...makeRouteArgs<Route.ActionArgs>(HABIT_URL, sessionUser, {
       body: JSON.stringify(submission),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
@@ -88,7 +90,7 @@ describe('HabitDetailsPage loader', () => {
   });
 });
 
-describe('HabitDetailsPage clientAction', () => {
+describe('HabitDetailsPage action', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(listFiles).mockResolvedValue([]);
@@ -121,10 +123,10 @@ describe('HabitDetailsPage clientAction', () => {
       iconPath: 'user-1/old.png',
     } as Awaited<ReturnType<typeof getHabit>>);
 
-    const args = makeRouteArgs<Route.ClientActionArgs>(HABIT_URL, user);
+    const args = makeRouteArgs<Route.ActionArgs>(HABIT_URL, user);
 
     await expect(
-      clientAction({
+      action({
         ...args,
         params: { habitId: 'habit-1' },
         request: {
@@ -272,5 +274,35 @@ describe('HabitDetailsPage clientAction', () => {
     await submitJson({ intent: 'remove-stock', stockId: 'stock-1' });
 
     expect(destroyStock).toHaveBeenCalledWith(testSupabaseClient, 'stock-1');
+  });
+});
+
+describe('HabitDetailsPage clientAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('clears the browser calendar cache after the server action', async () => {
+    const result = { ok: true as const, toasts: [] };
+
+    await expect(
+      clientAction({
+        ...makeRouteArgs<Route.ClientActionArgs>(HABIT_URL, user),
+        params: { habitId: 'habit-1' },
+        serverAction: vi.fn().mockResolvedValue(result),
+      })
+    ).resolves.toBe(result);
+    expect(clearCalendarData).toHaveBeenCalledOnce();
+  });
+
+  it('clears the cache even when the server action throws', async () => {
+    await expect(
+      clientAction({
+        ...makeRouteArgs<Route.ClientActionArgs>(HABIT_URL, user),
+        params: { habitId: 'habit-1' },
+        serverAction: vi.fn().mockRejectedValue(new Error('Offline')),
+      })
+    ).rejects.toThrow('Offline');
+    expect(clearCalendarData).toHaveBeenCalledOnce();
   });
 });

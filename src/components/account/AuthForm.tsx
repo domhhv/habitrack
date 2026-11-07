@@ -71,6 +71,7 @@ const AuthForm = ({
         onClick={() => {
           return signInWithGoogle(
             getSupabaseBrowserClient(),
+            window.location.origin,
             searchParams.get('returnTo') ?? undefined
           );
         }}

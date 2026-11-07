@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is in progress: its first step, toasts returned in action results, is done on `refactor/action-toasts`.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is in progress: its first step, toasts returned in action results, shipped in #505, and the second, server actions for everything but occurrences, is done on `refactor/server-actions`.
 
 ## Target end state
 
@@ -385,6 +385,22 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
     - Toasts appear when the action result arrives, before revalidation finishes, as before.
     - **Still in actions:** the success toasts shown right before a `redirect()` (login, register, anonymous login, password reset, account deletion). They move with step 2's flash messages.
     - Tests: `useActionFetcher` (toasts shown once, `onSuccess`), the upload-failure toast, and the toasts in the notes, settings and register results.
+  - **Step 2 as built** (`refactor/server-actions`):
+    - **Server actions.** Login, register, anonymous login, password reset, settings, OAuth consent, `/habits`, `/habits/:habitId` and `/resources/notes` export a server `action`. `/resources/occurrences` stays a `clientAction` until step 3. The auth pages and `/resources/notes` keep their `clientLoader`s.
+    - **Client wrappers.** `/habits/:habitId` and `/resources/notes` also export a `clientAction` that awaits `serverAction()` and clears the browser's calendar cache (`clearCalendarData`/`invalidateCalendarNotes`) in `finally`. It clears after every intent: reading the intent would consume the request body that `serverAction()` sends.
+    - **Flash toasts.** `redirectWithToasts(url, toasts)` (`src/utils/flash-toasts.ts`) redirects with a `flash` cookie (HTTP-only, 60 seconds, unsigned, read back through a toast type guard). `flashMiddleware` in the app layout parses it into `flashContext`. The app `loader` takes the toasts and returns them as `toasts`, and the middleware clears the cookie only in a response whose loader took them, so a data request that skips the app loader keeps them. `App` shows them with `useActionToasts(loaderData)`. That covers login, register, anonymous login, password reset and account deletion; no action shows a toast itself any more.
+    - **Callback URLs.** The user services that send email links (`signUp`, `convertAnonymousUser`, `updateUser`, `sendPasswordResetEmail`) take the request's `origin`, instead of reading `window.location.origin`. `signInWithGoogle` and `linkGoogleIdentity` take it too, from the browser.
+    - **Google linking** left the settings action: `ConnectedAccounts` calls `linkGoogleIdentity` with the browser client, because it leaves the page for Google. It stays pending until the redirect and toasts a failure. The `link-identity` intent is gone.
+    - **User changes.** `claimCalendarData(userId)` runs at the start of the calendar `clientLoader` and clears the range caches when they were filled for another user. Server sign-ins and account deletion send no auth event to the browser, so `useAuthSubscription` no longer sees every change. It still handles browser sign-outs.
+    - Settings failures go to `console.error`, which replaces the Rollbar report for `sync-email`; Rollbar is disabled on the server (§7).
+    - React Router rejects action requests whose `Origin` doesn't match the host (400). If a proxy ever changes the host, set `allowedActionOrigins` in `react-router.config.ts`.
+    - **Tests** cover the flash cookie and middleware, both client wrappers, `claimCalendarData`, browser-side Google linking, the request origin in the auth and settings service calls, and the flash cookie on account deletion. The converted pages' action tests now call `action`.
+    - **Verified against local Supabase** through the production server build, with a throwaway user:
+      - Login: a wrong password returns 400 with its toast. A correct one returns the redirect to `returnTo` with the session and flash cookies. The next app data load returns "Welcome back!" and clears the cookie; a load without the app route keeps it.
+      - Settings `update-profile`, trait creation, habit creation with an icon upload, habit update and deletion, and note creation all return `ok: true` with their toasts.
+      - Register, anonymous login, password reset and account deletion redirect with their flash cookies. Account deletion also clears the session cookie and removes the user. The reset email's link points at the request origin's `/auth/callback`.
+      - A cross-origin action POST is rejected.
+    - **Not verified:** a run in a real browser, including Google linking and the toasts appearing.
 - **Simplify revalidation.** Revisit `shouldRevalidate` and the `markAppDataStale` machinery once server loaders use the default revalidation. Keep explicit `shouldRevalidate` only where a loader is expensive.
 - ~~**Decision point.** If the app stays client-only instead, switch to `ssr: false` (SPA mode) with the landing page pre-rendered.~~ Settled by server loaders: the server now loads the data and streams it with the app shell.
 
