@@ -210,8 +210,11 @@ describe('occurrences resource action', () => {
     expect(patchOccurrence).toHaveBeenCalledWith(
       testSupabaseClient,
       'occurrence-1',
-      expect.not.objectContaining({ photoPaths: expect.anything() })
+      expect.any(Object)
     );
+    vi.mocked(patchOccurrence).mock.calls.forEach(([, , changes]) => {
+      expect(changes).not.toHaveProperty('photoPaths');
+    });
     expect(addOccurrencePhotoPaths).toHaveBeenCalledWith(
       testSupabaseClient,
       'occurrence-1',
