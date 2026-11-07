@@ -1,6 +1,6 @@
-import { Link, Toast } from '@heroui/react';
+import { Link } from '@heroui/react';
 import React from 'react';
-import { replace, redirect } from 'react-router';
+import { replace } from 'react-router';
 
 import { AuthForm } from '@components';
 import {
@@ -16,6 +16,7 @@ import {
   parseDayOfWeek,
   getReturnToPath,
   supabaseContext,
+  redirectWithToasts,
 } from '@utils';
 
 import type { Route } from './+types/RegisterPage';
@@ -30,22 +31,21 @@ export const clientLoader = ({ context, request }: Route.ClientLoaderArgs) => {
   return { isAnonymousUser: !!user?.isAnonymous };
 };
 
-export const clientAction = async ({
-  context,
-  request,
-}: Route.ClientActionArgs) => {
+export const action = async ({ context, request }: Route.ActionArgs) => {
   const formData = await request.formData();
   const email = String(formData.get('email') ?? '');
   const password = String(formData.get('password') ?? '');
   const supabase = context.get(supabaseContext);
   const isAnonymousUser = !!context.get(userContext)?.isAnonymous;
+  const { origin, search } = new URL(request.url);
 
   try {
     if (isAnonymousUser) {
-      await convertAnonymousUser(supabase, email, password);
+      await convertAnonymousUser(supabase, origin, email, password);
     } else {
       await signUp(
         supabase,
+        origin,
         email,
         password,
         parseDayOfWeek(formData.get('firstDayOfWeek'))
@@ -59,18 +59,22 @@ export const clientAction = async ({
   }
 
   if (isAnonymousUser) {
-    Toast.toast.success(
-      'Almost there! Check your inbox to confirm your email. All your habits and notes stay with your account.'
-    );
-
-    return redirect(getReturnToPath(request.url));
+    return redirectWithToasts(getReturnToPath(request.url), [
+      {
+        variant: 'success',
+        title:
+          'Almost there! Check your inbox to confirm your email. All your habits and notes stay with your account.',
+      },
+    ]);
   }
 
-  Toast.toast.success(
-    'Account created! Please check your email to confirm your account before logging in.'
-  );
-
-  return redirect(`/login${new URL(request.url).search}`);
+  return redirectWithToasts(`/login${search}`, [
+    {
+      variant: 'success',
+      title:
+        'Account created! Please check your email to confirm your account before logging in.',
+    },
+  ]);
 };
 
 const RegisterPage = ({

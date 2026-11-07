@@ -6,6 +6,7 @@ import type { CalendarRange } from '@utils';
 
 import {
   loadCalendarData,
+  claimCalendarData,
   clearCalendarData,
   primeCalendarData,
   createCalendarData,
@@ -106,6 +107,25 @@ describe('loadCalendarData', () => {
     );
 
     invalidateCalendarOccurrences();
+    await loadCalendarData(testSupabaseClient, range);
+
+    expect(vi.mocked(listOccurrences).mock.calls.length).toBeGreaterThan(
+      callsAfterFirstLoad
+    );
+  });
+  it('keeps the cache for the same user and clears it when the user changes', async () => {
+    claimCalendarData('user-1');
+    await loadCalendarData(testSupabaseClient, range);
+    const callsAfterFirstLoad = vi.mocked(listOccurrences).mock.calls.length;
+
+    claimCalendarData('user-1');
+    await loadCalendarData(testSupabaseClient, range);
+
+    expect(vi.mocked(listOccurrences).mock.calls.length).toBe(
+      callsAfterFirstLoad
+    );
+
+    claimCalendarData('user-2');
     await loadCalendarData(testSupabaseClient, range);
 
     expect(vi.mocked(listOccurrences).mock.calls.length).toBeGreaterThan(

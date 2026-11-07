@@ -10,6 +10,7 @@ import type { DaysOfWeek, TypedSupabaseClient } from '@models';
 import { ErrorFallbackPage } from '@pages';
 import {
   loadCalendarData,
+  claimCalendarData,
   primeCalendarData,
   createCalendarData,
   loadCalendarEntries,
@@ -113,6 +114,9 @@ export const clientLoader = async ({
   const view = getCalendarView(request);
   const supabase = context.get(supabaseContext);
   const user = context.get(userContext);
+
+  claimCalendarData(user?.id ?? null);
+
   const knownFirstDayOfWeek = getKnownFirstDayOfWeek(user?.id ?? null);
   const locale = navigator.language;
 

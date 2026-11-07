@@ -5,7 +5,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/OAuthConsentPage';
-import { loader, clientAction } from './OAuthConsentPage';
+import { loader, action } from './OAuthConsentPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -73,13 +73,13 @@ describe('OAuthConsentPage loader', () => {
   });
 });
 
-describe('OAuthConsentPage clientAction', () => {
+describe('OAuthConsentPage action', () => {
   const submit = (decision: string) => {
     const body = new FormData();
     body.set('decision', decision);
 
-    return clientAction(
-      makeRouteArgs<Route.ClientActionArgs>(CONSENT_URL, user, {
+    return action(
+      makeRouteArgs<Route.ActionArgs>(CONSENT_URL, user, {
         body,
         method: 'POST',
       })

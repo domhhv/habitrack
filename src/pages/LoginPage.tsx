@@ -1,6 +1,6 @@
-import { Link, Toast } from '@heroui/react';
+import { Link } from '@heroui/react';
 import React from 'react';
-import { replace, redirect } from 'react-router';
+import { replace } from 'react-router';
 
 import { AuthForm } from '@components';
 import { useAuthHref, useIsSubmitting, useActionToasts } from '@hooks';
@@ -10,6 +10,7 @@ import {
   userContext,
   getReturnToPath,
   supabaseContext,
+  redirectWithToasts,
 } from '@utils';
 
 import type { Route } from './+types/LoginPage';
@@ -22,10 +23,7 @@ export const clientLoader = ({ context, request }: Route.ClientLoaderArgs) => {
   return null;
 };
 
-export const clientAction = async ({
-  context,
-  request,
-}: Route.ClientActionArgs) => {
+export const action = async ({ context, request }: Route.ActionArgs) => {
   const formData = await request.formData();
 
   try {
@@ -41,9 +39,9 @@ export const clientAction = async ({
     );
   }
 
-  Toast.toast.success('Welcome back!');
-
-  return redirect(getReturnToPath(request.url));
+  return redirectWithToasts(getReturnToPath(request.url), [
+    { title: 'Welcome back!', variant: 'success' },
+  ]);
 };
 
 const LoginPage = ({ actionData }: Route.ComponentProps) => {

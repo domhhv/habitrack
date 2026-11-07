@@ -9,8 +9,8 @@ import decamelizeKeys from 'decamelize-keys';
 
 import type { DaysOfWeek, TypedSupabaseClient } from '@models';
 
-const getAuthCallbackUrl = (next: string) => {
-  const url = new URL('/auth/callback', window.location.origin);
+const getAuthCallbackUrl = (origin: string, next: string) => {
+  const url = new URL('/auth/callback', origin);
   url.searchParams.set('next', next);
 
   return url.href;
@@ -18,6 +18,7 @@ const getAuthCallbackUrl = (next: string) => {
 
 export const signUp = async (
   supabase: TypedSupabaseClient,
+  origin: string,
   email: string,
   password: string,
   firstDayOfWeek: DaysOfWeek
@@ -26,10 +27,13 @@ export const signUp = async (
     email,
     password,
     options: {
-      emailRedirectTo: getAuthCallbackUrl('/settings?emailConfirmed=true'),
       data: decamelizeKeys({
         firstDayOfWeek,
       }),
+      emailRedirectTo: getAuthCallbackUrl(
+        origin,
+        '/settings?emailConfirmed=true'
+      ),
     },
   });
 
@@ -57,12 +61,13 @@ export const signInAnonymously = async (
 
 export const signInWithGoogle = async (
   supabase: TypedSupabaseClient,
+  origin: string,
   next = '/calendar/month'
 ) => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: getAuthCallbackUrl(next),
+      redirectTo: getAuthCallbackUrl(origin, next),
     },
   });
 
@@ -81,11 +86,14 @@ export const getUserIdentities = async (supabase: TypedSupabaseClient) => {
   return data.identities;
 };
 
-export const linkGoogleIdentity = async (supabase: TypedSupabaseClient) => {
+export const linkGoogleIdentity = async (
+  supabase: TypedSupabaseClient,
+  origin: string
+) => {
   const { error } = await supabase.auth.linkIdentity({
     provider: 'google',
     options: {
-      redirectTo: getAuthCallbackUrl('/settings'),
+      redirectTo: getAuthCallbackUrl(origin, '/settings'),
     },
   });
 
@@ -107,13 +115,17 @@ export const unlinkIdentity = async (
 
 export const convertAnonymousUser = async (
   supabase: TypedSupabaseClient,
+  origin: string,
   email: string,
   password: string
 ) => {
   const { error } = await supabase.auth.updateUser(
     { email, password },
     {
-      emailRedirectTo: getAuthCallbackUrl('/settings?emailConfirmed=true'),
+      emailRedirectTo: getAuthCallbackUrl(
+        origin,
+        '/settings?emailConfirmed=true'
+      ),
     }
   );
 
@@ -165,10 +177,14 @@ export const deleteUser = async (supabase: TypedSupabaseClient) => {
 
 export const updateUser = async (
   supabase: TypedSupabaseClient,
+  origin: string,
   attributes: UserAttributes
 ) => {
   const { data, error } = await supabase.auth.updateUser(attributes, {
-    emailRedirectTo: getAuthCallbackUrl('/settings?emailChangeConfirmed=true'),
+    emailRedirectTo: getAuthCallbackUrl(
+      origin,
+      '/settings?emailChangeConfirmed=true'
+    ),
   });
 
   if (error) {
@@ -197,10 +213,11 @@ export const getUser = async (supabase: TypedSupabaseClient) => {
 
 export const sendPasswordResetEmail = async (
   supabase: TypedSupabaseClient,
+  origin: string,
   email: string
 ) => {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: getAuthCallbackUrl('/settings?passwordReset=true'),
+    redirectTo: getAuthCallbackUrl(origin, '/settings?passwordReset=true'),
   });
 
   if (error) {

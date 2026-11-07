@@ -50,7 +50,7 @@ yarn fix:sql           # Fix SQL formatting
 ### Technology Stack
 
 - **Frontend**: React 19, TypeScript 6, Vite 8, React Router v8 (framework mode, SSR enabled, data loaded in server `loader`s, app UI rendered in the browser behind an app-shell `HydrateFallback`)
-- **Server data**: React Router `middleware`/`loader` on the server, `clientMiddleware`/`clientLoader`/`clientAction` in the browser, fetchers and revalidation
+- **Server data**: React Router `middleware`/`loader`/`action` on the server, `clientMiddleware`/`clientLoader`/`clientAction` in the browser (browser caches and the occurrence writes), fetchers and revalidation
 - **Client UI state**: Zustand v5 with Immer middleware (drawers, confirmation dialog, calendar filters, mobile sidebar, theme)
 - **UI**: HeroUI v3 (React Aria-based), Tailwind CSS v4
 - **Backend**: Supabase (PostgreSQL, Auth, Storage, Real-time)
@@ -74,7 +74,7 @@ Use these aliases throughout the codebase:
 ### Key Directories
 
 - **`src/routes.ts`**: Route config. Every route has an explicit `id`; app routes are nested under the `app` layout (`src/App.tsx`), calendar views under the `calendar` layout (`src/pages/CalendarLayout.tsx`)
-- **`src/pages/`**: Route modules (page component plus `clientLoader`/`clientAction`/`ErrorBoundary` exports), typed via `./+types/<File>`
+- **`src/pages/`**: Route modules (page component plus `loader`/`action`/`clientLoader`/`clientAction`/`ErrorBoundary` exports), typed via `./+types/<File>`
 - **`src/routes/resources/`**: Component-less resource routes used only by fetchers (`/resources/occurrences`, `/resources/notes`)
 - **`src/components/`**: Domain-organized components (calendar, habit, trait, account, common)
 - **`src/services/`**: Supabase API service layer, plus the calendar range caches (`calendar-data.service.ts`)
@@ -93,26 +93,29 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
   - Habits, habit details, notes, settings and OAuth consent sit under the pathless `authenticated` layout (`src/pages/AuthenticatedLayout.tsx`). Its server `middleware` redirects signed-out document requests, and its `clientMiddleware` signed-out navigations, to `/login?returnTo=…` (`getLoginPath`). The login, register and anonymous-login pages go back to `returnTo` (`getReturnToPath`). The calendar stays public.
   - Auth redirects land on `/auth/callback` (`src/pages/AuthCallbackPage.tsx`). Its server `loader` exchanges an OAuth or PKCE `code`, or verifies an email `token_hash`, then redirects to `next`, which `getSafeRedirectPath` keeps on the same origin. Email redirects go through it too, and a `next` that points back at the callback is unwrapped. Email templates link to `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=…&next={{ .RedirectTo }}` (local copies in `supabase/templates/`).
 - **Loading**:
-  - The `app` layout's server `middleware` puts the verified session user into `userContext` and a once-per-request profile loader into `profileContext` (`await context.get(profileContext)()`). Its `clientMiddleware` sets the browser client and the session user for client actions.
-  - The `app` layout's server `loader` returns `{ appData }`, a streamed promise of `{ user, profile, habits, traits }`. Its `clientLoader` (`hydrate = true`) awaits it and records the first day of the week for the calendar. Read the data via `useUser`/`useProfile`/`useHabits`/`useTraits`.
+  - The `app` layout's server `middleware` puts the verified session user into `userContext` and a once-per-request profile loader into `profileContext` (`await context.get(profileContext)()`). Its server `middleware` also reads the flash cookie (`flashMiddleware`). Its `clientMiddleware` sets the browser client and the session user for client loaders and the occurrence actions.
+  - The `app` layout's server `loader` returns `{ appData, toasts }`: a streamed promise of `{ user, profile, habits, traits }`, and the flash toasts an action left before redirecting, which `App` shows. Its `clientLoader` (`hydrate = true`) awaits it and records the first day of the week for the calendar. Read the data via `useUser`/`useProfile`/`useHabits`/`useTraits`.
   - The `calendar` layout's server `loader` computes the range from the URL, profile, `Accept-Language` and the `tz` cookie (`getRequestLocale`/`getRequestTimeZone`) and streams the raw entries. Its `clientLoader` serves later ranges from the browser range cache and seeds the cache from `serverLoader()` on the first load. Read via `useCalendarData()`.
   - Pages load their own data in server `loader`s (habit stats, a habit, the notes list, connected identities, OAuth consent). Server code that needs the visitor's time zone reads the `tz` cookie, never `getLocalTimeZone()`.
   - `AppShellSkeleton` is the app layout's `HydrateFallback` and the pending UI while entering the app.
 - **Mutations**:
-  - Every write goes through a route `clientAction`. Branch on an `intent` and type the payloads in `src/models/*-submission.model.ts`.
+  - Every write goes through a route server `action`. Branch on an `intent` and type the payloads in `src/models/*-submission.model.ts`. Services that build URLs take the request's `origin` (`new URL(request.url).origin`), never `window.location`.
+  - A route whose writes change browser-cached calendar data also exports a `clientAction` that awaits `serverAction()` and clears the cache in `finally` (`/habits/:habitId`, `/resources/notes`).
+  - `/resources/occurrences` is still a `clientAction` (photo uploads and `photo_paths` writes have to move first). Google sign-in and identity linking call the browser client directly, because they leave the page.
   - UI that belongs to one page submits to that page's route. Global UI (drawers) submits to a `/resources/*` route.
   - Send JSON (`encType: 'application/json'`), or multipart `FormData` when files are involved.
 - **Submitting**:
   - Components submit with `useActionFetcher(onSuccess)` (a `useFetcher` that shows the result's toasts and calls `onSuccess` once the action returns `{ ok: true }`), or `<Form>` with `useActionToasts(actionData)`. Pending UI comes from `fetcher.state`/`useNavigation()`/`useIsSubmitting()`, not `useState`.
   - Block a new submission on a shared fetcher while one is pending.
 - **Results**:
-  - Actions never show toasts. They return them in the result (`ActionResult` in `src/models/action-result.model.ts`), and the submitting component shows them. The exception is a toast before a `redirect()`, which stays in the action until flash messages exist.
+  - Actions never show toasts. They return them in the result (`ActionResult` in `src/models/action-result.model.ts`), and the submitting component shows them. A toast for the page after a redirect goes through `redirectWithToasts(url, toasts)`, a flash cookie the app layout's loader reads and clears.
   - Wrap action work in `runAction(promise, actionType)`. It returns `{ ok: true, toasts }` or `{ ok: false, error, toasts }` with the standard messages, without a 4xx status, so partial writes still revalidate.
   - Return a 400 only for failures that wrote nothing, e.g. `failAction(title, error)`.
 - **Revalidation**:
   - React Router revalidates active loaders after each action.
   - The `app` layout `shouldRevalidate` skips plain navigations unless the app data was marked stale (`markAppDataStale`).
-  - Actions that change calendar data call `clearCalendarData()` (or `invalidateCalendarOccurrences`/`invalidateCalendarNotes`) in `finally`.
+  - Writes that change calendar data clear the browser cache with `clearCalendarData()` (or `invalidateCalendarOccurrences`/`invalidateCalendarNotes`) in a `clientAction`'s `finally`.
+  - The calendar `clientLoader` calls `claimCalendarData(userId)`, which clears the cache when the signed-in user changed. Server sign-ins send no auth event to the browser.
 - **URL state**: Prefer search params for shareable UI state (e.g. `/notes?pages=N`).
 - **Zustand**: Only for client UI state that has no server source.
 
@@ -185,7 +188,7 @@ Supabase storage buckets:
 
 - **Vitest** with jsdom environment for unit tests
 - **React Testing Library** for component testing
-- Route `loader`/`clientLoader`/`clientAction` functions and middleware are tested directly with `makeRouteArgs()` from `@tests` (builds the request plus a `RouterContextProvider` carrying `userContext` and `testSupabaseClient` in `supabaseContext`), with `@services` mocked. Service call assertions expect `testSupabaseClient` as the first argument
+- Route `loader`/`action`/`clientLoader`/`clientAction` functions and middleware are tested directly with `makeRouteArgs()` from `@tests` (builds the request plus a `RouterContextProvider` carrying `userContext` and `testSupabaseClient` in `supabaseContext`), with `@services` mocked. Service call assertions expect `testSupabaseClient` as the first argument
 - In test mode, Vite defines placeholder `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` values (`TEST_ENV` in `vite.config.ts`). `getSupabaseBrowserClient()` returns an empty stub under test, so mock it from `@utils` when a component's Supabase call is asserted
 - Components that use loader data, fetchers or `<Form>` render inside `createRoutesStub` from `react-router`
 - Test files located alongside components or in dedicated test directories

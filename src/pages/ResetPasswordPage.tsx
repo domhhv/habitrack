@@ -1,11 +1,16 @@
-import { Link, Toast } from '@heroui/react';
+import { Link } from '@heroui/react';
 import React from 'react';
-import { replace, redirect } from 'react-router';
+import { replace } from 'react-router';
 
 import { AuthForm } from '@components';
 import { useIsSubmitting, useActionToasts } from '@hooks';
 import { sendPasswordResetEmail } from '@services';
-import { failAction, userContext, supabaseContext } from '@utils';
+import {
+  failAction,
+  userContext,
+  supabaseContext,
+  redirectWithToasts,
+} from '@utils';
 
 import type { Route } from './+types/ResetPasswordPage';
 
@@ -17,15 +22,13 @@ export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
   return null;
 };
 
-export const clientAction = async ({
-  context,
-  request,
-}: Route.ClientActionArgs) => {
+export const action = async ({ context, request }: Route.ActionArgs) => {
   const formData = await request.formData();
 
   try {
     await sendPasswordResetEmail(
       context.get(supabaseContext),
+      new URL(request.url).origin,
       String(formData.get('email') ?? '')
     );
   } catch (error) {
@@ -35,11 +38,13 @@ export const clientAction = async ({
     );
   }
 
-  Toast.toast.success(
-    'Done! If there is an account associated with that email, you will receive a password reset link shortly.'
-  );
-
-  return redirect('/login');
+  return redirectWithToasts('/login', [
+    {
+      variant: 'success',
+      title:
+        'Done! If there is an account associated with that email, you will receive a password reset link shortly.',
+    },
+  ]);
 };
 
 const ResetPasswordPage = ({ actionData }: Route.ComponentProps) => {

@@ -177,6 +177,20 @@ export const clearCalendarData = () => {
   notesCache.clear();
 };
 
+let calendarDataUserId: string | null | undefined;
+
+/**
+ * Clears the caches when they were filled for another user. Server actions sign users in and out
+ * without an auth event in the browser, so the calendar loader checks this on every load.
+ */
+export const claimCalendarData = (userId: string | null) => {
+  if (calendarDataUserId !== undefined && calendarDataUserId !== userId) {
+    clearCalendarData();
+  }
+
+  calendarDataUserId = userId;
+};
+
 /**
  * The app layout reports the signed-in user's first day of the week once its data loads, so the
  * calendar can work out later ranges in the browser without asking the server.

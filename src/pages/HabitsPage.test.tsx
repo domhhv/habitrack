@@ -12,7 +12,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/HabitsPage';
-import { loader, clientAction } from './HabitsPage';
+import { loader, action } from './HabitsPage';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -73,7 +73,7 @@ describe('HabitsPage loader', () => {
   });
 });
 
-describe('HabitsPage clientAction', () => {
+describe('HabitsPage action', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -104,10 +104,10 @@ describe('HabitsPage clientAction', () => {
       ReturnType<typeof createHabit>
     >);
 
-    const args = makeRouteArgs<Route.ClientActionArgs>(HABITS_URL, user);
+    const args = makeRouteArgs<Route.ActionArgs>(HABITS_URL, user);
 
     await expect(
-      clientAction({
+      action({
         ...args,
         request: {
           headers: new Headers(),
@@ -139,8 +139,8 @@ describe('HabitsPage clientAction', () => {
   });
 
   it('creates a trait from a JSON submission', async () => {
-    await clientAction(
-      makeRouteArgs<Route.ClientActionArgs>(HABITS_URL, user, {
+    await action(
+      makeRouteArgs<Route.ActionArgs>(HABITS_URL, user, {
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
         body: JSON.stringify({
@@ -162,8 +162,8 @@ describe('HabitsPage clientAction', () => {
     vi.mocked(createHabit).mockRejectedValue(new Error('Duplicate'));
 
     await expect(
-      clientAction(
-        makeRouteArgs<Route.ClientActionArgs>(HABITS_URL, user, {
+      action(
+        makeRouteArgs<Route.ActionArgs>(HABITS_URL, user, {
           body: new FormData(),
           method: 'POST',
         })

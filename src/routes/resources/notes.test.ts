@@ -12,7 +12,7 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/notes';
-import { clientAction, clientLoader } from './notes';
+import { action, clientAction, clientLoader } from './notes';
 
 vi.mock('@services', async (importOriginal) => {
   return {
@@ -34,8 +34,8 @@ const note = {
 };
 
 const submit = (submission: NoteSubmission) => {
-  return clientAction(
-    makeRouteArgs<Route.ClientActionArgs>(NOTES_URL, user, {
+  return action(
+    makeRouteArgs<Route.ActionArgs>(NOTES_URL, user, {
       body: JSON.stringify(submission),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
@@ -88,12 +88,12 @@ describe('notes resource clientLoader', () => {
   });
 });
 
-describe('notes resource clientAction', () => {
+describe('notes resource action', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('creates a period note for the user and invalidates notes', async () => {
+  it('creates a period note for the user', async () => {
     await expect(submit({ intent: 'create', note })).resolves.toEqual({
       ok: true,
       toasts: [{ title: 'Note added', variant: 'success' }],
@@ -102,7 +102,6 @@ describe('notes resource clientAction', () => {
       ...note,
       userId: 'user-1',
     });
-    expect(invalidateCalendarNotes).toHaveBeenCalledOnce();
   });
 
   it('updates and deletes notes', async () => {
@@ -113,7 +112,7 @@ describe('notes resource clientAction', () => {
     expect(destroyNote).toHaveBeenCalledWith(testSupabaseClient, 'note-1');
   });
 
-  it('invalidates notes even when the write fails', async () => {
+  it('returns the failure with its toast', async () => {
     vi.mocked(createNote).mockRejectedValue(new Error('Too long'));
 
     await expect(submit({ intent: 'create', note })).resolves.toEqual({
@@ -127,6 +126,33 @@ describe('notes resource clientAction', () => {
         },
       ],
     });
+  });
+});
+
+describe('notes resource clientAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('invalidates the browser notes cache after the server action', async () => {
+    const result = { ok: true as const, toasts: [] };
+
+    await expect(
+      clientAction({
+        ...makeRouteArgs<Route.ClientActionArgs>(NOTES_URL, user),
+        serverAction: vi.fn().mockResolvedValue(result),
+      })
+    ).resolves.toBe(result);
+    expect(invalidateCalendarNotes).toHaveBeenCalledOnce();
+  });
+
+  it('invalidates the cache even when the server action throws', async () => {
+    await expect(
+      clientAction({
+        ...makeRouteArgs<Route.ClientActionArgs>(NOTES_URL, user),
+        serverAction: vi.fn().mockRejectedValue(new Error('Offline')),
+      })
+    ).rejects.toThrow('Offline');
     expect(invalidateCalendarNotes).toHaveBeenCalledOnce();
   });
 });

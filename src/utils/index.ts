@@ -8,6 +8,7 @@ export * from './calendar-range-cache';
 export { default as createCalendar } from './create-calendar';
 export * from './date';
 export { default as failAction } from './fail-action';
+export * from './flash-toasts';
 export { default as getErrorMessage } from './get-error-message';
 export { default as getSafeRedirectPath } from './get-safe-redirect-path';
 export { default as initializeTheme } from './initialize-theme';

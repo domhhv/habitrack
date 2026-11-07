@@ -5,7 +5,6 @@ import {
   Alert,
   Input,
   Label,
-  Toast,
   Select,
   ListBox,
   TextField,
@@ -14,7 +13,7 @@ import { PlugsIcon, ShieldIcon, UserCircleIcon } from '@phosphor-icons/react';
 import type { UserAttributes } from '@supabase/supabase-js';
 import type { SubmitEventHandler } from 'react';
 import React from 'react';
-import { data, redirect } from 'react-router';
+import { data } from 'react-router';
 
 import { CustomButton, PasswordInput, ConnectedAccounts } from '@components';
 import {
@@ -37,23 +36,21 @@ import {
   patchProfile,
   unlinkIdentity,
   getUserIdentities,
-  linkGoogleIdentity,
 } from '@services';
 import { useConfirmationActions } from '@stores';
 import {
-  rollbar,
   userContext,
   parseDayOfWeek,
   getErrorMessage,
   supabaseContext,
   type SessionUser,
+  redirectWithToasts,
 } from '@utils';
 
 import type { Route } from './+types/SettingsPage';
 
 const FAILURE_TITLES = {
   'delete-account': 'Failed to delete account',
-  'link-identity': 'Failed to link Google account',
   'sync-email': 'Something went wrong when updating your email',
   'unlink-identity': 'Failed to unlink Google account',
   'update-profile': 'Failed to update account',
@@ -114,20 +111,17 @@ const getUserAttributes = (formData: FormData) => {
 const runIntent = async (
   supabase: TypedSupabaseClient,
   intent: SettingsIntent,
+  request: Request,
   formData: FormData,
   user: NonNullable<SessionUser>
-): Promise<ActionToast | Response | null> => {
+): Promise<ActionToast | Response> => {
   switch (intent) {
     case 'delete-account':
       await deleteUser(supabase);
-      Toast.toast.success('Account deleted');
 
-      return redirect('/login');
-
-    case 'link-identity':
-      await linkGoogleIdentity(supabase);
-
-      return null;
+      return redirectWithToasts('/login', [
+        { title: 'Account deleted', variant: 'success' },
+      ]);
 
     case 'sync-email':
       await patchProfile(supabase, user.id, { email: user.email });
@@ -160,7 +154,11 @@ const runIntent = async (
       return { title: 'Account updated', variant: 'success' };
 
     case 'update-user':
-      await updateUser(supabase, getUserAttributes(formData));
+      await updateUser(
+        supabase,
+        new URL(request.url).origin,
+        getUserAttributes(formData)
+      );
 
       return {
         title: 'Account updated',
@@ -187,10 +185,7 @@ export const loader = async ({ context }: Route.LoaderArgs) => {
   }
 };
 
-export const clientAction = async ({
-  context,
-  request,
-}: Route.ClientActionArgs) => {
+export const action = async ({ context, request }: Route.ActionArgs) => {
   const user = context.get(userContext);
   const formData = await request.formData();
   const intent = formData.get('intent');
@@ -206,6 +201,7 @@ export const clientAction = async ({
     const result = await runIntent(
       context.get(supabaseContext),
       intent,
+      request,
       formData,
       user
     );
@@ -217,15 +213,10 @@ export const clientAction = async ({
     return {
       intent,
       ok: true as const,
-      toasts: result ? [result] : [],
+      toasts: [result],
     };
   } catch (error) {
-    if (intent === 'sync-email') {
-      rollbar.error(
-        'Failed to update profile with new email',
-        error instanceof Error ? error : new Error(getErrorMessage(error))
-      );
-    }
+    console.error(error);
 
     const toast: ActionToast = {
       description: getErrorMessage(error) || 'Please try again later',

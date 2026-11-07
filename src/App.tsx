@@ -15,7 +15,7 @@ import {
   OccurrenceDrawer,
   ConfirmationDialog,
 } from '@components';
-import { useAuthSubscription } from '@hooks';
+import { useActionToasts, useAuthSubscription } from '@hooks';
 import type { Profile } from '@models';
 import { ErrorFallbackPage } from '@pages';
 import {
@@ -29,8 +29,10 @@ import {
 import {
   noop,
   userContext,
+  flashContext,
   profileContext,
   isAppDataStale,
+  flashMiddleware,
   supabaseContext,
   markAppDataStale,
   trackAppDataLoad,
@@ -58,6 +60,7 @@ const sessionMiddleware: Route.MiddlewareFunction = async ({ context }) => {
 export const middleware: Route.MiddlewareFunction[] = [
   supabaseMiddleware,
   sessionMiddleware,
+  flashMiddleware,
 ];
 
 const loadAppData = async (context: Readonly<RouterContextProvider>) => {
@@ -81,13 +84,13 @@ const loadAppData = async (context: Readonly<RouterContextProvider>) => {
 
 /**
  * Returns the app data as a promise, so a document request sends the app shell right away and
- * streams the data after it.
+ * streams the data after it. `toasts` are the ones an action left before redirecting here.
  */
 export const loader = ({ context }: Route.LoaderArgs) => {
   const appData = loadAppData(context);
   appData.catch(noop);
 
-  return { appData };
+  return { appData, toasts: context.get(flashContext).take() };
 };
 
 export const clientLoader = async ({
@@ -95,7 +98,7 @@ export const clientLoader = async ({
   serverLoader,
 }: Route.ClientLoaderArgs) => {
   const finishAppDataLoad = trackAppDataLoad(request.signal);
-  const { appData } = await serverLoader();
+  const { appData, toasts } = await serverLoader();
   const data = await appData;
 
   rememberCalendarFirstDayOfWeek(
@@ -104,7 +107,7 @@ export const clientLoader = async ({
   );
   finishAppDataLoad();
 
-  return data;
+  return { ...data, toasts };
 };
 
 clientLoader.hydrate = true as const;
@@ -151,8 +154,9 @@ export const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => {
   return <ErrorFallbackPage error={error instanceof Error ? error : null} />;
 };
 
-const App = ({ loaderData: { user } }: Route.ComponentProps) => {
-  useAuthSubscription(user);
+const App = ({ loaderData }: Route.ComponentProps) => {
+  useAuthSubscription(loaderData.user);
+  useActionToasts(loaderData);
 
   React.useEffect(() => {
     document.getElementById('root')?.classList.add('initialized');
