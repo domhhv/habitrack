@@ -152,6 +152,11 @@ export const clientLoader = async ({
 
 clientLoader.hydrate = true as const;
 
+/**
+ * The range comes from the child route's view and date params, but by default a parent only
+ * reloads when its own path changes, so any path change re-runs it. The browser range cache keeps
+ * that cheap.
+ */
 export const shouldRevalidate = ({
   currentUrl,
   defaultShouldRevalidate,

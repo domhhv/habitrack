@@ -3,11 +3,7 @@ import React from 'react';
 import { useRevalidator } from 'react-router';
 
 import { clearCalendarData } from '@services';
-import {
-  markAppDataStale,
-  type SessionUser,
-  getSupabaseBrowserClient,
-} from '@utils';
+import { type SessionUser, getSupabaseBrowserClient } from '@utils';
 
 const useAuthSubscription = (user: SessionUser) => {
   const { revalidate } = useRevalidator();
@@ -38,7 +34,6 @@ const useAuthSubscription = (user: SessionUser) => {
       }
 
       if (hasUserChanged || event === 'USER_UPDATED') {
-        markAppDataStale();
         void revalidate();
       }
     });

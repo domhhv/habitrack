@@ -15,14 +15,14 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is done: toasts returned in action results shipped in #505, server actions for everything but occurrences in #506, and the occurrence server action is done on `refactor/occurrence-server-action`. Simplifying revalidation is next.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is done: toasts returned in action results shipped in #505, server actions for everything but occurrences in #506, and the occurrence server action is done on `refactor/occurrence-server-action`. Simplifying revalidation, which completes §1, is done on `refactor/simplify-revalidation`.
 
 ## Target end state
 
 | Concern                                     | Final home                                                                                                                                                                  |
 | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Session user, profile                       | App layout `clientMiddleware` (sets `userContext`) plus `clientLoader`. Read with `useRouteLoaderData('app')`                                                               |
-| Habits, traits                              | App layout `clientLoader`, limited by `shouldRevalidate`                                                                                                                    |
+| Habits, traits                              | App layout `loader`, with the default revalidation since §1                                                                                                                 |
 | Habit stats, habit details                  | `habits` and `habits/:habitId` route `clientLoader`s. An unknown id throws `data(null, { status: 404 })` and renders the route `ErrorBoundary`                              |
 | Occurrences and notes for the visible range | Calendar route `clientLoader`s that read through the existing `createCalendarRangeCache` (moved out of the slices). This keeps sibling prefetch and instant month switching |
 | Notes list (infinite scroll)                | `notes` route `clientLoader` loads page 0. Later pages load with `useFetcher().load('/notes?page=n')`                                                                       |
@@ -224,7 +224,7 @@ The store is created once at module level with `create`. Zustand's SSR guidance 
 ## Risks to watch
 
 - Component-less client resource routes: verified by the PR 1 spike, and in production since PR 7.
-- Revalidation load on the app layout. Every submission re-runs the habits and traits queries (the profile is memoized in the middleware since PR 9). If that becomes too much, also skip `/resources/notes` submissions in `shouldRevalidate`.
+- Revalidation load on the app layout. Every submission and search-param change re-runs the profile, habits and traits queries, in the same data request as the page's own loaders. If that becomes too much, add a `shouldRevalidate` that skips `/resources/notes` submissions; skipping search-param changes there would also skip revalidations that a navigation interrupted.
 - `react-router:split-route-modules` logs `SOURCEMAP_BROKEN` warnings for route modules with split client exports (seen since PR 2). Check that Rollbar stack traces for those chunks still map back to the source.
 - `HydrateFallback` on every hard load of an app route. Since server loaders, it is the app-shell skeleton and the data streams into the same response, but the UI still renders in the browser until the time-zone-safe server rendering (Future work §1) lands.
 - Moving the filter representation (PR 6) reset every user's current selection once. That was accepted, because filters were not persisted.
@@ -418,7 +418,16 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
       - The functions refuse `anon` callers.
       - Delete removed the entry.
     - **Not verified:** a run in a real browser (compression, the upload toasts, the drawer closing).
-- **Simplify revalidation.** Revisit `shouldRevalidate` and the `markAppDataStale` machinery once server loaders use the default revalidation. Keep explicit `shouldRevalidate` only where a loader is expensive.
+- **Simplify revalidation** – done on `refactor/simplify-revalidation`. Revisit `shouldRevalidate` and the `markAppDataStale` machinery once server loaders use the default revalidation. Keep explicit `shouldRevalidate` only where a loader is expensive.
+  - **As built:**
+    - **Why the machinery could go.** React Router 8.5 marks every loader for revalidation from the start of any submission, fetcher action or `revalidate()` until the next load completes (`isRevalidationRequired`, set by `interruptActiveLoads`). A navigation that interrupts a revalidation therefore reloads the app layout by default. That was the only job left for the stale-data counter, which dated from #488. Checked with a memory router and a pathless layout loader:
+      - A plain path change didn't reload it.
+      - A search-param change, a fetcher action, and a navigation interrupting a fetcher revalidation or `revalidate()` all did, and the final data came from a load that wasn't aborted.
+    - **App layout.** `shouldRevalidate` and `src/utils/app-revalidation.ts` (`markAppDataStale`, `isAppDataStale`, `trackAppDataLoad`) are deleted, and the app layout uses the default revalidation. `useAuthSubscription` only calls `revalidate()`. The one behaviour change: search-param changes now reload the app data too, which means every page of the notes list's infinite scroll. That runs in the same data request as the notes loader.
+    - **Calendar layout.** Its `shouldRevalidate` stays. By default a parent reloads only when its own path changes, so switching the view or date in the child path wouldn't reload the range. The range cache keeps it cheap.
+    - **Settings.** `useAuthSearchParams` called `setSearchParams({})` on every settings visit, even without auth params. That same-URL navigation reloaded every loader on the page, the identities included. It now returns early without params and clears them with `replace`, so the back button doesn't show the toast again.
+    - **Tests** cover the calendar `shouldRevalidate` and `useAuthSearchParams`; the settings loader test fails against the previous hook. The `app-revalidation` tests are deleted with the module.
+    - **Not verified:** a run in a real browser.
 - ~~**Decision point.** If the app stays client-only instead, switch to `ssr: false` (SPA mode) with the landing page pre-rendered.~~ Settled by server loaders: the server now loads the data and streams it with the app shell.
 
 ### 2. Progressive enhancement and forms

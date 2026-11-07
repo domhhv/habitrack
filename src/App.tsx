@@ -1,11 +1,7 @@
 import { Analytics } from '@vercel/analytics/react';
 import keyBy from 'lodash.keyby';
 import React from 'react';
-import {
-  Outlet,
-  type RouterContextProvider,
-  type ShouldRevalidateFunctionArgs,
-} from 'react-router';
+import { Outlet, type RouterContextProvider } from 'react-router';
 
 import {
   AppHeader,
@@ -31,11 +27,8 @@ import {
   userContext,
   flashContext,
   profileContext,
-  isAppDataStale,
   flashMiddleware,
   supabaseContext,
-  markAppDataStale,
-  trackAppDataLoad,
   supabaseMiddleware,
   loadSupabaseBrowserClient,
 } from '@utils';
@@ -94,10 +87,8 @@ export const loader = ({ context }: Route.LoaderArgs) => {
 };
 
 export const clientLoader = async ({
-  request,
   serverLoader,
 }: Route.ClientLoaderArgs) => {
-  const finishAppDataLoad = trackAppDataLoad(request.signal);
   const { appData, toasts } = await serverLoader();
   const data = await appData;
 
@@ -105,7 +96,6 @@ export const clientLoader = async ({
     data.user?.id ?? null,
     data.profile?.firstDayOfWeek
   );
-  finishAppDataLoad();
 
   return { ...data, toasts };
 };
@@ -128,23 +118,6 @@ export const clientMiddleware = [
   supabaseClientMiddleware,
   clientSessionMiddleware,
 ];
-
-export const shouldRevalidate = ({
-  currentUrl,
-  defaultShouldRevalidate,
-  formMethod,
-  nextUrl,
-}: ShouldRevalidateFunctionArgs) => {
-  if (!formMethod && currentUrl.href !== nextUrl.href) {
-    return isAppDataStale();
-  }
-
-  if (defaultShouldRevalidate) {
-    markAppDataStale();
-  }
-
-  return defaultShouldRevalidate;
-};
 
 export const HydrateFallback = () => {
   return <AppShellSkeleton />;

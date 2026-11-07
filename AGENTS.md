@@ -113,7 +113,9 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
   - Return a 400 only for failures that wrote nothing, e.g. `failAction(title, error)`.
 - **Revalidation**:
   - React Router revalidates active loaders after each action.
-  - The `app` layout `shouldRevalidate` skips plain navigations unless the app data was marked stale (`markAppDataStale`).
+  - Loaders use React Router's default revalidation, so the `app` layout reloads after actions, `revalidate()`, same-URL navigations and search-param changes, but not on plain path changes. A navigation that interrupts a revalidation still reloads it.
+  - Add `shouldRevalidate` only where the defaults miss a reload or a loader is expensive. The `calendar` layout has one, because it reads its child routes' params.
+  - Don't navigate to the same URL just to tidy it: that reloads every loader on the page.
   - Writes that change calendar data clear the browser cache with `clearCalendarData()` (or `invalidateCalendarOccurrences`/`invalidateCalendarNotes`) in a `clientAction`'s `finally`.
   - The calendar `clientLoader` calls `claimCalendarData(userId)`, which clears the cache when the signed-in user changed. Server sign-ins send no auth event to the browser.
 - **URL state**: Prefer search params for shareable UI state (e.g. `/notes?pages=N`).

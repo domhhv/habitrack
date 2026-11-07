@@ -13,6 +13,10 @@ const useAuthSearchParams = () => {
   const fetcher = useActionFetcher();
 
   React.useEffect(() => {
+    if (searchParams.size === 0) {
+      return;
+    }
+
     if (searchParams.get('emailConfirmed')) {
       Toast.toast.success(`Email confirmed! You're now logged in 🎉`);
     }
@@ -34,7 +38,7 @@ const useAuthSearchParams = () => {
       );
     }
 
-    setSearchParams({});
+    setSearchParams({}, { replace: true });
   }, [searchParams, setSearchParams, profile?.id, profile?.email, user?.email]); // eslint-disable-line react-hooks/exhaustive-deps
 };
 
