@@ -18,7 +18,22 @@ export type OccurrenceValuesSubmission = Omit<
   metricValues: Record<string, MetricValue>;
 };
 
+export type OccurrenceSaveSubmission =
+  | {
+      intent: 'create';
+      photoPaths: string[];
+      values: OccurrenceValuesSubmission;
+    }
+  | {
+      intent: 'update';
+      noteId: string | null;
+      occurrenceId: string;
+      photoPaths: string[];
+      values: OccurrenceValuesSubmission;
+    };
+
 export type OccurrenceSubmission =
+  | OccurrenceSaveSubmission
   | { intent: 'delete'; occurrenceId: string }
   | { intent: 'remove-photo'; occurrenceId: string; photoPath: string }
   | {

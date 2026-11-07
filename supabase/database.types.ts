@@ -687,7 +687,10 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "delete_user":
+            "add_occurrence_photo_paths":
+{ Args: { "p_occurrence_id": string,"p_photo_paths": (string)[] }; Returns: undefined
+                           },
+"delete_user":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "get_habits_stats":
@@ -705,7 +708,10 @@ isOneToOne: false
         to: "streak_info"
         isOneToOne: true
         isSetofReturn: false
-      } }
+      } },
+"remove_occurrence_photo_path":
+{ Args: { "p_occurrence_id": string,"p_photo_path": string }; Returns: undefined
+                           }
           }
           Enums: {
             "days_of_week": "sun"|"mon","metric_type": "number"|"duration"|"percentage"|"scale"|"range"|"choice"|"boolean"|"text","note_period_kind": "day"|"week"|"month","user_plans": "free"|"pro"

@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is in progress: its first step, toasts returned in action results, shipped in #505, and the second, server actions for everything but occurrences, is done on `refactor/server-actions`.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is done: toasts returned in action results shipped in #505, server actions for everything but occurrences in #506, and the occurrence server action is done on `refactor/occurrence-server-action`. Simplifying revalidation is next.
 
 ## Target end state
 
@@ -401,6 +401,23 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
       - Register, anonymous login, password reset and account deletion redirect with their flash cookies. Account deletion also clears the session cookie and removes the user. The reset email's link points at the request origin's `/auth/callback`.
       - A cross-origin action POST is rejected.
     - **Not verified:** a run in a real browser, including Google linking and the toasts appearing.
+  - **Step 3 as built** (`refactor/occurrence-server-action`):
+    - **Server action.** `/resources/occurrences` exports a server `action`, plus a `clientAction` that awaits `serverAction()` and calls `clearCalendarData()` in `finally`, like habit details and notes.
+    - **JSON only.** `create` and `update` are JSON now: `OccurrenceSaveSubmission` (`src/models/occurrence-submission.model.ts`) carries `values` (from `toOccurrenceValuesSubmission`, which replaced `toOccurrenceFormData`) and `photoPaths`. `update` also carries `occurrenceId` and `noteId`, now `null` instead of an empty string when there is no note.
+    - **Photos upload from the browser.** `useOccurrenceFetcher(onSuccess)` (`src/hooks/use-occurrence-fetcher.ts`), used by both form containers, compresses and uploads the files with the browser client and `uploadImages`, toasts any failed files, then submits the paths. Its `isSaving` covers the upload and the submission. A pending save blocks another one. This keeps request bodies far below the server's limit and `browser-image-compression` in the browser.
+    - **Paths are checked.** The action accepts only paths inside the user's own folder (`<userId>/…`) and fails before writing anything otherwise. Uploaded files of a save that fails afterwards stay in storage, as before.
+    - **Atomic photo paths.** `add_occurrence_photo_paths(p_occurrence_id, p_photo_paths)` and `remove_occurrence_photo_path(p_occurrence_id, p_photo_path)` (`06_occurrences.sql`, migration `20261107210601_add_occurrence_photo_path_functions`) each change `photo_paths` in one `UPDATE`, storing `NULL` for an empty list. They are `SECURITY INVOKER` with an empty `search_path`, so the table's row level security still applies, and only `authenticated` and `service_role` may run them. `addOccurrencePhotoPaths`/`removeOccurrencePhotoPath` call them. The update patches the other fields without `photo_paths`, then appends the new paths. `writePhotoPaths` and its per-tab queue are gone.
+    - **Time zone.** A new entry's `time_zone` comes from the `tz` cookie (`getRequestTimeZone`), not `getLocalTimeZone()`.
+    - `runAction` lost its `getExtraToasts` parameter, which only the server-side upload toasts used. `remove-photo` failures go to `console.error`.
+    - **Tests** cover every intent of the server action (the cookie time zone, foreign photo paths, the single-write photo removal), the cache wrapper, and `useOccurrenceFetcher` (browser upload, submitted paths, the failed-upload toast).
+    - **Verified against local Supabase** through the production server build, with a throwaway user and files uploaded to storage the way the browser does:
+      - Create stored the photo path and the cookie's `Europe/Berlin` time zone.
+      - Update appended two paths and saved the edited note.
+      - Two concurrent removals left exactly the remaining path, and removing the last path stored `NULL`.
+      - A path outside the user's folder was rejected.
+      - The functions refuse `anon` callers.
+      - Delete removed the entry.
+    - **Not verified:** a run in a real browser (compression, the upload toasts, the drawer closing).
 - **Simplify revalidation.** Revisit `shouldRevalidate` and the `markAppDataStale` machinery once server loaders use the default revalidation. Keep explicit `shouldRevalidate` only where a loader is expensive.
 - ~~**Decision point.** If the app stays client-only instead, switch to `ssr: false` (SPA mode) with the landing page pre-rendered.~~ Settled by server loaders: the server now loads the data and streams it with the app shell.
 
@@ -423,7 +440,7 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
 - **Abort signals.** Pass `request.signal` to Supabase (`.abortSignal()`) in loaders that don't share cached requests: habit details, the notes page, settings identities and the period-note lookup.
 - **Cache headers.** Add `headers` exports with `Cache-Control` on server loaders for rarely changing data, such as traits. Use this sparingly, as the React Router docs advise.
 - **Notes pagination.** Switch the notes page to keyset pagination on `created_at`, so "load more" stops re-fetching earlier pages.
-- **Atomic writes.** Turn multi-step writes into Postgres RPCs, so each action makes one transactional call: habit plus metric definitions, the occurrence create/update orchestration, stock-default replacement, and `array_remove` for photo paths. This fixes partial writes (duplicate habits on retry) and the photo-path race across tabs and devices at the source. Today `writePhotoPaths` only serializes within one tab.
+- **Atomic writes.** Turn multi-step writes into Postgres RPCs, so each action makes one transactional call: habit plus metric definitions, the occurrence create/update orchestration and stock-default replacement. This fixes partial writes (duplicate habits on retry). Photo paths already change through single-statement functions (server actions step 3).
 
 ### 5. Move the remaining UI state to the URL and cookies
 

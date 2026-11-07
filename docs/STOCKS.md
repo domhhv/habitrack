@@ -260,7 +260,7 @@ The `autoCompoundedMetricIds` set tracks which metrics were auto-filled by compo
 
 ### Stock usage submission
 
-On form submit, `OccurrenceCreateFormContainer`/`OccurrenceUpdateFormContainer` send the stock selections to the `/resources/occurrences` `clientAction`:
+On form submit, `OccurrenceCreateFormContainer`/`OccurrenceUpdateFormContainer` send the stock selections, through `useOccurrenceFetcher`, to the `/resources/occurrences` server `action`:
 
 - **Create**: `createOccurrenceStockUsages()` batch inserts, triggers decrement stock
 - **Update**: Compares the current DB usages with the submitted ones, deletes removed ones, creates new ones, updates changed quantities
@@ -288,7 +288,7 @@ User selects habit → habit.stocks loaded
   → user selects stock(s), sets quantity
   → metric defaults auto-populate form
   → user submits
-  → /resources/occurrences clientAction (intent 'create'):
+  → /resources/occurrences server action (intent 'create'):
     1. Creates occurrence (with cost if quantifiable — see COSTS.md)
     2. createOccurrenceStockUsages(usages)
     3. DB triggers decrement remaining_items, may set is_depleted

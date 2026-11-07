@@ -23,5 +23,5 @@ export * from './route-context';
 export { default as runAction, type ActionType } from './run-action';
 export * from './supabase-client';
 export * from './supabase-middleware';
-export { default as toOccurrenceFormData } from './to-occurrence-form-data';
+export { default as toOccurrenceValuesSubmission } from './to-occurrence-values-submission';
 export * from './type-guards';

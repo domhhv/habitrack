@@ -6,7 +6,6 @@ import {
   createNote,
   updateNote,
   patchStock,
-  uploadImages,
   getOccurrence,
   patchOccurrence,
   createOccurrence,
@@ -14,6 +13,8 @@ import {
   destroyOccurrence,
   destroyMetricValue,
   upsertMetricValues,
+  addOccurrencePhotoPaths,
+  removeOccurrencePhotoPath,
   updateOccurrenceStockUsage,
   createOccurrenceStockUsages,
   deleteOccurrenceStockUsages,
@@ -22,11 +23,12 @@ import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
 
 import type { Route } from './+types/occurrences';
-import { clientAction } from './occurrences';
+import { action, clientAction } from './occurrences';
 
 vi.mock('@services', async (importOriginal) => {
   return {
     ...(await importOriginal<object>()),
+    addOccurrencePhotoPaths: vi.fn(),
     clearCalendarData: vi.fn(),
     createNote: vi.fn(),
     createOccurrence: vi.fn(),
@@ -38,17 +40,10 @@ vi.mock('@services', async (importOriginal) => {
     getOccurrence: vi.fn(),
     patchOccurrence: vi.fn(),
     patchStock: vi.fn(),
+    removeOccurrencePhotoPath: vi.fn(),
     updateNote: vi.fn(),
     updateOccurrenceStockUsage: vi.fn(),
-    uploadImages: vi.fn(),
     upsertMetricValues: vi.fn(),
-  };
-});
-
-vi.mock('@stores', async (importOriginal) => {
-  return {
-    ...(await importOriginal<object>()),
-    refreshStoreNotesList: vi.fn(),
   };
 });
 
@@ -68,43 +63,24 @@ const values: OccurrenceValuesSubmission = {
   ],
 };
 
-const submitForm = (fields: Record<string, string>) => {
-  const body = new FormData();
-
-  Object.entries(fields).forEach(([name, value]) => {
-    body.set(name, value);
-  });
-  body.set('values', JSON.stringify(values));
-  body.append('photos', new File(['photo'], 'photo.jpg'));
-
-  return clientAction({
-    ...makeRouteArgs<Route.ClientActionArgs>(RESOURCE_URL, user),
-    request: {
-      headers: new Headers(),
-      formData: () => {
-        return Promise.resolve(body);
-      },
-    } as unknown as Request,
-  });
-};
-
-const submitJson = (submission: OccurrenceSubmission, sessionUser = user) => {
-  return clientAction(
-    makeRouteArgs<Route.ClientActionArgs>(RESOURCE_URL, sessionUser, {
+const submit = (submission: OccurrenceSubmission, sessionUser = user) => {
+  return action(
+    makeRouteArgs<Route.ActionArgs>(RESOURCE_URL, sessionUser, {
       body: JSON.stringify(submission),
-      headers: { 'Content-Type': 'application/json' },
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: 'tz=Europe%2FBerlin',
+      },
     })
   );
 };
 
-describe('occurrences resource clientAction', () => {
+const newPhotoPaths = ['user-1/habit-1/new.jpg'];
+
+describe('occurrences resource action', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(uploadImages).mockResolvedValue({
-      failedUploadErrors: [],
-      paths: ['user-1/habit-1/new.jpg'],
-    });
     vi.mocked(getHabit).mockResolvedValue({
       stocks: [{ cost: 10, currency: 'EUR', id: 'stock-1', totalItems: 5 }],
     } as Awaited<ReturnType<typeof getHabit>>);
@@ -118,7 +94,7 @@ describe('occurrences resource clientAction', () => {
 
   it('rejects signed-out users', async () => {
     await expect(
-      submitJson({ intent: 'delete', occurrenceId: 'occurrence-1' }, null)
+      submit({ intent: 'delete', occurrenceId: 'occurrence-1' }, null)
     ).resolves.toMatchObject({ init: { status: 401 } });
     expect(destroyOccurrence).not.toHaveBeenCalled();
   });
@@ -128,7 +104,9 @@ describe('occurrences resource clientAction', () => {
       id: 'occurrence-1',
     } as Awaited<ReturnType<typeof createOccurrence>>);
 
-    await expect(submitForm({ intent: 'create' })).resolves.toEqual({
+    await expect(
+      submit({ intent: 'create', photoPaths: newPhotoPaths, values })
+    ).resolves.toEqual({
       ok: true,
       toasts: [{ title: 'Occurrence added', variant: 'success' }],
     });
@@ -138,7 +116,8 @@ describe('occurrences resource clientAction', () => {
         cost: 4,
         currency: 'EUR',
         habitId: 'habit-1',
-        photoPaths: ['user-1/habit-1/new.jpg'],
+        photoPaths: newPhotoPaths,
+        timeZone: 'Europe/Berlin',
         userId: 'user-1',
       })
     );
@@ -167,30 +146,31 @@ describe('occurrences resource clientAction', () => {
     });
   });
 
-  it('saves the entry and returns a toast for photos that failed to upload', async () => {
+  it('saves an entry without photos', async () => {
     vi.mocked(createOccurrence).mockResolvedValue({
       id: 'occurrence-1',
     } as Awaited<ReturnType<typeof createOccurrence>>);
-    vi.mocked(uploadImages).mockResolvedValue({
-      failedUploadErrors: ['Too large'],
-      paths: [],
-    });
 
-    await expect(submitForm({ intent: 'create' })).resolves.toEqual({
-      ok: true,
-      toasts: [
-        {
-          description: 'Error details: Too large',
-          title: 'Failed to upload 1 photo',
-          variant: 'danger',
-        },
-        { title: 'Occurrence added', variant: 'success' },
-      ],
-    });
+    await submit({ intent: 'create', photoPaths: [], values });
+
     expect(createOccurrence).toHaveBeenCalledWith(
       testSupabaseClient,
       expect.objectContaining({ photoPaths: null })
     );
+  });
+
+  it("rejects photo paths outside the user's folder before writing", async () => {
+    await expect(
+      submit({
+        intent: 'create',
+        photoPaths: ['user-2/habit-1/theirs.jpg'],
+        values,
+      })
+    ).resolves.toMatchObject({
+      error: 'Some photos could not be attached to this entry',
+      ok: false,
+    });
+    expect(createOccurrence).not.toHaveBeenCalled();
   });
 
   it('updates an occurrence and syncs its stock usages and note', async () => {
@@ -204,10 +184,12 @@ describe('occurrences resource clientAction', () => {
     } as Awaited<ReturnType<typeof getOccurrence>>);
 
     await expect(
-      submitForm({
+      submit({
         intent: 'update',
         noteId: 'note-1',
         occurrenceId: 'occurrence-1',
+        photoPaths: newPhotoPaths,
+        values,
       })
     ).resolves.toMatchObject({ ok: true });
     expect(deleteOccurrenceStockUsages).toHaveBeenCalledWith(
@@ -228,9 +210,15 @@ describe('occurrences resource clientAction', () => {
     expect(patchOccurrence).toHaveBeenCalledWith(
       testSupabaseClient,
       'occurrence-1',
-      expect.objectContaining({
-        photoPaths: ['user-1/habit-1/old.jpg', 'user-1/habit-1/new.jpg'],
-      })
+      expect.any(Object)
+    );
+    vi.mocked(patchOccurrence).mock.calls.forEach(([, , changes]) => {
+      expect(changes).not.toHaveProperty('photoPaths');
+    });
+    expect(addOccurrencePhotoPaths).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'occurrence-1',
+      newPhotoPaths
     );
     expect(updateNote).toHaveBeenCalledWith(testSupabaseClient, 'note-1', {
       content: 'Felt great',
@@ -242,7 +230,13 @@ describe('occurrences resource clientAction', () => {
     vi.mocked(getOccurrence).mockResolvedValue(null);
 
     await expect(
-      submitForm({ intent: 'update', occurrenceId: 'missing' })
+      submit({
+        intent: 'update',
+        noteId: null,
+        occurrenceId: 'missing',
+        photoPaths: [],
+        values,
+      })
     ).resolves.toMatchObject({
       error: 'This entry no longer exists',
       ok: false,
@@ -256,7 +250,7 @@ describe('occurrences resource clientAction', () => {
       occurrence as Awaited<ReturnType<typeof getOccurrence>>
     );
 
-    await submitJson({ intent: 'delete', occurrenceId: 'occurrence-1' });
+    await submit({ intent: 'delete', occurrenceId: 'occurrence-1' });
 
     expect(destroyOccurrence).toHaveBeenCalledWith(
       testSupabaseClient,
@@ -267,7 +261,7 @@ describe('occurrences resource clientAction', () => {
   it('removes a metric value', async () => {
     vi.mocked(destroyMetricValue).mockResolvedValue(undefined);
 
-    await submitJson({
+    await submit({
       habitMetricId: 'metric-1',
       intent: 'remove-metric-value',
       occurrenceId: 'occurrence-1',
@@ -280,74 +274,62 @@ describe('occurrences resource clientAction', () => {
     );
   });
 
-  it('invalidates the calendar data even when a later step fails', async () => {
+  it('drops a deleted photo from the occurrence in one write', async () => {
+    await expect(
+      submit({
+        intent: 'remove-photo',
+        occurrenceId: 'occurrence-1',
+        photoPath: 'user-1/habit-1/drop.jpg',
+      })
+    ).resolves.toEqual({ ok: true });
+    expect(removeOccurrencePhotoPath).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'occurrence-1',
+      'user-1/habit-1/drop.jpg'
+    );
+    expect(patchOccurrence).not.toHaveBeenCalled();
+  });
+
+  it('returns the failure of a later step with its toast', async () => {
     vi.mocked(createOccurrence).mockResolvedValue({
       id: 'occurrence-1',
     } as Awaited<ReturnType<typeof createOccurrence>>);
     vi.mocked(upsertMetricValues).mockRejectedValue(new Error('Bad metric'));
 
-    await expect(submitForm({ intent: 'create' })).resolves.toMatchObject({
+    await expect(
+      submit({ intent: 'create', photoPaths: [], values })
+    ).resolves.toMatchObject({
       error: 'Bad metric',
       ok: false,
+      toasts: [expect.objectContaining({ variant: 'danger' })],
     });
+  });
+});
+
+describe('occurrences resource clientAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('clears the browser calendar cache after the server action', async () => {
+    const result = { ok: true as const, toasts: [] };
+
+    await expect(
+      clientAction({
+        ...makeRouteArgs<Route.ClientActionArgs>(RESOURCE_URL, user),
+        serverAction: vi.fn().mockResolvedValue(result),
+      })
+    ).resolves.toBe(result);
     expect(clearCalendarData).toHaveBeenCalledOnce();
   });
 
-  it('serializes concurrent photo removals of the same occurrence', async () => {
-    let storedPhotoPaths: string[] | null = ['a.jpg', 'b.jpg'];
-
-    vi.mocked(getOccurrence).mockImplementation(async () => {
-      await Promise.resolve();
-
-      return { photoPaths: storedPhotoPaths } as Awaited<
-        ReturnType<typeof getOccurrence>
-      >;
-    });
-    vi.mocked(patchOccurrence).mockImplementation(
-      async (_supabase, _id, { photoPaths }) => {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 0);
-        });
-        storedPhotoPaths = photoPaths ?? null;
-
-        return {} as Awaited<ReturnType<typeof patchOccurrence>>;
-      }
-    );
-
-    await Promise.all([
-      submitJson({
-        intent: 'remove-photo',
-        occurrenceId: 'occurrence-1',
-        photoPath: 'a.jpg',
-      }),
-      submitJson({
-        intent: 'remove-photo',
-        occurrenceId: 'occurrence-1',
-        photoPath: 'b.jpg',
-      }),
-    ]);
-
-    expect(storedPhotoPaths).toBeNull();
-  });
-
-  it('drops a deleted photo from the occurrence', async () => {
-    vi.mocked(getOccurrence).mockResolvedValue({
-      photoPaths: ['keep.jpg', 'drop.jpg'],
-    } as Awaited<ReturnType<typeof getOccurrence>>);
-
+  it('clears the cache even when the server action throws', async () => {
     await expect(
-      submitJson({
-        intent: 'remove-photo',
-        occurrenceId: 'occurrence-1',
-        photoPath: 'drop.jpg',
+      clientAction({
+        ...makeRouteArgs<Route.ClientActionArgs>(RESOURCE_URL, user),
+        serverAction: vi.fn().mockRejectedValue(new Error('Offline')),
       })
-    ).resolves.toMatchObject({ ok: true });
-    expect(patchOccurrence).toHaveBeenCalledWith(
-      testSupabaseClient,
-      'occurrence-1',
-      {
-        photoPaths: ['keep.jpg'],
-      }
-    );
+    ).rejects.toThrow('Offline');
+    expect(clearCalendarData).toHaveBeenCalledOnce();
   });
 });

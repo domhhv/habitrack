@@ -1,14 +1,11 @@
-import { getLocalTimeZone } from '@internationalized/date';
-import pluralize from 'pluralize';
 import { data } from 'react-router';
 
-import {
-  StorageBuckets,
-  type ActionToast,
-  type RawOccurrence,
-  type TypedSupabaseClient,
-  type OccurrenceSubmission,
-  type OccurrenceValuesSubmission,
+import type {
+  RawOccurrence,
+  TypedSupabaseClient,
+  OccurrenceSubmission,
+  OccurrenceSaveSubmission,
+  OccurrenceValuesSubmission,
 } from '@models';
 import {
   getHabit,
@@ -16,7 +13,6 @@ import {
   updateNote,
   patchStock,
   destroyNote,
-  uploadImages,
   getOccurrence,
   patchOccurrence,
   createOccurrence,
@@ -24,95 +20,38 @@ import {
   clearCalendarData,
   destroyMetricValue,
   upsertMetricValues,
+  addOccurrencePhotoPaths,
+  removeOccurrencePhotoPath,
   updateOccurrenceStockUsage,
   createOccurrenceStockUsages,
   deleteOccurrenceStockUsages,
 } from '@services';
 import {
-  rollbar,
   runAction,
   userContext,
   getErrorMessage,
   supabaseContext,
+  getRequestTimeZone,
   calculateOccurrenceCost,
 } from '@utils';
 
 import type { Route } from './+types/occurrences';
 
-const readValues = (formData: FormData) => {
-  return JSON.parse(
-    String(formData.get('values') ?? '{}')
-  ) as OccurrenceValuesSubmission;
-};
-
-const photoPathsWrites = new Map<RawOccurrence['id'], Promise<void>>();
-
 /**
- * Serializes read-modify-write updates of an occurrence's `photo_paths`, so concurrent photo
- * removals and entry updates in this tab never overwrite each other's changes.
+ * Photos upload from the browser into the user's own folder, so the action only accepts paths
+ * inside it.
  */
-const writePhotoPaths = (
-  supabase: TypedSupabaseClient,
-  occurrenceId: RawOccurrence['id'],
-  getNextPhotoPaths: (photoPaths: string[]) => string[],
-  changes: Parameters<typeof patchOccurrence>[2] = {}
-) => {
-  const write = (photoPathsWrites.get(occurrenceId) ?? Promise.resolve()).then(
-    async () => {
-      const occurrence = await getOccurrence(supabase, occurrenceId);
-      const photoPaths = getNextPhotoPaths(occurrence?.photoPaths ?? []);
+const assertOwnPhotoPaths = (photoPaths: unknown, userId: string) => {
+  if (
+    !Array.isArray(photoPaths) ||
+    !photoPaths.every((path) => {
+      return typeof path === 'string' && path.startsWith(`${userId}/`);
+    })
+  ) {
+    throw new Error('Some photos could not be attached to this entry');
+  }
 
-      await patchOccurrence(supabase, occurrenceId, {
-        ...changes,
-        photoPaths: photoPaths.length > 0 ? photoPaths : null,
-      });
-    }
-  );
-  const settled = write.catch(() => {
-    return undefined;
-  });
-
-  photoPathsWrites.set(occurrenceId, settled);
-  void settled.then(() => {
-    if (photoPathsWrites.get(occurrenceId) === settled) {
-      photoPathsWrites.delete(occurrenceId);
-    }
-  });
-
-  return write;
-};
-
-const uploadPhotos = (
-  supabase: TypedSupabaseClient,
-  formData: FormData,
-  userId: string,
-  habitId: string
-) => {
-  const photos = formData.getAll('photos').filter((photo): photo is File => {
-    return typeof photo !== 'string';
-  });
-
-  return photos.length > 0
-    ? uploadImages(
-        supabase,
-        StorageBuckets.OCCURRENCE_PHOTOS,
-        userId,
-        photos,
-        habitId
-      )
-    : Promise.resolve({ failedUploadErrors: [], paths: [] });
-};
-
-const getUploadFailureToasts = (failedUploadErrors: string[]) => {
-  return failedUploadErrors.length > 0
-    ? [
-        {
-          description: `Error details: ${failedUploadErrors.join(', ')}`,
-          title: `Failed to upload ${pluralize('photo', failedUploadErrors.length, true)}`,
-          variant: 'danger',
-        } satisfies ActionToast,
-      ]
-    : [];
+  return photoPaths as string[];
 };
 
 const getCost = async (
@@ -222,16 +161,14 @@ const syncStockUsages = async (
 
 const addOccurrence = async (
   supabase: TypedSupabaseClient,
-  formData: FormData,
-  userId: string
+  {
+    photoPaths,
+    values,
+  }: Extract<OccurrenceSaveSubmission, { intent: 'create' }>,
+  userId: string,
+  timeZone: string
 ) => {
-  const values = readValues(formData);
-  const { failedUploadErrors, paths: photoPaths } = await uploadPhotos(
-    supabase,
-    formData,
-    userId,
-    values.selectedHabitId
-  );
+  const ownPhotoPaths = assertOwnPhotoPaths(photoPaths, userId);
   const { cost, currency } = await getCost(supabase, values);
   const occurrence = await createOccurrence(supabase, {
     cost,
@@ -239,8 +176,8 @@ const addOccurrence = async (
     habitId: values.selectedHabitId,
     hasSpecificTime: values.hasSpecificTime,
     occurredAt: values.occurredAt,
-    photoPaths: photoPaths.length > 0 ? photoPaths : null,
-    timeZone: getLocalTimeZone(),
+    photoPaths: ownPhotoPaths.length > 0 ? ownPhotoPaths : null,
+    timeZone,
     userId,
   });
 
@@ -253,61 +190,50 @@ const addOccurrence = async (
     })
   );
   await markStocksDepleted(supabase, values);
-
-  return failedUploadErrors;
 };
 
 const updateOccurrence = async (
   supabase: TypedSupabaseClient,
-  formData: FormData,
+  {
+    noteId,
+    occurrenceId,
+    photoPaths,
+    values,
+  }: Extract<OccurrenceSaveSubmission, { intent: 'update' }>,
   userId: string
 ) => {
-  const occurrence = await getOccurrence(
-    supabase,
-    String(formData.get('occurrenceId') ?? '')
-  );
+  const ownPhotoPaths = assertOwnPhotoPaths(photoPaths, userId);
+  const occurrence = await getOccurrence(supabase, occurrenceId);
 
   if (!occurrence) {
     throw new Error('This entry no longer exists');
   }
 
-  const values = readValues(formData);
-  const noteId = formData.get('noteId');
-  const { failedUploadErrors, paths: uploadedPhotoPaths } = await uploadPhotos(
-    supabase,
-    formData,
-    userId,
-    values.selectedHabitId
-  );
   const { cost, currency } = await getCost(supabase, values);
 
   await syncStockUsages(supabase, occurrence, values, userId);
   await markStocksDepleted(supabase, values);
-  await writePhotoPaths(
-    supabase,
-    occurrence.id,
-    (photoPaths) => {
-      return photoPaths.concat(uploadedPhotoPaths);
-    },
-    {
-      cost,
-      currency,
-      habitId: values.selectedHabitId,
-      hasSpecificTime: values.hasSpecificTime,
-      occurredAt: values.occurredAt,
-      userId,
-    }
-  );
+  await patchOccurrence(supabase, occurrence.id, {
+    cost,
+    currency,
+    habitId: values.selectedHabitId,
+    hasSpecificTime: values.hasSpecificTime,
+    occurredAt: values.occurredAt,
+    userId,
+  });
+
+  if (ownPhotoPaths.length > 0) {
+    await addOccurrencePhotoPaths(supabase, occurrence.id, ownPhotoPaths);
+  }
+
   await saveOccurrenceNote(
     supabase,
     occurrence.id,
     values.note,
-    typeof noteId === 'string' && noteId ? noteId : null,
+    noteId,
     userId
   );
   await saveMetricValues(supabase, values, occurrence.id, userId);
-
-  return failedUploadErrors;
 };
 
 const deleteOccurrence = async (
@@ -321,22 +247,7 @@ const deleteOccurrence = async (
   }
 };
 
-const removePhoto = (
-  supabase: TypedSupabaseClient,
-  occurrenceId: string,
-  photoPath: string
-) => {
-  return writePhotoPaths(supabase, occurrenceId, (photoPaths) => {
-    return photoPaths.filter((path) => {
-      return path !== photoPath;
-    });
-  });
-};
-
-export const clientAction = async ({
-  context,
-  request,
-}: Route.ClientActionArgs) => {
+export const action = async ({ context, request }: Route.ActionArgs) => {
   const supabase = context.get(supabaseContext);
   const user = context.get(userContext);
 
@@ -347,32 +258,23 @@ export const clientAction = async ({
     );
   }
 
-  if (!request.headers.get('Content-Type')?.includes('application/json')) {
-    const formData = await request.formData();
-
-    return formData.get('intent') === 'update'
-      ? runAction(
-          updateOccurrence(supabase, formData, user.id).finally(
-            clearCalendarData
-          ),
-          'update_occurrence',
-          getUploadFailureToasts
-        )
-      : runAction(
-          addOccurrence(supabase, formData, user.id).finally(clearCalendarData),
-          'add_occurrence',
-          getUploadFailureToasts
-        );
-  }
-
   const submission = (await request.json()) as OccurrenceSubmission;
 
   switch (submission.intent) {
+    case 'create':
+      return runAction(
+        addOccurrence(
+          supabase,
+          submission,
+          user.id,
+          getRequestTimeZone(request)
+        ),
+        'add_occurrence'
+      );
+
     case 'delete':
       return runAction(
-        deleteOccurrence(supabase, submission.occurrenceId).finally(
-          clearCalendarData
-        ),
+        deleteOccurrence(supabase, submission.occurrenceId),
         'remove_occurrence'
       );
 
@@ -382,13 +284,13 @@ export const clientAction = async ({
           supabase,
           submission.occurrenceId,
           submission.habitMetricId
-        ).finally(clearCalendarData),
+        ),
         'remove_metric-value'
       );
 
     case 'remove-photo':
       try {
-        await removePhoto(
+        await removeOccurrencePhotoPath(
           supabase,
           submission.occurrenceId,
           submission.photoPath
@@ -396,13 +298,29 @@ export const clientAction = async ({
 
         return { ok: true as const };
       } catch (error) {
-        rollbar.error(
-          error instanceof Error ? error : new Error(getErrorMessage(error))
-        );
+        console.error(error);
 
         return { error: getErrorMessage(error), ok: false as const };
-      } finally {
-        clearCalendarData();
       }
+
+    case 'update':
+      return runAction(
+        updateOccurrence(supabase, submission, user.id),
+        'update_occurrence'
+      );
+  }
+};
+
+/**
+ * Occurrence changes show up in the calendar, so the browser's calendar cache is cleared after
+ * every submission, including failed ones that may have written part of the change.
+ */
+export const clientAction = async ({
+  serverAction,
+}: Route.ClientActionArgs) => {
+  try {
+    return await serverAction();
+  } finally {
+    clearCalendarData();
   }
 };

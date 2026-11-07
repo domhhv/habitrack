@@ -269,8 +269,8 @@ User selects habit in OccurrenceFormView
   → render MetricValuesSection with MetricValueInput per metric
   → user enters values → metricValues: Record<metricId, MetricValue | undefined>
   → on submit:
-    → OccurrenceCreateFormContainer submits toOccurrenceFormData(values) to /resources/occurrences
-    → the clientAction upserts the values via upsertMetricValues()
+    → useOccurrenceFetcher submits toOccurrenceValuesSubmission(values) as JSON to /resources/occurrences
+    → the server action upserts the values via upsertMetricValues()
 ```
 
 ### Updating occurrence metric values

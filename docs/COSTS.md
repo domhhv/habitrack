@@ -35,7 +35,7 @@ occurrence_cost = cost_per_item * usage.quantity
 
 **Example**: Stock costs EUR 10 for 20 pouches, user uses 2 pouches → EUR 1.00
 
-- Calculated by [`calculateOccurrenceCost()`](../src/utils/calculate-occurrence-cost.ts), which the `/resources/occurrences` `clientAction` calls with the habit's current stocks (via `getHabit()`) on create and update
+- Calculated by [`calculateOccurrenceCost()`](../src/utils/calculate-occurrence-cost.ts), which the `/resources/occurrences` server `action` calls with the habit's current stocks (via `getHabit()`) on create and update
 - Result stored in `occurrence.cost` and `occurrence.currency`
 - Only stored if all stock costs share the **same currency** (see [Multi-Currency](#multi-currency-handling))
 
@@ -147,7 +147,7 @@ This only aggregates stored costs (from quantifiable stocks). Depleted stock ave
 
 ```
 User submits occurrence form with stock selections
-  → /resources/occurrences clientAction (calculateOccurrenceCost):
+  → /resources/occurrences server action (calculateOccurrenceCost):
     1. For each quantifiable stock usage:
        cost_entry = (stock.cost / stock.totalItems) * quantity
     2. If all entries share same currency:

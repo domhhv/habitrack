@@ -1,9 +1,8 @@
 import React from 'react';
 
-import { useHabits, useActionFetcher } from '@hooks';
+import { useHabits, useOccurrenceFetcher } from '@hooks';
 import type { OccurrenceFormValues } from '@models';
 import { useOccurrenceDrawerState, useOccurrenceDrawerActions } from '@stores';
-import { toOccurrenceFormData } from '@utils';
 
 import OccurrenceFormView from './OccurrenceFormView';
 
@@ -11,14 +10,10 @@ const OccurrenceCreateFormContainer = () => {
   const { closeOccurrenceDrawer } = useOccurrenceDrawerActions();
   const { dayToLog } = useOccurrenceDrawerState();
   const habits = useHabits();
-  const fetcher = useActionFetcher(closeOccurrenceDrawer);
+  const { isSaving, save } = useOccurrenceFetcher(closeOccurrenceDrawer);
 
   const handleSubmit = (values: OccurrenceFormValues) => {
-    void fetcher.submit(toOccurrenceFormData(values, { intent: 'create' }), {
-      action: '/resources/occurrences',
-      encType: 'multipart/form-data',
-      method: 'post',
-    });
+    void save(values, { intent: 'create' });
   };
 
   if (!dayToLog) {
@@ -29,9 +24,9 @@ const OccurrenceCreateFormContainer = () => {
     <OccurrenceFormView
       habits={habits}
       dayToLog={dayToLog}
+      isSaving={isSaving}
       onSubmit={handleSubmit}
       onClose={closeOccurrenceDrawer}
-      isSaving={fetcher.state !== 'idle'}
     />
   );
 };

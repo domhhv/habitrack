@@ -4,12 +4,11 @@ import { useSubmit } from 'react-router';
 import {
   useHabits,
   useCalendarData,
-  useActionFetcher,
   useOccurrenceToEdit,
+  useOccurrenceFetcher,
 } from '@hooks';
 import type { OccurrenceFormValues, OccurrenceSubmission } from '@models';
 import { useOccurrenceDrawerActions } from '@stores';
-import { toOccurrenceFormData } from '@utils';
 
 import OccurrenceFormView from './OccurrenceFormView';
 
@@ -20,7 +19,7 @@ const OccurrenceUpdateFormContainer = () => {
     React.useState(liveOccurrence);
   const habits = useHabits();
   const { notesByOccurrenceId: notes } = useCalendarData();
-  const fetcher = useActionFetcher(closeOccurrenceDrawer);
+  const { isSaving, save } = useOccurrenceFetcher(closeOccurrenceDrawer);
   const submit = useSubmit();
 
   if (liveOccurrence && liveOccurrence.id !== occurrenceToEdit?.id) {
@@ -36,18 +35,11 @@ const OccurrenceUpdateFormContainer = () => {
       return;
     }
 
-    void fetcher.submit(
-      toOccurrenceFormData(values, {
-        intent: 'update',
-        noteId: occurrenceNote?.id ?? '',
-        occurrenceId: occurrenceToEdit.id,
-      }),
-      {
-        action: '/resources/occurrences',
-        encType: 'multipart/form-data',
-        method: 'post',
-      }
-    );
+    void save(values, {
+      intent: 'update',
+      noteId: occurrenceNote?.id ?? null,
+      occurrenceId: occurrenceToEdit.id,
+    });
   };
 
   const handlePhotoDelete = (photoPath: string) => {
@@ -78,11 +70,11 @@ const OccurrenceUpdateFormContainer = () => {
   return (
     <OccurrenceFormView
       habits={habits}
+      isSaving={isSaving}
       onSubmit={handleSubmit}
       onClose={closeOccurrenceDrawer}
       occurrenceNote={occurrenceNote}
       onPhotoDelete={handlePhotoDelete}
-      isSaving={fetcher.state !== 'idle'}
       occurrenceToEdit={occurrenceToEdit}
       photoPaths={liveOccurrence?.photoPaths ?? null}
     />
