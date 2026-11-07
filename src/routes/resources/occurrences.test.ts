@@ -101,7 +101,10 @@ const submitJson = (submission: OccurrenceSubmission, sessionUser = user) => {
 describe('occurrences resource clientAction', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(uploadImages).mockResolvedValue(['user-1/habit-1/new.jpg']);
+    vi.mocked(uploadImages).mockResolvedValue({
+      failedUploadErrors: [],
+      paths: ['user-1/habit-1/new.jpg'],
+    });
     vi.mocked(getHabit).mockResolvedValue({
       stocks: [{ cost: 10, currency: 'EUR', id: 'stock-1', totalItems: 5 }],
     } as Awaited<ReturnType<typeof getHabit>>);
@@ -127,6 +130,7 @@ describe('occurrences resource clientAction', () => {
 
     await expect(submitForm({ intent: 'create' })).resolves.toEqual({
       ok: true,
+      toasts: [{ title: 'Occurrence added', variant: 'success' }],
     });
     expect(createOccurrence).toHaveBeenCalledWith(
       testSupabaseClient,
@@ -163,6 +167,32 @@ describe('occurrences resource clientAction', () => {
     });
   });
 
+  it('saves the entry and returns a toast for photos that failed to upload', async () => {
+    vi.mocked(createOccurrence).mockResolvedValue({
+      id: 'occurrence-1',
+    } as Awaited<ReturnType<typeof createOccurrence>>);
+    vi.mocked(uploadImages).mockResolvedValue({
+      failedUploadErrors: ['Too large'],
+      paths: [],
+    });
+
+    await expect(submitForm({ intent: 'create' })).resolves.toEqual({
+      ok: true,
+      toasts: [
+        {
+          description: 'Error details: Too large',
+          title: 'Failed to upload 1 photo',
+          variant: 'danger',
+        },
+        { title: 'Occurrence added', variant: 'success' },
+      ],
+    });
+    expect(createOccurrence).toHaveBeenCalledWith(
+      testSupabaseClient,
+      expect.objectContaining({ photoPaths: null })
+    );
+  });
+
   it('updates an occurrence and syncs its stock usages and note', async () => {
     vi.mocked(getOccurrence).mockResolvedValue({
       id: 'occurrence-1',
@@ -179,7 +209,7 @@ describe('occurrences resource clientAction', () => {
         noteId: 'note-1',
         occurrenceId: 'occurrence-1',
       })
-    ).resolves.toEqual({ ok: true });
+    ).resolves.toMatchObject({ ok: true });
     expect(deleteOccurrenceStockUsages).toHaveBeenCalledWith(
       testSupabaseClient,
       ['usage-2']
@@ -213,7 +243,10 @@ describe('occurrences resource clientAction', () => {
 
     await expect(
       submitForm({ intent: 'update', occurrenceId: 'missing' })
-    ).resolves.toEqual({ error: 'This entry no longer exists', ok: false });
+    ).resolves.toMatchObject({
+      error: 'This entry no longer exists',
+      ok: false,
+    });
     expect(patchOccurrence).not.toHaveBeenCalled();
   });
 
@@ -253,7 +286,7 @@ describe('occurrences resource clientAction', () => {
     } as Awaited<ReturnType<typeof createOccurrence>>);
     vi.mocked(upsertMetricValues).mockRejectedValue(new Error('Bad metric'));
 
-    await expect(submitForm({ intent: 'create' })).resolves.toEqual({
+    await expect(submitForm({ intent: 'create' })).resolves.toMatchObject({
       error: 'Bad metric',
       ok: false,
     });
@@ -308,7 +341,7 @@ describe('occurrences resource clientAction', () => {
         occurrenceId: 'occurrence-1',
         photoPath: 'drop.jpg',
       })
-    ).resolves.toEqual({ ok: true });
+    ).resolves.toMatchObject({ ok: true });
     expect(patchOccurrence).toHaveBeenCalledWith(
       testSupabaseClient,
       'occurrence-1',

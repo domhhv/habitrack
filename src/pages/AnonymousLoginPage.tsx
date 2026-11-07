@@ -1,14 +1,19 @@
 import { Link, Toast } from '@heroui/react';
 import React from 'react';
-import { data, Form, replace, redirect } from 'react-router';
+import { Form, replace, redirect } from 'react-router';
 
 import { CustomButton } from '@components';
-import { useAuthHref, useIsSubmitting, useFirstDayOfWeek } from '@hooks';
+import {
+  useAuthHref,
+  useIsSubmitting,
+  useActionToasts,
+  useFirstDayOfWeek,
+} from '@hooks';
 import { signInAnonymously } from '@services';
 import {
+  failAction,
   userContext,
   parseDayOfWeek,
-  getErrorMessage,
   getReturnToPath,
   supabaseContext,
 } from '@utils';
@@ -35,14 +40,10 @@ export const clientAction = async ({
       parseDayOfWeek(formData.get('firstDayOfWeek'))
     );
   } catch (error) {
-    Toast.toast.danger(
+    return failAction(
       'Something went wrong while logging in anonymously. Please try again.',
-      {
-        description: `Error details: ${getErrorMessage(error)}`,
-      }
+      error
     );
-
-    return data({ error: getErrorMessage(error) }, { status: 400 });
   }
 
   Toast.toast.success('Welcome to Habitrack! You are browsing anonymously');
@@ -50,9 +51,10 @@ export const clientAction = async ({
   return redirect(getReturnToPath(request.url));
 };
 
-const AnonymousLoginPage = () => {
+const AnonymousLoginPage = ({ actionData }: Route.ComponentProps) => {
   const firstDayOfWeek = useFirstDayOfWeek();
   const isAuthenticating = useIsSubmitting();
+  useActionToasts(actionData);
   const registerHref = useAuthHref('/register');
   const loginHref = useAuthHref('/login');
 

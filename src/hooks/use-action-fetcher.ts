@@ -1,13 +1,19 @@
 import React from 'react';
 import { useFetcher } from 'react-router';
 
-type ActionResult = { error: string; ok: false } | { ok: true };
+import type { ActionResult } from '@models';
 
-const useActionFetcher = (onSuccess?: () => void) => {
-  const fetcher = useFetcher<ActionResult>();
+import useActionToasts from './use-action-toasts';
+
+const useActionFetcher = <TData extends ActionResult = ActionResult>(
+  onSuccess?: () => void
+) => {
+  const fetcher = useFetcher<TData>();
   const handleSuccess = React.useEffectEvent(() => {
     onSuccess?.();
   });
+
+  useActionToasts(fetcher.data);
 
   React.useEffect(() => {
     if (fetcher.state === 'idle' && fetcher.data?.ok) {

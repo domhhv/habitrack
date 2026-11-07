@@ -95,7 +95,11 @@ describe('SettingsPage clientAction', () => {
   it('patches only the submitted profile fields', async () => {
     await expect(
       submit({ firstDayOfWeek: 'sun', intent: 'update-profile', name: 'Dom' })
-    ).resolves.toEqual({ intent: 'update-profile', ok: true });
+    ).resolves.toEqual({
+      intent: 'update-profile',
+      ok: true,
+      toasts: [{ title: 'Account updated', variant: 'success' }],
+    });
     expect(patchProfile).toHaveBeenCalledWith(testSupabaseClient, 'user-1', {
       firstDayOfWeek: 'sun',
       name: 'Dom',
@@ -155,6 +159,13 @@ describe('SettingsPage clientAction', () => {
         error: 'This account is no longer connected',
         intent: 'unlink-identity',
         ok: false,
+        toasts: [
+          {
+            description: 'This account is no longer connected',
+            title: 'Failed to unlink Google account',
+            variant: 'danger',
+          },
+        ],
       },
     });
     expect(unlinkIdentity).not.toHaveBeenCalled();

@@ -1,9 +1,9 @@
 import { GoogleLogoIcon } from '@phosphor-icons/react';
 import type { UserIdentity } from '@supabase/supabase-js';
 import React from 'react';
-import { useFetcher } from 'react-router';
 
 import { CustomButton } from '@components';
+import { useActionFetcher } from '@hooks';
 
 type ConnectedAccountsProps = {
   identities: UserIdentity[];
@@ -14,7 +14,7 @@ const ConnectedAccounts = ({
   identities,
   loadError,
 }: ConnectedAccountsProps) => {
-  const fetcher = useFetcher();
+  const fetcher = useActionFetcher();
   const isProcessing = fetcher.state !== 'idle';
 
   const googleIdentity = identities.find((identity) => {

@@ -3,10 +3,9 @@ import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
-import { useFetcher } from 'react-router';
 
 import { CustomButton, InfinityLoader } from '@components';
-import { useHabits, useCalendarData } from '@hooks';
+import { useHabits, useCalendarData, useActionFetcher } from '@hooks';
 import type {
   Habit,
   Occurrence,
@@ -137,7 +136,7 @@ const OccurrenceListItem = ({
       })
     );
   }, [habits, occurrence.habitId]);
-  const metricValueFetcher = useFetcher();
+  const metricValueFetcher = useActionFetcher();
   const { askConfirmation } = useConfirmationActions();
   const [removalTargetMetricId, setRemovalTargetMetricId] = React.useState<
     string | null

@@ -116,7 +116,7 @@ describe('HabitsPage clientAction', () => {
           },
         } as unknown as Request,
       })
-    ).resolves.toEqual({ ok: true });
+    ).resolves.toMatchObject({ ok: true });
     expect(uploadHabitIcon).toHaveBeenCalledWith(
       testSupabaseClient,
       'user-1',
@@ -168,6 +168,6 @@ describe('HabitsPage clientAction', () => {
           method: 'POST',
         })
       )
-    ).resolves.toEqual({ error: 'Duplicate', ok: false });
+    ).resolves.toMatchObject({ error: 'Duplicate', ok: false });
   });
 });

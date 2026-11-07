@@ -12,10 +12,14 @@ import {
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
-import { useFetcher } from 'react-router';
 
 import { CustomButton } from '@components';
-import { useScreenWidth, useCalendarData, useOccurrenceToEdit } from '@hooks';
+import {
+  useScreenWidth,
+  useCalendarData,
+  useActionFetcher,
+  useOccurrenceToEdit,
+} from '@hooks';
 import type { Occurrence, OccurrenceSubmission } from '@models';
 import {
   useConfirmationActions,
@@ -31,7 +35,7 @@ import OccurrenceUpdateFormContainer from './OccurrenceUpdateFormContainer';
 const OccurrenceDrawer = () => {
   const timeZone = getLocalTimeZone();
   const { occurrencesByDate: occurrences } = useCalendarData();
-  const deleteFetcher = useFetcher();
+  const deleteFetcher = useActionFetcher();
   const [removalTargetId, setRemovalTargetId] = React.useState('');
   const occurrenceIdBeingRemoved =
     deleteFetcher.state === 'idle' ? '' : removalTargetId;

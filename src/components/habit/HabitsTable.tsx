@@ -4,10 +4,10 @@ import { TrashSimpleIcon, ArrowsClockwiseIcon } from '@phosphor-icons/react';
 import pluralize from 'pluralize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
-import { Link, useFetcher } from 'react-router';
+import { Link } from 'react-router';
 
 import { TraitChip, CustomButton, AddHabitDialogButton } from '@components';
-import { useHabits } from '@hooks';
+import { useHabits, useActionFetcher } from '@hooks';
 import type { Habit, HabitStats, HabitDetailsSubmission } from '@models';
 import { useConfirmationActions } from '@stores';
 
@@ -33,7 +33,7 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
   });
 
   const habits = useHabits();
-  const deleteFetcher = useFetcher();
+  const deleteFetcher = useActionFetcher();
   const isDeleting = deleteFetcher.state !== 'idle';
   const { askConfirmation } = useConfirmationActions();
 

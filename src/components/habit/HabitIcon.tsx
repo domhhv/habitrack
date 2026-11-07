@@ -1,9 +1,8 @@
 import { Button, Tooltip } from '@heroui/react';
 import React from 'react';
-import { useFetcher } from 'react-router';
 
 import { InfinityLoader, VisuallyHiddenInput } from '@components';
-import { useUser } from '@hooks';
+import { useUser, useActionFetcher } from '@hooks';
 import { type Habit, StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 
@@ -13,7 +12,7 @@ type HabitIconCellProps = {
 
 const HabitIcon = ({ habit }: HabitIconCellProps) => {
   const user = useUser();
-  const fetcher = useFetcher();
+  const fetcher = useActionFetcher();
   const isUploading = fetcher.state !== 'idle';
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
