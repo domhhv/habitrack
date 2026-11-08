@@ -103,7 +103,7 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
   - A route whose writes change browser-cached calendar data also exports a `clientAction` that awaits `serverAction()` and clears the cache in `finally` (`/habits/:habitId`, `/resources/notes`, `/resources/occurrences`).
   - Files larger than a server function's request body limit (about 4.5 MB) never go to an action. Occurrence photos are compressed and uploaded from the browser by `useOccurrenceFetcher`, and the action receives their storage paths. Google sign-in and identity linking call the browser client directly, because they leave the page.
   - UI that belongs to one page submits to that page's route. Global UI (drawers) submits to a `/resources/*` route.
-  - Send JSON (`encType: 'application/json'`), or multipart `FormData` when files are involved.
+  - A form that maps to flat fields posts its named inputs through `<ActionForm fetcher action>` (`@components`), which shows the action's `fieldErrors` next to the fields (`<FieldError />` inside each field). Otherwise send JSON (`encType: 'application/json'`), or multipart `FormData` when files are involved.
 - **Submitting**:
   - Components submit with `useActionFetcher(onSuccess)` (a `useFetcher` that shows the result's toasts and calls `onSuccess` once the action returns `{ ok: true }`), or `<Form>` with `useActionToasts(actionData)`. Pending UI comes from `fetcher.state`/`useNavigation()`/`useIsSubmitting()`, not `useState`.
   - Block a new submission on a shared fetcher while one is pending.
@@ -111,6 +111,7 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
   - Actions never show toasts. They return them in the result (`ActionResult` in `src/models/action-result.model.ts`), and the submitting component shows them. A toast for the page after a redirect goes through `redirectWithToasts(url, toasts)`, a flash cookie the app layout's loader reads and clears.
   - Wrap action work in `runAction(promise, actionType)`. It returns `{ ok: true, toasts }` or `{ ok: false, error, toasts }` with the standard messages, without a 4xx status, so partial writes still revalidate.
   - Return a 400 only for failures that wrote nothing, e.g. `failAction(title, error)`.
+  - Validate user input in the action before writing: collect `FieldErrors` and call `assertValidFields(fieldErrors)`. It throws a `FieldValidationError`, which `runAction` returns as `failValidation(fieldErrors)`, a 400 with `fieldErrors` and no toast. Read text fields with `getFormText(formData, name)` (trimmed).
 - **Revalidation**:
   - React Router revalidates active loaders after each action.
   - Loaders use React Router's default revalidation, so the `app` layout reloads after actions, `revalidate()`, same-URL navigations and search-param changes, but not on plain path changes. A navigation that interrupts a revalidation still reloads it.

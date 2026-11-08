@@ -138,24 +138,41 @@ describe('HabitsPage action', () => {
     ]);
   });
 
-  it('creates a trait from a JSON submission', async () => {
-    await action(
+  const submitTrait = (fields: Record<string, string>) => {
+    return action(
       makeRouteArgs<Route.ActionArgs>(HABITS_URL, user, {
-        headers: { 'Content-Type': 'application/json' },
+        body: new URLSearchParams({ intent: 'create-trait', ...fields }),
         method: 'POST',
-        body: JSON.stringify({
-          intent: 'create-trait',
-          trait: { color: '#000000', description: '', name: 'Good' },
-        }),
       })
     );
+  };
 
+  it('creates a trait from the form fields', async () => {
+    await expect(
+      submitTrait({ color: '000000', description: ' Calm ', name: ' Good ' })
+    ).resolves.toMatchObject({ ok: true });
     expect(createTrait).toHaveBeenCalledWith(testSupabaseClient, {
       color: '#000000',
-      description: '',
+      description: 'Calm',
       name: 'Good',
       userId: 'user-1',
     });
+  });
+
+  it('returns field errors for a blank label and an invalid color', async () => {
+    await expect(
+      submitTrait({ color: 'red', description: '', name: '  ' })
+    ).resolves.toMatchObject({
+      init: { status: 400 },
+      data: {
+        ok: false,
+        fieldErrors: {
+          color: 'Enter a color as 6 hex digits, e.g. 94a3b8',
+          name: 'Give the trait a label',
+        },
+      },
+    });
+    expect(createTrait).not.toHaveBeenCalled();
   });
 
   it('reports the failure without a 4xx so loaders still revalidate', async () => {

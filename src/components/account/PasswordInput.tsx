@@ -1,4 +1,4 @@
-import { Link, Label, TextField, InputGroup } from '@heroui/react';
+import { Link, Label, TextField, FieldError, InputGroup } from '@heroui/react';
 import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import React, { type ChangeEventHandler } from 'react';
 import { href } from 'react-router';
@@ -77,6 +77,7 @@ const PasswordInput = ({
           </CustomButton>
         </InputGroup.Suffix>
       </InputGroup>
+      <FieldError />
     </TextField>
   );
 };

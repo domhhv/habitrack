@@ -1,15 +1,22 @@
-import { cn, Form, Label, Drawer, TextArea, TextField } from '@heroui/react';
+import {
+  cn,
+  Label,
+  Drawer,
+  TextArea,
+  TextField,
+  FieldError,
+} from '@heroui/react';
 import {
   endOfWeek,
   endOfMonth,
   getLocalTimeZone,
 } from '@internationalized/date';
 import { CaretDownIcon } from '@phosphor-icons/react';
-import React, { type SyntheticEvent } from 'react';
+import React from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
 import { href, useFetcher } from 'react-router';
 
-import { CustomKbd, CustomButton } from '@components';
+import { CustomKbd, ActionForm, CustomButton } from '@components';
 import {
   useUser,
   useTextField,
@@ -18,7 +25,7 @@ import {
   useActionFetcher,
   useFirstDayOfWeek,
 } from '@hooks';
-import type { Note, NoteSubmission } from '@models';
+import type { Note } from '@models';
 import {
   useNoteDrawerState,
   useNoteDrawerActions,
@@ -117,16 +124,13 @@ const NoteDrawer = () => {
   const isSaving = saveFetcher.state !== 'idle';
   const isRemoving = removeFetcher.state !== 'idle';
 
-  const submitNoteChange = (
-    fetcher: typeof saveFetcher,
-    submission: NoteSubmission
-  ) => {
-    void fetcher.submit(submission, {
-      action: href('/resources/notes'),
-      encType: 'application/json',
-      method: 'post',
-    });
-  };
+  const canSaveNote =
+    !!user &&
+    !!content &&
+    !isSaving &&
+    !isRemoving &&
+    !isLoadingNote &&
+    existingNote?.content !== content;
 
   const closeDrawerWithConfirmation = async () => {
     if (await confirmUnsavedChanges()) {
@@ -134,36 +138,12 @@ const NoteDrawer = () => {
     }
   };
 
-  const submitNote = (e?: SyntheticEvent<HTMLFormElement>) => {
-    e?.preventDefault();
-
-    if (
-      !user ||
-      !periodDate ||
-      !content ||
-      isSaving ||
-      isLoadingNote ||
-      existingNote?.content === content
-    ) {
-      return;
-    }
-
-    const note = { content, periodDate: alignPeriodDate(), periodKind };
-
-    submitNoteChange(
-      saveFetcher,
-      existingNote
-        ? { intent: 'update', note, noteId: existingNote.id }
-        : { intent: 'create', note }
-    );
-  };
-
   const removeNote = () => {
     if (existingNote && !isRemoving) {
-      submitNoteChange(removeFetcher, {
-        intent: 'delete',
-        noteId: existingNote.id,
-      });
+      void removeFetcher.submit(
+        { intent: 'delete', noteId: existingNote.id },
+        { action: href('/resources/notes'), method: 'post' }
+      );
     }
   };
 
@@ -259,7 +239,32 @@ const NoteDrawer = () => {
                 />
               </CustomButton>
             </Drawer.Header>
-            <Form onSubmit={submitNote} className="max-h-[calc(100%-64px)]">
+            <ActionForm
+              fetcher={saveFetcher}
+              action={href('/resources/notes')}
+              className="max-h-[calc(100%-64px)]"
+              onSubmit={(event) => {
+                if (!canSaveNote) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              <input
+                type="hidden"
+                name="intent"
+                value={existingNote ? 'update' : 'create'}
+              />
+              <input
+                type="hidden"
+                name="noteId"
+                value={existingNote?.id ?? ''}
+              />
+              <input type="hidden" name="periodKind" value={periodKind} />
+              <input
+                type="hidden"
+                name="periodDate"
+                value={alignPeriodDate()}
+              />
               <Drawer.Body className="w-full space-y-4 py-0.5">
                 <NotePeriodPicker
                   endRange={getEndRangeDate()}
@@ -269,6 +274,7 @@ const NoteDrawer = () => {
                 <TextField
                   fullWidth
                   isRequired
+                  name="content"
                   value={content}
                   variant="secondary"
                   className="max-h-full"
@@ -277,7 +283,6 @@ const NoteDrawer = () => {
                   <Label className="after:hidden">Your note</Label>
                   <TextArea
                     autoFocus
-                    name="content"
                     disabled={isSaving || isRemoving}
                     placeholder={`Start typing your note about this ${periodKind}...`}
                     className={cn(
@@ -289,7 +294,7 @@ const NoteDrawer = () => {
                         (event.metaKey || event.ctrlKey) &&
                         event.key === 'Enter'
                       ) {
-                        void submitNote();
+                        event.currentTarget.form?.requestSubmit();
                       }
 
                       if (event.key === 'Escape') {
@@ -299,6 +304,7 @@ const NoteDrawer = () => {
                       return null;
                     }}
                   />
+                  <FieldError />
                   {getTextareaDescription() && (
                     <p className="text-foreground-500 text-sm">
                       {getTextareaDescription()}
@@ -321,15 +327,8 @@ const NoteDrawer = () => {
                   type="submit"
                   variant="primary"
                   isPending={isSaving}
+                  isDisabled={!canSaveNote}
                   fullWidth={isMobile && !existingNote}
-                  isDisabled={
-                    isSaving ||
-                    !user ||
-                    isRemoving ||
-                    isLoadingNote ||
-                    !content ||
-                    existingNote?.content === content
-                  }
                 >
                   <CustomKbd size="md" variant="default">
                     {mod} {enter}
@@ -337,7 +336,7 @@ const NoteDrawer = () => {
                   {existingNote ? 'Save' : 'Add'}
                 </CustomButton>
               </Drawer.Footer>
-            </Form>
+            </ActionForm>
           </Drawer.Dialog>
         </Drawer.Content>
       </Drawer.Backdrop>

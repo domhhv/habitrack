@@ -1,11 +1,10 @@
-import { Input, Label, Modal, TextField } from '@heroui/react';
+import { Input, Label, Modal, TextField, FieldError } from '@heroui/react';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 import { href } from 'react-router';
 
-import { CustomButton, OccurrenceChip } from '@components';
+import { ActionForm, CustomButton, OccurrenceChip } from '@components';
 import { useUser, useTextField, useActionFetcher } from '@hooks';
-import type { HabitsSubmission } from '@models';
 import { makeTestOccurrence } from '@tests';
 
 type AddCustomTraitModalProps = {
@@ -13,8 +12,10 @@ type AddCustomTraitModalProps = {
   onClose: () => void;
 };
 
+const DEFAULT_TRAIT_COLOR = '#94a3b8';
+
 const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
-  const [color, setTraitColor] = React.useState('#94a3b8');
+  const [color, setTraitColor] = React.useState(DEFAULT_TRAIT_COLOR);
 
   const user = useUser();
   const [label, handleLabelChange, clearLabel] = useTextField();
@@ -24,7 +25,7 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
   const clearFields = React.useCallback(() => {
     clearLabel();
     clearDescription();
-    setTraitColor('#94a3b8');
+    setTraitColor(DEFAULT_TRAIT_COLOR);
   }, [clearLabel, clearDescription]);
 
   const fetcher = useActionFetcher(() => {
@@ -38,20 +39,6 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
       clearFields();
     }
   }, [isOpen, clearFields]);
-
-  const handleAdd = () => {
-    void fetcher.submit(
-      {
-        intent: 'create-trait',
-        trait: { color, description, name: label },
-      } satisfies HabitsSubmission,
-      { action: href('/habits'), encType: 'application/json', method: 'post' }
-    );
-  };
-
-  const handleTraitColorChange = (color: string) => {
-    setTraitColor(color);
-  };
 
   return (
     <Modal>
@@ -69,74 +56,86 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
             <Modal.Header>
               <Modal.Heading>Add New Trait</Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="space-y-4">
-              <TextField fullWidth name="name" variant="secondary">
-                <Label>Label</Label>
-                <Input
+            <ActionForm
+              fetcher={fetcher}
+              className="contents"
+              action={href('/habits')}
+            >
+              <input type="hidden" name="intent" value="create-trait" />
+              <Modal.Body className="space-y-4">
+                <TextField
+                  fullWidth
+                  name="name"
                   value={label}
                   variant="secondary"
-                  disabled={isAdding}
+                  isDisabled={isAdding}
                   onChange={handleLabelChange}
-                  placeholder="e. g. Moderately Bad"
-                />
-              </TextField>
-              <TextField fullWidth name="description" variant="secondary">
-                <Label>Description</Label>
-                <Input
+                >
+                  <Label>Label</Label>
+                  <Input
+                    variant="secondary"
+                    placeholder="e. g. Moderately Bad"
+                  />
+                  <FieldError />
+                </TextField>
+                <TextField
+                  fullWidth
+                  name="description"
                   variant="secondary"
                   value={description}
-                  disabled={isAdding}
-                  placeholder="Optional"
-                  onChange={(e) => {
-                    handleDescriptionChange(e.target.value);
-                  }}
-                />
-              </TextField>
-              <div className="flex gap-4">
-                <HexColorPicker
-                  color={color}
-                  onChange={handleTraitColorChange}
-                />
-                <div className="flex w-1/2 flex-col gap-2">
-                  <div className="relative flex items-center">
-                    <span className="pointer-events-none absolute left-2 text-sm">
-                      #
-                    </span>
-                    <Input
-                      className="pl-5"
+                  isDisabled={isAdding}
+                  onChange={handleDescriptionChange}
+                >
+                  <Label>Description</Label>
+                  <Input variant="secondary" placeholder="Optional" />
+                </TextField>
+                <div className="flex gap-4">
+                  <HexColorPicker color={color} onChange={setTraitColor} />
+                  <div className="flex w-1/2 flex-col gap-2">
+                    <TextField
+                      name="color"
                       aria-label="Color"
                       variant="secondary"
+                      isDisabled={isAdding}
                       value={color.slice(1)}
-                      onChange={(event) => {
-                        handleTraitColorChange(event.target.value);
+                      onChange={(value) => {
+                        setTraitColor(`#${value.replace(/^#/, '')}`);
                       }}
-                    />
-                  </div>
-                  <p className="text-sm">
-                    This is how habits of this trait will appear on your
-                    calendar
-                  </p>
-                  <div className="flex">
-                    <OccurrenceChip
-                      isClickable={false}
-                      colorOverride={color}
-                      occurrences={[makeTestOccurrence()]}
-                    />
+                    >
+                      <div className="relative flex items-center">
+                        <span className="pointer-events-none absolute left-2 text-sm">
+                          #
+                        </span>
+                        <Input className="pl-5" variant="secondary" />
+                      </div>
+                      <FieldError />
+                    </TextField>
+                    <p className="text-sm">
+                      This is how habits of this trait will appear on your
+                      calendar
+                    </p>
+                    <div className="flex">
+                      <OccurrenceChip
+                        isClickable={false}
+                        colorOverride={color}
+                        occurrences={[makeTestOccurrence()]}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <CustomButton
-                fullWidth
-                type="submit"
-                variant="primary"
-                onPress={handleAdd}
-                isDisabled={isAdding || !user?.id}
-              >
-                Add Trait
-              </CustomButton>
-            </Modal.Footer>
+              </Modal.Body>
+              <Modal.Footer>
+                <CustomButton
+                  fullWidth
+                  type="submit"
+                  variant="primary"
+                  isPending={isAdding}
+                  isDisabled={isAdding || !user?.id}
+                >
+                  Add Trait
+                </CustomButton>
+              </Modal.Footer>
+            </ActionForm>
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>

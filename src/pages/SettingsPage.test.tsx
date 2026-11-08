@@ -120,6 +120,63 @@ describe('SettingsPage action', () => {
     );
   });
 
+  it('returns field errors and writes nothing for invalid profile values', async () => {
+    await expect(
+      submit({
+        defaultCurrency: 'XYZ',
+        firstDayOfWeek: 'wed',
+        intent: 'update-profile',
+        name: 'Dom',
+      })
+    ).resolves.toMatchObject({
+      init: { status: 400 },
+      data: {
+        ok: false,
+        fieldErrors: {
+          defaultCurrency: 'Choose one of the listed currencies',
+          firstDayOfWeek: 'Choose Sunday or Monday',
+        },
+      },
+    });
+    expect(patchProfile).not.toHaveBeenCalled();
+  });
+
+  it('returns field errors for an invalid email and a short password', async () => {
+    await expect(
+      submit({ email: 'not-an-email', intent: 'update-user', password: '123' })
+    ).resolves.toMatchObject({
+      init: { status: 400 },
+      data: {
+        fieldErrors: {
+          email: 'Enter a valid email address',
+          password: 'Use at least 6 characters',
+        },
+      },
+    });
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it('leaves out an unchanged email and skips the update when nothing changed', async () => {
+    await submit({
+      email: 'new@email.com',
+      intent: 'update-user',
+      password: 'secret',
+    });
+
+    expect(updateUser).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'http://localhost',
+      { password: 'secret' }
+    );
+
+    vi.mocked(updateUser).mockClear();
+
+    await expect(
+      submit({ email: 'new@email.com', intent: 'update-user', password: '' })
+    ).resolves.toEqual({ intent: 'update-user', ok: true, toasts: [] });
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
   it('syncs the confirmed email from the session to the profile', async () => {
     await submit({ intent: 'sync-email' });
 
