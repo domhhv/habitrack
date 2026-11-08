@@ -1,5 +1,6 @@
 import { Button, Tooltip } from '@heroui/react';
 import React from 'react';
+import { href } from 'react-router';
 
 import { InfinityLoader, VisuallyHiddenInput } from '@components';
 import { useUser, useActionFetcher } from '@hooks';
@@ -28,7 +29,7 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
     formData.set('icon', files[0]);
 
     void fetcher.submit(formData, {
-      action: `/habits/${habit.id}`,
+      action: href('/habits/:habitId', { habitId: habit.id }),
       encType: 'multipart/form-data',
       method: 'post',
     });

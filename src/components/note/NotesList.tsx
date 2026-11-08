@@ -1,6 +1,6 @@
 import { ScrollShadow } from '@heroui/react';
 import React from 'react';
-import { useNavigation, useSearchParams } from 'react-router';
+import { href, useNavigation, useSearchParams } from 'react-router';
 
 import { NoteListItem, InfinityLoader } from '@components';
 import type { NoteWithHabit } from '@models';
@@ -15,7 +15,8 @@ const NotesList = ({ hasMore, notes, pageCount }: NotesListProps) => {
   const navigation = useNavigation();
   const [, setSearchParams] = useSearchParams();
   const isLoading =
-    navigation.state === 'loading' && navigation.location.pathname === '/notes';
+    navigation.state === 'loading' &&
+    navigation.location.pathname === href('/notes');
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;

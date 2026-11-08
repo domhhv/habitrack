@@ -1,6 +1,6 @@
 import { Link } from '@heroui/react';
 import React from 'react';
-import { replace } from 'react-router';
+import { href, replace } from 'react-router';
 
 import { AuthForm } from '@components';
 import { useIsSubmitting, useActionToasts } from '@hooks';
@@ -9,6 +9,7 @@ import {
   failAction,
   userContext,
   supabaseContext,
+  getCalendarHref,
   redirectWithToasts,
 } from '@utils';
 
@@ -16,7 +17,7 @@ import type { Route } from './+types/ResetPasswordPage';
 
 export const clientLoader = ({ context }: Route.ClientLoaderArgs) => {
   if (context.get(userContext)) {
-    throw replace('/calendar');
+    throw replace(getCalendarHref('month'));
   }
 
   return null;
@@ -38,7 +39,7 @@ export const action = async ({ context, request }: Route.ActionArgs) => {
     );
   }
 
-  return redirectWithToasts('/login', [
+  return redirectWithToasts(href('/login'), [
     {
       variant: 'success',
       title:
@@ -63,7 +64,7 @@ const ResetPasswordPage = ({ actionData }: Route.ComponentProps) => {
             isAuthenticating={isAuthenticating}
             description="Enter your email address below and we will send you a link to reset your password."
             footer={
-              <Link href="/login" className="text-accent font-medium">
+              <Link href={href('/login')} className="text-accent font-medium">
                 Back to login
               </Link>
             }

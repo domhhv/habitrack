@@ -1,6 +1,6 @@
 import { Alert } from '@heroui/react';
 import React from 'react';
-import { data, redirect } from 'react-router';
+import { data, href, redirect } from 'react-router';
 
 import { CustomButton } from '@components';
 import type { TypedSupabaseClient } from '@models';
@@ -15,7 +15,7 @@ import {
 
 import type { Route } from './+types/AuthCallbackPage';
 
-const CALLBACK_PATH = '/auth/callback';
+const CALLBACK_PATH = href('/auth/callback');
 
 /**
  * Email redirects point at this route too, so with token-hash email templates `next` is this
@@ -94,7 +94,7 @@ const AuthCallbackPage = ({ loaderData: { error } }: Route.ComponentProps) => {
           </Alert.Title>
           <Alert.Description>{error}</Alert.Description>
         </Alert.Content>
-        <CustomButton href="/login" variant="danger-soft">
+        <CustomButton href={href('/login')} variant="danger-soft">
           Log in
         </CustomButton>
       </Alert>

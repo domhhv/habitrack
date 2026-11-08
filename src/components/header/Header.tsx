@@ -4,6 +4,7 @@ import {
   NotePencilIcon,
   CalendarCheckIcon,
 } from '@phosphor-icons/react';
+import { href } from 'react-router';
 
 import { UserMenu, CustomKbd, ThemeToggle, CustomButton } from '@components';
 import { useUser, useScreenWidth } from '@hooks';
@@ -50,8 +51,8 @@ const Header = () => {
             <>
               <CustomButton
                 size="sm"
-                href="/login"
                 variant="bordered"
+                href={href('/login')}
                 data-testid="login-button"
               >
                 Log In
@@ -61,8 +62,8 @@ const Header = () => {
               </CustomButton>
               <CustomButton
                 size="sm"
-                href="/register"
                 variant="primary"
+                href={href('/register')}
                 data-testid="register-button"
               >
                 Join

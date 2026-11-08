@@ -29,7 +29,11 @@ import {
   useFirstDayOfWeek,
 } from '@hooks';
 import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
-import { isDstTransitionDay, findDstTransitionHour } from '@utils';
+import {
+  getCalendarHref,
+  isDstTransitionDay,
+  findDstTransitionHour,
+} from '@utils';
 
 import CalendarSidebar from './CalendarSidebar';
 
@@ -226,7 +230,7 @@ const WeekCalendar = () => {
                           <CustomButton
                             variant="light"
                             aria-label="Open day"
-                            href={`/calendar/day/${day.year}/${day.month}/${day.day}`}
+                            href={getCalendarHref('day', day)}
                             className="h-5 w-5 min-w-fit rounded-xl px-0 lg:h-6 lg:w-6"
                           >
                             <ArrowSquareRightIcon

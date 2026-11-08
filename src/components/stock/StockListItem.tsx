@@ -14,6 +14,7 @@ import {
   PencilSimpleIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
+import { href } from 'react-router';
 
 import { CustomButton } from '@components';
 import { useUser, useActionFetcher } from '@hooks';
@@ -79,7 +80,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
 
   const submitStockChange = (submission: HabitDetailsSubmission) => {
     void fetcher.submit(submission, {
-      action: `/habits/${stock.habitId}`,
+      action: href('/habits/:habitId', { habitId: stock.habitId }),
       encType: 'application/json',
       method: 'post',
     });

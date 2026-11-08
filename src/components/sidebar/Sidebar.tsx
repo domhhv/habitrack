@@ -1,7 +1,7 @@
 import { cn, Drawer } from '@heroui/react';
 import { today, getLocalTimeZone } from '@internationalized/date';
 import React from 'react';
-import { useNavigate } from 'react-router';
+import { href, useNavigate } from 'react-router';
 
 import { useUser, useSidebarMode, useKeyboardShortcut } from '@hooks';
 import {
@@ -43,14 +43,14 @@ const Sidebar = () => {
   useKeyboardShortcut(
     'i',
     () => {
-      navigate('/login');
+      navigate(href('/login'));
     },
     { enabled: !user }
   );
   useKeyboardShortcut(
     'j',
     () => {
-      navigate('/register');
+      navigate(href('/register'));
     },
     { enabled: !user }
   );

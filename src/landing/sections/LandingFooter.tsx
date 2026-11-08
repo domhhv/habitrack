@@ -1,12 +1,13 @@
 import { cn } from '@heroui/react';
+import { href } from 'react-router';
 
 import InfinityMark from '../InfinityMark';
 
 const FOOTER_LINKS = [
   { href: 'https://github.com/domhhv/habitrack', label: 'GitHub' },
   { href: 'https://habitrack.featurebase.app/roadmap', label: 'Roadmap' },
-  { href: '/login', label: 'Log In' },
-  { href: '/register', label: 'Join' },
+  { href: href('/login'), label: 'Log In' },
+  { href: href('/register'), label: 'Join' },
 ];
 
 type LandingFooterProps = {

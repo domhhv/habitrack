@@ -18,7 +18,7 @@ import type { CalendarState } from 'react-stately';
 import { CustomButton } from '@components';
 import { useUser, useScreenWidth, useFirstDayOfWeek } from '@hooks';
 import { useCalendarFilters, useCalendarFiltersChange } from '@stores';
-import { getWeeksOfYear } from '@utils';
+import { isCalendarView, getWeeksOfYear, getCalendarHref } from '@utils';
 
 import CalendarNavigationButtons from './CalendarNavigationButtons';
 
@@ -81,9 +81,9 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   }, [weeks, focusedWeekStart]);
 
   const calendarMode = React.useMemo(() => {
-    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const view = location.pathname.split('/').filter(Boolean)[1];
 
-    return pathSegments[1] || 'month';
+    return isCalendarView(view) ? view : 'month';
   }, [location.pathname]);
 
   React.useEffect(() => {
@@ -143,7 +143,11 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
                       >
                         <Link
                           className="flex w-full px-2.5 py-1.5 no-underline!"
-                          href={`/calendar/${calendarMode}/${focusedDate.year}/${index + 1}/1`}
+                          href={getCalendarHref(calendarMode, {
+                            day: 1,
+                            month: index + 1,
+                            year: focusedDate.year,
+                          })}
                         >
                           {capitalize(month)}
                           <ListBox.ItemIndicator />
@@ -190,7 +194,11 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
                       >
                         <Link
                           className="flex w-full py-1.5 no-underline!"
-                          href={`/calendar/${calendarMode}/${year}/${focusedDate.month}/1`}
+                          href={getCalendarHref(calendarMode, {
+                            day: 1,
+                            month: focusedDate.month,
+                            year,
+                          })}
                         >
                           {year.toString()}
                           <ListBox.ItemIndicator />
@@ -256,8 +264,8 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
                       textValue={week.label}
                     >
                       <Link
+                        href={getCalendarHref('week', week.anchorDate)}
                         className="flex w-full px-2.5 py-1.5 no-underline!"
-                        href={`/calendar/week/${week.anchorDate.year}/${week.anchorDate.month}/${week.anchorDate.day}`}
                       >
                         {week.label}
                         <ListBox.ItemIndicator />

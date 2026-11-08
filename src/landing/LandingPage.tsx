@@ -1,7 +1,7 @@
 import React from 'react';
 import { PrefetchPageLinks } from 'react-router';
 
-import { hasBrowserSession } from '@utils';
+import { getCalendarHref, hasBrowserSession } from '@utils';
 
 import './landing.css';
 import LandingReveal from './LandingReveal';
@@ -84,7 +84,7 @@ const LandingPage = () => {
       {/*    }*/}
       {/*  }*/}
       {/*</script>*/}
-      {hasSession && <PrefetchPageLinks page="/calendar/month" />}
+      {hasSession && <PrefetchPageLinks page={getCalendarHref('month')} />}
       <div className="bg-background text-foreground min-h-screen antialiased">
         <LandingHeader hasSession={hasSession} />
         <main>

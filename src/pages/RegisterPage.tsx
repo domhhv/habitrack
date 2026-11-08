@@ -1,6 +1,6 @@
 import { Link } from '@heroui/react';
 import React from 'react';
-import { replace } from 'react-router';
+import { href, replace } from 'react-router';
 
 import { AuthForm } from '@components';
 import {
@@ -68,7 +68,7 @@ export const action = async ({ context, request }: Route.ActionArgs) => {
     ]);
   }
 
-  return redirectWithToasts(`/login${search}`, [
+  return redirectWithToasts(`${href('/login')}${search}`, [
     {
       variant: 'success',
       title:
@@ -84,7 +84,7 @@ const RegisterPage = ({
   const firstDayOfWeek = useFirstDayOfWeek();
   const isAuthenticating = useIsSubmitting();
   useActionToasts(actionData);
-  const loginHref = useAuthHref('/login');
+  const loginHref = useAuthHref(href('/login'));
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">

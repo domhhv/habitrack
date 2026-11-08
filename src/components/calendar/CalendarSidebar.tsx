@@ -16,7 +16,11 @@ import { useNavigate } from 'react-router';
 import { CustomButton } from '@components';
 import { useUser, useCalendarData, useFirstDayOfWeek } from '@hooks';
 import type { NotePeriodKind } from '@models';
-import { buildMetricTotals, buildOccurrenceSummary } from '@utils';
+import {
+  getCalendarHref,
+  buildMetricTotals,
+  buildOccurrenceSummary,
+} from '@utils';
 
 import CalendarFilters from './CalendarFilters';
 import CalendarNavigation from './CalendarNavigation';
@@ -86,14 +90,14 @@ const CalendarSidebar = ({
           : todayDate;
 
     return {
-      day: `/calendar/day/${dayDate.year}/${dayDate.month}/${dayDate.day}`,
-      month: `/calendar/month/${focusedDate.year}/${focusedDate.month}/1`,
-      week: `/calendar/week/${anchor.year}/${anchor.month}/${anchor.day}`,
+      day: getCalendarHref('day', dayDate),
+      month: getCalendarHref('month', startOfMonth(focusedDate)),
+      week: getCalendarHref('week', anchor),
     };
   }, [focusedDate, kind, locale, firstDayOfWeek, timeZone]);
 
   const handleCalendarChange = (value: CalendarDate) => {
-    navigate(`/calendar/day/${value.year}/${value.month}/${value.day}`);
+    navigate(getCalendarHref('day', value));
     setFocusedCalendarMonth(value);
   };
 

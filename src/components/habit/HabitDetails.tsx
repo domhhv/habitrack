@@ -1,6 +1,7 @@
 import { cn, Label, Dropdown, TextField, InputGroup } from '@heroui/react';
 import { XIcon, CheckIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
+import { href } from 'react-router';
 
 import {
   TraitChip,
@@ -51,7 +52,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
     submission: HabitDetailsSubmission
   ) => {
     void fetcher.submit(submission, {
-      action: `/habits/${habit.id}`,
+      action: href('/habits/:habitId', { habitId: habit.id }),
       encType: 'application/json',
       method: 'post',
     });

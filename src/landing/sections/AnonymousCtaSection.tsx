@@ -1,3 +1,7 @@
+import { href } from 'react-router';
+
+import { getCalendarHref } from '@utils';
+
 import CtaLink from '../CtaLink';
 
 const AnonymousCtaSection = () => {
@@ -14,8 +18,10 @@ const AnonymousCtaSection = () => {
             keep them.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <CtaLink href="/anonymous-login">Continue anonymously</CtaLink>
-            <CtaLink variant="secondary" href="/calendar/month">
+            <CtaLink href={href('/anonymous-login')}>
+              Continue anonymously
+            </CtaLink>
+            <CtaLink variant="secondary" href={getCalendarHref('month')}>
               Preview the calendar
             </CtaLink>
           </div>

@@ -2,6 +2,7 @@ import { Toast } from '@heroui/react';
 import { GoogleLogoIcon } from '@phosphor-icons/react';
 import type { UserIdentity } from '@supabase/supabase-js';
 import React from 'react';
+import { href } from 'react-router';
 
 import { CustomButton } from '@components';
 import { useActionFetcher } from '@hooks';
@@ -53,7 +54,7 @@ const ConnectedAccounts = ({
 
     void fetcher.submit(
       { identityId: googleIdentity.identity_id, intent: 'unlink-identity' },
-      { action: '/settings', method: 'post' }
+      { action: href('/settings'), method: 'post' }
     );
   };
 

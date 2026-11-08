@@ -1,5 +1,6 @@
 import { cn, Label, Dropdown } from '@heroui/react';
 import { GearIcon, UserIcon, SignOutIcon } from '@phosphor-icons/react';
+import { href } from 'react-router';
 
 import { CustomButton } from '@components';
 import { useUser, useProfile } from '@hooks';
@@ -86,8 +87,8 @@ const UserMenu = ({
         <Dropdown.Menu aria-label="Account">
           <Dropdown.Item
             id="settings"
-            href="/settings"
             textValue="Settings"
+            href={href('/settings')}
             onAction={closeMobileSidebar}
           >
             <GearIcon className="size-4 shrink-0" />

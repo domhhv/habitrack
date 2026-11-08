@@ -1,6 +1,6 @@
 import { Toast } from '@heroui/react';
 import React from 'react';
-import { useSearchParams } from 'react-router';
+import { href, useSearchParams } from 'react-router';
 
 import useActionFetcher from './use-action-fetcher';
 import useProfile from './use-profile';
@@ -34,7 +34,7 @@ const useAuthSearchParams = () => {
     ) {
       void fetcher.submit(
         { intent: 'sync-email' },
-        { action: '/settings', method: 'post' }
+        { action: href('/settings'), method: 'post' }
       );
     }
 
