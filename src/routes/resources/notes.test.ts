@@ -1,6 +1,5 @@
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
-import type { NoteSubmission } from '@models';
 import {
   createNote,
   updateNote,
@@ -33,11 +32,10 @@ const note = {
   periodKind: 'day' as const,
 };
 
-const submit = (submission: NoteSubmission) => {
+const submit = (fields: Record<string, string>) => {
   return action(
     makeRouteArgs<Route.ActionArgs>(NOTES_URL, user, {
-      body: JSON.stringify(submission),
-      headers: { 'Content-Type': 'application/json' },
+      body: new URLSearchParams(fields),
       method: 'POST',
     })
   );
@@ -94,7 +92,9 @@ describe('notes resource action', () => {
   });
 
   it('creates a period note for the user', async () => {
-    await expect(submit({ intent: 'create', note })).resolves.toEqual({
+    await expect(
+      submit({ ...note, content: '  Good day  ', intent: 'create' })
+    ).resolves.toEqual({
       ok: true,
       toasts: [{ title: 'Note added', variant: 'success' }],
     });
@@ -105,7 +105,7 @@ describe('notes resource action', () => {
   });
 
   it('updates and deletes notes', async () => {
-    await submit({ intent: 'update', note, noteId: 'note-1' });
+    await submit({ ...note, intent: 'update', noteId: 'note-1' });
     await submit({ intent: 'delete', noteId: 'note-1' });
 
     expect(updateNote).toHaveBeenCalledWith(testSupabaseClient, 'note-1', note);
@@ -115,7 +115,7 @@ describe('notes resource action', () => {
   it('returns the failure with its toast', async () => {
     vi.mocked(createNote).mockRejectedValue(new Error('Too long'));
 
-    await expect(submit({ intent: 'create', note })).resolves.toEqual({
+    await expect(submit({ ...note, intent: 'create' })).resolves.toEqual({
       error: 'Too long',
       ok: false,
       toasts: [
@@ -126,6 +126,49 @@ describe('notes resource action', () => {
         },
       ],
     });
+  });
+});
+
+describe('notes resource action validation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns a field error and writes nothing for a blank note', async () => {
+    await expect(
+      submit({ ...note, content: '   ', intent: 'create' })
+    ).resolves.toMatchObject({
+      init: { status: 400 },
+      data: {
+        fieldErrors: { content: 'Write something before saving the note' },
+        ok: false,
+      },
+    });
+    expect(createNote).not.toHaveBeenCalled();
+  });
+
+  it('fails without writing when the period is invalid', async () => {
+    await expect(
+      submit({ ...note, intent: 'create', periodKind: 'year' })
+    ).resolves.toMatchObject({
+      error: 'This note is not attached to a valid day, week or month',
+      ok: false,
+    });
+    expect(createNote).not.toHaveBeenCalled();
+  });
+
+  it('rejects updates and deletions without a note id, and unknown intents', async () => {
+    await expect(submit({ intent: 'delete' })).resolves.toMatchObject({
+      init: { status: 400 },
+    });
+    await expect(submit({ ...note, intent: 'update' })).resolves.toMatchObject({
+      init: { status: 400 },
+    });
+    await expect(submit({ intent: 'archive' })).resolves.toMatchObject({
+      init: { status: 400 },
+    });
+    expect(destroyNote).not.toHaveBeenCalled();
+    expect(updateNote).not.toHaveBeenCalled();
   });
 });
 

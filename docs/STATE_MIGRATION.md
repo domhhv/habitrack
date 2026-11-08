@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is done: toasts returned in action results shipped in #505, server actions for everything but occurrences in #506, and the occurrence server action is done on `refactor/occurrence-server-action`. Simplifying revalidation, which completes §1, shipped in #509. §2 runs as three PRs: type-safe `href()` (done on `refactor/type-safe-href`), then the settings, trait and note forms, then the habit and stock forms.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is done: toasts returned in action results shipped in #505, server actions for everything but occurrences in #506, and the occurrence server action is done on `refactor/occurrence-server-action`. Simplifying revalidation, which completes §1, shipped in #509. §2 runs as three PRs: type-safe `href()` shipped in #510, the settings, trait and note forms are done on `refactor/settings-trait-note-forms`, and the habit and stock forms come last.
 
 ## Target end state
 
@@ -436,6 +436,25 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
 
 - Replace `fetcher.submit(json)` with `<Form>`/`<fetcher.Form>` and named inputs wherever a form maps to flat fields: the settings general and security forms, the trait modal, the note drawer, inline habit edits and the stock forms. With server actions (§1) these work before JavaScript loads.
 - Validate in actions and return field errors with `data({ errors }, { status: 400 })`, rendered from `actionData`/`fetcher.data`. That makes the duplicated client checks unnecessary, such as the required habit name and stock quantity rules.
+- **Settings, trait and note forms** (the first two bullets) – done on `refactor/settings-trait-note-forms`. The habit and stock forms follow in their own PR.
+  - **As built:**
+    - **Shared pieces.**
+      - `ActionForm` (`src/components/common/ActionForm.tsx`) is HeroUI's `Form` rendering a `fetcher.Form` through its `render` prop. It posts the named fields to the given action and passes the result's `fieldErrors` to `validationErrors`. React Aria shows each message in the field's `<FieldError />` and clears it once that field is edited.
+      - `ActionResult` failures can carry `fieldErrors` (`FieldErrors`, keyed by field name).
+      - Validators collect messages and call `assertValidFields`, which throws a `FieldValidationError` before anything is written. `runAction` and the settings action return it as `failValidation(fieldErrors)`: a 400 without a toast, so loaders don't revalidate. `getFormText` reads a trimmed text field.
+      - The currency list moved to `CURRENCIES` in `@const`.
+    - **Settings.** The general and security forms are `ActionForm`s with hidden `intent` inputs. Their submit handlers, which picked out the changed fields, are gone.
+      - `update-profile` accepts only `sun`/`mon` and the listed currencies, and trims the name.
+      - `update-user` checks the email format and a password of at least 6 characters (Supabase's default), and sends only attributes that change: an unchanged email no longer goes to Supabase. With nothing to change it returns `ok` without a toast.
+      - `PasswordInput` has a `<FieldError />`.
+    - **Trait modal.** The whole dialog body is an `ActionForm` (`className="contents"`, so the modal layout doesn't change) that posts `intent=create-trait`, `name`, `description` and `color` to `/habits`.
+      - The action now reads `create-trait` from form data instead of JSON, and requires a label and a 6-digit hex color (with or without `#`). `HabitsSubmission` is deleted.
+      - Typing in the hex field used to drop the `#` and then the first digit; it now keeps the `#`.
+    - **Note drawer.** The drawer's form is an `ActionForm` with hidden `intent`, `noteId`, `periodKind` and `periodDate` inputs, and the content's `<FieldError />`. Cmd/Ctrl+Enter calls `requestSubmit()`, and `onSubmit` cancels when there is nothing to save. Removal posts form fields too.
+      - `/resources/notes` reads form data instead of JSON, trims the content, and rejects a blank note with a field error. It fails an invalid period, a missing note id or an unknown intent without writing. `NoteSubmission` and `src/models/note-submission.model.ts` are deleted.
+    - **Still client-only checks** that disable the submit buttons (unchanged values, empty note) stay as UX. The server is the source of truth.
+    - **Tests** cover `ActionForm` (fields posted, errors shown), the settings forms rendered for real (the selects post their values, field errors show), the trait modal, and the new action validation for settings, traits and notes.
+    - **Not verified:** a run in a real browser.
 - Build action URLs and links with the type-safe `href()` instead of strings such as `` `/habits/${id}` ``, `/resources/occurrences` and `/calendar/month/${y}/${m}/${d}` – done on `refactor/type-safe-href`.
   - **As built:**
     - Every route path in links, `navigate()` calls, fetcher actions and loads, redirects, and the auth services' callback URLs goes through `href()`, so renaming a route or a param is a type error. Search strings are appended after it, e.g. `` `${href('/login')}?${params}` ``.

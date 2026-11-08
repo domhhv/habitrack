@@ -4,6 +4,8 @@ import { StorageBuckets } from '@models';
 
 export const DAYS_OF_WEEK = Constants.public.Enums.days_of_week;
 
+export const CURRENCIES = ['EUR', 'USD', 'GBP', 'UAH'] as const;
+
 export const MAX_FILE_SIZE_MB = {
   [StorageBuckets.HABIT_ICONS]: 0.1,
   [StorageBuckets.OCCURRENCE_PHOTOS]: 5,

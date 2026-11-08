@@ -2,6 +2,8 @@ import capitalize from 'lodash.capitalize';
 
 import type { ActionToast } from '@models';
 
+import failValidation from './fail-validation';
+import { FieldValidationError } from './field-validation-error';
 import getErrorMessage from './get-error-message';
 import rollbar from './rollbar';
 
@@ -64,6 +66,10 @@ const runAction = async (action: Promise<unknown>, actionType: ActionType) => {
 
     return { ok: true as const, toasts };
   } catch (error) {
+    if (error instanceof FieldValidationError) {
+      return failValidation(error.fieldErrors);
+    }
+
     const errorMessage = getErrorMessage(error);
     rollbar.error(error instanceof Error ? error : new Error(errorMessage));
     console.error(error);

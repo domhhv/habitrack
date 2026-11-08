@@ -2,7 +2,6 @@ export * from './action-result.model';
 export * from './habit-submission.model';
 export * from './habit.model';
 export * from './metric.model';
-export * from './note-submission.model';
 export * from './note.model';
 export * from './occurrence-stock-usage.model';
 export * from './occurrence-submission.model';

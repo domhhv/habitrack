@@ -8,14 +8,20 @@ import {
   Select,
   ListBox,
   TextField,
+  FieldError,
 } from '@heroui/react';
 import { PlugsIcon, ShieldIcon, UserCircleIcon } from '@phosphor-icons/react';
 import type { UserAttributes } from '@supabase/supabase-js';
-import type { SubmitEventHandler } from 'react';
 import React from 'react';
 import { data, href } from 'react-router';
 
-import { CustomButton, PasswordInput, ConnectedAccounts } from '@components';
+import {
+  ActionForm,
+  CustomButton,
+  PasswordInput,
+  ConnectedAccounts,
+} from '@components';
+import { CURRENCIES, DAYS_OF_WEEK } from '@const';
 import {
   useUser,
   useProfile,
@@ -25,6 +31,7 @@ import {
 } from '@hooks';
 import type {
   DaysOfWeek,
+  FieldErrors,
   ActionToast,
   ActionResult,
   ProfilesUpdate,
@@ -39,12 +46,15 @@ import {
 } from '@services';
 import { useConfirmationActions } from '@stores';
 import {
+  getFormText,
   userContext,
-  parseDayOfWeek,
+  failValidation,
   getErrorMessage,
   supabaseContext,
   type SessionUser,
+  assertValidFields,
   redirectWithToasts,
+  FieldValidationError,
 } from '@utils';
 
 import type { Route } from './+types/SettingsPage';
@@ -59,7 +69,7 @@ const FAILURE_TITLES = {
 
 type SettingsIntent = keyof typeof FAILURE_TITLES;
 
-type SettingsActionResult = ActionResult & { intent: SettingsIntent | null };
+type SettingsActionResult = ActionResult & { intent?: SettingsIntent | null };
 
 const isSettingsIntent = (
   value: FormDataEntryValue | null
@@ -67,43 +77,79 @@ const isSettingsIntent = (
   return typeof value === 'string' && Object.hasOwn(FAILURE_TITLES, value);
 };
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASSWORD_LENGTH = 6;
+
 const getProfileUpdate = (formData: FormData) => {
+  const fieldErrors: FieldErrors = {};
   const profileUpdate: Pick<
     ProfilesUpdate,
     'name' | 'firstDayOfWeek' | 'defaultCurrency'
   > = {};
-  const name = formData.get('name');
-  const defaultCurrency = formData.get('defaultCurrency');
 
-  if (typeof name === 'string') {
-    profileUpdate.name = name;
+  if (formData.has('name')) {
+    profileUpdate.name = getFormText(formData, 'name');
   }
 
   if (formData.has('firstDayOfWeek')) {
-    profileUpdate.firstDayOfWeek = parseDayOfWeek(
-      formData.get('firstDayOfWeek')
-    );
+    const firstDayOfWeek = DAYS_OF_WEEK.find((day) => {
+      return day === formData.get('firstDayOfWeek');
+    });
+
+    if (firstDayOfWeek) {
+      profileUpdate.firstDayOfWeek = firstDayOfWeek;
+    } else {
+      fieldErrors.firstDayOfWeek = 'Choose Sunday or Monday';
+    }
   }
 
-  if (typeof defaultCurrency === 'string') {
-    profileUpdate.defaultCurrency = defaultCurrency;
+  if (formData.has('defaultCurrency')) {
+    const defaultCurrency = CURRENCIES.find((currency) => {
+      return currency === formData.get('defaultCurrency');
+    });
+
+    if (defaultCurrency) {
+      profileUpdate.defaultCurrency = defaultCurrency;
+    } else {
+      fieldErrors.defaultCurrency = 'Choose one of the listed currencies';
+    }
   }
+
+  assertValidFields(fieldErrors);
 
   return profileUpdate;
 };
 
-const getUserAttributes = (formData: FormData) => {
+/**
+ * Only the attributes that change are sent, so an unchanged email doesn't start an email change.
+ */
+const getUserAttributes = (
+  formData: FormData,
+  user: NonNullable<SessionUser>
+) => {
+  const fieldErrors: FieldErrors = {};
   const userAttributes: UserAttributes = {};
-  const email = formData.get('email');
   const password = formData.get('password');
 
-  if (typeof email === 'string') {
-    userAttributes.email = email;
+  if (formData.has('email')) {
+    const email = getFormText(formData, 'email');
+
+    if (!EMAIL_PATTERN.test(email)) {
+      fieldErrors.email = 'Enter a valid email address';
+    } else if (email !== user.email) {
+      userAttributes.email = email;
+    }
   }
 
-  if (typeof password === 'string') {
-    userAttributes.password = password;
+  if (typeof password === 'string' && password) {
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      fieldErrors.password = `Use at least ${MIN_PASSWORD_LENGTH} characters`;
+    } else {
+      userAttributes.password = password;
+    }
   }
+
+  assertValidFields(fieldErrors);
 
   return userAttributes;
 };
@@ -114,7 +160,7 @@ const runIntent = async (
   request: Request,
   formData: FormData,
   user: NonNullable<SessionUser>
-): Promise<ActionToast | Response> => {
+): Promise<ActionToast | Response | null> => {
   switch (intent) {
     case 'delete-account':
       await deleteUser(supabase);
@@ -153,20 +199,23 @@ const runIntent = async (
 
       return { title: 'Account updated', variant: 'success' };
 
-    case 'update-user':
-      await updateUser(
-        supabase,
-        new URL(request.url).origin,
-        getUserAttributes(formData)
-      );
+    case 'update-user': {
+      const userAttributes = getUserAttributes(formData, user);
+
+      if (Object.keys(userAttributes).length === 0) {
+        return null;
+      }
+
+      await updateUser(supabase, new URL(request.url).origin, userAttributes);
 
       return {
         title: 'Account updated',
         variant: 'success',
-        description: formData.has('email')
+        description: userAttributes.email
           ? 'Email change requested. Please check your inbox for a confirmation email.'
           : undefined,
       };
+    }
   }
 };
 
@@ -213,9 +262,13 @@ export const action = async ({ context, request }: Route.ActionArgs) => {
     return {
       intent,
       ok: true as const,
-      toasts: [result],
+      toasts: result ? [result] : [],
     };
   } catch (error) {
+    if (error instanceof FieldValidationError) {
+      return failValidation(error.fieldErrors);
+    }
+
     console.error(error);
 
     const toast: ActionToast = {
@@ -283,56 +336,6 @@ const SettingsPage = ({
       </div>
     );
   }
-
-  const handleGeneralSubmit: SubmitEventHandler = (e) => {
-    e.preventDefault();
-
-    const profileUpdatePayload: Record<string, string> = {};
-
-    if (firstDayOfWeek !== profile.firstDayOfWeek) {
-      profileUpdatePayload.firstDayOfWeek = firstDayOfWeek;
-    }
-
-    if (name !== profile.name) {
-      profileUpdatePayload.name = name;
-    }
-
-    if (defaultCurrency !== profile.defaultCurrency) {
-      profileUpdatePayload.defaultCurrency = defaultCurrency;
-    }
-
-    if (!Object.keys(profileUpdatePayload).length) {
-      return;
-    }
-
-    void fetcher.submit(
-      { intent: 'update-profile', ...profileUpdatePayload },
-      { method: 'post' }
-    );
-  };
-
-  const handleSecuritySubmit: SubmitEventHandler = (e) => {
-    e.preventDefault();
-
-    const userAttributesPayload: Record<string, string> = {};
-
-    if (password) {
-      userAttributesPayload.password = password;
-    }
-
-    if (email !== profile.email) {
-      userAttributesPayload.email = email;
-    }
-
-    if (!Object.keys(userAttributesPayload).length) {
-      return;
-    }
-
-    void fetcher.submit(
-      { intent: 'update-user', ...userAttributesPayload },
-      { method: 'post' }
-    );
-  };
 
   const handleDeleteAccount = async () => {
     if (!user) {
@@ -405,12 +408,15 @@ const SettingsPage = ({
             </Tabs.List>
           </Tabs.ListContainer>
           <Tabs.Panel id="general" className="w-full py-0 pl-6">
-            <form
+            <ActionForm
+              fetcher={fetcher}
+              action={href('/settings')}
               data-testid="general-form"
-              onSubmit={handleGeneralSubmit}
               className="flex w-full flex-col gap-4"
             >
+              <input type="hidden" name="intent" value="update-profile" />
               <TextField
+                name="name"
                 value={name}
                 variant="secondary"
                 isDisabled={isUpdating}
@@ -419,9 +425,11 @@ const SettingsPage = ({
               >
                 <Label>Name</Label>
                 <Input placeholder="Name" />
+                <FieldError />
               </TextField>
               <Select
                 variant="secondary"
+                name="firstDayOfWeek"
                 value={firstDayOfWeek}
                 isDisabled={isUpdating}
                 onChange={(value) => {
@@ -453,9 +461,11 @@ const SettingsPage = ({
                     })}
                   </ListBox>
                 </Select.Popover>
+                <FieldError />
               </Select>
               <Select
                 variant="secondary"
+                name="defaultCurrency"
                 isDisabled={isUpdating}
                 value={defaultCurrency}
                 onChange={(value) => {
@@ -471,24 +481,20 @@ const SettingsPage = ({
                 </Select.Trigger>
                 <Select.Popover>
                   <ListBox>
-                    {[
-                      { key: 'EUR', label: 'EUR' },
-                      { key: 'USD', label: 'USD' },
-                      { key: 'GBP', label: 'GBP' },
-                      { key: 'UAH', label: 'UAH' },
-                    ].map((currency) => {
+                    {CURRENCIES.map((currency) => {
                       return (
                         <ListBox.Item
-                          id={currency.key}
-                          key={currency.key}
-                          textValue={currency.label}
+                          id={currency}
+                          key={currency}
+                          textValue={currency}
                         >
-                          <Label>{currency.label}</Label>
+                          <Label>{currency}</Label>
                         </ListBox.Item>
                       );
                     })}
                   </ListBox>
                 </Select.Popover>
+                <FieldError />
               </Select>
               <CustomButton
                 fullWidth
@@ -504,15 +510,19 @@ const SettingsPage = ({
               >
                 Save
               </CustomButton>
-            </form>
+            </ActionForm>
           </Tabs.Panel>
           <Tabs.Panel id="security" className="w-full py-0 pl-6">
-            <form
+            <ActionForm
+              fetcher={fetcher}
+              action={href('/settings')}
               data-testid="security-form"
-              onSubmit={handleSecuritySubmit}
               className="flex w-full flex-col gap-4"
             >
+              <input type="hidden" name="intent" value="update-user" />
               <TextField
+                name="email"
+                type="email"
                 value={email}
                 variant="secondary"
                 isDisabled={isUpdating}
@@ -521,6 +531,7 @@ const SettingsPage = ({
               >
                 <Label>Email</Label>
                 <Input placeholder="Email" />
+                <FieldError />
               </TextField>
               <PasswordInput
                 value={password}
@@ -542,7 +553,7 @@ const SettingsPage = ({
               >
                 Save
               </CustomButton>
-            </form>
+            </ActionForm>
             <div className="border-danger/30 mt-8 flex w-full flex-col gap-3 border-t pt-6">
               <h2 className="text-danger text-base font-semibold">
                 Delete account

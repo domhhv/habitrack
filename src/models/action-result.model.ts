@@ -4,6 +4,16 @@ export type ActionToast = {
   variant: 'danger' | 'success';
 };
 
+/**
+ * Validation messages keyed by form field name.
+ */
+export type FieldErrors = Record<string, string>;
+
 export type ActionResult =
-  | { error: string; ok: false; toasts?: ActionToast[] }
+  | {
+      error: string;
+      fieldErrors?: FieldErrors;
+      ok: false;
+      toasts?: ActionToast[];
+    }
   | { ok: true; toasts?: ActionToast[] };

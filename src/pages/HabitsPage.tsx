@@ -4,7 +4,7 @@ import { data } from 'react-router';
 import { HabitsTable } from '@components';
 import type {
   HabitStats,
-  HabitsSubmission,
+  FieldErrors,
   TypedSupabaseClient,
   FormMetricDefinitions,
 } from '@models';
@@ -18,9 +18,11 @@ import {
 } from '@services';
 import {
   runAction,
+  getFormText,
   userContext,
   getErrorMessage,
   supabaseContext,
+  assertValidFields,
   getRequestTimeZone,
   buildHabitMetricInsert,
 } from '@utils';
@@ -44,6 +46,35 @@ const loadHabitsStats = async (
       return stat.habitId ? [[stat.habitId, stat]] : [];
     })
   );
+};
+
+const TRAIT_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
+
+const addTrait = async (
+  supabase: TypedSupabaseClient,
+  formData: FormData,
+  userId: string
+) => {
+  const fieldErrors: FieldErrors = {};
+  const name = getFormText(formData, 'name');
+  const color = `#${getFormText(formData, 'color').replace(/^#/, '')}`;
+
+  if (!name) {
+    fieldErrors.name = 'Give the trait a label';
+  }
+
+  if (!TRAIT_COLOR_PATTERN.test(color)) {
+    fieldErrors.color = 'Enter a color as 6 hex digits, e.g. 94a3b8';
+  }
+
+  assertValidFields(fieldErrors);
+
+  await createTrait(supabase, {
+    color,
+    description: getFormText(formData, 'description'),
+    name,
+    userId,
+  });
 };
 
 const addHabit = async (
@@ -108,19 +139,13 @@ export const action = async ({ context, request }: Route.ActionArgs) => {
     );
   }
 
-  if (request.headers.get('Content-Type')?.includes('application/json')) {
-    const { trait } = (await request.json()) as HabitsSubmission;
+  const formData = await request.formData();
 
-    return runAction(
-      createTrait(supabase, { ...trait, userId: user.id }),
-      'add_trait'
-    );
+  if (formData.get('intent') === 'create-trait') {
+    return runAction(addTrait(supabase, formData, user.id), 'add_trait');
   }
 
-  return runAction(
-    addHabit(supabase, await request.formData(), user.id),
-    'add_habit'
-  );
+  return runAction(addHabit(supabase, formData, user.id), 'add_habit');
 };
 
 const HabitsPage = ({ loaderData: { habitsStats } }: Route.ComponentProps) => {
