@@ -1,6 +1,5 @@
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
-import type { HabitDetailsSubmission } from '@models';
 import {
   getHabit,
   listFiles,
@@ -48,15 +47,22 @@ vi.mock('@services', async (importOriginal) => {
 const HABIT_URL = 'http://localhost/habits/habit-1';
 const user = { id: 'user-1' } as SessionUser;
 
-const submitJson = (submission: HabitDetailsSubmission, sessionUser = user) => {
+const submit = (fields: Record<string, string>, sessionUser = user) => {
   return action({
     ...makeRouteArgs<Route.ActionArgs>(HABIT_URL, sessionUser, {
-      body: JSON.stringify(submission),
-      headers: { 'Content-Type': 'application/json' },
+      body: new URLSearchParams(fields),
       method: 'POST',
     }),
     params: { habitId: 'habit-1' },
   });
+};
+
+const stockFields = {
+  cost: '4.5',
+  currency: 'eur',
+  isQuantifiable: 'on',
+  name: ' Pack ',
+  totalItems: '20',
 };
 
 describe('HabitDetailsPage loader', () => {
@@ -101,22 +107,51 @@ describe('HabitDetailsPage action', () => {
 
   it('rejects signed-out users', async () => {
     await expect(
-      submitJson({ intent: 'remove-stock', stockId: 'stock-1' }, null)
+      submit({ intent: 'remove-stock', stockId: 'stock-1' }, null)
     ).resolves.toMatchObject({ init: { status: 401 } });
     expect(destroyStock).not.toHaveBeenCalled();
   });
 
-  it('patches the submitted habit fields', async () => {
+  it('patches only the submitted habit fields', async () => {
     await expect(
-      submitJson({ habit: { name: 'Walking' }, intent: 'update-habit' })
+      submit({ intent: 'update-habit', name: ' Walking ' })
     ).resolves.toMatchObject({ ok: true });
     expect(patchHabit).toHaveBeenCalledWith(testSupabaseClient, 'habit-1', {
       name: 'Walking',
     });
   });
 
+  it('clears a blank description and an unset trait', async () => {
+    await submit({ description: '  ', intent: 'update-habit', traitId: '' });
+
+    expect(patchHabit).toHaveBeenCalledWith(testSupabaseClient, 'habit-1', {
+      description: null,
+      traitId: null,
+    });
+  });
+
+  it('returns field errors for a blank name and a long motivation', async () => {
+    await expect(
+      submit({
+        intent: 'update-habit',
+        motivation: 'a'.repeat(2001),
+        name: ' ',
+      })
+    ).resolves.toMatchObject({
+      init: { status: 400 },
+      data: {
+        fieldErrors: {
+          motivation: 'Keep it to 2000 characters',
+          name: 'Give the habit a name',
+        },
+      },
+    });
+    expect(patchHabit).not.toHaveBeenCalled();
+  });
+
   it('replaces the habit icon and removes the previous one', async () => {
     const body = new FormData();
+    body.set('intent', 'upload-icon');
     body.set('icon', new File(['icon'], 'icon.png'));
     vi.mocked(uploadHabitIcon).mockResolvedValue('user-1/new.png');
     vi.mocked(getHabit).mockResolvedValue({
@@ -155,7 +190,7 @@ describe('HabitDetailsPage action', () => {
       ReturnType<typeof listFiles>
     >);
 
-    await submitJson({ intent: 'delete-habit' });
+    await submit({ intent: 'delete-habit' });
 
     expect(deleteFile).toHaveBeenCalledWith(
       testSupabaseClient,
@@ -179,14 +214,14 @@ describe('HabitDetailsPage action', () => {
       type: 'number' as const,
     };
 
-    await submitJson({
+    await submit({
       intent: 'save-metrics',
-      metricDefinitions: [
+      metricDefinitions: JSON.stringify([
         { ...baseMetric, id: 'metric-1', isToBeRemoved: true, name: 'Old' },
         { ...baseMetric, id: 'form-1', isToBeAdded: true, name: 'New' },
         { ...baseMetric, id: 'metric-2', isToBeUpdated: true, name: 'Edit' },
         { ...baseMetric, id: 'metric-3', name: 'Untouched' },
-      ],
+      ]),
     });
 
     expect(destroyHabitMetrics).toHaveBeenCalledWith(testSupabaseClient, [
@@ -208,19 +243,25 @@ describe('HabitDetailsPage action', () => {
       ReturnType<typeof createStock>
     >);
 
-    await submitJson({
-      intent: 'add-stock',
-      stock: { currency: 'EUR', name: 'Pack' },
-      metricDefaults: {
-        compound: { 'metric-1': true },
-        values: { 'metric-1': { numericValue: 5 } },
-      },
-    });
+    await expect(
+      submit({
+        ...stockFields,
+        intent: 'add-stock',
+        metricDefaults: JSON.stringify({
+          compound: { 'metric-1': true },
+          values: { 'metric-1': { numericValue: 5 } },
+        }),
+      })
+    ).resolves.toMatchObject({ ok: true });
 
     expect(createStock).toHaveBeenCalledWith(testSupabaseClient, {
+      cost: 4.5,
       currency: 'EUR',
       habitId: 'habit-1',
+      isDepleted: false,
       name: 'Pack',
+      remainingItems: 20,
+      totalItems: 20,
       userId: 'user-1',
     });
     expect(createStockMetricDefaults).toHaveBeenCalledWith(testSupabaseClient, [
@@ -234,28 +275,92 @@ describe('HabitDetailsPage action', () => {
     ]);
   });
 
-  it('only patches the stock when no metric defaults are submitted', async () => {
-    await submitJson({
-      intent: 'update-stock',
-      stock: { isDepleted: true },
+  it('adds an approximate stock without item counts', async () => {
+    vi.mocked(createStock).mockResolvedValue({ id: 'stock-1' } as Awaited<
+      ReturnType<typeof createStock>
+    >);
+
+    await submit({
+      cost: '',
+      currency: 'USD',
+      intent: 'add-stock',
+      name: 'Beans',
+    });
+
+    expect(createStock).toHaveBeenCalledWith(
+      testSupabaseClient,
+      expect.objectContaining({
+        cost: null,
+        remainingItems: null,
+        totalItems: null,
+      })
+    );
+    expect(createStockMetricDefaults).not.toHaveBeenCalled();
+  });
+
+  it('returns field errors for invalid stock fields', async () => {
+    await expect(
+      submit({
+        cost: '-1',
+        currency: 'euro',
+        intent: 'add-stock',
+        isQuantifiable: 'on',
+        name: ' ',
+        totalItems: '',
+      })
+    ).resolves.toMatchObject({
+      init: { status: 400 },
+      data: {
+        fieldErrors: {
+          cost: 'Enter a cost of 0 or more',
+          currency: 'Use a 3-letter code, e.g. EUR',
+          name: 'Give the stock a name',
+          totalItems: 'Enter a whole number of at least 1',
+        },
+      },
+    });
+    expect(createStock).not.toHaveBeenCalled();
+  });
+
+  it('marks a stock as depleted', async () => {
+    await submit({
+      intent: 'set-stock-depleted',
+      isDepleted: 'true',
       stockId: 'stock-1',
     });
 
     expect(patchStock).toHaveBeenCalledWith(testSupabaseClient, 'stock-1', {
       isDepleted: true,
     });
+  });
+
+  it('only patches the stock when no metric defaults are submitted', async () => {
+    await submit({
+      ...stockFields,
+      intent: 'update-stock',
+      remainingItems: '30',
+      stockId: 'stock-1',
+    });
+
+    expect(patchStock).toHaveBeenCalledWith(testSupabaseClient, 'stock-1', {
+      cost: 4.5,
+      currency: 'EUR',
+      name: 'Pack',
+      remainingItems: 20,
+      totalItems: 20,
+    });
     expect(destroyStockMetricDefaults).not.toHaveBeenCalled();
   });
 
   it('replaces the stock metric defaults when they are submitted', async () => {
-    await submitJson({
+    await submit({
+      ...stockFields,
       intent: 'update-stock',
-      stock: { name: 'Pack' },
       stockId: 'stock-1',
-      metricDefaults: {
+      metricDefaults: JSON.stringify({
         compound: {},
         values: { 'metric-1': { numericValue: 2 } },
-      },
+      }),
     });
 
     expect(destroyStockMetricDefaults).toHaveBeenCalledWith(
@@ -271,9 +376,21 @@ describe('HabitDetailsPage action', () => {
   });
 
   it('removes a stock', async () => {
-    await submitJson({ intent: 'remove-stock', stockId: 'stock-1' });
+    await submit({ intent: 'remove-stock', stockId: 'stock-1' });
 
     expect(destroyStock).toHaveBeenCalledWith(testSupabaseClient, 'stock-1');
+  });
+
+  it('rejects a stock request without a stock and an unknown intent', async () => {
+    await expect(submit({ intent: 'remove-stock' })).resolves.toMatchObject({
+      data: { error: 'Choose a stock first' },
+      init: { status: 400 },
+    });
+    await expect(submit({ intent: 'rename' })).resolves.toMatchObject({
+      data: { error: 'Unsupported habit request' },
+      init: { status: 400 },
+    });
+    expect(destroyStock).not.toHaveBeenCalled();
   });
 });
 

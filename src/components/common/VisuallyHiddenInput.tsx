@@ -2,18 +2,21 @@ import React, { type ChangeEvent } from 'react';
 
 type VisuallyHiddenInputProps = {
   isDisabled?: boolean;
+  name?: string;
   ref?: React.RefObject<HTMLInputElement | null>;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 const VisuallyHiddenInput = ({
   isDisabled = false,
+  name,
   onChange,
   ref,
 }: VisuallyHiddenInputProps) => {
   return (
     <input
       ref={ref}
+      name={name}
       type="file"
       accept="image/*"
       onChange={onChange}

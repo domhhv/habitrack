@@ -184,13 +184,16 @@ Stocks are server data and go through React Router routes. No client store is in
 
 - Stocks (with metric defaults and usage counts) come with each habit, from the app layout `clientLoader` (`useHabits()`) and the habit details `clientLoader` (`getHabit()`).
 
-**Mutations**: the `/habits/:habitId` server `action` takes the JSON `HabitDetailsSubmission` (`src/models/habit-submission.model.ts`).
+**Mutations**: the `/habits/:habitId` server `action` reads form data and branches on its `intent` (`HabitDetailsIntent` in `src/models/habit-submission.model.ts`). The stock forms are `ActionForm`s that post `name`, `cost`, `currency`, `isQuantifiable`, `totalItems` and, when editing, `stockId` and `remainingItems`. The metric defaults go in one `metricDefaults` field as JSON (`StockMetricDefaultsSubmission`).
 
-| Intent         | What it does                                                                                                       |
-| -------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `add-stock`    | `createStock()`, then `createStockMetricDefaults()` with the new stock ID                                          |
-| `update-stock` | `patchStock()`. When `metricDefaults` is submitted, also `destroyStockMetricDefaults()` and recreates the defaults |
-| `remove-stock` | `destroyStock()`                                                                                                   |
+| Intent               | What it does                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `add-stock`          | `createStock()`, then `createStockMetricDefaults()` with the new stock ID                                          |
+| `update-stock`       | `patchStock()`. When `metricDefaults` is submitted, also `destroyStockMetricDefaults()` and recreates the defaults |
+| `set-stock-depleted` | `patchStock()` with `isDepleted` only                                                                              |
+| `remove-stock`       | `destroyStock()`                                                                                                   |
+
+Before writing, the action validates the stock fields and returns field errors (a 400) for a blank name, a negative cost, a currency that isn't 3 letters, or a missing or non-whole item count on a quantifiable stock. It uppercases the currency, sets `remainingItems` to the total on create, and caps it at the total on edit. A non-quantifiable stock gets `null` counts.
 
 Occurrence actions (`/resources/occurrences`) create, update or delete stock usages and mark depleted stocks with `patchStock()`. The DB triggers adjust `remaining_items`.
 
@@ -274,7 +277,8 @@ After the action finishes, loader revalidation brings back the latest `remaining
 ```
 User opens HabitStockManager → clicks "Add stock"
   → AddStockForm: enter name, cost, currency, quantifiable toggle, metric defaults
-  → on submit: useActionFetcher submits { intent: 'add-stock', stock, metricDefaults } to /habits/:habitId
+  → on submit: the ActionForm posts intent=add-stock, the stock fields and metricDefaults (JSON) to /habits/:habitId
+    0. invalid fields → 400 with field errors shown next to the inputs, nothing written
     1. createStock() → DB insert → returns HabitStockWithDefaults
     2. createStockMetricDefaults() with new stock ID
     3. loaders revalidate → habits come back with the new stock
@@ -302,7 +306,7 @@ User selects habit → habit.stocks loaded
 User opens StockListItem → enters edit mode
   → StockMetricDefaults renders MetricValuesSection
   → user changes defaults and compound toggles
-  → on save: { intent: 'update-stock', stock, metricDefaults } to /habits/:habitId
+  → on save: the ActionForm posts intent=update-stock, stockId, the stock fields and metricDefaults (JSON) to /habits/:habitId
     1. patchStock(stockId, stock)
     2. destroyStockMetricDefaults(stockId) — clears all existing
     3. createStockMetricDefaults(newDefaults) — inserts fresh

@@ -1,31 +1,18 @@
-import type { HabitsUpdate } from './habit.model';
-import type { MetricValue, FormMetricDefinitions } from './metric.model';
-import type { HabitStockInsert, HabitStockUpdate } from './stock.model';
+import type { MetricValue } from './metric.model';
 
+/** The `intent` values the habit details action accepts. */
+export type HabitDetailsIntent =
+  | 'add-stock'
+  | 'delete-habit'
+  | 'remove-stock'
+  | 'save-metrics'
+  | 'set-stock-depleted'
+  | 'update-habit'
+  | 'update-stock'
+  | 'upload-icon';
+
+/** The `metricDefaults` field of the stock forms, posted as JSON. */
 export type StockMetricDefaultsSubmission = {
   compound: Record<string, boolean>;
   values: Record<string, MetricValue>;
 };
-
-export type HabitDetailsSubmission =
-  | {
-      intent: 'add-stock';
-      metricDefaults: StockMetricDefaultsSubmission;
-      stock: Omit<HabitStockInsert, 'userId' | 'habitId'>;
-    }
-  | { intent: 'delete-habit' }
-  | { intent: 'remove-stock'; stockId: string }
-  | { intent: 'save-metrics'; metricDefinitions: FormMetricDefinitions[] }
-  | {
-      intent: 'update-habit';
-      habit: Pick<
-        HabitsUpdate,
-        'name' | 'traitId' | 'motivation' | 'description'
-      >;
-    }
-  | {
-      intent: 'update-stock';
-      metricDefaults?: StockMetricDefaultsSubmission;
-      stock: HabitStockUpdate;
-      stockId: string;
-    };

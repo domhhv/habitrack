@@ -250,7 +250,7 @@ On submit, the dialog processes these flags in order: remove marked metrics, cre
 HabitDetails loads habit.metricDefinitions
   → converts to FormMetricDefinitions[] with state flags
   → user adds/edits/removes via MetricDefinitionForm
-  → on save: useActionFetcher submits { intent: 'save-metrics', metricDefinitions } to /habits/:habitId
+  → on save: useActionFetcher posts intent=save-metrics and metricDefinitions (JSON) to /habits/:habitId
   → server action:
     1. destroyHabitMetrics(idsToRemove)
     2. createHabitMetrics(metricsToAdd)

@@ -1,26 +1,33 @@
-import { cn, Label, Dropdown, TextField, InputGroup } from '@heroui/react';
+import {
+  cn,
+  Label,
+  Dropdown,
+  TextField,
+  FieldError,
+  InputGroup,
+} from '@heroui/react';
 import { XIcon, CheckIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { href } from 'react-router';
 
 import {
   TraitChip,
+  ActionForm,
   CustomButton,
   HabitStockManager,
   MetricDefinitionForm,
 } from '@components';
+import { HABIT_FIELD_LIMITS } from '@const';
 import { useUser, useTraits, useActionFetcher } from '@hooks';
-import type {
-  Habit,
-  FormMetricDefinitions,
-  HabitDetailsSubmission,
-} from '@models';
+import type { Habit, FormMetricDefinitions } from '@models';
 
 import HabitIcon from './HabitIcon';
 
 type HabitDetailsProps = {
   habit: Habit;
 };
+
+type EditableHabitField = 'name' | 'description' | 'motivation';
 
 const HabitDetails = ({ habit }: HabitDetailsProps) => {
   const [isEditingName, setIsEditingName] = React.useState(false);
@@ -47,16 +54,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
   const isUpdatingTrait = traitFetcher.state !== 'idle';
   const isSavingMetrics = metricsFetcher.state !== 'idle';
 
-  const submitHabitChange = (
-    fetcher: typeof habitFetcher,
-    submission: HabitDetailsSubmission
-  ) => {
-    void fetcher.submit(submission, {
-      action: href('/habits/:habitId', { habitId: habit.id }),
-      encType: 'application/json',
-      method: 'post',
-    });
-  };
+  const habitAction = href('/habits/:habitId', { habitId: habit.id });
 
   const isEditing = React.useMemo(() => {
     return isEditingName || isEditingDescription || isEditingMotivation;
@@ -104,49 +102,13 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
   };
 
   const saveMetrics = () => {
-    submitHabitChange(metricsFetcher, {
-      intent: 'save-metrics',
-      metricDefinitions,
-    });
-  };
-
-  const saveHabit = () => {
-    const trimmedName = name.trim();
-    const trimmedDescription = description.trim();
-    const trimmedMotivation = motivation.trim();
-    const habitUpdate: Extract<
-      HabitDetailsSubmission,
-      { intent: 'update-habit' }
-    >['habit'] = {};
-
-    if ((isEditingName && !trimmedName) || habitFetcher.state !== 'idle') {
-      return;
-    }
-
-    if (trimmedName !== habit.name) {
-      habitUpdate.name = trimmedName;
-    }
-
-    if (trimmedDescription !== (habit.description || '')) {
-      habitUpdate.description = trimmedDescription || null;
-    }
-
-    if (trimmedMotivation !== (habit.motivation || '')) {
-      habitUpdate.motivation = trimmedMotivation || null;
-    }
-
-    if (Object.keys(habitUpdate).length === 0) {
-      setIsEditingName(false);
-      setIsEditingDescription(false);
-      setIsEditingMotivation(false);
-
-      return;
-    }
-
-    submitHabitChange(habitFetcher, {
-      habit: habitUpdate,
-      intent: 'update-habit',
-    });
+    void metricsFetcher.submit(
+      {
+        intent: 'save-metrics',
+        metricDefinitions: JSON.stringify(metricDefinitions),
+      },
+      { action: habitAction, method: 'post' }
+    );
   };
 
   const cancelEditing = () => {
@@ -158,16 +120,25 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
     setIsEditingMotivation(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      if (isEditingName && !name.trim()) {
-        return;
-      }
+  const skipUnchangedSubmit = (
+    event: React.SyntheticEvent,
+    field: EditableHabitField,
+    value: string
+  ) => {
+    if (habitFetcher.state !== 'idle') {
+      event.preventDefault();
 
-      saveHabit();
+      return;
     }
 
-    if (e.key === 'Escape') {
+    if (value.trim() === (habit[field] || '')) {
+      event.preventDefault();
+      cancelEditing();
+    }
+  };
+
+  const cancelOnEscape = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
       cancelEditing();
     }
   };
@@ -199,10 +170,10 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                     return;
                   }
 
-                  submitHabitChange(traitFetcher, {
-                    habit: { traitId: nextTraitId },
-                    intent: 'update-habit',
-                  });
+                  void traitFetcher.submit(
+                    { intent: 'update-habit', traitId: nextTraitId ?? '' },
+                    { action: habitAction, method: 'post' }
+                  );
                 }}
               >
                 {[
@@ -244,29 +215,36 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
         </div>
         <div className="space-y-2">
           {isEditingName ? (
-            <div className="flex items-center gap-1">
-              <TextField className="w-96">
+            <ActionForm
+              action={habitAction}
+              fetcher={habitFetcher}
+              className="flex items-center gap-1"
+              onSubmit={(event) => {
+                skipUnchangedSubmit(event, 'name', name);
+              }}
+            >
+              <input type="hidden" name="intent" value="update-habit" />
+              <TextField isRequired name="name" className="w-96">
                 <InputGroup>
                   <InputGroup.Input
-                    required
                     value={name}
-                    maxLength={50}
+                    onKeyDown={cancelOnEscape}
                     placeholder="Enter habit name"
+                    maxLength={HABIT_FIELD_LIMITS.name}
                     onChange={(e) => {
                       setName(e.target.value);
                     }}
                   />
                   <InputGroup.Suffix className="space-x-2">
                     <span className="text-foreground-400 text-tiny whitespace-nowrap">
-                      {name.length}/50
+                      {name.length}/{HABIT_FIELD_LIMITS.name}
                     </span>
                     <CustomButton
                       size="sm"
                       isIconOnly
+                      type="submit"
                       variant="ghost"
-                      onPress={saveHabit}
                       aria-label="Save name"
-                      isDisabled={!name.trim()}
                     >
                       <CheckIcon className="size-4" />
                     </CustomButton>
@@ -281,8 +259,9 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                     </CustomButton>
                   </InputGroup.Suffix>
                 </InputGroup>
+                <FieldError />
               </TextField>
-            </div>
+            </ActionForm>
           ) : (
             <div className="group flex items-center gap-2">
               <h1 className="text-2xl font-bold">{habit.name}</h1>
@@ -305,28 +284,36 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
             </div>
           )}
           {isEditingDescription ? (
-            <div className="flex items-center gap-1">
-              <TextField className="w-96">
+            <ActionForm
+              action={habitAction}
+              fetcher={habitFetcher}
+              className="flex items-center gap-1"
+              onSubmit={(event) => {
+                skipUnchangedSubmit(event, 'description', description);
+              }}
+            >
+              <input type="hidden" name="intent" value="update-habit" />
+              <TextField className="w-96" name="description">
                 <InputGroup>
                   <InputGroup.Input
                     autoFocus
-                    maxLength={100}
                     value={description}
-                    onKeyDown={handleKeyDown}
+                    onKeyDown={cancelOnEscape}
                     placeholder="No description"
+                    maxLength={HABIT_FIELD_LIMITS.description}
                     onChange={(e) => {
                       setDescription(e.target.value);
                     }}
                   />
                   <InputGroup.Suffix className="space-x-2">
                     <span className="text-foreground-400 text-tiny whitespace-nowrap">
-                      {description.length}/100
+                      {description.length}/{HABIT_FIELD_LIMITS.description}
                     </span>
                     <CustomButton
                       size="sm"
                       isIconOnly
+                      type="submit"
                       variant="ghost"
-                      onPress={saveHabit}
                       aria-label="Save description"
                     >
                       <CheckIcon className="size-4" />
@@ -342,8 +329,9 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                     </CustomButton>
                   </InputGroup.Suffix>
                 </InputGroup>
+                <FieldError />
               </TextField>
-            </div>
+            </ActionForm>
           ) : (
             <div className="group flex items-center gap-2">
               <p
@@ -372,13 +360,20 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
         </div>
       </div>
       {isEditingMotivation ? (
-        <div>
-          <TextField fullWidth className="flex flex-col">
+        <ActionForm
+          action={habitAction}
+          fetcher={habitFetcher}
+          onSubmit={(event) => {
+            skipUnchangedSubmit(event, 'motivation', motivation);
+          }}
+        >
+          <input type="hidden" name="intent" value="update-habit" />
+          <TextField fullWidth name="motivation" className="flex flex-col">
             <InputGroup>
               <InputGroup.TextArea
-                maxLength={2000}
                 className="h-24"
                 value={motivation}
+                maxLength={HABIT_FIELD_LIMITS.motivation}
                 onChange={(e) => {
                   setMotivation(e.target.value);
                 }}
@@ -386,13 +381,13 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
               />
               <InputGroup.Suffix className="items-center space-x-2 self-end py-2">
                 <span className="text-foreground-400 text-tiny whitespace-nowrap">
-                  {motivation.length}/2000
+                  {motivation.length}/{HABIT_FIELD_LIMITS.motivation}
                 </span>
                 <CustomButton
                   size="sm"
                   isIconOnly
+                  type="submit"
                   variant="ghost"
-                  onPress={saveHabit}
                   aria-label="Save motivation"
                 >
                   <CheckIcon className="size-4" />
@@ -408,8 +403,9 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 </CustomButton>
               </InputGroup.Suffix>
             </InputGroup>
+            <FieldError />
           </TextField>
-        </div>
+        </ActionForm>
       ) : (
         <div className="group">
           <h2 className="mt-4 mb-1 text-sm font-medium">Motivation</h2>

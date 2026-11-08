@@ -6,9 +6,10 @@ import type { FieldErrors } from '@models';
 
 type ActionFormProps = Omit<
   React.ComponentProps<typeof Form>,
-  'action' | 'method' | 'render' | 'validationErrors'
+  'action' | 'encType' | 'method' | 'render' | 'validationErrors'
 > & {
   action: string;
+  encType?: 'multipart/form-data';
   fetcher: FetcherWithComponents<unknown>;
 };
 
@@ -22,15 +23,28 @@ const getFieldErrors = (result: unknown) => {
 
 /**
  * A HeroUI form that posts its named fields to a route action through the fetcher, and shows the
- * action's `fieldErrors` next to the matching fields until they are edited.
+ * action's `fieldErrors` next to the matching fields until they are edited. Pass
+ * `encType="multipart/form-data"` when the form has a file input.
  */
-const ActionForm = ({ action, fetcher, ...props }: ActionFormProps) => {
+const ActionForm = ({
+  action,
+  encType,
+  fetcher,
+  ...props
+}: ActionFormProps) => {
   return (
     <Form
       {...props}
       validationErrors={getFieldErrors(fetcher.data)}
-      render={({ encType, ...formProps }) => {
-        return <fetcher.Form {...formProps} method="post" action={action} />;
+      render={({ encType: _, ...formProps }) => {
+        return (
+          <fetcher.Form
+            {...formProps}
+            method="post"
+            action={action}
+            encType={encType}
+          />
+        );
       }}
     />
   );

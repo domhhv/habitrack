@@ -18,12 +18,14 @@ import {
 } from '@services';
 import {
   runAction,
+  getFormJson,
   getFormText,
   userContext,
   getErrorMessage,
   supabaseContext,
   assertValidFields,
   getRequestTimeZone,
+  getHabitFieldErrors,
   buildHabitMetricInsert,
 } from '@utils';
 
@@ -82,19 +84,27 @@ const addHabit = async (
   formData: FormData,
   userId: string
 ) => {
+  assertValidFields(getHabitFieldErrors(formData));
+
   const icon = formData.get('icon');
-  const traitId = formData.get('traitId');
-  const metricDefinitions = JSON.parse(
-    String(formData.get('metricDefinitions') ?? '[]')
-  ) as FormMetricDefinitions[];
+  const traitId = getFormText(formData, 'traitId');
+  const metricDefinitions = getFormJson<FormMetricDefinitions[]>(
+    formData,
+    'metricDefinitions',
+    []
+  );
+
+  if (!Array.isArray(metricDefinitions)) {
+    throw new Error('The metric definitions could not be read');
+  }
 
   const habit = await createHabit(supabase, {
-    description: String(formData.get('description') ?? ''),
-    name: String(formData.get('name') ?? ''),
-    traitId: typeof traitId === 'string' && traitId ? traitId : null,
+    description: getFormText(formData, 'description'),
+    name: getFormText(formData, 'name'),
+    traitId: traitId || null,
     userId,
     iconPath:
-      icon && typeof icon !== 'string'
+      icon instanceof File && icon.size > 0
         ? await uploadHabitIcon(supabase, userId, icon)
         : '',
   });
@@ -141,11 +151,19 @@ export const action = async ({ context, request }: Route.ActionArgs) => {
 
   const formData = await request.formData();
 
-  if (formData.get('intent') === 'create-trait') {
-    return runAction(addTrait(supabase, formData, user.id), 'add_trait');
-  }
+  switch (formData.get('intent')) {
+    case 'create-habit':
+      return runAction(addHabit(supabase, formData, user.id), 'add_habit');
 
-  return runAction(addHabit(supabase, formData, user.id), 'add_habit');
+    case 'create-trait':
+      return runAction(addTrait(supabase, formData, user.id), 'add_trait');
+
+    default:
+      return data(
+        { error: 'Unsupported habits request', ok: false as const },
+        { status: 400 }
+      );
+  }
 };
 
 const HabitsPage = ({ loaderData: { habitsStats } }: Route.ComponentProps) => {
