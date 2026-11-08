@@ -1,11 +1,22 @@
-import { Input, Label, Switch, TextField, NumberField } from '@heroui/react';
+import {
+  Input,
+  Label,
+  Switch,
+  TextField,
+  FieldError,
+  NumberField,
+} from '@heroui/react';
 import { XIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { href } from 'react-router';
 
-import { CustomButton } from '@components';
-import { useUser, useProfile, useActionFetcher } from '@hooks';
-import type { Habit, MetricValue, HabitDetailsSubmission } from '@models';
+import { ActionForm, CustomButton } from '@components';
+import { useProfile, useActionFetcher } from '@hooks';
+import type {
+  Habit,
+  MetricValue,
+  StockMetricDefaultsSubmission,
+} from '@models';
 import { pickDefinedValues } from '@utils';
 
 import StockMetricDefaults from './StockMetricDefaults';
@@ -16,7 +27,6 @@ type AddStockFormProps = {
 };
 
 const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
-  const user = useUser();
   const profile = useProfile();
   const fetcher = useActionFetcher(onClose);
   const isSaving = fetcher.state !== 'idle';
@@ -37,48 +47,43 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
     Record<string, boolean>
   >({});
 
-  const handleSubmit = () => {
-    if (!user || !name.trim()) {
-      return;
-    }
-
-    if (isQuantifiable && (!totalItems || totalItems <= 0)) {
-      return;
-    }
-
-    void fetcher.submit(
-      {
-        intent: 'add-stock',
-        metricDefaults: {
-          compound: compoundDefaults,
-          values: pickDefinedValues(metricDefaults),
-        },
-        stock: {
-          cost: cost ?? null,
-          currency,
-          isDepleted: false,
-          name: name.trim(),
-          remainingItems: isQuantifiable && totalItems ? totalItems : null,
-          totalItems: isQuantifiable && totalItems ? totalItems : null,
-        },
-      } satisfies HabitDetailsSubmission,
-      {
-        action: href('/habits/:habitId', { habitId: habit.id }),
-        encType: 'application/json',
-        method: 'post',
-      }
-    );
-  };
-
   return (
-    <div className="border-border flex flex-col gap-3 rounded-lg border p-4">
+    <ActionForm
+      fetcher={fetcher}
+      action={href('/habits/:habitId', { habitId: habit.id })}
+      className="border-border flex flex-col gap-3 rounded-lg border p-4"
+      onSubmit={(event) => {
+        if (isSaving) {
+          event.preventDefault();
+        }
+      }}
+    >
+      <input type="hidden" name="intent" value="add-stock" />
+      {habit.metricDefinitions.length > 0 && (
+        <input
+          type="hidden"
+          name="metricDefaults"
+          value={JSON.stringify({
+            compound: compoundDefaults,
+            values: pickDefinedValues(metricDefaults),
+          } satisfies StockMetricDefaultsSubmission)}
+        />
+      )}
       <h3 className="text-sm font-medium">New stock item</h3>
-      <TextField autoFocus value={name} onChange={setName}>
+      <TextField
+        autoFocus
+        isRequired
+        name="name"
+        value={name}
+        onChange={setName}
+      >
         <Label>Name</Label>
         <Input placeholder="e.g. Velo Berry Frost 14mg" />
+        <FieldError />
       </TextField>
       <div className="flex gap-2">
         <NumberField
+          name="cost"
           minValue={0}
           value={cost}
           className="flex-1"
@@ -94,15 +99,24 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
             <NumberField.Input placeholder="0.00" />
             <NumberField.IncrementButton />
           </NumberField.Group>
+          <FieldError />
         </NumberField>
-        <TextField value={currency} className="w-24" onChange={setCurrency}>
+        <TextField
+          isRequired
+          name="currency"
+          value={currency}
+          className="w-24"
+          onChange={setCurrency}
+        >
           <Label>Currency</Label>
           <Input placeholder="EUR" />
+          <FieldError />
         </TextField>
       </div>
       <div className="flex items-center gap-2">
         <Switch
           size="sm"
+          name="isQuantifiable"
           isSelected={isQuantifiable}
           onChange={setIsQuantifiable}
         >
@@ -120,13 +134,20 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
         </span>
       </div>
       {isQuantifiable && (
-        <NumberField minValue={1} value={totalItems} onChange={setTotalItems}>
+        <NumberField
+          isRequired
+          minValue={1}
+          name="totalItems"
+          value={totalItems}
+          onChange={setTotalItems}
+        >
           <Label>Total items</Label>
           <NumberField.Group>
             <NumberField.DecrementButton />
             <NumberField.Input placeholder="e.g. 20" />
             <NumberField.IncrementButton />
           </NumberField.Group>
+          <FieldError />
         </NumberField>
       )}
       {habit.metricDefinitions.length > 0 && (
@@ -141,11 +162,10 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
       <div className="flex items-center gap-2">
         <CustomButton
           size="sm"
+          type="submit"
           variant="primary"
-          onPress={handleSubmit}
-          isDisabled={
-            isSaving || !name.trim() || (isQuantifiable && !totalItems)
-          }
+          isPending={isSaving}
+          isDisabled={isSaving}
         >
           <FloppyDiskIcon className="size-4" />
           Save
@@ -160,7 +180,7 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
           Cancel
         </CustomButton>
       </div>
-    </div>
+    </ActionForm>
   );
 };
 

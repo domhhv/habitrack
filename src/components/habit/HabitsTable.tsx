@@ -8,7 +8,7 @@ import { Link, href } from 'react-router';
 
 import { TraitChip, CustomButton, AddHabitDialogButton } from '@components';
 import { useHabits, useActionFetcher } from '@hooks';
-import type { Habit, HabitStats, HabitDetailsSubmission } from '@models';
+import type { Habit, HabitStats } from '@models';
 import { useConfirmationActions } from '@stores';
 
 import habitColumns from './habit-columns';
@@ -60,10 +60,9 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
 
     if (confirmed) {
       void deleteFetcher.submit(
-        { intent: 'delete-habit' } satisfies HabitDetailsSubmission,
+        { intent: 'delete-habit' },
         {
           action: href('/habits/:habitId', { habitId: habit.id }),
-          encType: 'application/json',
           method: 'post',
         }
       );

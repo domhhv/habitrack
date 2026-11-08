@@ -210,7 +210,6 @@ const MetricDefinitionForm = ({
         </Autocomplete>
         <TextField
           fullWidth
-          name="name"
           variant="secondary"
           value={metric.name}
           onChange={(value) => {

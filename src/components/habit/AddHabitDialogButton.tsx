@@ -4,6 +4,7 @@ import {
   Select,
   ListBox,
   TextField,
+  FieldError,
   InputGroup,
   useOverlayState,
 } from '@heroui/react';
@@ -12,11 +13,13 @@ import React from 'react';
 import { href } from 'react-router';
 
 import {
+  ActionForm,
   CustomButton,
   AddTraitModal,
   VisuallyHiddenInput,
   MetricDefinitionForm,
 } from '@components';
+import { HABIT_FIELD_LIMITS } from '@const';
 import {
   useUser,
   useTraits,
@@ -63,25 +66,6 @@ const AddHabitDialogButton = () => {
     }
   }, [addDialogState.isOpen, clearFields]);
 
-  const handleAdd = () => {
-    const formData = new FormData();
-
-    formData.set('name', name);
-    formData.set('description', description);
-    formData.set('traitId', traitId);
-    formData.set('metricDefinitions', JSON.stringify(metricDefinitions));
-
-    if (icon) {
-      formData.set('icon', icon);
-    }
-
-    void fetcher.submit(formData, {
-      action: href('/habits'),
-      encType: 'multipart/form-data',
-      method: 'post',
-    });
-  };
-
   const addMetric = () => {
     setMetricDefinitions((prev) => {
       return [
@@ -124,151 +108,171 @@ const AddHabitDialogButton = () => {
               <Modal.Header>
                 <Modal.Heading>Add New Habit</Modal.Heading>
               </Modal.Header>
-              <Modal.Body className="space-y-4">
-                <TextField fullWidth name="name" variant="secondary">
-                  <Label>Name</Label>
-                  <InputGroup>
-                    <InputGroup.Input
-                      required
-                      value={name}
-                      maxLength={50}
-                      onChange={handleNameChange}
-                      placeholder="Enter habit name"
-                    />
-                    <InputGroup.Suffix>
-                      <span className="text-foreground-400 text-tiny whitespace-nowrap">
-                        {name.length}/50
-                      </span>
-                    </InputGroup.Suffix>
-                  </InputGroup>
-                </TextField>
-                <TextField fullWidth name="description" variant="secondary">
-                  <Label>Description</Label>
-                  <InputGroup>
-                    <InputGroup.Input
-                      maxLength={100}
-                      value={description}
-                      onChange={handleDescriptionChange}
-                      placeholder="Enter short description (optional)"
-                    />
-                    <InputGroup.Suffix>
-                      <span className="text-foreground-400 text-tiny whitespace-nowrap">
-                        {description.length}/100
-                      </span>
-                    </InputGroup.Suffix>
-                  </InputGroup>
-                </TextField>
-                <Select
-                  variant="secondary"
-                  value={traitId || null}
-                  placeholder="Choose a trait (optional)"
-                  onChange={(key) => {
-                    setTraitId(typeof key === 'string' ? key : '');
-                  }}
-                >
-                  <Label>Choose a trait</Label>
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      {Object.values(traits).map((trait) => {
-                        return (
-                          <ListBox.Item
-                            textValue={trait.name}
-                            id={trait.id.toString()}
-                            key={trait.id.toString()}
-                          >
-                            {trait.name}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        );
-                      })}
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-                <CustomButton
-                  fullWidth
-                  size="sm"
-                  variant="tertiary"
-                  className="min-h-8"
-                  onPress={traitModalState.open}
-                >
-                  <PlusIcon />
-                  Or add a new trait
-                </CustomButton>
-                <CustomButton
-                  fullWidth
-                  size="sm"
-                  variant="tertiary"
-                  isDisabled={isAdding}
-                  onPress={() => {
-                    iconInputRef.current?.click();
-                  }}
-                >
-                  <CloudArrowUpIcon />
-                  Upload habit icon
-                </CustomButton>
-                <VisuallyHiddenInput
-                  ref={iconInputRef}
-                  isDisabled={isAdding}
-                  onChange={handleIconChange}
+              <ActionForm
+                fetcher={fetcher}
+                className="contents"
+                action={href('/habits')}
+                encType="multipart/form-data"
+              >
+                <input type="hidden" name="intent" value="create-habit" />
+                <input
+                  type="hidden"
+                  name="metricDefinitions"
+                  value={JSON.stringify(metricDefinitions)}
                 />
-                {icon && <p>{icon.name}</p>}
+                <Modal.Body className="space-y-4">
+                  <TextField
+                    fullWidth
+                    isRequired
+                    name="name"
+                    variant="secondary"
+                  >
+                    <Label>Name</Label>
+                    <InputGroup>
+                      <InputGroup.Input
+                        value={name}
+                        onChange={handleNameChange}
+                        placeholder="Enter habit name"
+                        maxLength={HABIT_FIELD_LIMITS.name}
+                      />
+                      <InputGroup.Suffix>
+                        <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                          {name.length}/{HABIT_FIELD_LIMITS.name}
+                        </span>
+                      </InputGroup.Suffix>
+                    </InputGroup>
+                    <FieldError />
+                  </TextField>
+                  <TextField fullWidth name="description" variant="secondary">
+                    <Label>Description</Label>
+                    <InputGroup>
+                      <InputGroup.Input
+                        value={description}
+                        onChange={handleDescriptionChange}
+                        maxLength={HABIT_FIELD_LIMITS.description}
+                        placeholder="Enter short description (optional)"
+                      />
+                      <InputGroup.Suffix>
+                        <span className="text-foreground-400 text-tiny whitespace-nowrap">
+                          {description.length}/{HABIT_FIELD_LIMITS.description}
+                        </span>
+                      </InputGroup.Suffix>
+                    </InputGroup>
+                    <FieldError />
+                  </TextField>
+                  <Select
+                    name="traitId"
+                    variant="secondary"
+                    value={traitId || null}
+                    placeholder="Choose a trait (optional)"
+                    onChange={(key) => {
+                      setTraitId(typeof key === 'string' ? key : '');
+                    }}
+                  >
+                    <Label>Choose a trait</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {Object.values(traits).map((trait) => {
+                          return (
+                            <ListBox.Item
+                              textValue={trait.name}
+                              id={trait.id.toString()}
+                              key={trait.id.toString()}
+                            >
+                              {trait.name}
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                          );
+                        })}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                  <CustomButton
+                    fullWidth
+                    size="sm"
+                    variant="tertiary"
+                    className="min-h-8"
+                    onPress={traitModalState.open}
+                  >
+                    <PlusIcon />
+                    Or add a new trait
+                  </CustomButton>
+                  <CustomButton
+                    fullWidth
+                    size="sm"
+                    variant="tertiary"
+                    isDisabled={isAdding}
+                    onPress={() => {
+                      iconInputRef.current?.click();
+                    }}
+                  >
+                    <CloudArrowUpIcon />
+                    Upload habit icon
+                  </CustomButton>
+                  <VisuallyHiddenInput
+                    name="icon"
+                    ref={iconInputRef}
+                    isDisabled={isAdding}
+                    onChange={handleIconChange}
+                  />
+                  {icon && <p>{icon.name}</p>}
 
-                {metricDefinitions.map((md) => {
-                  return (
-                    <MetricDefinitionForm
-                      key={md.id}
-                      metric={md}
-                      onRemove={() => {
-                        setMetricDefinitions((prev) => {
-                          return prev.filter((prevMd) => {
-                            return prevMd.id !== md.id;
+                  {metricDefinitions.map((md) => {
+                    return (
+                      <MetricDefinitionForm
+                        key={md.id}
+                        metric={md}
+                        onRemove={() => {
+                          setMetricDefinitions((prev) => {
+                            return prev.filter((prevMd) => {
+                              return prevMd.id !== md.id;
+                            });
                           });
-                        });
-                      }}
-                      onChange={(metricUpdates) => {
-                        setMetricDefinitions((prev) => {
-                          return prev.map((prevMd) => {
-                            if (prevMd.id === md.id) {
-                              return {
-                                ...prevMd,
-                                ...metricUpdates,
-                              };
-                            }
+                        }}
+                        onChange={(metricUpdates) => {
+                          setMetricDefinitions((prev) => {
+                            return prev.map((prevMd) => {
+                              if (prevMd.id === md.id) {
+                                return {
+                                  ...prevMd,
+                                  ...metricUpdates,
+                                };
+                              }
 
-                            return prevMd;
+                              return prevMd;
+                            });
                           });
-                        });
-                      }}
-                    />
-                  );
-                })}
-                <CustomButton
-                  fullWidth
-                  size="sm"
-                  variant="tertiary"
-                  className="min-h-8"
-                  onPress={addMetric}
-                  isDisabled={isAdding}
-                >
-                  Add metric
-                </CustomButton>
-              </Modal.Body>
-              <Modal.Footer>
-                <CustomButton
-                  fullWidth
-                  type="submit"
-                  variant="primary"
-                  onPress={handleAdd}
-                  isPending={isAdding}
-                  isDisabled={isAdding || !user?.id || !name}
-                >
-                  Submit
-                </CustomButton>
-              </Modal.Footer>
+                        }}
+                      />
+                    );
+                  })}
+                  <CustomButton
+                    fullWidth
+                    size="sm"
+                    variant="tertiary"
+                    className="min-h-8"
+                    onPress={addMetric}
+                    isDisabled={isAdding}
+                  >
+                    Add metric
+                  </CustomButton>
+                </Modal.Body>
+                <Modal.Footer>
+                  <CustomButton
+                    fullWidth
+                    type="submit"
+                    variant="primary"
+                    isPending={isAdding}
+                    isDisabled={isAdding || !user?.id}
+                  >
+                    Submit
+                  </CustomButton>
+                </Modal.Footer>
+              </ActionForm>
             </Modal.Dialog>
           </Modal.Container>
         </Modal.Backdrop>

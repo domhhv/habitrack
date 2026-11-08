@@ -81,6 +81,7 @@ describe('HabitsPage action', () => {
   it('creates a habit with its icon and metric definitions', async () => {
     const icon = new File(['icon'], 'icon.png', { type: 'image/png' });
     const body = new FormData();
+    body.set('intent', 'create-habit');
     body.set('name', 'Running');
     body.set('description', 'Morning runs');
     body.set('traitId', 'trait-1');
@@ -175,16 +176,50 @@ describe('HabitsPage action', () => {
     expect(createTrait).not.toHaveBeenCalled();
   });
 
+  const submitHabit = (fields: Record<string, string>) => {
+    return action(
+      makeRouteArgs<Route.ActionArgs>(HABITS_URL, user, {
+        body: new URLSearchParams({ intent: 'create-habit', ...fields }),
+        method: 'POST',
+      })
+    );
+  };
+
+  it('returns field errors for a blank name and a long description', async () => {
+    await expect(
+      submitHabit({ description: 'a'.repeat(101), name: '  ' })
+    ).resolves.toMatchObject({
+      init: { status: 400 },
+      data: {
+        fieldErrors: {
+          description: 'Keep it to 100 characters',
+          name: 'Give the habit a name',
+        },
+      },
+    });
+    expect(createHabit).not.toHaveBeenCalled();
+  });
+
+  it('rejects unreadable metric definitions without writing', async () => {
+    await expect(
+      submitHabit({ metricDefinitions: '{', name: 'Running' })
+    ).resolves.toMatchObject({ ok: false });
+    expect(createHabit).not.toHaveBeenCalled();
+  });
+
+  it('rejects an unknown intent', async () => {
+    await expect(submitHabit({ intent: 'rename' })).resolves.toMatchObject({
+      data: { error: 'Unsupported habits request' },
+      init: { status: 400 },
+    });
+  });
+
   it('reports the failure without a 4xx so loaders still revalidate', async () => {
     vi.mocked(createHabit).mockRejectedValue(new Error('Duplicate'));
 
-    await expect(
-      action(
-        makeRouteArgs<Route.ActionArgs>(HABITS_URL, user, {
-          body: new FormData(),
-          method: 'POST',
-        })
-      )
-    ).resolves.toMatchObject({ error: 'Duplicate', ok: false });
+    await expect(submitHabit({ name: 'Running' })).resolves.toMatchObject({
+      error: 'Duplicate',
+      ok: false,
+    });
   });
 });

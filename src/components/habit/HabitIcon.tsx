@@ -26,6 +26,7 @@ const HabitIcon = ({ habit }: HabitIconCellProps) => {
 
     const formData = new FormData();
 
+    formData.set('intent', 'upload-icon');
     formData.set('icon', files[0]);
 
     void fetcher.submit(formData, {

@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is done: toasts returned in action results shipped in #505, server actions for everything but occurrences in #506, and the occurrence server action is done on `refactor/occurrence-server-action`. Simplifying revalidation, which completes §1, shipped in #509. §2 runs as three PRs: type-safe `href()` shipped in #510, the settings, trait and note forms are done on `refactor/settings-trait-note-forms`, and the habit and stock forms come last.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is done: toasts returned in action results shipped in #505, server actions for everything but occurrences in #506, and the occurrence server action is done on `refactor/occurrence-server-action`. Simplifying revalidation, which completes §1, shipped in #509. §2 ran as three PRs: type-safe `href()` shipped in #510, the settings, trait and note forms in #511, and the habit and stock forms, which complete §2, are done on `refactor/habit-stock-forms`.
 
 ## Target end state
 
@@ -436,7 +436,7 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
 
 - Replace `fetcher.submit(json)` with `<Form>`/`<fetcher.Form>` and named inputs wherever a form maps to flat fields: the settings general and security forms, the trait modal, the note drawer, inline habit edits and the stock forms. With server actions (§1) these work before JavaScript loads.
 - Validate in actions and return field errors with `data({ errors }, { status: 400 })`, rendered from `actionData`/`fetcher.data`. That makes the duplicated client checks unnecessary, such as the required habit name and stock quantity rules.
-- **Settings, trait and note forms** (the first two bullets) – done on `refactor/settings-trait-note-forms`. The habit and stock forms follow in their own PR.
+- **Settings, trait and note forms** (the first two bullets) – shipped in #511.
   - **As built:**
     - **Shared pieces.**
       - `ActionForm` (`src/components/common/ActionForm.tsx`) is HeroUI's `Form` rendering a `fetcher.Form` through its `render` prop. It posts the named fields to the given action and passes the result's `fieldErrors` to `validationErrors`. React Aria shows each message in the field's `<FieldError />` and clears it once that field is edited.
@@ -454,6 +454,18 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
       - `/resources/notes` reads form data instead of JSON, trims the content, and rejects a blank note with a field error. It fails an invalid period, a missing note id or an unknown intent without writing. `NoteSubmission` and `src/models/note-submission.model.ts` are deleted.
     - **Still client-only checks** that disable the submit buttons (unchanged values, empty note) stay as UX. The server is the source of truth.
     - **Tests** cover `ActionForm` (fields posted, errors shown), the settings forms rendered for real (the selects post their values, field errors show), the trait modal, and the new action validation for settings, traits and notes.
+    - **Not verified:** a run in a real browser.
+- **Habit and stock forms** (the first two bullets, completing them) – done on `refactor/habit-stock-forms`.
+  - **As built:**
+    - **Nested data in a form.** The metric definitions and the stock metric defaults are not flat, so each travels in one hidden field as JSON, which the action reads with `getFormJson` (`src/utils/get-form-json.ts`). Unreadable JSON fails before anything is written. `ActionForm` takes `encType="multipart/form-data"` for forms with a file input.
+    - **Habit fields.** `HABIT_FIELD_LIMITS` in `@const` sets the name, description and motivation lengths for the inputs' `maxLength` and counters. `getHabitFieldErrors` checks the same limits on the server and requires a non-blank name whenever one is submitted. Both habit actions use it.
+    - **Create dialog.** The dialog body is an `ActionForm` posting `intent=create-habit`, `name`, `description`, `traitId`, the `icon` file input and the `metricDefinitions` JSON to `/habits`. The `/habits` action now requires an intent and rejects unknown ones with a 400. `MetricDefinitionForm`'s name field lost its `name` attribute, which would have clashed with the habit's `name` field and its errors.
+    - **Habit details action.** `/habits/:habitId` reads form data for every intent (`HabitDetailsIntent`); `HabitDetailsSubmission` is deleted. The icon upload posts `intent=upload-icon`. The delete, trait change and metric save post form fields too.
+      - `update-habit` patches only the fields present in the form, trims them, and stores a blank description, motivation or trait as `null`.
+      - The stock intents need a `stockId` (400 otherwise). Toggling depletion is its own `set-stock-depleted` intent, so it no longer goes through the stock field validation.
+    - **Inline habit edits.** The name, description and motivation editors are each an `ActionForm` with a submit button. Enter submits the inputs natively and Escape cancels. `onSubmit` closes the editor without posting when the value didn't change or a save is pending.
+    - **Stock forms.** `AddStockForm` and the `StockListItem` editor are `ActionForm`s with named fields. The server validates them (blank name, negative cost, currency not 3 letters, missing or non-whole item counts), uppercases the currency, and caps the remaining items at the total, which the editor used to do. The client checks that disabled Save are gone, except for a pending save.
+    - **Tests** cover the habit details action on form fields (patching, validation, stock fields, missing stock id, unknown intent), the `/habits` action's new validation, and the forms themselves: the create dialog's posted fields (the multipart body is read as text, because Node can't parse jsdom files back), the stock form's posted fields and field errors, and the inline name edit.
     - **Not verified:** a run in a real browser.
 - Build action URLs and links with the type-safe `href()` instead of strings such as `` `/habits/${id}` ``, `/resources/occurrences` and `/calendar/month/${y}/${m}/${d}` – done on `refactor/type-safe-href`.
   - **As built:**

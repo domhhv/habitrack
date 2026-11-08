@@ -4,6 +4,7 @@ import {
   Label,
   Switch,
   TextField,
+  FieldError,
   NumberField,
 } from '@heroui/react';
 import {
@@ -16,13 +17,13 @@ import {
 import React from 'react';
 import { href } from 'react-router';
 
-import { CustomButton } from '@components';
-import { useUser, useActionFetcher } from '@hooks';
+import { ActionForm, CustomButton } from '@components';
+import { useActionFetcher } from '@hooks';
 import type {
   Habit,
   MetricValue,
-  HabitDetailsSubmission,
   HabitStockWithDefaults,
+  StockMetricDefaultsSubmission,
 } from '@models';
 import { useConfirmationActions } from '@stores';
 import { pickDefinedValues } from '@utils';
@@ -51,7 +52,6 @@ const formatCost = (cost: number | null, currency: string) => {
 
 const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
   const { askConfirmation } = useConfirmationActions();
-  const user = useUser();
   const [isEditing, setIsEditing] = React.useState(false);
   const [name, setName] = React.useState(stock.name);
   const [cost, setCost] = React.useState<number | undefined>(
@@ -78,12 +78,13 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
   });
   const isSaving = fetcher.state !== 'idle';
 
-  const submitStockChange = (submission: HabitDetailsSubmission) => {
-    void fetcher.submit(submission, {
-      action: href('/habits/:habitId', { habitId: stock.habitId }),
-      encType: 'application/json',
-      method: 'post',
-    });
+  const habitAction = href('/habits/:habitId', { habitId: stock.habitId });
+
+  const submitStockChange = (fields: Record<string, string>) => {
+    void fetcher.submit(
+      { ...fields, stockId: stock.id },
+      { action: habitAction, method: 'post' }
+    );
   };
 
   const costPerItem =
@@ -108,15 +109,14 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
         variant: 'danger',
       })
     ) {
-      submitStockChange({ intent: 'remove-stock', stockId: stock.id });
+      submitStockChange({ intent: 'remove-stock' });
     }
   };
 
   const handleToggleDepleted = () => {
     submitStockChange({
-      intent: 'update-stock',
-      stock: { isDepleted: !stock.isDepleted },
-      stockId: stock.id,
+      intent: 'set-stock-depleted',
+      isDepleted: String(!stock.isDepleted),
     });
   };
 
@@ -139,43 +139,6 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
     setMetricDefaults(defaults);
     setCompoundDefaults(compoundMap);
     setIsEditing(true);
-  };
-
-  const handleSave = () => {
-    const trimmedName = name.trim();
-
-    if (!trimmedName || !user) {
-      return;
-    }
-
-    if (isQuantifiable && totalItems == null) {
-      return;
-    }
-
-    const nextTotalItems = isQuantifiable ? (totalItems ?? null) : null;
-    const nextRemainingItems =
-      isQuantifiable && nextTotalItems !== null
-        ? Math.min(remainingItems ?? nextTotalItems, nextTotalItems)
-        : null;
-
-    submitStockChange({
-      intent: 'update-stock',
-      stockId: stock.id,
-      metricDefaults:
-        metricDefinitions.length > 0
-          ? {
-              compound: compoundDefaults,
-              values: pickDefinedValues(metricDefaults),
-            }
-          : undefined,
-      stock: {
-        cost: cost ?? null,
-        currency,
-        name: trimmedName,
-        remainingItems: nextRemainingItems,
-        totalItems: nextTotalItems,
-      },
-    });
   };
 
   const handleCancel = () => {
@@ -278,13 +241,36 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
         </div>
       </div>
       {isEditing && (
-        <div className="flex flex-col gap-3">
-          <TextField value={name} onChange={setName}>
+        <ActionForm
+          fetcher={fetcher}
+          action={habitAction}
+          className="flex flex-col gap-3"
+          onSubmit={(event) => {
+            if (isSaving) {
+              event.preventDefault();
+            }
+          }}
+        >
+          <input type="hidden" name="intent" value="update-stock" />
+          <input type="hidden" name="stockId" value={stock.id} />
+          {metricDefinitions.length > 0 && (
+            <input
+              type="hidden"
+              name="metricDefaults"
+              value={JSON.stringify({
+                compound: compoundDefaults,
+                values: pickDefinedValues(metricDefaults),
+              } satisfies StockMetricDefaultsSubmission)}
+            />
+          )}
+          <TextField isRequired name="name" value={name} onChange={setName}>
             <Label>Name</Label>
             <Input placeholder="Stock name" />
+            <FieldError />
           </TextField>
           <div className="flex gap-2">
             <NumberField
+              name="cost"
               minValue={0}
               value={cost}
               className="flex-1"
@@ -300,15 +286,24 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
                 <NumberField.Input placeholder="0.00" />
                 <NumberField.IncrementButton />
               </NumberField.Group>
+              <FieldError />
             </NumberField>
-            <TextField value={currency} className="w-24" onChange={setCurrency}>
+            <TextField
+              isRequired
+              name="currency"
+              value={currency}
+              className="w-24"
+              onChange={setCurrency}
+            >
               <Label>Currency</Label>
               <Input placeholder="EUR" />
+              <FieldError />
             </TextField>
           </div>
           <div className="flex items-center gap-2">
             <Switch
               size="sm"
+              name="isQuantifiable"
               isSelected={isQuantifiable}
               onChange={setIsQuantifiable}
             >
@@ -326,7 +321,9 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
           {isQuantifiable && (
             <div className="flex gap-2">
               <NumberField
+                isRequired
                 minValue={1}
+                name="totalItems"
                 value={totalItems}
                 className="flex-1"
                 onChange={setTotalItems}
@@ -337,10 +334,12 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
                   <NumberField.Input placeholder="e.g. 20" />
                   <NumberField.IncrementButton />
                 </NumberField.Group>
+                <FieldError />
               </NumberField>
               <NumberField
                 minValue={0}
                 className="flex-1"
+                name="remainingItems"
                 value={remainingItems}
                 isDisabled={!totalItems}
                 onChange={setRemainingItems}
@@ -352,6 +351,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
                   <NumberField.Input placeholder="e.g. 10" />
                   <NumberField.IncrementButton />
                 </NumberField.Group>
+                <FieldError />
               </NumberField>
             </div>
           )}
@@ -378,9 +378,10 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
           <div className="flex items-center gap-2">
             <CustomButton
               size="sm"
+              type="submit"
               variant="primary"
-              onPress={handleSave}
-              isDisabled={isSaving || !name.trim() || !user}
+              isPending={isSaving}
+              isDisabled={isSaving}
             >
               <FloppyDiskIcon className="size-4" />
               Save
@@ -395,7 +396,7 @@ const StockListItem = ({ metricDefinitions, stock }: StockListItemProps) => {
               Cancel
             </CustomButton>
           </div>
-        </div>
+        </ActionForm>
       )}
     </div>
   );
