@@ -3,8 +3,10 @@ import {
   ArrowRightIcon,
   UserCirclePlusIcon,
 } from '@phosphor-icons/react';
+import { href } from 'react-router';
 
 import { CustomButton } from '@components';
+import { getCalendarHref } from '@utils';
 
 import CtaLink from '../CtaLink';
 import LandingReveal from '../LandingReveal';
@@ -38,7 +40,9 @@ const HeroSection = ({ hasSession }: HeroSectionProps) => {
                   know exactly what it uses and what it costs.
                 </p>
                 <div className="mt-4">
-                  <CtaLink href="/calendar/month">Open your calendar</CtaLink>
+                  <CtaLink href={getCalendarHref('month')}>
+                    Open your calendar
+                  </CtaLink>
                 </div>
               </div>
             ) : (
@@ -51,14 +55,17 @@ const HeroSection = ({ hasSession }: HeroSectionProps) => {
                       — and know exactly what it uses and what it costs.
                     </p>
                     <div className="flex gap-2 md:flex-col">
-                      <CustomButton href="/register" className="md:w-full">
+                      <CustomButton
+                        className="md:w-full"
+                        href={href('/register')}
+                      >
                         <UserCirclePlusIcon className="size-5" />
                         Join — it&apos;s free
                       </CustomButton>
                       <CustomButton
                         variant="outline"
                         data-discover="true"
-                        href="/calendar/month"
+                        href={getCalendarHref('month')}
                       >
                         Preview the full calendar
                         <ArrowRightIcon className="size-5" />
@@ -67,7 +74,10 @@ const HeroSection = ({ hasSession }: HeroSectionProps) => {
                   </div>
                 </div>
                 <div>
-                  <CustomButton variant="secondary" href="/anonymous-login">
+                  <CustomButton
+                    variant="secondary"
+                    href={href('/anonymous-login')}
+                  >
                     <GhostIcon className="size-5" />
                     Try it out anonymously
                   </CustomButton>

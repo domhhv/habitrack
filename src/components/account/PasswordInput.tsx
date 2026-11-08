@@ -1,6 +1,7 @@
 import { Link, Label, TextField, InputGroup } from '@heroui/react';
 import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import React, { type ChangeEventHandler } from 'react';
+import { href } from 'react-router';
 
 import { CustomButton } from '@components';
 
@@ -42,7 +43,7 @@ const PasswordInput = ({
         {canReset && (
           <div className="text-right">
             <Link
-              href="/reset-password"
+              href={href('/reset-password')}
               className="text-accent-soft-foreground text-sm"
             >
               Forgot password?

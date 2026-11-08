@@ -1,6 +1,7 @@
 import { Toast } from '@heroui/react';
 import pluralize from 'pluralize';
 import React from 'react';
+import { href } from 'react-router';
 
 import {
   StorageBuckets,
@@ -65,7 +66,7 @@ const useOccurrenceFetcher = (onSuccess: () => void) => {
           values: toOccurrenceValuesSubmission(values),
         } satisfies OccurrenceSaveSubmission,
         {
-          action: '/resources/occurrences',
+          action: href('/resources/occurrences'),
           encType: 'application/json',
           method: 'post',
         }

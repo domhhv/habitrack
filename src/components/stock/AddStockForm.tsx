@@ -1,6 +1,7 @@
 import { Input, Label, Switch, TextField, NumberField } from '@heroui/react';
 import { XIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 import React from 'react';
+import { href } from 'react-router';
 
 import { CustomButton } from '@components';
 import { useUser, useProfile, useActionFetcher } from '@hooks';
@@ -62,7 +63,7 @@ const AddStockForm = ({ habit, onClose }: AddStockFormProps) => {
         },
       } satisfies HabitDetailsSubmission,
       {
-        action: `/habits/${habit.id}`,
+        action: href('/habits/:habitId', { habitId: habit.id }),
         encType: 'application/json',
         method: 'post',
       }

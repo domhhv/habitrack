@@ -1,6 +1,7 @@
 import { Input, Label, Modal, TextField } from '@heroui/react';
 import React from 'react';
 import { HexColorPicker } from 'react-colorful';
+import { href } from 'react-router';
 
 import { CustomButton, OccurrenceChip } from '@components';
 import { useUser, useTextField, useActionFetcher } from '@hooks';
@@ -44,7 +45,7 @@ const AddTraitModal = ({ isOpen, onClose }: AddCustomTraitModalProps) => {
         intent: 'create-trait',
         trait: { color, description, name: label },
       } satisfies HabitsSubmission,
-      { action: '/habits', encType: 'application/json', method: 'post' }
+      { action: href('/habits'), encType: 'application/json', method: 'post' }
     );
   };
 

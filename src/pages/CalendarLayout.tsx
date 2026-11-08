@@ -22,6 +22,7 @@ import {
   isCalendarView,
   profileContext,
   supabaseContext,
+  getCalendarHref,
   type SessionUser,
   getCalendarRange,
   getRequestLocale,
@@ -37,7 +38,7 @@ const getCalendarView = (request: Request) => {
   const view = new URL(request.url).pathname.split('/')[2];
 
   if (!isCalendarView(view)) {
-    throw replace('/calendar/month');
+    throw replace(getCalendarHref('month'));
   }
 
   return view;

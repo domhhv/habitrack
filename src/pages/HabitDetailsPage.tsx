@@ -1,6 +1,6 @@
 import { Alert } from '@heroui/react';
 import React from 'react';
-import { data, isRouteErrorResponse } from 'react-router';
+import { data, href, isRouteErrorResponse } from 'react-router';
 
 import { CustomButton, HabitDetails } from '@components';
 import {
@@ -306,7 +306,7 @@ export const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => {
             <Alert.Description>{getErrorMessage(error)}</Alert.Description>
           )}
         </Alert.Content>
-        <CustomButton href="/habits" variant="danger-soft">
+        <CustomButton variant="danger-soft" href={href('/habits')}>
           My habits
         </CustomButton>
       </Alert>

@@ -1,4 +1,7 @@
+import { href } from 'react-router';
+
 import { CustomButton } from '@components';
+import { getCalendarHref } from '@utils';
 
 import ThemeToggle from '../../components/common/ThemeToggle';
 import CtaLink from '../CtaLink';
@@ -45,16 +48,16 @@ const LandingHeader = ({ hasSession }: LandingHeaderProps) => {
               <CustomButton
                 size="sm"
                 data-discover="true"
-                href="/calendar/month"
+                href={getCalendarHref('month')}
               >
                 Calendar
               </CustomButton>
             ) : (
               <div className="flex items-center gap-2">
-                <CtaLink size="sm" href="/login" variant="ghost">
+                <CtaLink size="sm" variant="ghost" href={href('/login')}>
                   Log In
                 </CtaLink>
-                <CtaLink size="sm" href="/register">
+                <CtaLink size="sm" href={href('/register')}>
                   Join
                 </CtaLink>
               </div>

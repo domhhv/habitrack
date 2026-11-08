@@ -1,6 +1,6 @@
 import { Link } from '@heroui/react';
 import React from 'react';
-import { replace } from 'react-router';
+import { href, replace } from 'react-router';
 
 import { AuthForm } from '@components';
 import { useAuthHref, useIsSubmitting, useActionToasts } from '@hooks';
@@ -47,8 +47,8 @@ export const action = async ({ context, request }: Route.ActionArgs) => {
 const LoginPage = ({ actionData }: Route.ComponentProps) => {
   const isAuthenticating = useIsSubmitting();
   useActionToasts(actionData);
-  const registerHref = useAuthHref('/register');
-  const anonymousLoginHref = useAuthHref('/anonymous-login');
+  const registerHref = useAuthHref(href('/register'));
+  const anonymousLoginHref = useAuthHref(href('/anonymous-login'));
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">

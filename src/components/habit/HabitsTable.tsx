@@ -4,7 +4,7 @@ import { TrashSimpleIcon, ArrowsClockwiseIcon } from '@phosphor-icons/react';
 import pluralize from 'pluralize';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
-import { Link } from 'react-router';
+import { Link, href } from 'react-router';
 
 import { TraitChip, CustomButton, AddHabitDialogButton } from '@components';
 import { useHabits, useActionFetcher } from '@hooks';
@@ -62,7 +62,7 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
       void deleteFetcher.submit(
         { intent: 'delete-habit' } satisfies HabitDetailsSubmission,
         {
-          action: `/habits/${habit.id}`,
+          action: href('/habits/:habitId', { habitId: habit.id }),
           encType: 'application/json',
           method: 'post',
         }
@@ -160,8 +160,8 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
                       <Table.Cell>
                         <Link
                           className="font-semibold"
-                          to={`/habits/${habit.id}`}
                           id={`habit-name-${habit.id}`}
+                          to={href('/habits/:habitId', { habitId: habit.id })}
                         >
                           {habit.name}
                         </Link>

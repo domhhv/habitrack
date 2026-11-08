@@ -20,7 +20,11 @@ import { useParams, useNavigate } from 'react-router';
 import { CustomButton, OccurrenceChip, SwipeableContainer } from '@components';
 import { useCurrentTime, useScreenWidth, useCalendarData } from '@hooks';
 import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
-import { isDstTransitionDay, findDstTransitionHour } from '@utils';
+import {
+  getCalendarHref,
+  isDstTransitionDay,
+  findDstTransitionHour,
+} from '@utils';
 
 import CalendarSidebar from './CalendarSidebar';
 
@@ -110,13 +114,13 @@ const DayCalendar = () => {
   const handleSwipeLeft = () => {
     const nextDay = focusedDate.add({ days: 1 });
     setSwipeDirection(1);
-    navigate(`/calendar/day/${nextDay.year}/${nextDay.month}/${nextDay.day}`);
+    navigate(getCalendarHref('day', nextDay));
   };
 
   const handleSwipeRight = () => {
     const prevDay = focusedDate.subtract({ days: 1 });
     setSwipeDirection(-1);
-    navigate(`/calendar/day/${prevDay.year}/${prevDay.month}/${prevDay.day}`);
+    navigate(getCalendarHref('day', prevDay));
   };
 
   return (

@@ -15,7 +15,7 @@ Goal: a sequence of small PRs that can each ship on their own. Every PR leaves t
 
 ## Status
 
-The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is done: toasts returned in action results shipped in #505, server actions for everything but occurrences in #506, and the occurrence server action is done on `refactor/occurrence-server-action`. Simplifying revalidation, which completes §1, is done on `refactor/simplify-revalidation`.
+The migration is complete: PRs 1–11 have shipped. All server data lives in route loaders and actions, and Zustand holds only client UI state (`ui.store.ts`, `theme.store.ts`). The [Future work](#future-work-full-stack-react-router) section is the roadmap for using React Router's full-stack features. Its first step, cookie sessions (§1), shipped in #495. The second, the auth callback route, shipped in #497. The third, the server auth guard, shipped in #498 together with the landing page's auth-state reveal. The fourth, server loaders, shipped in #499. The fifth, server actions, is done: toasts returned in action results shipped in #505, server actions for everything but occurrences in #506, and the occurrence server action is done on `refactor/occurrence-server-action`. Simplifying revalidation, which completes §1, shipped in #509. §2 runs as three PRs: type-safe `href()` (done on `refactor/type-safe-href`), then the settings, trait and note forms, then the habit and stock forms.
 
 ## Target end state
 
@@ -432,9 +432,17 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
 
 ### 2. Progressive enhancement and forms
 
+The app layout still server-renders only its `HydrateFallback` (§1, server loaders), so no app form can work before JavaScript loads yet. Until the app UI renders on the server, the form work in this section pays off as server-side validation with field errors and less form state in components, not as progressive enhancement. Planned PRs: type-safe `href()`, then the settings, trait and note forms, then the habit and stock forms.
+
 - Replace `fetcher.submit(json)` with `<Form>`/`<fetcher.Form>` and named inputs wherever a form maps to flat fields: the settings general and security forms, the trait modal, the note drawer, inline habit edits and the stock forms. With server actions (§1) these work before JavaScript loads.
 - Validate in actions and return field errors with `data({ errors }, { status: 400 })`, rendered from `actionData`/`fetcher.data`. That makes the duplicated client checks unnecessary, such as the required habit name and stock quantity rules.
-- Build action URLs and links with the type-safe `href()` instead of strings such as `` `/habits/${id}` ``, `/resources/occurrences` and `/calendar/month/${y}/${m}/${d}`.
+- Build action URLs and links with the type-safe `href()` instead of strings such as `` `/habits/${id}` ``, `/resources/occurrences` and `/calendar/month/${y}/${m}/${d}` – done on `refactor/type-safe-href`.
+  - **As built:**
+    - Every route path in links, `navigate()` calls, fetcher actions and loads, redirects, and the auth services' callback URLs goes through `href()`, so renaming a route or a param is a type error. Search strings are appended after it, e.g. `` `${href('/login')}?${params}` ``.
+    - **Calendar.** Each view is its own route, and `href()` takes only literal patterns, so `getCalendarHref(view, date?)` (`src/utils/calendar-href.ts`) maps a view and an optional date to the view's pattern. All calendar navigation uses it, along with the default signed-in path, the landing page's links and prefetch, and the fallback redirect. `CalendarNavigation` and `CalendarNavigationButtons` now read the view from the path with `isCalendarView`, falling back to the month view.
+    - **One redirect changed:** signed-in visitors to `/reset-password` go straight to `/calendar/month`, without the hop through `/calendar`.
+    - Path checks such as `pathname.startsWith('/calendar')` for the active sidebar item stay strings, because they match prefixes rather than build URLs.
+    - Tests cover `getCalendarHref`. The existing tests run unchanged.
 
 ### 3. Optimistic and pending UI
 

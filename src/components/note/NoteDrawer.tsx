@@ -7,7 +7,7 @@ import {
 import { CaretDownIcon } from '@phosphor-icons/react';
 import React, { type SyntheticEvent } from 'react';
 import { useLocale, useDateFormatter } from 'react-aria';
-import { useFetcher } from 'react-router';
+import { href, useFetcher } from 'react-router';
 
 import { CustomKbd, CustomButton } from '@components';
 import {
@@ -77,7 +77,7 @@ const NoteDrawer = () => {
   React.useEffect(() => {
     if (isOpen && user) {
       void loadNote(
-        `/resources/notes?kind=${periodKind}&date=${alignPeriodDate()}`
+        `${href('/resources/notes')}?${new URLSearchParams({ date: alignPeriodDate(), kind: periodKind })}`
       );
     }
   }, [isOpen, user, periodKind, alignPeriodDate, loadNote]);
@@ -122,7 +122,7 @@ const NoteDrawer = () => {
     submission: NoteSubmission
   ) => {
     void fetcher.submit(submission, {
-      action: '/resources/notes',
+      action: href('/resources/notes'),
       encType: 'application/json',
       method: 'post',
     });

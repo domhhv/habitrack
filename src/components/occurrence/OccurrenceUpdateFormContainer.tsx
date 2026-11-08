@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSubmit } from 'react-router';
+import { href, useSubmit } from 'react-router';
 
 import {
   useHabits,
@@ -54,7 +54,7 @@ const OccurrenceUpdateFormContainer = () => {
         photoPath,
       } satisfies OccurrenceSubmission,
       {
-        action: '/resources/occurrences',
+        action: href('/resources/occurrences'),
         encType: 'application/json',
         fetcherKey: `remove-photo-${photoPath}`,
         method: 'post',

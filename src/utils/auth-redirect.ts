@@ -1,11 +1,14 @@
+import { href } from 'react-router';
+
+import getCalendarHref from './calendar-href';
 import getSafeRedirectPath from './get-safe-redirect-path';
 
-export const DEFAULT_SIGNED_IN_PATH = '/calendar/month';
+export const DEFAULT_SIGNED_IN_PATH = getCalendarHref('month');
 
 export const getLoginPath = (requestUrl: string) => {
   const { pathname, search } = new URL(requestUrl);
 
-  return `/login?${new URLSearchParams({ returnTo: `${pathname}${search}` })}`;
+  return `${href('/login')}?${new URLSearchParams({ returnTo: `${pathname}${search}` })}`;
 };
 
 export const getReturnToPath = (requestUrl: string) => {

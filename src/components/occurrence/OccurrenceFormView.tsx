@@ -28,6 +28,7 @@ import groupBy from 'lodash.groupby';
 import isEqual from 'lodash.isequal';
 import pluralize from 'pluralize';
 import React from 'react';
+import { href } from 'react-router';
 
 import {
   CustomButton,
@@ -1017,10 +1018,10 @@ const OccurrenceFormView = ({
           </CustomButton>
         ) : (
           <CustomButton
-            href="/habits"
             variant="primary"
             className="w-full"
             onPress={handleClose}
+            href={href('/habits')}
             isDisabled={isSubmitButtonDisabled}
           >
             Go to Habits

@@ -9,6 +9,7 @@ import {
 } from '@heroui/react';
 import { PlusIcon, CloudArrowUpIcon } from '@phosphor-icons/react';
 import React from 'react';
+import { href } from 'react-router';
 
 import {
   CustomButton,
@@ -75,7 +76,7 @@ const AddHabitDialogButton = () => {
     }
 
     void fetcher.submit(formData, {
-      action: '/habits',
+      action: href('/habits'),
       encType: 'multipart/form-data',
       method: 'post',
     });

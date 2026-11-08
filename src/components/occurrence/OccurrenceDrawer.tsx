@@ -12,6 +12,7 @@ import {
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
+import { href } from 'react-router';
 
 import { CustomButton } from '@components';
 import {
@@ -110,7 +111,7 @@ const OccurrenceDrawer = () => {
         occurrenceId: occurrence.id,
       } satisfies OccurrenceSubmission,
       {
-        action: '/resources/occurrences',
+        action: href('/resources/occurrences'),
         encType: 'application/json',
         method: 'post',
       }

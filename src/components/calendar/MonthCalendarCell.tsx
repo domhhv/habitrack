@@ -30,6 +30,7 @@ import {
   useOccurrenceDrawerState,
   useOccurrenceDrawerActions,
 } from '@stores';
+import { getCalendarHref } from '@utils';
 
 export type CellPosition =
   'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | '';
@@ -203,7 +204,7 @@ const MonthCalendarCell = ({
               <CustomButton
                 variant="light"
                 aria-label="Open day"
-                href={`/calendar/day/${date.year}/${date.month}/${date.day}`}
+                href={getCalendarHref('day', date)}
                 className={cn(
                   'h-5 w-5 min-w-fit rounded-xl px-0 opacity-0 group-hover/cell:opacity-100 focus:opacity-100 lg:h-6 lg:w-6',
                   (isTodayCell || isDrawerDate) && 'opacity-100'
@@ -268,7 +269,7 @@ const MonthCalendarCell = ({
                     size="sm"
                     variant="ghost"
                     className="justify-start gap-2"
-                    href={`/calendar/day/${date.year}/${date.month}/${date.day}`}
+                    href={getCalendarHref('day', date)}
                   >
                     <ArrowSquareRightIcon size={16} weight="bold" />
                     Open day

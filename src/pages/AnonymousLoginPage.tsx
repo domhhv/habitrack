@@ -1,6 +1,6 @@
 import { Link } from '@heroui/react';
 import React from 'react';
-import { Form, replace } from 'react-router';
+import { Form, href, replace } from 'react-router';
 
 import { CustomButton } from '@components';
 import {
@@ -56,8 +56,8 @@ const AnonymousLoginPage = ({ actionData }: Route.ComponentProps) => {
   const firstDayOfWeek = useFirstDayOfWeek();
   const isAuthenticating = useIsSubmitting();
   useActionToasts(actionData);
-  const registerHref = useAuthHref('/register');
-  const loginHref = useAuthHref('/login');
+  const registerHref = useAuthHref(href('/register'));
+  const loginHref = useAuthHref(href('/login'));
 
   return (
     <div className="flex w-full flex-col items-center px-8 py-2 lg:px-16 lg:py-4">

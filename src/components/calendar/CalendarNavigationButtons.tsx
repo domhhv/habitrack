@@ -20,6 +20,7 @@ import type { CalendarState } from 'react-stately';
 import { CustomButton } from '@components';
 import { useScreenWidth, useFirstDayOfWeek, useKeyboardShortcut } from '@hooks';
 import { useNoteDrawerState, useOccurrenceDrawerState } from '@stores';
+import { isCalendarView, getCalendarHref } from '@utils';
 
 type CalendarNavigationButtonsProps = {
   focusedDate: CalendarState['focusedDate'];
@@ -38,9 +39,9 @@ const CalendarNavigationButtons = ({
   const { isDesktop } = useScreenWidth();
 
   const calendarMode = React.useMemo(() => {
-    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const view = location.pathname.split('/').filter(Boolean)[1];
 
-    return pathSegments[1] || 'month';
+    return isCalendarView(view) ? view : 'month';
   }, [location.pathname]);
 
   const [previousRangePath, nextRangePath] = React.useMemo(() => {
@@ -50,23 +51,9 @@ const CalendarNavigationButtons = ({
       weeks: calendarMode === 'week' ? 1 : 0,
     };
 
-    const previousRange = focusedDate
-      .subtract(toSet)
-      .toString()
-      .split('-')
-      .map(Number)
-      .join('/');
-
-    const nextRange = focusedDate
-      .add(toSet)
-      .toString()
-      .split('-')
-      .map(Number)
-      .join('/');
-
     return [
-      `/calendar/${calendarMode}/${previousRange}`,
-      `/calendar/${calendarMode}/${nextRange}`,
+      getCalendarHref(calendarMode, focusedDate.subtract(toSet)),
+      getCalendarHref(calendarMode, focusedDate.add(toSet)),
     ];
   }, [focusedDate, calendarMode]);
 
@@ -107,22 +94,18 @@ const CalendarNavigationButtons = ({
     const todayDate = today(timeZone);
 
     if (calendarMode === 'day') {
-      return `/calendar/day/${todayDate.year}/${todayDate.month}/${todayDate.day}`;
+      return getCalendarHref('day', todayDate);
     }
 
     if (calendarMode === 'month') {
-      return `/calendar/month/${todayDate.year}/${todayDate.month}/${
-        startOfMonth(todayDate).day
-      }`;
+      return getCalendarHref('month', startOfMonth(todayDate));
     }
 
     const weekStart = startOfWeek(todayDate, locale, firstDayOfWeek).add({
       days: firstDayOfWeek === 'sun' ? 4 : 3,
     });
 
-    return `/calendar/week/${weekStart.year}/${weekStart.month}/${
-      weekStart.day
-    }`;
+    return getCalendarHref('week', weekStart);
   }, [calendarMode, timeZone, locale, firstDayOfWeek]);
 
   return (

@@ -119,6 +119,7 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
   - Writes that change calendar data clear the browser cache with `clearCalendarData()` (or `invalidateCalendarOccurrences`/`invalidateCalendarNotes`) in a `clientAction`'s `finally`.
   - The calendar `clientLoader` calls `claimCalendarData(userId)`, which clears the cache when the signed-in user changed. Server sign-ins send no auth event to the browser.
 - **URL state**: Prefer search params for shareable UI state (e.g. `/notes?pages=N`).
+- **Route URLs**: Build every link, navigation, fetcher action and redirect with `href()` from `react-router` (`href('/habits/:habitId', { habitId })`), never a hand-written path. Calendar URLs go through `getCalendarHref(view, date?)` from `@utils`.
 - **Zustand**: Only for client UI state that has no server source.
 
 ### Database Schema Changes - Quick Reference

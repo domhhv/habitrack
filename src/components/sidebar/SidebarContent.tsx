@@ -12,11 +12,12 @@ import {
   ArrowUpRightIcon,
   CalendarCheckIcon,
 } from '@phosphor-icons/react';
-import { NavLink, useLocation } from 'react-router';
+import { href, NavLink, useLocation } from 'react-router';
 
 import { CustomKbd, ThemeToggle, CustomButton } from '@components';
 import { useUser } from '@hooks';
 import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
+import { getCalendarHref } from '@utils';
 
 import SidebarModeSelect from './SidebarModeSelect';
 import SidebarTooltip from './SidebarTooltip';
@@ -81,7 +82,7 @@ const SidebarContent = ({
 
   const navItems = [
     {
-      href: '/calendar/month',
+      href: getCalendarHref('month'),
       icon: CalendarDotsIcon,
       id: 'calendar',
       isActive: pathname.startsWith('/calendar'),
@@ -90,14 +91,14 @@ const SidebarContent = ({
     ...(user
       ? ([
           {
-            href: '/habits',
+            href: href('/habits'),
             icon: RepeatIcon,
             id: 'habits',
             isActive: pathname.startsWith('/habits'),
             label: 'Habits',
           },
           {
-            href: '/notes',
+            href: href('/notes'),
             icon: NoteIcon,
             id: 'notes',
             isActive: pathname === '/notes',
@@ -371,10 +372,10 @@ const SidebarContent = ({
           >
             <CustomButton
               size="sm"
-              href="/login"
               onPress={onClose}
               variant="bordered"
               className="flex-1"
+              href={href('/login')}
               data-testid="login-button"
             >
               Log In
@@ -384,10 +385,10 @@ const SidebarContent = ({
             </CustomButton>
             <CustomButton
               size="sm"
-              href="/register"
               variant="primary"
               onPress={onClose}
               className="flex-1"
+              href={href('/register')}
               data-testid="register-button"
             >
               Join
@@ -402,9 +403,9 @@ const SidebarContent = ({
               <CustomButton
                 size="sm"
                 isIconOnly
-                href="/login"
                 variant="bordered"
                 aria-label="Log In"
+                href={href('/login')}
               >
                 <SignInIcon size={16} />
               </CustomButton>
@@ -413,9 +414,9 @@ const SidebarContent = ({
               <CustomButton
                 size="sm"
                 isIconOnly
-                href="/register"
                 variant="primary"
                 aria-label="Join"
+                href={href('/register')}
               >
                 <UserPlusIcon size={16} />
               </CustomButton>

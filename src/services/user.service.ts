@@ -6,11 +6,13 @@ import {
 } from '@supabase/supabase-js';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
+import { href } from 'react-router';
 
 import type { DaysOfWeek, TypedSupabaseClient } from '@models';
+import { getCalendarHref } from '@utils';
 
 const getAuthCallbackUrl = (origin: string, next: string) => {
-  const url = new URL('/auth/callback', origin);
+  const url = new URL(href('/auth/callback'), origin);
   url.searchParams.set('next', next);
 
   return url.href;
@@ -32,7 +34,7 @@ export const signUp = async (
       }),
       emailRedirectTo: getAuthCallbackUrl(
         origin,
-        '/settings?emailConfirmed=true'
+        `${href('/settings')}?emailConfirmed=true`
       ),
     },
   });
@@ -62,7 +64,7 @@ export const signInAnonymously = async (
 export const signInWithGoogle = async (
   supabase: TypedSupabaseClient,
   origin: string,
-  next = '/calendar/month'
+  next = getCalendarHref('month')
 ) => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -93,7 +95,7 @@ export const linkGoogleIdentity = async (
   const { error } = await supabase.auth.linkIdentity({
     provider: 'google',
     options: {
-      redirectTo: getAuthCallbackUrl(origin, '/settings'),
+      redirectTo: getAuthCallbackUrl(origin, href('/settings')),
     },
   });
 
@@ -124,7 +126,7 @@ export const convertAnonymousUser = async (
     {
       emailRedirectTo: getAuthCallbackUrl(
         origin,
-        '/settings?emailConfirmed=true'
+        `${href('/settings')}?emailConfirmed=true`
       ),
     }
   );
@@ -183,7 +185,7 @@ export const updateUser = async (
   const { data, error } = await supabase.auth.updateUser(attributes, {
     emailRedirectTo: getAuthCallbackUrl(
       origin,
-      '/settings?emailChangeConfirmed=true'
+      `${href('/settings')}?emailChangeConfirmed=true`
     ),
   });
 
@@ -217,7 +219,10 @@ export const sendPasswordResetEmail = async (
   email: string
 ) => {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: getAuthCallbackUrl(origin, '/settings?passwordReset=true'),
+    redirectTo: getAuthCallbackUrl(
+      origin,
+      `${href('/settings')}?passwordReset=true`
+    ),
   });
 
   if (error) {

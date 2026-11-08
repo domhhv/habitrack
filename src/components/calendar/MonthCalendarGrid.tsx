@@ -10,7 +10,7 @@ import type { CalendarState } from 'react-stately';
 import { CustomButton } from '@components';
 import { useScreenWidth, useCalendarData, useFirstDayOfWeek } from '@hooks';
 import { useCalendarFilters, useNoteDrawerActions } from '@stores';
-import { getISOWeek } from '@utils';
+import { getISOWeek, getCalendarHref } from '@utils';
 
 import type { CellPosition } from './MonthCalendarCell';
 import MonthCalendarCell from './MonthCalendarCell';
@@ -119,8 +119,8 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
                     <CustomButton
                       size="sm"
                       variant="tertiary"
+                      href={getCalendarHref('week', thursday)}
                       aria-label={`Go to week ${weekIsoNumber}`}
-                      href={`/calendar/week/${thursday.year}/${thursday.month}/${thursday.day}`}
                       className={cn(
                         'mt-0 h-6.75 w-6 min-w-fit p-0 lg:h-7.75 lg:w-7',
                         weekIndex === 0 && 'top-0.5'

@@ -3,6 +3,7 @@ import { getLocalTimeZone } from '@internationalized/date';
 import { TrashSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useDateFormatter } from 'react-aria';
+import { href } from 'react-router';
 
 import { CustomButton, InfinityLoader } from '@components';
 import { useHabits, useCalendarData, useActionFetcher } from '@hooks';
@@ -170,7 +171,7 @@ const OccurrenceListItem = ({
         occurrenceId: occurrence.id,
       } satisfies OccurrenceSubmission,
       {
-        action: '/resources/occurrences',
+        action: href('/resources/occurrences'),
         encType: 'application/json',
         method: 'post',
       }
