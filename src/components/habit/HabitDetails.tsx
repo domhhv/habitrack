@@ -42,10 +42,12 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
   >([]);
   const traits = useTraits();
   const user = useUser();
-  const habitFetcher = useActionFetcher(() => {
-    setIsEditingName(false);
-    setIsEditingDescription(false);
-    setIsEditingMotivation(false);
+  const habitFetcher = useActionFetcher(undefined, {
+    onFailure: ({ fieldErrors }) => {
+      setIsEditingName(!!fieldErrors?.name);
+      setIsEditingDescription(!!fieldErrors?.description);
+      setIsEditingMotivation(!!fieldErrors?.motivation);
+    },
   });
   const traitFetcher = useActionFetcher();
   const metricsFetcher = useActionFetcher(() => {
@@ -55,6 +57,24 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
   const isSavingMetrics = metricsFetcher.state !== 'idle';
 
   const habitAction = href('/habits/:habitId', { habitId: habit.id });
+
+  const getShownValue = (field: EditableHabitField) => {
+    const pendingValue = habitFetcher.formData?.get(field);
+
+    return typeof pendingValue === 'string'
+      ? pendingValue.trim()
+      : habit[field] || '';
+  };
+
+  const shownName = getShownValue('name');
+  const shownDescription = getShownValue('description');
+  const shownMotivation = getShownValue('motivation');
+  const pendingTraitId = traitFetcher.formData?.get('traitId');
+  const shownTraitId =
+    typeof pendingTraitId === 'string'
+      ? pendingTraitId || null
+      : (habit.traitId ?? null);
+  const shownTrait = shownTraitId ? (traits[shownTraitId] ?? null) : null;
 
   const isEditing = React.useMemo(() => {
     return isEditingName || isEditingDescription || isEditingMotivation;
@@ -133,8 +153,11 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
 
     if (value.trim() === (habit[field] || '')) {
       event.preventDefault();
-      cancelEditing();
     }
+
+    setIsEditingName(false);
+    setIsEditingDescription(false);
+    setIsEditingMotivation(false);
   };
 
   const cancelOnEscape = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -148,23 +171,23 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
       <div className="flex gap-4">
         <div className="space-y-2">
           <div
-            style={{ borderColor: habit.trait?.color || '' }}
+            style={{ borderColor: shownTrait?.color || '' }}
             className="border-border justify-self-start rounded-2xl border-3 p-4"
           >
             <HabitIcon habit={habit} />
           </div>
           <Dropdown>
             <Dropdown.Trigger>
-              <TraitChip trait={habit.trait} className="hover:bg-background" />
+              <TraitChip trait={shownTrait} className="hover:bg-background" />
             </Dropdown.Trigger>
             <Dropdown.Popover>
               <Dropdown.Menu
                 selectionMode="single"
                 aria-label="Select trait"
-                selectedKeys={new Set([habit.traitId || 'no-trait'])}
+                selectedKeys={new Set([shownTraitId || 'no-trait'])}
                 onAction={(key) => {
                   const nextTraitId = key === 'no-trait' ? null : String(key);
-                  const currentTraitId = habit.traitId ?? null;
+                  const currentTraitId = shownTraitId;
 
                   if (isUpdatingTrait || nextTraitId === currentTraitId) {
                     return;
@@ -264,14 +287,14 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
             </ActionForm>
           ) : (
             <div className="group flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{habit.name}</h1>
+              <h1 className="text-2xl font-bold">{shownName}</h1>
               <CustomButton
                 size="sm"
                 isIconOnly
                 variant="ghost"
                 aria-label="Edit name"
                 onPress={() => {
-                  setName(habit.name);
+                  setName(shownName);
                   setIsEditingName(true);
                 }}
                 className={cn(
@@ -334,10 +357,8 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
             </ActionForm>
           ) : (
             <div className="group flex items-center gap-2">
-              <p
-                className={cn(!habit.description && 'text-default-500 italic')}
-              >
-                {habit.description || 'No description'}
+              <p className={cn(!shownDescription && 'text-default-500 italic')}>
+                {shownDescription || 'No description'}
               </p>
               <CustomButton
                 size="sm"
@@ -345,7 +366,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
                 variant="ghost"
                 aria-label="Edit description"
                 onPress={() => {
-                  setDescription(habit.description || '');
+                  setDescription(shownDescription);
                   setIsEditingDescription(true);
                 }}
                 className={cn(
@@ -412,11 +433,11 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
           <div className="flex items-center gap-2">
             <p
               className={cn(
-                !habit.motivation && 'text-default-500 italic',
+                !shownMotivation && 'text-default-500 italic',
                 'whitespace-pre-wrap'
               )}
             >
-              {habit.motivation || 'No motivation set'}
+              {shownMotivation || 'No motivation set'}
             </p>
             <CustomButton
               size="sm"
@@ -424,7 +445,7 @@ const HabitDetails = ({ habit }: HabitDetailsProps) => {
               variant="ghost"
               aria-label="Edit motivation"
               onPress={() => {
-                setMotivation(habit.motivation || '');
+                setMotivation(shownMotivation);
                 setIsEditingMotivation(true);
               }}
               className={cn(

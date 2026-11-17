@@ -4,6 +4,12 @@ import { StorageBuckets } from '@models';
 
 export const DAYS_OF_WEEK = Constants.public.Enums.days_of_week;
 
+/**
+ * The occurrence drawer closes as soon as a save starts, so the save runs on a keyed fetcher that
+ * the drawer keeps mounted to show the result's toasts.
+ */
+export const OCCURRENCE_SAVE_FETCHER_KEY = 'occurrence-save';
+
 export const CURRENCIES = ['EUR', 'USD', 'GBP', 'UAH'] as const;
 
 export const HABIT_FIELD_LIMITS = {

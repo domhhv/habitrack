@@ -44,7 +44,7 @@ const NoteDrawer = () => {
   const [isPeriodPickerShown, setIsPeriodPickerShown] = React.useState(false);
   const { enter, mod } = useModifierKeys();
   const { isOpen, periodDate, periodKind } = useNoteDrawerState();
-  const { closeNoteDrawer } = useNoteDrawerActions();
+  const { closeNoteDrawer, openNoteDrawer } = useNoteDrawerActions();
   const { askConfirmation } = useConfirmationActions();
   const dayFormatter = useDateFormatter({
     day: 'numeric',
@@ -119,14 +119,24 @@ const NoteDrawer = () => {
     clearContent();
   };
 
-  const saveFetcher = useActionFetcher(closeDrawer);
-  const removeFetcher = useActionFetcher(closeDrawer);
+  const submittedPeriod = React.useRef({ periodDate, periodKind });
+  const saveFetcher = useActionFetcher(undefined, {
+    onFailure: ({ fieldErrors }) => {
+      if (fieldErrors && !isOpen) {
+        openNoteDrawer(
+          submittedPeriod.current.periodDate,
+          submittedPeriod.current.periodKind
+        );
+      }
+    },
+  });
+  const removeFetcher = useActionFetcher();
   const isSaving = saveFetcher.state !== 'idle';
   const isRemoving = removeFetcher.state !== 'idle';
 
   const canSaveNote =
     !!user &&
-    !!content &&
+    !!content.trim() &&
     !isSaving &&
     !isRemoving &&
     !isLoadingNote &&
@@ -144,6 +154,7 @@ const NoteDrawer = () => {
         { intent: 'delete', noteId: existingNote.id },
         { action: href('/resources/notes'), method: 'post' }
       );
+      closeDrawer();
     }
   };
 
@@ -246,7 +257,12 @@ const NoteDrawer = () => {
               onSubmit={(event) => {
                 if (!canSaveNote) {
                   event.preventDefault();
+
+                  return;
                 }
+
+                submittedPeriod.current = { periodDate, periodKind };
+                closeDrawer();
               }}
             >
               <input

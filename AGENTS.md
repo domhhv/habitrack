@@ -107,6 +107,7 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
 - **Submitting**:
   - Components submit with `useActionFetcher(onSuccess)` (a `useFetcher` that shows the result's toasts and calls `onSuccess` once the action returns `{ ok: true }`), or `<Form>` with `useActionToasts(actionData)`. Pending UI comes from `fetcher.state`/`useNavigation()`/`useIsSubmitting()`, not `useState`.
   - Block a new submission on a shared fetcher while one is pending.
+  - Optimistic UI reads pending writes from `useFetchers()` (`collectPendingCalendarWrites`/`collectPendingHabitWrites` from `@utils`) or the submitting fetcher's `formData`, never Zustand. `useCalendarData()` already includes pending calendar writes. A form that closes on submit runs on a keyed fetcher (`useActionFetcher(onSuccess, { key, onFailure })`) owned by a component that stays mounted, so the result's toasts still show.
 - **Results**:
   - Actions never show toasts. They return them in the result (`ActionResult` in `src/models/action-result.model.ts`), and the submitting component shows them. A toast for the page after a redirect goes through `redirectWithToasts(url, toasts)`, a flash cookie the app layout's loader reads and clears.
   - Wrap action work in `runAction(promise, actionType)`. It returns `{ ok: true, toasts }` or `{ ok: false, error, toasts }` with the standard messages, without a 4xx status, so partial writes still revalidate.

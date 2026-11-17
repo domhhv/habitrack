@@ -478,6 +478,24 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
 ### 3. Optimistic and pending UI
 
 - **Optimistic UI** from `useFetchers()`: show a just-logged occurrence chip in its month cell, flip stock depletion, show edited habit names and note content immediately, and hide deleted rows while the deletion is pending.
+  - Done on `feat/optimistic-ui`.
+  - **As built:**
+    - **Reading pending writes.** `collectPendingCalendarWrites` and `collectPendingHabitWrites` (`src/utils/pending-writes.ts`) read `useFetchers()`, filtered by action path and intent: JSON bodies for `/resources/occurrences`, form fields for `/resources/notes` and `/habits/:habitId`. A write counts as pending while its fetcher submits and while the loaders revalidate, unless the action returned `ok: false`. A failed write rolls back on its own, because the loader data never changed, and its toast says why.
+    - **Calendar.** `useCalendarData()` applies the pending calendar writes with `applyPendingCalendarWrites` (`calendar-data.service.ts`), which rebuilds every index through `createCalendarData`, so cells, chips, the drawer list and the period summary agree. `CalendarData` now carries its `range` for this.
+      - Logged entries are built from the habit in `useHabits()` and the submitted `occurredAt`, with a `pending-<fetcherKey>` id and `isPending: true`. Edited entries take the new habit, time and photos.
+      - Deleted entries, removed metric values and deleted notes disappear. Day, week and month notes and entry notes show their new content.
+      - The merged result is cached per loaded data object, so the cells and chips share one merge per render.
+      - A chip whose entries are all pending is dimmed and not clickable. A pending entry's edit and delete buttons in the drawer are disabled. The drawer no longer tracks which entry or metric value is being removed, because it disappears.
+    - **Drawers close on submit.**
+      - The occurrence save runs on a keyed fetcher (`OCCURRENCE_SAVE_FETCHER_KEY`). `useOccurrenceFetcher` calls `onSubmitted` once the photos are uploaded and the save is submitted. `OccurrenceDrawer` stays mounted and shows the result's toasts through `useActionFetcher(undefined, { key })`.
+      - `NoteDrawer` closes in the form's `onSubmit` and after a removal. When the action returns field errors, it reopens for the submitted period, and the error shows next to the text area. Its client check now trims the content.
+    - **`useActionFetcher`** takes an optional `{ key, onFailure }`. `onFailure` gets the failed result once the fetcher is idle.
+    - **Habit details.** The name, description and motivation show the submitted value while the save is pending, and the trait chip shows the chosen trait. Editors close on submit and reopen for the fields with field errors.
+    - **Stocks.** `HabitStockManager` applies pending depletion changes and hides stocks being removed. Active and depleted stocks render in one keyed list, so a row keeps its fetcher when it moves between the groups.
+    - **Habits table.** It hides habits with a pending `delete-habit`.
+    - **Not changed:** the notes page has no edit UI, so it shows no pending notes. Photo removal already updated its own state. The §9 issue of `NoteDrawer` overwriting text typed before the note loads remains.
+    - **Tests** cover the collectors, the calendar merge, `useCalendarData` with a pending and then a failed save, close-on-submit for both drawers (with the note drawer reopening on a field error), pending habit fields and editor reopening, pending stock depletion and pending habit deletion.
+    - **Not verified:** a run in a real browser.
 - **Progress bar.** Replace the root "We're preparing the app" overlay with a slim global bar driven by `useNavigation()` and `useFetchers()`.
   - Done on `feat/global-progress-bar`.
   - **As built:**

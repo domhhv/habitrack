@@ -16,6 +16,7 @@ export { default as useKeyboardShortcut } from './use-keyboard-shortcut';
 export { default as useModifierKeys } from './use-modifier-keys';
 export { default as useOccurrenceFetcher } from './use-occurrence-fetcher';
 export { default as useOccurrenceToEdit } from './use-occurrence-to-edit';
+export { default as usePendingHabitWrites } from './use-pending-habit-writes';
 export { default as useProfile } from './use-profile';
 export { default as useScreenWidth } from './use-screen-width';
 export {

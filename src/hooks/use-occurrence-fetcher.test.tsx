@@ -29,12 +29,12 @@ const formValues: OccurrenceFormValues = {
   uploadedFiles: [photo],
 };
 
-const renderSaver = () => {
+const renderSaver = (result: Promise<unknown> = Promise.resolve(null)) => {
   const action = vi.fn();
-  const onSuccess = vi.fn();
+  const onSubmitted = vi.fn();
 
   const Saver = () => {
-    const { isSaving, save } = useOccurrenceFetcher(onSuccess);
+    const { isSaving, save } = useOccurrenceFetcher(onSubmitted);
 
     return (
       <button
@@ -62,6 +62,7 @@ const renderSaver = () => {
           path: '/resources/occurrences',
           action: async ({ request }) => {
             action(await request.json());
+            await result;
 
             return { ok: true, toasts: [] };
           },
@@ -70,7 +71,11 @@ const renderSaver = () => {
     },
   ]);
 
-  return { action, onSuccess, ...render(<Stub initialEntries={['/']} />) };
+  return {
+    action,
+    onSubmitted,
+    ...render(<Stub initialEntries={['/']} />),
+  };
 };
 
 describe(useOccurrenceFetcher.name, () => {
@@ -84,12 +89,12 @@ describe(useOccurrenceFetcher.name, () => {
       failedUploadErrors: [],
       paths: ['user-1/habit-1/photo.jpg'],
     });
-    const { action, findByText, onSuccess } = renderSaver();
+    const { action, findByText, onSubmitted } = renderSaver();
 
     fireEvent.click(await findByText('Save'));
 
     await waitFor(() => {
-      expect(onSuccess).toHaveBeenCalledOnce();
+      expect(onSubmitted).toHaveBeenCalledOnce();
     });
     expect(uploadImages).toHaveBeenCalledWith(
       expect.anything(),
@@ -111,6 +116,24 @@ describe(useOccurrenceFetcher.name, () => {
         stockUsages: [],
       },
     });
+  });
+
+  it('calls onSubmitted once the save is on its way, before the action returns', async () => {
+    vi.mocked(uploadImages).mockResolvedValue({
+      failedUploadErrors: [],
+      paths: [],
+    });
+    const { action, findByText, onSubmitted } = renderSaver(
+      new Promise(() => {})
+    );
+
+    fireEvent.click(await findByText('Save'));
+
+    await waitFor(() => {
+      expect(action).toHaveBeenCalledOnce();
+    });
+    expect(onSubmitted).toHaveBeenCalledOnce();
+    expect(await findByText('Save')).toBeDisabled();
   });
 
   it('shows a toast for failed uploads and still saves the entry', async () => {

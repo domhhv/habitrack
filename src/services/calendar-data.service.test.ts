@@ -1,7 +1,8 @@
-import { CalendarDateTime } from '@internationalized/date';
+import { parseAbsolute, CalendarDateTime } from '@internationalized/date';
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
-import { testSupabaseClient } from '@tests';
+import type { PendingCalendarWrites } from '@models';
+import { makeTestHabit, testSupabaseClient, makeTestOccurrence } from '@tests';
 import type { CalendarRange } from '@utils';
 
 import {
@@ -12,6 +13,7 @@ import {
   createCalendarData,
   loadCalendarEntries,
   getKnownFirstDayOfWeek,
+  applyPendingCalendarWrites,
   invalidateCalendarOccurrences,
   rememberCalendarFirstDayOfWeek,
 } from './calendar-data.service';
@@ -200,5 +202,183 @@ describe('getKnownFirstDayOfWeek', () => {
       value: 'mon',
     });
     expect(getKnownFirstDayOfWeek('user-2')).toBeNull();
+  });
+});
+
+describe('applyPendingCalendarWrites', () => {
+  const writes: PendingCalendarWrites = {
+    createdNotes: [],
+    createdOccurrences: [],
+    deletedNoteIds: [],
+    deletedOccurrenceIds: [],
+    removedMetricValues: [],
+    updatedNotes: [],
+    updatedOccurrences: [],
+  };
+  const values = {
+    depletedStockIds: [],
+    hasSpecificTime: true,
+    metricValues: {},
+    note: '',
+    occurredAt: '2026-10-21T08:00:00.000Z',
+    selectedHabitId: 'habit-1',
+    stockUsages: [],
+  };
+  const habit = makeTestHabit({ id: 'habit-1', name: 'Run' });
+  const habits = { [habit.id]: habit };
+
+  const makeData = () => {
+    return createCalendarData(
+      [
+        makeTestOccurrence({
+          id: 'kept',
+          occurredAt: parseAbsolute('2026-10-20T08:00:00.000Z', 'UTC'),
+          timeZone: 'UTC',
+          metricValues: [
+            {
+              createdAt: '2026-10-20T08:00:00.000Z',
+              habitMetricId: 'metric-1',
+              id: 'value-1',
+              updatedAt: null,
+              value: { numericValue: 1 },
+            },
+          ],
+        }),
+        makeTestOccurrence({
+          id: 'deleted',
+          occurredAt: parseAbsolute('2026-10-20T09:00:00.000Z', 'UTC'),
+        }),
+      ],
+      [
+        {
+          content: 'Day',
+          id: 'day',
+          periodDate: '2026-10-20',
+          periodKind: 'day',
+        },
+        {
+          content: 'Gone',
+          id: 'gone',
+          periodDate: '2026-10-21',
+          periodKind: 'day',
+        },
+        { content: 'Old', id: 'occurrence-note', occurrenceId: 'kept' },
+      ] as Parameters<typeof createCalendarData>[1],
+      range
+    );
+  };
+
+  it('adds pending entries and hides pending deletions', () => {
+    const data = applyPendingCalendarWrites(
+      makeData(),
+      {
+        ...writes,
+        deletedOccurrenceIds: ['deleted'],
+        createdOccurrences: [
+          {
+            id: 'pending-1',
+            photoPaths: [],
+            values: { ...values, note: 'First run' },
+          },
+        ],
+        removedMetricValues: [
+          { habitMetricId: 'metric-1', occurrenceId: 'kept' },
+        ],
+      },
+      habits
+    );
+
+    expect(Object.keys(data.occurrencesByDate['2026-10-20'])).toEqual(['kept']);
+    expect(data.occurrencesByDate['2026-10-21']['pending-1']).toMatchObject({
+      habit: { name: 'Run' },
+      habitId: 'habit-1',
+      isPending: true,
+    });
+    expect(data.occurrencesByDate['2026-10-20'].kept.metricValues).toEqual([]);
+    expect(data.notesByOccurrenceId['pending-1']).toMatchObject({
+      content: 'First run',
+    });
+  });
+
+  it('skips a pending entry outside the range or for an unknown habit', () => {
+    const data = applyPendingCalendarWrites(
+      makeData(),
+      {
+        ...writes,
+        createdOccurrences: [
+          {
+            id: 'outside',
+            photoPaths: [],
+            values: { ...values, occurredAt: '2026-11-02T08:00:00.000Z' },
+          },
+          {
+            id: 'unknown',
+            photoPaths: [],
+            values: { ...values, selectedHabitId: 'habit-2' },
+          },
+        ],
+      },
+      habits
+    );
+
+    expect(
+      data.occurrences.map(({ id }) => {
+        return id;
+      })
+    ).toEqual(['kept', 'deleted']);
+  });
+
+  it('applies edited entries and their notes', () => {
+    const data = applyPendingCalendarWrites(
+      makeData(),
+      {
+        ...writes,
+        updatedOccurrences: [
+          {
+            noteId: 'occurrence-note',
+            occurrenceId: 'kept',
+            photoPaths: ['new.jpg'],
+            values: { ...values, hasSpecificTime: false, note: '' },
+          },
+        ],
+      },
+      habits
+    );
+
+    expect(data.occurrencesByDate['2026-10-21'].kept).toMatchObject({
+      hasSpecificTime: false,
+      isPending: true,
+      photoPaths: ['new.jpg'],
+    });
+    expect(data.notesByOccurrenceId.kept).toBeUndefined();
+  });
+
+  it('adds, edits and hides day, week and month notes', () => {
+    const data = applyPendingCalendarWrites(
+      makeData(),
+      {
+        ...writes,
+        deletedNoteIds: ['gone'],
+        updatedNotes: [{ content: 'Edited day', noteId: 'day' }],
+        createdNotes: [
+          {
+            content: 'New week',
+            id: 'pending-week',
+            periodDate: '2026-10-19',
+            periodKind: 'week',
+          },
+        ],
+      },
+      habits
+    );
+
+    expect(
+      data.dayNotes.map(({ content, id }) => {
+        return { content, id };
+      })
+    ).toEqual([{ content: 'Edited day', id: 'day' }]);
+    expect(data.weekNotes).toMatchObject([
+      { content: 'New week', id: 'pending-week' },
+    ]);
   });
 });
