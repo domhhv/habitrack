@@ -1,6 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
 import keyBy from 'lodash.keyby';
-import React from 'react';
 import { Outlet, type RouterContextProvider } from 'react-router';
 
 import {
@@ -130,10 +129,6 @@ export const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => {
 const App = ({ loaderData }: Route.ComponentProps) => {
   useAuthSubscription(loaderData.user);
   useActionToasts(loaderData);
-
-  React.useEffect(() => {
-    document.getElementById('root')?.classList.add('initialized');
-  }, []);
 
   return (
     <>

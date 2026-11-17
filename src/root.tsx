@@ -1,7 +1,7 @@
-import { useMatches, useNavigation, isRouteErrorResponse } from 'react-router';
+import { isRouteErrorResponse } from 'react-router';
 import { Meta, Links, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
-import { AppShellSkeleton } from '@components';
+import { GlobalProgressBar } from '@components';
 import { initializeTheme, rememberTimeZone } from '@utils';
 
 import type { Route } from './+types/root';
@@ -97,22 +97,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function Root() {
-  const navigation = useNavigation();
-  const matches = useMatches();
-  const isEnteringApp =
-    Boolean(navigation.location) &&
-    !matches.some((match) => {
-      return match.id === 'app';
-    });
-
   return (
     <>
+      <GlobalProgressBar />
       <Outlet />
-      {isEnteringApp && (
-        <div className="fixed inset-0 z-50">
-          <AppShellSkeleton />
-        </div>
-      )}
     </>
   );
 }
