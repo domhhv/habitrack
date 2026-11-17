@@ -3,6 +3,7 @@ export { default as AppShellSkeleton } from './AppShellSkeleton';
 export { default as ConfirmationDialog } from './ConfirmationDialog';
 export { default as CustomButton } from './CustomButton';
 export { default as CustomKbd } from './CustomKbd';
+export { default as GlobalProgressBar } from './GlobalProgressBar';
 export { default as ImageCarousel } from './ImageCarousel';
 export { default as InfinityLoader } from './InfinityLoader';
 export { default as SignedImageViewer } from './SignedImageViewer';

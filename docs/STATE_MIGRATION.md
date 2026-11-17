@@ -479,6 +479,13 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
 
 - **Optimistic UI** from `useFetchers()`: show a just-logged occurrence chip in its month cell, flip stock depletion, show edited habit names and note content immediately, and hide deleted rows while the deletion is pending.
 - **Progress bar.** Replace the root "We're preparing the app" overlay with a slim global bar driven by `useNavigation()` and `useFetchers()`.
+  - Done on `feat/global-progress-bar`.
+  - **As built:**
+    - `GlobalProgressBar` (`src/components/common/GlobalProgressBar.tsx`) is rendered by the root route. It is busy while `useNavigation()` or any `useFetchers()` entry is not idle, and shows only after 150 ms, so cached calendar moves don't flash it. It is a fixed 2px accent bar above the header with an indeterminate slide, which becomes a static bar under reduced motion, and it fades out when idle.
+    - The root's full-screen `AppShellSkeleton` overlay while entering the app is gone: the current page stays visible with the bar. `AppShellSkeleton` is now only the app layout's `HydrateFallback`.
+    - The app layout no longer adds an `initialized` class to a `#root` element that doesn't exist.
+    - **Tests** cover the delay, navigations and fetcher submissions.
+    - **Not verified:** a run in a real browser.
 - **View transitions** (`viewTransition` on calendar navigation links, `useViewTransitionState`) for month, week and day switches.
 
 ### 4. Data loading performance

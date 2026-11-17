@@ -80,6 +80,26 @@ body {
   }
 }
 
+.global-progress-indicator {
+  width: 40%;
+  animation: global-progress 1.2s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    width: 100%;
+    animation: none;
+  }
+}
+
+@keyframes global-progress {
+  from {
+    translate: -100%;
+  }
+
+  to {
+    translate: 250%;
+  }
+}
+
 @keyframes travel {
   0% {
     stroke-dashoffset: 0;
