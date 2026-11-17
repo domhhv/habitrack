@@ -15,6 +15,7 @@ import { useDateFormatter } from 'react-aria';
 import { href } from 'react-router';
 
 import { CustomButton } from '@components';
+import { OCCURRENCE_SAVE_FETCHER_KEY } from '@const';
 import {
   useScreenWidth,
   useCalendarData,
@@ -37,9 +38,7 @@ const OccurrenceDrawer = () => {
   const timeZone = getLocalTimeZone();
   const { occurrencesByDate: occurrences } = useCalendarData();
   const deleteFetcher = useActionFetcher();
-  const [removalTargetId, setRemovalTargetId] = React.useState('');
-  const occurrenceIdBeingRemoved =
-    deleteFetcher.state === 'idle' ? '' : removalTargetId;
+  useActionFetcher(undefined, { key: OCCURRENCE_SAVE_FETCHER_KEY });
   const { askConfirmation } = useConfirmationActions();
   const { isMobile } = useScreenWidth();
   const {
@@ -104,7 +103,6 @@ const OccurrenceDrawer = () => {
       return;
     }
 
-    setRemovalTargetId(occurrence.id);
     void deleteFetcher.submit(
       {
         intent: 'delete',
@@ -276,7 +274,6 @@ const OccurrenceDrawer = () => {
                 <OccurrenceList
                   onRemove={dispatchOccurrenceRemoval}
                   hasChips={!!occurrencesData.dayOccurrences}
-                  occurrenceIdBeingRemoved={occurrenceIdBeingRemoved}
                   occurrencesWithTime={occurrencesData.occurrencesWithTime}
                   occurrencesWithoutTime={
                     occurrencesData.occurrencesWithoutTime

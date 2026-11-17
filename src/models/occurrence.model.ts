@@ -40,6 +40,7 @@ export type Occurrence = Omit<
   'occurredAt' | 'createdAt' | 'updatedAt'
 > & {
   createdAt: ZonedDateTime;
+  isPending?: boolean;
   occurredAt: ZonedDateTime;
   updatedAt: ZonedDateTime | null;
 };

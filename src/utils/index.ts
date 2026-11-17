@@ -20,6 +20,7 @@ export { default as initializeTheme } from './initialize-theme';
 export * from './metric-value';
 export { default as noop } from './noop';
 export { default as parseDayOfWeek } from './parse-day-of-week';
+export * from './pending-writes';
 export { default as pickDefinedValues } from './pick-defined-values';
 export { default as rememberTimeZone } from './remember-time-zone';
 export * from './request-preferences';

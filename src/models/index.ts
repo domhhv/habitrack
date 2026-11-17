@@ -6,6 +6,7 @@ export * from './note.model';
 export * from './occurrence-stock-usage.model';
 export * from './occurrence-submission.model';
 export * from './occurrence.model';
+export * from './pending-write.model';
 export * from './profile.model';
 export * from './stock.model';
 export * from './storage.model';

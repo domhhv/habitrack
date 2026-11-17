@@ -7,7 +7,7 @@ import { useDateFormatter } from 'react-aria';
 import { Link, href } from 'react-router';
 
 import { TraitChip, CustomButton, AddHabitDialogButton } from '@components';
-import { useHabits, useActionFetcher } from '@hooks';
+import { useHabits, useActionFetcher, usePendingHabitWrites } from '@hooks';
 import type { Habit, HabitStats } from '@models';
 import { useConfirmationActions } from '@stores';
 
@@ -34,6 +34,7 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
 
   const habits = useHabits();
   const deleteFetcher = useActionFetcher();
+  const { deletedHabitIds } = usePendingHabitWrites();
   const isDeleting = deleteFetcher.state !== 'idle';
   const { askConfirmation } = useConfirmationActions();
 
@@ -69,7 +70,9 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
     }
   };
 
-  const habitsList = Object.values(habits);
+  const habitsList = Object.values(habits).filter(({ id }) => {
+    return !deletedHabitIds.includes(id);
+  });
 
   const totalPages = Math.ceil(habitsList.length / ROWS_PER_PAGE);
 

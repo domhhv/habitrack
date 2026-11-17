@@ -1,10 +1,12 @@
 import { Toast } from '@heroui/react';
 import pluralize from 'pluralize';
 import React from 'react';
-import { href } from 'react-router';
+import { href, useFetcher } from 'react-router';
 
+import { OCCURRENCE_SAVE_FETCHER_KEY } from '@const';
 import {
   StorageBuckets,
+  type ActionResult,
   type DistributiveOmit,
   type OccurrenceFormValues,
   type OccurrenceSaveSubmission,
@@ -12,7 +14,6 @@ import {
 import { uploadImages } from '@services';
 import { getSupabaseBrowserClient, toOccurrenceValuesSubmission } from '@utils';
 
-import useActionFetcher from './use-action-fetcher';
 import useUser from './use-user';
 
 type OccurrenceSaveTarget = DistributiveOmit<
@@ -23,10 +24,14 @@ type OccurrenceSaveTarget = DistributiveOmit<
 /**
  * Saves an occurrence through `/resources/occurrences`. Photos upload from the browser first,
  * because server functions only accept small request bodies, and the action receives their paths.
+ * `onSubmitted` runs once the save is on its way, so the drawer can close while the calendar shows
+ * the pending entry. `OccurrenceDrawer` shows the result's toasts.
  */
-const useOccurrenceFetcher = (onSuccess: () => void) => {
+const useOccurrenceFetcher = (onSubmitted: () => void) => {
   const user = useUser();
-  const fetcher = useActionFetcher(onSuccess);
+  const fetcher = useFetcher<ActionResult>({
+    key: OCCURRENCE_SAVE_FETCHER_KEY,
+  });
   const [isUploading, setIsUploading] = React.useState(false);
   const isSaving = isUploading || fetcher.state !== 'idle';
 
@@ -71,6 +76,7 @@ const useOccurrenceFetcher = (onSuccess: () => void) => {
           method: 'post',
         }
       );
+      onSubmitted();
     } finally {
       setIsUploading(false);
     }

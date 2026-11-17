@@ -2,6 +2,7 @@ import { PlusIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { CustomButton } from '@components';
+import { usePendingHabitWrites } from '@hooks';
 import type { Habit } from '@models';
 
 import AddStockForm from './AddStockForm';
@@ -14,12 +15,34 @@ type HabitStockManagerProps = {
 const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
   const [isAdding, setIsAdding] = React.useState(false);
 
-  const activeStocks = habit.stocks.filter((s) => {
+  const { removedStockIds, stockDepletion } = usePendingHabitWrites();
+
+  const stocks = habit.stocks
+    .filter((stock) => {
+      return !removedStockIds.includes(stock.id);
+    })
+    .map((stock) => {
+      return {
+        ...stock,
+        isDepleted: stockDepletion[stock.id] ?? stock.isDepleted,
+      };
+    });
+  const activeStocks = stocks.filter((s) => {
     return !s.isDepleted;
   });
-  const depletedStocks = habit.stocks.filter((s) => {
+  const depletedStocks = stocks.filter((s) => {
     return s.isDepleted;
   });
+
+  const renderStock = (stock: (typeof stocks)[number]) => {
+    return (
+      <StockListItem
+        stock={stock}
+        key={stock.id}
+        metricDefinitions={habit.metricDefinitions}
+      />
+    );
+  };
 
   return (
     <div>
@@ -48,34 +71,16 @@ const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
             }}
           />
         )}
-        {activeStocks.length > 0 && (
-          <div className="flex flex-col gap-2">
-            {activeStocks.map((stock) => {
-              return (
-                <StockListItem
-                  stock={stock}
-                  key={stock.id}
-                  metricDefinitions={habit.metricDefinitions}
-                />
-              );
-            })}
-          </div>
-        )}
-        {depletedStocks.length > 0 && (
-          <div className="mt-2 flex flex-col gap-2">
-            <p className="text-foreground-400 text-tiny">Depleted</p>
-            {depletedStocks.map((stock) => {
-              return (
-                <StockListItem
-                  stock={stock}
-                  key={stock.id}
-                  metricDefinitions={habit.metricDefinitions}
-                />
-              );
-            })}
-          </div>
-        )}
-        {!isAdding && habit.stocks.length === 0 && (
+        {[
+          ...activeStocks.map(renderStock),
+          depletedStocks.length > 0 && (
+            <p key="depleted" className="text-foreground-400 text-tiny mt-2">
+              Depleted
+            </p>
+          ),
+          ...depletedStocks.map(renderStock),
+        ]}
+        {!isAdding && stocks.length === 0 && (
           <p className="text-default-500 italic">No stocks</p>
         )}
       </div>

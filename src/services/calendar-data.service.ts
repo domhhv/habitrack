@@ -1,4 +1,5 @@
 import {
+  now,
   toZoned,
   parseAbsolute,
   toCalendarDate,
@@ -9,10 +10,13 @@ import keyBy from 'lodash.keyby';
 
 import type {
   Note,
+  Habit,
   DaysOfWeek,
   Occurrence,
   RawOccurrence,
   TypedSupabaseClient,
+  PendingCalendarWrites,
+  OccurrenceValuesSubmission,
 } from '@models';
 import {
   isNoteOfPeriod,
@@ -138,6 +142,7 @@ export const createCalendarData = (
     occurrences,
     occurrencesByDate: buildOccurrencesByDate(occurrences, range),
     periodNotes,
+    range,
     weekNotes: notesOfKind('week'),
     notesByOccurrenceId: keyBy(
       notes.filter(isNoteOfOccurrence),
@@ -147,6 +152,210 @@ export const createCalendarData = (
 };
 
 export type CalendarData = ReturnType<typeof createCalendarData>;
+
+const toOccurrenceHabit = (habit: Habit): Occurrence['habit'] => {
+  return {
+    iconPath: habit.iconPath,
+    metricDefinitions: habit.metricDefinitions,
+    name: habit.name,
+    trait:
+      habit.trait && habit.traitId
+        ? { ...habit.trait, id: habit.traitId }
+        : null,
+  };
+};
+
+const applyOccurrenceValues = (
+  occurrence: Occurrence,
+  values: OccurrenceValuesSubmission,
+  photoPaths: string[],
+  habits: Record<Habit['id'], Habit>
+): Occurrence => {
+  const habit = habits[values.selectedHabitId];
+  const allPhotoPaths = [...(occurrence.photoPaths ?? []), ...photoPaths];
+
+  return {
+    ...occurrence,
+    habit: habit ? toOccurrenceHabit(habit) : occurrence.habit,
+    habitId: values.selectedHabitId,
+    hasSpecificTime: values.hasSpecificTime,
+    isPending: true,
+    occurredAt: parseAbsolute(values.occurredAt, occurrence.timeZone),
+    photoPaths: allPhotoPaths.length > 0 ? allPhotoPaths : null,
+  };
+};
+
+const createPendingOccurrence = (
+  id: string,
+  values: OccurrenceValuesSubmission,
+  photoPaths: string[],
+  habits: Record<Habit['id'], Habit>
+): Occurrence | null => {
+  const habit = habits[values.selectedHabitId];
+  const timeZone = getLocalTimeZone();
+
+  if (!habit) {
+    return null;
+  }
+
+  return applyOccurrenceValues(
+    {
+      cost: null,
+      createdAt: now(timeZone),
+      currency: null,
+      habit: toOccurrenceHabit(habit),
+      habitId: habit.id,
+      hasSpecificTime: values.hasSpecificTime,
+      id,
+      metricValues: [],
+      occurredAt: now(timeZone),
+      photoPaths: null,
+      stockUsages: [],
+      timeZone,
+      updatedAt: null,
+      userId: habit.userId,
+    },
+    values,
+    photoPaths,
+    habits
+  );
+};
+
+const getPendingNoteFields = () => {
+  return { createdAt: new Date().toISOString(), updatedAt: null, userId: '' };
+};
+
+const applyPendingOccurrenceWrites = (
+  occurrences: Occurrence[],
+  writes: PendingCalendarWrites,
+  habits: Record<Habit['id'], Habit>
+) => {
+  const deletedIds = new Set(writes.deletedOccurrenceIds);
+  const updatesById = keyBy(writes.updatedOccurrences, 'occurrenceId');
+
+  const nextOccurrences = occurrences
+    .filter(({ id }) => {
+      return !deletedIds.has(id);
+    })
+    .map((occurrence) => {
+      const update = updatesById[occurrence.id];
+      const removedMetricIds = new Set(
+        writes.removedMetricValues
+          .filter(({ occurrenceId }) => {
+            return occurrenceId === occurrence.id;
+          })
+          .map(({ habitMetricId }) => {
+            return habitMetricId;
+          })
+      );
+      const updated = update
+        ? applyOccurrenceValues(
+            occurrence,
+            update.values,
+            update.photoPaths,
+            habits
+          )
+        : occurrence;
+
+      return removedMetricIds.size > 0
+        ? {
+            ...updated,
+            metricValues: updated.metricValues.filter(({ habitMetricId }) => {
+              return !removedMetricIds.has(habitMetricId);
+            }),
+          }
+        : updated;
+    });
+
+  writes.createdOccurrences.forEach(({ id, photoPaths, values }) => {
+    const occurrence = createPendingOccurrence(id, values, photoPaths, habits);
+
+    if (occurrence) {
+      nextOccurrences.push(occurrence);
+    }
+  });
+
+  return nextOccurrences;
+};
+
+const applyPendingNoteWrites = (
+  notes: Note[],
+  writes: PendingCalendarWrites
+) => {
+  const deletedIds = new Set(writes.deletedNoteIds);
+  const contentById = new Map(
+    writes.updatedNotes.map(({ content, noteId }) => {
+      return [noteId, content];
+    })
+  );
+  const occurrenceNoteContent = new Map(
+    [...writes.createdOccurrences, ...writes.updatedOccurrences].map(
+      (write) => {
+        return [
+          'occurrenceId' in write ? write.occurrenceId : write.id,
+          write.values.note.trim(),
+        ];
+      }
+    )
+  );
+
+  const nextNotes: Note[] = notes.flatMap((note) => {
+    if (deletedIds.has(note.id)) {
+      return [];
+    }
+
+    const occurrenceId = isNoteOfOccurrence(note) ? note.occurrenceId : null;
+
+    if (occurrenceId && occurrenceNoteContent.has(occurrenceId)) {
+      const content = occurrenceNoteContent.get(occurrenceId);
+
+      occurrenceNoteContent.delete(occurrenceId);
+
+      return content ? [{ ...note, content }] : [];
+    }
+
+    const content = contentById.get(note.id);
+
+    return [content === undefined ? note : { ...note, content }];
+  });
+
+  occurrenceNoteContent.forEach((content, occurrenceId) => {
+    if (content) {
+      nextNotes.push({
+        ...getPendingNoteFields(),
+        content,
+        id: `pending-note-${occurrenceId}`,
+        occurrenceId,
+      });
+    }
+  });
+
+  writes.createdNotes.forEach((note) => {
+    nextNotes.push({ ...getPendingNoteFields(), ...note });
+  });
+
+  return nextNotes;
+};
+
+/**
+ * Shows calendar writes that are still in flight: logged and edited entries, removed entries and
+ * metric values, and day, week and month notes. A failed write drops out of the pending writes,
+ * so the calendar falls back to the loaded data.
+ */
+export const applyPendingCalendarWrites = (
+  data: CalendarData,
+  writes: PendingCalendarWrites,
+  habits: Record<Habit['id'], Habit>
+): CalendarData => {
+  return createCalendarData(
+    applyPendingOccurrenceWrites(data.occurrences, writes, habits),
+    applyPendingNoteWrites(
+      [...data.periodNotes, ...Object.values(data.notesByOccurrenceId)],
+      writes
+    ),
+    data.range
+  );
+};
 
 export const loadCalendarData = async (
   supabase: TypedSupabaseClient,

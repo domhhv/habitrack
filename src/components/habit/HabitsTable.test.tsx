@@ -1,10 +1,11 @@
 import { Provider as RollbarProvider } from '@rollbar/react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { createRoutesStub } from 'react-router';
 import { it, vi, expect, describe } from 'vitest';
 
 import { useHabits } from '@hooks';
+import { useConfirmationActions } from '@stores';
 import { makeTestHabit } from '@tests';
 
 import HabitsTable from './HabitsTable';
@@ -104,5 +105,43 @@ describe(HabitsTable.name, () => {
         'Delete habit: Habit name #2'
       );
     });
+  });
+
+  it('hides a habit while its deletion is pending', async () => {
+    vi.mocked(useConfirmationActions).mockReturnValue({
+      askConfirmation: vi.fn().mockResolvedValue(true),
+    } as unknown as ReturnType<typeof useConfirmationActions>);
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      'habit-1': makeTestHabit({ id: 'habit-1', name: 'Habit name #1' }),
+      'habit-2': makeTestHabit({ id: 'habit-2', name: 'Habit name #2' }),
+    });
+    const Stub = createRoutesStub([
+      {
+        path: '/habits',
+        Component: () => {
+          return (
+            <RollbarProvider config={{}}>
+              <HabitsTable habitsStats={{}} />
+            </RollbarProvider>
+          );
+        },
+      },
+      {
+        path: '/habits/:habitId',
+        action: () => {
+          return new Promise(() => {});
+        },
+      },
+    ]);
+    const { findByLabelText, getByText, queryByText } = render(
+      <Stub initialEntries={['/habits']} />
+    );
+
+    fireEvent.click(await findByLabelText('Delete habit: Habit name #1'));
+
+    await waitFor(() => {
+      expect(queryByText('Habit name #1')).toBeNull();
+    });
+    expect(getByText('Habit name #2')).toBeTruthy();
   });
 });

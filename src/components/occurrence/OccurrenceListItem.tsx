@@ -5,7 +5,7 @@ import React from 'react';
 import { useDateFormatter } from 'react-aria';
 import { href } from 'react-router';
 
-import { CustomButton, InfinityLoader } from '@components';
+import { CustomButton } from '@components';
 import { useHabits, useCalendarData, useActionFetcher } from '@hooks';
 import type {
   Habit,
@@ -109,7 +109,6 @@ const formatCost = (cost: number | null, currency: string | null) => {
 
 type OccurrenceListItemProps = {
   hasChip: boolean;
-  isBeingRemoved: boolean;
   occurrence: Occurrence;
   onEdit: () => void;
   onRemove: () => void;
@@ -117,7 +116,6 @@ type OccurrenceListItemProps = {
 
 const OccurrenceListItem = ({
   hasChip,
-  isBeingRemoved,
   occurrence,
   onEdit,
   onRemove,
@@ -139,11 +137,6 @@ const OccurrenceListItem = ({
   }, [habits, occurrence.habitId]);
   const metricValueFetcher = useActionFetcher();
   const { askConfirmation } = useConfirmationActions();
-  const [removalTargetMetricId, setRemovalTargetMetricId] = React.useState<
-    string | null
-  >(null);
-  const removingMetricId =
-    metricValueFetcher.state === 'idle' ? null : removalTargetMetricId;
   const timeFormatter = useDateFormatter({
     hour: 'numeric',
     minute: 'numeric',
@@ -163,7 +156,6 @@ const OccurrenceListItem = ({
       return;
     }
 
-    setRemovalTargetMetricId(habitMetricId);
     void metricValueFetcher.submit(
       {
         habitMetricId,
@@ -311,27 +303,22 @@ const OccurrenceListItem = ({
           {metricChips.length > 0 && (
             <div className="flex flex-wrap gap-1 pt-1">
               {metricChips.map((chip) => {
-                const isRemoving = removingMetricId === chip.id;
-
                 return (
                   <Chip key={chip.id} className="gap-2">
                     {chip.label}
-                    {isRemoving ? (
-                      <InfinityLoader size={16} color="var(--danger)" />
-                    ) : (
-                      <CustomButton
-                        size="sm"
-                        isIconOnly
-                        variant="ghost"
-                        aria-label="delete-metric-value"
-                        className="text-danger ml-0.5 h-4 w-4 min-w-0"
-                        onPress={() => {
-                          return handleRemoveMetricValue(chip.id);
-                        }}
-                      >
-                        <TrashSimpleIcon size={10} />
-                      </CustomButton>
-                    )}
+                    <CustomButton
+                      size="sm"
+                      isIconOnly
+                      variant="ghost"
+                      aria-label="delete-metric-value"
+                      isDisabled={occurrence.isPending}
+                      className="text-danger ml-0.5 h-4 w-4 min-w-0"
+                      onPress={() => {
+                        return handleRemoveMetricValue(chip.id);
+                      }}
+                    >
+                      <TrashSimpleIcon size={10} />
+                    </CustomButton>
                   </Chip>
                 );
               })}
@@ -374,8 +361,8 @@ const OccurrenceListItem = ({
             isIconOnly
             variant="light"
             onPress={onEdit}
-            isDisabled={isBeingRemoved}
             aria-label="edit-habit-entry"
+            isDisabled={occurrence.isPending}
           >
             <PencilSimpleIcon size={14} weight="bold" />
           </CustomButton>
@@ -384,8 +371,8 @@ const OccurrenceListItem = ({
             isIconOnly
             onPress={onRemove}
             variant="danger-soft"
-            isPending={isBeingRemoved}
             aria-label="delete-habit-entry"
+            isDisabled={occurrence.isPending}
           >
             <TrashSimpleIcon weight="bold" />
           </CustomButton>

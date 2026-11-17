@@ -3,6 +3,7 @@ import React from 'react';
 import { Outlet, createRoutesStub } from 'react-router';
 import { it, vi, expect, describe } from 'vitest';
 
+import type { ActionResult } from '@models';
 import { makeTestHabit } from '@tests';
 
 import HabitDetails from './HabitDetails';
@@ -17,7 +18,9 @@ vi.mock('@hooks', async (importOriginal) => {
 
 const habit = makeTestHabit({ id: 'habit-1', name: 'Running' });
 
-const renderDetails = () => {
+const renderDetails = (
+  result: Promise<ActionResult> | ActionResult = { ok: true, toasts: [] }
+) => {
   const action = vi.fn();
 
   const Stub = createRoutesStub([
@@ -30,7 +33,7 @@ const renderDetails = () => {
           action: async ({ request }) => {
             action(Object.fromEntries(await request.formData()));
 
-            return { ok: true, toasts: [] };
+            return result;
           },
           Component: () => {
             return <HabitDetails habit={habit} />;
@@ -72,5 +75,39 @@ describe(HabitDetails.name, () => {
 
     expect(await screen.findByLabelText('Edit name')).toBeTruthy();
     expect(action).not.toHaveBeenCalled();
+  });
+
+  it('shows the new name while the save is pending', async () => {
+    renderDetails(new Promise(() => {}));
+
+    fireEvent.click(await screen.findByLabelText('Edit name'));
+    fireEvent.change(screen.getByPlaceholderText('Enter habit name'), {
+      target: { value: ' Walking ' },
+    });
+    fireEvent.click(screen.getByLabelText('Save name'));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Walking' })
+    ).toBeTruthy();
+    expect(screen.queryByPlaceholderText('Enter habit name')).toBeNull();
+  });
+
+  it('reopens the editor with the field error when the save is rejected', async () => {
+    renderDetails({
+      error: 'Invalid habit',
+      fieldErrors: { name: 'Name is too long' },
+      ok: false,
+    });
+
+    fireEvent.click(await screen.findByLabelText('Edit name'));
+    fireEvent.change(screen.getByPlaceholderText('Enter habit name'), {
+      target: { value: 'Walking' },
+    });
+    fireEvent.click(screen.getByLabelText('Save name'));
+
+    expect(await screen.findByText('Name is too long')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Enter habit name')).toHaveValue(
+      'Walking'
+    );
   });
 });

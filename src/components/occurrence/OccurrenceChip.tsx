@@ -36,6 +36,10 @@ const OccurrenceChip = ({
   const { color: traitColor } = trait || {};
   const { screenWidth } = useScreenWidth();
   const [isFocused, setIsFocused] = React.useState(false);
+  const isPending = occurrences.every((o) => {
+    return o.isPending;
+  });
+  const isInteractive = isClickable && !isPending;
 
   const handleClick = () => {
     openOccurrenceDrawer({
@@ -45,14 +49,14 @@ const OccurrenceChip = ({
   };
 
   useKeyboardShortcut(['Enter', ' '], () => {
-    if (isClickable && isFocused) {
+    if (isInteractive && isFocused) {
       handleClick();
     }
   });
 
   let chip = (
     <div
-      {...(isClickable && {
+      {...(isInteractive && {
         onClick: handleClick,
         role: 'button',
         tabIndex: 0,
@@ -66,6 +70,7 @@ const OccurrenceChip = ({
       }}
       className={cn(
         'relative rounded-2xl border-2 bg-white p-1.5 dark:bg-black',
+        isPending && 'opacity-60',
         isHabitNameShown && 'flex items-center gap-2 px-1 py-0.5',
         hasMargin && 'md:mr-1 md:mb-1',
         screenWidth < 400 && 'p-1'
