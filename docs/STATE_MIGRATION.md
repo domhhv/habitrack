@@ -504,7 +504,19 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
     - The app layout no longer adds an `initialized` class to a `#root` element that doesn't exist.
     - **Tests** cover the delay, navigations and fetcher submissions.
     - **Not verified:** a run in a real browser.
-- **View transitions** (`viewTransition` on calendar navigation links, `useViewTransitionState`) for month, week and day switches.
+- **View transitions** for month, week and day switches. React Router 8.5 deprecates its own `viewTransition` option and `useViewTransitionState` in favour of React's `<ViewTransition>`, which activates inside the `startTransition` the router already wraps its state updates in.
+  - Done on `feat/calendar-view-transitions`.
+  - **As built:**
+    - **Calendar periods.** `CalendarPeriodTransition` (`src/components/calendar/`) wraps the month, week and day grids, not the sidebars. It keeps the last committed period in state and sets the boundary's `update` class from it (`getCalendarPeriodDirection` in `@utils`). Moving to a later period slides the grid in from the end, and an earlier one from the start. This holds whatever started the move: the period buttons, the month and year pickers, "today", arrow keys, the day swipe, week links in the month grid and the browser's back and forward buttons. Revalidations and pending writes keep the same period, so they don't animate the grid.
+    - **No transition types.** The plan passed types from each trigger through react-aria's router. Deriving the direction from the period covers every trigger, history navigation included, and needs no navigate wrapper.
+    - **View switches.** Each view's boundary is named `calendar-period`, so switching views unmounts one and mounts another with the same name. That forms a `share` pair, which crossfades the grids.
+    - **Focused date from the URL.** The views now read their focused date from the route params during render (`getFocusedCalendarDate`), through react-stately's controlled `focusedValue` for the month and week views. The effects that synced it after the commit are gone, so the commit that changes the URL already shows the new period, which the transition needs. Week columns and the day's hour list are keyed by date, so a new period mounts fresh and its chips don't animate on their own.
+    - **Chips.** Each chip group is a keyed `<ViewTransition>` with `chip-enter` and `chip-exit`, so a logged entry (shown optimistically) pops in and a deleted one pops out.
+    - **Lists.** Stocks, the "Depleted" label and the notes page's notes are keyed boundaries that fade in and out and move to their new position, so a stock glides between the active and depleted groups.
+    - **CSS** (`src/index.css`): the root snapshot doesn't animate, so the header and sidebars stay still. Slides move by 2rem with a fade over 220 ms, and reduced motion turns every view transition animation off.
+    - `SwipeableContainer` lost its unused `direction` and `swipeKey` props.
+    - **Not done:** habit table rows, because `view-transition-name` on a `<tr>` isn't reliable across browsers.
+    - **Tests** cover the period direction. jsdom has no `startViewTransition`, so the animations were checked in Chromium: period moves (buttons, arrow keys, back and forward) start `calendar-next`/`calendar-prev`, view switches `calendar-view`, and logging and deleting an entry `chip-enter`/`chip-exit`, with no transition on the revalidation that follows. Safari and Firefox weren't checked.
 
 ### 4. Data loading performance
 

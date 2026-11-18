@@ -1,18 +1,29 @@
+import { getLocalTimeZone } from '@internationalized/date';
 import capitalize from 'lodash.capitalize';
 import React from 'react';
 import { useLocale, useCalendar } from 'react-aria';
+import { useParams } from 'react-router';
 import { useCalendarState } from 'react-stately';
 
 import { MonthCalendar } from '@components';
 import { useFirstDayOfWeek } from '@hooks';
-import { createCalendar } from '@utils';
+import { createCalendar, getFocusedCalendarDate } from '@utils';
 
 const MonthCalendarPage = () => {
   const firstDayOfWeek = useFirstDayOfWeek();
   const { locale } = useLocale();
+  const params = useParams();
+  const focusedDate = getFocusedCalendarDate(
+    'month',
+    params,
+    locale,
+    firstDayOfWeek,
+    getLocalTimeZone()
+  );
   const calendarState = useCalendarState({
     createCalendar,
     firstDayOfWeek,
+    focusedValue: focusedDate,
     locale,
   });
   const { calendarProps, title } = useCalendar({}, calendarState);

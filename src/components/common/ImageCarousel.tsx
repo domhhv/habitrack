@@ -28,14 +28,12 @@ const ImageCarousel = ({
   width = 'w-full',
 }: ImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
 
   const handleNext = () => {
     if (imageUrls.length <= 1) {
       return;
     }
 
-    setDirection(1);
     setCurrentIndex((prevIndex) => {
       return (prevIndex + 1) % imageUrls.length;
     });
@@ -46,7 +44,6 @@ const ImageCarousel = ({
       return;
     }
 
-    setDirection(-1);
     setCurrentIndex((prevIndex) => {
       return (prevIndex - 1 + imageUrls.length) % imageUrls.length;
     });
@@ -76,11 +73,9 @@ const ImageCarousel = ({
   return (
     <div className={`relative overflow-hidden ${width} ${height} bg-muted`}>
       <SwipeableContainer
-        direction={direction}
         onSwipeLeft={handleNext}
         onSwipeRight={handlePrev}
         className="absolute inset-0"
-        swipeKey={String(currentIndex)}
       >
         {!!currentImageUrl.error && (
           <div className="bg-danger absolute inset-0 flex items-center justify-center rounded-sm">
@@ -178,7 +173,6 @@ const ImageCarousel = ({
                 key={index}
                 type="button"
                 onClick={() => {
-                  setDirection(index > currentIndex ? 1 : -1);
                   setCurrentIndex(index);
                 }}
                 className={cn(

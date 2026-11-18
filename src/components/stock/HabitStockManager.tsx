@@ -1,5 +1,5 @@
 import { PlusIcon } from '@phosphor-icons/react';
-import React from 'react';
+import React, { ViewTransition } from 'react';
 
 import { CustomButton } from '@components';
 import { usePendingHabitWrites } from '@hooks';
@@ -36,11 +36,12 @@ const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
 
   const renderStock = (stock: (typeof stocks)[number]) => {
     return (
-      <StockListItem
-        stock={stock}
-        key={stock.id}
-        metricDefinitions={habit.metricDefinitions}
-      />
+      <ViewTransition key={stock.id} exit="fade-out" enter="fade-in">
+        <StockListItem
+          stock={stock}
+          metricDefinitions={habit.metricDefinitions}
+        />
+      </ViewTransition>
     );
   };
 
@@ -74,9 +75,9 @@ const HabitStockManager = ({ habit }: HabitStockManagerProps) => {
         {[
           ...activeStocks.map(renderStock),
           depletedStocks.length > 0 && (
-            <p key="depleted" className="text-foreground-400 text-tiny mt-2">
-              Depleted
-            </p>
+            <ViewTransition key="depleted" exit="fade-out" enter="fade-in">
+              <p className="text-foreground-400 text-tiny mt-2">Depleted</p>
+            </ViewTransition>
           ),
           ...depletedStocks.map(renderStock),
         ]}

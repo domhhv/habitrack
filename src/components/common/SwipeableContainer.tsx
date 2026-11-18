@@ -4,8 +4,6 @@ import { useSwipeable } from 'react-swipeable';
 type SwipeableContainerProps = {
   children: React.ReactNode;
   className?: string;
-  direction: number;
-  swipeKey: string;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
 };
