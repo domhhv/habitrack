@@ -191,3 +191,123 @@ html.dark span.ripple {
 .occurrence-note-textarea::-webkit-resizer {
   display: none;
 }
+
+:root {
+  --view-transition-duration: 220ms;
+  --view-transition-easing: cubic-bezier(0.2, 0, 0, 1);
+  --view-transition-slide: 2rem;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(*) {
+  animation-duration: var(--view-transition-duration);
+  animation-timing-function: var(--view-transition-easing);
+}
+
+::view-transition-old(.calendar-next) {
+  animation: var(--view-transition-duration) var(--view-transition-easing) both
+    view-transition-slide-to-start;
+}
+
+::view-transition-new(.calendar-next) {
+  animation: var(--view-transition-duration) var(--view-transition-easing) both
+    view-transition-slide-from-end;
+}
+
+::view-transition-old(.calendar-prev) {
+  animation: var(--view-transition-duration) var(--view-transition-easing) both
+    view-transition-slide-to-end;
+}
+
+::view-transition-new(.calendar-prev) {
+  animation: var(--view-transition-duration) var(--view-transition-easing) both
+    view-transition-slide-from-start;
+}
+
+::view-transition-old(.calendar-view),
+::view-transition-old(.fade-out):only-child {
+  animation: var(--view-transition-duration) var(--view-transition-easing) both
+    view-transition-fade-out;
+}
+
+::view-transition-new(.calendar-view),
+::view-transition-new(.fade-in):only-child {
+  animation: var(--view-transition-duration) var(--view-transition-easing) both
+    view-transition-fade-in;
+}
+
+::view-transition-new(.chip-enter):only-child {
+  animation: var(--view-transition-duration) var(--view-transition-easing) both
+    view-transition-pop-in;
+}
+
+::view-transition-old(.chip-exit):only-child {
+  animation: var(--view-transition-duration) var(--view-transition-easing) both
+    view-transition-pop-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes view-transition-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes view-transition-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes view-transition-slide-from-end {
+  from {
+    opacity: 0;
+    translate: var(--view-transition-slide);
+  }
+}
+
+@keyframes view-transition-slide-from-start {
+  from {
+    opacity: 0;
+    translate: calc(var(--view-transition-slide) * -1);
+  }
+}
+
+@keyframes view-transition-slide-to-start {
+  to {
+    opacity: 0;
+    translate: calc(var(--view-transition-slide) * -1);
+  }
+}
+
+@keyframes view-transition-slide-to-end {
+  to {
+    opacity: 0;
+    translate: var(--view-transition-slide);
+  }
+}
+
+@keyframes view-transition-pop-in {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+@keyframes view-transition-pop-out {
+  to {
+    opacity: 0;
+    scale: 0.6;
+  }
+}

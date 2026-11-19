@@ -1,5 +1,5 @@
 import { ScrollShadow } from '@heroui/react';
-import React from 'react';
+import React, { ViewTransition } from 'react';
 import { href, useNavigation, useSearchParams } from 'react-router';
 
 import { NoteListItem, InfinityLoader } from '@components';
@@ -62,7 +62,11 @@ const NotesList = ({ hasMore, notes, pageCount }: NotesListProps) => {
     >
       <div className="flex flex-col gap-4">
         {notes.map((note) => {
-          return <NoteListItem note={note} key={note.id} />;
+          return (
+            <ViewTransition key={note.id} exit="fade-out" enter="fade-in">
+              <NoteListItem note={note} />
+            </ViewTransition>
+          );
         })}
         {renderEndMessage()}
       </div>

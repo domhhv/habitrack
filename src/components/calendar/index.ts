@@ -1,4 +1,5 @@
 export { default as CalendarNavigationButtons } from './CalendarNavigationButtons';
+export { default as CalendarPeriodTransition } from './CalendarPeriodTransition';
 export { default as CalendarSidebar } from './CalendarSidebar';
 export { default as DayCalendar } from './DayCalendar';
 export { default as MonthCalendar } from './MonthCalendar';

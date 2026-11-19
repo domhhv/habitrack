@@ -11,7 +11,7 @@ import {
 import type { BorderBeamProps } from 'border-beam';
 import BorderBeam from 'border-beam';
 import groupBy from 'lodash.groupby';
-import React from 'react';
+import React, { ViewTransition } from 'react';
 import { useCalendarCell } from 'react-aria';
 import type { CalendarState } from 'react-stately';
 
@@ -338,7 +338,14 @@ const MonthCalendarCell = ({
               }
 
               return (
-                <OccurrenceChip key={habitId} occurrences={habitOccurrences} />
+                <ViewTransition
+                  key={habitId}
+                  default="none"
+                  exit="chip-exit"
+                  enter="chip-enter"
+                >
+                  <OccurrenceChip occurrences={habitOccurrences} />
+                </ViewTransition>
               );
             }
           )}

@@ -5,6 +5,8 @@ export { default as calculateOccurrenceCost } from './calculate-occurrence-cost'
 export { default as getCalendarHref } from './calendar-href';
 export * from './calendar-range';
 export * from './calendar-range-cache';
+export { default as getCalendarPeriodDirection } from './calendar-transition';
+export type { CalendarPeriodDirection } from './calendar-transition';
 export { default as createCalendar } from './create-calendar';
 export * from './date';
 export { default as failAction } from './fail-action';

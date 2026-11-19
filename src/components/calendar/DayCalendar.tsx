@@ -1,11 +1,5 @@
 import { cn, Tooltip, ScrollShadow } from '@heroui/react';
-import {
-  today,
-  isToday,
-  CalendarDate,
-  toCalendarDate,
-  getLocalTimeZone,
-} from '@internationalized/date';
+import { isToday, getLocalTimeZone } from '@internationalized/date';
 import {
   NoteIcon,
   NoteBlankIcon,
@@ -13,19 +7,26 @@ import {
 } from '@phosphor-icons/react';
 import capitalize from 'lodash.capitalize';
 import groupBy from 'lodash.groupby';
-import React from 'react';
-import { useDateFormatter } from 'react-aria';
+import React, { ViewTransition } from 'react';
+import { useLocale, useDateFormatter } from 'react-aria';
 import { useParams, useNavigate } from 'react-router';
 
 import { CustomButton, OccurrenceChip, SwipeableContainer } from '@components';
-import { useCurrentTime, useScreenWidth, useCalendarData } from '@hooks';
+import {
+  useCurrentTime,
+  useScreenWidth,
+  useCalendarData,
+  useFirstDayOfWeek,
+} from '@hooks';
 import { useNoteDrawerActions, useOccurrenceDrawerActions } from '@stores';
 import {
   getCalendarHref,
   isDstTransitionDay,
   findDstTransitionHour,
+  getFocusedCalendarDate,
 } from '@utils';
 
+import CalendarPeriodTransition from './CalendarPeriodTransition';
 import CalendarSidebar from './CalendarSidebar';
 
 const DayCalendar = () => {
@@ -36,35 +37,22 @@ const DayCalendar = () => {
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
   const params = useParams();
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  const firstDayOfWeek = useFirstDayOfWeek();
   const timeZone = getLocalTimeZone();
-  const [focusedDate, setFocusedDate] = React.useState(() => {
-    return today(timeZone);
-  });
-  const [swipeDirection, setSwipeDirection] = React.useState(0);
+  const focusedDate = React.useMemo(() => {
+    return getFocusedCalendarDate(
+      'day',
+      params,
+      locale,
+      firstDayOfWeek,
+      timeZone
+    );
+  }, [params, locale, firstDayOfWeek, timeZone]);
 
   const formatter = useDateFormatter({
     dateStyle: 'full',
   });
-
-  React.useEffect(() => {
-    const currentDay = today(timeZone);
-
-    const {
-      day = currentDay.day,
-      month = currentDay.month,
-      year = currentDay.year,
-    } = params;
-
-    const paramsDate = new CalendarDate(
-      Number(year),
-      Number(month),
-      Number(day)
-    );
-
-    if (focusedDate.toString() !== paramsDate.toString()) {
-      setFocusedDate(toCalendarDate(paramsDate));
-    }
-  }, [params, timeZone, focusedDate]);
 
   const dayNote = React.useMemo(() => {
     return dayNotes.find((note) => {
@@ -113,13 +101,11 @@ const DayCalendar = () => {
 
   const handleSwipeLeft = () => {
     const nextDay = focusedDate.add({ days: 1 });
-    setSwipeDirection(1);
     navigate(getCalendarHref('day', nextDay));
   };
 
   const handleSwipeRight = () => {
     const prevDay = focusedDate.subtract({ days: 1 });
-    setSwipeDirection(-1);
     navigate(getCalendarHref('day', prevDay));
   };
 
@@ -133,10 +119,8 @@ const DayCalendar = () => {
           className="sticky top-0 z-20 flex gap-2 bg-inherit py-2 max-lg:py-0 lg:hidden"
         />
         <SwipeableContainer
-          direction={swipeDirection}
           onSwipeLeft={handleSwipeLeft}
           onSwipeRight={handleSwipeRight}
-          swipeKey={focusedDate.toString()}
         >
           <div className="flex items-center justify-center gap-2 py-2">
             <div className="flex items-center gap-3">
@@ -195,66 +179,78 @@ const DayCalendar = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col py-4 pr-8">
-            {[...Array(24).keys()].map((hour) => {
-              const isSkippedHour = dstType === 'spring' && hour === dstHour;
-              const isDuplicatedHour =
-                dstType === 'fall' && dstHour !== null && hour === dstHour - 1;
-              const isCurrentHour = isFocusedToday && now.getHours() === hour;
+          <CalendarPeriodTransition period={focusedDate.toString()}>
+            <div
+              key={focusedDate.toString()}
+              className="flex flex-col py-4 pr-8"
+            >
+              {[...Array(24).keys()].map((hour) => {
+                const isSkippedHour = dstType === 'spring' && hour === dstHour;
+                const isDuplicatedHour =
+                  dstType === 'fall' &&
+                  dstHour !== null &&
+                  hour === dstHour - 1;
+                const isCurrentHour = isFocusedToday && now.getHours() === hour;
 
-              return (
-                <div
-                  key={hour}
-                  className="group/minutes-cell relative flex gap-4"
-                >
-                  <p
-                    className={cn(
-                      'text-foreground w-6 shrink-0 -translate-y-3 text-right',
-                      (isSkippedHour || isDuplicatedHour) && 'text-muted',
-                      isCurrentHour && 'text-accent font-extrabold'
-                    )}
-                  >
-                    {hour !== 0 && hour}
-                  </p>
+                return (
                   <div
-                    className={cn(
-                      'border-border flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b p-2 group-last-of-type/minutes-cell:border-b-0',
-                      isSkippedHour && 'bg-background-secondary',
-                      isDuplicatedHour && 'border-l-warning border-l-3'
-                    )}
+                    key={hour}
+                    className="group/minutes-cell relative flex gap-4"
                   >
-                    {isSkippedHour && (
-                      <p className="text-muted text-xs italic">DST skip</p>
-                    )}
-                    {isDuplicatedHour && (
-                      <p className="text-warning italic">DST repeat</p>
-                    )}
-                    {isCurrentHour && (
-                      <div
-                        className="bg-accent absolute right-0 left-0 z-10 h-0.5"
-                        style={{
-                          top: `${(now.getMinutes() / 60) * 100}%`,
-                        }}
-                      />
-                    )}
-                    {groupOccurrences(hour).map(
-                      ([habitId, habitOccurrences]) => {
-                        if (!habitOccurrences) {
-                          return null;
-                        }
+                    <p
+                      className={cn(
+                        'text-foreground w-6 shrink-0 -translate-y-3 text-right',
+                        (isSkippedHour || isDuplicatedHour) && 'text-muted',
+                        isCurrentHour && 'text-accent font-extrabold'
+                      )}
+                    >
+                      {hour !== 0 && hour}
+                    </p>
+                    <div
+                      className={cn(
+                        'border-border flex h-20 w-full flex-wrap gap-2 overflow-x-hidden border-b p-2 group-last-of-type/minutes-cell:border-b-0',
+                        isSkippedHour && 'bg-background-secondary',
+                        isDuplicatedHour && 'border-l-warning border-l-3'
+                      )}
+                    >
+                      {isSkippedHour && (
+                        <p className="text-muted text-xs italic">DST skip</p>
+                      )}
+                      {isDuplicatedHour && (
+                        <p className="text-warning italic">DST repeat</p>
+                      )}
+                      {isCurrentHour && (
+                        <div
+                          className="bg-accent absolute right-0 left-0 z-10 h-0.5"
+                          style={{
+                            top: `${(now.getMinutes() / 60) * 100}%`,
+                          }}
+                        />
+                      )}
+                      {groupOccurrences(hour).map(
+                        ([habitId, habitOccurrences]) => {
+                          if (!habitOccurrences) {
+                            return null;
+                          }
 
-                        return (
-                          <div key={habitId}>
-                            <OccurrenceChip occurrences={habitOccurrences} />
-                          </div>
-                        );
-                      }
-                    )}
+                          return (
+                            <ViewTransition
+                              key={habitId}
+                              default="none"
+                              exit="chip-exit"
+                              enter="chip-enter"
+                            >
+                              <OccurrenceChip occurrences={habitOccurrences} />
+                            </ViewTransition>
+                          );
+                        }
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </CalendarPeriodTransition>
         </SwipeableContainer>
       </ScrollShadow>
       <CalendarSidebar
