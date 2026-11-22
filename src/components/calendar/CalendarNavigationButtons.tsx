@@ -111,31 +111,31 @@ const CalendarNavigationButtons = ({
   return (
     <>
       <CustomButton
-        className="px-3"
         variant="tertiary"
         href={previousRangePath}
         size={isDesktop ? 'md' : 'sm'}
         aria-label={`Previous ${calendarMode}`}
+        className="px-3 max-md:size-7 max-md:min-w-7 max-md:px-0"
       >
-        <ArrowFatLeftIcon size={20} />
+        <ArrowFatLeftIcon size={20} className="max-md:size-4" />
       </CustomButton>
       <CustomButton
-        className="px-3"
         href={todayRangePath}
         size={isDesktop ? 'md' : 'sm'}
         aria-label={`Current ${calendarMode}`}
         variant={isSameRange ? 'secondary' : 'tertiary'}
+        className="px-3 max-md:size-7 max-md:min-w-7 max-md:px-0"
       >
-        <CalendarDotIcon size={20} />
+        <CalendarDotIcon size={20} className="max-md:size-4" />
       </CustomButton>
       <CustomButton
-        className="px-3"
         variant="tertiary"
         href={nextRangePath}
         size={isDesktop ? 'md' : 'sm'}
         aria-label={`Next ${calendarMode}`}
+        className="px-3 max-md:size-7 max-md:min-w-7 max-md:px-0"
       >
-        <ArrowFatRightIcon size={20} />
+        <ArrowFatRightIcon size={20} className="max-md:size-4" />
       </CustomButton>
     </>
   );

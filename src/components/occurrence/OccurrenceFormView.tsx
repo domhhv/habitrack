@@ -1005,7 +1005,7 @@ const OccurrenceFormView = ({
           bucket={StorageBuckets.OCCURRENCE_PHOTOS}
         />
       )}
-      <div className="bg-background dark:bg-surface-tertiary border-border-tertiary fixed right-0 bottom-0 flex w-full items-center justify-between gap-2 border-t p-4">
+      <div className="bg-background dark:bg-surface-tertiary border-border-tertiary fixed right-0 bottom-0 z-30 flex w-full items-center justify-between gap-2 border-t p-4">
         {hasHabits ? (
           <CustomButton
             fullWidth

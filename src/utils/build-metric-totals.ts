@@ -58,7 +58,7 @@ const buildMetricTotals = (summary: OccurrenceSummaryItem[]) => {
         const formatted =
           config.decimalPlaces != null
             ? sum.toFixed(config.decimalPlaces)
-            : String(sum);
+            : String(Math.round(sum * 100) / 100);
 
         formattedTotal = config.unit
           ? `${formatted} ${config.unit}`

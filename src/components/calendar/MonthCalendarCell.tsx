@@ -65,7 +65,7 @@ const MonthCalendarCell = ({
     periodKind: noteDrawerPeriodKind,
   } = useNoteDrawerState();
   const { openOccurrenceDrawer } = useOccurrenceDrawerActions();
-  const { isDesktop, screenWidth } = useScreenWidth();
+  const { isDesktop, isMobile: isCompact, screenWidth } = useScreenWidth();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const calendarCellRef = React.useRef<HTMLDivElement | null>(null);
   const { cellProps, formattedDate, isOutsideVisibleRange } = useCalendarCell(
@@ -127,6 +127,7 @@ const MonthCalendarCell = ({
     <div
       className={cn(
         'flex w-fit flex-col items-center p-1.5 px-0.5 text-sm',
+        isCompact && 'p-0.5 text-[11px] leading-3',
         isOutsideVisibleRange && 'text-neutral-400 dark:text-neutral-600'
       )}
     >
@@ -234,12 +235,15 @@ const MonthCalendarCell = ({
     <div
       ref={calendarCellRef}
       {...cellProps}
-      className="group/cell border-border flex h-auto flex-1 flex-col gap-2 rounded-none border-r-2 last-of-type:border-r-0 lg:h-36"
+      className="group/cell border-border flex h-auto min-w-0 flex-1 basis-0 flex-col gap-2 rounded-none border-r-2 last-of-type:border-r-0 max-sm:border-r lg:h-36"
     >
       <Component
         {...(isDrawerDate && borderBeamProps)}
         className={cn(
-          'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 overflow-scroll bg-white transition-colors dark:bg-black',
+          'group-hover/cell:bg-background dark:group-hover/cell:bg-surface relative flex-1 bg-white transition-colors dark:bg-black',
+          isCompact
+            ? '[scrollbar-width:none] overflow-x-hidden overflow-y-auto'
+            : 'overflow-scroll',
           isTodayCell &&
             'bg-background group-hover/cell:bg-surface-secondary dark:group-hover/cell:bg-surface-secondary dark:bg-surface',
           isDrawerDate &&
@@ -328,7 +332,10 @@ const MonthCalendarCell = ({
         )}
         <div
           className={cn(
-            'flex flex-wrap justify-center gap-3 overflow-scroll overflow-x-auto p-3 pr-6 xl:justify-start'
+            isCompact
+              ? 'grid grid-cols-2 justify-items-center gap-x-0.5 gap-y-3 px-0.5 pt-4 pb-2 min-[500px]:grid-cols-3'
+              : 'flex flex-wrap justify-center gap-3 overflow-scroll overflow-x-auto p-3 pr-6 xl:justify-start',
+            isOutsideVisibleRange && 'opacity-40 grayscale'
           )}
         >
           {Object.entries(groupedOccurrences).map(
@@ -344,7 +351,10 @@ const MonthCalendarCell = ({
                   exit="chip-exit"
                   enter="chip-enter"
                 >
-                  <OccurrenceChip occurrences={habitOccurrences} />
+                  <OccurrenceChip
+                    isCompact={isCompact}
+                    occurrences={habitOccurrences}
+                  />
                 </ViewTransition>
               );
             }
