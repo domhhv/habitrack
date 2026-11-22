@@ -176,9 +176,9 @@ const CalendarSidebar = ({
             <CustomButton
               size="sm"
               key={view.id}
-              className="flex-1"
               href={viewPaths[view.id]}
               aria-label={`Switch to ${view.label} view`}
+              className="flex-1 max-md:h-7 max-md:text-xs"
               variant={kind === view.id ? 'primary' : 'tertiary'}
             >
               {index > 0 && <ButtonGroup.Separator />}

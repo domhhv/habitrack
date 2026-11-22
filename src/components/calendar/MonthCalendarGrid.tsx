@@ -78,9 +78,11 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
             return (
               <div
                 key={weekDay}
-                className="flex flex-1 items-center justify-center text-neutral-600 dark:text-neutral-300"
+                className="flex min-w-0 flex-1 basis-0 items-center justify-center text-neutral-600 dark:text-neutral-300"
               >
-                <p className="font-bold">{capitalize(weekDay)}</p>
+                <p className="font-bold max-sm:text-xs">
+                  {capitalize(weekDay)}
+                </p>
               </div>
             );
           })}
@@ -118,7 +120,7 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
               >
                 <div
                   className={cn(
-                    'absolute -left-7 flex h-full flex-col lg:-left-9',
+                    'absolute -left-7 hidden h-full flex-col sm:flex lg:-left-9',
                     weekIndex === 0 ? 'gap-1 lg:gap-1.5' : 'gap-0.5 lg:gap-1'
                   )}
                 >
@@ -174,7 +176,7 @@ const MonthCalendarGrid = ({ state }: MonthCalendarGridProps) => {
                 </div>
                 <div
                   className={cn(
-                    'border-border flex h-27.5 w-full basis-full justify-between border-r-2 border-l-2 group-first-of-type:border-t-2 last-of-type:border-b-2 lg:h-auto',
+                    'border-border flex h-27.5 w-full min-w-0 basis-full justify-between border-r-2 border-l-2 group-first-of-type:border-t-2 last-of-type:border-b-2 max-sm:h-auto max-sm:min-h-27.5 lg:h-auto',
                     weekIndex === 0 && 'rounded-t-3xl',
                     weekIndex === weeksInMonthCount - 1 && 'rounded-b-3xl'
                   )}

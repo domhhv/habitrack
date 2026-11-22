@@ -104,16 +104,16 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
   return (
     <div className="flex w-full flex-col gap-2">
       <div className="flex justify-between gap-2">
-        <div className="mr-0 flex items-stretch gap-2">
+        <div className="mr-0 flex min-w-0 items-stretch gap-1 sm:gap-2">
           <Select
             variant="secondary"
             value={monthSelectValue}
             isOpen={monthSelectState.isOpen}
-            className="select--sm w-17.5 md:w-28"
+            className="select--sm w-15 md:w-28"
             onOpenChange={monthSelectState.setOpen}
           >
             <Label className="sr-only">Month</Label>
-            <Select.Trigger>
+            <Select.Trigger className="max-md:h-7 max-md:min-h-7 max-md:px-2 max-md:py-0 max-md:text-xs">
               <Select.Value
                 render={() => {
                   return (
@@ -160,14 +160,14 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
             </Select.Popover>
           </Select>
           <Select
-            className="w-20"
             variant="secondary"
             value={yearSelectValue}
+            className="w-16 md:w-20"
             isOpen={yearSelectState.isOpen}
             onOpenChange={yearSelectState.setOpen}
           >
             <Label className="sr-only">Year</Label>
-            <Select.Trigger>
+            <Select.Trigger className="max-md:h-7 max-md:min-h-7 max-md:px-2 max-md:py-0 max-md:text-xs">
               <Select.Value
                 render={() => {
                   return (
@@ -211,7 +211,7 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
             </Select.Popover>
           </Select>
         </div>
-        <div className="flex gap-1 lg:gap-2">
+        <div className="flex shrink-0 gap-1 lg:gap-2">
           {!isDesktop && !!user && (
             <CustomButton
               size="sm"
@@ -219,9 +219,9 @@ const CalendarNavigation = ({ focusedDate }: MonthCalendarNavigationProps) => {
               variant="ghost"
               aria-label="Toggle filters"
               onPress={toggleFiltersVisibility}
-              className={cn(isMobile && 'min-w-fit p-0')}
+              className={cn(isMobile && 'size-7 min-w-7 p-0')}
             >
-              <FunnelSimpleIcon size={20} />
+              <FunnelSimpleIcon size={20} className="max-md:size-4" />
             </CustomButton>
           )}
           <CalendarNavigationButtons focusedDate={focusedDate} />

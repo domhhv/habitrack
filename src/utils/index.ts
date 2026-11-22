@@ -17,6 +17,7 @@ export { default as getErrorMessage } from './get-error-message';
 export { default as getFormJson } from './get-form-json';
 export { default as getFormText } from './get-form-text';
 export { default as getHabitFieldErrors } from './get-habit-field-errors';
+export { default as getReadableTextColor } from './get-readable-text-color';
 export { default as getSafeRedirectPath } from './get-safe-redirect-path';
 export { default as initializeTheme } from './initialize-theme';
 export * from './metric-value';

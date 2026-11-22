@@ -8,6 +8,7 @@ import type { Occurrence } from '@models';
 import { StorageBuckets } from '@models';
 import { getPublicUrl } from '@services';
 import { useOccurrenceDrawerActions } from '@stores';
+import { getReadableTextColor } from '@utils';
 
 export type OccurrenceChipProps = {
   colorOverride?: string;
@@ -15,6 +16,7 @@ export type OccurrenceChipProps = {
   hasMargin?: boolean;
   hasTooltip?: boolean;
   isClickable?: boolean;
+  isCompact?: boolean;
   isHabitNameShown?: boolean;
   occurrences: Occurrence[];
 };
@@ -25,6 +27,7 @@ const OccurrenceChip = ({
   hasMargin = true,
   hasTooltip = true,
   isClickable = true,
+  isCompact = false,
   isHabitNameShown = false,
   occurrences,
 }: OccurrenceChipProps) => {
@@ -53,6 +56,71 @@ const OccurrenceChip = ({
       handleClick();
     }
   });
+
+  const hasNote = occurrences.some((o) => {
+    return !!notes[o.id];
+  });
+  const hasPhoto = occurrences.some((o) => {
+    return o.photoPaths?.length;
+  });
+
+  if (isCompact) {
+    const badgeColor = colorOverride || traitColor;
+
+    return (
+      <div
+        {...(isInteractive && {
+          onClick: handleClick,
+          role: 'button',
+          tabIndex: 0,
+        })}
+        onFocus={() => {
+          return setIsFocused(true);
+        }}
+        onBlur={() => {
+          return setIsFocused(false);
+        }}
+        className={cn(
+          'relative flex size-4 items-center justify-center',
+          isPending && 'opacity-60'
+        )}
+      >
+        <img
+          className="size-3.5"
+          alt={`${habitName} icon`}
+          src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
+        />
+        <span
+          style={{
+            backgroundColor: badgeColor,
+            color: badgeColor ? getReadableTextColor(badgeColor) : undefined,
+          }}
+          className={cn(
+            'bg-accent absolute -right-0.5 -bottom-1 flex items-center justify-center rounded-full font-bold ring-1 ring-white dark:ring-black',
+            occurrences.length > 1
+              ? 'h-2.5 min-w-2.5 px-px text-[8px] leading-none'
+              : 'size-1.5'
+          )}
+        >
+          {occurrences.length > 1 && occurrences.length}
+        </span>
+        {hasNote && (
+          <NoteIcon
+            size={8}
+            weight="fill"
+            className="absolute -top-1 -right-0.5"
+          />
+        )}
+        {hasPhoto && (
+          <CameraIcon
+            size={8}
+            weight="fill"
+            className="absolute -top-1 -left-0.5"
+          />
+        )}
+      </div>
+    );
+  }
 
   let chip = (
     <div
@@ -110,11 +178,7 @@ const OccurrenceChip = ({
     );
   }
 
-  if (
-    occurrences.some((o) => {
-      return !!notes[o.id];
-    })
-  ) {
+  if (hasNote) {
     chip = (
       <Badge.Anchor>
         {chip}
@@ -129,11 +193,7 @@ const OccurrenceChip = ({
     );
   }
 
-  if (
-    occurrences.some((o) => {
-      return o.photoPaths?.length;
-    })
-  ) {
+  if (hasPhoto) {
     chip = (
       <Badge.Anchor>
         {chip}

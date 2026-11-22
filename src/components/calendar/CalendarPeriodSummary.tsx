@@ -1,10 +1,10 @@
-import { cn } from '@heroui/react';
+import { cn, Disclosure } from '@heroui/react';
 import type { CalendarDate } from '@internationalized/date';
 import { NotePencilIcon } from '@phosphor-icons/react';
 import React from 'react';
 
 import { CustomButton } from '@components';
-import { useHabits } from '@hooks';
+import { useHabits, useScreenWidth } from '@hooks';
 import type {
   NoteOfPeriod,
   NotePeriodKind,
@@ -33,6 +33,13 @@ const CalendarPeriodSummary = ({
 }: CalendarPeriodSummaryProps) => {
   const { openNoteDrawer } = useNoteDrawerActions();
   const habits = useHabits();
+  const { isDesktop } = useScreenWidth();
+  const [summaryToggle, setSummaryToggle] = React.useState<boolean | null>(
+    null
+  );
+  const totalLogged = occurrenceSummary.reduce((total, { count }) => {
+    return total + count;
+  }, 0);
 
   const stockCostsByHabit = React.useMemo(() => {
     const result: Record<
@@ -118,6 +125,7 @@ const CalendarPeriodSummary = ({
         <CustomButton
           fullWidth
           variant="secondary"
+          className="max-md:h-7 max-md:text-xs"
           onPress={() => {
             openNoteDrawer(startDate, kind);
           }}
@@ -126,96 +134,107 @@ const CalendarPeriodSummary = ({
           Add a note about this {kind}
         </CustomButton>
       )}
-      <div className="space-y-2">
-        <h4 className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-          Summary
-        </h4>
-        <div className="space-y-1.5">
-          {!occurrenceSummary.length && (
-            <p className="text-sm text-stone-500 dark:text-stone-400">
-              No habits logged for this {kind} yet.
-            </p>
-          )}
-          {occurrenceSummary.map(
-            ({
-              costByCurrency,
-              count,
-              habitId,
-              iconPath,
-              name,
-              traitColor,
-            }) => {
-              const totals = metricTotals[habitId];
-              const costEntries = Object.entries(costByCurrency);
-              const stockCosts = stockCostsByHabit[habitId];
-              const hasDetails =
-                totals ||
-                costEntries.length > 0 ||
-                (stockCosts && stockCosts.length > 0);
+      <Disclosure
+        onExpandedChange={setSummaryToggle}
+        isExpanded={summaryToggle ?? isDesktop}
+      >
+        <Disclosure.Heading>
+          <Disclosure.Trigger className="flex w-full items-center gap-2 text-sm font-semibold text-stone-700 dark:text-stone-200">
+            Summary
+            <span className="font-normal text-stone-400 dark:text-stone-500">
+              {totalLogged} logged
+            </span>
+            <Disclosure.Indicator className="ml-auto size-4" />
+          </Disclosure.Trigger>
+        </Disclosure.Heading>
+        <Disclosure.Content>
+          <Disclosure.Body className="space-y-1.5 pt-2">
+            {!occurrenceSummary.length && (
+              <p className="text-sm text-stone-500 dark:text-stone-400">
+                No habits logged for this {kind} yet.
+              </p>
+            )}
+            {occurrenceSummary.map(
+              ({
+                costByCurrency,
+                count,
+                habitId,
+                iconPath,
+                name,
+                traitColor,
+              }) => {
+                const totals = metricTotals[habitId];
+                const costEntries = Object.entries(costByCurrency);
+                const stockCosts = stockCostsByHabit[habitId];
+                const hasDetails =
+                  totals ||
+                  costEntries.length > 0 ||
+                  (stockCosts && stockCosts.length > 0);
 
-              return (
-                <div key={habitId}>
-                  <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
-                    <img
-                      alt={name}
-                      className="h-4 w-4"
-                      style={{ borderColor: traitColor }}
-                      src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
-                    />
-                    <span>
-                      {name}: {count}
-                    </span>
-                  </div>
-                  {hasDetails && (
-                    <div className="mt-0.5 ml-6 space-y-0.5">
-                      {totals?.map(({ formattedTotal, name: metricName }) => {
-                        return (
-                          <p
-                            key={metricName}
-                            className="text-xs text-stone-400 dark:text-stone-500"
-                          >
-                            {metricName}: {formattedTotal}
-                          </p>
-                        );
-                      })}
-                      {costEntries.map(([currency, total]) => {
-                        return (
-                          <p
-                            key={currency}
-                            className="text-xs text-stone-400 dark:text-stone-500"
-                          >
-                            Cost:{' '}
-                            {new Intl.NumberFormat(undefined, {
-                              currency,
-                              style: 'currency',
-                            }).format(total)}
-                          </p>
-                        );
-                      })}
-                      {stockCosts?.map((entry) => {
-                        const formatter = new Intl.NumberFormat(undefined, {
-                          currency: entry.currency,
-                          style: 'currency',
-                        });
-
-                        return (
-                          <p
-                            key={entry.name}
-                            className="text-xs text-stone-400 dark:text-stone-500"
-                          >
-                            {entry.name}: {formatter.format(entry.totalCost)}{' '}
-                            (avg {formatter.format(entry.avgCost)}/occurrence)
-                          </p>
-                        );
-                      })}
+                return (
+                  <div key={habitId}>
+                    <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
+                      <img
+                        alt={name}
+                        className="h-4 w-4"
+                        style={{ borderColor: traitColor }}
+                        src={getPublicUrl(StorageBuckets.HABIT_ICONS, iconPath)}
+                      />
+                      <span>
+                        {name}: {count}
+                      </span>
                     </div>
-                  )}
-                </div>
-              );
-            }
-          )}
-        </div>
-      </div>
+                    {hasDetails && (
+                      <div className="mt-0.5 ml-6 space-y-0.5">
+                        {totals?.map(({ formattedTotal, name: metricName }) => {
+                          return (
+                            <p
+                              key={metricName}
+                              className="text-xs text-stone-400 dark:text-stone-500"
+                            >
+                              {metricName}: {formattedTotal}
+                            </p>
+                          );
+                        })}
+                        {costEntries.map(([currency, total]) => {
+                          return (
+                            <p
+                              key={currency}
+                              className="text-xs text-stone-400 dark:text-stone-500"
+                            >
+                              Cost:{' '}
+                              {new Intl.NumberFormat(undefined, {
+                                currency,
+                                style: 'currency',
+                              }).format(total)}
+                            </p>
+                          );
+                        })}
+                        {stockCosts?.map((entry) => {
+                          const formatter = new Intl.NumberFormat(undefined, {
+                            currency: entry.currency,
+                            style: 'currency',
+                          });
+
+                          return (
+                            <p
+                              key={entry.name}
+                              className="text-xs text-stone-400 dark:text-stone-500"
+                            >
+                              {entry.name}: {formatter.format(entry.totalCost)}{' '}
+                              (avg {formatter.format(entry.avgCost)}/occurrence)
+                            </p>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+            )}
+          </Disclosure.Body>
+        </Disclosure.Content>
+      </Disclosure>
     </div>
   );
 };
