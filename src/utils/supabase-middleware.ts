@@ -20,6 +20,9 @@ type CookieToSet = {
  * Gives every server request its own Supabase client that reads the session from the request
  * cookies. Nothing reads the session up front, so a token refresh only happens once server code
  * asks for the user, and the cookies it writes are sent back with the response.
+ *
+ * App responses depend on the visitor's session, so a response without its own Cache-Control is
+ * marked `private, no-store`, which keeps shared and browser caches from serving it again.
  */
 export const supabaseMiddleware: MiddlewareFunction<Response> = async (
   { context, request },
@@ -56,6 +59,10 @@ export const supabaseMiddleware: MiddlewareFunction<Response> = async (
   headersToSet.forEach((value, name) => {
     response.headers.set(name, value);
   });
+
+  if (!response.headers.has('Cache-Control')) {
+    response.headers.set('Cache-Control', 'private, no-store');
+  }
 
   return response;
 };
