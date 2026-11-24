@@ -36,6 +36,7 @@ describe('NotesPage loader', () => {
     expect(listAllNotes).toHaveBeenCalledWith(testSupabaseClient, {
       limit: 40,
       page: 0,
+      signal: expect.any(AbortSignal),
     });
   });
 
@@ -53,6 +54,7 @@ describe('NotesPage loader', () => {
     expect(listAllNotes).toHaveBeenCalledWith(testSupabaseClient, {
       limit: 20,
       page: 0,
+      signal: expect.any(AbortSignal),
     });
   });
 

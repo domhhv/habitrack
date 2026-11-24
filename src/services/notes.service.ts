@@ -78,16 +78,20 @@ export const listNotes = async (
 export const getPeriodNote = async (
   supabase: TypedSupabaseClient,
   periodKind: NonNullable<NotePeriodKind>,
-  periodDate: string
+  periodDate: string,
+  signal?: AbortSignal
 ): Promise<Note | null> => {
-  const { data, error } = await supabase
+  const query = supabase
     .from('notes')
     .select()
     .eq('period_kind', periodKind)
     .eq('period_date', periodDate)
     .order('created_at')
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+
+  const { data, error } = await (
+    signal ? query.abortSignal(signal) : query
+  ).maybeSingle();
 
   if (error) {
     throw new Error(error.message);
@@ -128,11 +132,12 @@ export const destroyNote = async (
 export type ListAllNotesParams = {
   limit: number;
   page: number;
+  signal: AbortSignal;
 };
 
 export const listAllNotes = async (
   supabase: TypedSupabaseClient,
-  { limit, page }: ListAllNotesParams
+  { limit, page, signal }: ListAllNotesParams
 ): Promise<NoteWithHabit[]> => {
   const offset = page * limit;
 
@@ -150,7 +155,8 @@ export const listAllNotes = async (
     `
     )
     .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+    .range(offset, offset + limit - 1)
+    .abortSignal(signal);
 
   if (error) {
     throw new Error(error.message);
