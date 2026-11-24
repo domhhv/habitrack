@@ -22,6 +22,7 @@ export { default as getSafeRedirectPath } from './get-safe-redirect-path';
 export { default as initializeTheme } from './initialize-theme';
 export * from './metric-value';
 export { default as noop } from './noop';
+export * from './notes-cursor';
 export { default as parseDayOfWeek } from './parse-day-of-week';
 export * from './pending-writes';
 export { default as pickDefinedValues } from './pick-defined-values';

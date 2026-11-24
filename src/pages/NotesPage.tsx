@@ -2,34 +2,36 @@ import React from 'react';
 
 import { NotesList } from '@components';
 import { ErrorFallbackPage } from '@pages';
-import { listAllNotes } from '@services';
-import { userContext, supabaseContext } from '@utils';
+import { listNotesPage } from '@services';
+import {
+  userContext,
+  supabaseContext,
+  parseNotesCursor,
+  encodeNotesCursor,
+} from '@utils';
 
 import type { Route } from './+types/NotesPage';
 
 const NOTES_PAGE_SIZE = 20;
 
 export const loader = async ({ context, request }: Route.LoaderArgs) => {
-  const pageCount = Math.max(
-    1,
-    Math.floor(Number(new URL(request.url).searchParams.get('pages')) || 1)
-  );
+  const user = context.get(userContext);
 
-  if (!context.get(userContext)) {
-    return { hasMore: false, notes: [], pageCount };
+  if (!user) {
+    return { nextCursor: null, notes: [] };
   }
 
-  const notes = await listAllNotes(context.get(supabaseContext), {
-    limit: NOTES_PAGE_SIZE * pageCount,
-    page: 0,
-    signal: request.signal,
-  });
+  const { nextCursor, notes } = await listNotesPage(
+    context.get(supabaseContext),
+    {
+      before: parseNotesCursor(new URL(request.url).searchParams.get('before')),
+      limit: NOTES_PAGE_SIZE,
+      signal: request.signal,
+      userId: user.id,
+    }
+  );
 
-  return {
-    hasMore: notes.length === NOTES_PAGE_SIZE * pageCount,
-    notes,
-    pageCount,
-  };
+  return { nextCursor: nextCursor && encodeNotesCursor(nextCursor), notes };
 };
 
 export const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => {

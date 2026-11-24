@@ -51,7 +51,9 @@ ADD CONSTRAINT "notes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."u
 ) ON UPDATE CASCADE ON DELETE CASCADE;
 
 -- Indexes
-CREATE INDEX "idx_notes_user_id" ON "public"."notes" USING "btree" ("user_id");
+CREATE INDEX "idx_notes_user_id_created_at_id" ON "public"."notes" USING "btree" (
+    "user_id", "created_at" DESC, "id" DESC
+);
 CREATE INDEX "notes_period_kind_period_date_idx" ON "public"."notes" USING "btree" (
     "period_kind", "period_date"
 ) WHERE ("period_kind" IS NOT NULL);
