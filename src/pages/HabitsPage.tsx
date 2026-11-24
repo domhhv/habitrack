@@ -43,7 +43,7 @@ const loadHabitsStats = async (
 
   const stats = await getHabitsStats(supabase, habitIds, timeZone);
 
-  return Object.fromEntries(
+  return Object.fromEntries<HabitStats>(
     stats.flatMap((stat): [string, HabitStats][] => {
       return stat.habitId ? [[stat.habitId, stat]] : [];
     })
@@ -119,23 +119,21 @@ const addHabit = async (
   }
 };
 
-export const loader = async ({ context, request }: Route.LoaderArgs) => {
+export const loader = ({ context, request }: Route.LoaderArgs) => {
   if (!context.get(userContext)) {
-    return { habitsStats: {} };
+    return { habitsStats: Promise.resolve({}) };
   }
 
-  try {
-    return {
-      habitsStats: await loadHabitsStats(
-        context.get(supabaseContext),
-        getRequestTimeZone(request)
-      ),
-    };
-  } catch (error) {
-    console.error('Failed to load habit stats', getErrorMessage(error));
+  return {
+    habitsStats: loadHabitsStats(
+      context.get(supabaseContext),
+      getRequestTimeZone(request)
+    ).catch((error) => {
+      console.error('Failed to load habit stats', getErrorMessage(error));
 
-    return { habitsStats: {} };
-  }
+      return {};
+    }),
+  };
 };
 
 export const action = async ({ context, request }: Route.ActionArgs) => {

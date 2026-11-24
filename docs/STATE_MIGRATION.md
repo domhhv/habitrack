@@ -522,6 +522,14 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
 
 - **Link prefetch.** Add `<Link prefetch="intent">` to the sidebar and calendar navigation. With server loaders it prefetches the `.data` request as well as the modules, and could replace the custom sibling-range prefetch in `calendar-data.service.ts`.
 - **Streaming.** Return promises from server loaders for slow, non-critical data (habit stats, period summaries, the notes list after the first page) and render them with `<Await>` or `React.use` under `Suspense`.
+  - Done on `feat/stream-habit-stats`.
+  - **As built:**
+    - **Habit stats.** The `/habits` `loader` returns `habitsStats` as a promise, without awaiting it. A failed stats load is caught on the promise (`console.error`, then `{}`), so it never rejects and the page never errors.
+    - `HabitsTable` renders its rows at once from `useHabits()`. Only the last-entry, longest-streak and total-entries cells read the stats, each through `HabitStatsCell`: a `<Suspense>` boundary with a HeroUI `Skeleton` fallback around a reader that calls `React.use()`. React Router's revalidations run in a transition, so after a write the cells keep their previous values until the new stats arrive instead of flashing the skeleton.
+    - **Period summaries** are computed in the browser from `useCalendarData()` (`CalendarSidebar`, `CalendarPeriodSummary`), so no loader has them to stream.
+    - **The notes list** is a single query. Keyset pagination (below) removes the cost of loading more instead of streaming it.
+    - The app UI still renders only in the browser (§1), so a document request waits for the data either way. Streaming helps client navigations: the `.data` response sends the page loader's other data first and the stats when the RPC finishes.
+    - **Tests** read the loader's promise and render the table with a pending promise, checking that the stats appear once it resolves. A suspended render only retries in jsdom when the initial render ran inside `await act(...)`.
 - **Abort signals.** Pass `request.signal` to Supabase (`.abortSignal()`) in loaders that don't share cached requests: habit details, the notes page, settings identities and the period-note lookup.
   - Done on `refactor/loader-abort-signals`.
   - **As built:**

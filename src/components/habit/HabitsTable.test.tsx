@@ -1,5 +1,5 @@
 import { Provider as RollbarProvider } from '@rollbar/react';
-import { render, waitFor, fireEvent } from '@testing-library/react';
+import { act, render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { createRoutesStub } from 'react-router';
 import { it, vi, expect, describe } from 'vitest';
@@ -9,6 +9,7 @@ import { useConfirmationActions } from '@stores';
 import { makeTestHabit } from '@tests';
 
 import HabitsTable from './HabitsTable';
+import type { HabitsStats } from './HabitStatsCell';
 
 vi.mock(import('@rollbar/react'), async (importOriginal) => {
   const actual = await importOriginal();
@@ -79,7 +80,7 @@ describe(HabitsTable.name, () => {
         Component: () => {
           return (
             <RollbarProvider config={{}}>
-              <HabitsTable habitsStats={{}} />
+              <HabitsTable habitsStats={Promise.resolve({})} />
             </RollbarProvider>
           );
         },
@@ -107,6 +108,49 @@ describe(HabitsTable.name, () => {
     });
   });
 
+  it('shows the habit stats once they stream in', async () => {
+    (useHabits as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      'habit-1': makeTestHabit({ id: 'habit-1', name: 'Habit name #1' }),
+    });
+    const { promise, resolve } = Promise.withResolvers<HabitsStats>();
+    const Stub = createRoutesStub([
+      {
+        path: '/habits',
+        Component: () => {
+          return (
+            <RollbarProvider config={{}}>
+              <HabitsTable habitsStats={promise} />
+            </RollbarProvider>
+          );
+        },
+      },
+    ]);
+    const { getByText, queryByText } = await act(async () => {
+      return render(<Stub initialEntries={['/habits']} />);
+    });
+
+    await waitFor(() => {
+      expect(getByText('Habit name #1'));
+    });
+    expect(queryByText('7')).toBeNull();
+
+    await act(async () => {
+      resolve({
+        'habit-1': {
+          habitId: 'habit-1',
+          lastEntryAt: null,
+          longestStreakEnd: null,
+          longestStreakLength: null,
+          longestStreakStart: null,
+          totalEntries: 7,
+        },
+      });
+      await promise;
+    });
+
+    expect(getByText('7'));
+  });
+
   it('hides a habit while its deletion is pending', async () => {
     vi.mocked(useConfirmationActions).mockReturnValue({
       askConfirmation: vi.fn().mockResolvedValue(true),
@@ -121,7 +165,7 @@ describe(HabitsTable.name, () => {
         Component: () => {
           return (
             <RollbarProvider config={{}}>
-              <HabitsTable habitsStats={{}} />
+              <HabitsTable habitsStats={Promise.resolve({})} />
             </RollbarProvider>
           );
         },

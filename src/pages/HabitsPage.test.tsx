@@ -43,8 +43,8 @@ describe('HabitsPage loader', () => {
     ] as Awaited<ReturnType<typeof getHabitsStats>>);
 
     await expect(
-      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL, user))
-    ).resolves.toEqual({ habitsStats: { 'habit-1': stat } });
+      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL, user)).habitsStats
+    ).resolves.toEqual({ 'habit-1': stat });
     expect(getHabitsStats).toHaveBeenCalledWith(
       testSupabaseClient,
       ['habit-1'],
@@ -56,20 +56,21 @@ describe('HabitsPage loader', () => {
     vi.mocked(listHabitIds).mockResolvedValue([]);
 
     await expect(
-      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL, user))
-    ).resolves.toEqual({ habitsStats: {} });
+      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL, user)).habitsStats
+    ).resolves.toEqual({});
     await expect(
-      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL))
-    ).resolves.toEqual({ habitsStats: {} });
+      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL)).habitsStats
+    ).resolves.toEqual({});
     expect(getHabitsStats).not.toHaveBeenCalled();
   });
 
   it('keeps the page usable when the stats fail to load', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.mocked(listHabitIds).mockRejectedValue(new Error('Offline'));
 
     await expect(
-      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL, user))
-    ).resolves.toEqual({ habitsStats: {} });
+      loader(makeRouteArgs<Route.LoaderArgs>(HABITS_URL, user)).habitsStats
+    ).resolves.toEqual({});
   });
 });
 
