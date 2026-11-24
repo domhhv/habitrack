@@ -10,6 +10,17 @@ import type { Database } from '@db-types';
 
 import { supabaseContext } from './route-context';
 
+const PREFETCH_MAX_AGE_SECONDS = 10;
+
+const isPrefetchRequest = (request: Request) => {
+  return [
+    request.headers.get('Sec-Purpose'),
+    request.headers.get('Purpose'),
+  ].some((purpose) => {
+    return purpose?.includes('prefetch');
+  });
+};
+
 type CookieToSet = {
   name: string;
   options: CookieOptions;
@@ -22,7 +33,9 @@ type CookieToSet = {
  * asks for the user, and the cookies it writes are sent back with the response.
  *
  * App responses depend on the visitor's session, so a response without its own Cache-Control is
- * marked `private, no-store`, which keeps shared and browser caches from serving it again.
+ * marked `private, no-store`, which keeps shared and browser caches from serving it again. A link
+ * prefetch (`Sec-Purpose: prefetch`) is kept privately for a few seconds instead, so the navigation
+ * that follows it can reuse the response.
  */
 export const supabaseMiddleware: MiddlewareFunction<Response> = async (
   { context, request },
@@ -61,7 +74,12 @@ export const supabaseMiddleware: MiddlewareFunction<Response> = async (
   });
 
   if (!response.headers.has('Cache-Control')) {
-    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set(
+      'Cache-Control',
+      isPrefetchRequest(request)
+        ? `private, max-age=${PREFETCH_MAX_AGE_SECONDS}`
+        : 'private, no-store'
+    );
   }
 
   return response;

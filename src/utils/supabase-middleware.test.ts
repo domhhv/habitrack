@@ -127,6 +127,43 @@ describe('supabaseMiddleware', () => {
     ]);
   });
 
+  it('lets the browser keep a link prefetch for a few seconds', async () => {
+    const response = await runMiddleware(
+      new Request('https://habitrack.test/habits.data?_routes=habits', {
+        headers: { 'Sec-Purpose': 'prefetch' },
+      }),
+      () => {
+        return new Response('ok');
+      }
+    );
+
+    expect(response.headers.get('Cache-Control')).toBe('private, max-age=10');
+  });
+
+  it('keeps a prefetch that refreshed the session uncacheable', async () => {
+    const response = await runMiddleware(
+      new Request('https://habitrack.test/habits.data?_routes=habits', {
+        headers: { 'Sec-Purpose': 'prefetch' },
+      }),
+      () => {
+        getCookieMethods().setAll(
+          [
+            {
+              name: 'sb-test-project-auth-token',
+              options: { path: '/' },
+              value: 'base64-refreshed',
+            },
+          ],
+          { 'Cache-Control': 'private, no-store' }
+        );
+
+        return new Response('ok');
+      }
+    );
+
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+  });
+
   it('keeps a cache header the route set when the session is untouched', async () => {
     const response = await runMiddleware(
       new Request('https://habitrack.test/calendar'),

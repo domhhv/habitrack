@@ -160,6 +160,7 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
                       </Table.Cell>
                       <Table.Cell>
                         <Link
+                          prefetch="intent"
                           className="font-semibold"
                           id={`habit-name-${habit.id}`}
                           to={href('/habits/:habitId', { habitId: habit.id })}
