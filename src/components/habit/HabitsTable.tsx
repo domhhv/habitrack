@@ -8,19 +8,20 @@ import { Link, href } from 'react-router';
 
 import { TraitChip, CustomButton, AddHabitDialogButton } from '@components';
 import { useHabits, useActionFetcher, usePendingHabitWrites } from '@hooks';
-import type { Habit, HabitStats } from '@models';
+import type { Habit } from '@models';
 import { useConfirmationActions } from '@stores';
 
 import habitColumns from './habit-columns';
 import HabitIcon from './HabitIcon';
 import HabitLastEntry from './HabitLastEntry';
 import HabitLongestStreak from './HabitLongestStreak';
+import HabitStatsCell, { type HabitsStats } from './HabitStatsCell';
 import HabitTotalEntries from './HabitTotalEntries';
 
 const ROWS_PER_PAGE = 10;
 
 type HabitsTableProps = {
-  habitsStats: Record<Habit['id'], HabitStats>;
+  habitsStats: Promise<HabitsStats>;
 };
 
 const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
@@ -147,8 +148,6 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
               }}
             >
               {paginatedHabits.map((habit) => {
-                const habitStats = habitsStats[habit.id] || {};
-
                 return (
                   <Table.Row
                     key={habit.id}
@@ -180,26 +179,49 @@ const HabitsTable = ({ habitsStats }: HabitsTableProps) => {
                         {dateFormatter.format(new Date(habit.createdAt))}
                       </Table.Cell>
                       <Table.Cell>
-                        <HabitLastEntry
-                          timestamp={Number(
-                            new Date(habitStats.lastEntryAt || 0)
-                          )}
-                        />
+                        <HabitStatsCell
+                          habitId={habit.id}
+                          habitsStats={habitsStats}
+                        >
+                          {({ lastEntryAt }) => {
+                            return (
+                              <HabitLastEntry
+                                timestamp={Number(new Date(lastEntryAt || 0))}
+                              />
+                            );
+                          }}
+                        </HabitStatsCell>
                       </Table.Cell>
                       <Table.Cell>
-                        <HabitLongestStreak
-                          streak={{
-                            streakEnd: habitStats.longestStreakEnd,
-                            streakLength: habitStats.longestStreakLength,
-                            streakStart: habitStats.longestStreakStart,
+                        <HabitStatsCell
+                          habitId={habit.id}
+                          habitsStats={habitsStats}
+                        >
+                          {(stats) => {
+                            return (
+                              <HabitLongestStreak
+                                streak={{
+                                  streakEnd: stats.longestStreakEnd,
+                                  streakLength: stats.longestStreakLength,
+                                  streakStart: stats.longestStreakStart,
+                                }}
+                              />
+                            );
                           }}
-                        />
+                        </HabitStatsCell>
                       </Table.Cell>
                       <Table.Cell
                         className="text-center"
                         aria-label={`Total entries for ${habit.name}`}
                       >
-                        <HabitTotalEntries count={habitStats.totalEntries} />
+                        <HabitStatsCell
+                          habitId={habit.id}
+                          habitsStats={habitsStats}
+                        >
+                          {({ totalEntries }) => {
+                            return <HabitTotalEntries count={totalEntries} />;
+                          }}
+                        </HabitStatsCell>
                       </Table.Cell>
                       <Table.Cell aria-label="Actions" className="rounded-r-md">
                         <div
