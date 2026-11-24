@@ -111,7 +111,23 @@ describe('supabaseMiddleware', () => {
     expect(response.headers.get('Expires')).toBe('0');
   });
 
-  it('leaves the response alone when the session is untouched', async () => {
+  it('marks responses without their own cache headers as private and uncacheable', async () => {
+    const response = await runMiddleware(
+      new Request('https://habitrack.test/calendar'),
+      () => {
+        return new Response('ok', {
+          headers: { 'Set-Cookie': 'flash=; Max-Age=0; Path=/' },
+        });
+      }
+    );
+
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+    expect(response.headers.getSetCookie()).toEqual([
+      'flash=; Max-Age=0; Path=/',
+    ]);
+  });
+
+  it('keeps a cache header the route set when the session is untouched', async () => {
     const response = await runMiddleware(
       new Request('https://habitrack.test/calendar'),
       () => {

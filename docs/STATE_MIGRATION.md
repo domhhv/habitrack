@@ -532,6 +532,15 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
     - **Tests** expect the request's signal in the service calls and check that aborting it reaches the period-note lookup.
     - **Not verified:** whether Vercel's runtime fires `request.signal` on the server when a client disconnects.
 - **Cache headers.** Add `headers` exports with `Cache-Control` on server loaders for rarely changing data, such as traits. Use this sparingly, as the React Router docs advise.
+  - Done on `refactor/cache-headers`, by deciding against caching.
+  - **Why nothing is cacheable:**
+    - Every app response depends on the visitor's session cookie, so a shared cache (Vercel's CDN) must never store one.
+    - A `private, max-age` browser cache doesn't fit either. Headers apply to a whole response, and one `.data` request bundles the app layout (profile, habits, traits, flash toasts) with the page's loader. Revalidation after an action requests the same URL, so a cached response would be stale right after a write and would replay or drop flash toasts.
+    - Traits change too (`create-trait`) and share the app loader with habits and the profile.
+    - The landing page is prerendered and served as a static file, so route `headers` don't apply to it.
+  - **As built:** `supabaseMiddleware` marks every app response that has no `Cache-Control` of its own as `private, no-store`. That used to happen only on a token refresh (from `@supabase/ssr`); other responses had no header, which left them to the caches' heuristics. One middleware covers every app route, document and `.data` alike, where `headers` exports would have to be repeated on each route because the deepest one wins. A route that sets its own `Cache-Control` keeps it, and `Set-Cookie` is untouched. The calendar's browser range cache remains the app's cache.
+  - **Tests** cover the default header, a route's own header, and the cookies kept alongside.
+  - **Verified** through the production server build: `/calendar/month`, `/calendar/month.data`, `/login` and the signed-out `/habits` redirect all send `Cache-Control: private, no-store`.
 - **Notes pagination.** Switch the notes page to keyset pagination on `created_at`, so "load more" stops re-fetching earlier pages.
 - **Atomic writes.** Turn multi-step writes into Postgres RPCs, so each action makes one transactional call: habit plus metric definitions, the occurrence create/update orchestration and stock-default replacement. This fixes partial writes (duplicate habits on retry). Photo paths already change through single-statement functions (server actions step 3).
 
