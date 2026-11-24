@@ -177,7 +177,7 @@ This command starts the development server and opens the app in your default bro
 
 ### Database Migrations
 
-There are a few ways to create and run migrations in the project.
+There are two ways to create migrations in the project.
 
 - **[Recommended] Change or create [declarative database schema](https://supabase.com/docs/guides/local-development/declarative-database-schemas) SQL files under `supabase/schemas` directory as needed**
 
@@ -189,17 +189,11 @@ If you need to modify an existing table, add a new table/type/function, or make 
 yarn db:diff -f <your-migration-name>
 ```
 
-- **Diffing the Supabase Studio database schema changes to automatically generate a new migration file**
-
-Do the necessary changes in the local Supabase studio and then run the following to automatically generate a new migration file:
-
-```bash
-yarn db:diff -f <your-migration-name>
-```
+This runs `supabase db schema declarative sync`, which compares the schema files with the existing migrations and writes the difference as a new migration. Changes made directly in Supabase Studio or `psql` are not picked up, so make every schema change in the schema files.
 
 - **Creating a new migration file manually**
 
-To create a new migration file manually, run the following command:
+For changes that schema files can't express, such as data changes (`INSERT`/`UPDATE`/`DELETE`), create a new migration file manually by running:
 
 ```bash
 yarn db:migration:new <your-migration-name>

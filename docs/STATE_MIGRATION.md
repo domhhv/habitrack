@@ -563,7 +563,7 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
     - **Tests** cover the cursor, the loader (first page, cursor page, invalid cursor, signed-out), and the list loading the page after the cursor once, then stopping at the end.
     - **Verified against local Supabase** with a throwaway user and 45 notes, three per timestamp: three pages of 20, 20 and 5, every note exactly once. `EXPLAIN` shows an index scan on the new index with `created_at <= cursor` as an index condition and no sort.
     - **Not verified:** a run in a real browser.
-    - **Tooling.** Supabase CLI 3.2's `db diff` no longer diffs the declarative `supabase/schemas` files (it compares the migrations with the local database), so this migration was written by hand to match `07_notes.sql`.
+    - **Tooling.** Supabase CLI 3.2's `db diff` compares the migrations with the live database and ignores `supabase/schemas`. Declarative schemas now go through `supabase db schema declarative sync`, so `yarn db:diff` runs `sync --no-apply`, and AGENTS.md and the README describe the new workflow (no `db:stop` step). The migration was written by hand to match `07_notes.sql`, and `sync` afterwards found no schema changes, so the two match.
 - **Atomic writes.** Turn multi-step writes into Postgres RPCs, so each action makes one transactional call: habit plus metric definitions, the occurrence create/update orchestration and stock-default replacement. This fixes partial writes (duplicate habits on retry). Photo paths already change through single-statement functions (server actions step 3).
 
 ### 5. Move the remaining UI state to the URL and cookies

@@ -36,8 +36,8 @@ yarn db:stop           # Stop local Supabase
 yarn db:restart        # Stop and start local Supabase
 yarn db:status         # Check current status of local database
 yarn db:reset          # Reset DB with migrations and seeds
-yarn db:diff           # Generate migration from schema changes, additionally supplying migration name after -f flag
-yarn db:diff:storage   # Diff the storage schema (bucket policies)
+yarn db:diff           # Generate a migration from the schema files (supabase db schema declarative sync), supplying the migration name after the -f flag
+yarn db:diff:storage   # Diff the live storage schema (bucket policies) against the migrations
 yarn db:migration:new  # Create an empty migration file
 yarn db:migration:up   # Apply current migrations
 yarn db:gen-types      # Generate types into supabase/database.types.ts (patched and linted afterwards)
@@ -148,19 +148,14 @@ Create a new declarative schema file for any new standalone entity introduced
 #### 2. Run Migration Workflow
 
 ```bash
-# Stop local db (required before diffing)
-yarn db:stop
-
-# Generate migration file from schema diff
+# Generate a migration from the schema files (the local database can keep running)
 yarn db:diff -f <migration_name>
 
 # Review the generated migration in supabase/migrations/
-# Ensure it only contains intended changes (remove any unrelated drops/alters)
+# Ensure it only contains intended changes
 
-# Start db
+# Start the local database if it isn't running, then apply the migrations
 yarn db:start
-
-# Apply the migrations
 yarn db:migration:up
 
 # Regenerate TypeScript types
@@ -169,7 +164,10 @@ yarn db:gen-types
 
 #### 3. Key Notes
 
-- Always review the generated migration - db:diff may include unintended changes (e.g., storage policy drops)
+- `yarn db:diff` runs `supabase db schema declarative sync --no-apply` (pg-delta, the CLI's default engine). It compares the schema files with the migration history, not with the live database, so it ignores changes made in Studio or `psql`. Make every schema change in `supabase/schemas/`. Don't use plain `supabase db diff -f` for schema changes: it diffs the live database and ignores the schema files
+- Files are ordered by their dependencies, not their names. The numeric prefixes only group them for reading
+- Schema files can't hold data changes (`INSERT`/`UPDATE`/`DELETE`, including storage bucket rows). Put those in seeds or a hand-written migration (`yarn db:migration:new <name> < /dev/null`, which otherwise waits for SQL on stdin)
+- Always review the generated migration: default privileges can add `GRANT`/`REVOKE` lines you didn't write
 - After db:gen-types, new fields appear in supabase/database.types.ts and flow through to model types via TablesInsert<'tablename'> and TablesUpdate<'tablename'>
 - Use DEFAULT values for new columns to ensure backwards compatibility with existing data
 

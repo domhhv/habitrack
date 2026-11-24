@@ -45,7 +45,7 @@
     "db:stop": "supabase stop",
     "db:status": "supabase status",
     "db:restart": "yarn db:stop && yarn db:start",
-    "db:diff": "supabase db diff",
+    "db:diff": "supabase db schema declarative sync --no-apply",
     "db:diff:storage": "supabase db diff --schema storage",
     "db:migration:up": "supabase migration up",
     "db:migration:new": "supabase migration new",
