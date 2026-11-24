@@ -521,6 +521,15 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
 ### 4. Data loading performance
 
 - **Link prefetch.** Add `<Link prefetch="intent">` to the sidebar and calendar navigation. With server loaders it prefetches the `.data` request as well as the modules, and could replace the custom sibling-range prefetch in `calendar-data.service.ts`.
+  - Done on `feat/link-prefetch`.
+  - **As built:**
+    - **Where.** The sidebar's `NavLink`s (Calendar, Habits, Notes) and the habit names in `HabitsTable` use `prefetch="intent"`. Settings sits in the user menu, a HeroUI `Dropdown.Item href` that can't take `prefetch`, so `UserMenu` renders `<PrefetchPageLinks page="/settings" />` while the menu is open.
+    - **Calendar links only preload modules.** React Router leaves routes with a `clientLoader` out of the data prefetch, and the `app` and `calendar` layouts both have one; the calendar views have no loader. So prefetch can't replace the sibling-range prefetch in `calendar-data.service.ts`, which stays. The calendar's own navigation buttons are HeroUI links and were left as they are.
+    - **Cache headers.** A `no-store` response (§4 cache headers) can't be kept for the navigation that follows it. In Chromium the click fetched `/habits.data?_routes=habits` again in full after the hover had prefetched it, so every hover cost a wasted server request (on Habits, the stats RPC). `private, no-cache` didn't help either. `supabaseMiddleware` now answers requests marked `Sec-Purpose: prefetch` (or `Purpose: prefetch`) with `private, max-age=10` instead. Everything else stays `private, no-store`, and so does a prefetch that refreshed the session.
+    - **Trade-off:** after hovering a link, saving something and then clicking that link within 10 seconds, the page shows the data from before the save until its next revalidation.
+    - **Verified in Chromium** through a production build against local Supabase: hovering Habits and Notes prefetches their `.data`, and the click reuses it (0 bytes transferred, one server request per page). Safari doesn't support `<link rel="prefetch">`, so it only loads on click.
+    - **Found:** every client navigation also fetches `_routes=app`, so the app layout's profile, habits and traits reload on plain path changes too (e.g. `/habits` → `/notes`). That contradicts the revalidation notes in AGENTS.md and predates this change.
+    - **Tests** cover the prefetch cache header (and a session refresh keeping `no-store`) and the user menu prefetching Settings only while open.
 - **Streaming.** Return promises from server loaders for slow, non-critical data (habit stats, period summaries, the notes list after the first page) and render them with `<Await>` or `React.use` under `Suspense`.
   - Done on `feat/stream-habit-stats`.
   - **As built:**

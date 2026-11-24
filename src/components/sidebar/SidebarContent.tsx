@@ -255,6 +255,7 @@ const SidebarContent = ({
             <SidebarTooltip key={id} content={label} isEnabled={hasTooltips}>
               <NavLink
                 to={href}
+                prefetch="intent"
                 onClick={onClose}
                 aria-current={isActive ? 'page' : undefined}
               >
