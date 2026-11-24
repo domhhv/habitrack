@@ -128,13 +128,14 @@ export const listHabitIds = async (supabase: TypedSupabaseClient) => {
 
 export const getHabit = async (
   supabase: TypedSupabaseClient,
-  id: Habit['id']
+  id: Habit['id'],
+  signal?: AbortSignal
 ): Promise<Habit | null> => {
-  const { data, error } = await supabase
-    .from('habits')
-    .select(HABIT_SELECT)
-    .eq('id', id)
-    .maybeSingle();
+  const query = supabase.from('habits').select(HABIT_SELECT).eq('id', id);
+
+  const { data, error } = await (
+    signal ? query.abortSignal(signal) : query
+  ).maybeSingle();
 
   if (error) {
     throw new Error(error.message);

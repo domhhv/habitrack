@@ -22,6 +22,7 @@ export const loader = async ({ context, request }: Route.LoaderArgs) => {
   const notes = await listAllNotes(context.get(supabaseContext), {
     limit: NOTES_PAGE_SIZE * pageCount,
     page: 0,
+    signal: request.signal,
   });
 
   return {

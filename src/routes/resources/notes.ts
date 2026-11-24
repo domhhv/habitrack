@@ -80,7 +80,8 @@ export const clientLoader = async ({
     note: await getPeriodNote(
       context.get(supabaseContext),
       periodKind,
-      periodDate
+      periodDate,
+      request.signal
     ),
   };
 };

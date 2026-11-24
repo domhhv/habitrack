@@ -47,23 +47,29 @@ describe('notes resource clientLoader', () => {
   });
 
   it('returns the note of the requested period', async () => {
+    const controller = new AbortController();
     vi.mocked(getPeriodNote).mockResolvedValue({ id: 'note-1' } as Awaited<
       ReturnType<typeof getPeriodNote>
     >);
 
-    await expect(
-      clientLoader(
-        makeRouteArgs<Route.ClientLoaderArgs>(
-          `${NOTES_URL}?kind=week&date=2026-10-19`,
-          user
-        )
-      )
-    ).resolves.toEqual({ note: { id: 'note-1' } });
+    const args = makeRouteArgs<Route.ClientLoaderArgs>(
+      `${NOTES_URL}?kind=week&date=2026-10-19`,
+      user,
+      { signal: controller.signal }
+    );
+
+    await expect(clientLoader(args)).resolves.toEqual({
+      note: { id: 'note-1' },
+    });
     expect(getPeriodNote).toHaveBeenCalledWith(
       testSupabaseClient,
       'week',
-      '2026-10-19'
+      '2026-10-19',
+      args.request.signal
     );
+
+    controller.abort();
+    expect(vi.mocked(getPeriodNote).mock.calls[0][3]?.aborted).toBe(true);
   });
 
   it('skips the lookup for invalid periods or signed-out visitors', async () => {

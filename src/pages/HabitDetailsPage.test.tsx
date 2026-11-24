@@ -82,6 +82,11 @@ describe('HabitDetailsPage loader', () => {
         params: { habitId: 'habit-1' },
       })
     ).resolves.toEqual({ habit });
+    expect(getHabit).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'habit-1',
+      expect.any(AbortSignal)
+    );
   });
 
   it('throws a 404 for an unknown habit', async () => {

@@ -523,6 +523,14 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
 - **Link prefetch.** Add `<Link prefetch="intent">` to the sidebar and calendar navigation. With server loaders it prefetches the `.data` request as well as the modules, and could replace the custom sibling-range prefetch in `calendar-data.service.ts`.
 - **Streaming.** Return promises from server loaders for slow, non-critical data (habit stats, period summaries, the notes list after the first page) and render them with `<Await>` or `React.use` under `Suspense`.
 - **Abort signals.** Pass `request.signal` to Supabase (`.abortSignal()`) in loaders that don't share cached requests: habit details, the notes page, settings identities and the period-note lookup.
+  - Done on `refactor/loader-abort-signals`.
+  - **As built:**
+    - `getHabit` and `getPeriodNote` take an optional signal, because actions call them too. `listAllNotes` requires one. The signal is set before `.maybeSingle()`, which returns a builder without `abortSignal`.
+    - The habit details and notes `loader`s and the `/resources/notes` `clientLoader` pass `request.signal`. The period-note lookup gains the most: when `NoteDrawer` steps to another period, the new `fetcher.load` aborts the previous request, and the Supabase call with it.
+    - An aborted query resolves with an `AbortError`, which the services rethrow. React Router discards the aborted loader's result.
+    - **Settings identities are left out.** `auth.getUserIdentities()` takes no signal. Aborting it would need a per-request `global.fetch` wrapper on the server client, which would also abort the shared session and profile lookups.
+    - **Tests** expect the request's signal in the service calls and check that aborting it reaches the period-note lookup.
+    - **Not verified:** whether Vercel's runtime fires `request.signal` on the server when a client disconnects.
 - **Cache headers.** Add `headers` exports with `Cache-Control` on server loaders for rarely changing data, such as traits. Use this sparingly, as the React Router docs advise.
 - **Notes pagination.** Switch the notes page to keyset pagination on `created_at`, so "load more" stops re-fetching earlier pages.
 - **Atomic writes.** Turn multi-step writes into Postgres RPCs, so each action makes one transactional call: habit plus metric definitions, the occurrence create/update orchestration and stock-default replacement. This fixes partial writes (duplicate habits on retry). Photo paths already change through single-statement functions (server actions step 3).

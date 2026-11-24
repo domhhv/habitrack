@@ -320,8 +320,16 @@ const updateStock = async (
   }
 };
 
-export const loader = async ({ context, params }: Route.LoaderArgs) => {
-  const habit = await getHabit(context.get(supabaseContext), params.habitId);
+export const loader = async ({
+  context,
+  params,
+  request,
+}: Route.LoaderArgs) => {
+  const habit = await getHabit(
+    context.get(supabaseContext),
+    params.habitId,
+    request.signal
+  );
 
   if (!habit) {
     throw data('Habit not found', { status: 404 });
