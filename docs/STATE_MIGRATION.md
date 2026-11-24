@@ -428,6 +428,7 @@ The app already runs React Router with `ssr: true` on Vercel, but every app rout
     - **Settings.** `useAuthSearchParams` called `setSearchParams({})` on every settings visit, even without auth params. That same-URL navigation reloaded every loader on the page, the identities included. It now returns early without params and clears them with `replace`, so the back button doesn't show the toast again.
     - **Tests** cover the calendar `shouldRevalidate` and `useAuthSearchParams`; the settings loader test fails against the previous hook. The `app-revalidation` tests are deleted with the module.
     - **Not verified:** a run in a real browser.
+    - **Corrected later** (`fix/app-layout-revalidation`): the memory-router check above follows data-mode rules. In framework mode with SSR, single fetch revalidates every loader on every navigation (`singleFetchLoaderNavigationStrategy` calls `shouldCallHandler(true)` for any navigation that isn't a failed action), so the app layout reloaded its profile, habits and traits on every path change. See §9.
 - ~~**Decision point.** If the app stays client-only instead, switch to `ssr: false` (SPA mode) with the landing page pre-rendered.~~ Settled by server loaders: the server now loads the data and streams it with the app shell.
 
 ### 2. Progressive enhancement and forms
@@ -608,4 +609,13 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
 - `/habits/:habitId` with a non-UUID id shows "Couldn't load this habit" instead of "Habit not found".
 - The occurrence drawer's day navigation shows no entries outside the loaded calendar range. Fix it with a `fetcher.load` fallback to a day-range loader, or with the URL-driven drawers from §5.
 - `getLongestHabitStreak` and its RPC are unused (existing TODO in `occurrences.service.ts`).
+- ~~Every client navigation reloaded the app layout's data (`_routes=app`), because single fetch revalidates every loader on navigations in framework mode.~~ Fixed on `fix/app-layout-revalidation`:
+  - The app layout exports `shouldRevalidate = shouldRevalidateAppData` (`src/utils/app-revalidation.ts`). It reloads after a successful submission until a load completes, and on `revalidate()` and same-URL navigations. Any other navigation keeps the loaded data. Search-param changes no longer reload it either, because the app data doesn't depend on the URL.
+  - The write tracking is a version counter, like the `markAppDataStale` machinery from #488. Every successful submission seen by `shouldRevalidate` raises it, and the `clientLoader` records it through `trackAppDataLoad(request.signal)` once a load completes without being aborted. So a navigation that interrupts the revalidation still reloads, and a load that started before the write doesn't count.
+  - **Tests** cover plain navigations, same-URL reloads, writes, aborted loads, loads that started before a write, failed writes and GET submissions.
+  - **Verified in Chromium** through a production build against local Supabase with a throwaway user:
+    - `/habits`, `/notes` and `/settings` navigations fetch only their own route, and calendar moves fetch nothing.
+    - A trait creation revalidates `_routes=app`. The next navigation skips it again.
+    - A navigation started right after a write still fetches `_routes=app`, and both new traits appear.
+  - **Also found:** a browser holding the session cookie of a deleted user stayed on the app-shell skeleton on every page, until the cookie was removed.
 - ~~After a successful login the user lands on `/calendar`, which redirects once more through the calendar layout loader to `/calendar/month`.~~ Fixed with server loaders: sign-ins and the landing page's links go straight to `/calendar/month`.

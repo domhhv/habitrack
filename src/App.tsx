@@ -28,7 +28,9 @@ import {
   profileContext,
   flashMiddleware,
   supabaseContext,
+  trackAppDataLoad,
   supabaseMiddleware,
+  shouldRevalidateAppData,
   loadSupabaseBrowserClient,
 } from '@utils';
 
@@ -86,10 +88,14 @@ export const loader = ({ context }: Route.LoaderArgs) => {
 };
 
 export const clientLoader = async ({
+  request,
   serverLoader,
 }: Route.ClientLoaderArgs) => {
+  const markAppDataLoaded = trackAppDataLoad(request.signal);
   const { appData, toasts } = await serverLoader();
   const data = await appData;
+
+  markAppDataLoaded();
 
   rememberCalendarFirstDayOfWeek(
     data.user?.id ?? null,
@@ -100,6 +106,8 @@ export const clientLoader = async ({
 };
 
 clientLoader.hydrate = true as const;
+
+export const shouldRevalidate = shouldRevalidateAppData;
 
 const supabaseClientMiddleware: Route.ClientMiddlewareFunction = async ({
   context,
