@@ -11,6 +11,7 @@ import type {
   NotePeriodKind,
   TypedSupabaseClient,
 } from '@models';
+import type { NotesCursor } from '@utils';
 
 export const createNote = async (
   supabase: TypedSupabaseClient,
@@ -129,19 +130,23 @@ export const destroyNote = async (
   }
 };
 
-export type ListAllNotesParams = {
+export type ListNotesPageParams = {
+  before: NotesCursor | null;
   limit: number;
-  page: number;
   signal: AbortSignal;
+  userId: string;
 };
 
-export const listAllNotes = async (
-  supabase: TypedSupabaseClient,
-  { limit, page, signal }: ListAllNotesParams
-): Promise<NoteWithHabit[]> => {
-  const offset = page * limit;
+export type NotesPage = {
+  nextCursor: NotesCursor | null;
+  notes: NoteWithHabit[];
+};
 
-  const { data, error } = await supabase
+export const listNotesPage = async (
+  supabase: TypedSupabaseClient,
+  { before, limit, signal, userId }: ListNotesPageParams
+): Promise<NotesPage> => {
+  const query = supabase
     .from('notes')
     .select(
       `
@@ -154,15 +159,25 @@ export const listAllNotes = async (
       )
     `
     )
+    .eq('user_id', userId);
+
+  const { data, error } = await (
+    before
+      ? query
+          .lte('created_at', before.createdAt)
+          .or(`created_at.lt."${before.createdAt}",id.lt.${before.id}`)
+      : query
+  )
     .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1)
+    .order('id', { ascending: false })
+    .limit(limit + 1)
     .abortSignal(signal);
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return data.map((note) => {
+  const notes = data.slice(0, limit).map((note) => {
     const habit = note.occurrences?.habits ?? null;
     const { occurrences: _occurrences, ...noteWithoutOccurrences } = note;
 
@@ -176,4 +191,14 @@ export const listAllNotes = async (
         : null,
     });
   });
+
+  const lastNote = notes.at(-1);
+
+  return {
+    notes,
+    nextCursor:
+      data.length > limit && lastNote
+        ? { createdAt: lastNote.createdAt, id: lastNote.id }
+        : null,
+  };
 };
