@@ -8,6 +8,7 @@ import {
   type HabitsInsert,
   type HabitsUpdate,
   type TypedSupabaseClient,
+  type HabitMetricDefinition,
   type HabitStockWithDefaults,
 } from '@models';
 import { uploadFile } from '@services';
@@ -63,21 +64,28 @@ const transformHabit = ({
   };
 };
 
-export const createHabit = async (
+export type HabitWithMetricsInsert = Pick<
+  HabitsInsert,
+  'description' | 'iconPath' | 'name' | 'traitId'
+>;
+
+export const createHabitWithMetrics = async (
   supabase: TypedSupabaseClient,
-  body: HabitsInsert
-): Promise<Habit> => {
-  const { data, error } = await supabase
-    .from('habits')
-    .insert(decamelizeKeys(body))
-    .select(HABIT_SELECT)
-    .single();
+  habit: HabitWithMetricsInsert,
+  metricDefinitions: HabitMetricDefinition[]
+) => {
+  const { data, error } = await supabase.rpc('create_habit_with_metrics', {
+    p_habit: decamelizeKeys(habit),
+    p_metrics: metricDefinitions.map((definition) => {
+      return decamelizeKeys(definition);
+    }),
+  });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return transformHabit(camelcaseKeys(data, { deep: true }));
+  return data;
 };
 
 export const listHabits = async (

@@ -690,6 +690,9 @@ isOneToOne: false
             "add_occurrence_photo_paths":
 { Args: { "p_occurrence_id": string,"p_photo_paths": (string)[] }; Returns: undefined
                            },
+"create_habit_with_metrics":
+{ Args: { "p_habit": Json,"p_metrics": Json }; Returns: string
+                           },
 "delete_user":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
@@ -711,6 +714,15 @@ isOneToOne: false
       } },
 "remove_occurrence_photo_path":
 { Args: { "p_occurrence_id": string,"p_photo_path": string }; Returns: undefined
+                           },
+"save_habit_metrics":
+{ Args: { "p_added": Json,"p_habit_id": string,"p_removed_ids": (string)[],"p_updated": Json }; Returns: undefined
+                           },
+"save_occurrence":
+{ Args: { "p_depleted_stock_ids": (string)[],"p_metric_values": Json,"p_note": string,"p_occurrence": Json,"p_occurrence_id"?: string,"p_photo_paths": (string)[],"p_stock_usages": Json }; Returns: string
+                           },
+"save_stock":
+{ Args: { "p_habit_id": string,"p_metric_defaults"?: Json,"p_stock": Json,"p_stock_id"?: string }; Returns: string
                            }
           }
           Enums: {

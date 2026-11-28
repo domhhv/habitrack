@@ -72,21 +72,19 @@ Defined as `METRIC_PRESETS` in [`src/constants.ts`](../src/constants.ts). Preset
 
 File: [`src/models/metric.model.ts`](../src/models/metric.model.ts)
 
-| Type                          | Purpose                                                                                                                                                                                           |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MetricType`                  | Union of the 8 metric type strings                                                                                                                                                                |
-| `MetricConfigByType`          | Map from each `MetricType` to its config type (e.g. `number → NumberMetricConfig`)                                                                                                                |
-| `MetricValueByType`           | Map from each `MetricType` to its value type (e.g. `range → RangeMetricValue`)                                                                                                                    |
-| `MetricConfig`                | Union of all config types (`MetricConfigByType[MetricType]`)                                                                                                                                      |
-| `MetricValue`                 | Union of all value types (`MetricValueByType[MetricType]`) — **structural**, narrowed by shape, not `type`                                                                                        |
-| `HabitMetric`                 | Discriminated union keyed on `type`: narrowing `metric.type` narrows `metric.config`                                                                                                              |
-| `HabitMetricInsert`           | Insert type, also discriminated on `type`/`config`                                                                                                                                                |
-| `HabitMetricUpdate`           | Update type (partial; not discriminated)                                                                                                                                                          |
-| `OccurrenceMetricValue`       | CamelCased row from `occurrence_metric_values`, with `value` typed as `MetricValue` (not `Json`)                                                                                                  |
-| `OccurrenceMetricValueInsert` | Insert type for upsert operations, `value: MetricValue`                                                                                                                                           |
-| `FormMetricDefinitions`       | Client-side form state — **not** discriminated; `config` is the plain `MetricConfig` union because `type`/`config` change independently while editing (see [Form State Flags](#form-state-flags)) |
-| `MetricPreset`                | Discriminated `{ name, type, config }` for preset selection                                                                                                                                       |
-| `DistributiveOmit<T, K>`      | `Omit` that distributes over a union, preserving discriminants (used by `Habit.metricDefinitions`)                                                                                                |
+| Type                     | Purpose                                                                                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MetricType`             | Union of the 8 metric type strings                                                                                                                                                                |
+| `MetricConfigByType`     | Map from each `MetricType` to its config type (e.g. `number → NumberMetricConfig`)                                                                                                                |
+| `MetricValueByType`      | Map from each `MetricType` to its value type (e.g. `range → RangeMetricValue`)                                                                                                                    |
+| `MetricConfig`           | Union of all config types (`MetricConfigByType[MetricType]`)                                                                                                                                      |
+| `MetricValue`            | Union of all value types (`MetricValueByType[MetricType]`) — **structural**, narrowed by shape, not `type`                                                                                        |
+| `HabitMetric`            | Discriminated union keyed on `type`: narrowing `metric.type` narrows `metric.config`                                                                                                              |
+| `HabitMetricDefinition`  | The writable fields of a metric (no `habitId`/`userId`), discriminated on `type`/`config`; what the habit metric functions receive                                                                |
+| `OccurrenceMetricValue`  | CamelCased row from `occurrence_metric_values`, with `value` typed as `MetricValue` (not `Json`)                                                                                                  |
+| `FormMetricDefinitions`  | Client-side form state — **not** discriminated; `config` is the plain `MetricConfig` union because `type`/`config` change independently while editing (see [Form State Flags](#form-state-flags)) |
+| `MetricPreset`           | Discriminated `{ name, type, config }` for preset selection                                                                                                                                       |
+| `DistributiveOmit<T, K>` | `Omit` that distributes over a union, preserving discriminants (used by `Habit.metricDefinitions`)                                                                                                |
 
 ### Why `HabitMetric` is discriminated but `MetricValue` is not
 
@@ -100,16 +98,16 @@ File: [`src/utils/metric-value.ts`](../src/utils/metric-value.ts)
 
 This module is the single place metric `config`/`value` shapes are narrowed. Because the discriminated types require correlated `type`/`config` (and the DB stores `config`/`value` as `Json`), all narrowing goes through these helpers — there are **no `as` casts** for metric config/value/defaults anywhere in `src/`.
 
-| Helper                                                | Use                                                                                                                                                                                           |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `matchMetricValue(type, value, handlers)`             | Exhaustive dispatch: maps a `(type, value)` pair to its narrowed value type via a per-type handler map. Used by read sites like `formatMetricValue`.                                          |
-| `isMetricValue(value)`                                | Structural guard: narrows `Json` → `MetricValue` (no `type` needed). Used where the metric type is not co-located (stock defaults).                                                           |
-| `isMetricValueForType(type, value)`                   | Generic guard: narrows a value to `MetricValueByType[type]`. Used by the `MetricValueInput` dispatcher.                                                                                       |
-| `isMetricConfigForType(type, config)`                 | Generic guard: narrows a config to `MetricConfigByType[type]`. Used by the config/value field dispatchers.                                                                                    |
-| `isHabitMetric(metric)` / `parseHabitMetric`          | Whole-row guard / parser: validates a metric row's `config` against its `type`, narrowing the whole object so the discriminant is preserved. `parseHabitMetric` throws on malformed data.     |
-| `parseMetricValueHolder(holder)`                      | Narrows the `value` field of any row (occurrence values, stock defaults) to `MetricValue`; throws on malformed data.                                                                          |
-| `buildHabitMetricInsert(form, habitId, userId)`       | Builds a discriminated `HabitMetricInsert` from `FormMetricDefinitions` (spreads the validated metric so `type`/`config` stay correlated; re-listing the fields would decorrelate the union). |
-| `isNumericValue` / `isDurationValue` / `isRangeValue` | Small structural guards for the common single-shape reads (totals, range continue-from-last).                                                                                                 |
+| Helper                                                | Use                                                                                                                                                                                               |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `matchMetricValue(type, value, handlers)`             | Exhaustive dispatch: maps a `(type, value)` pair to its narrowed value type via a per-type handler map. Used by read sites like `formatMetricValue`.                                              |
+| `isMetricValue(value)`                                | Structural guard: narrows `Json` → `MetricValue` (no `type` needed). Used where the metric type is not co-located (stock defaults).                                                               |
+| `isMetricValueForType(type, value)`                   | Generic guard: narrows a value to `MetricValueByType[type]`. Used by the `MetricValueInput` dispatcher.                                                                                           |
+| `isMetricConfigForType(type, config)`                 | Generic guard: narrows a config to `MetricConfigByType[type]`. Used by the config/value field dispatchers.                                                                                        |
+| `isHabitMetric(metric)` / `parseHabitMetric`          | Whole-row guard / parser: validates a metric row's `config` against its `type`, narrowing the whole object so the discriminant is preserved. `parseHabitMetric` throws on malformed data.         |
+| `parseMetricValueHolder(holder)`                      | Narrows the `value` field of any row (occurrence values, stock defaults) to `MetricValue`; throws on malformed data.                                                                              |
+| `buildHabitMetricDefinition(form)`                    | Builds a discriminated `HabitMetricDefinition` from `FormMetricDefinitions` (spreads the validated metric so `type`/`config` stay correlated; re-listing the fields would decorrelate the union). |
+| `isNumericValue` / `isDurationValue` / `isRangeValue` | Small structural guards for the common single-shape reads (totals, range continue-from-last).                                                                                                     |
 
 The `parse*` helpers run at the **service boundary** (where camelcased DB rows enter the app) and throw on shape mismatch — defense-in-depth alongside the DB validation below.
 
@@ -142,13 +140,23 @@ Both are eagerly loaded via nested Supabase selects in the habits and occurrence
 
 File: [`src/services/metrics.service.ts`](../src/services/metrics.service.ts)
 
-| Function              | Signature                                                                     | Notes                                                 |
-| --------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `createHabitMetrics`  | `(metrics: HabitMetricInsert[]) => Promise<HabitMetric[]>`                    | Batch insert                                          |
-| `patchHabitMetric`    | `(id, body: HabitMetricUpdate) => Promise<HabitMetric>`                       | Single update                                         |
-| `destroyHabitMetrics` | `(ids: string[]) => Promise<void>`                                            | Batch delete (cascades to values)                     |
-| `upsertMetricValues`  | `(values: OccurrenceMetricValueInsert[]) => Promise<OccurrenceMetricValue[]>` | Upsert on `(occurrence_id, habit_metric_id)` conflict |
-| `destroyMetricValue`  | `(occurrenceId, habitMetricId) => Promise<void>`                              | Delete specific value                                 |
+| Function                 | Signature                                                                | Notes                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `saveHabitMetrics`       | `(habitId, { added, removedIds, updated }) => Promise<void>`             | One `save_habit_metrics` call: deletes, inserts and updates in one transaction           |
+| `createHabitWithMetrics` | `(habit, metricDefinitions: HabitMetricDefinition[]) => Promise<string>` | In `habits.service.ts`. One `create_habit_with_metrics` call; returns the new habit's id |
+| `destroyMetricValue`     | `(occurrenceId, habitMetricId) => Promise<void>`                         | Delete specific value                                                                    |
+
+Occurrence metric values are written by `saveOccurrence` (`occurrences.service.ts`, the `save_occurrence` function), which upserts them on the `(occurrence_id, habit_metric_id)` conflict together with the rest of the entry.
+
+### Database functions
+
+Defined in [`08_habit_metrics.sql`](../supabase/schemas/08_habit_metrics.sql) and [`13_occurrence_stock_usages.sql`](../supabase/schemas/13_occurrence_stock_usages.sql). They are `SECURITY INVOKER` with an empty `search_path`, so row level security still applies, and only `authenticated` and `service_role` may run them. They set `user_id` from `auth.uid()` and pass `config`/`value` JSON through unchanged, so the CHECK constraint and the validation trigger below still apply.
+
+| Function                                                            | Does                                                                                                     |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `create_habit_with_metrics(p_habit, p_metrics)`                     | Inserts the habit, then its metrics through `save_habit_metrics`. A rejected metric rolls the habit back |
+| `save_habit_metrics(p_habit_id, p_removed_ids, p_added, p_updated)` | Deletes, inserts and updates the habit's metrics                                                         |
+| `save_occurrence(…)`                                                | Writes an occurrence with its metric values, note, stock usages and photos (see [STOCKS.md](STOCKS.md))  |
 
 ### Eager loading in related services
 
@@ -183,12 +191,12 @@ Metric definitions and values are server data, so React Router routes load and c
 
 **Mutations**
 
-| Intent                | Route action             | What it does                                                                                             |
-| --------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| `create-habit`        | `/habits`                | Creates the habit, then `createHabitMetrics()` from the submitted `metricDefinitions` JSON field         |
-| `save-metrics`        | `/habits/:habitId`       | Processes the form flags in order: `destroyHabitMetrics()`, `createHabitMetrics()`, `patchHabitMetric()` |
-| `create` / `update`   | `/resources/occurrences` | `upsertMetricValues()` with the submitted `metricValues`                                                 |
-| `remove-metric-value` | `/resources/occurrences` | `destroyMetricValue(occurrenceId, habitMetricId)`                                                        |
+| Intent                | Route action             | What it does                                                                                     |
+| --------------------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `create-habit`        | `/habits`                | `createHabitWithMetrics()` with the submitted `metricDefinitions` JSON field, in one transaction |
+| `save-metrics`        | `/habits/:habitId`       | `saveHabitMetrics()` with the removed, added and updated metrics from the form flags             |
+| `create` / `update`   | `/resources/occurrences` | `saveOccurrence()` upserts the submitted `metricValues` with the rest of the entry               |
+| `remove-metric-value` | `/resources/occurrences` | `destroyMetricValue(occurrenceId, habitMetricId)`                                                |
 
 After each action, React Router revalidates the active loaders. Habit actions and occurrence actions also call `clearCalendarData()` in `finally`, so the calendar refetches occurrences that embed the changed definitions or values.
 
@@ -252,9 +260,8 @@ HabitDetails loads habit.metricDefinitions
   → user adds/edits/removes via MetricDefinitionForm
   → on save: useActionFetcher posts intent=save-metrics and metricDefinitions (JSON) to /habits/:habitId
   → server action:
-    1. destroyHabitMetrics(idsToRemove)
-    2. createHabitMetrics(metricsToAdd)
-    3. patchHabitMetric(id, changes) for each updated metric
+    saveHabitMetrics(habitId, { removedIds, added, updated })
+    → save_habit_metrics deletes, inserts and updates in one transaction
   → clientAction wrapper: clearCalendarData() (finally)
   → loaders revalidate, the editor closes on { ok: true }
 ```
@@ -270,7 +277,7 @@ User selects habit in OccurrenceFormView
   → user enters values → metricValues: Record<metricId, MetricValue | undefined>
   → on submit:
     → useOccurrenceFetcher submits toOccurrenceValuesSubmission(values) as JSON to /resources/occurrences
-    → the server action upserts the values via upsertMetricValues()
+    → the server action saves the entry with saveOccurrence(), which upserts the values in the same transaction
 ```
 
 ### Updating occurrence metric values
@@ -293,7 +300,7 @@ Calculates summed totals for `number` and `duration` metrics across occurrences 
 
 2. **Upsert on unique constraint**: The `(occurrence_id, habit_metric_id)` unique constraint enables safe create-or-update semantics without manual delete/insert logic.
 
-3. **Form state flags pattern**: Client-side tracking of pending changes (add/update/remove) prevents premature partial database updates. All changes are committed atomically on dialog submit.
+3. **Form state flags pattern**: Client-side tracking of pending changes (add/update/remove) prevents premature partial database updates. All changes are committed on dialog submit in one `save_habit_metrics` call, so they apply together or not at all.
 
 4. **Eager loading**: Metric definitions are loaded as part of habits, metric values as part of occurrences, avoiding N+1 queries.
 

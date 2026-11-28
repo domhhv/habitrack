@@ -101,6 +101,7 @@ Server data never goes into Zustand. See [docs/STATE_MIGRATION.md](docs/STATE_MI
   - `AppShellSkeleton` is only the app layout's `HydrateFallback`. Pending navigations and fetchers show `GlobalProgressBar` (rendered by the root route), a slim top bar that appears after 150 ms.
 - **Mutations**:
   - Every write goes through a route server `action`. Branch on an `intent` and type the payloads in `src/models/*-submission.model.ts`. Services that build URLs take the request's `origin` (`new URL(request.url).origin`), never `window.location`.
+  - A write that spans several rows is one database function, so it applies fully or not at all: `create_habit_with_metrics`, `save_habit_metrics`, `save_stock`, `save_occurrence` (`SECURITY INVOKER`, `user_id` from `auth.uid()`). Validate and compute in the action first, then make the one `rpc()` call through its service.
   - A route whose writes change browser-cached calendar data also exports a `clientAction` that awaits `serverAction()` and clears the cache in `finally` (`/habits/:habitId`, `/resources/notes`, `/resources/occurrences`).
   - Files larger than a server function's request body limit (about 4.5 MB) never go to an action. Occurrence photos are compressed and uploaded from the browser by `useOccurrenceFetcher`, and the action receives their storage paths. Google sign-in and identity linking call the browser client directly, because they leave the page.
   - UI that belongs to one page submits to that page's route. Global UI (drawers) submits to a `/resources/*` route.
@@ -176,7 +177,7 @@ yarn db:gen-types
 Supabase storage buckets:
 
 - `habit_icons`: Public bucket (100KB limit per file)
-- `occurrence_photos`: Private bucket (5MB limit per file), uploaded from the browser into `<userId>/<habitId>/`. `photo_paths` changes go through the `add_occurrence_photo_paths`/`remove_occurrence_photo_path` functions, one `UPDATE` each
+- `occurrence_photos`: Private bucket (5MB limit per file), uploaded from the browser into `<userId>/<habitId>/`. New `photo_paths` are appended by `save_occurrence`, and a removed one goes through `remove_occurrence_photo_path`, one `UPDATE` each
 
 ### Environment Requirements
 

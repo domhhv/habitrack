@@ -1,12 +1,7 @@
 import type { ZonedDateTime } from '@internationalized/date';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
-import type {
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-  CompositeTypes,
-} from '@db-types';
+import type { Tables, CompositeTypes } from '@db-types';
 
 import { type Habit } from './habit.model';
 import type { OccurrenceMetricValue } from './metric.model';
@@ -44,14 +39,6 @@ export type Occurrence = Omit<
   occurredAt: ZonedDateTime;
   updatedAt: ZonedDateTime | null;
 };
-
-export type OccurrencesInsert = CamelCasedPropertiesDeep<
-  TablesInsert<'occurrences'>
->;
-
-export type OccurrencesUpdate = CamelCasedPropertiesDeep<
-  TablesUpdate<'occurrences'>
->;
 
 export type OccurrenceSummaryItem = {
   costByCurrency: Record<string, number>;

@@ -2,21 +2,23 @@ import React from 'react';
 import { data } from 'react-router';
 
 import { HabitsTable } from '@components';
-import type {
-  HabitStats,
-  FieldErrors,
-  TypedSupabaseClient,
-  FormMetricDefinitions,
+import {
+  StorageBuckets,
+  type HabitStats,
+  type FieldErrors,
+  type TypedSupabaseClient,
+  type FormMetricDefinitions,
 } from '@models';
 import {
-  createHabit,
+  deleteFile,
   createTrait,
   listHabitIds,
   getHabitsStats,
   uploadHabitIcon,
-  createHabitMetrics,
+  createHabitWithMetrics,
 } from '@services';
 import {
+  noop,
   runAction,
   getFormJson,
   getFormText,
@@ -26,7 +28,7 @@ import {
   assertValidFields,
   getRequestTimeZone,
   getHabitFieldErrors,
-  buildHabitMetricInsert,
+  buildHabitMetricDefinition,
 } from '@utils';
 
 import type { Route } from './+types/HabitsPage';
@@ -98,24 +100,31 @@ const addHabit = async (
     throw new Error('The metric definitions could not be read');
   }
 
-  const habit = await createHabit(supabase, {
-    description: getFormText(formData, 'description'),
-    name: getFormText(formData, 'name'),
-    traitId: traitId || null,
-    userId,
-    iconPath:
-      icon instanceof File && icon.size > 0
-        ? await uploadHabitIcon(supabase, userId, icon)
-        : '',
-  });
+  const metrics = metricDefinitions.map(buildHabitMetricDefinition);
+  const iconPath =
+    icon instanceof File && icon.size > 0
+      ? await uploadHabitIcon(supabase, userId, icon)
+      : '';
 
-  if (metricDefinitions.length > 0) {
-    await createHabitMetrics(
+  try {
+    await createHabitWithMetrics(
       supabase,
-      metricDefinitions.map((metric) => {
-        return buildHabitMetricInsert(metric, habit.id, userId);
-      })
+      {
+        description: getFormText(formData, 'description'),
+        iconPath,
+        name: getFormText(formData, 'name'),
+        traitId: traitId || null,
+      },
+      metrics
     );
+  } catch (error) {
+    if (iconPath) {
+      await deleteFile(supabase, StorageBuckets.HABIT_ICONS, iconPath).catch(
+        noop
+      );
+    }
+
+    throw error;
   }
 };
 

@@ -3,19 +3,15 @@ import { it, vi, expect, describe, beforeEach } from 'vitest';
 import {
   getHabit,
   listFiles,
+  saveStock,
   deleteFile,
   patchHabit,
   patchStock,
-  createStock,
   destroyHabit,
   destroyStock,
   uploadHabitIcon,
-  patchHabitMetric,
+  saveHabitMetrics,
   clearCalendarData,
-  createHabitMetrics,
-  destroyHabitMetrics,
-  createStockMetricDefaults,
-  destroyStockMetricDefaults,
 } from '@services';
 import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
@@ -27,19 +23,15 @@ vi.mock('@services', async (importOriginal) => {
   return {
     ...(await importOriginal<object>()),
     clearCalendarData: vi.fn(),
-    createHabitMetrics: vi.fn(),
-    createStock: vi.fn(),
-    createStockMetricDefaults: vi.fn(),
     deleteFile: vi.fn(),
     destroyHabit: vi.fn(),
-    destroyHabitMetrics: vi.fn(),
     destroyStock: vi.fn(),
-    destroyStockMetricDefaults: vi.fn(),
     getHabit: vi.fn(),
     listFiles: vi.fn(),
     patchHabit: vi.fn(),
-    patchHabitMetric: vi.fn(),
     patchStock: vi.fn(),
+    saveHabitMetrics: vi.fn(),
+    saveStock: vi.fn(),
     uploadHabitIcon: vi.fn(),
   };
 });
@@ -210,14 +202,14 @@ describe('HabitDetailsPage action', () => {
     );
   });
 
-  it('removes, adds, and updates metric definitions', async () => {
-    const baseMetric = {
+  it('removes, adds, and updates metric definitions in one call', async () => {
+    const metricDefinition = {
       config: {},
       isRequired: false,
-      presetName: '',
       sortOrder: 0,
       type: 'number' as const,
     };
+    const baseMetric = { ...metricDefinition, presetName: '' };
 
     await submit({
       intent: 'save-metrics',
@@ -229,25 +221,19 @@ describe('HabitDetailsPage action', () => {
       ]),
     });
 
-    expect(destroyHabitMetrics).toHaveBeenCalledWith(testSupabaseClient, [
-      'metric-1',
-    ]);
-    expect(createHabitMetrics).toHaveBeenCalledWith(testSupabaseClient, [
-      expect.objectContaining({ habitId: 'habit-1', name: 'New' }),
-    ]);
-    expect(patchHabitMetric).toHaveBeenCalledOnce();
-    expect(patchHabitMetric).toHaveBeenCalledWith(
+    expect(saveHabitMetrics).toHaveBeenCalledOnce();
+    expect(saveHabitMetrics).toHaveBeenCalledWith(
       testSupabaseClient,
-      'metric-2',
-      expect.objectContaining({ name: 'Edit' })
+      'habit-1',
+      {
+        added: [{ ...metricDefinition, name: 'New' }],
+        removedIds: ['metric-1'],
+        updated: [{ ...metricDefinition, id: 'metric-2', name: 'Edit' }],
+      }
     );
   });
 
-  it('adds a stock with its metric defaults', async () => {
-    vi.mocked(createStock).mockResolvedValue({ id: 'stock-1' } as Awaited<
-      ReturnType<typeof createStock>
-    >);
-
+  it('adds a stock with its metric defaults in one call', async () => {
     await expect(
       submit({
         ...stockFields,
@@ -259,32 +245,27 @@ describe('HabitDetailsPage action', () => {
       })
     ).resolves.toMatchObject({ ok: true });
 
-    expect(createStock).toHaveBeenCalledWith(testSupabaseClient, {
-      cost: 4.5,
-      currency: 'EUR',
+    expect(saveStock).toHaveBeenCalledWith(testSupabaseClient, {
       habitId: 'habit-1',
-      isDepleted: false,
-      name: 'Pack',
-      remainingItems: 20,
-      totalItems: 20,
-      userId: 'user-1',
-    });
-    expect(createStockMetricDefaults).toHaveBeenCalledWith(testSupabaseClient, [
-      {
-        habitMetricId: 'metric-1',
-        habitStockId: 'stock-1',
-        shouldCompound: true,
-        userId: 'user-1',
-        value: { numericValue: 5 },
+      stockId: undefined,
+      metricDefaults: [
+        {
+          habitMetricId: 'metric-1',
+          shouldCompound: true,
+          value: { numericValue: 5 },
+        },
+      ],
+      stock: {
+        cost: 4.5,
+        currency: 'EUR',
+        name: 'Pack',
+        remainingItems: 20,
+        totalItems: 20,
       },
-    ]);
+    });
   });
 
   it('adds an approximate stock without item counts', async () => {
-    vi.mocked(createStock).mockResolvedValue({ id: 'stock-1' } as Awaited<
-      ReturnType<typeof createStock>
-    >);
-
     await submit({
       cost: '',
       currency: 'USD',
@@ -292,15 +273,18 @@ describe('HabitDetailsPage action', () => {
       name: 'Beans',
     });
 
-    expect(createStock).toHaveBeenCalledWith(
-      testSupabaseClient,
-      expect.objectContaining({
+    expect(saveStock).toHaveBeenCalledWith(testSupabaseClient, {
+      habitId: 'habit-1',
+      metricDefaults: null,
+      stockId: undefined,
+      stock: {
         cost: null,
+        currency: 'USD',
+        name: 'Beans',
         remainingItems: null,
         totalItems: null,
-      })
-    );
-    expect(createStockMetricDefaults).not.toHaveBeenCalled();
+      },
+    });
   });
 
   it('returns field errors for invalid stock fields', async () => {
@@ -324,7 +308,7 @@ describe('HabitDetailsPage action', () => {
         },
       },
     });
-    expect(createStock).not.toHaveBeenCalled();
+    expect(saveStock).not.toHaveBeenCalled();
   });
 
   it('marks a stock as depleted', async () => {
@@ -339,7 +323,7 @@ describe('HabitDetailsPage action', () => {
     });
   });
 
-  it('only patches the stock when no metric defaults are submitted', async () => {
+  it('updates the stock and keeps its metric defaults when none are submitted', async () => {
     await submit({
       ...stockFields,
       intent: 'update-stock',
@@ -347,17 +331,21 @@ describe('HabitDetailsPage action', () => {
       stockId: 'stock-1',
     });
 
-    expect(patchStock).toHaveBeenCalledWith(testSupabaseClient, 'stock-1', {
-      cost: 4.5,
-      currency: 'EUR',
-      name: 'Pack',
-      remainingItems: 20,
-      totalItems: 20,
+    expect(saveStock).toHaveBeenCalledWith(testSupabaseClient, {
+      habitId: 'habit-1',
+      metricDefaults: null,
+      stockId: 'stock-1',
+      stock: {
+        cost: 4.5,
+        currency: 'EUR',
+        name: 'Pack',
+        remainingItems: 20,
+        totalItems: 20,
+      },
     });
-    expect(destroyStockMetricDefaults).not.toHaveBeenCalled();
   });
 
-  it('replaces the stock metric defaults when they are submitted', async () => {
+  it('replaces the stock metric defaults in the same call when they are submitted', async () => {
     await submit({
       ...stockFields,
       intent: 'update-stock',
@@ -368,16 +356,20 @@ describe('HabitDetailsPage action', () => {
       }),
     });
 
-    expect(destroyStockMetricDefaults).toHaveBeenCalledWith(
+    expect(saveStock).toHaveBeenCalledOnce();
+    expect(saveStock).toHaveBeenCalledWith(
       testSupabaseClient,
-      'stock-1'
-    );
-    expect(createStockMetricDefaults).toHaveBeenCalledWith(testSupabaseClient, [
       expect.objectContaining({
-        habitStockId: 'stock-1',
-        value: { numericValue: 2 },
-      }),
-    ]);
+        stockId: 'stock-1',
+        metricDefaults: [
+          {
+            habitMetricId: 'metric-1',
+            shouldCompound: false,
+            value: { numericValue: 2 },
+          },
+        ],
+      })
+    );
   });
 
   it('removes a stock', async () => {

@@ -16,19 +16,15 @@ import {
 import {
   getHabit,
   listFiles,
+  saveStock,
   deleteFile,
   patchHabit,
   patchStock,
-  createStock,
   destroyHabit,
   destroyStock,
   uploadHabitIcon,
-  patchHabitMetric,
+  saveHabitMetrics,
   clearCalendarData,
-  createHabitMetrics,
-  destroyHabitMetrics,
-  createStockMetricDefaults,
-  destroyStockMetricDefaults,
 } from '@services';
 import {
   runAction,
@@ -39,24 +35,21 @@ import {
   supabaseContext,
   assertValidFields,
   getHabitFieldErrors,
-  buildHabitMetricInsert,
+  buildHabitMetricDefinition,
 } from '@utils';
 
 import type { Route } from './+types/HabitDetailsPage';
 
 const CURRENCY_CODE_PATTERN = /^[A-Z]{3}$/;
 
-const buildStockMetricDefaultInserts = (
-  habitStockId: string,
-  { compound, values }: StockMetricDefaultsSubmission,
-  userId: string
-) => {
+const toStockMetricDefaults = ({
+  compound,
+  values,
+}: StockMetricDefaultsSubmission) => {
   return Object.entries(values).map(([habitMetricId, value]) => {
     return {
       habitMetricId,
-      habitStockId,
       shouldCompound: compound[habitMetricId] ?? false,
-      userId,
       value,
     };
   });
@@ -111,8 +104,7 @@ const deleteHabit = async (
 const saveMetrics = async (
   supabase: TypedSupabaseClient,
   habitId: Habit['id'],
-  formData: FormData,
-  userId: string
+  formData: FormData
 ) => {
   const metricDefinitions = getFormJson<FormMetricDefinitions[]>(
     formData,
@@ -138,30 +130,13 @@ const saveMetrics = async (
     return metric.isToBeUpdated && !metric.isToBeRemoved;
   });
 
-  if (idsToRemove.length > 0) {
-    await destroyHabitMetrics(supabase, idsToRemove);
-  }
-
-  if (metricsToAdd.length > 0) {
-    await createHabitMetrics(
-      supabase,
-      metricsToAdd.map((metric) => {
-        return buildHabitMetricInsert(metric, habitId, userId);
-      })
-    );
-  }
-
-  await Promise.all(
-    metricsToUpdate.map(({ config, id, isRequired, name, sortOrder, type }) => {
-      return patchHabitMetric(supabase, id, {
-        config,
-        isRequired,
-        name,
-        sortOrder,
-        type,
-      });
-    })
-  );
+  await saveHabitMetrics(supabase, habitId, {
+    added: metricsToAdd.map(buildHabitMetricDefinition),
+    removedIds: idsToRemove,
+    updated: metricsToUpdate.map((metric) => {
+      return { ...buildHabitMetricDefinition(metric), id: metric.id };
+    }),
+  });
 };
 
 const updateHabit = async (
@@ -262,62 +237,21 @@ const getStockMetricDefaults = (formData: FormData) => {
   return metricDefaults;
 };
 
-const addStock = async (
+const saveStockForm = async (
   supabase: TypedSupabaseClient,
   habitId: Habit['id'],
   formData: FormData,
-  userId: string
+  stockId?: string
 ) => {
-  const stockFields = getStockFields(formData);
+  const stock = getStockFields(formData);
   const metricDefaults = getStockMetricDefaults(formData);
-  const stock = await createStock(supabase, {
-    ...stockFields,
+
+  await saveStock(supabase, {
     habitId,
-    isDepleted: false,
-    userId,
-  });
-
-  if (!metricDefaults) {
-    return;
-  }
-
-  const metricDefaultInserts = buildStockMetricDefaultInserts(
-    stock.id,
-    metricDefaults,
-    userId
-  );
-
-  if (metricDefaultInserts.length > 0) {
-    await createStockMetricDefaults(supabase, metricDefaultInserts);
-  }
-};
-
-const updateStock = async (
-  supabase: TypedSupabaseClient,
-  stockId: string,
-  formData: FormData,
-  userId: string
-) => {
-  const stockFields = getStockFields(formData);
-  const metricDefaults = getStockMetricDefaults(formData);
-
-  await patchStock(supabase, stockId, stockFields);
-
-  if (!metricDefaults) {
-    return;
-  }
-
-  await destroyStockMetricDefaults(supabase, stockId);
-
-  const metricDefaultInserts = buildStockMetricDefaultInserts(
+    metricDefaults: metricDefaults && toStockMetricDefaults(metricDefaults),
+    stock,
     stockId,
-    metricDefaults,
-    userId
-  );
-
-  if (metricDefaultInserts.length > 0) {
-    await createStockMetricDefaults(supabase, metricDefaultInserts);
-  }
+  });
 };
 
 export const loader = async ({
@@ -362,10 +296,7 @@ export const action = async ({
 
   switch (formData.get('intent') as HabitDetailsIntent) {
     case 'add-stock':
-      return runAction(
-        addStock(supabase, habitId, formData, user.id),
-        'add_stock'
-      );
+      return runAction(saveStockForm(supabase, habitId, formData), 'add_stock');
 
     case 'delete-habit':
       return runAction(deleteHabit(supabase, habitId, user.id), 'remove_habit');
@@ -377,7 +308,7 @@ export const action = async ({
 
     case 'save-metrics':
       return runAction(
-        saveMetrics(supabase, habitId, formData, user.id),
+        saveMetrics(supabase, habitId, formData),
         'update_habit'
       );
 
@@ -400,7 +331,7 @@ export const action = async ({
     case 'update-stock':
       return stockId
         ? runAction(
-            updateStock(supabase, stockId, formData, user.id),
+            saveStockForm(supabase, habitId, formData, stockId),
             'update_stock'
           )
         : missingStock;

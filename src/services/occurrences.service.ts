@@ -5,9 +5,8 @@ import decamelizeKeys from 'decamelize-keys';
 import type {
   Habit,
   Streak,
+  MetricValue,
   RawOccurrence,
-  OccurrencesInsert,
-  OccurrencesUpdate,
   TypedSupabaseClient,
 } from '@models';
 import { StorageBuckets } from '@models';
@@ -58,23 +57,6 @@ const toRawOccurrence = ({
   };
 };
 
-export const createOccurrence = async (
-  supabase: TypedSupabaseClient,
-  occurrence: OccurrencesInsert
-): Promise<RawOccurrence> => {
-  const { data, error } = await supabase
-    .from('occurrences')
-    .insert(decamelizeKeys(occurrence))
-    .select(OCCURRENCE_SELECT)
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return toRawOccurrence(camelcaseKeys(data, { deep: true }));
-};
-
 export const listOccurrences = async (
   supabase: TypedSupabaseClient,
   [rangeStart, rangeEnd]: [ZonedDateTime, ZonedDateTime]
@@ -108,40 +90,6 @@ export const getOccurrence = async (
   }
 
   return data && toRawOccurrence(camelcaseKeys(data, { deep: true }));
-};
-
-export const patchOccurrence = async (
-  supabase: TypedSupabaseClient,
-  id: RawOccurrence['id'],
-  occurrence: OccurrencesUpdate
-): Promise<RawOccurrence> => {
-  const { data, error } = await supabase
-    .from('occurrences')
-    .update(decamelizeKeys(occurrence))
-    .eq('id', id)
-    .select(OCCURRENCE_SELECT)
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return toRawOccurrence(camelcaseKeys(data, { deep: true }));
-};
-
-export const addOccurrencePhotoPaths = async (
-  supabase: TypedSupabaseClient,
-  id: RawOccurrence['id'],
-  photoPaths: string[]
-) => {
-  const { error } = await supabase.rpc('add_occurrence_photo_paths', {
-    p_occurrence_id: id,
-    p_photo_paths: photoPaths,
-  });
-
-  if (error) {
-    throw new Error(error.message);
-  }
 };
 
 export const removeOccurrencePhotoPath = async (
@@ -237,4 +185,58 @@ export const getHabitsStats = async (
   }
 
   return camelcaseKeys(data);
+};
+
+export type OccurrenceFields = {
+  cost: number | null;
+  currency: string | null;
+  habitId: string;
+  hasSpecificTime: boolean;
+  occurredAt: string;
+  timeZone?: string;
+};
+
+export type SaveOccurrenceParams = {
+  depletedStockIds: string[];
+  metricValues: Record<string, MetricValue>;
+  note: string;
+  occurrence: OccurrenceFields;
+  occurrenceId?: string;
+  photoPaths: string[];
+  stockUsages: { habitStockId: string; quantity: number | null }[];
+};
+
+/**
+ * Creates the occurrence, or updates it when `occurrenceId` is given, together with its note,
+ * metric values, stock usages, depleted stocks and new photo paths in one transaction.
+ */
+export const saveOccurrence = async (
+  supabase: TypedSupabaseClient,
+  {
+    depletedStockIds,
+    metricValues,
+    note,
+    occurrence,
+    occurrenceId,
+    photoPaths,
+    stockUsages,
+  }: SaveOccurrenceParams
+) => {
+  const { data, error } = await supabase.rpc('save_occurrence', {
+    p_depleted_stock_ids: depletedStockIds,
+    p_metric_values: metricValues,
+    p_note: note,
+    p_occurrence: decamelizeKeys(occurrence),
+    p_occurrence_id: occurrenceId,
+    p_photo_paths: photoPaths,
+    p_stock_usages: stockUsages.map((usage) => {
+      return decamelizeKeys(usage);
+    }),
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
 };

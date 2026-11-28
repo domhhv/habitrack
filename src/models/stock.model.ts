@@ -1,25 +1,16 @@
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
-import type { Tables, TablesInsert, TablesUpdate } from '@db-types';
+import type { Tables, TablesUpdate } from '@db-types';
 
 import type { MetricValue } from './metric.model';
 
 export type HabitStock = CamelCasedPropertiesDeep<Tables<'habit_stocks'>>;
-export type HabitStockInsert = CamelCasedPropertiesDeep<
-  TablesInsert<'habit_stocks'>
->;
 export type HabitStockUpdate = CamelCasedPropertiesDeep<
   TablesUpdate<'habit_stocks'>
 >;
 
 export type HabitStockMetricDefault = Omit<
   CamelCasedPropertiesDeep<Tables<'habit_stock_metric_defaults'>>,
-  'value'
-> & {
-  value: MetricValue;
-};
-export type HabitStockMetricDefaultInsert = Omit<
-  CamelCasedPropertiesDeep<TablesInsert<'habit_stock_metric_defaults'>>,
   'value'
 > & {
   value: MetricValue;

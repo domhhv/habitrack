@@ -84,3 +84,90 @@ WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 GRANT ALL ON TABLE "public"."habit_metrics" TO "anon";
 GRANT ALL ON TABLE "public"."habit_metrics" TO "authenticated";
 GRANT ALL ON TABLE "public"."habit_metrics" TO "service_role";
+
+-- noqa: disable=all
+-- Habit metric writes: each runs in one transaction, so a failed metric never leaves a habit or a
+-- half-saved set of definitions behind. SECURITY INVOKER keeps the row level security policies in force.
+CREATE OR REPLACE FUNCTION "public"."save_habit_metrics"(
+    "p_habit_id" UUID,
+    "p_removed_ids" UUID [],
+    "p_added" JSONB,
+    "p_updated" JSONB
+)
+RETURNS VOID
+LANGUAGE "plpgsql"
+SECURITY INVOKER
+SET search_path TO ''
+AS $function$
+BEGIN
+    DELETE FROM "public"."habit_metrics"
+    WHERE "habit_id" = "p_habit_id"
+      AND "id" = ANY(COALESCE("p_removed_ids", '{}'));
+
+    INSERT INTO "public"."habit_metrics" (
+        "user_id", "habit_id", "name", "type", "config", "is_required", "sort_order"
+    )
+    SELECT
+        (SELECT "auth"."uid"()),
+        "p_habit_id",
+        "metric" ->> 'name',
+        ("metric" ->> 'type')::"public"."metric_type",
+        COALESCE("metric" -> 'config', '{}'::JSONB),
+        COALESCE(("metric" ->> 'is_required')::BOOLEAN, false),
+        COALESCE(("metric" ->> 'sort_order')::INTEGER, 0)
+    FROM JSONB_ARRAY_ELEMENTS(COALESCE("p_added", '[]'::JSONB)) AS "metric";
+
+    UPDATE "public"."habit_metrics" AS "habit_metric"
+    SET "name" = "metric" ->> 'name',
+        "type" = ("metric" ->> 'type')::"public"."metric_type",
+        "config" = COALESCE("metric" -> 'config', '{}'::JSONB),
+        "is_required" = COALESCE(("metric" ->> 'is_required')::BOOLEAN, false),
+        "sort_order" = COALESCE(("metric" ->> 'sort_order')::INTEGER, 0)
+    FROM JSONB_ARRAY_ELEMENTS(COALESCE("p_updated", '[]'::JSONB)) AS "metric"
+    WHERE "habit_metric"."id" = ("metric" ->> 'id')::UUID
+      AND "habit_metric"."habit_id" = "p_habit_id";
+END;
+$function$;
+
+ALTER FUNCTION "public"."save_habit_metrics"(UUID, UUID [], JSONB, JSONB) OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION "public"."create_habit_with_metrics"(
+    "p_habit" JSONB,
+    "p_metrics" JSONB
+)
+RETURNS UUID
+LANGUAGE "plpgsql"
+SECURITY INVOKER
+SET search_path TO ''
+AS $function$
+DECLARE
+    "v_habit_id" UUID;
+BEGIN
+    INSERT INTO "public"."habits" ("user_id", "name", "description", "trait_id", "icon_path")
+    VALUES (
+        (SELECT "auth"."uid"()),
+        "p_habit" ->> 'name',
+        "p_habit" ->> 'description',
+        ("p_habit" ->> 'trait_id')::UUID,
+        "p_habit" ->> 'icon_path'
+    )
+    RETURNING "id" INTO "v_habit_id";
+
+    PERFORM "public"."save_habit_metrics"("v_habit_id", '{}', "p_metrics", '[]'::JSONB);
+
+    RETURN "v_habit_id";
+END;
+$function$;
+
+ALTER FUNCTION "public"."create_habit_with_metrics"(JSONB, JSONB) OWNER TO "postgres";
+
+REVOKE ALL ON FUNCTION "public"."save_habit_metrics"(UUID, UUID [], JSONB, JSONB) FROM PUBLIC;
+REVOKE ALL ON FUNCTION "public"."save_habit_metrics"(UUID, UUID [], JSONB, JSONB) FROM "anon";
+GRANT EXECUTE ON FUNCTION "public"."save_habit_metrics"(UUID, UUID [], JSONB, JSONB) TO "authenticated";
+GRANT EXECUTE ON FUNCTION "public"."save_habit_metrics"(UUID, UUID [], JSONB, JSONB) TO "service_role";
+
+REVOKE ALL ON FUNCTION "public"."create_habit_with_metrics"(JSONB, JSONB) FROM PUBLIC;
+REVOKE ALL ON FUNCTION "public"."create_habit_with_metrics"(JSONB, JSONB) FROM "anon";
+GRANT EXECUTE ON FUNCTION "public"."create_habit_with_metrics"(JSONB, JSONB) TO "authenticated";
+GRANT EXECUTE ON FUNCTION "public"."create_habit_with_metrics"(JSONB, JSONB) TO "service_role";
+-- noqa: enable=all

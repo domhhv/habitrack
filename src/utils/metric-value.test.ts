@@ -12,7 +12,7 @@ import {
   isMetricValueForType,
   isMetricConfigForType,
   parseMetricValueHolder,
-  buildHabitMetricInsert,
+  buildHabitMetricDefinition,
 } from './metric-value';
 
 describe('matchMetricValue', () => {
@@ -237,7 +237,7 @@ describe('parseMetricValueHolder', () => {
   });
 });
 
-describe('buildHabitMetricInsert', () => {
+describe('buildHabitMetricDefinition', () => {
   const form: FormMetricDefinitions = {
     config: { max: 5, min: 1, step: 1 },
     id: 'm1',
@@ -249,29 +249,23 @@ describe('buildHabitMetricInsert', () => {
     type: 'scale',
   };
 
-  it('builds a discriminated insert with habit/user ids and drops form-only fields', () => {
-    const insert = buildHabitMetricInsert(form, 'habit-1', 'user-1');
+  it('builds a discriminated definition and drops form-only fields', () => {
+    const definition = buildHabitMetricDefinition(form);
 
-    expect(insert).toEqual({
+    expect(definition).toEqual({
       config: { max: 5, min: 1, step: 1 },
-      habitId: 'habit-1',
       isRequired: true,
       name: 'Mood',
       sortOrder: 2,
       type: 'scale',
-      userId: 'user-1',
     });
-    expect('presetName' in insert).toBe(false);
-    expect('id' in insert).toBe(false);
+    expect('presetName' in definition).toBe(false);
+    expect('id' in definition).toBe(false);
   });
 
   it('throws when the form config does not match its type', () => {
     expect(() => {
-      return buildHabitMetricInsert(
-        { ...form, config: {} },
-        'habit-1',
-        'user-1'
-      );
+      return buildHabitMetricDefinition({ ...form, config: {} });
     }).toThrow();
   });
 });
