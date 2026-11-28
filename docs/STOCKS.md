@@ -98,25 +98,21 @@ The distinction is determined by whether `total_items` is set:
 
 File: [`src/models/stock.model.ts`](../src/models/stock.model.ts)
 
-| Type                            | Purpose                                                                                             |
-| ------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `HabitStock`                    | CamelCased row from `habit_stocks`                                                                  |
-| `HabitStockInsert`              | Insert type                                                                                         |
-| `HabitStockUpdate`              | Update type                                                                                         |
-| `HabitStockMetricDefault`       | CamelCased row from `habit_stock_metric_defaults`, with `value` typed as `MetricValue` (not `Json`) |
-| `HabitStockMetricDefaultInsert` | Insert type, `value: MetricValue`                                                                   |
-| `HabitStockWithDefaults`        | `HabitStock` extended with `metricDefaults[]` and `usageCount: number`                              |
-| `StockFormValues`               | Client-side form state for stock creation/editing                                                   |
+| Type                      | Purpose                                                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| `HabitStock`              | CamelCased row from `habit_stocks`                                                                  |
+| `HabitStockUpdate`        | Update type                                                                                         |
+| `HabitStockMetricDefault` | CamelCased row from `habit_stock_metric_defaults`, with `value` typed as `MetricValue` (not `Json`) |
+| `HabitStockWithDefaults`  | `HabitStock` extended with `metricDefaults[]` and `usageCount: number`                              |
+| `StockFormValues`         | Client-side form state for stock creation/editing                                                   |
 
 ### Stock usage types
 
 File: [`src/models/occurrence-stock-usage.model.ts`](../src/models/occurrence-stock-usage.model.ts)
 
-| Type                         | Purpose                                       |
-| ---------------------------- | --------------------------------------------- |
-| `OccurrenceStockUsage`       | CamelCased row from `occurrence_stock_usages` |
-| `OccurrenceStockUsageInsert` | Insert type                                   |
-| `OccurrenceStockUsageUpdate` | Update type                                   |
+| Type                   | Purpose                                       |
+| ---------------------- | --------------------------------------------- |
+| `OccurrenceStockUsage` | CamelCased row from `occurrence_stock_usages` |
 
 ### Integration with Habit and Occurrence models
 
@@ -144,14 +140,12 @@ type RawOccurrence = BaseOccurrence & {
 
 File: [`src/services/stocks.service.ts`](../src/services/stocks.service.ts)
 
-| Function                     | Signature                                                                       | Notes                                                         |
-| ---------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `createStock`                | `(body: HabitStockInsert) => Promise<HabitStockWithDefaults>`                   | Uses custom SELECT to include metric defaults and usage count |
-| `listStocksByHabit`          | `(habitId) => Promise<HabitStockWithDefaults[]>`                                | Ordered by `created_at DESC`                                  |
-| `patchStock`                 | `(id, stock: HabitStockUpdate) => Promise<HabitStockWithDefaults>`              | Update any stock fields                                       |
-| `destroyStock`               | `(id) => Promise<void>`                                                         | Cascade deletes usages and defaults                           |
-| `createStockMetricDefaults`  | `(body: HabitStockMetricDefaultInsert[]) => Promise<HabitStockMetricDefault[]>` | Batch insert defaults                                         |
-| `destroyStockMetricDefaults` | `(habitStockId) => Promise<void>`                                               | Clear all defaults for a stock                                |
+| Function            | Signature                                                           | Notes                                                                                      |
+| ------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `saveStock`         | `({ habitId, stock, metricDefaults, stockId? }) => Promise<string>` | One `save_stock` call: creates or updates the stock and, when given, replaces its defaults |
+| `listStocksByHabit` | `(habitId) => Promise<HabitStockWithDefaults[]>`                    | Ordered by `created_at DESC`                                                               |
+| `patchStock`        | `(id, stock: HabitStockUpdate) => Promise<HabitStockWithDefaults>`  | Used for `set-stock-depleted`                                                              |
+| `destroyStock`      | `(id) => Promise<void>`                                             | Cascade deletes usages and defaults                                                        |
 
 **Eager loading SELECT** used by stock queries:
 
@@ -161,15 +155,16 @@ File: [`src/services/stocks.service.ts`](../src/services/stocks.service.ts)
 
 The `usages(count)` aggregation gives `usageCount` without fetching all usage rows.
 
-### Stock usages service
+### Writes in database functions
 
-File: [`src/services/occurrence-stock-usages.service.ts`](../src/services/occurrence-stock-usages.service.ts)
+Stock and stock-usage writes that span several rows run in one database function each, so they either all apply or none do. The functions are `SECURITY INVOKER` with an empty `search_path`, so row level security still applies, and only `authenticated` and `service_role` may run them. They set `user_id` from `auth.uid()`.
 
-| Function                      | Signature                                                                   | Notes                                     |
-| ----------------------------- | --------------------------------------------------------------------------- | ----------------------------------------- |
-| `createOccurrenceStockUsages` | `(usages: OccurrenceStockUsageInsert[]) => Promise<OccurrenceStockUsage[]>` | Batch insert; triggers auto-decrement     |
-| `updateOccurrenceStockUsage`  | `(id, usage: OccurrenceStockUsageUpdate) => Promise<OccurrenceStockUsage>`  | Update quantity; trigger adjusts stock    |
-| `deleteOccurrenceStockUsages` | `(ids: string[]) => Promise<void>`                                          | Batch delete; triggers restore quantities |
+| Function                                                                                                                       | Defined in                                                                                     | Does                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `save_stock(p_habit_id, p_stock, p_metric_defaults, p_stock_id)`                                                               | [`12_habit_stock_metric_defaults.sql`](../supabase/schemas/12_habit_stock_metric_defaults.sql) | Inserts the stock (no `p_stock_id`) or updates it within its habit. When `p_metric_defaults` is given, deletes the stock's defaults and inserts the new ones. A rejected default keeps the old stock fields and defaults                                                                                                                                                                                        |
+| `save_occurrence(p_occurrence, p_note, p_metric_values, p_stock_usages, p_depleted_stock_ids, p_photo_paths, p_occurrence_id)` | [`13_occurrence_stock_usages.sql`](../supabase/schemas/13_occurrence_stock_usages.sql)         | Inserts or updates the occurrence, deletes the usages of stocks no longer selected, upserts the rest on `(occurrence_id, habit_stock_id)` (so the triggers below restore and apply quantities), marks the depleted stocks, upserts or deletes the entry's note by `occurrence_id`, upserts the metric values and appends the new photo paths. An update of a missing entry raises "This entry no longer exists" |
+
+`saveOccurrence` in [`occurrences.service.ts`](../src/services/occurrences.service.ts) calls `save_occurrence`. Using more items than a stock has left breaks the `remaining_items >= 0` check in the usage trigger, so the whole save fails and nothing is written.
 
 ### Eager loading in related services
 
@@ -188,14 +183,14 @@ Stocks are server data and go through React Router routes. No client store is in
 
 | Intent               | What it does                                                                                                       |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `add-stock`          | `createStock()`, then `createStockMetricDefaults()` with the new stock ID                                          |
-| `update-stock`       | `patchStock()`. When `metricDefaults` is submitted, also `destroyStockMetricDefaults()` and recreates the defaults |
+| `add-stock`          | `saveStock()` with the stock fields and metric defaults, in one transaction                                        |
+| `update-stock`       | `saveStock()` with `stockId`. When `metricDefaults` is submitted, it replaces the defaults in the same transaction |
 | `set-stock-depleted` | `patchStock()` with `isDepleted` only                                                                              |
 | `remove-stock`       | `destroyStock()`                                                                                                   |
 
 Before writing, the action validates the stock fields and returns field errors (a 400) for a blank name, a negative cost, a currency that isn't 3 letters, or a missing or non-whole item count on a quantifiable stock. It uppercases the currency, sets `remainingItems` to the total on create, and caps it at the total on edit. A non-quantifiable stock gets `null` counts.
 
-Occurrence actions (`/resources/occurrences`) create, update or delete stock usages and mark depleted stocks with `patchStock()`. The DB triggers adjust `remaining_items`.
+Occurrence actions (`/resources/occurrences`) save the stock usages and depleted stocks with the rest of the entry in one `saveOccurrence()` call. The DB triggers adjust `remaining_items`.
 
 There is no manual refresh: after every action, React Router revalidates the app layout loader, so the habits come back with fresh `remainingItems`, `isDepleted` and `usageCount`.
 
@@ -265,8 +260,7 @@ The `autoCompoundedMetricIds` set tracks which metrics were auto-filled by compo
 
 On form submit, `OccurrenceCreateFormContainer`/`OccurrenceUpdateFormContainer` send the stock selections, through `useOccurrenceFetcher`, to the `/resources/occurrences` server `action`:
 
-- **Create**: `createOccurrenceStockUsages()` batch inserts, triggers decrement stock
-- **Update**: Compares the current DB usages with the submitted ones, deletes removed ones, creates new ones, updates changed quantities
+- **Create** and **update** both go through `saveOccurrence()`. `save_occurrence` deletes the usages of stocks that are no longer selected and upserts the rest by stock, so the triggers restore and apply quantities, all in the same transaction as the entry itself
 
 After the action finishes, loader revalidation brings back the latest `remaining_items` and `usageCount` values.
 
@@ -279,9 +273,8 @@ User opens HabitStockManager → clicks "Add stock"
   → AddStockForm: enter name, cost, currency, quantifiable toggle, metric defaults
   → on submit: the ActionForm posts intent=add-stock, the stock fields and metricDefaults (JSON) to /habits/:habitId
     0. invalid fields → 400 with field errors shown next to the inputs, nothing written
-    1. createStock() → DB insert → returns HabitStockWithDefaults
-    2. createStockMetricDefaults() with new stock ID
-    3. loaders revalidate → habits come back with the new stock
+    1. saveStock() → save_stock inserts the stock and its defaults in one transaction
+    2. loaders revalidate → habits come back with the new stock
 ```
 
 ### Using a stock when logging an occurrence
@@ -293,11 +286,11 @@ User selects habit → habit.stocks loaded
   → metric defaults auto-populate form
   → user submits
   → /resources/occurrences server action (intent 'create'):
-    1. Creates occurrence (with cost if quantifiable — see COSTS.md)
-    2. createOccurrenceStockUsages(usages)
-    3. DB triggers decrement remaining_items, may set is_depleted
-    4. patchStock(id, { isDepleted: true }) for stocks the user marked depleted
-    5. loaders revalidate → habit stocks refresh
+    1. computes the cost (if quantifiable — see COSTS.md)
+    2. saveOccurrence() → save_occurrence, in one transaction:
+       inserts the occurrence, its usages (DB triggers decrement remaining_items,
+       may set is_depleted), marks the stocks the user marked depleted, note, metric values
+    3. loaders revalidate → habit stocks refresh
 ```
 
 ### Editing stock metric defaults
@@ -307,10 +300,8 @@ User opens StockListItem → enters edit mode
   → StockMetricDefaults renders MetricValuesSection
   → user changes defaults and compound toggles
   → on save: the ActionForm posts intent=update-stock, stockId, the stock fields and metricDefaults (JSON) to /habits/:habitId
-    1. patchStock(stockId, stock)
-    2. destroyStockMetricDefaults(stockId) — clears all existing
-    3. createStockMetricDefaults(newDefaults) — inserts fresh
-    4. loaders revalidate
+    1. saveStock() → save_stock updates the stock, deletes its defaults and inserts the new ones in one transaction
+    2. loaders revalidate
 ```
 
 ## Key Design Decisions

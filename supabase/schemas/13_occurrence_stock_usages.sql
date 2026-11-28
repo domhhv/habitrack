@@ -101,3 +101,109 @@ WITH CHECK (((SELECT "auth"."uid"() AS "uid") = "user_id"));
 GRANT ALL ON TABLE "public"."occurrence_stock_usages" TO "anon";
 GRANT ALL ON TABLE "public"."occurrence_stock_usages" TO "authenticated";
 GRANT ALL ON TABLE "public"."occurrence_stock_usages" TO "service_role";
+
+-- noqa: disable=all
+-- Creates (no p_occurrence_id) or updates an occurrence with its note, metric values, stock
+-- usages, depleted stocks and new photo paths in one transaction, so a failed step leaves nothing
+-- half-saved. Usages are matched by stock; the usage triggers still adjust remaining items.
+-- SECURITY INVOKER keeps the row level security policies in force.
+CREATE OR REPLACE FUNCTION "public"."save_occurrence"(
+    "p_occurrence" JSONB,
+    "p_note" TEXT,
+    "p_metric_values" JSONB,
+    "p_stock_usages" JSONB,
+    "p_depleted_stock_ids" UUID [],
+    "p_photo_paths" TEXT [],
+    "p_occurrence_id" UUID DEFAULT NULL
+)
+RETURNS UUID
+LANGUAGE "plpgsql"
+SECURITY INVOKER
+SET search_path TO ''
+AS $function$
+DECLARE
+    "v_user_id" UUID := (SELECT "auth"."uid"());
+    "v_occurrence_id" UUID;
+    "v_stock_usages" JSONB := COALESCE("p_stock_usages", '[]'::JSONB);
+BEGIN
+    IF "p_occurrence_id" IS NULL THEN
+        INSERT INTO "public"."occurrences" (
+            "user_id", "habit_id", "occurred_at", "has_specific_time", "time_zone", "cost", "currency", "photo_paths"
+        )
+        VALUES (
+            "v_user_id",
+            ("p_occurrence" ->> 'habit_id')::UUID,
+            ("p_occurrence" ->> 'occurred_at')::TIMESTAMPTZ,
+            COALESCE(("p_occurrence" ->> 'has_specific_time')::BOOLEAN, true),
+            COALESCE("p_occurrence" ->> 'time_zone', 'UTC'),
+            ("p_occurrence" ->> 'cost')::NUMERIC,
+            "p_occurrence" ->> 'currency',
+            NULLIF(COALESCE("p_photo_paths", '{}'), '{}')
+        )
+        RETURNING "id" INTO "v_occurrence_id";
+    ELSE
+        UPDATE "public"."occurrences"
+        SET "habit_id" = ("p_occurrence" ->> 'habit_id')::UUID,
+            "occurred_at" = ("p_occurrence" ->> 'occurred_at')::TIMESTAMPTZ,
+            "has_specific_time" = COALESCE(("p_occurrence" ->> 'has_specific_time')::BOOLEAN, true),
+            "cost" = ("p_occurrence" ->> 'cost')::NUMERIC,
+            "currency" = "p_occurrence" ->> 'currency',
+            "photo_paths" = NULLIF(COALESCE("photo_paths", '{}') || COALESCE("p_photo_paths", '{}'), '{}')
+        WHERE "id" = "p_occurrence_id"
+        RETURNING "id" INTO "v_occurrence_id";
+
+        IF "v_occurrence_id" IS NULL THEN
+            RAISE EXCEPTION 'This entry no longer exists' USING ERRCODE = 'P0002';
+        END IF;
+    END IF;
+
+    DELETE FROM "public"."occurrence_stock_usages" AS "usage"
+    WHERE "usage"."occurrence_id" = "v_occurrence_id"
+      AND NOT EXISTS (
+          SELECT 1
+          FROM JSONB_ARRAY_ELEMENTS("v_stock_usages") AS "next_usage"
+          WHERE ("next_usage" ->> 'habit_stock_id')::UUID = "usage"."habit_stock_id"
+      );
+
+    INSERT INTO "public"."occurrence_stock_usages" ("user_id", "occurrence_id", "habit_stock_id", "quantity")
+    SELECT
+        "v_user_id",
+        "v_occurrence_id",
+        ("next_usage" ->> 'habit_stock_id')::UUID,
+        ("next_usage" ->> 'quantity')::INTEGER
+    FROM JSONB_ARRAY_ELEMENTS("v_stock_usages") AS "next_usage"
+    ON CONFLICT ("occurrence_id", "habit_stock_id") DO UPDATE
+    SET "quantity" = EXCLUDED."quantity"
+    WHERE "occurrence_stock_usages"."quantity" IS DISTINCT FROM EXCLUDED."quantity";
+
+    UPDATE "public"."habit_stocks"
+    SET "is_depleted" = true
+    WHERE "id" = ANY(COALESCE("p_depleted_stock_ids", '{}'));
+
+    IF COALESCE("p_note", '') <> '' THEN
+        INSERT INTO "public"."notes" ("user_id", "occurrence_id", "content")
+        VALUES ("v_user_id", "v_occurrence_id", "p_note")
+        ON CONFLICT ("occurrence_id") DO UPDATE
+        SET "content" = EXCLUDED."content";
+    ELSE
+        DELETE FROM "public"."notes"
+        WHERE "occurrence_id" = "v_occurrence_id";
+    END IF;
+
+    INSERT INTO "public"."occurrence_metric_values" ("user_id", "occurrence_id", "habit_metric_id", "value")
+    SELECT "v_user_id", "v_occurrence_id", "metric_value"."key"::UUID, "metric_value"."value"
+    FROM JSONB_EACH(COALESCE("p_metric_values", '{}'::JSONB)) AS "metric_value"
+    ON CONFLICT ("occurrence_id", "habit_metric_id") DO UPDATE
+    SET "value" = EXCLUDED."value";
+
+    RETURN "v_occurrence_id";
+END;
+$function$;
+
+ALTER FUNCTION "public"."save_occurrence"(JSONB, TEXT, JSONB, JSONB, UUID [], TEXT [], UUID) OWNER TO "postgres";
+
+REVOKE ALL ON FUNCTION "public"."save_occurrence"(JSONB, TEXT, JSONB, JSONB, UUID [], TEXT [], UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION "public"."save_occurrence"(JSONB, TEXT, JSONB, JSONB, UUID [], TEXT [], UUID) FROM "anon";
+GRANT EXECUTE ON FUNCTION "public"."save_occurrence"(JSONB, TEXT, JSONB, JSONB, UUID [], TEXT [], UUID) TO "authenticated";
+GRANT EXECUTE ON FUNCTION "public"."save_occurrence"(JSONB, TEXT, JSONB, JSONB, UUID [], TEXT [], UUID) TO "service_role";
+-- noqa: enable=all

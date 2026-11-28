@@ -2,11 +2,11 @@ import type {
   MetricType,
   MetricValue,
   RangeMetricValue,
-  HabitMetricInsert,
   MetricValueByType,
   MetricConfigByType,
   NumericMetricValue,
   DurationMetricValue,
+  HabitMetricDefinition,
   FormMetricDefinitions,
 } from '@models';
 
@@ -197,15 +197,13 @@ export const parseMetricValueHolder = <T extends { value: unknown }>(
 };
 
 /**
- * Builds a `HabitMetricInsert` from transient form state. Validating with `isHabitMetric` narrows
- * the whole metric so its `type`/`config` stay correlated when spread, which the discriminated
- * insert requires; form-only fields are dropped. Cast-free.
+ * Builds a `HabitMetricDefinition` from transient form state. Validating with `isHabitMetric`
+ * narrows the whole metric so its `type`/`config` stay correlated when spread, which the
+ * discriminated definition requires; form-only fields are dropped. Cast-free.
  */
-export const buildHabitMetricInsert = (
-  metric: FormMetricDefinitions,
-  habitId: string,
-  userId: string
-): HabitMetricInsert => {
+export const buildHabitMetricDefinition = (
+  metric: FormMetricDefinitions
+): HabitMetricDefinition => {
   if (!isHabitMetric(metric)) {
     throw new Error('Malformed habit metric config');
   }
@@ -218,10 +216,10 @@ export const buildHabitMetricInsert = (
     isToBeRemoved,
     isToBeUpdated,
     presetName,
-    ...insert
+    ...definition
   } = metric;
 
-  return { ...insert, habitId, userId };
+  return definition;
 };
 
 export const isNumericValue = (

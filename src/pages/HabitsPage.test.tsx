@@ -1,12 +1,12 @@
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import {
-  createHabit,
+  deleteFile,
   createTrait,
   listHabitIds,
   getHabitsStats,
   uploadHabitIcon,
-  createHabitMetrics,
+  createHabitWithMetrics,
 } from '@services';
 import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
@@ -17,9 +17,9 @@ import { loader, action } from './HabitsPage';
 vi.mock('@services', async (importOriginal) => {
   return {
     ...(await importOriginal<object>()),
-    createHabit: vi.fn(),
-    createHabitMetrics: vi.fn(),
+    createHabitWithMetrics: vi.fn(),
     createTrait: vi.fn(),
+    deleteFile: vi.fn(),
     getHabitsStats: vi.fn(),
     listHabitIds: vi.fn(),
     uploadHabitIcon: vi.fn(),
@@ -79,14 +79,13 @@ describe('HabitsPage action', () => {
     vi.clearAllMocks();
   });
 
-  it('creates a habit with its icon and metric definitions', async () => {
-    const icon = new File(['icon'], 'icon.png', { type: 'image/png' });
+  const iconForm = () => {
     const body = new FormData();
     body.set('intent', 'create-habit');
     body.set('name', 'Running');
     body.set('description', 'Morning runs');
     body.set('traitId', 'trait-1');
-    body.set('icon', icon);
+    body.set('icon', new File(['icon'], 'icon.png', { type: 'image/png' }));
     body.set(
       'metricDefinitions',
       JSON.stringify([
@@ -101,43 +100,65 @@ describe('HabitsPage action', () => {
         },
       ])
     );
+
+    return action({
+      ...makeRouteArgs<Route.ActionArgs>(HABITS_URL, user),
+      request: {
+        headers: new Headers(),
+        formData: () => {
+          return Promise.resolve(body);
+        },
+      } as unknown as Request,
+    });
+  };
+
+  it('creates a habit with its icon and metric definitions in one call', async () => {
     vi.mocked(uploadHabitIcon).mockResolvedValue('user-1/icon.png');
-    vi.mocked(createHabit).mockResolvedValue({ id: 'habit-1' } as Awaited<
-      ReturnType<typeof createHabit>
-    >);
+    vi.mocked(createHabitWithMetrics).mockResolvedValue('habit-1');
 
-    const args = makeRouteArgs<Route.ActionArgs>(HABITS_URL, user);
-
-    await expect(
-      action({
-        ...args,
-        request: {
-          headers: new Headers(),
-          formData: () => {
-            return Promise.resolve(body);
-          },
-        } as unknown as Request,
-      })
-    ).resolves.toMatchObject({ ok: true });
+    await expect(iconForm()).resolves.toMatchObject({ ok: true });
     expect(uploadHabitIcon).toHaveBeenCalledWith(
       testSupabaseClient,
       'user-1',
       expect.objectContaining({ name: 'icon.png' })
     );
-    expect(createHabit).toHaveBeenCalledWith(testSupabaseClient, {
-      description: 'Morning runs',
-      iconPath: 'user-1/icon.png',
-      name: 'Running',
-      traitId: 'trait-1',
-      userId: 'user-1',
+    expect(createHabitWithMetrics).toHaveBeenCalledWith(
+      testSupabaseClient,
+      {
+        description: 'Morning runs',
+        iconPath: 'user-1/icon.png',
+        name: 'Running',
+        traitId: 'trait-1',
+      },
+      [
+        {
+          config: {},
+          isRequired: false,
+          name: 'Distance',
+          sortOrder: 0,
+          type: 'number',
+        },
+      ]
+    );
+    expect(deleteFile).not.toHaveBeenCalled();
+  });
+
+  it('deletes the uploaded icon when the habit could not be created', async () => {
+    vi.mocked(uploadHabitIcon).mockResolvedValue('user-1/icon.png');
+    vi.mocked(createHabitWithMetrics).mockRejectedValue(
+      new Error('Malformed metric')
+    );
+    vi.mocked(deleteFile).mockResolvedValue(true);
+
+    await expect(iconForm()).resolves.toMatchObject({
+      error: 'Malformed metric',
+      ok: false,
     });
-    expect(createHabitMetrics).toHaveBeenCalledWith(testSupabaseClient, [
-      expect.objectContaining({
-        habitId: 'habit-1',
-        name: 'Distance',
-        userId: 'user-1',
-      }),
-    ]);
+    expect(deleteFile).toHaveBeenCalledWith(
+      testSupabaseClient,
+      'habit_icons',
+      'user-1/icon.png'
+    );
   });
 
   const submitTrait = (fields: Record<string, string>) => {
@@ -198,14 +219,14 @@ describe('HabitsPage action', () => {
         },
       },
     });
-    expect(createHabit).not.toHaveBeenCalled();
+    expect(createHabitWithMetrics).not.toHaveBeenCalled();
   });
 
   it('rejects unreadable metric definitions without writing', async () => {
     await expect(
       submitHabit({ metricDefinitions: '{', name: 'Running' })
     ).resolves.toMatchObject({ ok: false });
-    expect(createHabit).not.toHaveBeenCalled();
+    expect(createHabitWithMetrics).not.toHaveBeenCalled();
   });
 
   it('rejects an unknown intent', async () => {
@@ -216,7 +237,7 @@ describe('HabitsPage action', () => {
   });
 
   it('reports the failure without a 4xx so loaders still revalidate', async () => {
-    vi.mocked(createHabit).mockRejectedValue(new Error('Duplicate'));
+    vi.mocked(createHabitWithMetrics).mockRejectedValue(new Error('Duplicate'));
 
     await expect(submitHabit({ name: 'Running' })).resolves.toMatchObject({
       error: 'Duplicate',

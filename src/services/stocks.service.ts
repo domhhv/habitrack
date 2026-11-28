@@ -3,12 +3,10 @@ import decamelizeKeys from 'decamelize-keys';
 
 import type {
   HabitStock,
-  HabitStockInsert,
+  MetricValue,
   HabitStockUpdate,
   TypedSupabaseClient,
   HabitStockWithDefaults,
-  HabitStockMetricDefault,
-  HabitStockMetricDefaultInsert,
 } from '@models';
 import { parseMetricValueHolder } from '@utils';
 
@@ -48,23 +46,6 @@ const toStockWithDefaults = ({
   };
 };
 
-export const createStock = async (
-  supabase: TypedSupabaseClient,
-  body: HabitStockInsert
-): Promise<HabitStockWithDefaults> => {
-  const { data, error } = await supabase
-    .from('habit_stocks')
-    .insert(decamelizeKeys(body))
-    .select(STOCK_WITH_DEFAULTS_SELECT)
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return toStockWithDefaults(camelcaseKeys(data, { deep: true }));
-};
-
 export const patchStock = async (
   supabase: TypedSupabaseClient,
   id: HabitStock['id'],
@@ -95,38 +76,44 @@ export const destroyStock = async (
   }
 };
 
-export const createStockMetricDefaults = async (
-  supabase: TypedSupabaseClient,
-  body: HabitStockMetricDefaultInsert[]
-): Promise<HabitStockMetricDefault[]> => {
-  const { data, error } = await supabase
-    .from('habit_stock_metric_defaults')
-    .insert(
-      body.map((b) => {
-        return decamelizeKeys(b);
-      })
-    )
-    .select();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return camelcaseKeys(data, { deep: true }).map((metricDefault) => {
-    return parseMetricValueHolder(metricDefault);
-  });
+export type StockFields = {
+  cost: number | null;
+  currency: string;
+  name: string;
+  remainingItems: number | null;
+  totalItems: number | null;
 };
 
-export const destroyStockMetricDefaults = async (
+export type StockMetricDefaultFields = {
+  habitMetricId: string;
+  shouldCompound: boolean;
+  value: MetricValue;
+};
+
+export type SaveStockParams = {
+  habitId: string;
+  metricDefaults: StockMetricDefaultFields[] | null;
+  stock: StockFields;
+  stockId?: string;
+};
+
+export const saveStock = async (
   supabase: TypedSupabaseClient,
-  habitStockId: HabitStock['id']
+  { habitId, metricDefaults, stock, stockId }: SaveStockParams
 ) => {
-  const { error } = await supabase
-    .from('habit_stock_metric_defaults')
-    .delete()
-    .eq('habit_stock_id', habitStockId);
+  const { data, error } = await supabase.rpc('save_stock', {
+    p_habit_id: habitId,
+    p_stock: decamelizeKeys(stock),
+    p_stock_id: stockId,
+    p_metric_defaults:
+      metricDefaults?.map((metricDefault) => {
+        return decamelizeKeys(metricDefault);
+      }) ?? undefined,
+  });
 
   if (error) {
     throw new Error(error.message);
   }
+
+  return data;
 };

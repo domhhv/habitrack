@@ -1,6 +1,6 @@
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
-import type { Tables, TablesInsert, TablesUpdate } from '@db-types';
+import type { Tables, TablesInsert } from '@db-types';
 
 export type MetricType = Tables<'habit_metrics'>['type'];
 
@@ -120,30 +120,20 @@ export type FormMetricDefinitions = {
   type: MetricType;
 };
 
-type BaseHabitMetricInsert = CamelCasedPropertiesDeep<
-  TablesInsert<'habit_metrics'>
+type BaseHabitMetricDefinition = Omit<
+  CamelCasedPropertiesDeep<TablesInsert<'habit_metrics'>>,
+  'config' | 'habitId' | 'type' | 'userId'
 >;
 
-export type HabitMetricInsert = {
-  [T in MetricType]: Omit<BaseHabitMetricInsert, 'config' | 'type'> & {
+export type HabitMetricDefinition = {
+  [T in MetricType]: BaseHabitMetricDefinition & {
     config: MetricConfigByType[T];
     type: T;
   };
 }[MetricType];
 
-export type HabitMetricUpdate = CamelCasedPropertiesDeep<
-  TablesUpdate<'habit_metrics'>
->;
-
 export type OccurrenceMetricValue = Omit<
   CamelCasedPropertiesDeep<Tables<'occurrence_metric_values'>>,
-  'value'
-> & {
-  value: MetricValue;
-};
-
-export type OccurrenceMetricValueInsert = Omit<
-  CamelCasedPropertiesDeep<TablesInsert<'occurrence_metric_values'>>,
   'value'
 > & {
   value: MetricValue;

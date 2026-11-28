@@ -3,21 +3,12 @@ import { it, vi, expect, describe, beforeEach } from 'vitest';
 import type { OccurrenceSubmission, OccurrenceValuesSubmission } from '@models';
 import {
   getHabit,
-  createNote,
-  updateNote,
-  patchStock,
   getOccurrence,
-  patchOccurrence,
-  createOccurrence,
+  saveOccurrence,
   clearCalendarData,
   destroyOccurrence,
   destroyMetricValue,
-  upsertMetricValues,
-  addOccurrencePhotoPaths,
   removeOccurrencePhotoPath,
-  updateOccurrenceStockUsage,
-  createOccurrenceStockUsages,
-  deleteOccurrenceStockUsages,
 } from '@services';
 import { makeRouteArgs, testSupabaseClient } from '@tests';
 import type { SessionUser } from '@utils';
@@ -28,22 +19,13 @@ import { action, clientAction } from './occurrences';
 vi.mock('@services', async (importOriginal) => {
   return {
     ...(await importOriginal<object>()),
-    addOccurrencePhotoPaths: vi.fn(),
     clearCalendarData: vi.fn(),
-    createNote: vi.fn(),
-    createOccurrence: vi.fn(),
-    createOccurrenceStockUsages: vi.fn(),
-    deleteOccurrenceStockUsages: vi.fn(),
     destroyMetricValue: vi.fn(),
     destroyOccurrence: vi.fn(),
     getHabit: vi.fn(),
     getOccurrence: vi.fn(),
-    patchOccurrence: vi.fn(),
-    patchStock: vi.fn(),
     removeOccurrencePhotoPath: vi.fn(),
-    updateNote: vi.fn(),
-    updateOccurrenceStockUsage: vi.fn(),
-    upsertMetricValues: vi.fn(),
+    saveOccurrence: vi.fn(),
   };
 });
 
@@ -84,12 +66,7 @@ describe('occurrences resource action', () => {
     vi.mocked(getHabit).mockResolvedValue({
       stocks: [{ cost: 10, currency: 'EUR', id: 'stock-1', totalItems: 5 }],
     } as Awaited<ReturnType<typeof getHabit>>);
-    vi.mocked(createNote).mockResolvedValue({ id: 'note-1' } as Awaited<
-      ReturnType<typeof createNote>
-    >);
-    vi.mocked(updateNote).mockResolvedValue({ id: 'note-1' } as Awaited<
-      ReturnType<typeof updateNote>
-    >);
+    vi.mocked(saveOccurrence).mockResolvedValue('occurrence-1');
   });
 
   it('rejects signed-out users', async () => {
@@ -99,64 +76,29 @@ describe('occurrences resource action', () => {
     expect(destroyOccurrence).not.toHaveBeenCalled();
   });
 
-  it('creates an occurrence with photos, cost, note, metrics, and stock usages', async () => {
-    vi.mocked(createOccurrence).mockResolvedValue({
-      id: 'occurrence-1',
-    } as Awaited<ReturnType<typeof createOccurrence>>);
-
+  it('creates an occurrence with its photos, cost, note, metrics, and stock usages in one call', async () => {
     await expect(
       submit({ intent: 'create', photoPaths: newPhotoPaths, values })
     ).resolves.toEqual({
       ok: true,
       toasts: [{ title: 'Occurrence added', variant: 'success' }],
     });
-    expect(createOccurrence).toHaveBeenCalledWith(
-      testSupabaseClient,
-      expect.objectContaining({
+    expect(saveOccurrence).toHaveBeenCalledOnce();
+    expect(saveOccurrence).toHaveBeenCalledWith(testSupabaseClient, {
+      depletedStockIds: ['stock-1'],
+      metricValues: { 'metric-1': { numericValue: 3 } },
+      note: 'Felt great',
+      photoPaths: newPhotoPaths,
+      stockUsages: values.stockUsages,
+      occurrence: {
         cost: 4,
         currency: 'EUR',
         habitId: 'habit-1',
-        photoPaths: newPhotoPaths,
+        hasSpecificTime: true,
+        occurredAt: '2026-10-22T08:00:00.000Z',
         timeZone: 'Europe/Berlin',
-        userId: 'user-1',
-      })
-    );
-    expect(createNote).toHaveBeenCalledWith(testSupabaseClient, {
-      content: 'Felt great',
-      occurrenceId: 'occurrence-1',
-      userId: 'user-1',
-    });
-    expect(upsertMetricValues).toHaveBeenCalledWith(testSupabaseClient, [
-      {
-        habitMetricId: 'metric-1',
-        occurrenceId: 'occurrence-1',
-        userId: 'user-1',
-        value: { numericValue: 3 },
       },
-    ]);
-    expect(createOccurrenceStockUsages).toHaveBeenCalledWith(
-      testSupabaseClient,
-      [
-        expect.objectContaining({ habitStockId: 'stock-1', quantity: 2 }),
-        expect.objectContaining({ habitStockId: 'stock-3', quantity: 1 }),
-      ]
-    );
-    expect(patchStock).toHaveBeenCalledWith(testSupabaseClient, 'stock-1', {
-      isDepleted: true,
     });
-  });
-
-  it('saves an entry without photos', async () => {
-    vi.mocked(createOccurrence).mockResolvedValue({
-      id: 'occurrence-1',
-    } as Awaited<ReturnType<typeof createOccurrence>>);
-
-    await submit({ intent: 'create', photoPaths: [], values });
-
-    expect(createOccurrence).toHaveBeenCalledWith(
-      testSupabaseClient,
-      expect.objectContaining({ photoPaths: null })
-    );
   });
 
   it("rejects photo paths outside the user's folder before writing", async () => {
@@ -170,19 +112,10 @@ describe('occurrences resource action', () => {
       error: 'Some photos could not be attached to this entry',
       ok: false,
     });
-    expect(createOccurrence).not.toHaveBeenCalled();
+    expect(saveOccurrence).not.toHaveBeenCalled();
   });
 
-  it('updates an occurrence and syncs its stock usages and note', async () => {
-    vi.mocked(getOccurrence).mockResolvedValue({
-      id: 'occurrence-1',
-      photoPaths: ['user-1/habit-1/old.jpg'],
-      stockUsages: [
-        { habitStockId: 'stock-1', id: 'usage-1', quantity: 1 },
-        { habitStockId: 'stock-2', id: 'usage-2', quantity: 1 },
-      ],
-    } as Awaited<ReturnType<typeof getOccurrence>>);
-
+  it('updates an occurrence in one call, keeping its time zone', async () => {
     await expect(
       submit({
         intent: 'update',
@@ -192,42 +125,25 @@ describe('occurrences resource action', () => {
         values,
       })
     ).resolves.toMatchObject({ ok: true });
-    expect(deleteOccurrenceStockUsages).toHaveBeenCalledWith(
+    expect(saveOccurrence).toHaveBeenCalledOnce();
+    expect(saveOccurrence).toHaveBeenCalledWith(
       testSupabaseClient,
-      ['usage-2']
+      expect.objectContaining({
+        note: 'Felt great',
+        occurrenceId: 'occurrence-1',
+        photoPaths: newPhotoPaths,
+        stockUsages: values.stockUsages,
+      })
     );
-    expect(updateOccurrenceStockUsage).toHaveBeenCalledWith(
-      testSupabaseClient,
-      'usage-1',
-      {
-        quantity: 2,
-      }
-    );
-    expect(createOccurrenceStockUsages).toHaveBeenCalledWith(
-      testSupabaseClient,
-      [expect.objectContaining({ habitStockId: 'stock-3' })]
-    );
-    expect(patchOccurrence).toHaveBeenCalledWith(
-      testSupabaseClient,
-      'occurrence-1',
-      expect.any(Object)
-    );
-    vi.mocked(patchOccurrence).mock.calls.forEach(([, , changes]) => {
-      expect(changes).not.toHaveProperty('photoPaths');
-    });
-    expect(addOccurrencePhotoPaths).toHaveBeenCalledWith(
-      testSupabaseClient,
-      'occurrence-1',
-      newPhotoPaths
-    );
-    expect(updateNote).toHaveBeenCalledWith(testSupabaseClient, 'note-1', {
-      content: 'Felt great',
-      occurrenceId: 'occurrence-1',
-    });
+    expect(
+      vi.mocked(saveOccurrence).mock.calls[0][1].occurrence
+    ).not.toHaveProperty('timeZone');
   });
 
-  it('fails the update when the occurrence no longer exists', async () => {
-    vi.mocked(getOccurrence).mockResolvedValue(null);
+  it('returns the failure of the save with its toast', async () => {
+    vi.mocked(saveOccurrence).mockRejectedValue(
+      new Error('This entry no longer exists')
+    );
 
     await expect(
       submit({
@@ -240,8 +156,8 @@ describe('occurrences resource action', () => {
     ).resolves.toMatchObject({
       error: 'This entry no longer exists',
       ok: false,
+      toasts: [expect.objectContaining({ variant: 'danger' })],
     });
-    expect(patchOccurrence).not.toHaveBeenCalled();
   });
 
   it('deletes the occurrence with its photos', async () => {
@@ -287,22 +203,7 @@ describe('occurrences resource action', () => {
       'occurrence-1',
       'user-1/habit-1/drop.jpg'
     );
-    expect(patchOccurrence).not.toHaveBeenCalled();
-  });
-
-  it('returns the failure of a later step with its toast', async () => {
-    vi.mocked(createOccurrence).mockResolvedValue({
-      id: 'occurrence-1',
-    } as Awaited<ReturnType<typeof createOccurrence>>);
-    vi.mocked(upsertMetricValues).mockRejectedValue(new Error('Bad metric'));
-
-    await expect(
-      submit({ intent: 'create', photoPaths: [], values })
-    ).resolves.toMatchObject({
-      error: 'Bad metric',
-      ok: false,
-      toasts: [expect.objectContaining({ variant: 'danger' })],
-    });
+    expect(saveOccurrence).not.toHaveBeenCalled();
   });
 });
 

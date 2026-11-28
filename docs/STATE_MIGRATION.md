@@ -575,6 +575,28 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
     - **Not verified:** a run in a real browser.
     - **Tooling.** Supabase CLI 3.2's `db diff` compares the migrations with the live database and ignores `supabase/schemas`. Declarative schemas now go through `supabase db schema declarative sync`, so `yarn db:diff` runs `sync --no-apply`, and AGENTS.md and the README describe the new workflow (no `db:stop` step). The migration was written by hand to match `07_notes.sql`, and `sync` afterwards found no schema changes, so the two match.
 - **Atomic writes.** Turn multi-step writes into Postgres RPCs, so each action makes one transactional call: habit plus metric definitions, the occurrence create/update orchestration and stock-default replacement. This fixes partial writes (duplicate habits on retry). Photo paths already change through single-statement functions (server actions step 3).
+  - Done on `refactor/atomic-write-rpcs`. Also covers GitHub issues #415 and #416, which listed the same flows from the stocks PR (#414).
+  - **As built:**
+    - **Four functions**, all `SECURITY INVOKER` with an empty `search_path` (so row level security still applies), executable only by `authenticated` and `service_role`. They set `user_id` from `auth.uid()` and pass the camelCase `config`/`value` JSON through untouched, so the existing CHECK constraint and validation trigger still run. Migration `20261128130417_add_atomic_write_functions`, generated with `yarn db:diff`. The redundant `postgres` grant lines were removed, and the file is wrapped in `-- noqa` like the photo-path migration.
+      - `create_habit_with_metrics(p_habit, p_metrics)` (`08_habit_metrics.sql`) inserts the habit, then its metrics through `save_habit_metrics`.
+      - `save_habit_metrics(p_habit_id, p_removed_ids, p_added, p_updated)` deletes, inserts and updates a habit's metrics.
+      - `save_stock(p_habit_id, p_stock, p_metric_defaults, p_stock_id)` (`12_habit_stock_metric_defaults.sql`) creates or updates a stock, and replaces its metric defaults when they're given.
+      - `save_occurrence(p_occurrence, p_note, p_metric_values, p_stock_usages, p_depleted_stock_ids, p_photo_paths, p_occurrence_id)` (`13_occurrence_stock_usages.sql`) creates or updates an entry with all its parts.
+        - Usages are matched by stock: deleted when their stock is no longer selected, otherwise upserted, so the usage triggers restore and apply quantities.
+        - The note is upserted or deleted by `occurrence_id`, so the client's `noteId` is now only used for optimistic UI.
+        - A missing entry raises "This entry no longer exists".
+      - The arguments that mean "create" or "keep the defaults" come last with `DEFAULT NULL`, so the generated types make them optional.
+    - **Services.** `createHabitWithMetrics`, `saveHabitMetrics`, `saveStock` and `saveOccurrence` each make one `rpc()` call. The multi-step helpers they replace are deleted, along with their insert and update model types and `occurrence-stock-usages.service.ts`: `createHabit`, `createHabitMetrics`, `patchHabitMetric`, `destroyHabitMetrics`, `upsertMetricValues`, `createStock`, the stock-default create and delete helpers, `createOccurrence`, `patchOccurrence`, `addOccurrencePhotoPaths` and the usage helpers. `buildHabitMetricInsert` became `buildHabitMetricDefinition`, which no longer takes the habit and user ids.
+    - **Actions.** Validation, the own-folder photo check and the cost calculation (`calculateOccurrenceCost`, from a `getHabit` read) stay in TypeScript, before the single call. If `create_habit_with_metrics` fails after the icon was uploaded, the action deletes the icon too. `addStock`/`updateStock` became one `saveStockForm`, and `addOccurrence`/`updateOccurrence` became one `saveOccurrenceSubmission`.
+    - **Issue #416, item 5 (trigger race):** not a bug. The usage triggers change `remaining_items` with a single `UPDATE … SET remaining_items = remaining_items - quantity`, which takes the row lock and re-reads the row under concurrency, so `SELECT … FOR UPDATE` would add nothing. Using more items than remain breaks the `remaining_items >= 0` check; inside `save_occurrence` that now fails the whole save instead of leaving an entry without its usages.
+    - `add_occurrence_photo_paths` no longer has a caller, because `save_occurrence` appends new paths. It stays in the database for now, so a server still running the previous build keeps working while this deploys. Drop it in a later migration.
+    - **Tests** rewrite the habit, habit details and occurrence action tests to expect one service call each, and add the icon clean-up after a failed habit creation.
+    - **Verified against local Supabase** as a signed-in throwaway user calling the functions:
+      - Each function wrote everything it should: habit with metrics; metric remove, add and update; stock with defaults; entry with note, metric value, usage, photo and the stock count going from 5 to 3; the update changing the usage to 1 (stock back to 4), dropping the note, appending a photo and marking the stock depleted.
+      - Each failure left nothing behind: a rejected metric rolled back the habit; a rejected metric update rolled back the added metric; rejected defaults kept the stock's name and old defaults; a rejected metric value on create left no entry and no stock change; a rejected value on update kept the usages, note and counts.
+      - Updating a missing entry and using more items than remain both failed cleanly.
+      - `anon` gets "permission denied" for all four.
+    - **Not verified:** a run in a real browser.
 
 ### 5. Move the remaining UI state to the URL and cookies
 
@@ -605,7 +627,7 @@ The app layout still server-renders only its `HydrateFallback` (§1, server load
 - ~~`updateUser` builds its email redirect with `userId=${attributes}`, so the URL contains `[object Object]`.~~ Fixed with the auth callback route.
 - ~~Nothing consumes the `returnTo` that the OAuth consent page sends signed-out users to (§1).~~ Fixed with the server auth guard: consent requests go through `/login?returnTo=…`.
 - `NoteDrawer` overwrites text typed before the period note finishes loading.
-- A habit whose metric creation fails after the habit row was written can be duplicated by retrying (§4, atomic writes).
+- ~~A habit whose metric creation fails after the habit row was written can be duplicated by retrying (§4, atomic writes).~~ Fixed by `create_habit_with_metrics`.
 - `/habits/:habitId` with a non-UUID id shows "Couldn't load this habit" instead of "Habit not found".
 - The occurrence drawer's day navigation shows no entries outside the loaded calendar range. Fix it with a `fetcher.load` fallback to a day-range loader, or with the URL-driven drawers from §5.
 - `getLongestHabitStreak` and its RPC are unused (existing TODO in `occurrences.service.ts`).
